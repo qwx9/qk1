@@ -1,0 +1,4 @@
+syntax:glob
+*.[1-9o]
+*qk1
+id1/
