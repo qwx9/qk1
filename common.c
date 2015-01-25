@@ -1006,9 +1006,6 @@ void COM_CheckRegistered (void)
 
 	if (h == -1)
 	{
-#if WINDED
-	Sys_Error ("This dedicated server requires a full registered copy of Quake");
-#endif
 		Con_Printf ("Playing shareware version.\n");
 		if (com_modified)
 			Sys_Error ("You must have the registered version to use modified games");
@@ -1415,14 +1412,7 @@ int COM_FindFile (char *filename, int *handle, FILE **file)
 				strcpy (cachepath, netpath);
 			else
 			{	
-#if defined(_WIN32)
-				if ((strlen(netpath) < 2) || (netpath[1] != ':'))
-					sprintf (cachepath,"%s%s", com_cachedir, netpath);
-				else
-					sprintf (cachepath,"%s%s", com_cachedir, netpath+2);
-#else
 				sprintf (cachepath,"%s%s", com_cachedir, netpath);
-#endif
 
 				cachetime = Sys_FileTime (cachepath);
 			

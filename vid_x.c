@@ -793,30 +793,6 @@ int XLateKey(XKeyEvent *ev)
 		case XK_KP_Add: key = '+'; break;
 		case XK_KP_Subtract: key = '-'; break;
 		case XK_KP_Divide: key = '/'; break;
-
-#if 0
-		case 0x021: key = '1';break;/* [!] */
-		case 0x040: key = '2';break;/* [@] */
-		case 0x023: key = '3';break;/* [#] */
-		case 0x024: key = '4';break;/* [$] */
-		case 0x025: key = '5';break;/* [%] */
-		case 0x05e: key = '6';break;/* [^] */
-		case 0x026: key = '7';break;/* [&] */
-		case 0x02a: key = '8';break;/* [*] */
-		case 0x028: key = '9';;break;/* [(] */
-		case 0x029: key = '0';break;/* [)] */
-		case 0x05f: key = '-';break;/* [_] */
-		case 0x02b: key = '=';break;/* [+] */
-		case 0x07c: key = '\'';break;/* [|] */
-		case 0x07d: key = '[';break;/* [}] */
-		case 0x07b: key = ']';break;/* [{] */
-		case 0x022: key = '\'';break;/* ["] */
-		case 0x03a: key = ';';break;/* [:] */
-		case 0x03f: key = '/';break;/* [?] */
-		case 0x03e: key = '.';break;/* [>] */
-		case 0x03c: key = ',';break;/* [<] */
-#endif
-
 		default:
 			key = *(unsigned char*)buf;
 			if (key >= 'A' && key <= 'Z')
@@ -1070,7 +1046,7 @@ void Sys_SendKeyEvents(void)
 	}
 }
 
-#if 0
+/*
 char *Sys_ConsoleInput (void)
 {
 
@@ -1099,7 +1075,7 @@ char *Sys_ConsoleInput (void)
 	return 0;
 	
 }
-#endif
+*/
 
 void D_BeginDirectRect (int x, int y, byte *pbitmap, int width, int height)
 {

@@ -9,7 +9,7 @@
 #include "asm_draw.h"
 #include "d_ifacea.h"
 
-#if	id386
+#ifdef	id386
 
 //----------------------------------------------------------------------
 // 8-bpp horizontal span drawing code for polygons, with no transparency and

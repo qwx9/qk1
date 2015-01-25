@@ -257,7 +257,7 @@ Debugging tool, just flashes the screen
 */
 void SetPal (int i)
 {
-#if 0
+/*
 	static int old;
 	byte	pal[768];
 	int		c;
@@ -288,7 +288,7 @@ void SetPal (int i)
 		}
 		VID_SetPalette (pal);
 	}
-#endif
+*/
 }
 
 /*

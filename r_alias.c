@@ -432,7 +432,7 @@ void R_AliasTransformFinalVert (finalvert_t *fv, auxvert_t *av,
 }
 
 
-#if	!id386
+#ifndef	id386
 
 /*
 ================
@@ -486,7 +486,7 @@ void R_AliasTransformAndProjectFinalVerts (finalvert_t *fv, stvert_t *pstverts)
 	}
 }
 
-#endif
+#endif //!id386
 
 
 /*
@@ -716,7 +716,7 @@ void R_AliasDrawModel (alight_t *plighting)
 	}
 	else
 	{
-#if	id386
+#ifdef	id386
 		D_Aff8Patch (currententity->colormap);
 #endif
 	}

@@ -211,7 +211,7 @@ void R_Init (void)
 	R_InitParticles ();
 
 // TODO: collect 386-specific code in one place
-#if	id386
+#ifdef	id386
 	Sys_MakeCodeWriteable ((uintptr)R_EdgeCodeStart,
 					     (uintptr)R_EdgeCodeEnd - (uintptr)R_EdgeCodeStart);
 #endif	// id386
@@ -443,7 +443,7 @@ void R_ViewChanged (vrect_t *pvrect, int lineadj, float aspect)
 		r_fov_greater_than_90 = true;
 
 // TODO: collect 386-specific code in one place
-#if	id386
+#ifdef	id386
 	if (r_pixbytes == 1)
 	{
 		Sys_MakeCodeWriteable ((uintptr)R_Surf8Start,

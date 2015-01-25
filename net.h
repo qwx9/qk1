@@ -219,7 +219,7 @@ typedef struct
 extern int hostCacheCount;
 extern hostcache_t hostcache[HOSTCACHESIZE];
 
-#if !defined(_WIN32 ) && !defined (__linux__) && !defined (__sun__)
+#ifndef __linux__
 #ifndef htonl
 extern u32int htonl (u32int hostlong);
 #endif

@@ -11,13 +11,8 @@
 #define	LINUX_VERSION		1.30
 #define	X11_VERSION			1.10
 
-//define	PARANOID			// speed sapping error checking
-
-#ifdef QUAKE2
+#define	PARANOID			// speed sapping error checking
 #define	GAMENAME	"id1"		// directory to look in by default
-#else
-#define	GAMENAME	"id1"
-#endif
 
 #include <stdio.h>
 //#include <math.h>
@@ -26,32 +21,15 @@
 //#include <stdlib.h>
 //#include <setjmp.h>
 
-#if defined(_WIN32) && !defined(WINDED)
-
-#if defined(_M_IX86)
-#define __i386__	1
-#endif
-
-void	VID_LockBuffer (void);
-void	VID_UnlockBuffer (void);
-
-#else
-
 #define	VID_LockBuffer()
 #define	VID_UnlockBuffer()
 
+#ifdef __i386__ // && !defined __sun__
+#define id386
 #endif
 
-#if defined __i386__ // && !defined __sun__
-#define id386	1
-#else
-#define id386	0
-#endif
-
-#if id386
-#define UNALIGNED_OK	1	// set to 0 if unaligned accesses are not supported
-#else
-#define UNALIGNED_OK	0
+#ifdef id386
+#define UNALIGNED_OK	// unset if unaligned accesses are not supported
 #endif
 
 // !!! if this is changed, it must be changed in d_ifacea.h too !!!
@@ -225,7 +203,8 @@ typedef struct
 
 #ifdef GLQUAKE
 #include "gl_model.h"
-#else
+#endif
+#ifndef GLQUAKE
 #include "model.h"
 #include "d_iface.h"
 #endif

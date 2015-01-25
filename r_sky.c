@@ -99,7 +99,7 @@ void R_MakeSky (void)
 		baseofs = ((y+yshift) & SKYMASK) * 131;
 
 // FIXME: clean this up
-#if UNALIGNED_OK
+#ifdef UNALIGNED_OK
 
 		for (x=0 ; x<SKYSIZE ; x += 4)
 		{
@@ -113,7 +113,8 @@ void R_MakeSky (void)
 			pnewsky++;
 		}
 
-#else
+#endif /* UNALIGNED_OK */
+#ifndef UNALIGNED_OK
 
 		for (x=0 ; x<SKYSIZE ; x++)
 		{
@@ -125,7 +126,7 @@ void R_MakeSky (void)
 			pnewsky = (unsigned *)((byte *)pnewsky + 1);
 		}
 
-#endif
+#endif /* ! UNALIGNED_OK */
 
 		pnewsky += 128 / sizeof (unsigned);
 	}
@@ -158,7 +159,7 @@ void R_GenSkyTile (void *pdest)
 		baseofs = ((y+yshift) & SKYMASK) * 131;
 
 // FIXME: clean this up
-#if UNALIGNED_OK
+#ifdef UNALIGNED_OK
 
 		for (x=0 ; x<SKYSIZE ; x += 4)
 		{
@@ -173,7 +174,8 @@ void R_GenSkyTile (void *pdest)
 			pd++;
 		}
 
-#else
+#endif /* UNALIGNED_OK */
+#ifndef UNALIGNED_OK
 
 		for (x=0 ; x<SKYSIZE ; x++)
 		{
@@ -186,7 +188,7 @@ void R_GenSkyTile (void *pdest)
 			pd = (unsigned *)((byte *)pd + 1);
 		}
 
-#endif
+#endif /* ! UNALIGNED_OK */
 
 		pnewsky += 128 / sizeof (unsigned);
 	}

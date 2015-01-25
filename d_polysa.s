@@ -8,7 +8,7 @@
 #include "asm_draw.h"
 #include "d_ifacea.h"
 
-#if	id386
+#ifdef	id386
 
 // !!! if this is changed, it must be changed in d_polyse.c too !!!
 #define DPS_MAXSPANS			MAXHEIGHT+1	
@@ -35,10 +35,8 @@ lzistepx:		.long	0
 
 	.text
 
-#ifndef NeXT
 	.extern C(D_PolysetSetEdgeTable)
 	.extern C(D_RasterizeAliasPolySmooth)
-#endif
 
 //----------------------------------------------------------------------
 // affine triangle gradient calculation code

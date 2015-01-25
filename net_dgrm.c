@@ -4,12 +4,6 @@
 #define BAN_TEST
 
 #ifdef BAN_TEST
-#if defined(_WIN32)
-#include <windows.h>
-#elif defined (NeXT)
-#include <sys/socket.h>
-#include <arpa/inet.h>
-#else
 #include <u.h>
 #include <libc.h>
 #define AF_INET 		2	/* internet */
@@ -32,7 +26,6 @@ struct sockaddr_in
 };
 char *inet_ntoa(struct in_addr in);
 u32int inet_addr(const char *cp);
-#endif
 #endif	// BAN_TEST
 
 #include "quakedef.h"

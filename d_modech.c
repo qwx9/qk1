@@ -19,7 +19,7 @@ D_Patch
 */
 void D_Patch (void)
 {
-#if id386
+#ifdef id386
 
 	static qboolean protectset8 = false;
 

@@ -8,7 +8,7 @@
 #include "d_ifacea.h"
 #include "asm_draw.h"
 
-#if	id386
+#ifdef	id386
 
 //----------------------------------------------------------------------
 // 8-bpp particle drawing code.

@@ -7,7 +7,7 @@
 #include "quakeasm.h"
 
 
-#if	id386
+#ifdef	id386
 
 	.data
 

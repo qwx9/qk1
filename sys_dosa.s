@@ -22,7 +22,7 @@ C(MaskExceptions):
 
 	ret
 
-#if 0
+/*
 .globl C(unmaskexceptions)
 C(unmaskexceptions):
 	fnstenv	fpenv
@@ -30,7 +30,7 @@ C(unmaskexceptions):
 	fldenv	fpenv
 
 	ret
-#endif
+*/
 
 	.data
 
@@ -73,19 +73,19 @@ C(Sys_PopFPCW):
 C(Sys_SetFPCW):
 	fnstcw	cw
 	movl	cw,%eax
-#if	id386
+#ifdef	id386
 	andb	$0xF0,%ah
 	orb		$0x03,%ah	// round mode, 64-bit precision
 #endif
 	movl	%eax,full_cw
 
-#if	id386
+#ifdef	id386
 	andb	$0xF0,%ah
 	orb		$0x0C,%ah	// chop mode, single precision
 #endif
 	movl	%eax,single_cw
 
-#if	id386
+#ifdef	id386
 	andb	$0xF0,%ah
 	orb		$0x08,%ah	// ceil mode, single precision
 #endif

@@ -6,7 +6,7 @@
 #include "asm_i386.h"
 #include "quakeasm.h"
 
-#if	id386
+#ifdef	id386
 
 	.text
 

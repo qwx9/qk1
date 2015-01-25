@@ -8,7 +8,7 @@
 #include "asm_draw.h"
 #include "d_ifacea.h"
 
-#if id386
+#ifdef id386
 
 	.data
 Ltemp0:	.long	0

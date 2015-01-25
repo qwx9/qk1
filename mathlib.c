@@ -68,11 +68,6 @@ void PerpendicularVector( vec3_t dst, const vec3_t src )
 	VectorNormalize( dst );
 }
 
-#ifdef _WIN32
-#pragma optimize( "", off )
-#endif
-
-
 void RotatePointAroundVector( vec3_t dst, const vec3_t dir, const vec3_t point, float degrees )
 {
 	float	m[3][3];
@@ -128,21 +123,16 @@ void RotatePointAroundVector( vec3_t dst, const vec3_t dir, const vec3_t point, 
 	}
 }
 
-#ifdef _WIN32
-#pragma optimize( "", on )
-#endif
-
 /*-----------------------------------------------------------------*/
-
 
 float	anglemod(float a)
 {
-#if 0
+	/*
 	if (a >= 0)
 		a -= 360*(int)(a/360);
 	else
 		a += 360*( 1 + (int)(-a/360) );
-#endif
+	*/
 	a = (360.0/65536) * ((int)(a*(65536/360.0)) & 65535);
 	return a;
 }
@@ -160,7 +150,7 @@ void BOPS_Error (void)
 }
 
 
-#if	!id386
+#ifndef	id386
 
 /*
 ==================
@@ -174,8 +164,8 @@ int BoxOnPlaneSide (vec3_t emins, vec3_t emaxs, mplane_t *p)
 	float	dist1, dist2;
 	int		sides;
 
-#if 0	// this is done by the BOX_ON_PLANE_SIDE macro before calling this
-		// function
+/*
+	// this is done by the BOX_ON_PLANE_SIDE macro before calling this function
 // fast axial cases
 	if (p->type < 3)
 	{
@@ -185,7 +175,7 @@ int BoxOnPlaneSide (vec3_t emins, vec3_t emaxs, mplane_t *p)
 			return 2;
 		return 3;
 	}
-#endif
+*/
 	
 // general case
 	switch (p->signbits)
@@ -228,7 +218,7 @@ dist2 = p->normal[0]*emaxs[0] + p->normal[1]*emaxs[1] + p->normal[2]*emaxs[2];
 		break;
 	}
 
-#if 0
+/*
 	int		i;
 	vec3_t	corners[2];
 
@@ -253,7 +243,7 @@ dist2 = p->normal[0]*emaxs[0] + p->normal[1]*emaxs[1] + p->normal[2]*emaxs[2];
 	if (dist2 < 0)
 		sides |= 2;
 
-#endif
+*/
 
 	sides = 0;
 	if (dist1 >= p->dist)
@@ -269,7 +259,7 @@ if (sides == 0)
 	return sides;
 }
 
-#endif
+#endif // !id386
 
 
 void AngleVectors (vec3_t angles, vec3_t forward, vec3_t right, vec3_t up)
@@ -544,7 +534,7 @@ int GreatestCommonDivisor (int i1, int i2)
 }
 
 
-#if	!id386
+#ifndef	id386
 
 // TODO: move to nonintel.c
 
@@ -565,4 +555,4 @@ fixed16_t Invert24To16(fixed16_t val)
 			(((double)0x10000 * (double)0x1000000 / (double)val) + 0.5);
 }
 
-#endif
+#endif // !id386

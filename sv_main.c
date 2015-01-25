@@ -258,7 +258,8 @@ void SV_ConnectClient (int clientnum)
 
 #ifdef IDGODS
 	client->privileged = IsID(&client->netconnection->addr);
-#else	
+#endif
+#ifndef IDGODS
 	client->privileged = false;				
 #endif
 

@@ -7,7 +7,7 @@
 #include "quakeasm.h"
 #include "asm_draw.h"
 
-#if	id386
+#ifdef	id386
 
 	.data
 Ltemp:					.long	0

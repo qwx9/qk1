@@ -2,10 +2,6 @@
 #include <libc.h>
 #include "quakedef.h"
 
-#ifdef _WIN32
-#include "winquake.h"
-#endif
-
 void (*vid_menudrawfn)(void);
 void (*vid_menukeyfn)(int key);
 
@@ -891,17 +887,9 @@ void M_Net_Draw (void)
 	f = 32;
 
 	if (serialAvailable)
-	{
 		p = Draw_CachePic ("gfx/netmen1.lmp");
-	}
 	else
-	{
-#ifdef _WIN32
-		p = NULL;
-#else
 		p = Draw_CachePic ("gfx/dim_modm.lmp");
-#endif
-	}
 
 	if (p)
 		M_DrawTransPic (72, f, p);
@@ -909,17 +897,9 @@ void M_Net_Draw (void)
 	f += 19;
 
 	if (serialAvailable)
-	{
 		p = Draw_CachePic ("gfx/netmen2.lmp");
-	}
 	else
-	{
-#ifdef _WIN32
-		p = NULL;
-#else
 		p = Draw_CachePic ("gfx/dim_drct.lmp");
-#endif
-	}
 
 	if (p)
 		M_DrawTransPic (72, f, p);
@@ -1019,11 +999,7 @@ again:
 //=============================================================================
 /* OPTIONS MENU */
 
-#ifdef _WIN32
-#define	OPTIONS_ITEMS	14
-#else
 #define	OPTIONS_ITEMS	13
-#endif
 
 #define	SLIDER_RANGE	10
 
@@ -1034,13 +1010,6 @@ void M_Menu_Options_f (void)
 	key_dest = key_menu;
 	m_state = m_options;
 	m_entersound = true;
-
-#ifdef _WIN32
-	if ((options_cursor == 13) && (modestate != MS_WINDOWED))
-	{
-		options_cursor = 0;
-	}
-#endif
 }
 
 
@@ -1075,11 +1044,7 @@ void M_AdjustSliders (int dir)
 		Cvar_SetValue ("sensitivity", sensitivity.value);
 		break;
 	case 6:	// music volume
-#ifdef _WIN32
-		bgmvolume.value += dir * 1.0;
-#else
 		bgmvolume.value += dir * 0.1;
-#endif
 		if (bgmvolume.value < 0)
 			bgmvolume.value = 0;
 		if (bgmvolume.value > 1)
@@ -1119,12 +1084,6 @@ void M_AdjustSliders (int dir)
 	case 11:	// lookstrafe
 		Cvar_SetValue ("lookstrafe", !lookstrafe.value);
 		break;
-
-#ifdef _WIN32
-	case 13:	// _windowed_mouse
-		Cvar_SetValue ("_windowed_mouse", !_windowed_mouse.value);
-		break;
-#endif
 	}
 }
 
@@ -1146,12 +1105,12 @@ void M_DrawSlider (int x, int y, float range)
 
 void M_DrawCheckbox (int x, int y, int on)
 {
-#if 0
+	/*
 	if (on)
 		M_DrawCharacter (x, y, 131);
 	else
 		M_DrawCharacter (x, y, 129);
-#endif
+	*/
 	if (on)
 		M_Print (x, y, "on");
 	else
@@ -1205,14 +1164,6 @@ void M_Options_Draw (void)
 
 	if (vid_menudrawfn)
 		M_Print (16, 128, "         Video Options");
-
-#ifdef _WIN32
-	if (modestate == MS_WINDOWED)
-	{
-		M_Print (16, 136, "             Use Mouse");
-		M_DrawCheckbox (220, 136, _windowed_mouse.value);
-	}
-#endif
 
 // cursor
 	M_DrawCharacter (200, 32 + options_cursor*8, 12+((int)(realtime*4)&1));
@@ -1280,16 +1231,6 @@ void M_Options_Key (int k)
 		else
 			options_cursor = 0;
 	}
-
-#ifdef _WIN32
-	if ((options_cursor == 13) && (modestate != MS_WINDOWED))
-	{
-		if (k == K_UPARROW)
-			options_cursor = 12;
-		else
-			options_cursor = 0;
-	}
-#endif
 }
 
 //=============================================================================
@@ -1563,7 +1504,6 @@ int		msgNumber;
 int		m_quit_prevstate;
 qboolean	wasInMenus;
 
-#ifndef	_WIN32
 char *quitMessage [] = 
 {
 /* .........1.........2.... */
@@ -1607,7 +1547,6 @@ char *quitMessage [] =
   "   for you next time!   ",
   "                        "
 };
-#endif
 
 void M_Menu_Quit_f (void)
 {
@@ -1663,37 +1602,11 @@ void M_Quit_Draw (void)
 		M_Draw ();
 		m_state = m_quit;
 	}
-
-#ifdef _WIN32
-	M_DrawTextBox (0, 0, 38, 23);
-	M_PrintWhite (16, 12,  "  Quake version 1.09 by id Software\n\n");
-	M_PrintWhite (16, 28,  "Programming        Art \n");
-	M_Print (16, 36,  " John Carmack       Adrian Carmack\n");
-	M_Print (16, 44,  " Michael Abrash     Kevin Cloud\n");
-	M_Print (16, 52,  " John Cash          Paul Steed\n");
-	M_Print (16, 60,  " Dave 'Zoid' Kirsch\n");
-	M_PrintWhite (16, 68,  "Design             Biz\n");
-	M_Print (16, 76,  " John Romero        Jay Wilbur\n");
-	M_Print (16, 84,  " Sandy Petersen     Mike Wilson\n");
-	M_Print (16, 92,  " American McGee     Donna Jackson\n");
-	M_Print (16, 100,  " Tim Willits        Todd Hollenshead\n");
-	M_PrintWhite (16, 108, "Support            Projects\n");
-	M_Print (16, 116, " Barrett Alexander  Shawn Green\n");
-	M_PrintWhite (16, 124, "Sound Effects\n");
-	M_Print (16, 132, " Trent Reznor and Nine Inch Nails\n\n");
-	M_PrintWhite (16, 140, "Quake is a trademark of Id Software,\n");
-	M_PrintWhite (16, 148, "inc., (c)1996 Id Software, inc. All\n");
-	M_PrintWhite (16, 156, "rights reserved. NIN logo is a\n");
-	M_PrintWhite (16, 164, "registered trademark licensed to\n");
-	M_PrintWhite (16, 172, "Nothing Interactive, Inc. All rights\n");
-	M_PrintWhite (16, 180, "reserved. Press y to exit\n");
-#else
 	M_DrawTextBox (56, 76, 24, 4);
 	M_Print (64, 84,  quitMessage[msgNumber*4+0]);
 	M_Print (64, 92,  quitMessage[msgNumber*4+1]);
 	M_Print (64, 100, quitMessage[msgNumber*4+2]);
 	M_Print (64, 108, quitMessage[msgNumber*4+3]);
-#endif
 }
 
 //=============================================================================

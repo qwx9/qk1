@@ -73,7 +73,7 @@ void D_WarpScreen (void)
 }
 
 
-#if	!id386
+#ifndef	id386
 
 /*
 =============
@@ -230,7 +230,7 @@ void Turbulent8 (espan_t *pspan)
 }
 
 
-#if	!id386
+#ifndef	id386
 
 /*
 =============
@@ -368,7 +368,7 @@ void D_DrawSpans8 (espan_t *pspan)
 #endif
 
 
-#if	!id386
+#ifndef	id386
 
 /*
 =============

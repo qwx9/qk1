@@ -128,12 +128,10 @@ cvar_t	v_centerspeed = {"v_centerspeed","500"};
 
 void V_StartPitchDrift (void)
 {
-#if 1
 	if (cl.laststop == cl.time)
 	{
 		return;		// something else is keeping it from drifting
 	}
-#endif
 	if (cl.nodrift || !cl.pitchvel)
 	{
 		cl.pitchvel = v_centerspeed.value;
@@ -593,7 +591,8 @@ void V_UpdatePalette (void)
 
 	VID_ShiftPalette (pal);	
 }
-#else	// !GLQUAKE
+#endif	/* GLQUAKE */
+#ifndef GLQUAKE
 void V_UpdatePalette (void)
 {
 	int		i, j;
@@ -661,7 +660,7 @@ void V_UpdatePalette (void)
 
 	VID_ShiftPalette (pal);	
 }
-#endif	// !GLQUAKE
+#endif	/* ! GLQUAKE */
 
 
 /* 
@@ -921,9 +920,9 @@ void V_CalcRefdef (void)
 // fudge position around to keep amount of weapon visible
 // roughly equal with different FOV
 
-#if 0
+	/*
 	if (cl.model_precache[cl.stats[STAT_WEAPON]] && strcmp (cl.model_precache[cl.stats[STAT_WEAPON]]->name,  "progs/v_shot2.mdl"))
-#endif
+	*/
 	if (scr_viewsize.value == 110)
 		view->origin[2] += 1;
 	else if (scr_viewsize.value == 100)

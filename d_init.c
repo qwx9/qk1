@@ -128,12 +128,13 @@ void D_SetupFrame (void)
 	for (i=0 ; i<(NUM_MIPS-1) ; i++)
 		d_scalemip[i] = basemip[i] * d_mipscale.value;
 
-#if	id386
+#ifdef	id386
 				if (d_subdiv16.value)
 					d_drawspans = D_DrawSpans16;
 				else
 					d_drawspans = D_DrawSpans8;
-#else
+#endif
+#ifndef id386
 				d_drawspans = D_DrawSpans8;
 #endif
 

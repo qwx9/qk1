@@ -8,7 +8,7 @@
 #include "r_local.h"
 #include "d_local.h"
 
-#if	!id386
+#ifndef	id386
 
 /*
 ================

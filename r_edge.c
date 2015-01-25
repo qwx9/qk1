@@ -3,8 +3,7 @@
 #include "quakedef.h"
 #include "r_local.h"
 
-#if 0
-// FIXME
+/* FIXME
 the complex cases add new polys on most lines, so dont optimize for keeping them the same
 have multiple free span lists to try to get better coherence?
 low depth complexity -- 1 to 3 or so
@@ -12,7 +11,7 @@ low depth complexity -- 1 to 3 or so
 this breaks spans at every edge, even hidden ones (bad)
 
 have a sentinal at both ends?
-#endif
+*/
 
 
 edge_t	*auxedges;
@@ -139,7 +138,7 @@ void R_BeginEdgeFrame (void)
 }
 
 
-#if	!id386
+#ifndef	id386
 
 /*
 ==============
@@ -185,7 +184,7 @@ addedge:
 #endif	// !id386
 	
 
-#if	!id386
+#ifndef id386
 
 /*
 ==============
@@ -205,7 +204,7 @@ void R_RemoveEdges (edge_t *pedge)
 #endif	// !id386
 
 
-#if	!id386
+#ifndef	id386
 
 /*
 ==============
@@ -431,7 +430,7 @@ void R_TrailingEdge (surf_t *surf, edge_t *edge)
 }
 
 
-#if	!id386
+#ifndef	id386
 
 /*
 ==============

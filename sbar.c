@@ -472,7 +472,7 @@ void Sbar_DrawScoreboard (void)
 	Sbar_SoloScoreboard ();
 	if (cl.gametype == GAME_DEATHMATCH)
 		Sbar_DeathmatchOverlay ();
-#if 0
+/*
 	int		i, j, c;
 	int		x, y;
 	int		l;
@@ -516,7 +516,7 @@ void Sbar_DrawScoreboard (void)
 			Sbar_DrawCharacter ( (x+j)*8, y, c);
 		}
 	}
-#endif
+*/
 }
 
 //=============================================================================
@@ -1116,7 +1116,7 @@ void Sbar_DeathmatchOverlay (void)
 		if (k == cl.viewentity - 1)
 			Draw_Character ( x - 8, y, 12);
 
-#if 0
+/*
 {
 	int				total;
 	int				n, minutes, tens, units;
@@ -1132,7 +1132,7 @@ void Sbar_DeathmatchOverlay (void)
 
 		Draw_String ( x+48 , y, num);
 }
-#endif
+*/
 
 	// draw name
 		Draw_String (x+64, y, s->name);
@@ -1218,7 +1218,7 @@ void Sbar_MiniDeathmatchOverlay (void)
 			Draw_Character ( x + 32, y, 17);
 		}
 
-#if 0
+/*
 {
 	int				total;
 	int				n, minutes, tens, units;
@@ -1234,7 +1234,7 @@ void Sbar_MiniDeathmatchOverlay (void)
 
 		Draw_String ( x+48 , y, num);
 }
-#endif
+*/
 
 	// draw name
 		Draw_String (x+48, y, s->name);

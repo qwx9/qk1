@@ -149,7 +149,7 @@ SV_Accelerate
 */
 cvar_t	sv_maxspeed = {"sv_maxspeed", "320", false, true};
 cvar_t	sv_accelerate = {"sv_accelerate", "10"};
-#if 0
+/*
 void SV_Accelerate (vec3_t wishvel)
 {
 	int			i;
@@ -169,7 +169,7 @@ void SV_Accelerate (vec3_t wishvel)
 	for (i=0 ; i<3 ; i++)
 		velocity[i] += accelspeed*pushvec[i];	
 }
-#endif
+*/
 void SV_Accelerate (void)
 {
 	int			i;

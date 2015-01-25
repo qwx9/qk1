@@ -66,7 +66,7 @@ surfcache_t	*D_CacheSurface (msurface_t *surface, int miplevel);
 
 extern int D_MipLevelForScale (float scale);
 
-#if id386
+#ifdef id386
 extern void D_PolysetAff8Start (void);
 extern void D_PolysetAff8End (void);
 #endif

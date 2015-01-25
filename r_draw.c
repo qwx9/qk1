@@ -50,7 +50,7 @@ int				r_ceilv1;
 qboolean	r_lastvertvalid;
 
 
-#if	!id386
+#ifndef	id386
 
 /*
 ================

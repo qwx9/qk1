@@ -19,14 +19,6 @@ typedef uint32_t u32int;
 #include <sys/ioctl.h>
 #include <errno.h>
 
-#ifdef __sun__
-#include <sys/filio.h>
-#endif
-
-#ifdef NeXT
-#include <libc.h>
-#endif
-
 extern int gethostname (char *, int);
 extern int close (int);
 

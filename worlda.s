@@ -8,7 +8,7 @@
 #include "quakeasm.h"
 #include "d_ifacea.h"
 
-#if id386
+#ifdef id386
 
 	.data
 

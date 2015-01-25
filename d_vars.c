@@ -1,6 +1,6 @@
 // r_vars.c: global refresh variables
 
-#if	!id386
+#ifndef	id386
 
 #include <u.h>
 #include <libc.h>

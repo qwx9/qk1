@@ -1,6 +1,6 @@
 // comndef.h  -- general definitions
 
-#if !defined BYTE_DEFINED
+#ifndef BYTE_DEFINED
 typedef unsigned char 		byte;
 #define BYTE_DEFINED 1
 #endif
