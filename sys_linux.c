@@ -1,19 +1,21 @@
-#include <unistd.h>
+#include <u.h>
+#include <libc.h>
+//#include <unistd.h>
 #include <signal.h>
-#include <stdlib.h>
-#include <limits.h>
+//#include <stdlib.h>
+//#include <limits.h>
 #include <sys/time.h>
 #include <sys/types.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <stdarg.h>
-#include <stdio.h>
+//#include <unistd.h>
+//#include <fcntl.h>
+//#include <stdarg.h>
+//#include <stdio.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
 #include <sys/stat.h>
-#include <string.h>
-#include <ctype.h>
-#include <sys/wait.h>
+//#include <string.h>
+//#include <ctype.h>
+//#include <sys/wait.h>
 #include <sys/mman.h>
 #include <errno.h>
 
@@ -194,7 +196,8 @@ int Sys_FileOpenRead (char *path, int *handle)
 	struct stat	fileinfo;
     
 	
-	h = open (path, O_RDONLY, 0666);
+	/*h = open (path, O_RDONLY, 0666);*/
+	h = open (path, OREAD);
 	*handle = h;
 	if (h == -1)
 		return -1;
@@ -211,8 +214,8 @@ int Sys_FileOpenWrite (char *path)
 
 	umask (0);
 	
-	handle = open(path,O_RDWR | O_CREAT | O_TRUNC
-	, 0666);
+	/*handle = open(path,O_RDWR | O_CREAT | O_TRUNC, 0666);*/
+	handle = open(path, OREAD|OAPPEND);
 
 	if (handle == -1)
 		Sys_Error ("Error opening %s: %s", path,strerror(errno));
@@ -250,7 +253,8 @@ void Sys_DebugLog(char *file, char *fmt, ...)
     vsprintf(data, fmt, argptr);
     va_end(argptr);
 //    fd = open(file, O_WRONLY | O_BINARY | O_CREAT | O_APPEND, 0666);
-    fd = open(file, O_WRONLY | O_CREAT | O_APPEND, 0666);
+    /*fd = open(file, O_WRONLY | O_CREAT | O_APPEND, 0666);*/
+	fd = open(file, OREAD|OAPPEND);
     write(fd, data, strlen(data));
     close(fd);
 }
@@ -436,11 +440,11 @@ int main (int c, char **v)
 Sys_MakeCodeWriteable
 ================
 */
-void Sys_MakeCodeWriteable (unsigned long startaddr, unsigned long length)
+void Sys_MakeCodeWriteable (uintptr startaddr, uintptr length)
 {
 
 	int r;
-	unsigned long addr;
+	uintptr addr;
 	int psize = getpagesize();
 
 	addr = (startaddr & ~(psize-1)) - psize;

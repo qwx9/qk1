@@ -1,34 +1,17 @@
-/*
-Copyright (C) 1996-1997 Id Software, Inc.
-
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-as published by the Free Software Foundation; either version 2
-of the License, or (at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
-
-See the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-
-*/
 // Quake is a trademark of Id Software, Inc., (c) 1996 Id Software, Inc. All
 // rights reserved.
 
-#include <stdio.h>
-#include <unistd.h>
-#include <stdlib.h>
+#include <u.h>
+#include <libc.h>
+//#include <stdio.h>
+//#include <unistd.h>
+//#include <stdlib.h>
 #include <sys/ioctl.h>
-#include <sys/file.h>
-#include <sys/types.h>
-#include <fcntl.h>
-#include <string.h>
-#include <time.h>
+//#include <sys/file.h>
+//#include <sys/types.h>
+//#include <fcntl.h>
+//#include <string.h>
+//#include <time.h>
 #include <errno.h>
 
 #include <linux/cdrom.h>
@@ -381,7 +364,7 @@ int CDAudio_Init(void)
 		cd_dev[sizeof(cd_dev) - 1] = 0;
 	}
 
-	if ((cdfile = open(cd_dev, O_RDONLY)) == -1) {
+	if ((cdfile = open(cd_dev, OREAD)) == -1) {
 		Con_Printf("CDAudio_Init: open of \"%s\" failed (%i)\n", cd_dev, errno);
 		cdfile = -1;
 		return -1;

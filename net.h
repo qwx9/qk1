@@ -1,22 +1,3 @@
-/*
-Copyright (C) 1996-1997 Id Software, Inc.
-
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-as published by the Free Software Foundation; either version 2
-of the License, or (at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
-
-See the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-
-*/
 // net.h -- quake's interface to the networking layer
 
 struct qsockaddr
@@ -240,13 +221,13 @@ extern hostcache_t hostcache[HOSTCACHESIZE];
 
 #if !defined(_WIN32 ) && !defined (__linux__) && !defined (__sun__)
 #ifndef htonl
-extern unsigned long htonl (unsigned long hostlong);
+extern u32int htonl (u32int hostlong);
 #endif
 #ifndef htons
 extern unsigned short htons (unsigned short hostshort);
 #endif
 #ifndef ntohl
-extern unsigned long ntohl (unsigned long netlong);
+extern u32int ntohl (u32int netlong);
 #endif
 #ifndef ntohs
 extern unsigned short ntohs (unsigned short netshort);

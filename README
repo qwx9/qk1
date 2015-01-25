@@ -1,0 +1,12 @@
+qk1 - port of Quake to 9front
+=============================
+Does not work. Nothing to see here, move along.
+
+builds only with p9p on linux/386 and amd64, but amd64 build is buggered
+(pr_strings pointer shit, maybe more).
+plan9 shit missing completely, asm not ungccfied.
+
+
+legal
+-----
+Quake, hence qk1, are licensed under the GPLv2. See COPYING for details.

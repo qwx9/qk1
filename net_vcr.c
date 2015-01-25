@@ -1,24 +1,5 @@
-/*
-Copyright (C) 1996-1997 Id Software, Inc.
-
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-as published by the Free Software Foundation; either version 2
-of the License, or (at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
-
-See the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-
-*/
-// net_vcr.c
-
+#include <u.h>
+#include <libc.h>
 #include "quakedef.h"
 #include "net_vcr.h"
 
@@ -33,7 +14,7 @@ static struct
 {
 	double	time;
 	int		op;
-	long	session;
+	intptr	session;
 }	next;
 
 int VCR_Init (void)
@@ -79,7 +60,7 @@ int VCR_GetMessage (qsocket_t *sock)
 {
 	int	ret;
 	
-	if (host_time != next.time || next.op != VCR_OP_GETMESSAGE || next.session != *(long *)(&sock->driverdata))
+	if (host_time != next.time || next.op != VCR_OP_GETMESSAGE || next.session != *(s32int *)(&sock->driverdata))
 		Sys_Error ("VCR missmatch");
 
 	Sys_FileRead(vcrFile, &ret, sizeof(int));
@@ -102,7 +83,7 @@ int VCR_SendMessage (qsocket_t *sock, sizebuf_t *data)
 {
 	int	ret;
 
-	if (host_time != next.time || next.op != VCR_OP_SENDMESSAGE || next.session != *(long *)(&sock->driverdata))
+	if (host_time != next.time || next.op != VCR_OP_SENDMESSAGE || next.session != *(s32int *)(&sock->driverdata))
 		Sys_Error ("VCR missmatch");
 
 	Sys_FileRead(vcrFile, &ret, sizeof(int));
@@ -117,7 +98,7 @@ qboolean VCR_CanSendMessage (qsocket_t *sock)
 {
 	qboolean	ret;
 
-	if (host_time != next.time || next.op != VCR_OP_CANSENDMESSAGE || next.session != *(long *)(&sock->driverdata))
+	if (host_time != next.time || next.op != VCR_OP_CANSENDMESSAGE || next.session != *(s32int *)(&sock->driverdata))
 		Sys_Error ("VCR missmatch");
 
 	Sys_FileRead(vcrFile, &ret, sizeof(int));
@@ -158,7 +139,7 @@ qsocket_t *VCR_CheckNewConnections (void)
 	}
 
 	sock = NET_NewQSocket ();
-	*(long *)(&sock->driverdata) = next.session;
+	*(s32int *)(&sock->driverdata) = next.session;
 
 	Sys_FileRead (vcrFile, sock->address, NET_NAMELEN);
 	VCR_ReadNext ();

@@ -1,22 +1,3 @@
-/*
-Copyright (C) 1996-1997 Id Software, Inc.
-
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-as published by the Free Software Foundation; either version 2
-of the License, or (at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
-
-See the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-
-*/
 // net_dgrm.c
 
 // This is enables a simple IP banning mechanism
@@ -29,6 +10,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #else
+#include <u.h>
+#include <libc.h>
 #define AF_INET 		2	/* internet */
 struct in_addr
 {
@@ -36,7 +19,7 @@ struct in_addr
 	{
 		struct { unsigned char s_b1,s_b2,s_b3,s_b4; } S_un_b;
 		struct { unsigned short s_w1,s_w2; } S_un_w;
-		unsigned long S_addr;
+		u32int S_addr;
 	} S_un;
 };
 #define	s_addr	S_un.S_addr	/* can be used for most tcp & ip code */
@@ -48,7 +31,7 @@ struct sockaddr_in
     char			sin_zero[8];
 };
 char *inet_ntoa(struct in_addr in);
-unsigned long inet_addr(const char *cp);
+u32int inet_addr(const char *cp);
 #endif
 #endif	// BAN_TEST
 
@@ -99,8 +82,8 @@ char *StrAddr (struct qsockaddr *addr)
 
 
 #ifdef BAN_TEST
-unsigned long banAddr = 0x00000000;
-unsigned long banMask = 0xffffffff;
+u32int banAddr = 0x00000000;
+u32int banMask = 0xffffffff;
 
 void NET_Ban_f (void)
 {
@@ -988,7 +971,7 @@ static qsocket_t *_Datagram_CheckNewConnections (void)
 	// check for a ban
 	if (clientaddr.sa_family == AF_INET)
 	{
-		unsigned long testAddr;
+		u32int testAddr;
 		testAddr = ((struct sockaddr_in *)&clientaddr)->sin_addr.s_addr;
 		if ((testAddr & banMask) == banAddr)
 		{

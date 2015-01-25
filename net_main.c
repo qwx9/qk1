@@ -1,24 +1,5 @@
-/*
-Copyright (C) 1996-1997 Id Software, Inc.
-
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-as published by the Free Software Foundation; either version 2
-of the License, or (at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
-
-See the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-
-*/
-// net_main.c
-
+#include <u.h>
+#include <libc.h>
 #include "quakedef.h"
 #include "net_vcr.h"
 
@@ -451,7 +432,7 @@ struct
 {
 	double	time;
 	int		op;
-	long	session;
+	intptr	session;
 } vcrConnect;
 
 qsocket_t *NET_CheckNewConnections (void)
@@ -473,7 +454,7 @@ qsocket_t *NET_CheckNewConnections (void)
 			{
 				vcrConnect.time = host_time;
 				vcrConnect.op = VCR_OP_CONNECT;
-				vcrConnect.session = (long)ret;
+				vcrConnect.session = (intptr)ret;
 				Sys_FileWrite (vcrFile, &vcrConnect, sizeof(vcrConnect));
 				Sys_FileWrite (vcrFile, ret->address, NET_NAMELEN);
 			}
@@ -530,7 +511,7 @@ struct
 {
 	double	time;
 	int		op;
-	long	session;
+	intptr	session;
 	int		ret;
 	int		len;
 } vcrGetMessage;
@@ -580,7 +561,7 @@ int	NET_GetMessage (qsocket_t *sock)
 		{
 			vcrGetMessage.time = host_time;
 			vcrGetMessage.op = VCR_OP_GETMESSAGE;
-			vcrGetMessage.session = (long)sock;
+			vcrGetMessage.session = (intptr)sock;
 			vcrGetMessage.ret = ret;
 			vcrGetMessage.len = net_message.cursize;
 			Sys_FileWrite (vcrFile, &vcrGetMessage, 24);
@@ -593,7 +574,7 @@ int	NET_GetMessage (qsocket_t *sock)
 		{
 			vcrGetMessage.time = host_time;
 			vcrGetMessage.op = VCR_OP_GETMESSAGE;
-			vcrGetMessage.session = (long)sock;
+			vcrGetMessage.session = (intptr)sock;
 			vcrGetMessage.ret = ret;
 			Sys_FileWrite (vcrFile, &vcrGetMessage, 20);
 		}
@@ -618,7 +599,7 @@ struct
 {
 	double	time;
 	int		op;
-	long	session;
+	intptr	session;
 	int		r;
 } vcrSendMessage;
 
@@ -644,7 +625,7 @@ int NET_SendMessage (qsocket_t *sock, sizebuf_t *data)
 	{
 		vcrSendMessage.time = host_time;
 		vcrSendMessage.op = VCR_OP_SENDMESSAGE;
-		vcrSendMessage.session = (long)sock;
+		vcrSendMessage.session = (intptr)sock;
 		vcrSendMessage.r = r;
 		Sys_FileWrite (vcrFile, &vcrSendMessage, 20);
 	}
@@ -675,7 +656,7 @@ int NET_SendUnreliableMessage (qsocket_t *sock, sizebuf_t *data)
 	{
 		vcrSendMessage.time = host_time;
 		vcrSendMessage.op = VCR_OP_SENDMESSAGE;
-		vcrSendMessage.session = (long)sock;
+		vcrSendMessage.session = (intptr)sock;
 		vcrSendMessage.r = r;
 		Sys_FileWrite (vcrFile, &vcrSendMessage, 20);
 	}
@@ -710,7 +691,7 @@ qboolean NET_CanSendMessage (qsocket_t *sock)
 	{
 		vcrSendMessage.time = host_time;
 		vcrSendMessage.op = VCR_OP_CANSENDMESSAGE;
-		vcrSendMessage.session = (long)sock;
+		vcrSendMessage.session = (intptr)sock;
 		vcrSendMessage.r = r;
 		Sys_FileWrite (vcrFile, &vcrSendMessage, 20);
 	}

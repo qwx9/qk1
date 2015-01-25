@@ -1,35 +1,17 @@
-/*
-Copyright (C) 1996-1997 Id Software, Inc.
-
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-as published by the Free Software Foundation; either version 2
-of the License, or (at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
-
-See the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-
-*/
 // vid_x.c -- general x video driver
 
 #define _BSD
 
-
-#include <ctype.h>
+#include <u.h>
+#include <libc.h>
+//#include <ctype.h>
 #include <sys/time.h>
 #include <sys/types.h>
-#include <unistd.h>
+//#include <unistd.h>
 #include <signal.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
+//#include <stdlib.h>
+//#include <stdio.h>
+//#include <string.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
 #include <X11/Xlib.h>
@@ -96,8 +78,8 @@ static int verbose=0;
 
 static byte current_palette[768];
 
-static long X11_highhunkmark;
-static long X11_buffersize;
+static s32int X11_highhunkmark;
+static s32int X11_buffersize;
 
 int vid_surfcachesize;
 void *vid_surfcache;
@@ -107,12 +89,12 @@ void (*vid_menukeyfn)(int key);
 void VID_MenuKey (int key);
 
 typedef unsigned short PIXEL16;
-typedef unsigned long PIXEL24;
+typedef u32int PIXEL24;
 static PIXEL16 st2d_8to16table[256];
 static PIXEL24 st2d_8to24table[256];
 static int shiftmask_fl=0;
-static long r_shift,g_shift,b_shift;
-static unsigned long r_mask,g_mask,b_mask;
+static s32int r_shift,g_shift,b_shift;
+static u32int r_mask,g_mask,b_mask;
 
 void shiftmask_init()
 {
@@ -419,8 +401,8 @@ void ResetSharedFrameBuffers(void)
 		x_shminfo[frm].shmaddr =
 			(void *) shmat(x_shminfo[frm].shmid, 0, 0);
 
-		printf("VID: shared memory id=%d, addr=0x%lx\n", x_shminfo[frm].shmid,
-			(long) x_shminfo[frm].shmaddr);
+		printf("VID: shared memory id=%d, addr=0x%p\n", x_shminfo[frm].shmid,
+			x_shminfo[frm].shmaddr);
 
 		x_framebuffer[frm]->data = x_shminfo[frm].shmaddr;
 
