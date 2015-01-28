@@ -3,7 +3,8 @@
 
 #ifdef ELF
 #define C(label) label
-#else
+#endif
+#ifndef ELF
 #define C(label) _##label
 #endif
 

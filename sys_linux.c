@@ -374,13 +374,7 @@ int main (int c, char **v)
 	COM_InitArgv(c, v);
 	parms.argc = com_argc;
 	parms.argv = com_argv;
-
-#ifdef GLQUAKE
-	parms.memsize = 16*1024*1024;
-#endif
-#ifndef GLQUAKE
 	parms.memsize = 8*1024*1024;
-#endif
 
 	j = COM_CheckParm("-mem");
 	if (j)

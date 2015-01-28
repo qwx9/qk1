@@ -425,12 +425,6 @@ void SV_WriteEntitiesToClient (edict_t	*clent, sizebuf_t *msg)
 	ent = NEXT_EDICT(sv.edicts);
 	for (e=1 ; e<sv.num_edicts ; e++, ent = NEXT_EDICT(ent))
 	{
-#ifdef QUAKE2
-		// don't send if flagged for NODRAW and there are no lighting effects
-		if (ent->v.effects == EF_NODRAW)
-			continue;
-#endif
-
 // ignore if not touching a PV leaf
 		if (ent != clent)	// clent is ALLWAYS sent
 		{
@@ -563,9 +557,7 @@ void SV_WriteClientdataToMessage (edict_t *ent, sizebuf_t *msg)
 	int		i;
 	edict_t	*other;
 	int		items;
-#ifndef QUAKE2
 	eval_t	*val;
-#endif
 
 //
 // send a damage message
@@ -607,16 +599,12 @@ void SV_WriteClientdataToMessage (edict_t *ent, sizebuf_t *msg)
 
 // stuff the sigil bits into the high bits of items for sbar, or else
 // mix in items2
-#ifdef QUAKE2
-	items = (int)ent->v.items | ((int)ent->v.items2 << 23);
-#else
 	val = GetEdictFieldValue(ent, "items2");
 
 	if (val)
 		items = (int)ent->v.items | ((int)val->_float << 23);
 	else
 		items = (int)ent->v.items | ((int)pr_global_struct->serverflags << 28);
-#endif
 
 	bits |= SU_ITEMS;
 	
@@ -980,11 +968,7 @@ void SV_SendReconnect (void)
 	NET_SendToAll (&msg, 5);
 	
 	if (cls.state != ca_dedicated)
-#ifdef QUAKE2
-		Cbuf_InsertText ("reconnect\n");
-#else
 		Cmd_ExecuteString ("reconnect\n", src_command);
-#endif
 }
 
 
@@ -1025,11 +1009,7 @@ This is called at the start of each level
 */
 extern float		scr_centertime_off;
 
-#ifdef QUAKE2
-void SV_SpawnServer (char *server, char *startspot)
-#else
 void SV_SpawnServer (char *server)
-#endif
 {
 	edict_t		*ent;
 	int			i;
@@ -1071,10 +1051,6 @@ void SV_SpawnServer (char *server)
 	memset (&sv, 0, sizeof(sv));
 
 	strcpy (sv.name, server);
-#ifdef QUAKE2
-	if (startspot)
-		strcpy(sv.startspot, startspot);
-#endif
 
 // load progs to get entity field count
 	PR_LoadProgs ();
@@ -1152,9 +1128,6 @@ void SV_SpawnServer (char *server)
 		pr_global_struct->deathmatch = deathmatch.value;
 
 	pr_global_struct->mapname = sv.name - pr_strings;
-#ifdef QUAKE2
-	pr_global_struct->startspot = sv.startspot - pr_strings;
-#endif
 
 // serverflags are for cross level information (sigils)
 	pr_global_struct->serverflags = svs.serverflags;

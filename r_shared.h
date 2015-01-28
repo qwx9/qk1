@@ -1,4 +1,3 @@
-#ifndef GLQUAKE
 // r_shared.h: general refresh-related stuff shared between the refresh and the
 // driver
 
@@ -134,5 +133,3 @@ typedef struct edge_s
 } edge_t;
 
 #endif	// _R_SHARED_H_
-
-#endif	// GLQUAKE

@@ -645,10 +645,6 @@ void R_DrawViewModel (void)
 
 	r_viewlighting.plightvec = lightvec;
 
-#ifdef QUAKE2
-	cl.light_level = r_viewlighting.ambientlight;
-#endif
-
 	R_AliasDrawModel (&r_viewlighting);
 }
 
@@ -943,8 +939,9 @@ void R_RenderView_ (void)
 	R_SetupFrame ();
 
 #ifdef PASSAGES
-SetVisibilityByPassages ();
-#else
+	SetVisibilityByPassages ();
+#endif
+#ifndef PASSAGES
 	R_MarkLeaves ();	// done here so we know if we're in water
 #endif
 
