@@ -2,9 +2,19 @@ qk1 - port of Quake to 9front
 =============================
 Does not work. Nothing to see here, move along.
 
-builds only with p9p on linux/386 and amd64, but amd64 build is buggered
-(pr_strings pointer shit, maybe more).
+builds only with p9p on linux/386 and amd64; bugged to hell.
 plan9 shit missing completely, asm not ungccfied.
+
+intrusive changes:
+	- pr_strings: assumed 32bit pointer arithmetic: use PR_GetStr() instead of
+	  dealing with it directly; may be ass
+
+bugs
+----
+	- compile with PARANOID -> MSG_WriteByte complains about range error and
+	  exits.  no idea why. (386/amd64)
+	- new game while already ingame -> R_RenderView: called without enough
+	  stack
 
 
 legal

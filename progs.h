@@ -48,6 +48,8 @@ void PR_Init (void);
 void PR_ExecuteProgram (func_t fnum);
 void PR_LoadProgs (void);
 
+char	*PR_Str (int ofs);
+
 void PR_Profile_f (void);
 
 edict_t *ED_Alloc (void);
@@ -84,14 +86,14 @@ int NUM_FOR_EDICT(edict_t *e);
 #define G_EDICTNUM(o) NUM_FOR_EDICT(G_EDICT(o))
 #define	G_VECTOR(o) (&pr_globals[o])
 /* FIXME: amd64 */
-#define	G_STRING(o) (pr_strings + *(string_t *)&pr_globals[o])
+#define	G_STRING(o) (PR_Str(*(string_t *)&pr_globals[o]))
 #define	G_FUNCTION(o) (*(func_t *)&pr_globals[o])
 
 #define	E_FLOAT(e,o) (((float*)&e->v)[o])
 #define	E_INT(e,o) (*(int *)&((float*)&e->v)[o])
 #define	E_VECTOR(e,o) (&((float*)&e->v)[o])
 /* FIXME: amd64 */
-#define	E_STRING(e,o) (pr_strings + *(string_t *)&((float*)&e->v)[o])
+#define	E_STRING(e,o) (PR_Str(*(string_t *)&((float*)&e->v)[o]))
 
 extern	int		type_size[8];
 
@@ -114,3 +116,7 @@ void ED_PrintNum (int ent);
 
 eval_t *GetEdictFieldValue(edict_t *ed, char *field);
 
+void M_Init (void);
+void M_Keydown (int key);
+void M_ToggleMenu_f (void);
+void M_Draw (void);

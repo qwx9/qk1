@@ -11,7 +11,7 @@
 #define	LINUX_VERSION		1.30
 #define	X11_VERSION			1.10
 
-#define	PARANOID			// speed sapping error checking
+//#define	PARANOID			// speed sapping error checking
 #define	GAMENAME	"id1"		// directory to look in by default
 
 #include <stdio.h>

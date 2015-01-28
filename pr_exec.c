@@ -190,7 +190,7 @@ void PR_StackTrace (void)
 			Con_Printf ("<NO FUNCTION>\n");
 		}
 		else
-			Con_Printf ("%12s : %s\n", pr_strings + f->s_file, pr_strings + f->s_name);		
+			Con_Printf ("%12s : %s\n", PR_Str(f->s_file), PR_Str(f->s_name));		
 	}
 }
 
@@ -225,7 +225,7 @@ void PR_Profile_f (void)
 		if (best)
 		{
 			if (num < 10)
-				Con_Printf ("%7i %s\n", best->profile, pr_strings+best->s_name);
+				Con_Printf ("%7i %s\n", best->profile, PR_Str(best->s_name));
 			num++;
 			best->profile = 0;
 		}
@@ -465,7 +465,7 @@ while (1)
 		c->_float = !a->vector[0] && !a->vector[1] && !a->vector[2];
 		break;
 	case OP_NOT_S:
-		c->_float = !a->string || !pr_strings[a->string];
+		c->_float = !a->string || !*PR_Str(a->string);
 		break;
 	case OP_NOT_FNC:
 		c->_float = !a->function;
@@ -482,9 +482,8 @@ while (1)
 					(a->vector[1] == b->vector[1]) &&
 					(a->vector[2] == b->vector[2]);
 		break;
-	/* FIXME: amd64 */
 	case OP_EQ_S:
-		c->_float = !strcmp(pr_strings+a->string,pr_strings+b->string);
+		c->_float = !strcmp(PR_Str(a->string),PR_Str(b->string));
 		break;
 	case OP_EQ_E:
 		c->_float = a->_int == b->_int;
@@ -502,9 +501,8 @@ while (1)
 					(a->vector[1] != b->vector[1]) ||
 					(a->vector[2] != b->vector[2]);
 		break;
-	/* FIXME: amd64 */
 	case OP_NE_S:
-		c->_float = strcmp(pr_strings+a->string,pr_strings+b->string);
+		c->_float = strcmp(PR_Str(a->string),PR_Str(b->string));
 		break;
 	case OP_NE_E:
 		c->_float = a->_int != b->_int;
