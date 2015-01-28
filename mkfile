@@ -80,31 +80,10 @@ OFILES=\
 	snd_mem.o\
 	snd_mix.o\
 	snd_linux.o\
-	d_draw.o\
-	d_draw16.o\
-	d_parta.o\
-	d_polysa.o\
-	d_scana.o\
-	d_spr8.o\
-	d_varsa.o\
-	math.o\
-	r_aliasa.o\
-	r_drawa.o\
-	r_edgea.o\
-	r_varsa.o\
-	surf16.o\
-	surf8.o\
-	worlda.o\
-	r_aclipa.o\
-	snd_mixa.o\
-	#sys_dosa.o\
 
 HFILES=\
 	adivtab.h\
 	anorms.h\
-	asm_draw.h\
-	asm_i386.h\
-	block16.h\
 	bspfile.h\
 	cdaudio.h\
 	client.h\
@@ -113,7 +92,6 @@ HFILES=\
 	console.h\
 	crc.h\
 	cvar.h\
-	d_ifacea.h\
 	d_iface.h\
 	d_local.h\
 	draw.h\
@@ -131,7 +109,6 @@ HFILES=\
 	progdefs.h\
 	progs.h\
 	protocol.h\
-	quakeasm.h\
 	quakedef.h\
 	render.h\
 	r_local.h\
@@ -149,8 +126,3 @@ HFILES=\
 	zone.h\
 
 <$PLAN9/src/mkone
-
-AS=gcc
-
-%.$O:	%.s
-	$AS $AFLAGS -o $target -c $stem.s
