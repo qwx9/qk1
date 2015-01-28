@@ -19,11 +19,7 @@
 #define	VID_LockBuffer()
 #define	VID_UnlockBuffer()
 
-#ifdef __i386__ // && !defined __sun__
-#define id386
-#endif
-
-#ifdef id386
+#ifdef __id386__
 #define UNALIGNED_OK	// unset if unaligned accesses are not supported
 #endif
 

@@ -1,7 +1,5 @@
 // r_vars.c: global refresh variables
 
-#ifndef	id386
-
 #include <u.h>
 #include <libc.h>
 #include	"quakedef.h"
@@ -28,6 +26,3 @@ pixel_t			*d_viewbuffer;
 short			*d_pzbuffer;
 unsigned int	d_zrowbytes;
 unsigned int	d_zwidth;
-
-#endif	// !id386
-

@@ -8,8 +8,6 @@
 #include "r_local.h"
 #include "d_local.h"
 
-#ifndef	id386
-
 /*
 ================
 R_Surf8Patch
@@ -41,7 +39,3 @@ void R_SurfacePatch (void)
 {
 	// we only patch code on Intel
 }
-
-
-#endif	// !id386
-

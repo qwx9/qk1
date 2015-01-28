@@ -273,8 +273,6 @@ void R_TransformFrustum (void)
 }
 
 
-#ifndef	id386
-
 /*
 ================
 TransformVector
@@ -286,8 +284,6 @@ void TransformVector (vec3_t in, vec3_t out)
 	out[1] = DotProduct(in,vup);
 	out[2] = DotProduct(in,vpn);		
 }
-
-#endif //!id386
 
 
 /*

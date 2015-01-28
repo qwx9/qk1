@@ -69,8 +69,8 @@ OFILES=\
 	sv_phys.o\
 	sv_move.o\
 	sv_user.o\
-	zone.o	\
-	view.o	\
+	zone.o\
+	view.o\
 	wad.o\
 	world.o\
 	cd_linux.o\

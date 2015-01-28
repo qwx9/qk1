@@ -150,8 +150,6 @@ void BOPS_Error (void)
 }
 
 
-#ifndef	id386
-
 /*
 ==================
 BoxOnPlaneSide
@@ -258,8 +256,6 @@ if (sides == 0)
 
 	return sides;
 }
-
-#endif // !id386
 
 
 void AngleVectors (vec3_t angles, vec3_t forward, vec3_t right, vec3_t up)
@@ -534,8 +530,6 @@ int GreatestCommonDivisor (int i1, int i2)
 }
 
 
-#ifndef	id386
-
 // TODO: move to nonintel.c
 
 /*
@@ -554,5 +548,3 @@ fixed16_t Invert24To16(fixed16_t val)
 	return (fixed16_t)
 			(((double)0x10000 * (double)0x1000000 / (double)val) + 0.5);
 }
-
-#endif // !id386
