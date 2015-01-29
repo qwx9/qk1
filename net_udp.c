@@ -7,7 +7,6 @@
 typedef uintptr_t uintptr;
 typedef uint32_t u32int;
 
-
 #include "quakedef.h"
 
 #include <sys/types.h>

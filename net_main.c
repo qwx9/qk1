@@ -30,8 +30,8 @@ qboolean	slistLocal = true;
 static double	slistStartTime;
 static int		slistLastShown;
 
-static void Slist_Send(void);
-static void Slist_Poll(void);
+static void Slist_Send(void *);
+static void Slist_Poll(void *);
 PollProcedure	slistSendProcedure = {NULL, 0.0, Slist_Send};
 PollProcedure	slistPollProcedure = {NULL, 0.0, Slist_Poll};
 
@@ -293,7 +293,7 @@ void NET_Slist_f (void)
 }
 
 
-static void Slist_Send(void)
+static void Slist_Send(void *)
 {
 	for (net_driverlevel=0; net_driverlevel < net_numdrivers; net_driverlevel++)
 	{
@@ -309,7 +309,7 @@ static void Slist_Send(void)
 }
 
 
-static void Slist_Poll(void)
+static void Slist_Poll(void *)
 {
 	for (net_driverlevel=0; net_driverlevel < net_numdrivers; net_driverlevel++)
 	{
@@ -432,7 +432,7 @@ struct
 {
 	double	time;
 	int		op;
-	intptr	session;
+	int	session;
 } vcrConnect;
 
 qsocket_t *NET_CheckNewConnections (void)
@@ -454,7 +454,7 @@ qsocket_t *NET_CheckNewConnections (void)
 			{
 				vcrConnect.time = host_time;
 				vcrConnect.op = VCR_OP_CONNECT;
-				vcrConnect.session = (intptr)ret;
+				vcrConnect.session = (int)ret;
 				Sys_FileWrite (vcrFile, &vcrConnect, sizeof(vcrConnect));
 				Sys_FileWrite (vcrFile, ret->address, NET_NAMELEN);
 			}
@@ -511,7 +511,8 @@ struct
 {
 	double	time;
 	int		op;
-	intptr	session;
+	/* FIXME: different size -> vcr problems? */
+	uintptr	session;
 	int		ret;
 	int		len;
 } vcrGetMessage;
@@ -561,7 +562,7 @@ int	NET_GetMessage (qsocket_t *sock)
 		{
 			vcrGetMessage.time = host_time;
 			vcrGetMessage.op = VCR_OP_GETMESSAGE;
-			vcrGetMessage.session = (intptr)sock;
+			vcrGetMessage.session = (uintptr)sock;
 			vcrGetMessage.ret = ret;
 			vcrGetMessage.len = net_message.cursize;
 			Sys_FileWrite (vcrFile, &vcrGetMessage, 24);
@@ -574,7 +575,7 @@ int	NET_GetMessage (qsocket_t *sock)
 		{
 			vcrGetMessage.time = host_time;
 			vcrGetMessage.op = VCR_OP_GETMESSAGE;
-			vcrGetMessage.session = (intptr)sock;
+			vcrGetMessage.session = (uintptr)sock;
 			vcrGetMessage.ret = ret;
 			Sys_FileWrite (vcrFile, &vcrGetMessage, 20);
 		}
@@ -599,7 +600,8 @@ struct
 {
 	double	time;
 	int		op;
-	intptr	session;
+	/* FIXME: different size -> vcr problems? */
+	uintptr	session;
 	int		r;
 } vcrSendMessage;
 
@@ -625,7 +627,7 @@ int NET_SendMessage (qsocket_t *sock, sizebuf_t *data)
 	{
 		vcrSendMessage.time = host_time;
 		vcrSendMessage.op = VCR_OP_SENDMESSAGE;
-		vcrSendMessage.session = (intptr)sock;
+		vcrSendMessage.session = (uintptr)sock;
 		vcrSendMessage.r = r;
 		Sys_FileWrite (vcrFile, &vcrSendMessage, 20);
 	}
@@ -656,7 +658,7 @@ int NET_SendUnreliableMessage (qsocket_t *sock, sizebuf_t *data)
 	{
 		vcrSendMessage.time = host_time;
 		vcrSendMessage.op = VCR_OP_SENDMESSAGE;
-		vcrSendMessage.session = (intptr)sock;
+		vcrSendMessage.session = (uintptr)sock;
 		vcrSendMessage.r = r;
 		Sys_FileWrite (vcrFile, &vcrSendMessage, 20);
 	}
@@ -691,7 +693,7 @@ qboolean NET_CanSendMessage (qsocket_t *sock)
 	{
 		vcrSendMessage.time = host_time;
 		vcrSendMessage.op = VCR_OP_CANSENDMESSAGE;
-		vcrSendMessage.session = (intptr)sock;
+		vcrSendMessage.session = (uintptr)sock;
 		vcrSendMessage.r = r;
 		Sys_FileWrite (vcrFile, &vcrSendMessage, 20);
 	}

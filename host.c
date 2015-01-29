@@ -425,7 +425,7 @@ void Host_ShutdownServer(qboolean crash)
 	while (count);
 
 // make sure all the clients know we're disconnecting
-	buf.data = message;
+	buf.data = (uchar *)message;
 	buf.maxsize = 4;
 	buf.cursize = 0;
 	MSG_WriteByte(&buf, svc_disconnect);
@@ -798,7 +798,7 @@ void Host_Init (quakeparms_t *parms)
 	NET_Init ();
 	SV_Init ();
 
-	Con_Printf ("Exe: "__TIME__" "__DATE__"\n");
+	Con_Printf ("Exe: 00:00:00 Jun 22 1996\n");
 	Con_Printf ("%4.1f megabyte heap\n",parms->memsize/ (1024*1024.0));
 	
 	R_InitTextures ();		// needed even for dedicated servers

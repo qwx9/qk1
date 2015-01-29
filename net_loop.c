@@ -20,12 +20,12 @@ void Loop_Shutdown (void)
 }
 
 
-void Loop_Listen (qboolean state)
+void Loop_Listen (qboolean) /*state*/
 {
 }
 
 
-void Loop_SearchForHosts (qboolean xmit)
+void Loop_SearchForHosts (qboolean) /*xmit*/
 {
 	if (!sv.active)
 		return;
@@ -206,7 +206,7 @@ qboolean Loop_CanSendMessage (qsocket_t *sock)
 }
 
 
-qboolean Loop_CanSendUnreliableMessage (qsocket_t *sock)
+qboolean Loop_CanSendUnreliableMessage (qsocket_t *) /*sock*/
 {
 	return true;
 }

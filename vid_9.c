@@ -1,5 +1,3 @@
-// vid_x.c -- general x video driver
-
 #define _BSD
 
 #include <u.h>
@@ -78,8 +76,8 @@ static int verbose=0;
 
 static byte current_palette[768];
 
-static s32int X11_highhunkmark;
-static s32int X11_buffersize;
+static int X11_highhunkmark;
+static int X11_buffersize;
 
 int vid_surfcachesize;
 void *vid_surfcache;
@@ -93,8 +91,8 @@ typedef u32int PIXEL24;
 static PIXEL16 st2d_8to16table[256];
 static PIXEL24 st2d_8to24table[256];
 static int shiftmask_fl=0;
-static s32int r_shift,g_shift,b_shift;
-static u32int r_mask,g_mask,b_mask;
+static int r_shift,g_shift,b_shift;
+static uint r_mask,g_mask,b_mask;
 
 void shiftmask_init()
 {

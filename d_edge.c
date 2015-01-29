@@ -173,7 +173,7 @@ void D_DrawSurfaces (void)
 			d_zistepv = s->d_zistepv;
 			d_ziorigin = s->d_ziorigin;
 
-			D_DrawSolidSurface (s, (intptr)s->data & 0xFF);
+			D_DrawSolidSurface (s, (uintptr)s->data & 0xFF);
 			D_DrawZSpans (s->spans);
 		}
 	}

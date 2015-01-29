@@ -7,7 +7,7 @@
 void S_Play(void);
 void S_PlayVol(void);
 void S_SoundList(void);
-void S_Update_();
+void S_Update_(void);
 void S_StopAllSounds(qboolean clear);
 void S_StopAllSoundsC(void);
 
@@ -375,10 +375,9 @@ SND_Spatialize
 void SND_Spatialize(channel_t *ch)
 {
     vec_t dot;
-    vec_t ldist, rdist, dist;
+    vec_t dist;
     vec_t lscale, rscale, scale;
     vec3_t source_vec;
-	sfx_t *snd;
 
 // anything coming from the view entity will allways be full volume
 	if (ch->entnum == cl.viewentity)
@@ -390,7 +389,6 @@ void SND_Spatialize(channel_t *ch)
 
 // calculate stereo seperation and distance attenuation
 
-	snd = ch->sfx;
 	VectorSubtract(ch->origin, listener_origin, source_vec);
 	
 	dist = VectorNormalize(source_vec) * ch->dist_mult;

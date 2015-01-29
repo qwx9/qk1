@@ -1,11 +1,7 @@
 // quakedef.h -- primary header for client
 
 #define	QUAKE_GAME			// as opposed to utilities
-
 #define	VERSION				1.09
-#define	LINUX_VERSION		1.30
-#define	X11_VERSION			1.10
-
 //#define	PARANOID			// speed sapping error checking
 #define	GAMENAME	"id1"		// directory to look in by default
 
@@ -26,8 +22,7 @@
 // !!! if this is changed, it must be changed in d_ifacea.h too !!!
 #define CACHE_SIZE	32		// used to align key data structures
 
-#define UNUSED(x)	(x = x)	// for pesky compiler / lint warnings
-
+/* FIXME? wrong on !386? */
 #define	MINIMUM_MEMORY			0x550000
 #define	MINIMUM_MEMORY_LEVELPAK	(MINIMUM_MEMORY + 0x100000)
 

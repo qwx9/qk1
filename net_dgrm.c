@@ -256,7 +256,7 @@ qboolean Datagram_CanSendMessage (qsocket_t *sock)
 }
 
 
-qboolean Datagram_CanSendUnreliableMessage (qsocket_t *sock)
+qboolean Datagram_CanSendUnreliableMessage (qsocket_t *) /*sock*/
 {
 	return true;
 }
@@ -492,10 +492,10 @@ static int		testPollCount;
 static int		testDriver;
 static int		testSocket;
 
-static void Test_Poll(void);
+static void Test_Poll(void *);
 PollProcedure	testPollProcedure = {NULL, 0.0, Test_Poll};
 
-static void Test_Poll(void)
+static void Test_Poll(void *)
 {
 	struct qsockaddr clientaddr;
 	int		control;
@@ -620,10 +620,10 @@ static qboolean test2InProgress = false;
 static int		test2Driver;
 static int		test2Socket;
 
-static void Test2_Poll(void);
+static void Test2_Poll(void *);
 PollProcedure	test2PollProcedure = {NULL, 0.0, Test2_Poll};
 
-static void Test2_Poll(void)
+static void Test2_Poll(void *)
 {
 	struct qsockaddr clientaddr;
 	int		control;

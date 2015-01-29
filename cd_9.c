@@ -1,6 +1,3 @@
-// Quake is a trademark of Id Software, Inc., (c) 1996 Id Software, Inc. All
-// rights reserved.
-
 #include <u.h>
 #include <libc.h>
 //#include <stdio.h>
@@ -13,7 +10,6 @@
 //#include <string.h>
 //#include <time.h>
 #include <errno.h>
-
 #include <linux/cdrom.h>
 
 #include "quakedef.h"

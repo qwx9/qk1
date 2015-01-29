@@ -114,7 +114,7 @@ int R_ClipSpriteFace (int nump, clipplane_t *pclipplane)
 R_SetupAndDrawSprite
 ================
 */
-void R_SetupAndDrawSprite ()
+void R_SetupAndDrawSprite (void)
 {
 	int			i, nump;
 	float		dot, scale, *pv;

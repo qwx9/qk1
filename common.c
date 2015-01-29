@@ -122,7 +122,7 @@ void Q_memset (void *dest, int fill, int count)
 {
 	int             i;
 	
-	if ( (((intptr)dest | count) & 3) == 0)
+	if ( ((uintptr)dest | count) & 3 == 0)
 	{
 		count >>= 2;
 		fill = fill | (fill<<8) | (fill<<16) | (fill<<24);
@@ -138,7 +138,7 @@ void Q_memcpy (void *dest, void *src, int count)
 {
 	int             i;
 	
-	if (( ( (intptr)dest | (intptr)src | count) & 3) == 0 )
+	if (( ( (uintptr)dest | (uintptr)src | count) & 3) == 0 )
 	{
 		count>>=2;
 		for (i=0 ; i<count ; i++)
@@ -166,7 +166,7 @@ void Q_strcpy (char *dest, char *src)
 	{
 		*dest++ = *src++;
 	}
-	*dest++ = 0;
+	*dest = 0;
 }
 
 void Q_strncpy (char *dest, char *src, int count)
@@ -176,7 +176,7 @@ void Q_strncpy (char *dest, char *src, int count)
 		*dest++ = *src++;
 	}
 	if (count)
-		*dest++ = 0;
+		*dest = 0;
 }
 
 int Q_strlen (char *str)
@@ -216,8 +216,6 @@ int Q_strcmp (char *s1, char *s2)
 		s1++;
 		s2++;
 	}
-	
-	return -1;
 }
 
 int Q_strncmp (char *s1, char *s2, int count)
@@ -233,8 +231,6 @@ int Q_strncmp (char *s1, char *s2, int count)
 		s1++;
 		s2++;
 	}
-	
-	return -1;
 }
 
 int Q_strncasecmp (char *s1, char *s2, int n)
@@ -263,8 +259,6 @@ int Q_strncasecmp (char *s1, char *s2, int n)
 //              s1++;
 //              s2++;
 	}
-	
-	return -1;
 }
 
 int Q_strcasecmp (char *s1, char *s2)
@@ -326,8 +320,6 @@ int Q_atoi (char *str)
 			return val*sign;
 		val = val*10 + c - '0';
 	}
-	
-	return 0;
 }
 
 
@@ -1102,7 +1094,7 @@ void COM_InitArgv (int argc, char **argv)
 COM_Init
 ================
 */
-void COM_Init (char *basedir)
+void COM_Init (char *) /*basedir*/
 {
 	byte    swaptest[2] = {1,0};
 

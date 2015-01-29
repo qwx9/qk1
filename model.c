@@ -85,8 +85,6 @@ mleaf_t *Mod_PointInLeaf (vec3_t p, model_t *model)
 		else
 			node = node->children[1];
 	}
-	
-	return NULL;	// never reached
 }
 
 

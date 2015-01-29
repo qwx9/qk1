@@ -212,7 +212,7 @@ int Sys_FileOpenWrite (char *path)
 	umask (0);
 	
 	/*handle = open(path,O_RDWR | O_CREAT | O_TRUNC, 0666);*/
-	handle = open(path, OREAD|OAPPEND);
+	handle = open(path, OREAD);
 
 	if (handle == -1)
 		Sys_Error ("Error opening %s: %s", path,strerror(errno));
@@ -251,7 +251,7 @@ void Sys_DebugLog(char *file, char *fmt, ...)
     va_end(argptr);
 //    fd = open(file, O_WRONLY | O_BINARY | O_CREAT | O_APPEND, 0666);
     /*fd = open(file, O_WRONLY | O_CREAT | O_APPEND, 0666);*/
-	fd = open(file, OREAD|OAPPEND);
+	fd = open(file, OREAD);
     write(fd, data, strlen(data));
     close(fd);
 }

@@ -198,7 +198,7 @@ void Con_Init (void)
 		if (strlen (com_gamedir) < (MAXGAMEDIRLEN - strlen (t2)))
 		{
 			sprintf (temp, "%s%s", com_gamedir, t2);
-			unlink (temp);
+			remove (temp);
 		}
 	}
 
@@ -336,7 +336,7 @@ void Con_DebugLog(char *file, char *fmt, ...)
     vsprintf(data, fmt, argptr);
     va_end(argptr);
     /*fd = open(file, OWRITE | O_WRONLY | O_CREAT | O_APPEND, 0666);*/
-    fd = open(file, OWRITE|OAPPEND);
+    fd = open(file, OWRITE);
     write(fd, data, strlen(data));
     close(fd);
 }

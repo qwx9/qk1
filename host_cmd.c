@@ -40,7 +40,7 @@ void Host_Status_f (void)
 	client_t	*client;
 	int			seconds;
 	int			minutes;
-	int			hours = 0;
+	int			hours;
 	int			j;
 	void		(*print) (char *fmt, ...);
 	
@@ -595,7 +595,6 @@ void Host_Loadgame_f (void)
 		if (i == sizeof(str)-1)
 			Sys_Error ("Loadgame buffer overflow");
 		str[i] = 0;
-		start = str;
 		start = COM_Parse(str);
 		if (!com_token[0])
 			break;		// end of file
@@ -687,7 +686,7 @@ void Host_Name_f (void)
 void Host_Version_f (void)
 {
 	Con_Printf ("Version %4.2f\n", VERSION);
-	Con_Printf ("Exe: "__TIME__" "__DATE__"\n");
+	Con_Printf ("Exe: 00:00:00 Jun 22 1996\n");
 }
 
 #ifdef IDGODS
@@ -749,7 +748,7 @@ void Host_Say(qboolean teamonly)
 	client_t *save;
 	int		j;
 	char	*p;
-	unsigned char	text[64];
+	char	text[64];
 	qboolean	fromServer = false;
 
 	if (cmd_source == src_command)

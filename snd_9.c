@@ -10,6 +10,7 @@
 //#include <sys/wait.h>
 #include <linux/soundcard.h>
 //#include <stdio.h>
+
 #include "quakedef.h"
 
 int audio_fd;

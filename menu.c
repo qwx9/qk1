@@ -1373,11 +1373,7 @@ void M_Keys_Key (int k)
 	if (bind_grab)
 	{	// defining a key
 		S_LocalSound ("misc/menu1.wav");
-		if (k == K_ESCAPE)
-		{
-			bind_grab = false;
-		}
-		else if (k != '`')
+		if (k != '`')
 		{
 			sprintf (cmd, "bind \"%s\" \"%s\"\n", Key_KeynumToString (k), bindnames[keys_cursor][0]);
 			Cbuf_InsertText (cmd);
@@ -2263,9 +2259,7 @@ void M_LanConfig_Key (int key)
 			lanConfig_cursor = 0;
 
 	l =  Q_atoi(lanConfig_portname);
-	if (l > 65535)
-		l = lanConfig_port;
-	else
+	if (l < 65535)
 		lanConfig_port = l;
 	sprintf(lanConfig_portname, "%u", lanConfig_port);
 }
@@ -2783,7 +2777,7 @@ void M_Search_Draw (void)
 }
 
 
-void M_Search_Key (int key)
+void M_Search_Key (int) /*key*/
 {
 }
 

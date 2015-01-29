@@ -27,7 +27,8 @@
 
 #define ALIAS_VERSION	6
 
-#define ALIAS_ONSEAM				0x0020
+/* defined in r_shared.h */
+//#define ALIAS_ONSEAM				0x0020
 
 // must match definition in spritegn.h
 #ifndef SYNCTYPE_T
