@@ -454,7 +454,7 @@ qsocket_t *NET_CheckNewConnections (void)
 			{
 				vcrConnect.time = host_time;
 				vcrConnect.op = VCR_OP_CONNECT;
-				vcrConnect.session = (int)ret;
+				vcrConnect.session = (uintptr)ret;
 				Sys_FileWrite (vcrFile, &vcrConnect, sizeof(vcrConnect));
 				Sys_FileWrite (vcrFile, ret->address, NET_NAMELEN);
 			}
