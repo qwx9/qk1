@@ -256,8 +256,6 @@ int Q_strncasecmp (char *s1, char *s2, int n)
 		}
 		if (!c1)
 			return 0;               // strings are equal
-//              s1++;
-//              s2++;
 	}
 }
 
@@ -1170,7 +1168,7 @@ QUAKE FILESYSTEM
 =============================================================================
 */
 
-int     com_filesize;
+vlong	com_filesize;
 
 
 //
@@ -1304,7 +1302,8 @@ needed.  This is for the convenience of developers using ISDN from home.
 void COM_CopyFile (char *netpath, char *cachepath)
 {
 	int             in, out;
-	int             remaining, count;
+	int             count;
+	vlong		remaining;
 	char    buf[4096];
 	
 	remaining = Sys_FileOpenRead (netpath, &in);            

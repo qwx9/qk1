@@ -1,26 +1,71 @@
 qk1 - port of Quake to 9front
 =============================
-Does not work. Nothing to see here, move along.
+	- based on linux/x11 code from original gpl release
+	- setup:
+		. mk install
+		. mkdir id1
+		. cp /n/quakecd/id1/*.pak id1/
+		. run from same dir...
+	- unfinished and very buggy (both shitty new code and badly ported old code)
+	- sound does not work; assume that you should always launch with -nosound
+	- assume high resolutions don't work well and are very crash prone (e.g. > 800x600)
+		. exit with: Hunk_Alloc: failed on ... => not enough memory
+		use [-mem megabytes], e.g.:
+			% qk1 -nosound -mem 10
+	- don't use -winsize, -width, -height; just resize the window (bugsbugsbugs)
+	- mouse is grabbed using _windowed_mouse cvar
+		. open console (~)
+		. type _windowed_mouse 1 (can autocomplete w/ tab)
+		. setting now saved in .cfg
+	- assume it can crash with mouse still being captured (in_9.c)
+		. if window size < physical screen size, swipe mouse super to exit the window
+		(bug in mproc)
+	- tested on 386 and amd64 only
 
-builds only with p9p on linux/386 and amd64; bugged to hell.
-actually, untested on 386, because linux crosscompiling and p9p on not-OSX.
 
-plan9 shit missing completely, asm not ungccfied.
-
-intrusive changes:
+port notes
+----------
 	- pr_strings: assumed 32bit pointer arithmetic: use PR_GetStr() instead of
 	  dealing with it directly; may be ass
-	- global cppdefotomy
+	- global cppdefotomy, removing code seen as useless for plan9
 
 
-bugs
-----
+bugs present in linux/x11
+-------------------------
 	- compile with PARANOID -> MSG_WriteByte complains about range error and
-	  exits. no idea why. (386/amd64)
-	- new game while already ingame -> front falls off (amd64)
-		. most of the time: exit with R_RenderView: called without enough stack
+	  exits. no idea why.
+	- new game while already ingame -> front falls off
+		. most of the time: exits with R_RenderView: called without enough stack
+		. sometimes: goes batshit on the console (->press y again and quit normally, etc.)
+	- compile with BAN_TEST -> net_dgrm build fails
+	- sprites/particles not scaled on high resolutions
+	- mouselook was completely fucked; still is somewhat
+		. when paused, if _windowed_mouse 1, can still look around with the mouse, even
+		if world is frozen
+	- fp exceptions galore
+
+
+todo
+----
+	- kill stdio; other than stdio uses, NULL -> nil; same for *printf
+	- vid_9.c: remove/limit stupid
+	- net_9p.c
+	- net_udp.c + net_dgrm.c: actuallyport
+	- snd_9.c: actuallyport
+	- cd_9.c: everything; just specigy via cvar a folder and look for files there?
+	- kill mouse on crash
+	- mproc: better grabout shit
+	- free mouselook without needing +mlook
+	- plan9-like install
+	- fix *Printf functions (console.c, sys_9.c, etc.)
+	- do something about all the fucking shit printed in console
+	- caps lock == Kctl
+	- ungrab mouse when entering console or menus a la games/doom (IN_Grabm())
+	- clean up *_9.c
+	- linking errors with -T cflag
+	- fix potential fp exceptions in code rather than ignoring them
 
 
 legal
 -----
-Quake, hence qk1, are licensed under the GPLv2. See COPYING for details.
+Quake, hence qk1, is licensed under the GPLv2. See COPYING for details.

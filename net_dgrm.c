@@ -1,11 +1,10 @@
-// net_dgrm.c
-
-// This is enables a simple IP banning mechanism
-#define BAN_TEST
-
-#ifdef BAN_TEST
 #include <u.h>
 #include <libc.h>
+
+// This is enables a simple IP banning mechanism
+//#define BAN_TEST	/* FIXME */
+
+#ifdef BAN_TEST
 #define AF_INET 		2	/* internet */
 struct in_addr
 {
@@ -131,7 +130,7 @@ void NET_Ban_f (void)
 			break;
 	}
 }
-#endif
+#endif // BAN_TEST
 
 
 int Datagram_SendMessage (qsocket_t *sock, sizebuf_t *data)

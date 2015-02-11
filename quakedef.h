@@ -5,12 +5,7 @@
 //#define	PARANOID			// speed sapping error checking
 #define	GAMENAME	"id1"		// directory to look in by default
 
-#include <stdio.h>
-//#include <math.h>
-//#include <string.h>
-//#include <stdarg.h>
-//#include <stdlib.h>
-//#include <setjmp.h>
+#include <stdio.h>	/* FIXME */
 
 #define	VID_LockBuffer()
 #define	VID_UnlockBuffer()
@@ -153,6 +148,9 @@
 // This makes anyone on id's net privileged
 // Use for multiplayer testing only - VERY dangerous!!!
 // #define IDGODS
+
+/* FIXME: if hj no dicks, struct sizes screw up lump loading, see zB model.c errors */
+#pragma pack on
 
 #include "common.h"
 #include "bspfile.h"

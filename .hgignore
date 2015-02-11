@@ -1,4 +1,5 @@
 syntax:glob
-*.[1-9o]
+*.[1-9qv]
 *qk1
+*.out
 id1/

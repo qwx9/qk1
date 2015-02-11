@@ -219,7 +219,6 @@ typedef struct
 extern int hostCacheCount;
 extern hostcache_t hostcache[HOSTCACHESIZE];
 
-#ifndef __linux__
 #ifndef htonl
 extern u32int htonl (u32int hostlong);
 #endif
@@ -231,7 +230,6 @@ extern u32int ntohl (u32int netlong);
 #endif
 #ifndef ntohs
 extern unsigned short ntohs (unsigned short netshort);
-#endif
 #endif
 
 #ifdef IDGODS

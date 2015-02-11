@@ -123,3 +123,7 @@ HFILES=\
 	zone.h\
 
 </sys/src/cmd/mkone
+
+# FIXME (packing error?)
+CFLAGS=-FVw
+#LDFLAGS=-v

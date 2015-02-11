@@ -177,7 +177,7 @@ CalcFov
 */
 float CalcFov (float fov_x, float width, float height)
 {
-        float   a;
+        float   a = 0;
         float   x;
 
         if (fov_x < 1 || fov_x > 179)
@@ -185,8 +185,8 @@ float CalcFov (float fov_x, float width, float height)
 
         x = width/tan(fov_x/360*M_PI);
 
-        a = atan (height/x);
-
+	if(x != 0)
+        	a = atan (height/x);
         a = a*360/M_PI;
 
         return a;

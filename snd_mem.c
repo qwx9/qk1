@@ -230,7 +230,7 @@ void DumpChunks(void)
 GetWavinfo
 ============
 */
-wavinfo_t GetWavinfo (char *name, byte *wav, int wavlength)
+wavinfo_t GetWavinfo (char *name, byte *wav, vlong wavlength)
 {
 	wavinfo_t	info;
 	int     i;
