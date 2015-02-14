@@ -204,7 +204,8 @@ void S_Init (void)
 		shm->buffer = Hunk_AllocName(1<<16, "shmbuf");
 	}
 
-	Con_Printf ("Sound sampling rate: %i\n", shm->speed);
+	if(shm != nil)
+		Con_Printf ("Sound sampling rate: %i\n", shm->speed);
 
 	// provides a tick sound until washed clean
 
@@ -231,13 +232,11 @@ void S_Shutdown(void)
 	if (shm)
 		shm->gamealive = 0;
 
-	shm = 0;
+	//shm = 0;	/* why? */
 	sound_started = 0;
 
 	if (!fakedma)
-	{
 		SNDDMA_Shutdown();
-	}
 }
 
 

@@ -12,30 +12,41 @@ cvar_t sys_linerefresh = {"sys_linerefresh","0"};	// set for entity display
 void Sys_Printf (char *fmt, ...)
 {
 	char buf[1024];
-	va_list arg;
 	uchar *p;
+	va_list arg;
 
-	/* FIXME: does not work, fix your megashit code */
 	if(nostdout)
 		return;
 	va_start(arg, fmt);
 	vseprint(buf, buf+sizeof(buf), fmt, arg);
 	va_end(arg);
-
+	//write(1, buf, out-buf);
 	for(p = (uchar *)buf; *p; p++){
 		*p &= 0x7f;
 		if((*p > 128 || *p < 32) && *p != 10 && *p != 13 && *p != 9)
 			print("[%02x]", *p);
 		else
-			write(1, p, sizeof *p);
+			print("%c", *p);
 	}
 }
 
 void Sys_Quit (void)
 {
 	Host_Shutdown();
-	//fcntl (0, F_SETFL, fcntl (0, F_GETFL, 0) & ~FNDELAY);
 	exits(nil);
+}
+
+void Sys_Warn (char *msg, ...)
+{
+	char buf[1024], *out;
+	va_list arg;
+
+	out = seprint(buf, buf+sizeof(buf), "%s: ", argv0);
+	va_start(arg, msg);
+	out = vseprint(out, buf+sizeof(buf), msg, arg);
+	va_end(arg);
+	out = seprint(out, buf+sizeof(buf), ": %r\n");
+	write(2, buf, out-buf);
 }
 
 void Sys_Error (char *error, ...)
@@ -43,29 +54,23 @@ void Sys_Error (char *error, ...)
 	char buf[1024], *out;
 	va_list arg;
 
-	/* FIXME: does not work, fix your megashit code */
-	//fcntl (0, F_SETFL, fcntl (0, F_GETFL, 0) & ~FNDELAY);
-	out = seprint(buf, buf+sizeof(buf), "%s: ", argv0);
 	va_start(arg, error);
-	out = vseprint(out, buf+sizeof(buf), error, arg);
+	out = vseprint(buf, buf+sizeof(buf), error, arg);
 	va_end(arg);
+	out = seprint(out, buf+sizeof(buf), "\n%s: %r\n", argv0);
 	write(2, buf, out-buf);
-	/* FIXME: newline */
 	Host_Shutdown();
-	exits("ending");
+	sysfatal("ending");
 } 
 
 int Sys_FileTime (char *path)
 {
-	/* FIXME: man 5 intro, man 2 stat, man 2 fcall */
 	uchar	sb[1024];
 
 	if(stat(path, sb, sizeof sb) < 0){
-		fprint(2, "%s stat %s: %r\n", argv0, path);
+		Sys_Warn("Sys_FileTime:stat");
 		return -1;
 	}
-
-	/* FIXME */
 	return *((int *)(sb+25));
 }
 
@@ -74,7 +79,7 @@ void Sys_mkdir (char *path)
 	int	d;
 
 	if((d = create(path, OREAD, DMDIR|0777)) < 0)
-		fprint(2, "%s create %s: %r\n", argv0, path);
+		Sys_Warn("Sys_mkdir:create %s", path);
 	else
 		close(d);
 }
@@ -89,8 +94,7 @@ vlong Sys_FileOpenRead (char *path, int *handle)
 	if(d < 0)
 		return -1;
 	if(fstat(d, bs, sizeof bs) < 0)
-		Sys_Error("%s fstat %s: %r", argv0, path);
-	/* FIXME */
+		Sys_Error("Sys_FileOpenRead %s failed", path);
 	return *((vlong *)(bs+33));
 }
 
@@ -99,7 +103,7 @@ int Sys_FileOpenWrite (char *path)
 	int     d;
 
 	if((d = open(path, OREAD|OTRUNC)) < 0)
-		Sys_Error("%s open %s: %r", argv0, path);
+		Sys_Error("Sys_FileOpenWrite %s failed", path);
 	return d;
 }
 

@@ -213,7 +213,7 @@ void mproc (void)
 	nerr = 0;
 	for(;;){
 		if((n = read(fd, buf, sizeof buf)) != 1+4*12){
-			Con_Printf("mouse: bad count %d not 49: %r\n", n);
+			Sys_Warn("mproc:read: bad count %d not 49", n);
 			if(n < 0 || ++nerr > 10)
 				break;
 			continue;
@@ -262,7 +262,7 @@ void IN_Grabm (int on)
 		return;
 	if(mouseactive = on){
 		if((fd = open("/dev/cursor", ORDWR|OCEXEC)) < 0){
-			Con_Printf("%s IN_Grabm: open: %r", argv0);
+			Sys_Warn("IN_Grabm:open");
 			return;
 		}
 		write(fd, nocurs, sizeof(nocurs));
@@ -286,12 +286,20 @@ void IN_Shutdown (void)
 	mouse_avail = 0;
 }
 
+void sucks(void *, char *note)
+{
+	if(!strncmp(note, "sys:", 4))
+		IN_Shutdown();	/* FIXME: safe? */
+	noted(NDFLT);
+}
+
 void IN_Init (void)
 {
 	int pid;
 
 	Cvar_RegisterVariable(&_windowed_mouse);
 	Cvar_RegisterVariable(&m_filter);
+	notify(sucks);
 	IN_Grabm(1);
 	if((pid = rfork(RFPROC|RFMEM|RFFDG)) == 0){
 		kproc();

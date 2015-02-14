@@ -294,7 +294,8 @@ int CDAudio_Init(void)
 	}
 
 	if((cdfile = open(cd_dev, OREAD)) == -1){
-		Con_Printf("CDAudio_Init %s: %r\n", cd_dev);
+		Sys_Warn("CDAudio_Init %s", cd_dev);
+		Con_Printf("CDAudio_Init %s: failed to initialize\n", cd_dev);
 		cdfile = -1;
 		return -1;
 	}

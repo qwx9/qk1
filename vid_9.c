@@ -248,7 +248,7 @@ void VID_Init (unsigned char *palette)
 	}
 
 	if(initdraw(nil, nil, "quake") < 0)
-		Sys_Error("%s initdraw: %r", argv0);
+		Sys_Error("VID_Init:initdraw");
 
 	if(vid.width == -1)
 		vid.width = Dx(screen->r);
@@ -320,7 +320,7 @@ void VID_Update (vrect_t *rects)
 	if(config_notify){		/* skip this frame if window resize */
 		config_notify = 0;
 		if(getwindow(display, Refnone) < 0)
-			Sys_Error("%s getwindow: %r", argv0);
+			Sys_Error("VID_Update:getwindow");
 		vid.width = Dx(screen->r);
 		vid.height = Dy(screen->r);
 		ResetFrameBuffer();
@@ -333,7 +333,6 @@ void VID_Update (vrect_t *rects)
 		vid.conheight = vid.height;
 		vid.conrowbytes = vid.rowbytes;
 		vid.recalc_refdef = 1;			// force a surface cache flush
-		draw(screen, screen->r, display->black, nil, ZP);
 		Con_CheckResize();
 		Con_Clear_f();
 		return;
