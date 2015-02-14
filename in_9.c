@@ -6,13 +6,14 @@
 #include <keyboard.h>
 #include "quakedef.h"
 
-cvar_t _windowed_mouse = {"_windowed_mouse","0", true};
+cvar_t m_windowed = {"m_windowed","0", true};
 cvar_t m_filter = {"m_filter","0", true};
-float old_windowed_mouse;
+cvar_t m_freelook = {"m_freelook", "0", true};
+float oldm_windowed;
 qboolean mouse_avail;
 int mouse_buttons = 3;
 int mouse_buttonstate, mouse_oldbuttonstate;
-float mouse_x, mouse_y, old_mouse_x, old_mouse_y, p_mouse_x, p_mouse_y;
+float mouse_x, mouse_y, old_mouse_x, old_mouse_y;
 
 struct {
 	int key;
@@ -31,9 +32,10 @@ extern Rectangle grabout;
 
 void Sys_SendKeyEvents(void)
 {
-	if(old_windowed_mouse != _windowed_mouse.value){
-		old_windowed_mouse = _windowed_mouse.value;
-		if(!_windowed_mouse.value)
+	/* FIXME: sloppy */
+	if(oldm_windowed != m_windowed.value){
+		oldm_windowed = m_windowed.value;
+		if(!m_windowed.value)
 			IN_Grabm(0);
 		else
 			IN_Grabm(1);
@@ -80,10 +82,10 @@ void IN_Move (usercmd_t *cmd)
 		cmd->sidemove += m_side.value * mouse_x;
 	else
 		cl.viewangles[YAW] -= m_yaw.value * mouse_x;
-	if(in_mlook.state & 1)
+	if(m_freelook.value || in_mlook.state & 1)
 		V_StopPitchDrift();
    
-	if(in_mlook.state & 1 && ~in_strafe.state & 1){
+	if(m_freelook.value || in_mlook.state & 1 && ~in_strafe.state & 1){
 		cl.viewangles[PITCH] += m_pitch.value * mouse_y;
 		if(cl.viewangles[PITCH] > 80)
 			cl.viewangles[PITCH] = 80;
@@ -232,19 +234,11 @@ void mproc (void)
 			//m.buttons = atoi(buf+1+2*12);
 			b = atoi(buf+1+2*12);
 
-			/* FIXME: does not work well */
-			if(_windowed_mouse.value){
-				if(!ptinrect(m, grabout)){
-					fprint(fd, "m%d %d", center.x, center.y);
-					m = center;
-					p_mouse_x = center.x;
-					p_mouse_y = center.y;
-				}
-			}
-			mouse_x = (float)(m.x - p_mouse_x);
-			mouse_y = (float)(m.y - p_mouse_y);
-			p_mouse_x = m.x;
-			p_mouse_y = m.y;
+			/* FIXME: cursor can still get out */
+			mouse_x += (float)(m.x - center.x);
+			mouse_y += (float)(m.y - center.y);
+			if(m_windowed.value)
+				fprint(fd, "m%d %d", center.x, center.y);
 
 			mouse_buttonstate = b&1 | (b&2)<<1 | (b&4)>>1;
 			break;
@@ -297,10 +291,12 @@ void IN_Init (void)
 {
 	int pid;
 
-	Cvar_RegisterVariable(&_windowed_mouse);
+	Cvar_RegisterVariable(&m_windowed);
 	Cvar_RegisterVariable(&m_filter);
+	Cvar_RegisterVariable(&m_freelook);
 	notify(sucks);
-	IN_Grabm(1);
+	if(m_windowed.value)
+		IN_Grabm(1);
 	if((pid = rfork(RFPROC|RFMEM|RFFDG)) == 0){
 		kproc();
 		exits(nil);
@@ -308,12 +304,13 @@ void IN_Init (void)
 	kpid = pid;
 	if(COM_CheckParm("-nomouse"))
 		return;
-	/* FIXME: notify(catch) if crash -> disable mouse */
 	if((pid = rfork(RFPROC|RFMEM|RFFDG)) == 0){
 		mproc();
 		exits(nil);
 	}
 	mpid = pid;
-	p_mouse_x = p_mouse_y = mouse_x = mouse_y = 0.0;
+	mouse_x = mouse_y = 0.0;
+	/* FIXME: both kind of do the same thing */
+	//mouse_avail = mouseactive = 1;
 	mouse_avail = 1;
 }

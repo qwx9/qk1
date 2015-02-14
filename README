@@ -22,8 +22,8 @@ qk1 - (9) quake
 	- tested on 386 and amd64 only
 
 
-some cvars useful for workarounds
----------------------------------
+some params useful for workarounds
+----------------------------------
 	-nosound
 	-nostdout
 	-mem %d
@@ -41,6 +41,7 @@ port notes
 	- Sys_Warn added again for print(2) stuff in *_9.c that uses %r, kind of stupid
 	since Con_Printf was often used there, and it outputs to both fd=1 and console,
 	so needs fixing
+	- m_freelook, as a quick hack to have (reversible) free mouse look
 
 
 bugs present in linux/x11 (w/ my tweaks in early commits)

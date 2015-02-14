@@ -31,7 +31,6 @@ Rectangle grabout;	/* center mouse outside of this if cvar set */
 void (*vid_menudrawfn)(void);
 void (*vid_menukeyfn)(int key);
 
-
 void shiftmask_init (void)
 {
 	uint x;
@@ -205,6 +204,13 @@ void ResetFrameBuffer (void)
 // the palette data will go away after the call, so it must be copied off if
 // the video driver will need it again
 
+void resetscr(void)
+{
+	ResetFrameBuffer();
+	center = addpt(screen->r.min, Pt(Dx(screen->r)/2, Dy(screen->r)/2));
+	grabout = insetrect(screen->r, Dx(screen->r)/8);
+}
+
 void VID_Init (unsigned char *palette)
 {
 	int pnum;
@@ -259,9 +265,7 @@ void VID_Init (unsigned char *palette)
 
 	if(screen->chan == CMAP8)
 		VID_SetPalette(palette);
-	ResetFrameBuffer();
-	center = addpt(screen->r.min, Pt(Dx(screen->r)/2, Dy(screen->r)/2));
-	grabout = insetrect(screen->r, Dx(screen->r)/8);
+	resetscr();
 	vid.rowbytes = Dx(screen->r) * screen->depth/8;
 	vid.buffer = framebuf;
 	vid.direct = 0;
@@ -323,9 +327,7 @@ void VID_Update (vrect_t *rects)
 			Sys_Error("VID_Update:getwindow");
 		vid.width = Dx(screen->r);
 		vid.height = Dy(screen->r);
-		ResetFrameBuffer();
-		center = addpt(screen->r.min, Pt(Dx(screen->r)/2, Dy(screen->r)/2));
-		grabout = insetrect(screen->r, Dx(screen->r)/8);
+		resetscr();
 		vid.rowbytes = vid.width * screen->depth/8;
 		vid.buffer = framebuf;
 		vid.conbuffer = framebuf;
