@@ -1,5 +1,6 @@
 #include <u.h>
 #include <libc.h>
+#include <stdio.h>
 #include "quakedef.h"
 #include "net_vcr.h"
 
@@ -121,7 +122,7 @@ void VCR_SearchForHosts (qboolean) /*xmit*/
 
 qsocket_t *VCR_Connect (char *) /*host*/
 {
-	return NULL;
+	return nil;
 }
 
 
@@ -135,7 +136,7 @@ qsocket_t *VCR_CheckNewConnections (void)
 	if (!next.session)
 	{
 		VCR_ReadNext ();
-		return NULL;
+		return nil;
 	}
 
 	sock = NET_NewQSocket ();

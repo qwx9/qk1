@@ -1,5 +1,6 @@
 #include <u.h>
 #include <libc.h>
+#include <stdio.h>
 #include "quakedef.h"
 
 extern cvar_t	pausable;
@@ -63,7 +64,7 @@ void Host_Status_f (void)
 	if (ipxAvailable)
 		print ("ipx:     %s\n", my_ipx_address);
 	print ("map:     %s\n", sv.name);
-	print ("players: %i active (%i max)\n\n", net_activeconnections, svs.maxclients);
+	print ("players: %d active (%d max)\n\n", net_activeconnections, svs.maxclients);
 	for (j=0, client = svs.clients ; j<svs.maxclients ; j++, client++)
 	{
 		if (!client->active)
@@ -79,7 +80,7 @@ void Host_Status_f (void)
 		}
 		else
 			hours = 0;
-		print ("#%-2u %-16.16s  %3i  %2i:%02i:%02i\n", j+1, client->name, (int)client->edict->v.frags, hours, minutes, seconds);
+		print ("#%-2ud %-16.16s  %3d  %2d:%02d:%02d\n", j+1, client->name, (int)client->edict->v.frags, hours, minutes, seconds);
 		print ("   %s\n", client->netconnection->address);
 	}
 }
@@ -213,7 +214,7 @@ void Host_Ping_f (void)
 		for (j=0 ; j<NUM_PING_TIMES ; j++)
 			total+=client->ping_times[j];
 		total /= NUM_PING_TIMES;
-		SV_ClientPrintf ("%4i %s\n", (int)(total*1000), client->name);
+		SV_ClientPrintf ("%4d %s\n", (int)(total*1000), client->name);
 	}
 }
 
@@ -388,7 +389,7 @@ void Host_SavegameComment (char *text)
 	for (i=0 ; i<SAVEGAME_COMMENT_LENGTH ; i++)
 		text[i] = ' ';
 	memcpy (text, cl.levelname, strlen(cl.levelname));
-	sprintf (kills,"kills:%3i/%3i", cl.stats[STAT_MONSTERS], cl.stats[STAT_TOTALMONSTERS]);
+	sprint (kills,"kills:%3d/%3d", cl.stats[STAT_MONSTERS], cl.stats[STAT_TOTALMONSTERS]);
 	memcpy (text+22, kills, strlen(kills));
 // convert space to _ to make stdio happy
 	for (i=0 ; i<SAVEGAME_COMMENT_LENGTH ; i++)
@@ -452,7 +453,7 @@ void Host_Savegame_f (void)
 		}
 	}
 
-	sprintf (name, "%s/%s", com_gamedir, Cmd_Argv(1));
+	sprint (name, "%s/%s", com_gamedir, Cmd_Argv(1));
 	COM_DefaultExtension (name, ".sav");
 	
 	Con_Printf ("Saving game to %s...\n", name);
@@ -463,7 +464,7 @@ void Host_Savegame_f (void)
 		return;
 	}
 	
-	fprintf (f, "%i\n", SAVEGAME_VERSION);
+	fprintf (f, "%d\n", SAVEGAME_VERSION);
 	Host_SavegameComment (comment);
 	fprintf (f, "%s\n", comment);
 	for (i=0 ; i<NUM_SPAWN_PARMS ; i++)
@@ -523,7 +524,7 @@ void Host_Loadgame_f (void)
 
 	cls.demonum = -1;		// stop demo loop in case this fails
 
-	sprintf (name, "%s/%s", com_gamedir, Cmd_Argv(1));
+	sprint (name, "%s/%s", com_gamedir, Cmd_Argv(1));
 	COM_DefaultExtension (name, ".sav");
 	
 // we can't call SCR_BeginLoadingPlaque, because too much stack space has
@@ -538,11 +539,11 @@ void Host_Loadgame_f (void)
 		return;
 	}
 
-	fscanf (f, "%i\n", &version);
+	fscanf (f, "%d\n", &version);
 	if (version != SAVEGAME_VERSION)
 	{
 		fclose (f);
-		Con_Printf ("Savegame is version %i, not %i\n", version, SAVEGAME_VERSION);
+		Con_Printf ("Savegame is version %d, not %d\n", version, SAVEGAME_VERSION);
 		return;
 	}
 	fscanf (f, "%s\n", str);
@@ -780,9 +781,9 @@ void Host_Say(qboolean teamonly)
 
 // turn on color set 1
 	if (!fromServer)
-		sprintf (text, "%c%s: ", 1, save->name);
+		sprint (text, "%c%s: ", 1, save->name);
 	else
-		sprintf (text, "%c<%s> ", 1, hostname.string);
+		sprint (text, "%c<%s> ", 1, hostname.string);
 
 	j = sizeof(text) - 2 - Q_strlen(text);  // -2 for /n and null terminator
 	if (Q_strlen(p) > j)
@@ -882,7 +883,7 @@ void Host_Color_f(void)
 	
 	if (Cmd_Argc() == 1)
 	{
-		Con_Printf ("\"color\" is \"%i %i\"\n", ((int)cl_color.value) >> 4, ((int)cl_color.value) & 0x0f);
+		Con_Printf ("\"color\" is \"%d %d\"\n", ((int)cl_color.value) >> 4, ((int)cl_color.value) & 0x0f);
 		Con_Printf ("color <0-13> [0-13]\n");
 		return;
 	}
@@ -1162,7 +1163,7 @@ Kicks a user off of the server
 void Host_Kick_f (void)
 {
 	char		*who;
-	char		*message = NULL;
+	char		*message = nil;
 	client_t	*save;
 	int			i;
 	qboolean	byNumber = false;
@@ -1417,7 +1418,7 @@ edict_t	*FindViewthing (void)
 			return e;
 	}
 	Con_Printf ("No viewthing on map\n");
-	return NULL;
+	return nil;
 }
 
 /*
@@ -1479,7 +1480,7 @@ void PrintFrameName (model_t *m, int frame)
 		return;
 	pframedesc = &hdr->frames[frame];
 	
-	Con_Printf ("frame %i: %s\n", frame, pframedesc->name);
+	Con_Printf ("frame %d: %s\n", frame, pframedesc->name);
 }
 
 /*
@@ -1555,10 +1556,10 @@ void Host_Startdemos_f (void)
 	c = Cmd_Argc() - 1;
 	if (c > MAX_DEMOS)
 	{
-		Con_Printf ("Max %i demos in demoloop\n", MAX_DEMOS);
+		Con_Printf ("Max %d demos in demoloop\n", MAX_DEMOS);
 		c = MAX_DEMOS;
 	}
-	Con_Printf ("%i demo(s) in loop\n", c);
+	Con_Printf ("%d demo(s) in loop\n", c);
 
 	for (i=1 ; i<c+1 ; i++)
 		strncpy (cls.demos[i-1], Cmd_Argv(i), sizeof(cls.demos[0])-1);

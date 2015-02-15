@@ -2,6 +2,7 @@
 
 #include <u.h>
 #include <libc.h>
+#include <stdio.h>
 #include "quakedef.h"
 
 cvar_t	*cvar_vars;
@@ -119,7 +120,7 @@ void Cvar_SetValue (char *var_name, float value)
 {
 	char	val[32];
 	
-	sprintf (val, "%f",value);
+	sprint (val, "%f",value);
 	Cvar_Set (var_name, val);
 }
 

@@ -1,5 +1,6 @@
 #include <u.h>
 #include <libc.h>
+#include <stdio.h>
 #include <draw.h>
 #include <thread.h>
 #include <mouse.h>

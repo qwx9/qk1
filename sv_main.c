@@ -2,6 +2,7 @@
 
 #include <u.h>
 #include <libc.h>
+#include <stdio.h>
 #include "quakedef.h"
 
 server_t		sv;
@@ -42,7 +43,7 @@ void SV_Init (void)
 	Cvar_RegisterVariable (&sv_nostep);
 
 	for (i=0 ; i<MAX_MODELS ; i++)
-		sprintf (localmodels[i], "*%i", i);
+		sprint (localmodels[i], "*%d", i);
 }
 
 /*
@@ -107,13 +108,13 @@ void SV_StartSound (edict_t *entity, int channel, char *sample, int volume,
 	int			ent;
 	
 	if (volume < 0 || volume > 255)
-		Sys_Error ("SV_StartSound: volume = %i", volume);
+		Sys_Error ("SV_StartSound: volume = %d", volume);
 
 	if (attenuation < 0 || attenuation > 4)
 		Sys_Error ("SV_StartSound: attenuation = %f", attenuation);
 
 	if (channel < 0 || channel > 7)
-		Sys_Error ("SV_StartSound: channel = %i", channel);
+		Sys_Error ("SV_StartSound: channel = %d", channel);
 
 	if (sv.datagram.cursize > MAX_DATAGRAM-16)
 		return;	
@@ -175,7 +176,7 @@ void SV_SendServerinfo (client_t *client)
 	char			message[2048];
 
 	MSG_WriteByte (&client->message, svc_print);
-	sprintf (message, "%c\nVERSION %4.2f SERVER (%i CRC)", 2, VERSION, pr_crc);
+	sprint (message, "%c\nVERSION %4.2f SERVER (%ud CRC)", 2, VERSION, pr_crc);
 	MSG_WriteString (&client->message,message);
 
 	MSG_WriteByte (&client->message, svc_serverinfo);
@@ -187,7 +188,7 @@ void SV_SendServerinfo (client_t *client)
 	else
 		MSG_WriteByte (&client->message, GAME_COOP);
 
-	sprintf (message, PR_Str(sv.edicts->v.message));
+	sprint (message, PR_Str(sv.edicts->v.message));
 
 	MSG_WriteString (&client->message,message);
 
@@ -1086,7 +1087,7 @@ void SV_SpawnServer (char *server)
 	sv.time = 1.0;
 	
 	strcpy (sv.name, server);
-	sprintf (sv.modelname,"maps/%s.bsp", server);
+	sprint (sv.modelname,"maps/%s.bsp", server);
 	sv.worldmodel = Mod_ForName (sv.modelname, false);
 	if (!sv.worldmodel)
 	{

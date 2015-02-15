@@ -2,6 +2,7 @@
 
 #include <u.h>
 #include <libc.h>
+#include <stdio.h>
 #include "quakedef.h"
 #include "r_local.h"
 
@@ -535,7 +536,7 @@ void WritePCXfile (char *filename, byte *data, int width, int height,
 	byte		*pack;
 	  
 	pcx = Hunk_TempAlloc (width*height*2+1000);
-	if (pcx == NULL)
+	if (pcx == nil)
 	{
 		Con_Printf("SCR_ScreenShot_f: not enough memory\n");
 		return;
@@ -608,7 +609,7 @@ void SCR_ScreenShot_f (void)
 	{ 
 		pcxname[5] = i/10 + '0'; 
 		pcxname[6] = i%10 + '0'; 
-		sprintf (checkname, "%s/%s", com_gamedir, pcxname);
+		sprint (checkname, "%s/%s", com_gamedir, pcxname);
 		if (Sys_FileTime(checkname) == -1)
 			break;	// file doesn't exist
 	} 
@@ -862,7 +863,7 @@ void SCR_UpdateScreen (void)
 		Sbar_Changed ();
 	}
 
-	pconupdate = NULL;
+	pconupdate = nil;
 
 
 	SCR_SetUpToDrawConsole ();

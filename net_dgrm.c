@@ -1,5 +1,6 @@
 #include <u.h>
 #include <libc.h>
+#include <stdio.h>
 
 // This is enables a simple IP banning mechanism
 //#define BAN_TEST	/* FIXME */
@@ -67,7 +68,7 @@ char *StrAddr (struct qsockaddr *addr)
 	int n;
 
 	for (n = 0; n < 16; n++)
-		sprintf (buf + n * 2, "%02x", *p++);
+		sprint (buf + n * 2, "%02x", *p++);
 	return buf;
 }
 #endif
@@ -144,7 +145,7 @@ int Datagram_SendMessage (qsocket_t *sock, sizebuf_t *data)
 		Sys_Error("Datagram_SendMessage: zero length message\n");
 
 	if (data->cursize > NET_MAXMESSAGE)
-		Sys_Error("Datagram_SendMessage: message too big %u\n", data->cursize);
+		Sys_Error("Datagram_SendMessage: message too big %ud\n", data->cursize);
 
 	if (sock->canSend == false)
 		Sys_Error("SendMessage: called with canSend == false\n");
@@ -270,7 +271,7 @@ int Datagram_SendUnreliableMessage (qsocket_t *sock, sizebuf_t *data)
 		Sys_Error("Datagram_SendUnreliableMessage: zero length message\n");
 
 	if (data->cursize > MAX_DATAGRAM)
-		Sys_Error("Datagram_SendUnreliableMessage: message too big %u\n", data->cursize);
+		Sys_Error("Datagram_SendUnreliableMessage: message too big %ud\n", data->cursize);
 #endif
 
 	packetLen = NET_HEADERSIZE + data->cursize;
@@ -354,7 +355,7 @@ int	Datagram_GetMessage (qsocket_t *sock)
 			{
 				count = sequence - sock->unreliableReceiveSequence;
 				droppedDatagrams += count;
-				Con_DPrintf("Dropped %u datagram(s)\n", count);
+				Con_DPrintf("Dropped %ud datagram(s)\n", count);
 			}
 			sock->unreliableReceiveSequence = sequence + 1;
 
@@ -440,9 +441,9 @@ int	Datagram_GetMessage (qsocket_t *sock)
 
 void PrintStats(qsocket_t *s)
 {
-	Con_Printf("canSend = %4u   \n", s->canSend);
-	Con_Printf("sendSeq = %4u   ", s->sendSequence);
-	Con_Printf("recvSeq = %4u   \n", s->receiveSequence);
+	Con_Printf("canSend = %4ud   \n", s->canSend);
+	Con_Printf("sendSeq = %4ud   ", s->sendSequence);
+	Con_Printf("recvSeq = %4ud   \n", s->receiveSequence);
 	Con_Printf("\n");
 }
 
@@ -452,16 +453,16 @@ void NET_Stats_f (void)
 
 	if (Cmd_Argc () == 1)
 	{
-		Con_Printf("unreliable messages sent   = %i\n", unreliableMessagesSent);
-		Con_Printf("unreliable messages recv   = %i\n", unreliableMessagesReceived);
-		Con_Printf("reliable messages sent     = %i\n", messagesSent);
-		Con_Printf("reliable messages received = %i\n", messagesReceived);
-		Con_Printf("packetsSent                = %i\n", packetsSent);
-		Con_Printf("packetsReSent              = %i\n", packetsReSent);
-		Con_Printf("packetsReceived            = %i\n", packetsReceived);
-		Con_Printf("receivedDuplicateCount     = %i\n", receivedDuplicateCount);
-		Con_Printf("shortPacketCount           = %i\n", shortPacketCount);
-		Con_Printf("droppedDatagrams           = %i\n", droppedDatagrams);
+		Con_Printf("unreliable messages sent   = %d\n", unreliableMessagesSent);
+		Con_Printf("unreliable messages recv   = %d\n", unreliableMessagesReceived);
+		Con_Printf("reliable messages sent     = %d\n", messagesSent);
+		Con_Printf("reliable messages received = %d\n", messagesReceived);
+		Con_Printf("packetsSent                = %d\n", packetsSent);
+		Con_Printf("packetsReSent              = %d\n", packetsReSent);
+		Con_Printf("packetsReceived            = %d\n", packetsReceived);
+		Con_Printf("receivedDuplicateCount     = %d\n", receivedDuplicateCount);
+		Con_Printf("shortPacketCount           = %d\n", shortPacketCount);
+		Con_Printf("droppedDatagrams           = %d\n", droppedDatagrams);
 	}
 	else if (Q_strcmp(Cmd_Argv(1), "*") == 0)
 	{
@@ -475,11 +476,11 @@ void NET_Stats_f (void)
 		for (s = net_activeSockets; s; s = s->next)
 			if (Q_strcasecmp(Cmd_Argv(1), s->address) == 0)
 				break;
-		if (s == NULL)
+		if (s == nil)
 			for (s = net_freeSockets; s; s = s->next)
 				if (Q_strcasecmp(Cmd_Argv(1), s->address) == 0)
 					break;
-		if (s == NULL)
+		if (s == nil)
 			return;
 		PrintStats(s);
 	}
@@ -492,7 +493,7 @@ static int		testDriver;
 static int		testSocket;
 
 static void Test_Poll(void *);
-PollProcedure	testPollProcedure = {NULL, 0.0, Test_Poll};
+PollProcedure	testPollProcedure = {nil, 0.0, Test_Poll};
 
 static void Test_Poll(void *)
 {
@@ -536,7 +537,7 @@ static void Test_Poll(void *)
 		connectTime = MSG_ReadLong();
 		Q_strcpy(address, MSG_ReadString());
 
-		Con_Printf("%s\n  frags:%3i  colors:%u %u  time:%u\n  %s\n", name, frags, colors >> 4, colors & 0x0f, connectTime / 60, address);
+		Con_Printf("%s\n  frags:%3d  colors:%ud %ud  time:%ud\n  %s\n", name, frags, colors >> 4, colors & 0x0f, connectTime / 60, address);
 	}
 
 	testPollCount--;
@@ -620,7 +621,7 @@ static int		test2Driver;
 static int		test2Socket;
 
 static void Test2_Poll(void *);
-PollProcedure	test2PollProcedure = {NULL, 0.0, Test2_Poll};
+PollProcedure	test2PollProcedure = {nil, 0.0, Test2_Poll};
 
 static void Test2_Poll(void *)
 {
@@ -817,30 +818,30 @@ static qsocket_t *_Datagram_CheckNewConnections (void)
 
 	acceptsock = dfunc.CheckNewConnections();
 	if (acceptsock == -1)
-		return NULL;
+		return nil;
 
 	SZ_Clear(&net_message);
 
 	len = dfunc.Read (acceptsock, net_message.data, net_message.maxsize, &clientaddr);
 	if (len < sizeof(int))
-		return NULL;
+		return nil;
 	net_message.cursize = len;
 
 	MSG_BeginReading ();
 	control = BigLong(*((int *)net_message.data));
 	MSG_ReadLong();
 	if (control == -1)
-		return NULL;
+		return nil;
 	if ((control & (~NETFLAG_LENGTH_MASK)) !=  NETFLAG_CTL)
-		return NULL;
+		return nil;
 	if ((control & NETFLAG_LENGTH_MASK) != len)
-		return NULL;
+		return nil;
 
 	command = MSG_ReadByte();
 	if (command == CCREQ_SERVER_INFO)
 	{
 		if (Q_strcmp(MSG_ReadString(), "QUAKE") != 0)
-			return NULL;
+			return nil;
 
 		SZ_Clear(&net_message);
 		// save space for the header, filled in later
@@ -856,7 +857,7 @@ static qsocket_t *_Datagram_CheckNewConnections (void)
 		*((int *)net_message.data) = BigLong(NETFLAG_CTL | (net_message.cursize & NETFLAG_LENGTH_MASK));
 		dfunc.Write (acceptsock, net_message.data, net_message.cursize, &clientaddr);
 		SZ_Clear(&net_message);
-		return NULL;
+		return nil;
 	}
 
 	if (command == CCREQ_PLAYER_INFO)
@@ -878,7 +879,7 @@ static qsocket_t *_Datagram_CheckNewConnections (void)
 			}
 		}
 		if (clientNumber == svs.maxclients)
-			return NULL;
+			return nil;
 
 		SZ_Clear(&net_message);
 		// save space for the header, filled in later
@@ -894,7 +895,7 @@ static qsocket_t *_Datagram_CheckNewConnections (void)
 		dfunc.Write (acceptsock, net_message.data, net_message.cursize, &clientaddr);
 		SZ_Clear(&net_message);
 
-		return NULL;
+		return nil;
 	}
 
 	if (command == CCREQ_RULE_INFO)
@@ -908,7 +909,7 @@ static qsocket_t *_Datagram_CheckNewConnections (void)
 		{
 			var = Cvar_FindVar (prevCvarName);
 			if (!var)
-				return NULL;
+				return nil;
 			var = var->next;
 		}
 		else
@@ -937,14 +938,14 @@ static qsocket_t *_Datagram_CheckNewConnections (void)
 		dfunc.Write (acceptsock, net_message.data, net_message.cursize, &clientaddr);
 		SZ_Clear(&net_message);
 
-		return NULL;
+		return nil;
 	}
 
 	if (command != CCREQ_CONNECT)
-		return NULL;
+		return nil;
 
 	if (Q_strcmp(MSG_ReadString(), "QUAKE") != 0)
-		return NULL;
+		return nil;
 
 	if (MSG_ReadByte() != NET_PROTOCOL_VERSION)
 	{
@@ -956,7 +957,7 @@ static qsocket_t *_Datagram_CheckNewConnections (void)
 		*((int *)net_message.data) = BigLong(NETFLAG_CTL | (net_message.cursize & NETFLAG_LENGTH_MASK));
 		dfunc.Write (acceptsock, net_message.data, net_message.cursize, &clientaddr);
 		SZ_Clear(&net_message);
-		return NULL;
+		return nil;
 	}
 
 #ifdef BAN_TEST
@@ -975,7 +976,7 @@ static qsocket_t *_Datagram_CheckNewConnections (void)
 			*((int *)net_message.data) = BigLong(NETFLAG_CTL | (net_message.cursize & NETFLAG_LENGTH_MASK));
 			dfunc.Write (acceptsock, net_message.data, net_message.cursize, &clientaddr);
 			SZ_Clear(&net_message);
-			return NULL;
+			return nil;
 		}
 	}
 #endif
@@ -1001,18 +1002,18 @@ static qsocket_t *_Datagram_CheckNewConnections (void)
 				*((int *)net_message.data) = BigLong(NETFLAG_CTL | (net_message.cursize & NETFLAG_LENGTH_MASK));
 				dfunc.Write (acceptsock, net_message.data, net_message.cursize, &clientaddr);
 				SZ_Clear(&net_message);
-				return NULL;
+				return nil;
 			}
 			// it's somebody coming back in from a crash/disconnect
 			// so close the old qsocket and let their retry get them back in
 			NET_Close(s);
-			return NULL;
+			return nil;
 		}
 	}
 
 	// allocate a QSocket
 	sock = NET_NewQSocket ();
-	if (sock == NULL)
+	if (sock == nil)
 	{
 		// no room; try to let him know
 		SZ_Clear(&net_message);
@@ -1023,7 +1024,7 @@ static qsocket_t *_Datagram_CheckNewConnections (void)
 		*((int *)net_message.data) = BigLong(NETFLAG_CTL | (net_message.cursize & NETFLAG_LENGTH_MASK));
 		dfunc.Write (acceptsock, net_message.data, net_message.cursize, &clientaddr);
 		SZ_Clear(&net_message);
-		return NULL;
+		return nil;
 	}
 
 	// allocate a network socket
@@ -1031,7 +1032,7 @@ static qsocket_t *_Datagram_CheckNewConnections (void)
 	if (newsock == -1)
 	{
 		NET_FreeQSocket(sock);
-		return NULL;
+		return nil;
 	}
 
 	// connect to the client
@@ -1039,7 +1040,7 @@ static qsocket_t *_Datagram_CheckNewConnections (void)
 	{
 		dfunc.CloseSocket(newsock);
 		NET_FreeQSocket(sock);
-		return NULL;
+		return nil;
 	}
 
 	// everything is allocated, just fill in the details	
@@ -1065,11 +1066,11 @@ static qsocket_t *_Datagram_CheckNewConnections (void)
 
 qsocket_t *Datagram_CheckNewConnections (void)
 {
-	qsocket_t *ret = NULL;
+	qsocket_t *ret = nil;
 
 	for (net_landriverlevel = 0; net_landriverlevel < net_numlandrivers; net_landriverlevel++)
 		if (net_landrivers[net_landriverlevel].initialized)
-			if ((ret = _Datagram_CheckNewConnections ()) != NULL)
+			if ((ret = _Datagram_CheckNewConnections ()) != nil)
 				break;
 	return ret;
 }
@@ -1192,7 +1193,7 @@ static qsocket_t *_Datagram_Connect (char *host)
 	struct qsockaddr readaddr;
 	qsocket_t	*sock;
 	int			newsock;
-	int			ret;
+	int			ret = 0;
 	int			reps;
 	double		start_time;
 	int			control;
@@ -1200,14 +1201,14 @@ static qsocket_t *_Datagram_Connect (char *host)
 
 	// see if we can resolve the host name
 	if (dfunc.GetAddrFromName(host, &sendaddr) == -1)
-		return NULL;
+		return nil;
 
 	newsock = dfunc.OpenSocket (0);
 	if (newsock == -1)
-		return NULL;
+		return nil;
 
 	sock = NET_NewQSocket ();
-	if (sock == NULL)
+	if (sock == nil)
 		goto ErrorReturn2;
 	sock->socket = newsock;
 	sock->landriver = net_landriverlevel;
@@ -1350,16 +1351,16 @@ ErrorReturn2:
 		m_state = m_return_state;
 		m_return_onerror = false;
 	}
-	return NULL;
+	return nil;
 }
 
 qsocket_t *Datagram_Connect (char *host)
 {
-	qsocket_t *ret = NULL;
+	qsocket_t *ret = nil;
 
 	for (net_landriverlevel = 0; net_landriverlevel < net_numlandrivers; net_landriverlevel++)
 		if (net_landrivers[net_landriverlevel].initialized)
-			if ((ret = _Datagram_Connect (host)) != NULL)
+			if ((ret = _Datagram_Connect (host)) != nil)
 				break;
 	return ret;
 }

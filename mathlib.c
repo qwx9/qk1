@@ -2,7 +2,7 @@
 
 #include <u.h>
 #include <libc.h>
-//#include <math.h>
+#include <stdio.h>
 #include "quakedef.h"
 
 void Sys_Error (char *error, ...);

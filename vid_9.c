@@ -1,6 +1,7 @@
 #include <u.h>
 #include <libc.h>
 #include <draw.h>
+#include <stdio.h>
 #include "quakedef.h"
 #include "d_local.h"
 

@@ -1,5 +1,6 @@
 #include <u.h>
 #include <libc.h>
+#include <stdio.h>
 #include "quakedef.h"
 #include "r_local.h"
 
@@ -61,7 +62,7 @@ void R_RemoveEfrags (entity_t *ent)
 		cl.free_efrags = old;
 	}
 	
-	ent->efrag = NULL; 
+	ent->efrag = nil; 
 }
 
 /*
@@ -104,7 +105,7 @@ void R_SplitEntityOnNode (mnode_t *node)
 // add the entity link	
 		*lastlink = ef;
 		lastlink = &ef->entnext;
-		ef->entnext = NULL;
+		ef->entnext = nil;
 		
 // set the leaf links
 		ef->leaf = leaf;
@@ -194,7 +195,7 @@ void R_AddEfrags (entity_t *ent)
 	r_addent = ent;
 			
 	lastlink = &ent->efrag;
-	r_pefragtopnode = NULL;
+	r_pefragtopnode = nil;
 	
 	entmodel = ent->model;
 
@@ -224,7 +225,7 @@ void R_StoreEfrags (efrag_t **ppefrag)
 	efrag_t		*pefrag;
 
 
-	while ((pefrag = *ppefrag) != NULL)
+	while ((pefrag = *ppefrag) != nil)
 	{
 		pent = pefrag->entity;
 		clmodel = pent->model;

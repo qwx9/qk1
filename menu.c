@@ -1,5 +1,6 @@
 #include <u.h>
 #include <libc.h>
+#include <stdio.h>
 #include "quakedef.h"
 
 void (*vid_menudrawfn)(void);
@@ -279,7 +280,7 @@ void M_Main_Draw (void)
 
 	f = (int)(host_time * 10)%6;
 
-	M_DrawTransPic (54, 32 + m_main_cursor * 20,Draw_CachePic( va("gfx/menudot%i.lmp", f+1 ) ) );
+	M_DrawTransPic (54, 32 + m_main_cursor * 20,Draw_CachePic( va("gfx/menudot%d.lmp", f+1 ) ) );
 }
 
 
@@ -362,7 +363,7 @@ void M_SinglePlayer_Draw (void)
 
 	f = (int)(host_time * 10)%6;
 
-	M_DrawTransPic (54, 32 + m_singleplayer_cursor * 20,Draw_CachePic( va("gfx/menudot%i.lmp", f+1 ) ) );
+	M_DrawTransPic (54, 32 + m_singleplayer_cursor * 20,Draw_CachePic( va("gfx/menudot%d.lmp", f+1 ) ) );
 }
 
 
@@ -433,7 +434,7 @@ void M_ScanSaves (void)
 	{
 		strcpy (m_filenames[i], "--- UNUSED SLOT ---");
 		loadable[i] = false;
-		sprintf (name, "%s/s%i.sav", com_gamedir, i);
+		sprint (name, "%s/s%d.sav", com_gamedir, i);
 		f = fopen (name, "r");
 		if (!f)
 			continue;
@@ -526,7 +527,7 @@ void M_Load_Key (int k)
 		SCR_BeginLoadingPlaque ();
 
 	// issue the load command
-		Cbuf_AddText (va ("load s%i\n", load_cursor) );
+		Cbuf_AddText (va ("load s%d\n", load_cursor) );
 		return;
 
 	case K_UPARROW:
@@ -559,7 +560,7 @@ void M_Save_Key (int k)
 	case K_ENTER:
 		m_state = m_none;
 		key_dest = key_game;
-		Cbuf_AddText (va("save s%i\n", load_cursor));
+		Cbuf_AddText (va("save s%d\n", load_cursor));
 		return;
 
 	case K_UPARROW:
@@ -607,7 +608,7 @@ void M_MultiPlayer_Draw (void)
 
 	f = (int)(host_time * 10)%6;
 
-	M_DrawTransPic (54, 32 + m_multiplayer_cursor * 20,Draw_CachePic( va("gfx/menudot%i.lmp", f+1 ) ) );
+	M_DrawTransPic (54, 32 + m_multiplayer_cursor * 20,Draw_CachePic( va("gfx/menudot%d.lmp", f+1 ) ) );
 
 	if (serialAvailable || ipxAvailable || tcpipAvailable)
 		return;
@@ -778,7 +779,7 @@ forward:
 		if (Q_strcmp(hostname.string, setup_hostname) != 0)
 			Cvar_Set("hostname", setup_hostname);
 		if (setup_top != setup_oldtop || setup_bottom != setup_oldbottom)
-			Cbuf_AddText( va ("color %i %i\n", setup_top, setup_bottom) );
+			Cbuf_AddText( va ("color %d %d\n", setup_top, setup_bottom) );
 		m_entersound = true;
 		M_Menu_MultiPlayer_f ();
 		break;
@@ -934,7 +935,7 @@ void M_Net_Draw (void)
 	M_Print (f, 166, net_helpMessage[m_net_cursor*4+3]);
 
 	f = (int)(host_time * 10)%6;
-	M_DrawTransPic (54, 32 + m_net_cursor * 20,Draw_CachePic( va("gfx/menudot%i.lmp", f+1 ) ) );
+	M_DrawTransPic (54, 32 + m_net_cursor * 20,Draw_CachePic( va("gfx/menudot%d.lmp", f+1 ) ) );
 }
 
 
@@ -1375,7 +1376,7 @@ void M_Keys_Key (int k)
 		S_LocalSound ("misc/menu1.wav");
 		if (k != '`')
 		{
-			sprintf (cmd, "bind \"%s\" \"%s\"\n", Key_KeynumToString (k), bindnames[keys_cursor][0]);
+			sprint (cmd, "bind \"%s\" \"%s\"\n", Key_KeynumToString (k), bindnames[keys_cursor][0]);
 			Cbuf_InsertText (cmd);
 		}
 
@@ -1462,7 +1463,7 @@ void M_Menu_Help_f (void)
 
 void M_Help_Draw (void)
 {
-	M_DrawPic (0, 0, Draw_CachePic ( va("gfx/help%i.lmp", help_page)) );
+	M_DrawPic (0, 0, Draw_CachePic ( va("gfx/help%d.lmp", help_page)) );
 }
 
 
@@ -1686,15 +1687,15 @@ void M_SerialConfig_Draw (void)
 
 	M_Print (basex, serialConfig_cursor_table[0], "Port");
 	M_DrawTextBox (160, 40, 4, 1);
-	M_Print (168, serialConfig_cursor_table[0], va("COM%u", serialConfig_comport));
+	M_Print (168, serialConfig_cursor_table[0], va("COM%ud", serialConfig_comport));
 
 	M_Print (basex, serialConfig_cursor_table[1], "IRQ");
 	M_DrawTextBox (160, serialConfig_cursor_table[1]-8, 1, 1);
-	M_Print (168, serialConfig_cursor_table[1], va("%u", serialConfig_irq));
+	M_Print (168, serialConfig_cursor_table[1], va("%ud", serialConfig_irq));
 
 	M_Print (basex, serialConfig_cursor_table[2], "Baud");
 	M_DrawTextBox (160, serialConfig_cursor_table[2]-8, 5, 1);
-	M_Print (168, serialConfig_cursor_table[2], va("%u", serialConfig_baudrate[serialConfig_baud]));
+	M_Print (168, serialConfig_cursor_table[2], va("%ud", serialConfig_baudrate[serialConfig_baud]));
 
 	if (SerialConfig)
 	{
@@ -2090,7 +2091,7 @@ void M_Menu_LanConfig_f (void)
 	if (StartingGame && lanConfig_cursor == 2)
 		lanConfig_cursor = 1;
 	lanConfig_port = DEFAULTnet_hostport;
-	sprintf(lanConfig_portname, "%u", lanConfig_port);
+	sprint(lanConfig_portname, "%ud", (uint)lanConfig_port);	/* FIXME */
 
 	m_return_onerror = false;
 	m_return_reason[0] = 0;
@@ -2261,7 +2262,7 @@ void M_LanConfig_Key (int key)
 	l =  Q_atoi(lanConfig_portname);
 	if (l < 65535)
 		lanConfig_port = l;
-	sprintf(lanConfig_portname, "%u", lanConfig_port);
+	sprint(lanConfig_portname, "%ud", (uint)lanConfig_port);	/* FIXME */
 }
 
 //=============================================================================
@@ -2446,7 +2447,7 @@ void M_GameOptions_Draw (void)
 	M_Print (160, 40, "begin game");
 
 	M_Print (0, 56, "      Max players");
-	M_Print (160, 56, va("%i", maxplayers) );
+	M_Print (160, 56, va("%d", maxplayers) );
 
 	M_Print (0, 64, "        Game Type");
 	if (coop.value)
@@ -2498,13 +2499,13 @@ void M_GameOptions_Draw (void)
 	if (fraglimit.value == 0)
 		M_Print (160, 88, "none");
 	else
-		M_Print (160, 88, va("%i frags", (int)fraglimit.value));
+		M_Print (160, 88, va("%d frags", (int)fraglimit.value));
 
 	M_Print (0, 96, "       Time Limit");
 	if (timelimit.value == 0)
 		M_Print (160, 96, "none");
 	else
-		M_Print (160, 96, va("%i minutes", (int)timelimit.value));
+		M_Print (160, 96, va("%d minutes", (int)timelimit.value));
 
 	M_Print (0, 112, "         Episode");
    //MED 01/06/97 added hipnotic episodes
@@ -2703,7 +2704,7 @@ void M_GameOptions_Key (int key)
 			if (sv.active)
 				Cbuf_AddText ("disconnect\n");
 			Cbuf_AddText ("listen 0\n");	// so host_netport will be re-examined
-			Cbuf_AddText ( va ("maxplayers %u\n", maxplayers) );
+			Cbuf_AddText ( va ("maxplayers %ud\n", maxplayers) );
 			SCR_BeginLoadingPlaque ();
 
 			if (hipnotic)
@@ -2828,9 +2829,9 @@ void M_ServerList_Draw (void)
 	for (n = 0; n < hostCacheCount; n++)
 	{
 		if (hostcache[n].maxusers)
-			sprintf(string, "%-15.15s %-15.15s %2u/%2u\n", hostcache[n].name, hostcache[n].map, hostcache[n].users, hostcache[n].maxusers);
+			sprint(string, "%-15.15s %-15.15s %2ud/%2ud\n", hostcache[n].name, hostcache[n].map, (uint)hostcache[n].users, (uint)hostcache[n].maxusers);	/* FIXME */
 		else
-			sprintf(string, "%-15.15s %-15.15s\n", hostcache[n].name, hostcache[n].map);
+			sprint(string, "%-15.15s %-15.15s\n", hostcache[n].name, hostcache[n].map);
 		M_Print (16, 32 + 8*n, string);
 	}
 	M_DrawCharacter (0, 32 + slist_cursor*8, 12+((int)(realtime*4)&1));

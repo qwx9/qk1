@@ -83,6 +83,7 @@ todo/issues
 	- sys_9.c: proper P9 use (bad programming?)
 	- rewrite everything to use plan9 style? (ocd)
 	- proper %r use for *_Printf and Sys_Error
+	- g '/\* FIXME'
 
 
 legal

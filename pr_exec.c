@@ -1,5 +1,6 @@
 #include <u.h>
 #include <libc.h>
+#include <stdio.h>
 #include "quakedef.h"
 
 
@@ -142,10 +143,10 @@ void PR_PrintStatement (dstatement_t *s)
 	}
 		
 	if (s->op == OP_IF || s->op == OP_IFNOT)
-		Con_Printf ("%sbranch %i",PR_GlobalString(s->a),s->b);
+		Con_Printf ("%sbranch %d",PR_GlobalString(s->a),s->b);
 	else if (s->op == OP_GOTO)
 	{
-		Con_Printf ("branch %i",s->a);
+		Con_Printf ("branch %d",s->a);
 	}
 	else if ( (unsigned)(s->op - OP_STORE_F) < 6)
 	{
@@ -212,7 +213,7 @@ void PR_Profile_f (void)
 	do
 	{
 		max = 0;
-		best = NULL;
+		best = nil;
 		for (i=0 ; i<progs->numfunctions ; i++)
 		{
 			f = &pr_functions[i];
@@ -225,7 +226,7 @@ void PR_Profile_f (void)
 		if (best)
 		{
 			if (num < 10)
-				Con_Printf ("%7i %s\n", best->profile, PR_Str(best->s_name));
+				Con_Printf ("%7d %s\n", best->profile, PR_Str(best->s_name));
 			num++;
 			best->profile = 0;
 		}
@@ -246,7 +247,7 @@ void PR_RunError (char *error, ...)
 	char		string[1024];
 
 	va_start (argptr,error);
-	vsprintf (string,error,argptr);
+	vseprint (string,string+sizeof(string),error,argptr);
 	va_end (argptr);
 
 	PR_PrintStatement (pr_statements + pr_xstatement);
@@ -639,7 +640,7 @@ while (1)
 		break;
 		
 	default:
-		PR_RunError ("Bad opcode %i", st->op);
+		PR_RunError ("Bad opcode %d", st->op);
 	}
 }
 

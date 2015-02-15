@@ -2,6 +2,7 @@
 
 #include <u.h>
 #include <libc.h>
+#include <stdio.h>
 #include "quakedef.h"
 #include "r_local.h"
 
@@ -688,7 +689,7 @@ void V_CalcIntermissionRefdef (void)
 
 	VectorCopy (ent->origin, r_refdef.vieworg);
 	VectorCopy (ent->angles, r_refdef.viewangles);
-	view->model = NULL;
+	view->model = nil;
 
 // allways idle in intermission
 	old = v_idlescale.value;

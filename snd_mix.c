@@ -2,6 +2,7 @@
 
 #include <u.h>
 #include <libc.h>
+#include <stdio.h>
 #include "quakedef.h"
 
 #define DWORD	u32int
@@ -202,7 +203,7 @@ void S_PaintChannels(int endtime)
 					}
 					else				
 					{	// channel just stopped
-						ch->sfx = NULL;
+						ch->sfx = nil;
 						break;
 					}
 				}

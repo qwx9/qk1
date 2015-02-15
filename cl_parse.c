@@ -2,6 +2,7 @@
 
 #include <u.h>
 #include <libc.h>
+#include <stdio.h>
 #include "quakedef.h"
 
 char *svc_strings[] =
@@ -64,7 +65,7 @@ entity_t	*CL_EntityNum (int num)
 	if (num >= cl.num_entities)
 	{
 		if (num >= MAX_EDICTS)
-			Host_Error ("CL_EntityNum: %i is an invalid number",num);
+			Host_Error ("CL_EntityNum: %d is an invalid number",num);
 		while (cl.num_entities<=num)
 		{
 			cl_entities[cl.num_entities].colormap = vid.colormap;
@@ -110,7 +111,7 @@ void CL_ParseStartSoundPacket(void)
 	channel &= 7;
 
 	if (ent > MAX_EDICTS)
-		Host_Error ("CL_ParseStartSoundPacket: ent = %i", ent);
+		Host_Error ("CL_ParseStartSoundPacket: ent = %d", ent);
 	
 	for (i=0 ; i<3 ; i++)
 		pos[i] = MSG_ReadCoord ();
@@ -202,7 +203,7 @@ void CL_ParseServerInfo (void)
 	i = MSG_ReadLong ();
 	if (i != PROTOCOL_VERSION)
 	{
-		Con_Printf ("Server returned version %i, not %i", i, PROTOCOL_VERSION);
+		Con_Printf ("Server returned version %d, not %d", i, PROTOCOL_VERSION);
 		return;
 	}
 
@@ -210,7 +211,7 @@ void CL_ParseServerInfo (void)
 	cl.maxclients = MSG_ReadByte ();
 	if (cl.maxclients < 1 || cl.maxclients > MAX_SCOREBOARD)
 	{
-		Con_Printf("Bad maxclients (%u) from server\n", cl.maxclients);
+		Con_Printf("Bad maxclients (%ud) from server\n", cl.maxclients);
 		return;
 	}
 	cl.scores = Hunk_AllocName (cl.maxclients*sizeof(*cl.scores), "scores");
@@ -271,7 +272,7 @@ void CL_ParseServerInfo (void)
 	for (i=1 ; i<nummodels ; i++)
 	{
 		cl.model_precache[i] = Mod_ForName (model_precache[i], false);
-		if (cl.model_precache[i] == NULL)
+		if (cl.model_precache[i] == nil)
 		{
 			Con_Printf("Model %s not found\n", model_precache[i]);
 			return;
@@ -671,7 +672,7 @@ void CL_ParseStaticSound (void)
 }
 
 
-#define SHOWNET(x) if(cl_shownet.value==2)Con_Printf ("%3i:%s\n", msg_readcount-1, x);
+#define SHOWNET(x) if(cl_shownet.value==2)Con_Printf ("%3d:%s\n", msg_readcount-1, x);
 
 /*
 =====================
@@ -687,7 +688,7 @@ void CL_ParseServerMessage (void)
 // if recording demos, copy the message out
 //
 	if (cl_shownet.value == 1)
-		Con_Printf ("%i ",net_message.cursize);
+		Con_Printf ("%d ",net_message.cursize);
 	else if (cl_shownet.value == 2)
 		Con_Printf ("------------------\n");
 	
@@ -744,7 +745,7 @@ void CL_ParseServerMessage (void)
 		case svc_version:
 			i = MSG_ReadLong ();
 			if (i != PROTOCOL_VERSION)
-				Host_Error ("CL_ParseServerMessage: Server is protocol %i instead of %i\n", i, PROTOCOL_VERSION);
+				Host_Error ("CL_ParseServerMessage: Server is protocol %d instead of %d\n", i, PROTOCOL_VERSION);
 			break;
 			
 		case svc_disconnect:
@@ -852,7 +853,7 @@ void CL_ParseServerMessage (void)
 		case svc_signonnum:
 			i = MSG_ReadByte ();
 			if (i <= cls.signon)
-				Host_Error ("Received signon %i when at %i", i, cls.signon);
+				Host_Error ("Received signon %d when at %d", i, cls.signon);
 			cls.signon = i;
 			CL_SignonReply ();
 			break;
@@ -868,7 +869,7 @@ void CL_ParseServerMessage (void)
 		case svc_updatestat:
 			i = MSG_ReadByte ();
 			if (i < 0 || i >= MAX_CL_STATS)
-				Sys_Error ("svc_updatestat: %i is invalid", i);
+				Sys_Error ("svc_updatestat: %d is invalid", i);
 			cl.stats[i] = MSG_ReadLong ();;
 			break;
 			

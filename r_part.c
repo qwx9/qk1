@@ -1,5 +1,6 @@
 #include <u.h>
 #include <libc.h>
+#include <stdio.h>
 #include "quakedef.h"
 #include "r_local.h"
 
@@ -120,11 +121,11 @@ void R_ClearParticles (void)
 	int		i;
 	
 	free_particles = &particles[0];
-	active_particles = NULL;
+	active_particles = nil;
 
 	for (i=0 ;i<r_numparticles ; i++)
 		particles[i].next = &particles[i+1];
-	particles[r_numparticles-1].next = NULL;
+	particles[r_numparticles-1].next = nil;
 }
 
 
@@ -137,7 +138,7 @@ void R_ReadPointFile_f (void)
 	particle_t	*p;
 	char	name[MAX_OSPATH];
 	
-	sprintf (name,"maps/%s.pts", sv.name);
+	sprint (name,"maps/%s.pts", sv.name);
 
 	COM_FOpenFile (name, &f);
 	if (!f)
@@ -173,7 +174,7 @@ void R_ReadPointFile_f (void)
 	}
 
 	fclose (f);
-	Con_Printf ("%i points read\n", c);
+	Con_Printf ("%d points read\n", c);
 }
 
 /*

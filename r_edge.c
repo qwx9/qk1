@@ -1,5 +1,6 @@
 #include <u.h>
 #include <libc.h>
+#include <stdio.h>
 #include "quakedef.h"
 #include "r_local.h"
 
@@ -113,7 +114,7 @@ void R_BeginEdgeFrame (void)
 
 	surface_p = &surfaces[2];	// background is surface 1,
 								//  surface 0 is a dummy
-	surfaces[1].spans = NULL;	// no background spans yet
+	surfaces[1].spans = nil;	// no background spans yet
 	surfaces[1].flags = SURF_DRAWBACKGROUND;
 
 // put the background behind everything in the world
@@ -133,7 +134,7 @@ void R_BeginEdgeFrame (void)
 // FIXME: set with memset
 	for (v=r_refdef.vrect.y ; v<r_refdef.vrectbottom ; v++)
 	{
-		newedges[v] = removeedges[v] = NULL;
+		newedges[v] = removeedges[v] = nil;
 	}
 }
 
@@ -176,7 +177,7 @@ addedge:
 		edgestoadd->prev = edgelist->prev;
 		edgelist->prev->next = edgestoadd;
 		edgelist->prev = edgestoadd;
-	} while ((edgestoadd = next_edge) != NULL);
+	} while ((edgestoadd = next_edge) != nil);
 }
 
 
@@ -192,7 +193,7 @@ void R_RemoveEdges (edge_t *pedge)
 	{
 		pedge->next->prev = pedge->prev;
 		pedge->prev->next = pedge->next;
-	} while ((pedge = pedge->nextremove) != NULL);
+	} while ((pedge = pedge->nextremove) != nil);
 }
 
 
@@ -642,7 +643,7 @@ void R_ScanEdges (void)
 	edge_head.u = r_refdef.vrect.x << 20;
 	edge_head_u_shift20 = edge_head.u >> 20;
 	edge_head.u_step = 0;
-	edge_head.prev = NULL;
+	edge_head.prev = nil;
 	edge_head.next = &edge_tail;
 	edge_head.surfs[0] = 0;
 	edge_head.surfs[1] = 1;
@@ -703,7 +704,7 @@ void R_ScanEdges (void)
 
 		// clear the surface span pointers
 			for (s = &surfaces[1] ; s<surface_p ; s++)
-				s->spans = NULL;
+				s->spans = nil;
 
 			span_p = basespan_p;
 		}

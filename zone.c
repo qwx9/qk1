@@ -1,5 +1,6 @@
 #include <u.h>
 #include <libc.h>
+#include <stdio.h>
 #include "quakedef.h"
 
 #define	DYNAMIC_SIZE	0xc000
@@ -127,7 +128,7 @@ void *Z_Malloc (int size)
 Z_CheckHeap ();	// DEBUG
 	buf = Z_TagMalloc (size, 1);
 	if (!buf)
-		Sys_Error ("Z_Malloc: failed on allocation of %i bytes",size);
+		Sys_Error ("Z_Malloc: failed on allocation of %d bytes",size);
 	Q_memset (buf, 0, size);
 
 	return buf;
@@ -155,7 +156,7 @@ void *Z_TagMalloc (int size, int tag)
 	do
 	{
 		if (rover == start)	// scaned all the way around the list
-			return NULL;
+			return nil;
 		if (rover->tag)
 			base = rover = rover->next;
 		else
@@ -201,11 +202,11 @@ void Z_Print (memzone_t *zone)
 {
 	memblock_t	*block;
 	
-	Con_Printf ("zone size: %i  location: %p\n",mainzone->size,mainzone);
+	Con_Printf ("zone size: %d  location: %p\n",mainzone->size,mainzone);
 	
 	for (block = zone->blocklist.next ; ; block = block->next)
 	{
-		Con_Printf ("block:%p    size:%7i    tag:%3i\n",
+		Con_Printf ("block:%p    size:%7d    tag:%3d\n",
 			block, block->size, block->tag);
 		
 		if (block->next == &zone->blocklist)
@@ -310,7 +311,7 @@ void Hunk_Print (qboolean all)
 	starthigh = (hunk_t *)(hunk_base + hunk_size - hunk_high_used);
 	endhigh = (hunk_t *)(hunk_base + hunk_size);
 
-	Con_Printf ("          :%8i total hunk size\n", hunk_size);
+	Con_Printf ("          :%8d total hunk size\n", hunk_size);
 	Con_Printf ("-------------------------\n");
 
 	while (1)
@@ -321,7 +322,7 @@ void Hunk_Print (qboolean all)
 		if ( h == endlow )
 		{
 			Con_Printf ("-------------------------\n");
-			Con_Printf ("          :%8i REMAINING\n", hunk_size - hunk_low_used - hunk_high_used);
+			Con_Printf ("          :%8d REMAINING\n", hunk_size - hunk_low_used - hunk_high_used);
 			Con_Printf ("-------------------------\n");
 			h = starthigh;
 		}
@@ -350,7 +351,7 @@ void Hunk_Print (qboolean all)
 	//
 		memcpy (name, h->name, 8);
 		if (all)
-			Con_Printf ("%8p :%8i %8s\n",h, h->size, name);
+			Con_Printf ("%8p :%8d %8s\n",h, h->size, name);
 			
 	//
 	// print the total
@@ -359,7 +360,7 @@ void Hunk_Print (qboolean all)
 		strncmp (h->name, next->name, 8) )
 		{
 			if (!all)
-				Con_Printf ("          :%8i %8s (TOTAL)\n",sum, name);
+				Con_Printf ("          :%8d %8s (TOTAL)\n",sum, name);
 			count = 0;
 			sum = 0;
 		}
@@ -368,7 +369,7 @@ void Hunk_Print (qboolean all)
 	}
 
 	Con_Printf ("-------------------------\n");
-	Con_Printf ("%8i total blocks\n", totalblocks);
+	Con_Printf ("%8d total blocks\n", totalblocks);
 	
 }
 
@@ -386,12 +387,12 @@ void *Hunk_AllocName (int size, char *name)
 #endif
 
 	if (size < 0)
-		Sys_Error ("Hunk_Alloc: bad size: %i", size);
+		Sys_Error ("Hunk_Alloc: bad size: %d", size);
 		
 	size = sizeof(hunk_t) + ((size+15)&~15);
 	
 	if (hunk_size - hunk_low_used - hunk_high_used < size)
-		Sys_Error ("Hunk_Alloc: failed on %i bytes",size);
+		Sys_Error ("Hunk_Alloc: failed on %d bytes",size);
 	
 	h = (hunk_t *)(hunk_base + hunk_low_used);
 	hunk_low_used += size;
@@ -425,7 +426,7 @@ int	Hunk_LowMark (void)
 void Hunk_FreeToLowMark (int mark)
 {
 	if (mark < 0 || mark > hunk_low_used)
-		Sys_Error ("Hunk_FreeToLowMark: bad mark %i", mark);
+		Sys_Error ("Hunk_FreeToLowMark: bad mark %d", mark);
 	memset (hunk_base + mark, 0, hunk_low_used - mark);
 	hunk_low_used = mark;
 }
@@ -449,7 +450,7 @@ void Hunk_FreeToHighMark (int mark)
 		Hunk_FreeToHighMark (hunk_tempmark);
 	}
 	if (mark < 0 || mark > hunk_high_used)
-		Sys_Error ("Hunk_FreeToHighMark: bad mark %i", mark);
+		Sys_Error ("Hunk_FreeToHighMark: bad mark %d", mark);
 	memset (hunk_base + hunk_size - hunk_high_used, 0, hunk_high_used - mark);
 	hunk_high_used = mark;
 }
@@ -465,7 +466,7 @@ void *Hunk_HighAllocName (int size, char *name)
 	hunk_t	*h;
 
 	if (size < 0)
-		Sys_Error ("Hunk_HighAllocName: bad size: %i", size);
+		Sys_Error ("Hunk_HighAllocName: bad size: %d", size);
 
 	if (hunk_tempactive)
 	{
@@ -481,8 +482,8 @@ void *Hunk_HighAllocName (int size, char *name)
 
 	if (hunk_size - hunk_low_used - hunk_high_used < size)
 	{
-		Con_Printf ("Hunk_HighAlloc: failed on %i bytes\n",size);
-		return NULL;
+		Con_Printf ("Hunk_HighAlloc: failed on %d bytes\n",size);
+		return nil;
 	}
 
 	hunk_high_used += size;
@@ -610,7 +611,7 @@ void Cache_FreeHigh (int new_high_hunk)
 {
 	cache_system_t	*c, *prev;
 	
-	prev = NULL;
+	prev = nil;
 	while (1)
 	{
 		c = cache_head.prev;
@@ -636,7 +637,7 @@ void Cache_UnlinkLRU (cache_system_t *cs)
 	cs->lru_next->lru_prev = cs->lru_prev;
 	cs->lru_prev->lru_next = cs->lru_next;
 	
-	cs->lru_prev = cs->lru_next = NULL;
+	cs->lru_prev = cs->lru_next = nil;
 }
 
 void Cache_MakeLRU (cache_system_t *cs)
@@ -667,7 +668,7 @@ cache_system_t *Cache_TryAlloc (int size, qboolean nobottom)
 	if (!nobottom && cache_head.prev == &cache_head)
 	{
 		if (hunk_size - hunk_high_used - hunk_low_used < size)
-			Sys_Error ("Cache_TryAlloc: %i is greater then free hunk", size);
+			Sys_Error ("Cache_TryAlloc: %d is greater then free hunk", size);
 
 		new = (cache_system_t *) (hunk_base + hunk_low_used);
 		memset (new, 0, sizeof(*new));
@@ -727,7 +728,7 @@ cache_system_t *Cache_TryAlloc (int size, qboolean nobottom)
 		return new;
 	}
 	
-	return NULL;		// couldn't allocate
+	return nil;		// couldn't allocate
 }
 
 /*
@@ -756,7 +757,7 @@ void Cache_Print (void)
 
 	for (cd = cache_head.next ; cd != &cache_head ; cd = cd->next)
 	{
-		Con_Printf ("%8i : %s\n", cd->size, cd->name);
+		Con_Printf ("%8d : %s\n", cd->size, cd->name);
 	}
 }
 
@@ -813,9 +814,9 @@ void Cache_Free (cache_user_t *c)
 
 	cs->prev->next = cs->next;
 	cs->next->prev = cs->prev;
-	cs->next = cs->prev = NULL;
+	cs->next = cs->prev = nil;
 
-	c->data = NULL;
+	c->data = nil;
 
 	Cache_UnlinkLRU (cs);
 }
@@ -832,7 +833,7 @@ void *Cache_Check (cache_user_t *c)
 	cache_system_t	*cs;
 
 	if (!c->data)
-		return NULL;
+		return nil;
 
 	cs = ((cache_system_t *)c->data) - 1;
 
@@ -857,7 +858,7 @@ void *Cache_Alloc (cache_user_t *c, int size, char *name)
 		Sys_Error ("Cache_Alloc: allready allocated");
 	
 	if (size <= 0)
-		Sys_Error ("Cache_Alloc: size %i", size);
+		Sys_Error ("Cache_Alloc: size %d", size);
 
 	size = (size + sizeof(cache_system_t) + 15) & ~15;
 

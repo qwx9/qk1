@@ -1,5 +1,6 @@
 #include <u.h>
 #include <libc.h>
+#include <stdio.h>
 #include "quakedef.h"
 #include "r_local.h"
 
@@ -225,9 +226,9 @@ void R_NewMap (void)
 // clear out efrags in case the level hasn't been reloaded
 // FIXME: is this one short?
 	for (i=0 ; i<cl.worldmodel->numleafs ; i++)
-		cl.worldmodel->leafs[i].efrags = NULL;
+		cl.worldmodel->leafs[i].efrags = nil;
 		 	
-	r_viewleaf = NULL;
+	r_viewleaf = nil;
 	R_ClearParticles ();
 
 	r_cnumsurfs = r_maxsurfs.value;
@@ -261,7 +262,7 @@ void R_NewMap (void)
 
 	if (r_numallocatededges <= NUMSTACKEDGES)
 	{
-		auxedges = NULL;
+		auxedges = nil;
 	}
 	else
 	{
@@ -768,7 +769,7 @@ void R_DrawBEntitiesOnList (void)
 				}
 				else
 				{
-					r_pefragtopnode = NULL;
+					r_pefragtopnode = nil;
 
 					for (j=0 ; j<3 ; j++)
 					{
@@ -796,7 +797,7 @@ void R_DrawBEntitiesOnList (void)
 							R_DrawSubmodelPolygons (clmodel, clipflags);
 						}
 	
-						currententity->topnode = NULL;
+						currententity->topnode = nil;
 					}
 				}
 

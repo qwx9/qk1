@@ -2,6 +2,7 @@
 
 #include <u.h>
 #include <libc.h>
+#include <stdio.h>
 #include "quakedef.h"
 #include "r_local.h"
 
@@ -72,7 +73,7 @@ void Host_EndGame (char *message, ...)
 	char		string[1024];
 	
 	va_start (argptr,message);
-	vsprintf (string,message,argptr);
+	vseprint (string,string+sizeof(string),message,argptr);
 	va_end (argptr);
 	Con_DPrintf ("Host_EndGame: %s\n",string);
 	
@@ -110,7 +111,7 @@ void Host_Error (char *error, ...)
 	SCR_EndLoadingPlaque ();		// reenable screen updates
 
 	va_start (argptr,error);
-	vsprintf (string,error,argptr);
+	vseprint (string,string+sizeof(string),error,argptr);
 	va_end (argptr);
 	Con_Printf ("Host_Error: %s\n",string);
 	
@@ -259,7 +260,7 @@ void SV_ClientPrintf (char *fmt, ...)
 	char		string[1024];
 	
 	va_start (argptr,fmt);
-	vsprintf (string, fmt,argptr);
+	vseprint (string,string+sizeof(string),fmt,argptr);
 	va_end (argptr);
 	
 	MSG_WriteByte (&host_client->message, svc_print);
@@ -280,7 +281,7 @@ void SV_BroadcastPrintf (char *fmt, ...)
 	int			i;
 	
 	va_start (argptr,fmt);
-	vsprintf (string, fmt,argptr);
+	vseprint (string,string+sizeof(string),fmt,argptr);
 	va_end (argptr);
 	
 	for (i=0 ; i<svs.maxclients ; i++)
@@ -304,7 +305,7 @@ void Host_ClientCommands (char *fmt, ...)
 	char		string[1024];
 	
 	va_start (argptr,fmt);
-	vsprintf (string, fmt,argptr);
+	vseprint (string,string+sizeof(string),fmt,argptr);
 	va_end (argptr);
 	
 	MSG_WriteByte (&host_client->message, svc_stufftext);
@@ -349,7 +350,7 @@ void SV_DropClient (qboolean crash)
 
 // break the net connection
 	NET_Close (host_client->netconnection);
-	host_client->netconnection = NULL;
+	host_client->netconnection = nil;
 
 // free the client (the body stays around)
 	host_client->active = false;
@@ -431,7 +432,7 @@ void Host_ShutdownServer(qboolean crash)
 	MSG_WriteByte(&buf, svc_disconnect);
 	count = NET_SendToAll(&buf, 5);
 	if (count)
-		Con_Printf("Host_ShutdownServer: NET_SendToAll failed for %u clients\n", count);
+		Con_Printf("Host_ShutdownServer: NET_SendToAll failed for %ud clients\n", count);
 
 	for (i=0, host_client = svs.clients ; i<svs.maxclients ; i++, host_client++)
 		if (host_client->active)
@@ -649,7 +650,7 @@ void _Host_Frame (float time)
 		time3 = Sys_FloatTime ();
 		pass2 = (time2 - time1)*1000;
 		pass3 = (time3 - time2)*1000;
-		Con_Printf ("%3i tot %3i server %3i gfx %3i snd\n",
+		Con_Printf ("%3d tot %3d server %3d gfx %3d snd\n",
 					pass1+pass2+pass3, pass1, pass2, pass3);
 	}
 	
@@ -689,7 +690,7 @@ void Host_Frame (float time)
 			c++;
 	}
 
-	Con_Printf ("serverprofile: %2i clients %2i msec\n",  c,  m);
+	Con_Printf ("serverprofile: %2d clients %2d msec\n",  c,  m);
 }
 
 //============================================================================
@@ -849,7 +850,7 @@ void Host_Shutdown(void)
 	
 	if (isdown)
 	{
-		printf ("recursive shutdown\n");
+		print ("recursive shutdown\n");
 		return;
 	}
 	isdown = true;

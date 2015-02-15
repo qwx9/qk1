@@ -1,7 +1,6 @@
-// d_sky.c
-
 #include <u.h>
 #include <libc.h>
+#include <stdio.h>
 #include "quakedef.h"
 #include "r_local.h"
 #include "d_local.h"
@@ -116,6 +115,6 @@ void D_DrawSkyScans8 (espan_t *pspan)
 
 		} while (count > 0);
 
-	} while ((pspan = pspan->pnext) != NULL);
+	} while ((pspan = pspan->pnext) != nil);
 }
 

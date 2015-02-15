@@ -3,6 +3,7 @@
 
 #include <u.h>
 #include <libc.h>
+#include <stdio.h>
 #include "quakedef.h"
 #include "r_local.h"
 #include "d_local.h"
@@ -43,18 +44,18 @@ int			d_xdenom;
 edgetable	*pedgetable;
 
 edgetable	edgetables[12] = {
-	{0, 1, r_p0, r_p2, NULL, 2, r_p0, r_p1, r_p2 },
-	{0, 2, r_p1, r_p0, r_p2,   1, r_p1, r_p2, NULL},
-	{1, 1, r_p0, r_p2, NULL, 1, r_p1, r_p2, NULL},
-	{0, 1, r_p1, r_p0, NULL, 2, r_p1, r_p2, r_p0 },
-	{0, 2, r_p0, r_p2, r_p1,   1, r_p0, r_p1, NULL},
-	{0, 1, r_p2, r_p1, NULL, 1, r_p2, r_p0, NULL},
-	{0, 1, r_p2, r_p1, NULL, 2, r_p2, r_p0, r_p1 },
-	{0, 2, r_p2, r_p1, r_p0,   1, r_p2, r_p0, NULL},
-	{0, 1, r_p1, r_p0, NULL, 1, r_p1, r_p2, NULL},
-	{1, 1, r_p2, r_p1, NULL, 1, r_p0, r_p1, NULL},
-	{1, 1, r_p1, r_p0, NULL, 1, r_p2, r_p0, NULL},
-	{0, 1, r_p0, r_p2, NULL, 1, r_p0, r_p1, NULL},
+	{0, 1, r_p0, r_p2, nil, 2, r_p0, r_p1, r_p2 },
+	{0, 2, r_p1, r_p0, r_p2,   1, r_p1, r_p2, nil},
+	{1, 1, r_p0, r_p2, nil, 1, r_p1, r_p2, nil},
+	{0, 1, r_p1, r_p0, nil, 2, r_p1, r_p2, r_p0 },
+	{0, 2, r_p0, r_p2, r_p1,   1, r_p0, r_p1, nil},
+	{0, 1, r_p2, r_p1, nil, 1, r_p2, r_p0, nil},
+	{0, 1, r_p2, r_p1, nil, 2, r_p2, r_p0, r_p1 },
+	{0, 2, r_p2, r_p1, r_p0,   1, r_p2, r_p0, nil},
+	{0, 1, r_p1, r_p0, nil, 1, r_p1, r_p2, nil},
+	{1, 1, r_p2, r_p1, nil, 1, r_p0, r_p1, nil},
+	{1, 1, r_p1, r_p0, nil, 1, r_p2, r_p0, nil},
+	{0, 1, r_p0, r_p2, nil, 1, r_p0, r_p1, nil},
 };
 
 // FIXME: some of these can become statics

@@ -1,5 +1,6 @@
 #include <u.h>
 #include <libc.h>
+#include <stdio.h>
 #include "quakedef.h"
 #include "r_local.h"
 #include "d_local.h"	// FIXME: shouldn't need to include this
@@ -323,7 +324,7 @@ void R_ClipEdge (mvertex_t *pv0, mvertex_t *pv1, clipplane_t *clip)
 				R_ClipEdge (&clipvert, pv1, clip->next);
 				return;
 			}
-		} while ((clip = clip->next) != NULL);
+		} while ((clip = clip->next) != nil);
 	}
 
 // add the edge
@@ -386,7 +387,7 @@ void R_RenderFace (msurface_t *fa, int clipflags)
 	c_faceclip++;
 
 // set up clip planes
-	pclip = NULL;
+	pclip = nil;
 
 	for (i=3, mask = 0x08 ; i>=0 ; i--, mask >>= 1)
 	{
@@ -533,7 +534,7 @@ void R_RenderFace (msurface_t *fa, int clipflags)
 	surface_p->spanstate = 0;
 	surface_p->entity = currententity;
 	surface_p->key = r_currentkey++;
-	surface_p->spans = NULL;
+	surface_p->spans = nil;
 
 	pplane = fa->plane;
 // FIXME: cache this?
@@ -587,7 +588,7 @@ void R_RenderBmodelFace (bedge_t *pedges, msurface_t *psurf)
 	r_pedge = &tedge;
 
 // set up clip planes
-	pclip = NULL;
+	pclip = nil;
 
 	for (i=3, mask = 0x08 ; i>=0 ; i--, mask >>= 1)
 	{
@@ -648,7 +649,7 @@ void R_RenderBmodelFace (bedge_t *pedges, msurface_t *psurf)
 	surface_p->spanstate = 0;
 	surface_p->entity = currententity;
 	surface_p->key = r_currentbkey;
-	surface_p->spans = NULL;
+	surface_p->spans = nil;
 
 	pplane = psurf->plane;
 // FIXME: cache this?
@@ -692,7 +693,7 @@ void R_RenderPoly (msurface_t *fa, int clipflags)
 	s_axis = t_axis = 0;	// keep compiler happy
 
 // set up clip planes
-	pclip = NULL;
+	pclip = nil;
 
 	for (i=3, mask = 0x08 ; i>=0 ; i--, mask >>= 1)
 	{

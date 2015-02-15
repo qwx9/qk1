@@ -1,5 +1,6 @@
 #include <u.h>
 #include <libc.h>
+#include <stdio.h>
 #include "quakedef.h"
 
 int			wad_numlumps;
@@ -100,7 +101,7 @@ lumpinfo_t	*W_GetLumpinfo (char *name)
 	}
 	
 	Sys_Error ("W_GetLumpinfo: %s not found", name);
-	return NULL;
+	return nil;
 }
 
 void *W_GetLumpName (char *name)
@@ -117,7 +118,7 @@ void *W_GetLumpNum (int num)
 	lumpinfo_t	*lump;
 	
 	if (num < 0 || num > wad_numlumps)
-		Sys_Error ("W_GetLumpNum: bad number: %i", num);
+		Sys_Error ("W_GetLumpNum: bad number: %d", num);
 		
 	lump = wad_lumps + num;
 	

@@ -1,5 +1,6 @@
 #include <u.h>
 #include <libc.h>
+#include <stdio.h>
 #include "quakedef.h"
 
 /*
@@ -120,7 +121,7 @@ keyname_t keynames[] =
 
 	{"SEMICOLON", ';'},	// because a raw semicolon seperates commands
 
-	{NULL,0}
+	{nil,0}
 };
 
 /*
@@ -386,7 +387,7 @@ void Key_SetBinding (int keynum, char *binding)
 	if (keybindings[keynum])
 	{
 		Z_Free (keybindings[keynum]);
-		keybindings[keynum] = NULL;
+		keybindings[keynum] = nil;
 	}
 			
 // allocate memory for new binding
@@ -649,7 +650,7 @@ void Key_Event (int key, qboolean down)
 		kb = keybindings[key];
 		if (kb && kb[0] == '+')
 		{
-			sprintf (cmd, "-%s %i\n", kb+1, key);
+			sprint (cmd, "-%s %d\n", kb+1, key);
 			Cbuf_AddText (cmd);
 		}
 		if (keyshift[key] != key)
@@ -657,7 +658,7 @@ void Key_Event (int key, qboolean down)
 			kb = keybindings[keyshift[key]];
 			if (kb && kb[0] == '+')
 			{
-				sprintf (cmd, "-%s %i\n", kb+1, key);
+				sprint (cmd, "-%s %d\n", kb+1, key);
 				Cbuf_AddText (cmd);
 			}
 		}
@@ -685,7 +686,7 @@ void Key_Event (int key, qboolean down)
 		{
 			if (kb[0] == '+')
 			{	// button commands add keynum as a parm
-				sprintf (cmd, "%s %i\n", kb, key);
+				sprint (cmd, "%s %d\n", kb, key);
 				Cbuf_AddText (cmd);
 			}
 			else

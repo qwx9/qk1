@@ -5,6 +5,7 @@
 
 #include <u.h>
 #include <libc.h>
+#include <stdio.h>
 #include "quakedef.h"
 #include "r_local.h"
 
@@ -154,7 +155,7 @@ void Mod_ClearAll (void)
 	for (i=0 , mod=mod_known ; i<mod_numknown ; i++, mod++) {
 		mod->needload = NL_UNREFERENCED;
 //FIX FOR CACHE_ALLOC ERRORS:
-		if (mod->type == mod_sprite) mod->cache.data = NULL;
+		if (mod->type == mod_sprite) mod->cache.data = nil;
 	}
 }
 
@@ -168,10 +169,10 @@ model_t *Mod_FindName (char *name)
 {
 	int		i;
 	model_t	*mod;
-	model_t	*avail = NULL;
+	model_t	*avail = nil;
 
 	if (!name[0])
-		Sys_Error ("Mod_ForName: NULL name");
+		Sys_Error ("Mod_ForName: nil name");
 		
 //
 // search the currently loaded models
@@ -265,7 +266,7 @@ model_t *Mod_LoadModel (model_t *mod, qboolean crash)
 	{
 		if (crash)
 			Sys_Error ("Mod_NumForName: %s not found", mod->name);
-		return NULL;
+		return nil;
 	}
 	
 //
@@ -344,7 +345,7 @@ void Mod_LoadTextures (lump_t *l)
 
 	if (!l->filelen)
 	{
-		loadmodel->textures = NULL;
+		loadmodel->textures = nil;
 		return;
 	}
 	m = (dmiptexlump_t *)(mod_base + l->fileofs);
@@ -454,7 +455,7 @@ void Mod_LoadTextures (lump_t *l)
 		{
 			tx2 = anims[j];
 			if (!tx2)
-				Sys_Error ("Missing frame %i of %s",j, tx->name);
+				Sys_Error ("Missing frame %d of %s",j, tx->name);
 			tx2->anim_total = max * ANIM_CYCLE;
 			tx2->anim_min = j * ANIM_CYCLE;
 			tx2->anim_max = (j+1) * ANIM_CYCLE;
@@ -466,7 +467,7 @@ void Mod_LoadTextures (lump_t *l)
 		{
 			tx2 = altanims[j];
 			if (!tx2)
-				Sys_Error ("Missing frame %i of %s",j, tx->name);
+				Sys_Error ("Missing frame %d of %s",j, tx->name);
 			tx2->anim_total = altmax * ANIM_CYCLE;
 			tx2->anim_min = j * ANIM_CYCLE;
 			tx2->anim_max = (j+1) * ANIM_CYCLE;
@@ -486,7 +487,7 @@ void Mod_LoadLighting (lump_t *l)
 {
 	if (!l->filelen)
 	{
-		loadmodel->lightdata = NULL;
+		loadmodel->lightdata = nil;
 		return;
 	}
 	loadmodel->lightdata = Hunk_AllocName ( l->filelen, loadname);	
@@ -503,7 +504,7 @@ void Mod_LoadVisibility (lump_t *l)
 {
 	if (!l->filelen)
 	{
-		loadmodel->visdata = NULL;
+		loadmodel->visdata = nil;
 		return;
 	}
 	loadmodel->visdata = Hunk_AllocName ( l->filelen, loadname);	
@@ -520,7 +521,7 @@ void Mod_LoadEntities (lump_t *l)
 {
 	if (!l->filelen)
 	{
-		loadmodel->entities = NULL;
+		loadmodel->entities = nil;
 		return;
 	}
 	loadmodel->entities = Hunk_AllocName ( l->filelen, loadname);	
@@ -783,7 +784,7 @@ void Mod_LoadFaces (lump_t *l)
 			out->styles[i] = in->styles[i];
 		i = LittleLong(in->lightofs);
 		if (i == -1)
-			out->samples = NULL;
+			out->samples = nil;
 		else
 			out->samples = loadmodel->lightdata + i;
 		
@@ -867,7 +868,7 @@ void Mod_LoadNodes (lump_t *l)
 		}
 	}
 	
-	Mod_SetParent (loadmodel->nodes, NULL);	// sets nodes and leafs
+	Mod_SetParent (loadmodel->nodes, nil);	// sets nodes and leafs
 }
 
 /*
@@ -907,10 +908,10 @@ void Mod_LoadLeafs (lump_t *l)
 		
 		p = LittleLong(in->visofs);
 		if (p == -1)
-			out->compressed_vis = NULL;
+			out->compressed_vis = nil;
 		else
 			out->compressed_vis = loadmodel->visdata + p;
-		out->efrags = NULL;
+		out->efrags = nil;
 		
 		for (j=0 ; j<4 ; j++)
 			out->ambient_sound_level[j] = in->ambient_level[j];
@@ -1133,7 +1134,7 @@ void Mod_LoadBrushModel (model_t *mod, void *buffer)
 
 	i = LittleLong (header->version);
 	if (i != BSPVERSION)
-		Sys_Error ("Mod_LoadBrushModel: %s has wrong version number (%i should be %i)", mod->name, i, BSPVERSION);
+		Sys_Error ("Mod_LoadBrushModel: %s has wrong version number (%d should be %d)", mod->name, i, BSPVERSION);
 
 // swap all the lumps
 	mod_base = (byte *)header;
@@ -1191,7 +1192,7 @@ void Mod_LoadBrushModel (model_t *mod, void *buffer)
 		{	// duplicate the basic information
 			char	name[10];
 
-			sprintf (name, "*%i", i+1);
+			sprint (name, "*%d", i+1);
 			loadmodel = Mod_FindName (name);
 			*loadmodel = *mod;
 			strcpy (loadmodel->name, name);
@@ -1442,7 +1443,7 @@ void Mod_LoadAliasModel (model_t *mod, void *buffer)
 
 	version = LittleLong (pinmodel->version);
 	if (version != ALIAS_VERSION)
-		Sys_Error ("%s has wrong version number (%i should be %i)",
+		Sys_Error ("%s has wrong version number (%d should be %d)",
 				 mod->name, version, ALIAS_VERSION);
 
 //
@@ -1771,7 +1772,7 @@ void Mod_LoadSpriteModel (model_t *mod, void *buffer)
 	version = LittleLong (pin->version);
 	if (version != SPRITE_VERSION)
 		Sys_Error ("%s has wrong version number "
-				 "(%i should be %i)", mod->name, version, SPRITE_VERSION);
+				 "(%d should be %d)", mod->name, version, SPRITE_VERSION);
 
 	numframes = LittleLong (pin->numframes);
 

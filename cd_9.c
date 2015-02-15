@@ -1,5 +1,6 @@
 #include <u.h>
 #include <libc.h>
+#include <stdio.h>
 #include "quakedef.h"
 
 qboolean cdValid = false;
@@ -64,7 +65,7 @@ void CDAudio_Play (byte track, qboolean looping)
 
 	track = remap[track];
 	if(track < 1 || track > maxTrack){
-		Con_DPrintf("CDAudio: Bad track number %u.\n", track);
+		Con_DPrintf("CDAudio: Bad track number %ud.\n", track);
 		return;
 	}
 
@@ -83,7 +84,7 @@ void CDAudio_Play (byte track, qboolean looping)
 		return;
 	}
 	if(entry.cdte_ctrl == CDROM_DATA_TRACK){
-		Con_Printf("CDAudio: track %i is not audio\n", track);
+		Con_Printf("CDAudio: track %d is not audio\n", track);
 		return;
 	}
 
@@ -178,7 +179,7 @@ void CD_f (void)
 		if(ret <= 0){
 			for(n = 1; n < 100; n++)
 				if(remap[n] != n)
-					Con_Printf("  %u -> %u\n", n, remap[n]);
+					Con_Printf("  %ud -> %ud\n", n, remap[n]);
 			return;
 		}
 		for(n = 1; n <= ret; n++)
@@ -224,11 +225,11 @@ void CD_f (void)
 		return;
 	}
 	if(Q_strcasecmp(command, "info") == 0){
-		Con_Printf("%u tracks\n", maxTrack);
+		Con_Printf("%ud tracks\n", maxTrack);
 		if(playing)
-			Con_Printf("Currently %s track %u\n", playLooping ? "looping" : "playing", playTrack);
+			Con_Printf("Currently %s track %ud\n", playLooping ? "looping" : "playing", playTrack);
 		else if(wasPlaying)
-			Con_Printf("Paused %s track %u\n", playLooping ? "looping" : "playing", playTrack);
+			Con_Printf("Paused %s track %ud\n", playLooping ? "looping" : "playing", playTrack);
 		Con_Printf("Volume is %f\n", cdvolume);
 		return;
 	}

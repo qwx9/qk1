@@ -2,6 +2,7 @@
 
 #include <u.h>
 #include <libc.h>
+#include <stdio.h>
 #include "quakedef.h"
 
 #define NUM_SAFE_ARGVS  7
@@ -714,7 +715,7 @@ void SZ_Alloc (sizebuf_t *buf, int startsize)
 void SZ_Free (sizebuf_t *buf)
 {
 //      Z_Free (buf->data);
-//      buf->data = NULL;
+//      buf->data = nil;
 //      buf->maxsize = 0;
 	buf->cursize = 0;
 }
@@ -734,7 +735,7 @@ void *SZ_GetSpace (sizebuf_t *buf, int length)
 			Sys_Error ("SZ_GetSpace: overflow without allowoverflow set");
 		
 		if (length > buf->maxsize)
-			Sys_Error ("SZ_GetSpace: %i is > full buffer size", length);
+			Sys_Error ("SZ_GetSpace: %d is > full buffer size", length);
 			
 		buf->overflowed = true;
 		Con_Printf ("SZ_GetSpace: overflow");
@@ -889,15 +890,15 @@ char *COM_Parse (char *data)
 	len = 0;
 	com_token[0] = 0;
 	
-	if (!data)
-		return NULL;
+	if (data == nil)
+		return nil;
 		
 // skip whitespace
 skipwhite:
 	while ( (c = *data) <= ' ')
 	{
 		if (c == 0)
-			return NULL;                    // end of file;
+			return nil;                    // end of file;
 		data++;
 	}
 	
@@ -1142,7 +1143,7 @@ char    *va(char *format, ...)
 	static char             string[1024];
 	
 	va_start (argptr, format);
-	vsprintf (string, format,argptr);
+	vseprint (string,string+sizeof(string),format,argptr);
 	va_end (argptr);
 
 	return string;  
@@ -1234,7 +1235,7 @@ void COM_Path_f (void)
 	{
 		if (s->pack)
 		{
-			Con_Printf ("%s (%i files)\n", s->pack->filename, s->pack->numfiles);
+			Con_Printf ("%s (%d files)\n", s->pack->filename, s->pack->numfiles);
 		}
 		else
 			Con_Printf ("%s\n", s->filename);
@@ -1253,7 +1254,7 @@ void COM_WriteFile (char *filename, void *data, int len)
 	int             handle;
 	char    name[MAX_OSPATH];
 	
-	sprintf (name, "%s/%s", com_gamedir, filename);
+	sprint (name, "%s/%s", com_gamedir, filename);
 
 	handle = Sys_FileOpenWrite (name);
 	if (handle == -1)
@@ -1392,7 +1393,7 @@ int COM_FindFile (char *filename, int *handle, FILE **file)
 					continue;
 			}
 			
-			sprintf (netpath, "%s/%s",search->filename, filename);
+			sprint (netpath, "%s/%s",search->filename, filename);
 			
 			findtime = Sys_FileTime (netpath);
 			if (findtime == -1)
@@ -1403,7 +1404,7 @@ int COM_FindFile (char *filename, int *handle, FILE **file)
 				strcpy (cachepath, netpath);
 			else
 			{	
-				sprintf (cachepath,"%s%s", com_cachedir, netpath);
+				sprint (cachepath,"%s%s", com_cachedir, netpath);
 
 				cachetime = Sys_FileTime (cachepath);
 			
@@ -1461,7 +1462,7 @@ into the file.
 */
 int COM_FOpenFile (char *filename, FILE **file)
 {
-	return COM_FindFile (filename, NULL, file);
+	return COM_FindFile (filename, nil, file);
 }
 
 /*
@@ -1501,12 +1502,12 @@ byte *COM_LoadFile (char *path, int usehunk)
 	char    base[32];
 	int             len;
 
-	buf = NULL;     // quiet compiler warning
+	buf = nil;     // quiet compiler warning
 
 // look for it in the filesystem or pack files
 	len = COM_OpenFile (path, &h);
 	if (h == -1)
-		return NULL;
+		return nil;
 	
 // extract the filename base name for hunk tag
 	COM_FileBase (path, base);
@@ -1594,7 +1595,7 @@ pack_t *COM_LoadPackFile (char *packfile)
 	if (Sys_FileOpenRead (packfile, &packhandle) == -1)
 	{
 //              Con_Printf ("Couldn't open %s\n", packfile);
-		return NULL;
+		return nil;
 	}
 	Sys_FileRead (packhandle, (void *)&header, sizeof(header));
 	if (header.id[0] != 'P' || header.id[1] != 'A'
@@ -1606,7 +1607,7 @@ pack_t *COM_LoadPackFile (char *packfile)
 	numpackfiles = header.dirlen / sizeof(dpackfile_t);
 
 	if (numpackfiles > MAX_FILES_IN_PACK)
-		Sys_Error ("%s has %i files", packfile, numpackfiles);
+		Sys_Error ("%s has %d files", packfile, numpackfiles);
 
 	if (numpackfiles != PAK0_COUNT)
 		com_modified = true;    // not the original file
@@ -1637,7 +1638,7 @@ pack_t *COM_LoadPackFile (char *packfile)
 	pack->numfiles = numpackfiles;
 	pack->files = newfiles;
 	
-	Con_Printf ("Added packfile %s (%i files)\n", packfile, numpackfiles);
+	Con_Printf ("Added packfile %s (%d files)\n", packfile, numpackfiles);
 	return pack;
 }
 
@@ -1672,7 +1673,7 @@ void COM_AddGameDirectory (char *dir)
 //
 	for (i=0 ; ; i++)
 	{
-		sprintf (pakfile, "%s/pak%i.pak", dir, i);
+		sprint (pakfile, "%s/pak%d.pak", dir, i);
 		pak = COM_LoadPackFile (pakfile);
 		if (!pak)
 			break;
@@ -1764,7 +1765,7 @@ void COM_InitFilesystem (void)
 	if (i)
 	{
 		com_modified = true;
-		com_searchpaths = NULL;
+		com_searchpaths = nil;
 		while (++i < com_argc)
 		{
 			if (!com_argv[i] || com_argv[i][0] == '+' || com_argv[i][0] == '-')

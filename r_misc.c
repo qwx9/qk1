@@ -1,5 +1,6 @@
 #include <u.h>
 #include <libc.h>
+#include <stdio.h>
 #include "quakedef.h"
 #include "r_local.h"
 
@@ -35,7 +36,7 @@ void Show (void)
 	vr.x = vr.y = 0;
 	vr.width = vid.width;
 	vr.height = vid.height;
-	vr.pnext = NULL;
+	vr.pnext = nil;
 	VID_Update (&vr);
 }
 
@@ -71,7 +72,7 @@ void R_TimeRefresh_f (void)
 		vr.y = r_refdef.vrect.y;
 		vr.width = r_refdef.vrect.width;
 		vr.height = r_refdef.vrect.height;
-		vr.pnext = NULL;
+		vr.pnext = nil;
 		VID_Update (&vr);
 	}
 	stop = Sys_FloatTime ();
@@ -181,7 +182,7 @@ void R_PrintTimes (void)
 
 	ms = 1000* (r_time2 - r_time1);
 	
-	Con_Printf ("%5.1f ms %3i/%3i/%3i poly %3i surf\n",
+	Con_Printf ("%5.1f ms %3d/%3d/%3d poly %3d surf\n",
 				ms, c_faceclip, r_polycount, r_drawnpolycount, c_surf);
 	c_surf = 0;
 }
@@ -206,7 +207,7 @@ void R_PrintDSpeeds (void)
 	dv_time = (dv_time2 - dv_time1) * 1000;
 	ms = (r_time2 - r_time1) * 1000;
 
-	Con_Printf ("%3i %4.1fp %3iw %4.1fb %3is %4.1fe %4.1fv\n",
+	Con_Printf ("%3d %4.1fp %3dw %4.1fb %3ds %4.1fe %4.1fv\n",
 				(int)ms, dp_time, (int)rw_time, db_time, (int)se_time, de_time,
 				dv_time);
 }
@@ -219,7 +220,7 @@ R_PrintAliasStats
 */
 void R_PrintAliasStats (void)
 {
-	Con_Printf ("%3i polygon model drawn\n", r_amodels_drawn);
+	Con_Printf ("%3d polygon model drawn\n", r_amodels_drawn);
 }
 
 

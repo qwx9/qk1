@@ -2,6 +2,7 @@
 
 #include <u.h>
 #include <libc.h>
+#include <stdio.h>
 #include "quakedef.h"
 
 int			cache_full_cycle;
@@ -104,14 +105,14 @@ sfxcache_t *S_LoadSound (sfx_t *s)
 	if (!data)
 	{
 		Con_Printf ("Couldn't load %s\n", namebuffer);
-		return NULL;
+		return nil;
 	}
 
 	info = GetWavinfo (s->name, data, com_filesize);
 	if (info.channels != 1)
 	{
 		Con_Printf ("%s is a stereo sample\n",s->name);
-		return NULL;
+		return nil;
 	}
 
 	stepscale = (float)info.rate / shm->speed;	
@@ -121,7 +122,7 @@ sfxcache_t *S_LoadSound (sfx_t *s)
 
 	sc = Cache_Alloc ( &s->cache, len + sizeof(sfxcache_t), s->name);
 	if (!sc)
-		return NULL;
+		return nil;
 	
 	sc->length = info.samples;
 	sc->loopstart = info.loopstart;
@@ -182,7 +183,7 @@ void FindNextChunk(char *name)
 
 		if (data_p >= iff_end)
 		{	// didn't find the chunk
-			data_p = NULL;
+			data_p = nil;
 			return;
 		}
 		
@@ -190,11 +191,11 @@ void FindNextChunk(char *name)
 		iff_chunk_len = GetLittleLong();
 		if (iff_chunk_len < 0)
 		{
-			data_p = NULL;
+			data_p = nil;
 			return;
 		}
 //		if (iff_chunk_len > 1024*1024)
-//			Sys_Error ("FindNextChunk: %i length is past the 1 meg sanity limit", iff_chunk_len);
+//			Sys_Error ("FindNextChunk: %d length is past the 1 meg sanity limit", iff_chunk_len);
 		data_p -= 8;
 		last_chunk = data_p + 8 + ( (iff_chunk_len + 1) & ~1 );
 		if (!Q_strncmp((char *)data_p, name, 4))
@@ -293,7 +294,7 @@ wavinfo_t GetWavinfo (char *name, byte *wav, vlong wavlength)
 				data_p += 24;
 				i = GetLittleLong ();	// samples in loop
 				info.samples = info.loopstart + i;
-//				Con_Printf("looped length: %i\n", i);
+//				Con_Printf("looped length: %d\n", i);
 			}
 		}
 	}

@@ -1,5 +1,6 @@
 #include <u.h>
 #include <libc.h>
+#include <stdio.h>
 #include "quakedef.h"
 
 int audio_fd;
@@ -85,5 +86,5 @@ void SNDDMA_Submit(void)
 		Sys_Warn("SNDDMA_Submit:write");
 		SNDDMA_Shutdown();
 	}
-	n += wpos;
+	wpos += n;
 }

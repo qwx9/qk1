@@ -1,5 +1,6 @@
 #include <u.h>
 #include <libc.h>
+#include <stdio.h>
 #include "quakedef.h"
 
 #define	RETURN_EDICT(e) (((int *)pr_globals)[OFS_RETURN] = EDICT_TO_PROG(e))
@@ -552,13 +553,13 @@ void PF_sound (void)
 	attenuation = G_FLOAT(OFS_PARM4);
 	
 	if (volume < 0 || volume > 255)
-		Sys_Error ("SV_StartSound: volume = %i", volume);
+		Sys_Error ("SV_StartSound: volume = %d", volume);
 
 	if (attenuation < 0 || attenuation > 4)
 		Sys_Error ("SV_StartSound: attenuation = %f", attenuation);
 
 	if (channel < 0 || channel > 7)
-		Sys_Error ("SV_StartSound: channel = %i", channel);
+		Sys_Error ("SV_StartSound: channel = %d", channel);
 
 	SV_StartSound (entity, channel, sample, volume, attenuation);
 }
@@ -880,9 +881,9 @@ void PF_ftos (void)
 	v = G_FLOAT(OFS_PARM0);
 	
 	if (v == (int)v)
-		sprintf (pr_string_temp, "%d",(int)v);
+		sprint (pr_string_temp, "%d",(int)v);
 	else
-		sprintf (pr_string_temp, "%5.1f",v);
+		sprint (pr_string_temp, "%5.1f",v);
 	G_INT(OFS_RETURN) = pr_string_temp - pr_strings;
 }
 
@@ -895,7 +896,7 @@ void PF_fabs (void)
 
 void PF_vtos (void)
 {
-	sprintf (pr_string_temp, "'%5.1f %5.1f %5.1f'", G_VECTOR(OFS_PARM0)[0], G_VECTOR(OFS_PARM0)[1], G_VECTOR(OFS_PARM0)[2]);
+	sprint (pr_string_temp, "'%5.1f %5.1f %5.1f'", G_VECTOR(OFS_PARM0)[0], G_VECTOR(OFS_PARM0)[1], G_VECTOR(OFS_PARM0)[2]);
 	G_INT(OFS_RETURN) = pr_string_temp - pr_strings;
 }
 
@@ -1254,7 +1255,7 @@ void PF_aim (void)
 // try all possible entities
 	VectorCopy (dir, bestdir);
 	bestdist = sv_aim.value;
-	bestent = NULL;
+	bestent = nil;
 	
 	check = NEXT_EDICT(sv.edicts);
 	for (i=1 ; i<sv.num_edicts ; i++, check = NEXT_EDICT(check) )
@@ -1383,7 +1384,7 @@ sizebuf_t *WriteDest (void)
 		break;
 	}
 	
-	return NULL;
+	return nil;
 }
 
 void PF_WriteByte (void)

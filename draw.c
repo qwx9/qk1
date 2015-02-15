@@ -3,6 +3,7 @@
 
 #include <u.h>
 #include <libc.h>
+#include <stdio.h>
 #include "quakedef.h"
 
 typedef struct {
@@ -126,9 +127,9 @@ void Draw_Character (int x, int y, int num)
 
 #ifdef PARANOID
 	if (y > vid.height - 8 || x < 0 || x > vid.width - 8)
-		Sys_Error ("Con_DrawCharacter: (%i, %i)", x, y);
+		Sys_Error ("Con_DrawCharacter: (%d, %d)", x, y);
 	if (num < 0 || num > 255)
-		Sys_Error ("Con_DrawCharacter: char %i", num);
+		Sys_Error ("Con_DrawCharacter: char %d", num);
 #endif
 
 	row = num>>4;

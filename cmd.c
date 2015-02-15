@@ -2,6 +2,7 @@
 
 #include <u.h>
 #include <libc.h>
+#include <stdio.h>
 #include "quakedef.h"
 
 void Cmd_ForwardToServer (void);
@@ -93,7 +94,7 @@ FIXME: actually change the command buffer to do less copying
 */
 void Cbuf_InsertText (char *text)
 {
-	char	*temp;
+	char	*temp = nil;
 	int		templen;
 
 // copy off any commands still remaining in the exec buffer
@@ -104,8 +105,6 @@ void Cbuf_InsertText (char *text)
 		Q_memcpy (temp, cmd_text.data, templen);
 		SZ_Clear (&cmd_text);
 	}
-	else
-		temp = NULL;	// shut up compiler
 		
 // add the entire text of the file
 	Cbuf_AddText (text);
@@ -396,7 +395,7 @@ typedef struct cmd_function_s
 static	int			cmd_argc;
 static	char		*cmd_argv[MAX_ARGS];
 static	char		*cmd_null_string = "";
-static	char		*cmd_args = NULL;
+static	char		*cmd_args = nil;
 
 cmd_source_t	cmd_source;
 
@@ -470,7 +469,7 @@ void Cmd_TokenizeString (char *text)
 		Z_Free (cmd_argv[i]);
 		
 	cmd_argc = 0;
-	cmd_args = NULL;
+	cmd_args = nil;
 	
 	while (1)
 	{
@@ -576,14 +575,14 @@ char *Cmd_CompleteCommand (char *partial)
 	len = Q_strlen(partial);
 	
 	if (!len)
-		return NULL;
+		return nil;
 		
 // check functions
 	for (cmd=cmd_functions ; cmd ; cmd=cmd->next)
 		if (!Q_strncmp (partial,cmd->name, len))
 			return cmd->name;
 
-	return NULL;
+	return nil;
 }
 
 /*
@@ -677,8 +676,8 @@ int Cmd_CheckParm (char *parm)
 {
 	int i;
 	
-	if (!parm)
-		Sys_Error ("Cmd_CheckParm: NULL");
+	if (parm == nil)
+		Sys_Error ("Cmd_CheckParm: nil");
 
 	for (i = 1; i < Cmd_Argc (); i++)
 		if (! Q_strcasecmp (parm, Cmd_Argv (i)))

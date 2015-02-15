@@ -1,10 +1,11 @@
 #include <u.h>
 #include <libc.h>
+#include <stdio.h>
 #include "quakedef.h"
 #include "net_vcr.h"
 
-qsocket_t	*net_activeSockets = NULL;
-qsocket_t	*net_freeSockets = NULL;
+qsocket_t	*net_activeSockets = nil;
+qsocket_t	*net_freeSockets = nil;
 int			net_numsockets = 0;
 
 qboolean	serialAvailable = false;
@@ -32,8 +33,8 @@ static int		slistLastShown;
 
 static void Slist_Send(void *);
 static void Slist_Poll(void *);
-PollProcedure	slistSendProcedure = {NULL, 0.0, Slist_Send};
-PollProcedure	slistPollProcedure = {NULL, 0.0, Slist_Poll};
+PollProcedure	slistSendProcedure = {nil, 0.0, Slist_Send};
+PollProcedure	slistPollProcedure = {nil, 0.0, Slist_Poll};
 
 
 sizebuf_t		net_message;
@@ -92,11 +93,11 @@ qsocket_t *NET_NewQSocket (void)
 {
 	qsocket_t	*sock;
 
-	if (net_freeSockets == NULL)
-		return NULL;
+	if (net_freeSockets == nil)
+		return nil;
 
 	if (net_activeconnections >= svs.maxclients)
-		return NULL;
+		return nil;
 
 	// get one from free list
 	sock = net_freeSockets;
@@ -111,7 +112,7 @@ qsocket_t *NET_NewQSocket (void)
 	Q_strcpy (sock->address,"UNSET ADDRESS");
 	sock->driver = net_driverlevel;
 	sock->socket = 0;
-	sock->driverdata = NULL;
+	sock->driverdata = nil;
 	sock->canSend = true;
 	sock->sendNext = false;
 	sock->lastMessageTime = net_time;
@@ -157,7 +158,7 @@ static void NET_Listen_f (void)
 {
 	if (Cmd_Argc () != 2)
 	{
-		Con_Printf ("\"listen\" is \"%u\"\n", listening ? 1 : 0);
+		Con_Printf ("\"listen\" is \"%ud\"\n", listening ? 1 : 0);
 		return;
 	}
 
@@ -178,7 +179,7 @@ static void MaxPlayers_f (void)
 
 	if (Cmd_Argc () != 2)
 	{
-		Con_Printf ("\"maxplayers\" is \"%u\"\n", svs.maxclients);
+		Con_Printf ("\"maxplayers\" is \"%ud\"\n", svs.maxclients);
 		return;
 	}
 
@@ -194,7 +195,7 @@ static void MaxPlayers_f (void)
 	if (n > svs.maxclientslimit)
 	{
 		n = svs.maxclientslimit;
-		Con_Printf ("\"maxplayers\" set to \"%u\"\n", n);
+		Con_Printf ("\"maxplayers\" set to \"%ud\"\n", n);
 	}
 
 	if ((n == 1) && listening)
@@ -217,7 +218,7 @@ static void NET_Port_f (void)
 
 	if (Cmd_Argc () != 2)
 	{
-		Con_Printf ("\"port\" is \"%u\"\n", net_hostport);
+		Con_Printf ("\"port\" is \"%ud\"\n", net_hostport);
 		return;
 	}
 
@@ -255,7 +256,7 @@ static void PrintSlist(void)
 	for (n = slistLastShown; n < hostCacheCount; n++)
 	{
 		if (hostcache[n].maxusers)
-			Con_Printf("%-15.15s %-15.15s %2u/%2u\n", hostcache[n].name, hostcache[n].map, hostcache[n].users, hostcache[n].maxusers);
+			Con_Printf("%-15.15s %-15.15s %2ud/%2ud\n", hostcache[n].name, hostcache[n].map, hostcache[n].users, hostcache[n].maxusers);
 		else
 			Con_Printf("%-15.15s %-15.15s\n", hostcache[n].name, hostcache[n].map);
 	}
@@ -355,7 +356,7 @@ qsocket_t *NET_Connect (char *host)
 	SetNetTime();
 
 	if (host && *host == 0)
-		host = NULL;
+		host = nil;
 
 	if (host)
 	{
@@ -384,10 +385,10 @@ qsocket_t *NET_Connect (char *host)
 	while(slistInProgress)
 		NET_Poll();
 
-	if (host == NULL)
+	if (host == nil)
 	{
 		if (hostCacheCount != 1)
-			return NULL;
+			return nil;
 		host = hostcache[0].cname;
 		Con_Printf("Connecting to...\n%s @ %s\n\n", hostcache[0].name, host);
 	}
@@ -418,7 +419,7 @@ JustDoIt:
 		PrintSlistTrailer();
 	}
 	
-	return NULL;
+	return nil;
 }
 
 
@@ -470,7 +471,7 @@ qsocket_t *NET_CheckNewConnections (void)
 		Sys_FileWrite (vcrFile, &vcrConnect, sizeof(vcrConnect));
 	}
 
-	return NULL;
+	return nil;
 }
 
 /*
@@ -905,7 +906,7 @@ void		NET_Shutdown (void)
 }
 
 
-static PollProcedure *pollProcedureList = NULL;
+static PollProcedure *pollProcedureList = nil;
 
 void NET_Poll(void)
 {
@@ -943,14 +944,14 @@ void SchedulePollProcedure(PollProcedure *proc, double timeOffset)
 	PollProcedure *pp, *prev;
 
 	proc->nextTime = Sys_FloatTime() + timeOffset;
-	for (pp = pollProcedureList, prev = NULL; pp; pp = pp->next)
+	for (pp = pollProcedureList, prev = nil; pp; pp = pp->next)
 	{
 		if (pp->nextTime >= proc->nextTime)
 			break;
 		prev = pp;
 	}
 
-	if (prev == NULL)
+	if (prev == nil)
 	{
 		proc->next = pollProcedureList;
 		pollProcedureList = proc;

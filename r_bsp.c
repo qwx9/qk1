@@ -1,5 +1,6 @@
 #include <u.h>
 #include <libc.h>
+#include <stdio.h>
 #include "quakedef.h"
 #include "r_local.h"
 
@@ -145,7 +146,7 @@ void R_RecursiveClipBPoly (bedge_t *pedges, mnode_t *pnode, msurface_t *psurf)
 	mvertex_t	*pvert, *plastvert, *ptvert;
 	mnode_t		*pn;
 
-	psideedges[0] = psideedges[1] = NULL;
+	psideedges[0] = psideedges[1] = nil;
 
 	makeclippededge = false;
 
@@ -370,7 +371,7 @@ void R_DrawSolidClippedSubmodelPolygons (model_t *pmodel)
 					pbedge[j].pnext = &pbedge[j+1];
 				}
 
-				pbedge[j-1].pnext = NULL;	// mark end of edges
+				pbedge[j-1].pnext = nil;	// mark end of edges
 
 				R_RecursiveClipBPoly (pbedge, currententity->topnode, psurf);
 			}

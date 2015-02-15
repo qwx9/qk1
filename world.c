@@ -2,6 +2,7 @@
 
 #include <u.h>
 #include <libc.h>
+#include <stdio.h>
 #include "quakedef.h"
 
 /*
@@ -197,7 +198,7 @@ areanode_t *SV_CreateAreaNode (int depth, vec3_t mins, vec3_t maxs)
 	if (depth == AREA_DEPTH)
 	{
 		anode->axis = -1;
-		anode->children[0] = anode->children[1] = NULL;
+		anode->children[0] = anode->children[1] = nil;
 		return anode;
 	}
 	
@@ -248,7 +249,7 @@ void SV_UnlinkEdict (edict_t *ent)
 	if (!ent->area.prev)
 		return;		// not linked in anywhere
 	RemoveLink (&ent->area);
-	ent->area.prev = ent->area.next = NULL;
+	ent->area.prev = ent->area.next = nil;
 }
 
 
@@ -508,7 +509,7 @@ edict_t	*SV_TestEntityPosition (edict_t *ent)
 	if (trace.startsolid)
 		return sv.edicts;
 		
-	return NULL;
+	return nil;
 }
 
 

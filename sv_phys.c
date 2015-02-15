@@ -1,5 +1,6 @@
 #include <u.h>
 #include <libc.h>
+#include <stdio.h>
 #include "quakedef.h"
 
 /*
@@ -196,7 +197,7 @@ Returns the clipflags if the velocity was modified (hit something solid)
 1 = floor
 2 = wall / step
 4 = dead stop
-If steptrace is not NULL, the trace of any vertical wall hit will be stored
+If steptrace is not nil, the trace of any vertical wall hit will be stored
 ============
 */
 #define	MAX_CLIP_PLANES	5
@@ -312,7 +313,7 @@ int SV_FlyMove (edict_t *ent, float time, trace_t *steptrace)
 		{	// go along the crease
 			if (numplanes != 2)
 			{
-//				Con_Printf ("clip velocity, numplanes == %i\n",numplanes);
+//				Con_Printf ("clip velocity, numplanes == %d\n",numplanes);
 				VectorCopy (vec3_origin, ent->v.velocity);
 				return 7;
 			}
@@ -896,7 +897,7 @@ void SV_Physics_Client (edict_t	*ent, int num)
 	case MOVETYPE_FLY:
 		if (!SV_RunThink (ent))
 			return;
-		SV_FlyMove (ent, host_frametime, NULL);
+		SV_FlyMove (ent, host_frametime, nil);
 		break;
 		
 	case MOVETYPE_NOCLIP:
@@ -906,7 +907,7 @@ void SV_Physics_Client (edict_t	*ent, int num)
 		break;
 		
 	default:
-		Sys_Error ("SV_Physics_client: bad movetype %i", (int)ent->v.movetype);
+		Sys_Error ("SV_Physics_client: bad movetype %d", (int)ent->v.movetype);
 	}
 
 //
@@ -1093,7 +1094,7 @@ void SV_Physics_Step (edict_t *ent)
 
 		SV_AddGravity (ent);
 		SV_CheckVelocity (ent);
-		SV_FlyMove (ent, host_frametime, NULL);
+		SV_FlyMove (ent, host_frametime, nil);
 		SV_LinkEdict (ent, true);
 
 		if ( (int)ent->v.flags & FL_ONGROUND )	// just hit ground
@@ -1160,7 +1161,7 @@ void SV_Physics (void)
 		|| ent->v.movetype == MOVETYPE_FLYMISSILE)
 			SV_Physics_Toss (ent);
 		else
-			Sys_Error ("SV_Physics: bad movetype %i", (int)ent->v.movetype);			
+			Sys_Error ("SV_Physics: bad movetype %d", (int)ent->v.movetype);			
 	}
 	
 	if (pr_global_struct->force_retouch)

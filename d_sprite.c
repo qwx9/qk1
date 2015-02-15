@@ -3,6 +3,7 @@
 
 #include <u.h>
 #include <libc.h>
+#include <stdio.h>
 #include "quakedef.h"
 #include "d_local.h"
 
@@ -144,7 +145,7 @@ void D_SpriteDrawSpans (sspan_t *pspan)
 				btemp = *(pbase + (s >> 16) + (t >> 16) * cachewidth);
 				if (btemp != 255)
 				{
-					if (*pz <= (izi >> 16))
+					if (*pz <= (izi >> 16))	/* FIXME: segfault: assumed 32bit ptr? */
 					{
 						*pz = izi >> 16;
 						*pdest = btemp;

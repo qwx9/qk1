@@ -1,7 +1,7 @@
 #include <u.h>
 #include <libc.h>
+#include <stdio.h>
 #include "quakedef.h"
-
 #include "net_loop.h"
 #include "net_dgrm.h"
 

@@ -2,6 +2,7 @@
 
 #include <u.h>
 #include <libc.h>
+#include <stdio.h>
 #include "quakedef.h"
 
 int			num_temp_entities;
@@ -244,9 +245,9 @@ entity_t *CL_NewTempEntity (void)
 	entity_t	*ent;
 
 	if (cl_numvisedicts == MAX_VISEDICTS)
-		return NULL;
+		return nil;
 	if (num_temp_entities == MAX_TEMP_ENTITIES)
-		return NULL;
+		return nil;
 	ent = &cl_temp_entities[num_temp_entities];
 	memset (ent, 0, sizeof(*ent));
 	num_temp_entities++;

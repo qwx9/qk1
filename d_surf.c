@@ -2,6 +2,7 @@
 
 #include <u.h>
 #include <libc.h>
+#include <stdio.h>
 #include "quakedef.h"
 #include "d_local.h"
 #include "r_local.h"
@@ -67,14 +68,14 @@ void D_InitCaches (void *buffer, int size)
 {
 
 	if (!msg_suppress_1)
-		Con_Printf ("%ik surface cache\n", size/1024);
+		Con_Printf ("%dk surface cache\n", size/1024);
 
 	sc_size = size - GUARDSIZE;
 	sc_base = (surfcache_t *)buffer;
 	sc_rover = sc_base;
 	
-	sc_base->next = NULL;
-	sc_base->owner = NULL;
+	sc_base->next = nil;
+	sc_base->owner = nil;
 	sc_base->size = sc_size;
 	
 	D_ClearCacheGuard ();
@@ -96,12 +97,12 @@ void D_FlushCaches (void)
 	for (c = sc_base ; c ; c = c->next)
 	{
 		if (c->owner)
-			*c->owner = NULL;
+			*c->owner = nil;
 	}
 	
 	sc_rover = sc_base;
-	sc_base->next = NULL;
-	sc_base->owner = NULL;
+	sc_base->next = nil;
+	sc_base->owner = nil;
 	sc_base->size = sc_size;
 }
 
@@ -124,7 +125,7 @@ surfcache_t     *D_SCAlloc (int width, uintptr size)
 	size = (uintptr)&((surfcache_t *)0)->data[size];
 	size = (size + 3) & ~3;
 	if (size > sc_size)
-		Sys_Error ("D_SCAlloc: %i > cache size",size);
+		Sys_Error ("D_SCAlloc: %d > cache size",size);
 
 // if there is not size bytes after the rover, reset to the start
 	wrapped_this_time = false;
@@ -141,7 +142,7 @@ surfcache_t     *D_SCAlloc (int width, uintptr size)
 // colect and free surfcache_t blocks until the rover block is large enough
 	new = sc_rover;
 	if (sc_rover->owner)
-		*sc_rover->owner = NULL;
+		*sc_rover->owner = nil;
 	
 	while (new->size < size)
 	{
@@ -150,7 +151,7 @@ surfcache_t     *D_SCAlloc (int width, uintptr size)
 		if (!sc_rover)
 			Sys_Error ("D_SCAlloc: hit the end of memory");
 		if (sc_rover->owner)
-			*sc_rover->owner = NULL;
+			*sc_rover->owner = nil;
 			
 		new->size += sc_rover->size;
 		new->next = sc_rover->next;
@@ -163,7 +164,7 @@ surfcache_t     *D_SCAlloc (int width, uintptr size)
 		sc_rover->size = new->size - size;
 		sc_rover->next = new->next;
 		sc_rover->width = 0;
-		sc_rover->owner = NULL;
+		sc_rover->owner = nil;
 		new->next = sc_rover;
 		new->size = size;
 	}
@@ -175,7 +176,7 @@ surfcache_t     *D_SCAlloc (int width, uintptr size)
 	if (width > 0)
 		new->height = (size - sizeof(*new) + sizeof(new->data)) / width;
 
-	new->owner = NULL;              // should be set properly after return
+	new->owner = nil;              // should be set properly after return
 
 	if (d_roverwrapped)
 	{
@@ -205,7 +206,7 @@ void D_SCDump (void)
 	{
 		if (test == sc_rover)
 			Sys_Printf ("ROVER:\n");
-		printf ("%p : %i bytes     %i width\n",test, test->size, test->width);
+		print ("%p : %d bytes     %ud width\n",test, test->size, test->width);
 	}
 }
 

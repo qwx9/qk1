@@ -2,6 +2,7 @@
 
 #include <u.h>
 #include <libc.h>
+#include <stdio.h>
 #include "quakedef.h"
 
 dprograms_t		*progs;
@@ -41,7 +42,7 @@ typedef struct {
 	char	field[MAX_FIELD_LEN];
 } gefv_cache;
 
-static gefv_cache	gefvCache[GEFV_CACHESIZE] = {{NULL, ""}, {NULL, ""}};
+static gefv_cache	gefvCache[GEFV_CACHESIZE] = {{nil, ""}, {nil, ""}};
 
 /* amd64: kludge for assumed 32bit pointer arithmetic */
 char *PR_Str (int ofs)
@@ -55,7 +56,7 @@ char *PR_Str (int ofs)
 =================
 ED_ClearEdict
 
-Sets everything to NULL
+Sets everything to nil
 =================
 */
 void ED_ClearEdict (edict_t *e)
@@ -147,7 +148,7 @@ ddef_t *ED_GlobalAtOfs (int ofs)
 		if (def->ofs == ofs)
 			return def;
 	}
-	return NULL;
+	return nil;
 }
 
 /*
@@ -166,7 +167,7 @@ ddef_t *ED_FieldAtOfs (int ofs)
 		if (def->ofs == ofs)
 			return def;
 	}
-	return NULL;
+	return nil;
 }
 
 /*
@@ -185,7 +186,7 @@ ddef_t *ED_FindField (char *name)
 		if (!strcmp(PR_Str(def->s_name),name) )
 			return def;
 	}
-	return NULL;
+	return nil;
 }
 
 
@@ -205,7 +206,7 @@ ddef_t *ED_FindGlobal (char *name)
 		if (!strcmp(PR_Str(def->s_name),name) )
 			return def;
 	}
-	return NULL;
+	return nil;
 }
 
 
@@ -225,7 +226,7 @@ dfunction_t *ED_FindFunction (char *name)
 		if (!strcmp(PR_Str(func->s_name),name) )
 			return func;
 	}
-	return NULL;
+	return nil;
 }
 
 
@@ -279,33 +280,33 @@ char *PR_ValueString (etype_t type, eval_t *val)
 	switch (type)
 	{
 	case ev_string:
-		sprintf (line, "%s", PR_Str(val->string));
+		sprint (line, "%s", PR_Str(val->string));
 		break;
 	case ev_entity:	
-		sprintf (line, "entity %i", NUM_FOR_EDICT(PROG_TO_EDICT(val->edict)) );
+		sprint (line, "entity %d", NUM_FOR_EDICT(PROG_TO_EDICT(val->edict)) );
 		break;
 	case ev_function:
 		f = pr_functions + val->function;
-		sprintf (line, "%s()", PR_Str(f->s_name));
+		sprint (line, "%s()", PR_Str(f->s_name));
 		break;
 	case ev_field:
 		def = ED_FieldAtOfs ( val->_int );
-		sprintf (line, ".%s", PR_Str(def->s_name));
+		sprint (line, ".%s", PR_Str(def->s_name));
 		break;
 	case ev_void:
-		sprintf (line, "void");
+		sprint (line, "void");
 		break;
 	case ev_float:
-		sprintf (line, "%5.1f", val->_float);
+		sprint (line, "%5.1f", val->_float);
 		break;
 	case ev_vector:
-		sprintf (line, "'%5.1f %5.1f %5.1f'", val->vector[0], val->vector[1], val->vector[2]);
+		sprint (line, "'%5.1f %5.1f %5.1f'", val->vector[0], val->vector[1], val->vector[2]);
 		break;
 	case ev_pointer:
-		sprintf (line, "pointer");
+		sprint (line, "pointer");
 		break;
 	default:
-		sprintf (line, "bad type %i", type);
+		sprint (line, "bad type %d", type);
 		break;
 	}
 	
@@ -331,30 +332,30 @@ char *PR_UglyValueString (etype_t type, eval_t *val)
 	switch (type)
 	{
 	case ev_string:
-		sprintf (line, "%s", PR_Str(val->string));
+		sprint (line, "%s", PR_Str(val->string));
 		break;
 	case ev_entity:	
-		sprintf (line, "%i", NUM_FOR_EDICT(PROG_TO_EDICT(val->edict)));
+		sprint (line, "%d", NUM_FOR_EDICT(PROG_TO_EDICT(val->edict)));
 		break;
 	case ev_function:
 		f = pr_functions + val->function;
-		sprintf (line, "%s", PR_Str(f->s_name));
+		sprint (line, "%s", PR_Str(f->s_name));
 		break;
 	case ev_field:
 		def = ED_FieldAtOfs ( val->_int );
-		sprintf (line, "%s", PR_Str(def->s_name));
+		sprint (line, "%s", PR_Str(def->s_name));
 		break;
 	case ev_void:
-		sprintf (line, "void");
+		sprint (line, "void");
 		break;
 	case ev_float:
-		sprintf (line, "%f", val->_float);
+		sprint (line, "%f", val->_float);
 		break;
 	case ev_vector:
-		sprintf (line, "%f %f %f", val->vector[0], val->vector[1], val->vector[2]);
+		sprint (line, "%f %f %f", val->vector[0], val->vector[1], val->vector[2]);
 		break;
 	default:
-		sprintf (line, "bad type %i", type);
+		sprint (line, "bad type %d", type);
 		break;
 	}
 	
@@ -380,11 +381,11 @@ char *PR_GlobalString (int ofs)
 	val = (void *)&pr_globals[ofs];
 	def = ED_GlobalAtOfs(ofs);
 	if (!def)
-		sprintf (line,"%i(???)", ofs);
+		sprint (line,"%d(???)", ofs);	/* FIXME */
 	else
 	{
 		s = PR_ValueString (def->type, val);
-		sprintf (line,"%i(%s)%s", ofs, PR_Str(def->s_name), s);
+		sprint (line,"%d(%s)%s", ofs, PR_Str(def->s_name), s);
 	}
 	
 	i = strlen(line);
@@ -403,9 +404,9 @@ char *PR_GlobalStringNoContents (int ofs)
 	
 	def = ED_GlobalAtOfs(ofs);
 	if (!def)
-		sprintf (line,"%i(???)", ofs);
+		sprint (line,"%d(???)", ofs);	/* FIXME */
 	else
-		sprintf (line,"%i(%s)", ofs, PR_Str(def->s_name));
+		sprint (line,"%d(%s)", ofs, PR_Str(def->s_name));
 	
 	i = strlen(line);
 	for ( ; i<20 ; i++)
@@ -438,7 +439,7 @@ void ED_Print (edict_t *ed)
 		return;
 	}
 
-	Con_Printf("\nEDICT %i:\n", NUM_FOR_EDICT(ed));
+	Con_Printf("\nEDICT %d:\n", NUM_FOR_EDICT(ed));
 	for (i=1 ; i<progs->numfielddefs ; i++)
 	{
 		d = &pr_fielddefs[i];
@@ -529,7 +530,7 @@ void ED_PrintEdicts (void)
 {
 	int		i;
 	
-	Con_Printf ("%i entities\n", sv.num_edicts);
+	Con_Printf ("%d entities\n", sv.num_edicts);
 	for (i=0 ; i<sv.num_edicts ; i++)
 		ED_PrintNum (i);
 }
@@ -582,11 +583,11 @@ void ED_Count (void)
 			step++;
 	}
 
-	Con_Printf ("num_edicts:%3i\n", sv.num_edicts);
-	Con_Printf ("active    :%3i\n", active);
-	Con_Printf ("view      :%3i\n", models);
-	Con_Printf ("touch     :%3i\n", solid);
-	Con_Printf ("step      :%3i\n", step);
+	Con_Printf ("num_edicts:%3d\n", sv.num_edicts);
+	Con_Printf ("active    :%3d\n", active);
+	Con_Printf ("view      :%3d\n", models);
+	Con_Printf ("touch     :%3d\n", solid);
+	Con_Printf ("step      :%3d\n", step);
 
 }
 
@@ -864,7 +865,7 @@ if (anglehack)
 {
 char	temp[32];
 strcpy (temp, com_token);
-sprintf (com_token, "0 %s 0", temp);
+sprint (com_token, "0 %s 0", temp);
 }
 
 		if (!ED_ParseEpair ((void *)&ent->v, key, com_token))
@@ -899,7 +900,7 @@ void ED_LoadFromFile (char *data)
 	int			inhibit;
 	dfunction_t	*func;
 	
-	ent = NULL;
+	ent = nil;
 	inhibit = 0;
 	pr_global_struct->time = sv.time;
 	
@@ -964,7 +965,7 @@ void ED_LoadFromFile (char *data)
 		PR_ExecuteProgram (func - pr_functions);
 	}	
 
-	Con_DPrintf ("%i entities inhibited\n", inhibit);
+	Con_DPrintf ("%d entities inhibited\n", inhibit);
 }
 
 
@@ -996,7 +997,7 @@ void PR_LoadProgs (void)
 		((int *)progs)[i] = LittleLong ( ((int *)progs)[i] );		
 
 	if (progs->version != PROG_VERSION)
-		Sys_Error ("progs.dat has wrong version number (%i should be %i)", progs->version, PROG_VERSION);
+		Sys_Error ("progs.dat has wrong version number (%d should be %d)", progs->version, PROG_VERSION);
 	if (progs->crc != PROGHEADER_CRC)
 		Sys_Error ("progs.dat system vars have been modified, progdefs.h is out of date");
 
@@ -1080,7 +1081,7 @@ void PR_Init (void)
 edict_t *EDICT_NUM(int n)
 {
 	if (n < 0 || n >= sv.max_edicts)
-		Sys_Error ("EDICT_NUM: bad number %i", n);
+		Sys_Error ("EDICT_NUM: bad number %d", n);
 	return (edict_t *)((byte *)sv.edicts+ (n)*pr_edict_size);
 }
 

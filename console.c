@@ -1,7 +1,6 @@
-//#include <unistd.h>
-//#include <fcntl.h>
 #include <u.h>
 #include <libc.h>
+#include <stdio.h>
 #include "quakedef.h"
 
 int 		con_linewidth;
@@ -197,7 +196,7 @@ void Con_Init (void)
 	{
 		if (strlen (com_gamedir) < (MAXGAMEDIRLEN - strlen (t2)))
 		{
-			sprintf (temp, "%s%s", com_gamedir, t2);
+			sprint (temp, "%s%s", com_gamedir, t2);
 			remove (temp);
 		}
 	}
@@ -333,7 +332,7 @@ void Con_DebugLog(char *file, char *fmt, ...)
     int fd;
     
     va_start(argptr, fmt);
-    vsprintf(data, fmt, argptr);
+    vseprint(data, data+sizeof(data), fmt, argptr);
     va_end(argptr);
     /*fd = open(file, OWRITE | O_WRONLY | O_CREAT | O_APPEND, 0666);*/
     fd = open(file, OWRITE);
@@ -358,7 +357,7 @@ void Con_Printf (char *fmt, ...)
 	static qboolean	inupdate;
 	
 	va_start (argptr,fmt);
-	vsprintf (msg,fmt,argptr);
+	vseprint (msg,msg+sizeof(msg),fmt,argptr);
 	va_end (argptr);
 	
 // also echo to debugging console
@@ -407,7 +406,7 @@ void Con_DPrintf (char *fmt, ...)
 		return;			// don't confuse non-developers with techie stuff...
 
 	va_start (argptr,fmt);
-	vsprintf (msg,fmt,argptr);
+	vseprint (msg,msg+sizeof(msg),fmt,argptr);
 	va_end (argptr);
 	
 	Con_Printf ("%s", msg);
@@ -428,7 +427,7 @@ void Con_SafePrintf (char *fmt, ...)
 	int			temp;
 		
 	va_start (argptr,fmt);
-	vsprintf (msg,fmt,argptr);
+	vseprint (msg,msg+sizeof(msg),fmt,argptr);
 	va_end (argptr);
 
 	temp = scr_disabled_for_loading;

@@ -2,6 +2,7 @@
 
 #include <u.h>
 #include <libc.h>
+#include <stdio.h>
 #include "quakedef.h"
 
 void S_Play(void);
@@ -205,7 +206,7 @@ void S_Init (void)
 	}
 
 	if(shm != nil)
-		Con_Printf ("Sound sampling rate: %i\n", shm->speed);
+		Con_Printf ("Sound sampling rate: %d\n", shm->speed);
 
 	// provides a tick sound until washed clean
 
@@ -255,7 +256,7 @@ sfx_t *S_FindName (char *name)
 	int		i;
 	sfx_t	*sfx;
 
-	if (!name)
+	if (name == nil)
 		Sys_Error ("S_FindName: NULL\n");
 
 	if (Q_strlen(name) >= MAX_QPATH)
@@ -308,7 +309,7 @@ sfx_t *S_PrecacheSound (char *name)
 	sfx_t	*sfx;
 
 	if (!sound_started || nosound.value)
-		return NULL;
+		return nil;
 
 	sfx = S_FindName (name);
 	
@@ -358,10 +359,10 @@ channel_t *SND_PickChannel(int entnum, int entchannel)
    }
 
 	if (first_to_die == -1)
-		return NULL;
+		return nil;
 
 	if (channels[first_to_die].sfx)
-		channels[first_to_die].sfx = NULL;
+		channels[first_to_die].sfx = nil;
 
     return &channels[first_to_die];    
 }       
@@ -462,7 +463,7 @@ void S_StartSound(int entnum, int entchannel, sfx_t *sfx, vec3_t origin, float f
 	sc = S_LoadSound (sfx);
 	if (!sc)
 	{
-		target_chan->sfx = NULL;
+		target_chan->sfx = nil;
 		return;		// couldn't load the sound's data
 	}
 
@@ -500,7 +501,7 @@ void S_StopSound(int entnum, int entchannel)
 			&& channels[i].entchannel == entchannel)
 		{
 			channels[i].end = 0;
-			channels[i].sfx = NULL;
+			channels[i].sfx = nil;
 			return;
 		}
 	}
@@ -517,7 +518,7 @@ void S_StopAllSounds(qboolean clear)
 
 	for (i=0 ; i<MAX_CHANNELS ; i++)
 		if (channels[i].sfx)
-			channels[i].sfx = NULL;
+			channels[i].sfx = nil;
 
 	Q_memset(channels, 0, MAX_CHANNELS * sizeof(channel_t));
 
@@ -613,7 +614,7 @@ void S_UpdateAmbientSounds (void)
 	if (!l || !ambient_level.value)
 	{
 		for (ambient_channel = 0 ; ambient_channel< NUM_AMBIENTS ; ambient_channel++)
-			channels[ambient_channel].sfx = NULL;
+			channels[ambient_channel].sfx = nil;
 		return;
 	}
 
@@ -670,7 +671,7 @@ void S_Update(vec3_t origin, vec3_t forward, vec3_t right, vec3_t up)
 // update general area ambient sound sources
 	S_UpdateAmbientSounds ();
 
-	combine = NULL;
+	combine = nil;
 
 // update spatialization for static and dynamic sounds	
 	ch = channels+NUM_AMBIENTS;
@@ -703,7 +704,7 @@ void S_Update(vec3_t origin, vec3_t forward, vec3_t right, vec3_t up)
 					
 			if (j == total_channels)
 			{
-				combine = NULL;
+				combine = nil;
 			}
 			else
 			{
@@ -730,11 +731,11 @@ void S_Update(vec3_t origin, vec3_t forward, vec3_t right, vec3_t up)
 		for (i=0 ; i<total_channels; i++, ch++)
 			if (ch->sfx && (ch->leftvol || ch->rightvol) )
 			{
-				//Con_Printf ("%3i %3i %s\n", ch->leftvol, ch->rightvol, ch->sfx->name);
+				//Con_Printf ("%3d %3d %s\n", ch->leftvol, ch->rightvol, ch->sfx->name);
 				total++;
 			}
 		
-		Con_Printf ("----(%i)----\n", total);
+		Con_Printf ("----(%d)----\n", total);
 	}
 
 // mix some sound
@@ -883,9 +884,9 @@ void S_SoundList(void)
 			Con_Printf ("L");
 		else
 			Con_Printf (" ");
-		Con_Printf("(%2db) %6i : %s\n",sc->width*8,  size, sfx->name);
+		Con_Printf("(%2db) %6d : %s\n",sc->width*8,  size, sfx->name);
 	}
-	Con_Printf ("Total resident: %i\n", total);
+	Con_Printf ("Total resident: %d\n", total);
 }
 
 

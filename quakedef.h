@@ -5,8 +5,6 @@
 //#define	PARANOID			// speed sapping error checking
 #define	GAMENAME	"id1"		// directory to look in by default
 
-#include <stdio.h>	/* FIXME */
-
 #define	VID_LockBuffer()
 #define	VID_UnlockBuffer()
 

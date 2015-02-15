@@ -2,6 +2,7 @@
 
 #include <u.h>
 #include <libc.h>
+#include <stdio.h>
 #include "quakedef.h"
 
 // we need to declare some mouse variables here, because the menu system
@@ -68,7 +69,7 @@ void CL_ClearState (void)
 	cl.free_efrags = cl_efrags;
 	for (i=0 ; i<MAX_EFRAGS-1 ; i++)
 		cl.free_efrags[i].entnext = &cl.free_efrags[i+1];
-	cl.free_efrags[i].entnext = NULL;
+	cl.free_efrags[i].entnext = nil;
 }
 
 /*
@@ -159,7 +160,7 @@ void CL_SignonReply (void)
 {
 	char 	str[8192];
 
-Con_DPrintf ("CL_SignonReply: %i\n", cls.signon);
+Con_DPrintf ("CL_SignonReply: %d\n", cls.signon);
 
 	switch (cls.signon)
 	{
@@ -173,10 +174,10 @@ Con_DPrintf ("CL_SignonReply: %i\n", cls.signon);
 		MSG_WriteString (&cls.message, va("name \"%s\"\n", cl_name.string));
 	
 		MSG_WriteByte (&cls.message, clc_stringcmd);
-		MSG_WriteString (&cls.message, va("color %i %i\n", ((int)cl_color.value)>>4, ((int)cl_color.value)&15));
+		MSG_WriteString (&cls.message, va("color %d %d\n", ((int)cl_color.value)>>4, ((int)cl_color.value)&15));
 	
 		MSG_WriteByte (&cls.message, clc_stringcmd);
-		sprintf (str, "spawn %s", cls.spawnparms);
+		sprint (str, "spawn %s", cls.spawnparms);
 		MSG_WriteString (&cls.message, str);
 		break;
 		
@@ -219,7 +220,7 @@ void CL_NextDemo (void)
 		}
 	}
 
-	sprintf (str,"playdemo %s\n", cls.demos[cls.demonum]);
+	sprint (str,"playdemo %s\n", cls.demos[cls.demonum]);
 	Cbuf_InsertText (str);
 	cls.demonum++;
 }
@@ -236,13 +237,13 @@ void CL_PrintEntities_f (void)
 	
 	for (i=0,ent=cl_entities ; i<cl.num_entities ; i++,ent++)
 	{
-		Con_Printf ("%3i:",i);
+		Con_Printf ("%3d:",i);
 		if (!ent->model)
 		{
 			Con_Printf ("EMPTY\n");
 			continue;
 		}
-		Con_Printf ("%s:%2i  (%5.1f,%5.1f,%5.1f) [%5.1f %5.1f %5.1f]\n"
+		Con_Printf ("%s:%2d  (%5.1f,%5.1f,%5.1f) [%5.1f %5.1f %5.1f]\n"
 		,ent->model->name,ent->frame, ent->origin[0], ent->origin[1], ent->origin[2], ent->angles[0], ent->angles[1], ent->angles[2]);
 	}
 }
@@ -255,7 +256,7 @@ SetPal
 Debugging tool, just flashes the screen
 ===============
 */
-void SetPal (int i)
+void SetPal (int /*i*/)
 {
 /*
 	static int old;
@@ -473,7 +474,7 @@ void CL_RelinkEntities (void)
 // if the object wasn't included in the last packet, remove it
 		if (ent->msgtime != cl.mtime[0])
 		{
-			ent->model = NULL;
+			ent->model = nil;
 			continue;
 		}
 

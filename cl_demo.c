@@ -1,5 +1,6 @@
 #include <u.h>
 #include <libc.h>
+#include <stdio.h>
 #include "quakedef.h"
 
 void CL_FinishTimeDemo (void);
@@ -100,7 +101,7 @@ int CL_GetMessage (void)
 		VectorCopy (cl.mviewangles[0], cl.mviewangles[1]);
 		for (i=0 ; i<3 ; i++)
 		{
-			r = fread (&f, 4, 1, cls.demofile);
+			fread (&f, 4, 1, cls.demofile);
 			cl.mviewangles[0][i] = LittleFloat (f);
 		}
 		
@@ -207,7 +208,7 @@ void CL_Record_f (void)
 	if (c == 4)
 	{
 		track = atoi(Cmd_Argv(3));
-		Con_Printf ("Forcing CD track to %i\n", cls.forcetrack);
+		Con_Printf ("Forcing CD track to %d\n", cls.forcetrack);
 	}
 	else
 		track = -1;	
@@ -234,7 +235,7 @@ void CL_Record_f (void)
 	}
 
 	cls.forcetrack = track;
-	fprintf (cls.demofile, "%i\n", cls.forcetrack);
+	fprintf (cls.demofile, "%d\n", cls.forcetrack);
 	
 	cls.demorecording = true;
 }
@@ -316,7 +317,7 @@ void CL_FinishTimeDemo (void)
 	time = realtime - cls.td_starttime;
 	if (!time)
 		time = 1;
-	Con_Printf ("%i frames %5.1f seconds %5.1f fps\n", frames, time, frames/time);
+	Con_Printf ("%d frames %5.1f seconds %5.1f fps\n", frames, time, frames/time);
 }
 
 /*

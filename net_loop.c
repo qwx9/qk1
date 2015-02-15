@@ -1,11 +1,12 @@
 #include <u.h>
 #include <libc.h>
+#include <stdio.h>
 #include "quakedef.h"
 #include "net_loop.h"
 
 qboolean	localconnectpending = false;
-qsocket_t	*loop_client = NULL;
-qsocket_t	*loop_server = NULL;
+qsocket_t	*loop_client = nil;
+qsocket_t	*loop_server = nil;
 
 int Loop_Init (void)
 {
@@ -46,16 +47,16 @@ void Loop_SearchForHosts (qboolean) /*xmit*/
 qsocket_t *Loop_Connect (char *host)
 {
 	if (Q_strcmp(host,"local") != 0)
-		return NULL;
+		return nil;
 	
 	localconnectpending = true;
 
 	if (!loop_client)
 	{
-		if ((loop_client = NET_NewQSocket ()) == NULL)
+		if ((loop_client = NET_NewQSocket ()) == nil)
 		{
 			Con_Printf("Loop_Connect: no qsocket available\n");
-			return NULL;
+			return nil;
 		}
 		Q_strcpy (loop_client->address, "localhost");
 	}
@@ -65,10 +66,10 @@ qsocket_t *Loop_Connect (char *host)
 
 	if (!loop_server)
 	{
-		if ((loop_server = NET_NewQSocket ()) == NULL)
+		if ((loop_server = NET_NewQSocket ()) == nil)
 		{
 			Con_Printf("Loop_Connect: no qsocket available\n");
-			return NULL;
+			return nil;
 		}
 		Q_strcpy (loop_server->address, "LOCAL");
 	}
@@ -86,7 +87,7 @@ qsocket_t *Loop_Connect (char *host)
 qsocket_t *Loop_CheckNewConnections (void)
 {
 	if (!localconnectpending)
-		return NULL;
+		return nil;
 
 	localconnectpending = false;
 	loop_server->sendMessageLength = 0;
@@ -215,12 +216,12 @@ qboolean Loop_CanSendUnreliableMessage (qsocket_t *) /*sock*/
 void Loop_Close (qsocket_t *sock)
 {
 	if (sock->driverdata)
-		((qsocket_t *)sock->driverdata)->driverdata = NULL;
+		((qsocket_t *)sock->driverdata)->driverdata = nil;
 	sock->receiveMessageLength = 0;
 	sock->sendMessageLength = 0;
 	sock->canSend = true;
 	if (sock == loop_client)
-		loop_client = NULL;
+		loop_client = nil;
 	else
-		loop_server = NULL;
+		loop_server = nil;
 }
