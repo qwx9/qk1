@@ -59,12 +59,7 @@ int SNDDMA_GetDMAPos(void)
 {
 	if (!snd_inited)
 		return 0;
-
-	/* FIXME: utter bullshit */
-	//shm->samplepos = count.bytes/shm->samplebits/8 & shm->samples-1;
-	//shm->samplepos = count.ptr / (shm->samplebits / 8);
-	shm->samplepos = wpos / shm->samplebits/8 & shm->samples-1;
-	//wpos = 0;
+	shm->samplepos = wpos / (shm->samplebits/8);
 	return shm->samplepos;
 }
 
@@ -81,7 +76,6 @@ void SNDDMA_Submit(void)
 {
 	int n;
 
-	/* FIXME: utter bullshit */
 	if((n = write(audio_fd, shm->buffer, shm->samplebits/8 * shm->samples)) < 0){
 		Sys_Warn("SNDDMA_Submit:write");
 		SNDDMA_Shutdown();

@@ -13,25 +13,9 @@ float cdvolume;
 byte remap[100];
 byte playTrack;
 byte maxTrack;
-int cdfile = -1;
+int cdfd = -1;
 char cd_dev[64] = "/dev/cdrom";
 
-
-void CDAudio_Eject (void)
-{
-	if(cdfile == -1 || !enabled)
-		return;
-
-	Con_DPrintf("CDAudio_Eject: PORTME\n");
-}
-
-void CDAudio_CloseDoor (void)
-{
-	if(cdfile == -1 || !enabled)
-		return;
-
-	Con_DPrintf("CDAudio_CloseDoor: PORTME\n");
-}
 
 int CDAudio_GetAudioDiskInfo (void)
 {
@@ -54,23 +38,22 @@ int CDAudio_GetAudioDiskInfo (void)
 
 void CDAudio_Play (byte track, qboolean looping)
 {
-	if(cdfile == -1 || !enabled)
+	if(cdfd == -1 || !enabled)
 		return;
-	
 	if(!cdValid){
 		CDAudio_GetAudioDiskInfo();
 		if(!cdValid)
 			return;
 	}
 
+	Con_DPrintf("CDAudio_Play: PORTME\n");
+	return;
+
 	track = remap[track];
 	if(track < 1 || track > maxTrack){
 		Con_DPrintf("CDAudio: Bad track number %ud.\n", track);
 		return;
 	}
-
-	Con_DPrintf("CDAudio_Play: PORTME\n");
-	return;
 
 	/*
 	struct cdrom_tocentry entry;
@@ -79,7 +62,7 @@ void CDAudio_Play (byte track, qboolean looping)
 	// don't try to play a non-audio track
 	entry.cdte_track = track;
 	entry.cdte_format = CDROM_MSF;
-	if(ioctl(cdfile, CDROMREADTOCENTRY, &entry) == -1){
+	if(ioctl(cdfd, CDROMREADTOCENTRY, &entry) == -1){
 		Con_DPrintf("ioctl cdromreadtocentry failed\n");
 		return;
 	}
@@ -98,11 +81,11 @@ void CDAudio_Play (byte track, qboolean looping)
 	ti.cdti_trk1 = track;
 	ti.cdti_ind0 = 1;
 	ti.cdti_ind1 = 99;
-	if(ioctl(cdfile, CDROMPLAYTRKIND, &ti) == -1) {
+	if(ioctl(cdfd, CDROMPLAYTRKIND, &ti) == -1) {
 		Con_DPrintf("ioctl cdromplaytrkind failed\n");
 		return;
 	}
-	if(ioctl(cdfile, CDROMRESUME) == -1) 
+	if(ioctl(cdfd, CDROMRESUME) == -1) 
 		Con_DPrintf("ioctl cdromresume failed\n");
 	*/
 
@@ -116,33 +99,24 @@ void CDAudio_Play (byte track, qboolean looping)
 
 void CDAudio_Stop (void)
 {
-	if(cdfile == -1 || !enabled || !playing)
+	if(cdfd == -1 || !enabled || !playing)
 		return;
-
-	Con_DPrintf("CDAudio_Stop: PORTME\n");
-
 	wasPlaying = false;
 	playing = false;
 }
 
 void CDAudio_Pause (void)
 {
-	if(cdfile == -1 || !enabled || !playing)
+	if(cdfd == -1 || !enabled || !playing)
 		return;
-
-	Con_DPrintf("CDAudio_Pause: PORTME\n");
-
 	wasPlaying = playing;
 	playing = false;
 }
 
 void CDAudio_Resume (void)
 {
-	if(cdfile == -1 || !enabled || !cdValid || !wasPlaying)
+	if(cdfd == -1 || !enabled || !cdValid || !wasPlaying)
 		return;
-
-	Con_DPrintf("CDAudio_Resume: PORTME\n");
-
 	playing = true;
 }
 
@@ -153,7 +127,6 @@ void CD_f (void)
 
 	if(Cmd_Argc() < 2)
 		return;
-
 	command = Cmd_Argv(1);
 	if(Q_strcasecmp(command, "on") == 0){
 		enabled = true;
@@ -186,10 +159,6 @@ void CD_f (void)
 			remap[n] = Q_atoi(Cmd_Argv(n+1));
 		return;
 	}
-	if(Q_strcasecmp(command, "close") == 0){
-		CDAudio_CloseDoor();
-		return;
-	}
 	if(!cdValid){
 		CDAudio_GetAudioDiskInfo();
 		if(!cdValid){
@@ -215,13 +184,6 @@ void CD_f (void)
 	}
 	if(Q_strcasecmp(command, "resume") == 0){
 		CDAudio_Resume();
-		return;
-	}
-	if(Q_strcasecmp(command, "eject") == 0){
-		if(playing)
-			CDAudio_Stop();
-		CDAudio_Eject();
-		cdValid = false;
 		return;
 	}
 	if(Q_strcasecmp(command, "info") == 0){
@@ -262,7 +224,7 @@ void CDAudio_Update (void)
 		struct cdrom_subchnl subchnl;
 
 		subchnl.cdsc_format = CDROM_MSF;
-		if(ioctl(cdfile, CDROMSUBCHNL, &subchnl) == -1 ) {
+		if(ioctl(cdfd, CDROMSUBCHNL, &subchnl) == -1 ) {
 			Con_DPrintf("ioctl cdromsubchnl failed\n");
 			playing = false;
 			return;
@@ -286,18 +248,15 @@ int CDAudio_Init(void)
 	if(COM_CheckParm("-nocdaudio"))
 		return -1;
 
-	/* FIXME */
-	return -1;
-
 	if((i = COM_CheckParm("-cddev")) != 0 && i < com_argc - 1) {
 		strncpy(cd_dev, com_argv[i + 1], sizeof(cd_dev));
 		cd_dev[sizeof(cd_dev)-1] = 0;
 	}
 
-	if((cdfile = open(cd_dev, OREAD)) == -1){
+	if((cdfd = open(cd_dev, OREAD)) == -1){
 		Sys_Warn("CDAudio_Init %s", cd_dev);
 		Con_Printf("CDAudio_Init %s: failed to initialize\n", cd_dev);
-		cdfile = -1;
+		cdfd = -1;
 		return -1;
 	}
 
@@ -323,6 +282,6 @@ void CDAudio_Shutdown (void)
 	if(!initialized)
 		return;
 	CDAudio_Stop();
-	close(cdfile);
-	cdfile = -1;
+	close(cdfd);
+	cdfd = -1;
 }
