@@ -7,19 +7,23 @@ qk1 - (9) quake
 		. cp /n/quakecd/id1/*.pak id1/
 		. run from same dir...
 	- unfinished and very buggy (both shitty new code and badly ported old code)
-	- sound does not work, cdaudio/networking don't exist
+	- sound works, but is glitchy and reduces FPS quite a bit
+	- cdaudio, networking: PORTME
 	- assume high resolutions don't work well and are very crash prone (e.g. > 800x600)
-		. exit with: Hunk_Alloc: failed on ... => not enough memory
-		use [-mem megabytes], e.g.:
+		. exit with: Hunk_Alloc: failed on ... => not enough memory (default 8M);
+		->use [-mem megabytes], e.g.:
 			% qk1 -nosound -mem 10
 		. if window size < physical screen size, swipe mouse super fast to exit
 		the window (bug in mproc())
 	- don't use -winsize, -width, -height; just resize the window (bugsbugsbugs)
-	- mouse is grabbed using _windowed_mouse cvar
+	- mouse is grabbed using m_windowed cvar
 		. open console (~)
-		. type _windowed_mouse 1 (can autocomplete w/ tab)
+		. type m_windowed 1 (can autocomplete w/ tab)
 		. setting now saved in id1/config.cfg
-	- tested on 386 and amd64 only
+	- tested on 386 and amd64 only (works ok on a pentium 4)
+	- the point of THIS port is to make it work on plan9, and be portable across
+	cputypes on plan9, which justifies some more intrusive changes (but is a bad
+	justification)
 
 
 some params useful for workarounds
@@ -42,6 +46,9 @@ port notes
 	since Con_Printf was often used there, and it outputs to both fd=1 and console,
 	so needs fixing
 	- m_freelook, as a quick hack to have (reversible) free mouse look
+	- vid_9.c: shitty, can probably improve performance a bit without screwing code
+	- snd_9.c: maybe writes to /dev/audio should be on another proc?
+	- *printf -> *print was stupid
 
 
 bugs present in linux/x11 (w/ my tweaks in early commits)
@@ -57,33 +64,29 @@ bugs present in linux/x11 (w/ my tweaks in early commits)
 		. when paused, if _windowed_mouse 1, can still look around with the mouse, even
 		if world is frozen
 	- fp exceptions galore
-	- high resolutions -> depression, then suicide
-	- resizing to smaller window -> gory death
-	- resizing several times -> genitals chopped off, etc.
-	- seemingly random crashes on startup
+	- high resolutions -> casts Anxiodepressive Disorder on user
+	- resizing to smaller window -> no.
+	- resizing several times -> no.
+	- seemingly random crashes on startup (fp?)
 
 
 todo/issues
 -----------
-	- kill stdio; other than stdio uses, NULL -> nil; same for *printf
-	- vid_9.c: remove/limit stupid
 	- net_9p.c
-	- net_udp.c + net_dgrm.c: actuallyport
-	- snd_9.c: actuallyport
-	- cd_9.c: everything; just specify via cvar a folder and look for files there?
-	- mproc: better grabout shit
-	- free mouselook without needing +mlook
-	- plan9-like install
-	- do something about all the fucking shit printed in console
+	- cd_9.c,net_udp.c,net_dgrm.c: actuallyport
+	- snd_9.c, vid_9.c: lousy
+	- plan9-like install, manpages
 	- caps lock == Kctl (← kbdfs)
 	- ungrab mouse when entering console or menus a la games/doom (IN_Grabm())
-	- clean up *_9.c
+	- cleanse *_9.c from linux legacy
 	- linking errors with -T cflag
-	- fix potential fp exceptions in code rather than ignoring them
-	- sys_9.c: proper P9 use (bad programming?)
+	- fix potential fp exceptions in code rather than ignoring them?
+	- sys_9.c: proper P9 use (style)
 	- rewrite everything to use plan9 style? (ocd)
-	- proper %r use for *_Printf and Sys_Error
+	- sys_9.c: proper %r use for *_Printf and Sys_Error
 	- g '/\* FIXME'
+	- test w/ expansions (+cdaudio)
+	- port quakeworld and utilities +/- merge common code and mkmany
 
 
 legal
