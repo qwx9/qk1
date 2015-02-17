@@ -153,22 +153,10 @@ void kproc (void)
 	if((fd = open("/dev/kbd", OREAD)) < 0)
 		sysfatal("open /dev/kbd: %r");
 
-	/* FIXMESS */
-
 	while((n = read(fd, buf, sizeof(buf))) > 0){
 		buf[n-1] = 0;
-
 		switch(*buf){
 		case 'c':
-			/*
-			chartorune(&r, buf+1);
-			if(r){
-				keyq[keyq_head].key = runetokey(r);
-				keyq[keyq_head].down = true;
-				keyq_head = keyq_head+1 & 63;
-			}
-			*/
-			/* fall through */
 		default:
 			continue;
 		case 'k':
@@ -207,12 +195,11 @@ void mproc (void)
 {
 	int b, n, nerr, fd;
 	char buf[1+5*12];
-	Point m;
+	float x, y;
 
 	if((fd = open("/dev/mouse", ORDWR)) < 0)
 		sysfatal("open /dev/mouse: %r");
 
-	memset(&m, 0, sizeof m);
 	nerr = 0;
 	for(;;){
 		if((n = read(fd, buf, sizeof buf)) != 1+4*12){
@@ -230,15 +217,13 @@ void mproc (void)
 			if(!mouseactive)
 				break;
 
-			m.x = atoi(buf+1+0*12);
-			m.y = atoi(buf+1+1*12);
-			//m.buttons = atoi(buf+1+2*12);
+			x = atoi(buf+1+0*12) - center.x;
+			y = atoi(buf+1+1*12) - center.y;
 			b = atoi(buf+1+2*12);
 
-			/* FIXME: cursor can still get out */
-			mouse_x += (float)(m.x - center.x);
-			mouse_y += (float)(m.y - center.y);
-			if(m_windowed.value)
+			mouse_x += x;
+			mouse_y += y;
+			if(m_windowed.value && x + y != 0)
 				fprint(fd, "m%d %d", center.x, center.y);
 
 			mouse_buttonstate = b&1 | (b&2)<<1 | (b&4)>>1;
@@ -296,8 +281,6 @@ void IN_Init (void)
 	Cvar_RegisterVariable(&m_filter);
 	Cvar_RegisterVariable(&m_freelook);
 	notify(sucks);
-	if(m_windowed.value)
-		IN_Grabm(1);
 	if((pid = rfork(RFPROC|RFMEM|RFFDG)) == 0){
 		kproc();
 		exits(nil);
@@ -305,6 +288,8 @@ void IN_Init (void)
 	kpid = pid;
 	if(COM_CheckParm("-nomouse"))
 		return;
+	if(m_windowed.value)
+		IN_Grabm(1);
 	if((pid = rfork(RFPROC|RFMEM|RFFDG)) == 0){
 		mproc();
 		exits(nil);

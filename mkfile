@@ -124,6 +124,5 @@ HFILES=\
 
 </sys/src/cmd/mkone
 
-# FIXME (packing error?)
+# FIXME
 CFLAGS=-FVw
-#LDFLAGS=-v

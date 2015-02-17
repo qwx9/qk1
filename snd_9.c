@@ -6,8 +6,8 @@
 int audio_fd;
 int snd_inited;
 int wpos;
-
 int tryrates[] = { 11025, 22051, 44100, 8000 };
+
 
 qboolean SNDDMA_Init(void)
 {
@@ -57,7 +57,7 @@ qboolean SNDDMA_Init(void)
 
 int SNDDMA_GetDMAPos(void)
 {
-	if (!snd_inited)
+	if(!snd_inited)
 		return 0;
 	shm->samplepos = wpos / (shm->samplebits/8);
 	return shm->samplepos;

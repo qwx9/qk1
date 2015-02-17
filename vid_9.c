@@ -14,6 +14,7 @@ viddef_t vid;	// global video state
 unsigned short d_8to16table[256];
 int d_con_indirect = 0;
 uchar *framebuf;	/* draw buffer */
+Image *fbim;	/* framebuf image */
 byte current_palette[768];
 int X11_highhunkmark;
 int X11_buffersize;
@@ -172,45 +173,46 @@ void st3_fixup (uchar *data, int x, int y, int width, int height)
 	}
 }
 
+/* vid.height and vid.width must be set correctly before this call */
 void ResetFrameBuffer (void)
 {
-	if(framebuf)
+	if(framebuf != nil)
 		free(framebuf);
+
 	if(d_pzbuffer){
 		D_FlushCaches();
 		Hunk_FreeToHighMark(X11_highhunkmark);
 		d_pzbuffer = nil;
 	}
 	X11_highhunkmark = Hunk_HighMark();
-
 	// alloc an extra line in case we want to wrap, and allocate the z-buffer
 	X11_buffersize = vid.width * vid.height * sizeof(*d_pzbuffer);
 	vid_surfcachesize = D_SurfaceCacheForRes(vid.width, vid.height);
 	X11_buffersize += vid_surfcachesize;
-
-	d_pzbuffer = Hunk_HighAllocName(X11_buffersize, "video");
-	if(d_pzbuffer == nil)
+	if((d_pzbuffer = Hunk_HighAllocName(X11_buffersize, "video")) == nil)
 		Sys_Error("Not enough memory for video mode\n");
-
 	vid_surfcache = (byte *)d_pzbuffer + vid.width * vid.height * sizeof(*d_pzbuffer);
-
 	D_InitCaches(vid_surfcache, vid_surfcachesize);
 
 	framebuf = malloc(sizeof *framebuf * Dx(screen->r) * Dy(screen->r) * screen->depth/8);
 	vid.buffer = framebuf;
+	vid.rowbytes = Dx(screen->r) * screen->depth/8;
+	vid.aspect = (float)vid.height / (float)vid.width * (320.0/240.0);	/* FIXME */
 	vid.conbuffer = vid.buffer;
+	vid.conrowbytes = vid.rowbytes;
+	vid.conwidth = vid.width;
+	vid.conheight = vid.height;
+	center = addpt(screen->r.min, Pt(Dx(screen->r)/2, Dy(screen->r)/2));
+	grabout = insetrect(screen->r, Dx(screen->r)/8);
+	if(fbim != nil)
+		freeimage(fbim);
+	/* FIXME: seems to crash later with DBlack rather than DNofill, why? */
+	fbim = allocimage(display, Rect(0, 0, vid.width, vid.height), screen->chan, 1, DNofill);
 }
 
 // Called at startup to set up translation tables, takes 256 8 bit RGB values
 // the palette data will go away after the call, so it must be copied off if
 // the video driver will need it again
-
-void resetscr(void)
-{
-	ResetFrameBuffer();
-	center = addpt(screen->r.min, Pt(Dx(screen->r)/2, Dy(screen->r)/2));
-	grabout = insetrect(screen->r, Dx(screen->r)/8);
-}
 
 void VID_Init (unsigned char *palette)
 {
@@ -229,7 +231,7 @@ void VID_Init (unsigned char *palette)
 	//vid.grades = VID_GRADES;
 	vid.fullbright = 256 - LittleLong(*((int *)vid.colormap + 2048));
 
-	srand(getpid());	/* glibc srandom() affects rand() too, right? */
+	srand(getpid());
 
 	if(pnum = COM_CheckParm("-winsize")){
 		if(pnum >= com_argc-2)
@@ -261,23 +263,10 @@ void VID_Init (unsigned char *palette)
 		vid.width = Dx(screen->r);
 	if(vid.height == -1)
 		vid.height = Dy(screen->r);
-
-	/* TODO: resize properly if -winsize,.. params provided, draw centered */
-
 	if(screen->chan == CMAP8)
 		VID_SetPalette(palette);
-	resetscr();
-	vid.rowbytes = Dx(screen->r) * screen->depth/8;
-	vid.buffer = framebuf;
+	ResetFrameBuffer();
 	vid.direct = 0;
-	vid.conbuffer = framebuf;
-	vid.conrowbytes = vid.rowbytes;
-	vid.conwidth = vid.width;
-	vid.conheight = vid.height;
-	/* FIXME */
-	vid.aspect = (float)vid.height / (float)vid.width * (320.0/240.0);
-
-	draw(screen, screen->r, display->black, nil, ZP);
 }
 
 void VID_ShiftPalette (unsigned char *p)
@@ -314,27 +303,19 @@ void VID_SetPalette (unsigned char *palette)
 void VID_Shutdown (void)
 {
 	Con_Printf("VID_Shutdown\n");
+	freeimage(fbim);
 }
 
 /* flush given rectangles from view buffer to the screen */
 void VID_Update (vrect_t *rects)
 {
-	Rectangle svr, dr;
-	Image *im;
-
 	if(config_notify){		/* skip this frame if window resize */
 		config_notify = 0;
 		if(getwindow(display, Refnone) < 0)
 			Sys_Error("VID_Update:getwindow");
 		vid.width = Dx(screen->r);
 		vid.height = Dy(screen->r);
-		resetscr();
-		vid.rowbytes = vid.width * screen->depth/8;
-		vid.buffer = framebuf;
-		vid.conbuffer = framebuf;
-		vid.conwidth = vid.width;
-		vid.conheight = vid.height;
-		vid.conrowbytes = vid.rowbytes;
+		ResetFrameBuffer();
 		vid.recalc_refdef = 1;			// force a surface cache flush
 		Con_CheckResize();
 		Con_Clear_f();
@@ -344,10 +325,6 @@ void VID_Update (vrect_t *rects)
 	if(screen->chan != CMAP8)	/* force full update if not 8bit */
 		scr_fullupdate = 0;
 
-	/* FIXME: seems to crash later with DBlack rather than DNofill, why? */
-	im = allocimage(display, Rect(0, 0, vid.width, vid.height), screen->chan, 1, DNofill);
-
-	svr = screen->clipr;
 	while(rects){
 		if(screen->chan == RGB16)
 			st2_fixup(framebuf, rects->x, rects->y,
@@ -356,18 +333,10 @@ void VID_Update (vrect_t *rects)
 		else if(screen->chan == RGB24 || screen->chan == RGBA32 || screen->chan == XRGB32)
 			st3_fixup(framebuf, rects->x, rects->y,
 				rects->width, rects->height);
-
-		/* FIXME */
-		//loadimage(im, im->r, &framebuf[rects->x*vid.rowbytes];
-		loadimage(im, im->r, framebuf, vid.height * vid.rowbytes);
-		dr = Rpt(addpt(screen->r.min, Pt(rects->x, rects->y)),
-			addpt(screen->r.min, Pt(rects->x+rects->width, rects->y+rects->height)));
-		//replclipr(screen, 0, dr);	/* FIXME: necessary? */
-		draw(screen, dr, im, nil, ZP);
 		rects = rects->pnext;
 	}
-	replclipr(screen, 0, svr);
-	freeimage(im);
+	loadimage(fbim, fbim->r, framebuf, vid.height * vid.rowbytes);
+	draw(screen, screen->r, fbim, nil, ZP);
 	flushimage(display, 1);
 }
 
