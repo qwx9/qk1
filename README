@@ -15,11 +15,15 @@ qk1 - (9) quake
 			% qk1 -nosound -mem 10
 		. if window size < physical screen size, swipe mouse super fast to exit
 		the window (bug in mproc())
+		. actually, I've seen only two points where it segfaults, and it's fairly
+		constant
+	- resolutions under 320x240 don't seem to work
 	- don't use -winsize, -width, -height; just resize the window (bugsbugsbugs)
 	- mouse is grabbed using m_windowed cvar
 		. open console (~)
 		. type m_windowed 1 (can autocomplete w/ tab)
 		. setting now saved in id1/config.cfg
+	- official expansions (rogue and hipnotic) work fine, mods could too
 	- tested on 386 and amd64 only (works ok on a pentium 4)
 	- the point of THIS port is to make it work on plan9, and be portable across
 	cputypes on plan9, which justifies some more intrusive changes (but is a bad
@@ -31,7 +35,7 @@ some params useful for workarounds
 	-nosound
 	-nostdout
 	-mem %d
-	-noudp
+	(-noudp)
 	(-winsize %d %d)
 	(-width %d)
 	(-height %d)
@@ -49,10 +53,12 @@ port notes
 	- vid_9.c: shitty, can probably improve performance a bit without screwing code
 	- snd_9.c: maybe writes to /dev/audio should be on another proc?
 	- *printf -> *print was stupid
+	- m_freelook is sort of useless, can just type +mlook in console, but that isn't
+	saved on exit; maybe there's a better way
 
 
-bugs present in linux/x11 (w/ my tweaks in early commits)
----------------------------------------------------------
+bugs present in linux/x11 (w/ my workaround for amd64)
+------------------------------------------------------
 	- compile with PARANOID -> MSG_WriteByte complains about range error and
 	  exits. no idea why.
 	- new game while already ingame -> front falls off
@@ -75,18 +81,17 @@ todo/issues
 	- net_9p.c
 	- cd_9.c,net_udp.c,net_dgrm.c: actuallyport
 	- snd_9.c, vid_9.c: lousy
-	- plan9-like install, manpages
-	- caps lock == Kctl (← kbdfs)
+	- plan9-like install (lib/quake rather than cwd), manpages
+	- caps lock == Kctl (← kbdfs, notanissue?)
 	- ungrab mouse when entering console or menus a la games/doom (IN_Grabm())
 	- cleanse *_9.c from linux legacy
 	- linking errors with -T cflag
 	- fix potential fp exceptions in code rather than ignoring them?
 	- sys_9.c: proper P9 use (style)
 	- rewrite everything to use plan9 style? (ocd)
-	- sys_9.c: proper %r use for *_Printf and Sys_Error
 	- g '/\* FIXME'
-	- test w/ expansions (+cdaudio)
 	- port quakeworld and utilities +/- merge common code and mkmany
+	- Sys_Error printing %r systematically is stupid
 
 
 legal

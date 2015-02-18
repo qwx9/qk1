@@ -2,4 +2,5 @@ syntax:glob
 *.[1-9qv]
 *qk1
 *.out
+*.acid
 id1/
