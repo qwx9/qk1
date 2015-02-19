@@ -5,7 +5,6 @@
 
 qboolean isDedicated;
 int nostdout = 0;
-char *basedir = ".";
 char *cachedir = "/tmp";
 cvar_t sys_linerefresh = {"sys_linerefresh","0"};	// set for entity display
 
@@ -163,31 +162,35 @@ void Sys_LineRefresh (void)
 {
 }
 
-int main (int c, char **v)
+void main (int c, char **v)
 {
-	double	time, oldtime, newtime;
-	quakeparms_t	parms;
-	extern int	vcrFile;
-	extern int	recording;
-	int	j;
-
-	argv0 = *v;
+	static char basedir[1024];
+	int j;
+	char *home;
+	double time, oldtime, newtime;
+	quakeparms_t parms;
+	extern int vcrFile;
+	extern int recording;
 
 	memset(&parms, 0, sizeof(parms));
 
 	COM_InitArgv(c, v);
 	parms.argc = com_argc;
 	parms.argv = com_argv;
+	argv0 = *v;
+
 	parms.memsize = 8*1024*1024;
-
-	j = COM_CheckParm("-mem");
-	if(j)
+	if(j = COM_CheckParm("-mem"))
 		parms.memsize = (int)(Q_atof(com_argv[j+1]) * 1024*1024);
-
 	parms.membase = malloc(parms.memsize);
-	parms.basedir = basedir;
 
-	//fcntl(0, F_SETFL, fcntl (0, F_GETFL, 0) | FNDELAY);
+	if(home = getenv("home")){
+		snprintf(basedir, sizeof basedir, "%s/lib/quake", home);
+		free(home);
+	}else
+		snprintf(basedir, sizeof basedir, "/sys/lib/quake");
+
+	parms.basedir = basedir;
 
 	/* ignore fp exceptions (bad), rendering shit assumes they are */
 	setfcr(getfcr() & ~(FPOVFL|FPUNFL|FPINVAL|FPZDIV));	/* FIXME */
@@ -196,15 +199,13 @@ int main (int c, char **v)
 
 	if(COM_CheckParm("-nostdout"))
 		nostdout = 1;
-	else{
-		//fcntl(0, F_SETFL, fcntl (0, F_GETFL, 0) | FNDELAY);
+	else
 		print("(9)quake %4.2f\n", (float)VERSION);
-	}
 
-	oldtime = Sys_FloatTime () - 0.1;
+	oldtime = Sys_FloatTime() - 0.1;
 	for(;;){
 		// find time spent rendering last frame
-		newtime = Sys_FloatTime ();
+		newtime = Sys_FloatTime();
 		time = newtime - oldtime;
 
 		if(cls.state == ca_dedicated){   // play vcrfiles at max speed

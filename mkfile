@@ -1,7 +1,7 @@
 </$objtype/mkfile
 
-BIN=.
-TARG=qk1
+BIN=$home/bin/$objtype
+TARG=quake
 
 OFILES=\
 	cl_demo.$O\

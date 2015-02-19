@@ -2,9 +2,12 @@ qk1 - (9) quake
 ===============
 	- setup:
 		. mk install
-		. mkdir id1
+	- to install quake (shareware or registered):
+		. mkdir $home/lib/quake/id1
 		. cp /n/quakecd/id1/*.pak id1/
-		. run from same dir...
+	- to install an expansion or compatible mod (zB rogue):
+		. mkdir $home/lib/quake/rogue
+		. cp /n/quakecd/rogue/*.pak $home/lib/quake/rogue
 	- sound works, but is glitchy and reduces FPS quite a bit, esp. high resolutions
 	- cdaudio, networking: PORTME
 	- high resolutions work up to 4096x4096 (arbitrary limit in r_shared.h)
@@ -18,7 +21,6 @@ qk1 - (9) quake
 		. open console (~)
 		. type m_windowed 1 (can autocomplete w/ tab)
 		. setting saved on exit in id1/config.cfg
-	- official expansions (rogue and hipnotic) work fine, mods could too
 	- tested on 386 and amd64 only (works ok on a pentium 4)
 
 
@@ -60,7 +62,7 @@ todo/issues
 	- net_9p.c
 	- cd_9.c,net_udp.c,net_dgrm.c: actuallyport
 	- snd_9.c, vid_9.c: lousy
-	- plan9-like install (lib/quake rather than cwd), manpages
+	- manpages
 	- caps lock == Kctl (← kbdfs, notanissue?)
 	- ungrab mouse when entering console or menus a la games/doom (IN_Grabm())
 	- cleanse *_9.c from linux legacy
