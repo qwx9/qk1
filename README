@@ -42,12 +42,9 @@ port notes
 	- Sys_Warn added again for print(2) stuff in *_9.c that uses %r, kind of stupid
 	since Con_Printf was often used there, and it outputs to both fd=1 and console,
 	so needs fixing
-	- m_freelook, as a quick hack to have (reversible) free mouse look
 	- vid_9.c: shitty, can probably improve performance a bit without screwing code
 	- snd_9.c: maybe writes to /dev/audio should be on another proc?
 	- *printf -> *print was stupid
-	- m_freelook is sort of useless, can just type +mlook in console, but that isn't
-	saved on exit; maybe there's a better way
 
 
 todo/issues

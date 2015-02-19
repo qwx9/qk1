@@ -9,7 +9,6 @@
 
 cvar_t m_windowed = {"m_windowed","0", true};
 cvar_t m_filter = {"m_filter","0", true};
-cvar_t m_freelook = {"m_freelook", "0", true};
 float oldm_windowed;
 qboolean mouse_avail;
 int mouse_buttons = 3;
@@ -83,10 +82,10 @@ void IN_Move (usercmd_t *cmd)
 		cmd->sidemove += m_side.value * mouse_x;
 	else
 		cl.viewangles[YAW] -= m_yaw.value * mouse_x;
-	if(m_freelook.value || in_mlook.state & 1)
+	if(in_mlook.state & 1)
 		V_StopPitchDrift();
    
-	if(m_freelook.value || in_mlook.state & 1 && ~in_strafe.state & 1){
+	if(in_mlook.state & 1 && ~in_strafe.state & 1){
 		cl.viewangles[PITCH] += m_pitch.value * mouse_y;
 		if(cl.viewangles[PITCH] > 80)
 			cl.viewangles[PITCH] = 80;
@@ -279,7 +278,6 @@ void IN_Init (void)
 
 	Cvar_RegisterVariable(&m_windowed);
 	Cvar_RegisterVariable(&m_filter);
-	Cvar_RegisterVariable(&m_freelook);
 	notify(sucks);
 	if((pid = rfork(RFPROC|RFMEM|RFFDG)) == 0){
 		kproc();
