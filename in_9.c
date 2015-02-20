@@ -222,7 +222,7 @@ void mproc (void)
 
 			mouse_x += x;
 			mouse_y += y;
-			if(m_windowed.value && x + y != 0)
+			if(m_windowed.value && (x != 0.0 ||  y != 0.0))
 				fprint(fd, "m%d %d", center.x, center.y);
 
 			mouse_buttonstate = b&1 | (b&2)<<1 | (b&4)>>1;
