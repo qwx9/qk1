@@ -1,13 +1,12 @@
 #include <u.h>
 #include <libc.h>
 #include <stdio.h>
+#include <thread.h>
 #include "quakedef.h"
 
 qboolean isDedicated;
 int nostdout = 0;
-char *cachedir = "/tmp";
-cvar_t sys_linerefresh = {"sys_linerefresh","0"};	// set for entity display
-
+mainstacksize = 512*1024;	/* FIXME */
 
 void Sys_Printf (char *fmt, ...)
 {
@@ -158,11 +157,7 @@ void Sys_LowFPPrecision (void)
 {
 }
 
-void Sys_LineRefresh (void)
-{
-}
-
-void main (int c, char **v)
+void threadmain (int c, char **v)
 {
 	static char basedir[1024];
 	int j;
@@ -173,6 +168,9 @@ void main (int c, char **v)
 	extern int recording;
 
 	memset(&parms, 0, sizeof(parms));
+
+	/* ignore fp exceptions (bad), rendering shit assumes they are */
+	setfcr(getfcr() & ~(FPOVFL|FPUNFL|FPINVAL|FPZDIV));	/* FIXME */
 
 	COM_InitArgv(c, v);
 	parms.argc = com_argc;
@@ -189,11 +187,7 @@ void main (int c, char **v)
 		free(home);
 	}else
 		snprintf(basedir, sizeof basedir, "/sys/lib/quake");
-
 	parms.basedir = basedir;
-
-	/* ignore fp exceptions (bad), rendering shit assumes they are */
-	setfcr(getfcr() & ~(FPOVFL|FPUNFL|FPINVAL|FPZDIV));	/* FIXME */
 
 	Host_Init(&parms);
 
@@ -222,9 +216,5 @@ void main (int c, char **v)
 			oldtime += time;
 
 		Host_Frame(time);
-
-		// graphic debugging aids
-		if (sys_linerefresh.value)
-			Sys_LineRefresh ();
 	}
 }

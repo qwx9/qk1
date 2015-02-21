@@ -22,7 +22,7 @@ struct {
 int keyq_head = 0;
 int keyq_tail = 0;
 int mouseactive;
-int kpid = -1, mpid = -1;
+int ktid = -1, mtid = -1;
 
 /* vid_9.c */
 extern int config_notify;
@@ -143,7 +143,7 @@ int runetokey (Rune r)
 	return k;
 }
 
-void kproc (void)
+void kproc (void *)
 {
 	int n, k, fd;
 	char buf[128], kdown[128] = {0}, *s;
@@ -190,7 +190,7 @@ void kproc (void)
 	close(fd);
 }
 
-void mproc (void)
+void mproc (void *)
 {
 	int b, n, nerr, fd;
 	char buf[1+5*12];
@@ -254,13 +254,13 @@ void IN_Grabm (int on)
 void IN_Shutdown (void)
 {
 	IN_Grabm(0);
-	if(kpid != -1){
-		postnote(PNPROC, kpid, "shutdown");
-		kpid = -1;
+	if(ktid != -1){
+		threadkill(ktid);
+		ktid = -1;
 	}
-	if(mpid != -1){
-		postnote(PNPROC, mpid, "shutdown");
-		mpid = -1;
+	if(mtid != -1){
+		threadkill(mtid);
+		mtid = -1;
 	}
 	mouse_avail = 0;
 }
@@ -268,31 +268,23 @@ void IN_Shutdown (void)
 void sucks(void *, char *note)
 {
 	if(!strncmp(note, "sys:", 4))
-		IN_Shutdown();	/* FIXME: safe? */
+		IN_Shutdown();
 	noted(NDFLT);
 }
 
 void IN_Init (void)
 {
-	int pid;
-
 	Cvar_RegisterVariable(&m_windowed);
 	Cvar_RegisterVariable(&m_filter);
 	notify(sucks);
-	if((pid = rfork(RFPROC|RFMEM|RFFDG)) == 0){
-		kproc();
-		exits(nil);
-	}
-	kpid = pid;
+	if((ktid = proccreate(kproc, nil, mainstacksize)) < 0)
+		sysfatal("proccreate kproc: %r");
 	if(COM_CheckParm("-nomouse"))
 		return;
 	if(m_windowed.value)
 		IN_Grabm(1);
-	if((pid = rfork(RFPROC|RFMEM|RFFDG)) == 0){
-		mproc();
-		exits(nil);
-	}
-	mpid = pid;
+	if((mtid = proccreate(mproc, nil, mainstacksize)) < 0)
+		sysfatal("proccreate mproc: %r");
 	mouse_x = mouse_y = 0.0;
 	/* FIXME: both kind of do the same thing */
 	//mouse_avail = mouseactive = 1;

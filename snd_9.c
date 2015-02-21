@@ -1,13 +1,36 @@
 #include <u.h>
 #include <libc.h>
 #include <stdio.h>
+#include <thread.h>
 #include "quakedef.h"
 
 int audio_fd;
 int snd_inited;
 int wpos;
-int tryrates[] = { 11025, 22051, 44100, 8000 };
+int stid = -1;
+enum{
+	Nbuf	= 16
+};
+Channel *schan;
 
+
+void sproc (void *)
+{
+	int n;
+
+	for(;;){
+		if(recv(schan, nil) < 0){
+			Sys_Warn("sproc:recv");
+			break;
+		}
+		if((n = write(audio_fd, shm->buffer, shm->samplebits/8 * shm->samples)) < 0){
+			Sys_Warn("SNDDMA_Submit:write");
+			break;
+		}
+		wpos += n;
+	}
+	stid = -1;
+}
 
 qboolean SNDDMA_Init(void)
 {
@@ -44,13 +67,17 @@ qboolean SNDDMA_Init(void)
 	shm->samples = 1024;
 	shm->submission_chunk = 1;
 
-	/* FIXME: use Hunk_AllocName? */
 	if((shm->buffer = mallocz(shm->samplebits/8 * shm->samples, 1)) == nil){
 		Sys_Warn("SNDDMA_Init:malloc");
 		close(audio_fd);
 		return 0;
 	}
 	shm->samplepos = 0;
+	schan = chancreate(sizeof(int), Nbuf);
+	if((stid = proccreate(sproc, nil, mainstacksize)) < 0){
+		Sys_Warn("proccreate sproc");
+		return 0;
+	}
 	snd_inited = 1;
 	return 1;
 }
@@ -68,17 +95,20 @@ void SNDDMA_Shutdown(void)
 	if(snd_inited){
 		close(audio_fd);
 		free(shm->buffer);
+		if(stid != -1){
+			threadkill(stid);
+			stid = -1;
+		}
+		chanclose(schan);
+		chanfree(schan);
 		snd_inited = 0;
 	}
 }
 
 void SNDDMA_Submit(void)
 {
-	int n;
-
-	if((n = write(audio_fd, shm->buffer, shm->samplebits/8 * shm->samples)) < 0){
-		Sys_Warn("SNDDMA_Submit:write");
+	if(nbsend(schan, nil) < 0){
+		Sys_Warn("SNDDMA_Submit:send");
 		SNDDMA_Shutdown();
 	}
-	wpos += n;
 }
