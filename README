@@ -12,11 +12,11 @@ qk1 - (9) quake
 	- cdaudio, networking: PORTME
 	- high resolutions work up to 4096x4096 (arbitrary limit in r_shared.h)
 		. by default, quake uses a 8MB heap, which will be insufficient for higher
-		resolutions → exit with "Hunk_Alloc: failed on ..."
+		resolutions → crash/exit with "Hunk_Alloc: failed on ..."
 			-> use -mem param, e.g.
 			% qk1 -mem 24
-		. resolutions under e.g. 320x240 don't work
-	- don't use -winsize, -width, -height; just resize the window (bugsbugsbugs)
+		. resolutions under around 328x160 don't work, possibly because
+		menu text isn't scaled down, or something
 	- mouse is grabbed using m_windowed cvar
 		. open console (~)
 		. type m_windowed 1 (can autocomplete w/ tab)
@@ -30,9 +30,6 @@ some params useful for workarounds
 	-nostdout
 	-mem %d
 	(-noudp)
-	(-winsize %d %d)
-	(-width %d)
-	(-height %d)
 
 
 port notes
@@ -46,6 +43,8 @@ port notes
 	so needs fixing
 	- vid_9.c: shitty, can probably improve performance a bit without screwing code
 	- *printf -> *print was stupid
+	- removed some of the command line parameters
+		. -winsize, -width, -height: just set the window dimensions with rio/rc
 
 
 todo/issues

@@ -216,13 +216,7 @@ void ResetFrameBuffer (void)
 
 void VID_Init (unsigned char *palette)
 {
-	int pnum;
-
 	ignorenext = 0;
-	//vid.width = 320;
-	//vid.height = 200;
-	vid.width = -1;
-	vid.height = -1;
 	vid.maxwarpwidth = WARP_WIDTH;
 	vid.maxwarpheight = WARP_HEIGHT;
 	vid.numpages = 2;
@@ -233,36 +227,10 @@ void VID_Init (unsigned char *palette)
 
 	srand(getpid());
 
-	if(pnum = COM_CheckParm("-winsize")){
-		if(pnum >= com_argc-2)
-			Sys_Error("VID: -winsize <width> <height>\n");
-		vid.width = Q_atoi(com_argv[pnum+1]);
-		vid.height = Q_atoi(com_argv[pnum+2]);
-		if(!vid.width || !vid.height)
-			Sys_Error("VID: Bad window width/height\n");
-	}
-	if(pnum = COM_CheckParm("-width")){
-		if(pnum >= com_argc-1)
-			Sys_Error("VID: -width <width>\n");
-		vid.width = Q_atoi(com_argv[pnum+1]);
-		if(!vid.width)
-			Sys_Error("VID: Bad window width\n");
-	}
-	if(pnum = COM_CheckParm("-height")){
-		if(pnum >= com_argc-1)
-			Sys_Error("VID: -height <height>\n");
-		vid.height = Q_atoi(com_argv[pnum+1]);
-		if(!vid.height)
-			Sys_Error("VID: Bad window height\n");
-	}
-
 	if(initdraw(nil, nil, "quake") < 0)
 		Sys_Error("VID_Init:initdraw");
-
-	if(vid.width == -1)
-		vid.width = Dx(screen->r);
-	if(vid.height == -1)
-		vid.height = Dy(screen->r);
+	vid.width = Dx(screen->r);
+	vid.height = Dy(screen->r);
 	if(screen->chan == CMAP8)
 		VID_SetPalette(palette);
 	ResetFrameBuffer();
