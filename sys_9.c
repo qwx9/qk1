@@ -7,6 +7,53 @@
 qboolean isDedicated;
 int nostdout = 0;
 mainstacksize = 512*1024;	/* FIXME */
+char end1[] =
+	"                QUAKE: The Doomed Dimension by id Software\n"
+	"  ----------------------------------------------------------------------------\n"
+	"           CALL 1-800-IDGAMES TO ORDER OR FOR TECHNICAL SUPPORT\n"
+	"             PRICE: $45.00 (PRICES MAY VARY OUTSIDE THE US.)\n"
+	"\n"
+	"  Yes! You only have one fourth of this incredible epic. That is because most\n"
+	"   of you have paid us nothing or at most, very little. You could steal the\n"
+	"   game from a friend. But we both know you'll be punished by God if you do.\n"
+	"        WHY RISK ETERNAL DAMNATION? CALL 1-800-IDGAMES AND BUY NOW!\n"
+	"             Remember, we love you almost as much as He does.\n"
+	"\n"
+	"            Programming: John Carmack, Michael Abrash, John Cash\n"
+	"      Design: John Romero, Sandy Petersen, American McGee, Tim Willits\n"
+	"                     Art: Adrian Carmack, Kevin Cloud\n"
+	"               Biz: Jay Wilbur, Mike Wilson, Donna Jackson\n"
+	"            Projects: Shawn Green   Support: Barrett Alexander\n"
+	"              Sound Effects: Trent Reznor and Nine Inch Nails\n"
+	"  For other information or details on ordering outside the US, check out the\n"
+	"     files accompanying QUAKE or our website at http://www.idsoftware.com.\n"
+	"    Quake is a trademark of Id Software, inc., (c)1996 Id Software, inc.\n"
+	"     All rights reserved. NIN logo is a registered trademark licensed to\n"
+	"                 Nothing Interactive, Inc. All rights reserved.\n";
+char end2[] =
+	"        QUAKE by id Software\n"
+	" -----------------------------------------------------------------------------\n"
+	"        Why did you quit from the registered version of QUAKE? Did the\n"
+	"        scary monsters frighten you? Or did Mr. Sandman tug at your\n"
+	"        little lids? No matter! What is important is you love our\n"
+	"        game, and gave us your money. Congratulations, you are probably\n"
+	"        not a thief.\n"
+	"                                                           Thank You.\n"
+	"        id Software is:\n"
+	"        PROGRAMMING: John Carmack, Michael Abrash, John Cash\n"
+	"        DESIGN: John Romero, Sandy Petersen, American McGee, Tim Willits\n"
+	"        ART: Adrian Carmack, Kevin Cloud\n"
+	"        BIZ: Jay Wilbur, Mike Wilson     PROJECTS MAN: Shawn Green\n"
+	"        BIZ ASSIST: Donna Jackson        SUPPORT: Barrett Alexander\n"
+	"        SOUND EFFECTS AND MUSIC: Trent Reznor and Nine Inch Nails\n"
+	"\n"
+	"        If you need help running QUAKE refer to the text files in the\n"
+	"        QUAKE directory, or our website at http://www.idsoftware.com.\n"
+	"        If all else fails, call our technical support at 1-800-IDGAMES.\n"
+	"      Quake is a trademark of Id Software, inc., (c)1996 Id Software, inc.\n"
+	"        All rights reserved. NIN logo is a registered trademark licensed\n"
+	"             to Nothing Interactive, Inc. All rights reserved.\n";
+
 
 void Sys_Printf (char *fmt, ...)
 {
@@ -32,6 +79,11 @@ void Sys_Printf (char *fmt, ...)
 void Sys_Quit (void)
 {
 	Host_Shutdown();
+	print("\n");
+	if(registered.value)
+		print("%s\n", end2);
+	else
+		print("%s\n", end1);
 	exits(nil);
 }
 

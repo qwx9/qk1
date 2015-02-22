@@ -8,7 +8,7 @@ qk1 - (9) quake
 	- to install an expansion or compatible mod (zB rogue):
 		. mkdir $home/lib/quake/rogue
 		. cp /n/quakecd/rogue/*.pak $home/lib/quake/rogue
-	- sound is a glitchy with higher resolutions (see snd_9.c)
+	- sound is glitchy with higher resolutions (see snd_9.c)
 	- cdaudio, networking: PORTME
 	- high resolutions work up to 4096x4096 (arbitrary limit in r_shared.h)
 		. by default, quake uses a 8MB heap, which will be insufficient for higher
