@@ -202,7 +202,7 @@ void mproc (void *)
 	nerr = 0;
 	for(;;){
 		if((n = read(fd, buf, sizeof buf)) != 1+4*12){
-			Sys_Warn("mproc:read: bad count %d not 49", n);
+			Con_Printf("mproc:read: bad count %d not 49: %r\n", n);
 			if(n < 0 || ++nerr > 10)
 				break;
 			continue;
@@ -241,7 +241,7 @@ void IN_Grabm (int on)
 		return;
 	if(mouseactive = on){
 		if((fd = open("/dev/cursor", ORDWR|OCEXEC)) < 0){
-			Sys_Warn("IN_Grabm:open");
+			Con_Printf("IN_Grabm:open: %r\n");
 			return;
 		}
 		write(fd, nocurs, sizeof(nocurs));

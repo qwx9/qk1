@@ -13,8 +13,8 @@ qk1 - (9) quake
 	- high resolutions work up to 4096x4096 (arbitrary limit in r_shared.h)
 		. by default, quake uses a 8MB heap, which will be insufficient for higher
 		resolutions → crash/exit with "Hunk_Alloc: failed on ..."
-			-> use -mem param, e.g.
-			% qk1 -mem 24
+			→ use [-mem MB], e.g.:
+			; quake -mem 24
 		. resolutions under around 328x160 don't work, possibly because
 		menu text isn't scaled down, or something
 	- mouse is grabbed using m_windowed cvar
@@ -28,7 +28,7 @@ some params useful for workarounds
 ----------------------------------
 	-nosound
 	-nostdout
-	-mem %d
+	-mem MB
 	(-noudp)
 
 
@@ -38,11 +38,8 @@ port notes
 	- pr_strings: assumed 32bit pointer arithmetic: use PR_GetStr() instead of
 	  dealing with it directly; may be ass
 	- global cppdefotomy, removing code seen as useless for plan9
-	- Sys_Warn added again for print(2) stuff in *_9.c that uses %r, kind of stupid
-	since Con_Printf was often used there, and it outputs to both fd=1 and console,
-	so needs fixing
 	- vid_9.c: shitty, can probably improve performance a bit without screwing code
-	- *printf -> *print was stupid
+	- *printf -> *print was (mostly) stupid
 	- removed some of the command line parameters
 		. -winsize, -width, -height: just set the window dimensions with rio/rc
 
@@ -54,22 +51,21 @@ todo/issues
 	- new game while already ingame -> front falls off
 		. most of the time: exits with R_RenderView: called without enough stack
 		. sometimes: goes batshit on the console (->press y again and quit normally, etc.)
+	- leave running for a couple of hours -> sound dies and eventually, invalid
+	write/reads -> crash
 	- compile with BAN_TEST -> net_dgrm build fails
 	- sprites/particles not scaled correctly on high resolutions
 	- m_windowed 1: can still look around in frozen world when paused
 	- m_windowed 1: mouse can still escape, causing glitchy mouse look
 	- net_9p.c
 	- cd_9.c,net_udp.c,net_dgrm.c: actuallyport
-	- snd_9.c, vid_9.c: lousy
 	- manpages
 	- ungrab mouse when entering console or menus a la games/doom (IN_Grabm())
 	- cleanse *_9.c from linux legacy
 	- linking errors with -T cflag
 	- fix potential fp exceptions in code rather than ignoring them?
-	- sys_9.c: proper P9 use (style)
 	- g '/\* FIXME'
 	- port quakeworld and utilities +/- merge common code and mkmany
-	- Sys_Error printing %r systematically is stupid
 
 
 legal

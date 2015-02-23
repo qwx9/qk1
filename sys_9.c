@@ -5,7 +5,6 @@
 #include "quakedef.h"
 
 qboolean isDedicated;
-int nostdout = 0;
 mainstacksize = 512*1024;	/* FIXME */
 char end1[] =
 	"                QUAKE: The Doomed Dimension by id Software\n"
@@ -53,6 +52,7 @@ char end2[] =
 	"      Quake is a trademark of Id Software, inc., (c)1996 Id Software, inc.\n"
 	"        All rights reserved. NIN logo is a registered trademark licensed\n"
 	"             to Nothing Interactive, Inc. All rights reserved.\n";
+int nostdout;
 
 
 void Sys_Printf (char *fmt, ...)
@@ -87,19 +87,6 @@ void Sys_Quit (void)
 	exits(nil);
 }
 
-void Sys_Warn (char *msg, ...)
-{
-	char buf[1024], *out;
-	va_list arg;
-
-	out = seprint(buf, buf+sizeof(buf), "%s: ", argv0);
-	va_start(arg, msg);
-	out = vseprint(out, buf+sizeof(buf), msg, arg);
-	va_end(arg);
-	out = seprint(out, buf+sizeof(buf), ": %r\n");
-	write(2, buf, out-buf);
-}
-
 void Sys_Error (char *error, ...)
 {
 	char buf[1024], *out;
@@ -108,7 +95,6 @@ void Sys_Error (char *error, ...)
 	va_start(arg, error);
 	out = vseprint(buf, buf+sizeof(buf), error, arg);
 	va_end(arg);
-	out = seprint(out, buf+sizeof(buf), "\n%s: %r\n", argv0);
 	write(2, buf, out-buf);
 	Host_Shutdown();
 	sysfatal("ending");
@@ -119,7 +105,7 @@ int Sys_FileTime (char *path)
 	uchar	sb[1024];
 
 	if(stat(path, sb, sizeof sb) < 0){
-		Sys_Warn("Sys_FileTime:stat");
+		Sys_Printf("Sys_FileTime:stat: %r\n");
 		return -1;
 	}
 	return *((int *)(sb+25));
@@ -127,34 +113,34 @@ int Sys_FileTime (char *path)
 
 void Sys_mkdir (char *path)
 {
-	int	d;
+	int d;
 
 	if((d = create(path, OREAD, DMDIR|0777)) < 0)
-		Sys_Warn("Sys_mkdir:create %s", path);
+		Sys_Printf("Sys_mkdir:create: %r\n");
 	else
 		close(d);
 }
 
 vlong Sys_FileOpenRead (char *path, int *handle)
 {
-	int	d;
-	uchar	bs[1024];
+	int d;
+	uchar bs[1024];
 
 	d = open (path, OREAD);
 	*handle = d;
 	if(d < 0)
 		return -1;
 	if(fstat(d, bs, sizeof bs) < 0)
-		Sys_Error("Sys_FileOpenRead %s failed", path);
+		Sys_Error("Sys_FileOpenRead:fstat: %r\n");
 	return *((vlong *)(bs+33));
 }
 
 int Sys_FileOpenWrite (char *path)
 {
-	int     d;
+	int d;
 
 	if((d = open(path, OREAD|OTRUNC)) < 0)
-		Sys_Error("Sys_FileOpenWrite %s failed", path);
+		Sys_Error("Sys_FileOpenWrite:open: %r\n");
 	return d;
 }
 
@@ -235,10 +221,10 @@ void threadmain (int c, char **v)
 	parms.membase = malloc(parms.memsize);
 
 	if(home = getenv("home")){
-		snprintf(basedir, sizeof basedir, "%s/lib/quake", home);
+		snprint(basedir, sizeof basedir, "%s/lib/quake", home);
 		free(home);
 	}else
-		snprintf(basedir, sizeof basedir, "/sys/lib/quake");
+		snprint(basedir, sizeof basedir, "/sys/lib/quake");
 	parms.basedir = basedir;
 
 	Host_Init(&parms);

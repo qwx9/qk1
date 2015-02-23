@@ -16,7 +16,6 @@ void Sys_mkdir (char *path);
 //
 // system IO
 //
-void Sys_Warn (char *msg, ...);
 void Sys_Error (char *error, ...);
 void Sys_Printf (char *fmt, ...);
 void Sys_Quit (void);

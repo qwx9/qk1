@@ -381,7 +381,7 @@ char *PR_GlobalString (int ofs)
 	val = (void *)&pr_globals[ofs];
 	def = ED_GlobalAtOfs(ofs);
 	if (!def)
-		sprint (line,"%d(???)", ofs);	/* FIXME */
+		sprint (line,"%d(???)", ofs);
 	else
 	{
 		s = PR_ValueString (def->type, val);
@@ -404,7 +404,7 @@ char *PR_GlobalStringNoContents (int ofs)
 	
 	def = ED_GlobalAtOfs(ofs);
 	if (!def)
-		sprint (line,"%d(???)", ofs);	/* FIXME */
+		sprint (line,"%d(???)", ofs);
 	else
 		sprint (line,"%d(%s)", ofs, PR_Str(def->s_name));
 	

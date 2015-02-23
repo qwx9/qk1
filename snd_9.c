@@ -20,11 +20,11 @@ void sproc (void *)
 
 	for(;;){
 		if(recv(schan, nil) < 0){
-			Sys_Warn("sproc:recv");
+			Con_Printf("sproc:recv %r\n");
 			break;
 		}
 		if((n = write(audio_fd, shm->buffer, shm->samplebits/8 * shm->samples)) < 0){
-			Sys_Warn("SNDDMA_Submit:write");
+			Con_Printf("sproc:write: %r\n");
 			break;
 		}
 		wpos += n;
@@ -39,8 +39,7 @@ qboolean SNDDMA_Init(void)
 	snd_inited = 0;
 
 	if((audio_fd = open("/dev/audio", OWRITE)) < 0){
-		Sys_Warn("SNDDMA_Init:open");
-		Con_Printf("Could not open /dev/audio\n");
+		Con_Printf("Could not open /dev/audio: %r\n");
 		return 0;
 	}
 
@@ -60,25 +59,21 @@ qboolean SNDDMA_Init(void)
 	shm->channels = 2;
 	if(COM_CheckParm("-sndmono") != 0)
 		shm->channels = 1;
-	//else if(COM_CheckParm("-sndstereo") != 0)
-	//	shm->channels = 2;
 
 	//shm->samples = info.fragstotal * info.fragsize / (shm->samplebits/8);
 	shm->samples = 1024;
 	shm->submission_chunk = 1;
 
-	if((shm->buffer = mallocz(shm->samplebits/8 * shm->samples, 1)) == nil){
-		Sys_Warn("SNDDMA_Init:malloc");
-		close(audio_fd);
-		return 0;
-	}
+	if((shm->buffer = mallocz(shm->samplebits/8 * shm->samples, 1)) == nil)
+		Sys_Error("SNDDMA_Init:malloc: %r\n");
 	shm->samplepos = 0;
+	snd_inited = 1;
 	schan = chancreate(sizeof(int), Nbuf);
 	if((stid = proccreate(sproc, nil, mainstacksize)) < 0){
-		Sys_Warn("proccreate sproc");
-		return 0;
+		stid = -1;
+		SNDDMA_Shutdown();
+		Sys_Error("SNDDMA_Init:proccreate: %r\n");
 	}
-	snd_inited = 1;
 	return 1;
 }
 
@@ -108,7 +103,7 @@ void SNDDMA_Shutdown(void)
 void SNDDMA_Submit(void)
 {
 	if(nbsend(schan, nil) < 0){
-		Sys_Warn("SNDDMA_Submit:send");
+		Con_Printf("SNDDMA_Submit:send: %r\n");
 		SNDDMA_Shutdown();
 	}
 }

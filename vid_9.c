@@ -228,7 +228,7 @@ void VID_Init (unsigned char *palette)
 	srand(getpid());
 
 	if(initdraw(nil, nil, "quake") < 0)
-		Sys_Error("VID_Init:initdraw");
+		Sys_Error("VID_Init:initdraw: %r\n");
 	vid.width = Dx(screen->r);
 	vid.height = Dy(screen->r);
 	if(screen->chan == CMAP8)
@@ -280,7 +280,7 @@ void VID_Update (vrect_t *rects)
 	if(config_notify){		/* skip this frame if window resize */
 		config_notify = 0;
 		if(getwindow(display, Refnone) < 0)
-			Sys_Error("VID_Update:getwindow");
+			Sys_Error("VID_Update:getwindow: %r\n");
 		vid.width = Dx(screen->r);
 		vid.height = Dy(screen->r);
 		ResetFrameBuffer();
