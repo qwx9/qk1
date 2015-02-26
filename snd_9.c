@@ -103,7 +103,7 @@ void SNDDMA_Shutdown(void)
 void SNDDMA_Submit(void)
 {
 	if(nbsend(schan, nil) < 0){
-		Con_Printf("SNDDMA_Submit:send: %r\n");
+		Con_Printf("SNDDMA_Submit:nbsend: %r\n");
 		SNDDMA_Shutdown();
 	}
 }

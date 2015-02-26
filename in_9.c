@@ -7,6 +7,15 @@
 #include <keyboard.h>
 #include "quakedef.h"
 
+typedef struct Kev Kev;
+struct Kev{
+	int key;
+	int down;
+};
+enum{
+	Nbuf	= 64
+};
+
 cvar_t m_windowed = {"m_windowed","0", true};
 cvar_t m_filter = {"m_filter","0", true};
 float oldm_windowed;
@@ -14,15 +23,9 @@ qboolean mouse_avail;
 int mouse_buttons = 3;
 int mouse_buttonstate, mouse_oldbuttonstate;
 float mouse_x, mouse_y, old_mouse_x, old_mouse_y;
-
-struct {
-	int key;
-	int down;
-} keyq[64];
-int keyq_head = 0;
-int keyq_tail = 0;
 int mouseactive;
 int ktid = -1, mtid = -1;
+Channel *kchan;
 
 /* vid_9.c */
 extern int config_notify;
@@ -32,6 +35,9 @@ extern Rectangle grabout;
 
 void Sys_SendKeyEvents(void)
 {
+	Kev ev;
+	int r;
+
 	/* FIXME: sloppy */
 	if(oldm_windowed != m_windowed.value){
 		oldm_windowed = m_windowed.value;
@@ -41,10 +47,10 @@ void Sys_SendKeyEvents(void)
 			IN_Grabm(1);
 	}
 
-	while(keyq_head != keyq_tail){
-		Key_Event(keyq[keyq_tail].key, keyq[keyq_tail].down);
-		keyq_tail = keyq_tail+1 & 63;
-	}
+	while((r = nbrecv(kchan, &ev)) > 0)
+		Key_Event(ev.key, ev.down);
+	if(r < 0)
+		Con_Printf("Sys_SendKeyEvents:nbrecv: %r\n");
 }
 
 void IN_Commands (void)
@@ -148,6 +154,7 @@ void kproc (void *)
 	int n, k, fd;
 	char buf[128], kdown[128] = {0}, *s;
 	Rune r;
+	Kev ev;
 
 	if((fd = open("/dev/kbd", OREAD)) < 0)
 		sysfatal("open /dev/kbd: %r");
@@ -164,9 +171,10 @@ void kproc (void *)
 				s += chartorune(&r, s);
 				if(utfrune(kdown+1, r) == nil){
 					if(k = runetokey(r)){
-						keyq[keyq_head].key = k;
-						keyq[keyq_head].down = true;
-						keyq_head = keyq_head+1 & 63;
+						ev.key = k;
+						ev.down = true;
+						if(nbsend(kchan, &ev) < 0)
+							Con_Printf("kproc:nbsend: %r\n");
 					}
 				}
 			}
@@ -177,9 +185,10 @@ void kproc (void *)
 				s += chartorune(&r, s);
 				if(utfrune(buf+1, r) == nil){
 					if(k = runetokey(r)){
-						keyq[keyq_head].key = k;
-						keyq[keyq_head].down = false;
-						keyq_head = keyq_head+1 & 63;
+						ev.key = k;
+						ev.down = false;
+						if(nbsend(kchan, &ev) < 0)
+							Con_Printf("kproc:nbsend: %r\n");
 					}
 				}
 			}
@@ -262,6 +271,8 @@ void IN_Shutdown (void)
 		threadkill(mtid);
 		mtid = -1;
 	}
+	chanclose(kchan);
+	chanfree(kchan);
 	mouse_avail = 0;
 }
 
@@ -277,6 +288,7 @@ void IN_Init (void)
 	Cvar_RegisterVariable(&m_windowed);
 	Cvar_RegisterVariable(&m_filter);
 	notify(sucks);
+	kchan = chancreate(sizeof(Kev), Nbuf);
 	if((ktid = proccreate(kproc, nil, mainstacksize)) < 0)
 		sysfatal("proccreate kproc: %r");
 	if(COM_CheckParm("-nomouse"))

@@ -48,11 +48,8 @@ todo/issues
 -----------
 	- compile with PARANOID -> MSG_WriteByte complains about range error and
 	  exits. no idea why.
-	- new game while already ingame -> front falls off
-		. most of the time: exits with R_RenderView: called without enough stack
-		. sometimes: goes batshit on the console (->press y again and quit normally, etc.)
 	- leave running for a couple of hours -> sound dies and eventually, invalid
-	write/reads -> crash
+	  write/reads -> crash
 	- compile with BAN_TEST -> net_dgrm build fails
 	- sprites/particles not scaled correctly on high resolutions
 	- m_windowed 1: can still look around in frozen world when paused
