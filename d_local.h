@@ -1,7 +1,5 @@
 // d_local.h:  private rasterization driver defs
 
-#include "r_shared.h"
-
 //
 // TODO: fine-tune this; it's based on providing some overage even if there
 // is a 2k-wide scan, with subdivision every 8, for 256 spans of 12 bytes each

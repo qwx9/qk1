@@ -8,23 +8,6 @@
 // * pass data from one to the other via model files.      *
 // *********************************************************
 
-#ifdef INCLUDELIBS
-
-#include <u.h>
-#include <libc.h>
-//#include <stdlib.h>
-//#include <stdio.h>
-//#include <math.h>
-//#include <string.h>
-
-#include "cmdlib.h"
-#include "scriplib.h"
-#include "trilib.h"
-#include "lbmlib.h"
-#include "mathlib.h"
-
-#endif
-
 #define ALIAS_VERSION	6
 
 /* defined in r_shared.h */

@@ -3,9 +3,6 @@
 
 // FIXME: clean up and move into d_iface.h
 
-#ifndef _R_SHARED_H_
-#define _R_SHARED_H_
-
 #define	MAXVERTS	16					// max points in a surface polygon
 #define MAXWORKINGVERTS	(MAXVERTS+4)	// max points in an intermediate
 										//  polygon (while processing)
@@ -131,5 +128,3 @@ typedef struct edge_s
 	float			nearzi;
 	medge_t			*owner;
 } edge_t;
-
-#endif	// _R_SHARED_H_

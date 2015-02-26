@@ -267,37 +267,4 @@ void	LoadBSPFile (char *filename);
 void	WriteBSPFile (char *filename);
 void	PrintBSPFileSizes (void);
 
-//===============
-
-
-typedef struct epair_s
-{
-	struct epair_s	*next;
-	char	*key;
-	char	*value;
-} epair_t;
-
-typedef struct
-{
-	vec3_t		origin;
-	int			firstbrush;
-	int			numbrushes;
-	epair_t		*epairs;
-} entity_t;
-
-extern	int			num_entities;
-extern	entity_t	entities[MAX_MAP_ENTITIES];
-
-void	ParseEntities (void);
-void	UnparseEntities (void);
-
-void 	SetKeyValue (entity_t *ent, char *key, char *value);
-char 	*ValueForKey (entity_t *ent, char *key);
-// will return "" if not present
-
-vec_t	FloatForKey (entity_t *ent, char *key);
-void 	GetVectorForKey (entity_t *ent, char *key, vec3_t vec);
-
-epair_t *ParseEpair (void);
-
 #endif

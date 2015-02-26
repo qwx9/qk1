@@ -4,6 +4,7 @@
 #include <libc.h>
 #include <stdio.h>
 #include "quakedef.h"
+#include "r_local.h"
 #include "d_local.h"
 
 #define NUM_MIPS	4
