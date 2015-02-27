@@ -42,6 +42,7 @@ port notes
 	- *printf -> *print was (mostly) stupid
 	- removed some of the command line parameters
 		. -winsize, -width, -height: just set the window dimensions with rio/rc
+		. -condebug: can just redirect with rc to same effect
 
 
 todo/issues

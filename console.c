@@ -25,8 +25,6 @@ float		con_times[NUM_CON_TIMES];	// realtime time the line was generated
 
 int			con_vislines;
 
-qboolean	con_debuglog;
-
 #define		MAXCMDLINE	256
 extern	char	key_lines[32][MAXCMDLINE];
 extern	int		edit_line;
@@ -186,21 +184,6 @@ Con_Init
 */
 void Con_Init (void)
 {
-#define MAXGAMEDIRLEN	1000
-	char	temp[MAXGAMEDIRLEN+1];
-	char	*t2 = "/qconsole.log";
-
-	con_debuglog = COM_CheckParm("-condebug");
-
-	if (con_debuglog)
-	{
-		if (strlen (com_gamedir) < (MAXGAMEDIRLEN - strlen (t2)))
-		{
-			sprint (temp, "%s%s", com_gamedir, t2);
-			remove (temp);
-		}
-	}
-
 	con_text = Hunk_AllocName (CON_TEXTSIZE, "context");
 	Q_memset (con_text, ' ', CON_TEXTSIZE);
 	con_linewidth = -1;
@@ -322,27 +305,6 @@ void Con_Print (char *txt)
 
 /*
 ================
-Con_DebugLog
-================
-*/
-void Con_DebugLog(char *file, char *fmt, ...)
-{
-    va_list argptr; 
-    static char data[1024];
-    int fd;
-    
-    va_start(argptr, fmt);
-    vseprint(data, data+sizeof(data), fmt, argptr);
-    va_end(argptr);
-    /*fd = open(file, OWRITE | O_WRONLY | O_CREAT | O_APPEND, 0666);*/
-    fd = open(file, OWRITE);
-    write(fd, data, strlen(data));
-    close(fd);
-}
-
-
-/*
-================
 Con_Printf
 
 Handles cursor positioning, line wrapping, etc
@@ -362,10 +324,6 @@ void Con_Printf (char *fmt, ...)
 	
 // also echo to debugging console
 	Sys_Printf ("%s", msg);	// also echo to debugging console
-
-// log all messages to file
-	if (con_debuglog)
-		Con_DebugLog(va("%s/qconsole.log",com_gamedir), "%s", msg);
 
 	if (!con_initialized)
 		return;
