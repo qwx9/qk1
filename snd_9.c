@@ -65,7 +65,7 @@ qboolean SNDDMA_Init(void)
 	shm->submission_chunk = 1;
 
 	if((shm->buffer = mallocz(shm->samplebits/8 * shm->samples, 1)) == nil)
-		Sys_Error("SNDDMA_Init:malloc: %r\n");
+		Sys_Error("SNDDMA_Init:mallocz: %r\n");
 	shm->samplepos = 0;
 	snd_inited = 1;
 	schan = chancreate(sizeof(int), Nbuf);

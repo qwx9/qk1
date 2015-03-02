@@ -36,7 +36,7 @@ int CDAudio_GetAudioDiskInfo (void)
 	*/
 }
 
-void CDAudio_Play (byte track, qboolean looping)
+void CDAudio_Play (byte track, qboolean /*looping*/)
 {
 	if(cdfd == -1 || !enabled)
 		return;
@@ -46,14 +46,14 @@ void CDAudio_Play (byte track, qboolean looping)
 			return;
 	}
 
-	Con_DPrintf("CDAudio_Play: PORTME\n");
-	return;
-
 	track = remap[track];
 	if(track < 1 || track > maxTrack){
 		Con_DPrintf("CDAudio: Bad track number %ud.\n", track);
 		return;
 	}
+
+	Con_DPrintf("CDAudio_Play: PORTME\n");
+	return;
 
 	/*
 	struct cdrom_tocentry entry;
@@ -87,7 +87,6 @@ void CDAudio_Play (byte track, qboolean looping)
 	}
 	if(ioctl(cdfd, CDROMRESUME) == -1) 
 		Con_DPrintf("ioctl cdromresume failed\n");
-	*/
 
 	playLooping = looping;
 	playTrack = track;
@@ -95,6 +94,7 @@ void CDAudio_Play (byte track, qboolean looping)
 
 	if(cdvolume == 0.0)
 		CDAudio_Pause();
+	*/
 }
 
 void CDAudio_Stop (void)

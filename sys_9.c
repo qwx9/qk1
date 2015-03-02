@@ -84,7 +84,7 @@ void Sys_Quit (void)
 		print("%s\n", end2);
 	else
 		print("%s\n", end1);
-	exits(nil);
+	threadexitsall(nil);
 }
 
 void Sys_Error (char *error, ...)
@@ -95,9 +95,10 @@ void Sys_Error (char *error, ...)
 	va_start(arg, error);
 	out = vseprint(buf, buf+sizeof(buf), error, arg);
 	va_end(arg);
+	out = seprint(out, buf+sizeof(buf), "\n");
 	write(2, buf, out-buf);
 	Host_Shutdown();
-	sysfatal("ending");
+	sysfatal("ending.");
 } 
 
 int Sys_FileTime (char *path)

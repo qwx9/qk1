@@ -820,8 +820,6 @@ void D_RasterizeAliasPolySmooth (void)
 		// FIXME: need to clamp l, s, t, at both ends?
 			d_pedgespanpackage->light = d_light;
 			d_pedgespanpackage->zi = d_zi;
-
-			d_pedgespanpackage++;
 		}
 		else
 		{

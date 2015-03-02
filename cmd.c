@@ -479,11 +479,8 @@ void Cmd_TokenizeString (char *text)
 			text++;
 		}
 		
-		if (*text == '\n')
-		{	// a newline seperates commands in the buffer
-			text++;
-			break;
-		}
+		if (*text == '\n')	// a newline seperates commands in the buffer	
+			return;
 
 		if (!*text)
 			return;
@@ -502,7 +499,6 @@ void Cmd_TokenizeString (char *text)
 			cmd_argc++;
 		}
 	}
-	
 }
 
 
