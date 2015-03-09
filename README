@@ -47,12 +47,12 @@ port notes
 
 todo/issues
 -----------
-	- compile with PARANOID -> MSG_WriteByte complains about range error and
-	  exits. no idea why.
+	- compiling with PARANOID reveals several points of failure that are otherwise
+          ignored, resulting in abnormal exit (also on linux)
 	- leave running for a couple of hours -> sound dies and eventually, invalid
 	  write/reads -> crash
-	- compile with BAN_TEST -> net_dgrm build fails
-	- sprites/particles not scaled correctly on high resolutions
+	- compile with BAN_TEST -> net_dgrm build fails (struct sockaddr_in)
+	- sprites/particles not scaled correctly on high resolutions (also in quake2)
 	- m_windowed 1: can still look around in frozen world when paused
 	- m_windowed 1: mouse can still escape, causing glitchy mouse look
 	- net_9p.c

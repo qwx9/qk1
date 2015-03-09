@@ -19,11 +19,10 @@ enum{
 cvar_t m_windowed = {"m_windowed","0", true};
 cvar_t m_filter = {"m_filter","0", true};
 float oldm_windowed;
-qboolean mouse_avail;
 int mouse_buttons = 3;
 int mouse_buttonstate, mouse_oldbuttonstate;
 float mouse_x, mouse_y, old_mouse_x, old_mouse_y;
-int mouseactive;
+int mouseon;
 int ktid = -1, mtid = -1;
 Channel *kchan;
 
@@ -57,7 +56,7 @@ void IN_Commands (void)
 {
 	int i;
 
-	if(!mouse_avail)
+	if(!mouseon)
 		return;
 
 	/* FIXMEGASHIT */
@@ -72,7 +71,7 @@ void IN_Commands (void)
 
 void IN_Move (usercmd_t *cmd)
 {
-	if(!mouse_avail)
+	if(!mouseon)
 		return;
    
 	if(m_filter.value){
@@ -222,7 +221,7 @@ void mproc (void *)
 			config_notify = 1;
 			/* fall through */
 		case 'm':
-			if(!mouseactive)
+			if(!mouseon)
 				break;
 
 			x = atoi(buf+1+0*12) - center.x;
@@ -243,12 +242,12 @@ void mproc (void *)
 
 void IN_Grabm (int on)
 {
-	static char nocurs[2*4+2*2*16] = {0};
+	static char nocurs[2*4+2*2*16];
 	static int fd = -1;
 
-	if(mouseactive == on)
+	if(mouseon == on)
 		return;
-	if(mouseactive = on){
+	if(mouseon = on){
 		if((fd = open("/dev/cursor", ORDWR|OCEXEC)) < 0){
 			Con_Printf("IN_Grabm:open: %r\n");
 			return;
@@ -273,10 +272,10 @@ void IN_Shutdown (void)
 	}
 	chanclose(kchan);
 	chanfree(kchan);
-	mouse_avail = 0;
+	mouseon = 0;
 }
 
-void sucks(void *, char *note)
+void sucks (void *, char *note)
 {
 	if(!strncmp(note, "sys:", 4))
 		IN_Shutdown();
@@ -289,16 +288,13 @@ void IN_Init (void)
 	Cvar_RegisterVariable(&m_filter);
 	notify(sucks);
 	kchan = chancreate(sizeof(Kev), Nbuf);
-	if((ktid = proccreate(kproc, nil, mainstacksize)) < 0)
+	if((ktid = proccreate(kproc, nil, 8192)) < 0)
 		sysfatal("proccreate kproc: %r");
 	if(COM_CheckParm("-nomouse"))
 		return;
 	if(m_windowed.value)
 		IN_Grabm(1);
-	if((mtid = proccreate(mproc, nil, mainstacksize)) < 0)
+	if((mtid = proccreate(mproc, nil, 8192)) < 0)
 		sysfatal("proccreate mproc: %r");
 	mouse_x = mouse_y = 0.0;
-	/* FIXME: both kind of do the same thing */
-	//mouse_avail = mouseactive = 1;
-	mouse_avail = 1;
 }

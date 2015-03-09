@@ -49,29 +49,29 @@ void shiftmask_init (void)
 	shiftmask_fl = 1;
 }
 
-PIXEL24 xlib_rgb24 (int r, int g, int b)
+PIXEL24 rgb24 (int r, int g, int b)
 {
 	PIXEL24 p = 0;
 
 	if(shiftmask_fl == 0)
 		shiftmask_init();
-	if(r_shift > 0){
+	if(r_shift > 0)
 		p = r<<r_shift & r_mask;
-	}else if(r_shift < 0){
+	else if(r_shift < 0)
 		p = r>>-r_shift & r_mask;
-	}else
+	else
 		p |= r & r_mask;
-	if(g_shift > 0){
+	if(g_shift > 0)
 		p |= g<<g_shift & g_mask;
-	}else if(g_shift < 0){
+	else if(g_shift < 0)
 		p |= g>>-g_shift & g_mask;
-	}else
+	else
 		p |= g & g_mask;
-	if(b_shift > 0){
+	if(b_shift > 0)
 		p |= b<<b_shift & b_mask;
-	}else if(b_shift < 0){
+	else if(b_shift < 0)
 		p |= b>>-b_shift & b_mask;
-	}else
+	else
 		p |= b & b_mask;
 	return p;
 }
@@ -182,12 +182,13 @@ void VID_SetPalette (uchar *palette)
 	int i;
 
 	for(i = 0; i < 256; i++)
-		st2d_8to24table[i] = xlib_rgb24(palette[i*3], palette[i*3+1], palette[i*3+2]);
+		st2d_8to24table[i] = rgb24(palette[i*3], palette[i*3+1], palette[i*3+2]);
 }
 
 void VID_Shutdown (void)
 {
 	Con_Printf("VID_Shutdown\n");
+	free(framebuf);
 	freeimage(fbim);
 }
 

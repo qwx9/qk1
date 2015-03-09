@@ -69,7 +69,7 @@ qboolean SNDDMA_Init(void)
 	shm->samplepos = 0;
 	snd_inited = 1;
 	schan = chancreate(sizeof(int), Nbuf);
-	if((stid = proccreate(sproc, nil, mainstacksize)) < 0){
+	if((stid = proccreate(sproc, nil, 8192)) < 0){
 		stid = -1;
 		SNDDMA_Shutdown();
 		Sys_Error("SNDDMA_Init:proccreate: %r\n");
