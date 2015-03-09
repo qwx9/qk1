@@ -2,7 +2,6 @@
 #include <libc.h>
 #include <stdio.h>
 #include "quakedef.h"
-#include "r_local.h"
 
 /* FIXME
 the complex cases add new polys on most lines, so dont optimize for keeping them the same

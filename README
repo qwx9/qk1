@@ -60,7 +60,6 @@ todo/issues
 	- manpages
 	- ungrab mouse when entering console or menus a la games/doom (IN_Grabm())
 	- cleanse *_9.c from linux legacy
-	- linking errors with -T cflag
 	- fix potential fp exceptions in code rather than ignoring them?
 	- g '/\* FIXME'
 	- port quakeworld and utilities +/- merge common code and mkmany

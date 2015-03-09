@@ -4,8 +4,6 @@
 #include <libc.h>
 #include <stdio.h>
 #include "quakedef.h"
-#include "r_local.h"
-#include "d_local.h"
 
 static finalvert_t		fv[2][8];
 static auxvert_t		av[8];

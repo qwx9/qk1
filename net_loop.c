@@ -2,7 +2,6 @@
 #include <libc.h>
 #include <stdio.h>
 #include "quakedef.h"
-#include "net_loop.h"
 
 qboolean	localconnectpending = false;
 qsocket_t	*loop_client = nil;

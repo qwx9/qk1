@@ -7,7 +7,6 @@
 #include <libc.h>
 #include <stdio.h>
 #include "quakedef.h"
-#include "r_local.h"
 
 model_t	*loadmodel;
 char	loadname[32];	// for hunk tags

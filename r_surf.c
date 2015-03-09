@@ -4,7 +4,6 @@
 #include <libc.h>
 #include <stdio.h>
 #include "quakedef.h"
-#include "r_local.h"
 
 drawsurf_t	r_drawsurf;
 

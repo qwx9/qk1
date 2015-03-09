@@ -2,7 +2,6 @@
 #include <libc.h>
 #include <stdio.h>
 #include "quakedef.h"
-#include "net_vcr.h"
 
 qsocket_t	*net_activeSockets = nil;
 qsocket_t	*net_freeSockets = nil;

@@ -1,6 +1,7 @@
 #include <u.h>
 #include <libc.h>
 #include <stdio.h>
+#include "quakedef.h"
 
 // This is enables a simple IP banning mechanism
 //#define BAN_TEST	/* FIXME */
@@ -28,8 +29,6 @@ char *inet_ntoa(struct in_addr in);
 u32int inet_addr(const char *cp);
 #endif	// BAN_TEST
 
-#include "quakedef.h"
-#include "net_dgrm.h"
 
 // these two macros are to make the code more readable
 #define sfunc	net_landrivers[sock->landriver]

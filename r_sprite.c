@@ -2,7 +2,6 @@
 #include <libc.h>
 #include <stdio.h>
 #include "quakedef.h"
-#include "r_local.h"
 
 static int				clip_current;
 static vec5_t			clip_verts[2][MAXWORKINGVERTS];

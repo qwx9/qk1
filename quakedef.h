@@ -193,6 +193,10 @@ typedef struct
 #include "crc.h"
 #include "cdaudio.h"
 
+/* included here to avoid type incompatibilities errors from 2c(1),2l(1) */
+#include "r_local.h"
+#include "d_local.h"
+
 //=============================================================================
 
 // the host system specifies the base of the directory tree, the

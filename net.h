@@ -314,3 +314,69 @@ extern	qboolean	slistSilent;
 extern	qboolean	slistLocal;
 
 void NET_Slist_f (void);
+
+/* dgrm */
+int			Datagram_Init (void);
+void		Datagram_Listen (qboolean state);
+void		Datagram_SearchForHosts (qboolean xmit);
+qsocket_t	*Datagram_Connect (char *host);
+qsocket_t 	*Datagram_CheckNewConnections (void);
+int			Datagram_GetMessage (qsocket_t *sock);
+int			Datagram_SendMessage (qsocket_t *sock, sizebuf_t *data);
+int			Datagram_SendUnreliableMessage (qsocket_t *sock, sizebuf_t *data);
+qboolean	Datagram_CanSendMessage (qsocket_t *sock);
+qboolean	Datagram_CanSendUnreliableMessage (qsocket_t *sock);
+void		Datagram_Close (qsocket_t *sock);
+void		Datagram_Shutdown (void);
+
+/* loop */
+int			Loop_Init (void);
+void		Loop_Listen (qboolean state);
+void		Loop_SearchForHosts (qboolean xmit);
+qsocket_t 	*Loop_Connect (char *host);
+qsocket_t 	*Loop_CheckNewConnections (void);
+int			Loop_GetMessage (qsocket_t *sock);
+int			Loop_SendMessage (qsocket_t *sock, sizebuf_t *data);
+int			Loop_SendUnreliableMessage (qsocket_t *sock, sizebuf_t *data);
+qboolean	Loop_CanSendMessage (qsocket_t *sock);
+qboolean	Loop_CanSendUnreliableMessage (qsocket_t *sock);
+void		Loop_Close (qsocket_t *sock);
+void		Loop_Shutdown (void);
+
+/* vcr */
+#define VCR_OP_CONNECT		1
+#define VCR_OP_GETMESSAGE	2
+#define VCR_OP_SENDMESSAGE	3
+#define VCR_OP_CANSENDMESSAGE	4
+#define VCR_MAX_MESSAGE		4
+
+int			VCR_Init (void);
+void		VCR_Listen (qboolean state);
+void		VCR_SearchForHosts (qboolean xmit);
+qsocket_t 	*VCR_Connect (char *host);
+qsocket_t 	*VCR_CheckNewConnections (void);
+int			VCR_GetMessage (qsocket_t *sock);
+int			VCR_SendMessage (qsocket_t *sock, sizebuf_t *data);
+qboolean	VCR_CanSendMessage (qsocket_t *sock);
+void		VCR_Close (qsocket_t *sock);
+void		VCR_Shutdown (void);
+
+/* udp */
+int  UDP_Init (void);
+void UDP_Shutdown (void);
+void UDP_Listen (qboolean state);
+int  UDP_OpenSocket (int port);
+int  UDP_CloseSocket (int socket);
+int  UDP_Connect (int socket, struct qsockaddr *addr);
+int  UDP_CheckNewConnections (void);
+int  UDP_Read (int socket, byte *buf, int len, struct qsockaddr *addr);
+int  UDP_Write (int socket, byte *buf, int len, struct qsockaddr *addr);
+int  UDP_Broadcast (int socket, byte *buf, int len);
+char *UDP_AddrToString (struct qsockaddr *addr);
+int  UDP_StringToAddr (char *string, struct qsockaddr *addr);
+int  UDP_GetSocketAddr (int socket, struct qsockaddr *addr);
+int  UDP_GetNameFromAddr (struct qsockaddr *addr, char *name);
+int  UDP_GetAddrFromName (char *name, struct qsockaddr *addr);
+int  UDP_AddrCompare (struct qsockaddr *addr1, struct qsockaddr *addr2);
+int  UDP_GetSocketPort (struct qsockaddr *addr);
+int  UDP_SetSocketPort (struct qsockaddr *addr, int port);

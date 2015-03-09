@@ -19,8 +19,6 @@ static struct qsockaddr broadcastaddr;
 static u32int myAddr;
 */
 
-#include "net_udp.h"
-
 int UDP_Init (void)
 {
 	/*

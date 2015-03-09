@@ -2,7 +2,6 @@
 #include <libc.h>
 #include <stdio.h>
 #include "quakedef.h"
-#include "net_vcr.h"
 
 extern int vcrFile;
 

@@ -2,8 +2,6 @@
 #include <libc.h>
 #include <stdio.h>
 #include "quakedef.h"
-#include "r_local.h"
-#include "d_local.h"	// FIXME: shouldn't need to include this
 
 #define MAXLEFTCLIPEDGES		100
 

@@ -97,11 +97,7 @@ HFILES=\
 	menu.h\
 	modelgen.h\
 	model.h\
-	net_dgrm.h\
 	net.h\
-	net_loop.h\
-	net_udp.h\
-	net_vcr.h\
 	pr_comp.h\
 	progdefs.h\
 	progs.h\
@@ -123,6 +119,3 @@ HFILES=\
 	zone.h\
 
 </sys/src/cmd/mkone
-
-# FIXME
-CFLAGS=-FVw

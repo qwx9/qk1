@@ -3,9 +3,6 @@
 #include <draw.h>
 #include <stdio.h>
 #include "quakedef.h"
-#include "r_local.h"
-#include "d_local.h"
-
 extern int scr_fullupdate;
 
 int config_notify;

@@ -5,7 +5,6 @@
 #include <stdio.h>
 #include "quakedef.h"
 
-
 /*
 ================
 D_FillRect

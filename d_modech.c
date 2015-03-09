@@ -4,8 +4,6 @@
 #include <libc.h>
 #include <stdio.h>
 #include "quakedef.h"
-#include "r_local.h"
-#include "d_local.h"
 
 int	d_vrectx, d_vrecty, d_vrectright_particle, d_vrectbottom_particle;
 
