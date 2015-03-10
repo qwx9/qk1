@@ -58,7 +58,6 @@ todo/issues
 	- net_9p.c
 	- cd_9.c,net_udp.c,net_dgrm.c: actuallyport
 	- manpages
-	- ungrab mouse when entering console or menus a la games/doom (IN_Grabm())
 	- cleanse *_9.c from linux legacy
 	- fix potential fp exceptions in code rather than ignoring them?
 	- g '/\* FIXME'

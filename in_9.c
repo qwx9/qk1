@@ -247,7 +247,7 @@ void IN_Grabm (int on)
 
 	if(mouseon == on)
 		return;
-	if(mouseon = on){
+	if(mouseon = on && m_windowed.value){
 		if((fd = open("/dev/cursor", ORDWR|OCEXEC)) < 0){
 			Con_Printf("IN_Grabm:open: %r\n");
 			return;

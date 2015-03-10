@@ -226,6 +226,7 @@ void M_ToggleMenu_f (void)
 {
 	m_entersound = true;
 
+	IN_Grabm(0);
 	if (key_dest == key_menu)
 	{
 		if (m_state != m_main)
@@ -294,6 +295,7 @@ void M_Main_Key (int key)
 		cls.demonum = m_save_demonum;
 		if (cls.demonum != -1 && !cls.demoplayback && cls.state != ca_connected)
 			CL_NextDemo ();
+		IN_Grabm(1);
 		break;
 
 	case K_DOWNARROW:
@@ -401,6 +403,7 @@ void M_SinglePlayer_Key (int key)
 				Cbuf_AddText ("disconnect\n");
 			Cbuf_AddText ("maxplayers 1\n");
 			Cbuf_AddText ("map start\n");
+			IN_Grabm(1);
 			break;
 
 		case 1:
@@ -528,6 +531,7 @@ void M_Load_Key (int k)
 
 	// issue the load command
 		Cbuf_AddText (va ("load s%d\n", load_cursor) );
+		IN_Grabm(1);
 		return;
 
 	case K_UPARROW:
