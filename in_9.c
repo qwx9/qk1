@@ -270,8 +270,10 @@ void IN_Shutdown (void)
 		threadkill(mtid);
 		mtid = -1;
 	}
-	chanclose(kchan);
-	chanfree(kchan);
+	if(kchan != nil){
+		chanfree(kchan);
+		kchan = nil;
+	}
 	mouseon = 0;
 }
 

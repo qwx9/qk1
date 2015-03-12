@@ -5,7 +5,7 @@
 #include "quakedef.h"
 
 int audio_fd;
-int snd_inited;
+int sndon;
 int wpos;
 int stid = -1;
 enum{
@@ -36,7 +36,7 @@ qboolean SNDDMA_Init(void)
 {
 	int i;
 
-	snd_inited = 0;
+	sndon = 0;
 
 	if((audio_fd = open("/dev/audio", OWRITE)) < 0){
 		Con_Printf("Could not open /dev/audio: %r\n");
@@ -67,7 +67,7 @@ qboolean SNDDMA_Init(void)
 	if((shm->buffer = mallocz(shm->samplebits/8 * shm->samples, 1)) == nil)
 		Sys_Error("SNDDMA_Init:mallocz: %r\n");
 	shm->samplepos = 0;
-	snd_inited = 1;
+	sndon = 1;
 	schan = chancreate(sizeof(int), Nbuf);
 	if((stid = proccreate(sproc, nil, 8192)) < 0){
 		stid = -1;
@@ -79,7 +79,7 @@ qboolean SNDDMA_Init(void)
 
 int SNDDMA_GetDMAPos(void)
 {
-	if(!snd_inited)
+	if(!sndon)
 		return 0;
 	shm->samplepos = wpos / (shm->samplebits/8);
 	return shm->samplepos;
@@ -87,17 +87,20 @@ int SNDDMA_GetDMAPos(void)
 
 void SNDDMA_Shutdown(void)
 {
-	if(snd_inited){
-		close(audio_fd);
-		free(shm->buffer);
-		if(stid != -1){
-			threadkill(stid);
-			stid = -1;
-		}
-		chanclose(schan);
-		chanfree(schan);
-		snd_inited = 0;
+	if(!sndon)
+		return;
+
+	close(audio_fd);
+	free(shm->buffer);
+	if(stid != -1){
+		threadkill(stid);
+		stid = -1;
 	}
+	if(schan != nil){
+		chanfree(schan);
+		schan = nil;
+	}
+	sndon = 0;
 }
 
 void SNDDMA_Submit(void)
