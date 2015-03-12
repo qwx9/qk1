@@ -12,9 +12,9 @@ qk1 - (9) quake
 	- cdaudio, networking: PORTME
 	- high resolutions work up to 4096x4096 (arbitrary limit in r_shared.h)
 		. by default, quake uses a 8MB heap, which will be insufficient for higher
-		resolutions → crash/exit with "Hunk_Alloc: failed on ..."
+		resolutions → exits with a related error message (not a note)
 			→ use [-mem MB], e.g.:
-			; quake -mem 24
+			; quake -mem 16
 		. resolutions under around 328x160 don't work, possibly because
 		menu text isn't scaled down, or something
 	- mouse is grabbed using m_windowed cvar

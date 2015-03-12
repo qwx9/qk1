@@ -104,15 +104,17 @@ void st3_fixup (uchar *data, int x, int y, int width, int height)
 			}while(--n > 0);
 		}
 		//for(xi = x+width-1; xi >= x; xi--)
-		//	dest[xi] = st2d_8to16table[src[xi]];
+		//	dest[xi] = st2d_8to24table[src[xi]];
 	}
 }
 
 /* vid.height and vid.width must be set correctly before this call */
 void ResetFrameBuffer (void)
 {
-	if(framebuf != nil)
+	if(framebuf != nil){
 		free(framebuf);
+		framebuf = nil;
+	}
 
 	if(d_pzbuffer){
 		D_FlushCaches();
