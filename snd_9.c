@@ -61,7 +61,7 @@ qboolean SNDDMA_Init(void)
 		shm->channels = 1;
 
 	//shm->samples = info.fragstotal * info.fragsize / (shm->samplebits/8);
-	shm->samples = 1024;
+	shm->samples = 4096;
 	shm->submission_chunk = 1;
 
 	if((shm->buffer = mallocz(shm->samplebits/8 * shm->samples, 1)) == nil)
