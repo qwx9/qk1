@@ -4,19 +4,18 @@ qk1 - (9) quake
 		. mk install
 	- to install quake (shareware or registered):
 		. mkdir $home/lib/quake/id1
-		. cp /n/quakecd/id1/*.pak id1/
+		. cp /n/quakecd/id1/*.pak $home/lib/quake/id1
 	- to install an expansion or compatible mod (zB rogue):
 		. mkdir $home/lib/quake/rogue
 		. cp /n/quakecd/rogue/*.pak $home/lib/quake/rogue
-	- sound is glitchy with higher resolutions (see snd_9.c)
 	- cdaudio, networking: PORTME
 	- high resolutions work up to 4096x4096 (arbitrary limit in r_shared.h)
 		. by default, quake uses a 8MB heap, which will be insufficient for higher
-		resolutions → exits with a related error message (not a note)
+		  resolutions → exits with a related error message (not a note)
 			→ use [-mem MB], e.g.:
 			; quake -mem 16
-		. resolutions under around 328x160 don't work, possibly because
-		menu text isn't scaled down, or something
+		. resolutions under around 328x160 don't work, possibly because menu text
+		  isn't scaled down, or something
 	- mouse is grabbed using m_windowed cvar
 		. open console (~)
 		. type m_windowed 1 (can autocomplete w/ tab)
@@ -27,7 +26,6 @@ qk1 - (9) quake
 some params useful for workarounds
 ----------------------------------
 	-nosound
-	-nostdout
 	-mem MB
 	(-noudp)
 
@@ -42,7 +40,7 @@ port notes
 	- *printf -> *print was (mostly) stupid
 	- removed some of the command line parameters
 		. -winsize, -width, -height: just set the window dimensions with rio/rc
-		. -condebug: can just redirect with rc to same effect
+		. -condebug, -nostdout: can just redirect with rc to same effect
 
 
 todo/issues
@@ -54,11 +52,10 @@ todo/issues
 	- compile with BAN_TEST -> net_dgrm build fails (struct sockaddr_in)
 	- sprites/particles not scaled correctly on high resolutions (also in quake2)
 	- m_windowed 1: can still look around in frozen world when paused
-	- m_windowed 1: mouse can still escape, causing glitchy mouse look
+	- m_windowed 1: mouse can still escape, mouse movement not very smooth
 	- net_9p.c
 	- cd_9.c,net_udp.c,net_dgrm.c: actuallyport
 	- manpages
-	- cleanse *_9.c from linux legacy
 	- fix potential fp exceptions in code rather than ignoring them?
 	- g '/\* FIXME'
 	- port quakeworld and utilities +/- merge common code and mkmany

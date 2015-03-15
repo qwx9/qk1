@@ -52,7 +52,6 @@ char end2[] =
 	"      Quake is a trademark of Id Software, inc., (c)1996 Id Software, inc.\n"
 	"        All rights reserved. NIN logo is a registered trademark licensed\n"
 	"             to Nothing Interactive, Inc. All rights reserved.\n";
-int nostdout;
 
 
 void Sys_Printf (char *fmt, ...)
@@ -61,8 +60,6 @@ void Sys_Printf (char *fmt, ...)
 	uchar *p;
 	va_list arg;
 
-	if(nostdout)
-		return;
 	va_start(arg, fmt);
 	vseprint(buf, buf+sizeof(buf), fmt, arg);
 	va_end(arg);
@@ -230,10 +227,7 @@ void threadmain (int c, char **v)
 
 	Host_Init(&parms);
 
-	if(COM_CheckParm("-nostdout"))
-		nostdout = 1;
-	else
-		print("(9)quake %4.2f\n", (float)VERSION);
+	print("(9)quake %4.2f\n", (float)VERSION);
 
 	oldtime = Sys_FloatTime() - 0.1;
 	for(;;){
