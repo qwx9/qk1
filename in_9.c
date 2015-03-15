@@ -37,13 +37,9 @@ void Sys_SendKeyEvents(void)
 	Kev ev;
 	int r;
 
-	/* FIXME: sloppy */
 	if(oldm_windowed != m_windowed.value){
 		oldm_windowed = m_windowed.value;
-		if(!m_windowed.value)
-			IN_Grabm(0);
-		else
-			IN_Grabm(1);
+		IN_Grabm(m_windowed.value);
 	}
 
 	while((r = nbrecv(kchan, &ev)) > 0)
@@ -230,7 +226,7 @@ void mproc (void *)
 
 			mouse_x += x;
 			mouse_y += y;
-			if(m_windowed.value && (x != 0.0 ||  y != 0.0))
+			if(x != 0.0 ||  y != 0.0)
 				fprint(fd, "m%d %d", center.x, center.y);
 
 			mouse_buttonstate = b&1 | (b&2)<<1 | (b&4)>>1;
@@ -277,25 +273,15 @@ void IN_Shutdown (void)
 	mouseon = 0;
 }
 
-void sucks (void *, char *note)
-{
-	if(!strncmp(note, "sys:", 4))
-		IN_Shutdown();
-	noted(NDFLT);
-}
-
 void IN_Init (void)
 {
 	Cvar_RegisterVariable(&m_windowed);
 	Cvar_RegisterVariable(&m_filter);
-	notify(sucks);
 	kchan = chancreate(sizeof(Kev), Nbuf);
 	if((ktid = proccreate(kproc, nil, 8192)) < 0)
 		sysfatal("proccreate kproc: %r");
 	if(COM_CheckParm("-nomouse"))
 		return;
-	if(m_windowed.value)
-		IN_Grabm(1);
 	if((mtid = proccreate(mproc, nil, 8192)) < 0)
 		sysfatal("proccreate mproc: %r");
 	mouse_x = mouse_y = 0.0;

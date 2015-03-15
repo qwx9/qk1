@@ -60,7 +60,6 @@ qboolean SNDDMA_Init(void)
 	if(COM_CheckParm("-sndmono") != 0)
 		shm->channels = 1;
 
-	//shm->samples = info.fragstotal * info.fragsize / (shm->samplebits/8);
 	shm->samples = 4096;
 	shm->submission_chunk = 1;
 

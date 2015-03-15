@@ -193,6 +193,15 @@ void Sys_LowFPPrecision (void)
 {
 }
 
+void croak (void *, char *note)
+{
+	if(!strncmp(note, "sys:", 4)){
+		IN_Shutdown();
+		SNDDMA_Shutdown();
+	}
+	noted(NDFLT);
+}
+
 void threadmain (int c, char **v)
 {
 	static char basedir[1024];
@@ -207,6 +216,7 @@ void threadmain (int c, char **v)
 
 	/* ignore fp exceptions (bad), rendering shit assumes they are */
 	setfcr(getfcr() & ~(FPOVFL|FPUNFL|FPINVAL|FPZDIV));	/* FIXME */
+	notify(croak);
 
 	COM_InitArgv(c, v);
 	parms.argc = com_argc;
