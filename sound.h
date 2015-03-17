@@ -38,7 +38,7 @@ typedef struct
 	int				channels;
 	int				samples;				// mono samples in buffer
 	int				submission_chunk;		// don't mix less than this #
-	int				samplepos;				// in mono samples
+	uint				samplepos;				// in mono samples
 	int				samplebits;
 	int				speed;
 	unsigned char	*buffer;
@@ -99,7 +99,7 @@ void SND_Spatialize(channel_t *ch);
 qboolean SNDDMA_Init(void);
 
 // gets the current DMA position
-int SNDDMA_GetDMAPos(void);
+uint SNDDMA_GetDMAPos(void);
 
 // shutdown the DMA xfer.
 void SNDDMA_Shutdown(void);

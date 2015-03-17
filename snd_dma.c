@@ -744,9 +744,9 @@ void S_Update(vec3_t origin, vec3_t forward, vec3_t right, vec3_t up)
 
 void GetSoundtime(void)
 {
-	int		samplepos;
+	uint		samplepos;
 	static	int		buffers;
-	static	int		oldsamplepos;
+	static	uint		oldsamplepos;
 	int		fullsamples;
 	
 	fullsamples = shm->samples / shm->channels;

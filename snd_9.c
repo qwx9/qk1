@@ -6,7 +6,7 @@
 
 int audio_fd;
 int sndon;
-int wpos;
+uint wpos;
 int stid = -1;
 enum{
 	Nbuf	= 16
@@ -76,7 +76,7 @@ qboolean SNDDMA_Init(void)
 	return 1;
 }
 
-int SNDDMA_GetDMAPos(void)
+uint SNDDMA_GetDMAPos(void)
 {
 	if(!sndon)
 		return 0;
