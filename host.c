@@ -282,7 +282,7 @@ void SV_BroadcastPrintf (char *fmt, ...)
 	va_start (argptr,fmt);
 	vseprint (string,string+sizeof(string),fmt,argptr);
 	va_end (argptr);
-	
+
 	for (i=0 ; i<svs.maxclients ; i++)
 		if (svs.clients[i].active && svs.clients[i].spawned)
 		{

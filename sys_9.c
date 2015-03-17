@@ -57,16 +57,16 @@ char end2[] =
 void Sys_Printf (char *fmt, ...)
 {
 	char buf[1024];
-	uchar *p;
+	char *p;
 	va_list arg;
 
 	va_start(arg, fmt);
 	vseprint(buf, buf+sizeof(buf), fmt, arg);
 	va_end(arg);
-	//write(1, buf, out-buf);
-	for(p = (uchar *)buf; *p; p++){
+
+	for(p = buf; *p; p++){
 		*p &= 0x7f;
-		if((*p > 128 || *p < 32) && *p != 10 && *p != 13 && *p != 9)
+		if(*p < 32 && *p != 10 && *p != 13 && *p != 9)
 			print("[%02x]", *p);
 		else
 			print("%c", *p);

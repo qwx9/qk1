@@ -317,13 +317,23 @@ void Con_Printf (char *fmt, ...)
 	va_list		argptr;
 	char		msg[MAXPRINTMSG];
 	static qboolean	inupdate;
-	
-	va_start (argptr,fmt);
-	vseprint (msg,msg+sizeof(msg),fmt,argptr);
-	va_end (argptr);
-	
-// also echo to debugging console
-	Sys_Printf ("%s", msg);	// also echo to debugging console
+	char c, *p;
+
+	/* FIXME: Con_Print uses 1<<7 bit for color; this bit is used in zB rogue to print team names
+	 * in color. for some reason, if this bit is set, print(2) goes apeshit. using vseprint et al
+	 * results in a badly formed string. I've noticed some really fucked up behavior when mixing
+	 * vsnprintf with print. so, we use stdio here instead of vseprint + Sys_Printf for echoing
+	 * to 1 */
+	va_start(argptr, fmt);
+	vsnprintf(msg, sizeof(msg), fmt, argptr);
+	va_end(argptr);
+	for(p = msg; *p; p++){
+		c = *p & 0x7f;
+		if(c < 32 && c != 10 && c != 13 && c != 9)
+			printf("[%02x]", c);
+		else
+			printf("%c", c);
+	}
 
 	if (!con_initialized)
 		return;
