@@ -147,9 +147,6 @@
 // Use for multiplayer testing only - VERY dangerous!!!
 // #define IDGODS
 
-/* FIXME: if hj no dicks, struct sizes screw up lump loading, see zB model.c errors */
-#pragma pack on
-
 #include "common.h"
 #include "bspfile.h"
 #include "vid.h"
@@ -167,7 +164,6 @@ typedef struct
 	int		skin;
 	int		effects;
 } entity_state_t;
-
 
 #include "wad.h"
 #include "draw.h"

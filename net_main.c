@@ -61,9 +61,6 @@ cvar_t	config_modem_hangup = {"_config_modem_hangup", "AT H", true};
 cvar_t	idgods = {"idgods", "0"};
 #endif
 
-int	vcrFile = -1;
-qboolean recording = false;
-
 // these two macros are to make the code more readable
 #define sfunc	net_drivers[sock->driver]
 #define dfunc	net_drivers[net_driverlevel]
@@ -108,7 +105,7 @@ qsocket_t *NET_NewQSocket (void)
 
 	sock->disconnected = false;
 	sock->connecttime = net_time;
-	Q_strcpy (sock->address,"UNSET ADDRESS");
+	strcpy(sock->address,"UNSET ADDRESS");
 	sock->driver = net_driverlevel;
 	sock->socket = 0;
 	sock->driverdata = nil;
@@ -161,7 +158,7 @@ static void NET_Listen_f (void)
 		return;
 	}
 
-	listening = Q_atoi(Cmd_Argv(1)) ? true : false;
+	listening = atoi(Cmd_Argv(1)) ? true : false;
 
 	for (net_driverlevel=0 ; net_driverlevel<net_numdrivers; net_driverlevel++)
 	{
@@ -188,7 +185,7 @@ static void MaxPlayers_f (void)
 		return;
 	}
 
-	n = Q_atoi(Cmd_Argv(1));
+	n = atoi(Cmd_Argv(1));
 	if (n < 1)
 		n = 1;
 	if (n > svs.maxclientslimit)
@@ -221,7 +218,7 @@ static void NET_Port_f (void)
 		return;
 	}
 
-	n = Q_atoi(Cmd_Argv(1));
+	n = atoi(Cmd_Argv(1));
 	if (n < 1 || n > 65534)
 	{
 		Con_Printf ("Bad value, must be between 1 and 65534\n");
@@ -359,7 +356,7 @@ qsocket_t *NET_Connect (char *host)
 
 	if (host)
 	{
-		if (Q_strcasecmp (host, "local") == 0)
+		if(cistrcmp(host, "local") == 0)
 		{
 			numdrivers = 1;
 			goto JustDoIt;
@@ -368,7 +365,7 @@ qsocket_t *NET_Connect (char *host)
 		if (hostCacheCount)
 		{
 			for (n = 0; n < hostCacheCount; n++)
-				if (Q_strcasecmp (host, hostcache[n].name) == 0)
+				if(cistrcmp(host, hostcache[n].name) == 0)
 				{
 					host = hostcache[n].cname;
 					break;
@@ -394,7 +391,7 @@ qsocket_t *NET_Connect (char *host)
 
 	if (hostCacheCount)
 		for (n = 0; n < hostCacheCount; n++)
-			if (Q_strcasecmp (host, hostcache[n].name) == 0)
+			if(cistrcmp(host, hostcache[n].name) == 0)
 			{
 				host = hostcache[n].cname;
 				break;
@@ -421,20 +418,6 @@ JustDoIt:
 	return nil;
 }
 
-
-/*
-===================
-NET_CheckNewConnections
-===================
-*/
-
-struct
-{
-	double	time;
-	int		op;
-	int	session;
-} vcrConnect;
-
 qsocket_t *NET_CheckNewConnections (void)
 {
 	qsocket_t	*ret;
@@ -448,26 +431,8 @@ qsocket_t *NET_CheckNewConnections (void)
 		if (net_driverlevel && listening == false)
 			continue;
 		ret = dfunc.CheckNewConnections ();
-		if (ret)
-		{
-			if (recording)
-			{
-				vcrConnect.time = host_time;
-				vcrConnect.op = VCR_OP_CONNECT;
-				vcrConnect.session = (uintptr)ret;
-				Sys_FileWrite (vcrFile, &vcrConnect, sizeof(vcrConnect));
-				Sys_FileWrite (vcrFile, ret->address, NET_NAMELEN);
-			}
+		if(ret)
 			return ret;
-		}
-	}
-	
-	if (recording)
-	{
-		vcrConnect.time = host_time;
-		vcrConnect.op = VCR_OP_CONNECT;
-		vcrConnect.session = 0;
-		Sys_FileWrite (vcrFile, &vcrConnect, sizeof(vcrConnect));
 	}
 
 	return nil;
@@ -506,16 +471,6 @@ returns 1 if a message was received
 returns -1 if connection is invalid
 =================
 */
-
-struct
-{
-	double	time;
-	int		op;
-	/* FIXME: different size -> vcr problems? */
-	uintptr	session;
-	int		ret;
-	int		len;
-} vcrGetMessage;
 
 extern void PrintStats(qsocket_t *s);
 
@@ -557,28 +512,6 @@ int	NET_GetMessage (qsocket_t *sock)
 			else if (ret == 2)
 				unreliableMessagesReceived++;
 		}
-
-		if (recording)
-		{
-			vcrGetMessage.time = host_time;
-			vcrGetMessage.op = VCR_OP_GETMESSAGE;
-			vcrGetMessage.session = (uintptr)sock;
-			vcrGetMessage.ret = ret;
-			vcrGetMessage.len = net_message.cursize;
-			Sys_FileWrite (vcrFile, &vcrGetMessage, 24);
-			Sys_FileWrite (vcrFile, net_message.data, net_message.cursize);
-		}
-	}
-	else
-	{
-		if (recording)
-		{
-			vcrGetMessage.time = host_time;
-			vcrGetMessage.op = VCR_OP_GETMESSAGE;
-			vcrGetMessage.session = (uintptr)sock;
-			vcrGetMessage.ret = ret;
-			Sys_FileWrite (vcrFile, &vcrGetMessage, 20);
-		}
 	}
 
 	return ret;
@@ -596,14 +529,6 @@ returns 1 if the message was sent properly
 returns -1 if the connection died
 ==================
 */
-struct
-{
-	double	time;
-	int		op;
-	/* FIXME: different size -> vcr problems? */
-	uintptr	session;
-	int		r;
-} vcrSendMessage;
 
 int NET_SendMessage (qsocket_t *sock, sizebuf_t *data)
 {
@@ -623,15 +548,6 @@ int NET_SendMessage (qsocket_t *sock, sizebuf_t *data)
 	if (r == 1 && sock->driver)
 		messagesSent++;
 
-	if (recording)
-	{
-		vcrSendMessage.time = host_time;
-		vcrSendMessage.op = VCR_OP_SENDMESSAGE;
-		vcrSendMessage.session = (uintptr)sock;
-		vcrSendMessage.r = r;
-		Sys_FileWrite (vcrFile, &vcrSendMessage, 20);
-	}
-	
 	return r;
 }
 
@@ -653,15 +569,6 @@ int NET_SendUnreliableMessage (qsocket_t *sock, sizebuf_t *data)
 	r = sfunc.SendUnreliableMessage(sock, data);
 	if (r == 1 && sock->driver)
 		unreliableMessagesSent++;
-
-	if (recording)
-	{
-		vcrSendMessage.time = host_time;
-		vcrSendMessage.op = VCR_OP_SENDMESSAGE;
-		vcrSendMessage.session = (uintptr)sock;
-		vcrSendMessage.r = r;
-		Sys_FileWrite (vcrFile, &vcrSendMessage, 20);
-	}
 	
 	return r;
 }
@@ -688,16 +595,7 @@ qboolean NET_CanSendMessage (qsocket_t *sock)
 	SetNetTime();
 
 	r = sfunc.CanSendMessage(sock);
-	
-	if (recording)
-	{
-		vcrSendMessage.time = host_time;
-		vcrSendMessage.op = VCR_OP_CANSENDMESSAGE;
-		vcrSendMessage.session = (uintptr)sock;
-		vcrSendMessage.r = r;
-		Sys_FileWrite (vcrFile, &vcrSendMessage, 20);
-	}
-	
+
 	return r;
 }
 
@@ -790,15 +688,6 @@ void NET_Init (void)
 	int			controlSocket;
 	qsocket_t	*s;
 
-	if (COM_CheckParm("-playback"))
-	{
-		net_numdrivers = 1;
-		net_drivers[0].Init = VCR_Init;
-	}
-
-	if (COM_CheckParm("-record"))
-		recording = true;
-
 	i = COM_CheckParm ("-port");
 	if (!i)
 		i = COM_CheckParm ("-udpport");
@@ -808,7 +697,7 @@ void NET_Init (void)
 	if (i)
 	{
 		if (i < com_argc-1)
-			DEFAULTnet_hostport = Q_atoi (com_argv[i+1]);
+			DEFAULTnet_hostport = atoi(com_argv[i+1]);
 		else
 			Sys_Error ("NET_Init: you must specify a number after -port");
 	}
@@ -824,7 +713,7 @@ void NET_Init (void)
 
 	for (i = 0; i < net_numsockets; i++)
 	{
-		s = (qsocket_t *)Hunk_AllocName(sizeof(qsocket_t), "qsocket");
+		s = Hunk_AllocName(sizeof *s, "qsocket");
 		s->next = net_freeSockets;
 		net_freeSockets = s;
 		s->disconnected = true;
@@ -895,12 +784,6 @@ void		NET_Shutdown (void)
 			net_drivers[net_driverlevel].Shutdown ();
 			net_drivers[net_driverlevel].initialized = false;
 		}
-	}
-
-	if (vcrFile != -1)
-	{
-		Con_Printf ("Closing vcrfile.\n");
-		Sys_FileClose(vcrFile);
 	}
 }
 

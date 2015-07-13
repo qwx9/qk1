@@ -13,7 +13,6 @@ int		snd_scaletable[32][256];
 int 	*snd_p, snd_linear_count, snd_vol;
 short	*snd_out;
 
-void Snd_WriteLinearBlastStereo16 (void);
 
 void Snd_WriteLinearBlastStereo16 (void)
 {
@@ -45,7 +44,7 @@ void S_TransferStereo16 (int endtime)
 	int		lpos;
 	int		lpaintedtime;
 	DWORD	*pbuf;
-	
+
 	snd_vol = volume.value*256;
 
 	snd_p = (int *) paintbuffer;
@@ -160,7 +159,7 @@ void S_PaintChannels(int endtime)
 			end = paintedtime + PAINTBUFFER_SIZE;
 
 	// clear the paint buffer
-		Q_memset(paintbuffer, 0, (end - paintedtime) * sizeof(portable_samplepair_t));
+		memset(paintbuffer, 0, (end - paintedtime) * sizeof *paintbuffer);
 
 	// paint in the channels.
 		ch = channels;

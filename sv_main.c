@@ -226,16 +226,15 @@ once for a player each game, not once for each level change.
 */
 void SV_ConnectClient (int clientnum)
 {
-	edict_t			*ent;
-	client_t		*client;
-	int				edictnum;
+	int i, edictnum;
+	float spawn_parms[NUM_SPAWN_PARMS];
+	edict_t *ent;
+	client_t *client;
 	struct qsocket_s *netconnection;
-	int				i;
-	float			spawn_parms[NUM_SPAWN_PARMS];
 
 	client = svs.clients + clientnum;
 
-	Con_DPrintf ("Client %s connected\n", client->netconnection->address);
+	Con_DPrintf("Client %s connected\n", client->netconnection->address);
 
 	edictnum = clientnum+1;
 
@@ -244,17 +243,17 @@ void SV_ConnectClient (int clientnum)
 // set up the client_t
 	netconnection = client->netconnection;
 	
-	if (sv.loadgame)
-		memcpy (spawn_parms, client->spawn_parms, sizeof(spawn_parms));
-	memset (client, 0, sizeof(*client));
+	if(sv.loadgame)
+		memcpy(spawn_parms, client->spawn_parms, sizeof spawn_parms);
+	memset(client, 0, sizeof *client);
 	client->netconnection = netconnection;
 
-	strcpy (client->name, "unconnected");
+	strcpy(client->name, "unconnected");
 	client->active = true;
 	client->spawned = false;
 	client->edict = ent;
 	client->message.data = client->msgbuf;
-	client->message.maxsize = sizeof(client->msgbuf);
+	client->message.maxsize = sizeof client->msgbuf;
 	client->message.allowoverflow = true;		// we can catch it
 
 #ifdef IDGODS
@@ -264,17 +263,16 @@ void SV_ConnectClient (int clientnum)
 	client->privileged = false;				
 #endif
 
-	if (sv.loadgame)
-		memcpy (client->spawn_parms, spawn_parms, sizeof(spawn_parms));
-	else
-	{
-	// call the progs to get default spawn parms for the new client
-		PR_ExecuteProgram (pr_global_struct->SetNewParms);
-		for (i=0 ; i<NUM_SPAWN_PARMS ; i++)
+	if(sv.loadgame)
+		memcpy(client->spawn_parms, spawn_parms, sizeof spawn_parms);
+	else{
+		// call the progs to get default spawn parms for the new client
+		PR_ExecuteProgram(pr_global_struct->SetNewParms);
+		for(i=0; i<NUM_SPAWN_PARMS; i++)
 			client->spawn_parms[i] = (&pr_global_struct->parm1)[i];
 	}
 
-	SV_SendServerinfo (client);
+	SV_SendServerinfo(client);
 }
 
 
@@ -395,7 +393,7 @@ given point.
 byte *SV_FatPVS (vec3_t org)
 {
 	fatbytes = (sv.worldmodel->numleafs+31)>>3;
-	Q_memset (fatpvs, 0, fatbytes);
+	memset(fatpvs, 0, fatbytes);
 	SV_AddToFatPVS (org, sv.worldmodel->nodes);
 	return fatpvs;
 }
@@ -696,7 +694,7 @@ qboolean SV_SendClientDatagram (client_t *client)
 	sizebuf_t	msg;
 	
 	msg.data = buf;
-	msg.maxsize = sizeof(buf);
+	msg.maxsize = sizeof buf;
 	msg.cursize = 0;
 
 	MSG_WriteByte (&msg, svc_time);
@@ -774,7 +772,7 @@ void SV_SendNop (client_t *client)
 	byte		buf[4];
 	
 	msg.data = buf;
-	msg.maxsize = sizeof(buf);
+	msg.maxsize = sizeof buf;
 	msg.cursize = 0;
 
 	MSG_WriteChar (&msg, svc_nop);
@@ -962,7 +960,7 @@ void SV_SendReconnect (void)
 
 	msg.data = data;
 	msg.cursize = 0;
-	msg.maxsize = sizeof(data);
+	msg.maxsize = sizeof data;
 
 	MSG_WriteChar (&msg, svc_stufftext);
 	MSG_WriteString (&msg, "reconnect\n");
@@ -1049,9 +1047,9 @@ void SV_SpawnServer (char *server)
 //
 	Host_ClearMemory ();
 
-	memset (&sv, 0, sizeof(sv));
+	memset(&sv, 0, sizeof sv);
 
-	strcpy (sv.name, server);
+	strcpy(sv.name, server);
 
 // load progs to get entity field count
 	PR_LoadProgs ();
@@ -1061,15 +1059,15 @@ void SV_SpawnServer (char *server)
 	
 	sv.edicts = Hunk_AllocName (sv.max_edicts*pr_edict_size, "edicts");
 
-	sv.datagram.maxsize = sizeof(sv.datagram_buf);
+	sv.datagram.maxsize = sizeof sv.datagram_buf;
 	sv.datagram.cursize = 0;
 	sv.datagram.data = sv.datagram_buf;
 	
-	sv.reliable_datagram.maxsize = sizeof(sv.reliable_datagram_buf);
+	sv.reliable_datagram.maxsize = sizeof sv.reliable_datagram_buf;
 	sv.reliable_datagram.cursize = 0;
 	sv.reliable_datagram.data = sv.reliable_datagram_buf;
 	
-	sv.signon.maxsize = sizeof(sv.signon_buf);
+	sv.signon.maxsize = sizeof sv.signon_buf;
 	sv.signon.cursize = 0;
 	sv.signon.data = sv.signon_buf;
 	
@@ -1116,7 +1114,7 @@ void SV_SpawnServer (char *server)
 // load the rest of the entities
 //	
 	ent = EDICT_NUM(0);
-	memset (&ent->v, 0, progs->entityfields * 4);
+	memset(&ent->v, 0, progs->entityfields * 4);
 	ent->free = false;
 	ent->v.model = sv.worldmodel->name - pr_strings;
 	ent->v.modelindex = 1;		// world model

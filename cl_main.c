@@ -51,17 +51,17 @@ void CL_ClearState (void)
 		Host_ClearMemory ();
 
 // wipe the entire cl structure
-	memset (&cl, 0, sizeof(cl));
+	memset(&cl, 0, sizeof cl);
 
 	SZ_Clear (&cls.message);
 
 // clear other arrays	
-	memset (cl_efrags, 0, sizeof(cl_efrags));
-	memset (cl_entities, 0, sizeof(cl_entities));
-	memset (cl_dlights, 0, sizeof(cl_dlights));
-	memset (cl_lightstyle, 0, sizeof(cl_lightstyle));
-	memset (cl_temp_entities, 0, sizeof(cl_temp_entities));
-	memset (cl_beams, 0, sizeof(cl_beams));
+	memset(cl_efrags, 0, sizeof cl_efrags);
+	memset(cl_entities, 0, sizeof cl_entities);
+	memset(cl_dlights, 0, sizeof cl_dlights);
+	memset(cl_lightstyle, 0, sizeof cl_lightstyle);
+	memset(cl_temp_entities, 0, sizeof cl_temp_entities);
+	memset(cl_beams, 0, sizeof cl_beams);
 
 //
 // allocate the efrags and chain together into a free list
@@ -311,7 +311,7 @@ dlight_t *CL_AllocDlight (int key)
 		{
 			if (dl->key == key)
 			{
-				memset (dl, 0, sizeof(*dl));
+				memset(dl, 0, sizeof *dl);
 				dl->key = key;
 				return dl;
 			}
@@ -324,14 +324,14 @@ dlight_t *CL_AllocDlight (int key)
 	{
 		if (dl->die < cl.time)
 		{
-			memset (dl, 0, sizeof(*dl));
+			memset(dl, 0, sizeof *dl);
 			dl->key = key;
 			return dl;
 		}
 	}
 
 	dl = &cl_dlights[0];
-	memset (dl, 0, sizeof(*dl));
+	memset(dl, 0, sizeof *dl);
 	dl->key = key;
 	return dl;
 }

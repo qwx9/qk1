@@ -61,20 +61,15 @@ void Con_ToggleConsole_f (void)
 		key_dest = key_console;
 	
 	SCR_EndLoadingPlaque ();
-	memset (con_times, 0, sizeof(con_times));
+	memset(con_times, 0, sizeof con_times);
 }
 
-/*
-================
-Con_Clear_f
-================
-*/
-void Con_Clear_f (void)
+void
+Con_Clear_f(void)
 {
-	if (con_text)
-		Q_memset (con_text, ' ', CON_TEXTSIZE);
+	if(con_text)
+		memset(con_text, ' ', CON_TEXTSIZE);
 }
-
 						
 /*
 ================
@@ -138,7 +133,7 @@ void Con_CheckResize (void)
 		width = 38;
 		con_linewidth = width;
 		con_totallines = CON_TEXTSIZE / con_linewidth;
-		Q_memset (con_text, ' ', CON_TEXTSIZE);
+		memset(con_text, ' ', CON_TEXTSIZE);
 	}
 	else
 	{
@@ -156,8 +151,8 @@ void Con_CheckResize (void)
 		if (con_linewidth < numchars)
 			numchars = con_linewidth;
 
-		Q_memcpy (tbuf, con_text, CON_TEXTSIZE);
-		Q_memset (con_text, ' ', CON_TEXTSIZE);
+		memcpy(tbuf, con_text, CON_TEXTSIZE);
+		memset(con_text, ' ', CON_TEXTSIZE);
 
 		for (i=0 ; i<numlines ; i++)
 		{
@@ -185,7 +180,7 @@ Con_Init
 void Con_Init (void)
 {
 	con_text = Hunk_AllocName (CON_TEXTSIZE, "context");
-	Q_memset (con_text, ' ', CON_TEXTSIZE);
+	memset(con_text, ' ', CON_TEXTSIZE);
 	con_linewidth = -1;
 	Con_CheckResize ();
 	
@@ -213,8 +208,7 @@ void Con_Linefeed (void)
 {
 	con_x = 0;
 	con_current++;
-	Q_memset (&con_text[(con_current%con_totallines)*con_linewidth]
-	, ' ', con_linewidth);
+	memset(&con_text[(con_current%con_totallines)*con_linewidth], ' ', con_linewidth);
 }
 
 /*
@@ -303,107 +297,65 @@ void Con_Print (char *txt)
 }
 
 
-/*
-================
-Con_Printf
-
-Handles cursor positioning, line wrapping, etc
-================
-*/
 #define	MAXPRINTMSG	4096
-// FIXME: make a buffer size safe vsprintf?
-void Con_Printf (char *fmt, ...)
-{
-	va_list		argptr;
-	char		msg[MAXPRINTMSG];
-	static qboolean	inupdate;
-	char c, *p;
 
-	/* FIXME: Con_Print uses 1<<7 bit for color; this bit is used in zB rogue to print team names
-	 * in color. for some reason, if this bit is set, print(2) goes apeshit. using vseprint et al
-	 * results in a badly formed string. I've noticed some really fucked up behavior when mixing
-	 * vsnprintf with print. so, we use stdio here instead of vseprint + Sys_Printf for echoing
-	 * to 1 */
-	va_start(argptr, fmt);
-	vsnprintf(msg, sizeof(msg), fmt, argptr);
-	va_end(argptr);
+/* Handles cursor positioning, line wrapping, etc */
+void
+Con_Printf(char *fmt, ...)
+{
+	va_list arg;
+	char c, *p, msg[MAXPRINTMSG];
+	static qboolean	inupdate;
+
+	/* FIXME: Con_Print() above uses 1<<7 bit for color printing select
+	 * letters, notably in mods. this does not amuse print(2) (dofmt()?). */
+	va_start(arg, fmt);
+	vsnprintf(msg, sizeof msg, fmt, arg);
+	va_end(arg);
 	for(p = msg; *p; p++){
 		c = *p & 0x7f;
 		if(c < 32 && c != 10 && c != 13 && c != 9)
-			printf("[%02x]", c);
+			print("[%02x]", c);
 		else
-			printf("%c", c);
+			print("%c", c);
 	}
 
-	if (!con_initialized)
+	if(!con_initialized)
 		return;
-		
-	if (cls.state == ca_dedicated)
+
+	if(cls.state == ca_dedicated)
 		return;		// no graphics mode
 
 // write it to the scrollable buffer
-	Con_Print (msg);
+	Con_Print(msg);
 	
 // update the screen if the console is displayed
-	if (cls.signon != SIGNONS && !scr_disabled_for_loading )
-	{
-	// protect against infinite loop if something in SCR_UpdateScreen calls
-	// Con_Printd
-		if (!inupdate)
-		{
+	if(cls.signon != SIGNONS && !scr_disabled_for_loading){
+		/* protect against infinite loop if something in
+		 * SCR_UpdateScreen() calls Con_Printf() */
+		if(!inupdate){
 			inupdate = true;
-			SCR_UpdateScreen ();
+			SCR_UpdateScreen();
 			inupdate = false;
 		}
 	}
 }
 
-/*
-================
-Con_DPrintf
-
-A Con_Printf that only shows up if the "developer" cvar is set
-================
-*/
-void Con_DPrintf (char *fmt, ...)
+void
+Con_DPrintf(char *fmt, ...)
 {
-	va_list		argptr;
-	char		msg[MAXPRINTMSG];
-		
-	if (!developer.value)
-		return;			// don't confuse non-developers with techie stuff...
+	va_list arg;
+	char s[MAXPRINTMSG];
 
-	va_start (argptr,fmt);
-	vseprint (msg,msg+sizeof(msg),fmt,argptr);
-	va_end (argptr);
-	
-	Con_Printf ("%s", msg);
+	if(!developer.value)
+		return;	// don't confuse non-developers with techie stuff...
+
+	va_start(arg, fmt);
+	vsnprint(s, sizeof s, fmt, arg);
+	va_end(arg);
+
+	Con_Printf("%s", s);
 }
-
-
-/*
-==================
-Con_SafePrintf
-
-Okay to call even when the screen can't be updated
-==================
-*/
-void Con_SafePrintf (char *fmt, ...)
-{
-	va_list		argptr;
-	char		msg[1024];
-	int			temp;
-		
-	va_start (argptr,fmt);
-	vseprint (msg,msg+sizeof(msg),fmt,argptr);
-	va_end (argptr);
-
-	temp = scr_disabled_for_loading;
-	scr_disabled_for_loading = true;
-	Con_Printf ("%s", msg);
-	scr_disabled_for_loading = temp;
-}
-
 
 /*
 ==============================================================================
@@ -589,4 +541,3 @@ void Con_NotifyBox (char *text)
 	key_dest = key_game;
 	realtime = 0;				// put the cursor back to invisible
 }
-

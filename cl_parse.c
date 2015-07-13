@@ -214,7 +214,7 @@ void CL_ParseServerInfo (void)
 		Con_Printf("Bad maxclients (%ud) from server\n", cl.maxclients);
 		return;
 	}
-	cl.scores = Hunk_AllocName (cl.maxclients*sizeof(*cl.scores), "scores");
+	cl.scores = Hunk_AllocName(cl.maxclients * sizeof *cl.scores, "scores");
 
 // parse gametype
 	cl.gametype = MSG_ReadByte ();
@@ -234,7 +234,7 @@ void CL_ParseServerInfo (void)
 //
 
 // precache models
-	memset (cl.model_precache, 0, sizeof(cl.model_precache));
+	memset(cl.model_precache, 0, sizeof cl.model_precache);
 	for (nummodels=1 ; ; nummodels++)
 	{
 		str = MSG_ReadString ();
@@ -250,7 +250,7 @@ void CL_ParseServerInfo (void)
 	}
 
 // precache sounds
-	memset (cl.sound_precache, 0, sizeof(cl.sound_precache));
+	memset(cl.sound_precache, 0, sizeof cl.sound_precache);
 	for (numsounds=1 ; ; numsounds++)
 	{
 		str = MSG_ReadString ();
@@ -602,7 +602,7 @@ void CL_NewTranslation (int slot)
 		Sys_Error ("CL_NewTranslation: slot > cl.maxclients");
 	dest = cl.scores[slot].translations;
 	source = vid.colormap;
-	memcpy (dest, vid.colormap, sizeof(cl.scores[slot].translations));
+	memcpy(dest, vid.colormap, sizeof cl.scores[slot].translations);
 	top = cl.scores[slot].colors & 0xf0;
 	bottom = (cl.scores[slot].colors &15)<<4;
 
@@ -785,8 +785,8 @@ void CL_ParseServerMessage (void)
 			i = MSG_ReadByte ();
 			if (i >= MAX_LIGHTSTYLES)
 				Sys_Error ("svc_lightstyle > MAX_LIGHTSTYLES");
-			Q_strcpy (cl_lightstyle[i].map,  MSG_ReadString());
-			cl_lightstyle[i].length = Q_strlen(cl_lightstyle[i].map);
+			strcpy(cl_lightstyle[i].map,  MSG_ReadString());
+			cl_lightstyle[i].length = strlen(cl_lightstyle[i].map);
 			break;
 			
 		case svc_sound:

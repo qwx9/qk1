@@ -1,5 +1,4 @@
-#ifndef __MODEL__
-#define __MODEL__
+typedef enum {ST_SYNC, ST_RAND} synctype_t;
 
 #include "modelgen.h"
 #include "spritegn.h"
@@ -358,5 +357,3 @@ void	Mod_TouchModel (char *name);
 
 mleaf_t *Mod_PointInLeaf (float *p, model_t *model);
 byte	*Mod_LeafPVS (mleaf_t *leaf, model_t *model);
-
-#endif	// __MODEL__

@@ -7,101 +7,128 @@
 #include <keyboard.h>
 #include "quakedef.h"
 
+/* vid_9.c */
+extern int resized;
+extern Point center;
+
 typedef struct Kev Kev;
+
+enum{
+	Nbuf = 24
+};
+
 struct Kev{
 	int key;
 	int down;
 };
-enum{
-	Nbuf	= 64
-};
+static Channel *kchan;
 
-cvar_t m_windowed = {"m_windowed","0", true};
-cvar_t m_filter = {"m_filter","0", true};
-float oldm_windowed;
-int mouse_buttons = 3;
-int mouse_buttonstate, mouse_oldbuttonstate;
-float mouse_x, mouse_y, old_mouse_x, old_mouse_y;
-int mouseon;
-int ktid = -1, mtid = -1;
-Channel *kchan;
-
-/* vid_9.c */
-extern int config_notify;
-extern Point center;
-extern Rectangle grabout;
+static cvar_t m_windowed = {"m_windowed", "0", true};
+static cvar_t m_filter = {"m_filter", "0", true};
+static int mouseon;
+static int oldmwin;
+static float mx;
+static float my;
+static float oldmx;
+static float oldmy;
+static int mb;
+static int oldmb;
+static int iop;
+static int pfd[2];
 
 
-void Sys_SendKeyEvents(void)
+char *
+Sys_ConsoleInput(void)
+{
+	char buf[256];
+
+	if(cls.state == ca_dedicated){
+		if(iop < 0)
+			return nil;
+		if(flen(pfd[1]) < 1)	/* only poll for input */
+			return nil;
+		if(read(pfd[1], buf, sizeof buf) < 0)
+			sysfatal("Sys_ConsoleInput:read: %r");
+		return buf;
+	}
+	return nil;
+}
+
+void
+Sys_SendKeyEvents(void)
 {
 	Kev ev;
 	int r;
 
-	if(oldm_windowed != m_windowed.value){
-		oldm_windowed = m_windowed.value;
-		IN_Grabm(m_windowed.value);
+	if(kchan == nil)
+		return;
+
+	if(oldmwin != (int)m_windowed.value){
+		oldmwin = (int)m_windowed.value;
+		IN_Grabm(oldmwin);
 	}
 
 	while((r = nbrecv(kchan, &ev)) > 0)
 		Key_Event(ev.key, ev.down);
 	if(r < 0)
-		Con_Printf("Sys_SendKeyEvents:nbrecv: %r\n");
+		fprint(2, "Sys_SendKeyEvents:nbrecv: %r\n");
 }
 
-void IN_Commands (void)
+void
+IN_Commands(void)
 {
-	int i;
+	int i, r;
 
 	if(!mouseon)
 		return;
 
-	/* FIXMEGASHIT */
-	for(i = 0; i < mouse_buttons; i++){
-		if(mouse_buttonstate & 1<<i && ~mouse_oldbuttonstate & 1<<i)
-			Key_Event(K_MOUSE1+i, true);
-		if (~mouse_buttonstate & 1<<i && mouse_oldbuttonstate & 1<<i)
-			Key_Event(K_MOUSE1+i, false);
+	for(i=0; i<3; i++){
+		r = mb & 1<<i;
+		if(r ^ oldmb & 1<<i)
+			Key_Event(K_MOUSE1+i, r);
 	}
-	mouse_oldbuttonstate = mouse_buttonstate;
+	oldmb = mb;
 }
 
-void IN_Move (usercmd_t *cmd)
+void
+IN_Move(usercmd_t *cmd)
 {
 	if(!mouseon)
 		return;
    
 	if(m_filter.value){
-		mouse_x = (mouse_x + old_mouse_x) * 0.5;
-		mouse_y = (mouse_y + old_mouse_y) * 0.5;
+		mx = (mx + oldmx) * 0.5;
+		my = (my + oldmy) * 0.5;
 	}
-	old_mouse_x = mouse_x;
-	old_mouse_y = mouse_y;
-	mouse_x *= sensitivity.value;
-	mouse_y *= sensitivity.value;
+	oldmx = mx;
+	oldmy = my;
+	mx *= sensitivity.value;
+	my *= sensitivity.value;
    
 	if(in_strafe.state & 1 || lookstrafe.value && in_mlook.state & 1)
-		cmd->sidemove += m_side.value * mouse_x;
+		cmd->sidemove += m_side.value * mx;
 	else
-		cl.viewangles[YAW] -= m_yaw.value * mouse_x;
+		cl.viewangles[YAW] -= m_yaw.value * mx;
 	if(in_mlook.state & 1)
 		V_StopPitchDrift();
    
 	if(in_mlook.state & 1 && ~in_strafe.state & 1){
-		cl.viewangles[PITCH] += m_pitch.value * mouse_y;
+		cl.viewangles[PITCH] += m_pitch.value * my;
 		if(cl.viewangles[PITCH] > 80)
 			cl.viewangles[PITCH] = 80;
 		if(cl.viewangles[PITCH] < -70)
 			cl.viewangles[PITCH] = -70;
 	}else{
 		if(in_strafe.state & 1 && noclip_anglehack)
-			cmd->upmove -= m_forward.value * mouse_y;
+			cmd->upmove -= m_forward.value * my;
 		else
-			cmd->forwardmove -= m_forward.value * mouse_y;
+			cmd->forwardmove -= m_forward.value * my;
 	}
-	mouse_x = mouse_y = 0.0;
+	mx = my = 0.0;
 }
 
-int runetokey (Rune r)
+static int
+runetokey(Rune r)
 {
 	int k = 0;
 
@@ -144,17 +171,20 @@ int runetokey (Rune r)
 	return k;
 }
 
-void kproc (void *)
+static void
+kproc(void *)
 {
 	int n, k, fd;
-	char buf[128], kdown[128] = {0}, *s;
+	char buf[128], kdown[128], *s;
 	Rune r;
 	Kev ev;
 
+	threadsetgrp(THin);
+
+	kdown[1] = kdown[0] = 0;
 	if((fd = open("/dev/kbd", OREAD)) < 0)
 		sysfatal("open /dev/kbd: %r");
-
-	while((n = read(fd, buf, sizeof(buf))) > 0){
+	while((n = read(fd, buf, sizeof buf)) > 0){
 		buf[n-1] = 0;
 		switch(*buf){
 		case 'c':
@@ -169,7 +199,7 @@ void kproc (void *)
 						ev.key = k;
 						ev.down = true;
 						if(nbsend(kchan, &ev) < 0)
-							Con_Printf("kproc:nbsend: %r\n");
+							fprint(2, "kproc:nbsend: %r\n");
 					}
 				}
 			}
@@ -183,7 +213,7 @@ void kproc (void *)
 						ev.key = k;
 						ev.down = false;
 						if(nbsend(kchan, &ev) < 0)
-							Con_Printf("kproc:nbsend: %r\n");
+							fprint(2, "kproc:nbsend: %r\n");
 					}
 				}
 			}
@@ -194,11 +224,14 @@ void kproc (void *)
 	close(fd);
 }
 
-void mproc (void *)
+static void
+mproc(void *)
 {
 	int b, n, nerr, fd;
 	char buf[1+5*12];
 	float x, y;
+
+	threadsetgrp(THin);
 
 	if((fd = open("/dev/mouse", ORDWR)) < 0)
 		sysfatal("open /dev/mouse: %r");
@@ -206,7 +239,7 @@ void mproc (void *)
 	nerr = 0;
 	for(;;){
 		if((n = read(fd, buf, sizeof buf)) != 1+4*12){
-			Con_Printf("mproc:read: bad count %d not 49: %r\n", n);
+			fprint(2, "mproc:read: bad count %d not 49: %r\n", n);
 			if(n < 0 || ++nerr > 10)
 				break;
 			continue;
@@ -214,7 +247,7 @@ void mproc (void *)
 		nerr = 0;
 		switch(*buf){
 		case 'r':
-			config_notify = 1;
+			resized = 1;
 			/* fall through */
 		case 'm':
 			if(!mouseon)
@@ -224,19 +257,40 @@ void mproc (void *)
 			y = atoi(buf+1+1*12) - center.y;
 			b = atoi(buf+1+2*12);
 
-			mouse_x += x;
-			mouse_y += y;
+			mx += x;
+			my += y;
 			if(x != 0.0 ||  y != 0.0)
 				fprint(fd, "m%d %d", center.x, center.y);
 
-			mouse_buttonstate = b&1 | (b&2)<<1 | (b&4)>>1;
+			mb = b&1 | (b&2)<<1 | (b&4)>>1;
 			break;
 		}
 	}
 	close(fd);
 }
 
-void IN_Grabm (int on)
+static void
+iproc(void *)
+{
+	int n;
+	char s[256];
+
+	threadsetgrp(THin);
+
+	if((iop = pipe(pfd)) < 0)
+		sysfatal("iproc:pipe: %r");
+	for(;;){
+		if((n = read(0, s, sizeof s)) <= 0)
+			break;
+		s[n-1] = 0;
+		if((write(pfd[0], s, n)) != n)
+			break;
+	}
+	fprint(2, "iproc %d: %r\n", threadpid(threadid()));
+}
+
+void
+IN_Grabm(int on)
 {
 	static char nocurs[2*4+2*2*16];
 	static int fd = -1;
@@ -245,44 +299,46 @@ void IN_Grabm (int on)
 		return;
 	if(mouseon = on && m_windowed.value){
 		if((fd = open("/dev/cursor", ORDWR|OCEXEC)) < 0){
-			Con_Printf("IN_Grabm:open: %r\n");
+			fprint(2, "IN_Grabm:open: %r\n");
 			return;
 		}
-		write(fd, nocurs, sizeof(nocurs));
+		write(fd, nocurs, sizeof nocurs);
 	}else if(fd >= 0){
 		close(fd);
 		fd = -1;
 	}
 }
 
-void IN_Shutdown (void)
+void
+IN_Shutdown(void)
 {
 	IN_Grabm(0);
-	if(ktid != -1){
-		threadkill(ktid);
-		ktid = -1;
-	}
-	if(mtid != -1){
-		threadkill(mtid);
-		mtid = -1;
-	}
+	threadkillgrp(THin);
+	close(pfd[0]);
+	close(pfd[1]);
 	if(kchan != nil){
 		chanfree(kchan);
 		kchan = nil;
 	}
-	mouseon = 0;
 }
 
-void IN_Init (void)
+void
+IN_Init(void)
 {
+	if(cls.state == ca_dedicated){
+		if(proccreate(iproc, nil, 8192) < 0)
+			sysfatal("proccreate iproc: %r");
+		return;
+	}
 	Cvar_RegisterVariable(&m_windowed);
 	Cvar_RegisterVariable(&m_filter);
-	kchan = chancreate(sizeof(Kev), Nbuf);
-	if((ktid = proccreate(kproc, nil, 8192)) < 0)
+	if((kchan = chancreate(sizeof(Kev), Nbuf)) == nil)
+		sysfatal("chancreate kchan: %r");
+	if(proccreate(kproc, nil, 8192) < 0)
 		sysfatal("proccreate kproc: %r");
 	if(COM_CheckParm("-nomouse"))
 		return;
-	if((mtid = proccreate(mproc, nil, 8192)) < 0)
+	if(proccreate(mproc, nil, 8192) < 0)
 		sysfatal("proccreate mproc: %r");
-	mouse_x = mouse_y = 0.0;
+	mx = my = 0.0;
 }

@@ -128,17 +128,17 @@ void CD_f (void)
 	if(Cmd_Argc() < 2)
 		return;
 	command = Cmd_Argv(1);
-	if(Q_strcasecmp(command, "on") == 0){
+	if(cistrcmp(command, "on") == 0){
 		enabled = true;
 		return;
 	}
-	if(Q_strcasecmp(command, "off") == 0){
+	if(cistrcmp(command, "off") == 0){
 		if(playing)
 			CDAudio_Stop();
 		enabled = false;
 		return;
 	}
-	if(Q_strcasecmp(command, "reset") == 0){
+	if(cistrcmp(command, "reset") == 0){
 		enabled = true;
 		if(playing)
 			CDAudio_Stop();
@@ -147,7 +147,7 @@ void CD_f (void)
 		CDAudio_GetAudioDiskInfo();
 		return;
 	}
-	if(Q_strcasecmp(command, "remap") == 0){
+	if(cistrcmp(command, "remap") == 0){
 		ret = Cmd_Argc() - 2;
 		if(ret <= 0){
 			for(n = 1; n < 100; n++)
@@ -156,7 +156,7 @@ void CD_f (void)
 			return;
 		}
 		for(n = 1; n <= ret; n++)
-			remap[n] = Q_atoi(Cmd_Argv(n+1));
+			remap[n] = atoi(Cmd_Argv(n+1));
 		return;
 	}
 	if(!cdValid){
@@ -166,27 +166,27 @@ void CD_f (void)
 			return;
 		}
 	}
-	if(Q_strcasecmp(command, "play") == 0){
-		CDAudio_Play((byte)Q_atoi(Cmd_Argv(2)), false);
+	if(cistrcmp(command, "play") == 0){
+		CDAudio_Play((uchar)atoi(Cmd_Argv(2)), false);
 		return;
 	}
-	if(Q_strcasecmp(command, "loop") == 0){
-		CDAudio_Play((byte)Q_atoi(Cmd_Argv(2)), true);
+	if(cistrcmp(command, "loop") == 0){
+		CDAudio_Play((uchar)atoi(Cmd_Argv(2)), true);
 		return;
 	}
-	if(Q_strcasecmp(command, "stop") == 0){
+	if(cistrcmp(command, "stop") == 0){
 		CDAudio_Stop();
 		return;
 	}
-	if (Q_strcasecmp(command, "pause") == 0){
+	if (cistrcmp(command, "pause") == 0){
 		CDAudio_Pause();
 		return;
 	}
-	if(Q_strcasecmp(command, "resume") == 0){
+	if(cistrcmp(command, "resume") == 0){
 		CDAudio_Resume();
 		return;
 	}
-	if(Q_strcasecmp(command, "info") == 0){
+	if(cistrcmp(command, "info") == 0){
 		Con_Printf("%ud tracks\n", maxTrack);
 		if(playing)
 			Con_Printf("Currently %s track %ud\n", playLooping ? "looping" : "playing", playTrack);
@@ -254,7 +254,7 @@ int CDAudio_Init(void)
 	}
 
 	if((cdfd = open(cd_dev, OREAD)) == -1){
-		Con_Printf("CDAudio_Init failed: %r\n");
+		fprint(2, "open: %r\n");
 		cdfd = -1;
 		return -1;
 	}

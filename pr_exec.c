@@ -241,22 +241,21 @@ PR_RunError
 Aborts the currently executing function
 ============
 */
-void PR_RunError (char *error, ...)
+void PR_RunError (char *fmt, ...)
 {
-	va_list		argptr;
-	char		string[1024];
+	va_list arg;
+	char s[1024];
 
-	va_start (argptr,error);
-	vseprint (string,string+sizeof(string),error,argptr);
-	va_end (argptr);
+	va_start(arg, fmt);
+	vsnprint(s, sizeof s, fmt, arg);
+	va_end(arg);
 
-	PR_PrintStatement (pr_statements + pr_xstatement);
-	PR_StackTrace ();
-	Con_Printf ("%s\n", string);
+	PR_PrintStatement(pr_statements + pr_xstatement);
+	PR_StackTrace();
+	Con_Printf("%s\n", s);
 	
-	pr_depth = 0;		// dump the stack so host_error can shutdown functions
-
-	Host_Error ("Program error");
+	pr_depth = 0;	// dump the stack so host_error can shutdown functions
+	Host_Error("Program error");
 }
 
 /*

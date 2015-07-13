@@ -36,7 +36,6 @@ OFILES=\
 	model.$O\
 	net_loop.$O\
 	net_main.$O\
-	net_vcr.$O\
 	net_dgrm.$O\
 	net_bsd.$O\
 	nonintel.$O\
@@ -70,11 +69,11 @@ OFILES=\
 	snd_dma.$O\
 	snd_mem.$O\
 	snd_mix.$O\
-	in_9.$O\
-	sys_9.$O\
-	vid_9.$O\
-	snd_9.$O\
-	cd_9.$O\
+	in.$O\
+	sys.$O\
+	vid.$O\
+	snd.$O\
+	cd.$O\
 	net_udp.$O\
 
 HFILES=\

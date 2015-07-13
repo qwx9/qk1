@@ -66,28 +66,27 @@ cvar_t	temp1 = {"temp1","0"};
 Host_EndGame
 ================
 */
-void Host_EndGame (char *message, ...)
+void Host_EndGame (char *fmt, ...)
 {
-	va_list		argptr;
-	char		string[1024];
-	
-	va_start (argptr,message);
-	vseprint (string,string+sizeof(string),message,argptr);
-	va_end (argptr);
-	Con_DPrintf ("Host_EndGame: %s\n",string);
-	
-	if (sv.active)
-		Host_ShutdownServer (false);
+	va_list arg;
+	char s[1024];
 
-	if (cls.state == ca_dedicated)
-		Sys_Error ("Host_EndGame: %s\n",string);	// dedicated servers exit
-	
-	if (cls.demonum != -1)
-		CL_NextDemo ();
+	va_start(arg, fmt);
+	vsnprint(s, sizeof s, fmt, arg);
+	va_end(arg);
+
+	Con_DPrintf("Host_EndGame: %s\n", s);
+
+	if(sv.active)
+		Host_ShutdownServer(false);
+	if(cls.state == ca_dedicated)
+		Sys_Error("Host_EndGame: %s\n", s);	// dedicated servers exit
+	if(cls.demonum != -1)
+		CL_NextDemo();
 	else
-		CL_Disconnect ();
+		CL_Disconnect();
 
-	longjmp (host_abortserver, 1);
+	longjmp(host_abortserver, 1);
 }
 
 /*
@@ -97,35 +96,34 @@ Host_Error
 This shuts down both the client and server
 ================
 */
-void Host_Error (char *error, ...)
+void Host_Error (char *fmt, ...)
 {
-	va_list		argptr;
-	char		string[1024];
-	static	qboolean inerror = false;
+	va_list arg;
+	char s[1024];
+	static qboolean inerror = false;
 	
-	if (inerror)
-		Sys_Error ("Host_Error: recursively entered");
+	if(inerror)
+		Sys_Error("Host_Error: recursively entered");
 	inerror = true;
 	
-	SCR_EndLoadingPlaque ();		// reenable screen updates
+	SCR_EndLoadingPlaque();	// reenable screen updates
 
-	va_start (argptr,error);
-	vseprint (string,string+sizeof(string),error,argptr);
-	va_end (argptr);
-	Con_Printf ("Host_Error: %s\n",string);
+	va_start(arg, fmt);
+	vsnprint(s, sizeof s, fmt, arg);
+	va_end(arg);
+
+	Con_Printf("Host_Error: %s\n", s);
 	
-	if (sv.active)
-		Host_ShutdownServer (false);
-
-	if (cls.state == ca_dedicated)
-		Sys_Error ("Host_Error: %s\n",string);	// dedicated servers exit
-
-	CL_Disconnect ();
+	if(sv.active)
+		Host_ShutdownServer(false);
+	if(cls.state == ca_dedicated)
+		Sys_Error("Host_Error: %s\n", s);	// dedicated servers exit
+	CL_Disconnect();
 	cls.demonum = -1;
 
 	inerror = false;
 
-	longjmp (host_abortserver, 1);
+	longjmp(host_abortserver, 1);
 }
 
 /*
@@ -143,10 +141,8 @@ void	Host_FindMaxClients (void)
 	if (i)
 	{
 		cls.state = ca_dedicated;
-		if (i != (com_argc - 1))
-		{
-			svs.maxclients = Q_atoi (com_argv[i+1]);
-		}
+		if(i != com_argc-1)
+			svs.maxclients = atoi(com_argv[i+1]);
 		else
 			svs.maxclients = 8;
 	}
@@ -159,7 +155,7 @@ void	Host_FindMaxClients (void)
 		if (cls.state == ca_dedicated)
 			Sys_Error ("Only one of -dedicated or -listen can be specified");
 		if (i != (com_argc - 1))
-			svs.maxclients = Q_atoi (com_argv[i+1]);
+			svs.maxclients = atoi(com_argv[i+1]);
 		else
 			svs.maxclients = 8;
 	}
@@ -171,7 +167,7 @@ void	Host_FindMaxClients (void)
 	svs.maxclientslimit = svs.maxclients;
 	if (svs.maxclientslimit < 4)
 		svs.maxclientslimit = 4;
-	svs.clients = Hunk_AllocName (svs.maxclientslimit*sizeof(client_t), "clients");
+	svs.clients = Hunk_AllocName(svs.maxclientslimit * sizeof *svs.clients, "clients");
 
 	if (svs.maxclients > 1)
 		Cvar_SetValue ("deathmatch", 1.0);
@@ -255,15 +251,15 @@ FIXME: make this just a stuffed echo?
 */
 void SV_ClientPrintf (char *fmt, ...)
 {
-	va_list		argptr;
-	char		string[1024];
-	
-	va_start (argptr,fmt);
-	vseprint (string,string+sizeof(string),fmt,argptr);
-	va_end (argptr);
-	
-	MSG_WriteByte (&host_client->message, svc_print);
-	MSG_WriteString (&host_client->message, string);
+	va_list arg;
+	char s[1024];
+
+	va_start(arg, fmt);
+	vsnprint(s, sizeof s, fmt, arg);
+	va_end(arg);
+
+	MSG_WriteByte(&host_client->message, svc_print);
+	MSG_WriteString(&host_client->message, s);
 }
 
 /*
@@ -275,19 +271,18 @@ Sends text to all active clients
 */
 void SV_BroadcastPrintf (char *fmt, ...)
 {
-	va_list		argptr;
-	char		string[1024];
-	int			i;
+	va_list arg;
+	char s[1024];
+	int i;
 	
-	va_start (argptr,fmt);
-	vseprint (string,string+sizeof(string),fmt,argptr);
-	va_end (argptr);
+	va_start(arg, fmt);
+	vsnprint(s, sizeof s, fmt, arg);
+	va_end(arg);
 
-	for (i=0 ; i<svs.maxclients ; i++)
-		if (svs.clients[i].active && svs.clients[i].spawned)
-		{
-			MSG_WriteByte (&svs.clients[i].message, svc_print);
-			MSG_WriteString (&svs.clients[i].message, string);
+	for(i=0; i<svs.maxclients; i++)
+		if(svs.clients[i].active && svs.clients[i].spawned){
+			MSG_WriteByte(&svs.clients[i].message, svc_print);
+			MSG_WriteString(&svs.clients[i].message, s);
 		}
 }
 
@@ -300,15 +295,15 @@ Send text over to the client to be executed
 */
 void Host_ClientCommands (char *fmt, ...)
 {
-	va_list		argptr;
-	char		string[1024];
-	
-	va_start (argptr,fmt);
-	vseprint (string,string+sizeof(string),fmt,argptr);
-	va_end (argptr);
-	
-	MSG_WriteByte (&host_client->message, svc_stufftext);
-	MSG_WriteString (&host_client->message, string);
+	va_list arg;
+	char s[1024];
+
+	va_start(arg, fmt);
+	vsnprint(s, sizeof s, fmt, arg);
+	va_end(arg);
+
+	MSG_WriteByte(&host_client->message, svc_stufftext);
+	MSG_WriteString(&host_client->message, s);
 }
 
 /*
@@ -440,8 +435,8 @@ void Host_ShutdownServer(qboolean crash)
 //
 // clear structures
 //
-	memset (&sv, 0, sizeof(sv));
-	memset (svs.clients, 0, svs.maxclientslimit*sizeof(client_t));
+	memset(&sv, 0, sizeof sv);
+	memset(svs.clients, 0, svs.maxclientslimit * sizeof *svs.clients);
 }
 
 
@@ -462,8 +457,8 @@ void Host_ClearMemory (void)
 		Hunk_FreeToLowMark (host_hunklevel);
 
 	cls.signon = 0;
-	memset (&sv, 0, sizeof(sv));
-	memset (&cl, 0, sizeof(cl));
+	memset(&sv, 0, sizeof sv);
+	memset(&cl, 0, sizeof cl);
 }
 
 
@@ -515,7 +510,7 @@ void Host_GetConsoleCommands (void)
 	while (1)
 	{
 		cmd = Sys_ConsoleInput ();
-		if (!cmd)
+		if (cmd == nil)
 			break;
 		Cbuf_AddText (cmd);
 	}
@@ -692,71 +687,6 @@ void Host_Frame (float time)
 	Con_Printf ("serverprofile: %2d clients %2d msec\n",  c,  m);
 }
 
-//============================================================================
-
-
-extern int vcrFile;
-#define	VCR_SIGNATURE	0x56435231
-// "VCR1"
-
-void Host_InitVCR (quakeparms_t *parms)
-{
-	int		i, len, n;
-	char	*p;
-	
-	if (COM_CheckParm("-playback"))
-	{
-		if (com_argc != 2)
-			Sys_Error("No other parameters allowed with -playback\n");
-
-		Sys_FileOpenRead("quake.vcr", &vcrFile);
-		if (vcrFile == -1)
-			Sys_Error("playback file not found\n");
-
-		Sys_FileRead (vcrFile, &i, sizeof(int));
-		if (i != VCR_SIGNATURE)
-			Sys_Error("Invalid signature in vcr file\n");
-
-		Sys_FileRead (vcrFile, &com_argc, sizeof(int));
-		com_argv = malloc(com_argc * sizeof(char *));
-		com_argv[0] = parms->argv[0];
-		for (i = 0; i < com_argc; i++)
-		{
-			Sys_FileRead (vcrFile, &len, sizeof(int));
-			p = malloc(len);
-			Sys_FileRead (vcrFile, p, len);
-			com_argv[i+1] = p;
-		}
-		com_argc++; /* add one for arg[0] */
-		parms->argc = com_argc;
-		parms->argv = com_argv;
-	}
-
-	if ( (n = COM_CheckParm("-record")) != 0)
-	{
-		vcrFile = Sys_FileOpenWrite("quake.vcr");
-
-		i = VCR_SIGNATURE;
-		Sys_FileWrite(vcrFile, &i, sizeof(int));
-		i = com_argc - 1;
-		Sys_FileWrite(vcrFile, &i, sizeof(int));
-		for (i = 1; i < com_argc; i++)
-		{
-			if (i == n)
-			{
-				len = 10;
-				Sys_FileWrite(vcrFile, &len, sizeof(int));
-				Sys_FileWrite(vcrFile, "-playback", len);
-				continue;
-			}
-			len = Q_strlen(com_argv[i]) + 1;
-			Sys_FileWrite(vcrFile, &len, sizeof(int));
-			Sys_FileWrite(vcrFile, com_argv[i], len);
-		}
-	}
-	
-}
-
 /*
 ====================
 Host_Init
@@ -786,7 +716,6 @@ void Host_Init (quakeparms_t *parms)
 	Cmd_Init ();	
 	V_Init ();
 	Chase_Init ();
-	Host_InitVCR (parms);
 	COM_Init (parms->basedir);
 	Host_InitLocal ();
 	W_LoadWadFile ("gfx.wad");
@@ -813,7 +742,6 @@ void Host_Init (quakeparms_t *parms)
 			Sys_Error ("Couldn't load gfx/colormap.lmp");
 
 		VID_Init (host_basepal);
-		IN_Init ();
 
 		Draw_Init ();
 		SCR_Init ();
@@ -823,6 +751,7 @@ void Host_Init (quakeparms_t *parms)
 		Sbar_Init ();
 		CL_Init ();
 	}
+	IN_Init ();
 
 	Cbuf_InsertText ("exec quake.rc\n");
 
@@ -868,5 +797,6 @@ void Host_Shutdown(void)
 	{
 		VID_Shutdown();
 	}
+	IN_Shutdown();
 }
 

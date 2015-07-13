@@ -114,292 +114,6 @@ void InsertLinkAfter (link_t *l, link_t *after)
 /*
 ============================================================================
 
-					LIBRARY REPLACEMENT FUNCTIONS
-
-============================================================================
-*/
-
-void Q_memset (void *dest, int fill, int count)
-{
-	int             i;
-	
-	if ( ((uintptr)dest | count) & 3 == 0)
-	{
-		count >>= 2;
-		fill = fill | (fill<<8) | (fill<<16) | (fill<<24);
-		for (i=0 ; i<count ; i++)
-			((int *)dest)[i] = fill;
-	}
-	else
-		for (i=0 ; i<count ; i++)
-			((byte *)dest)[i] = fill;
-}
-
-void Q_memcpy (void *dest, void *src, int count)
-{
-	int             i;
-	
-	if (( ( (uintptr)dest | (uintptr)src | count) & 3) == 0 )
-	{
-		count>>=2;
-		for (i=0 ; i<count ; i++)
-			((int *)dest)[i] = ((int *)src)[i];
-	}
-	else
-		for (i=0 ; i<count ; i++)
-			((byte *)dest)[i] = ((byte *)src)[i];
-}
-
-int Q_memcmp (void *m1, void *m2, int count)
-{
-	while(count)
-	{
-		count--;
-		if (((byte *)m1)[count] != ((byte *)m2)[count])
-			return -1;
-	}
-	return 0;
-}
-
-void Q_strcpy (char *dest, char *src)
-{
-	while (*src)
-	{
-		*dest++ = *src++;
-	}
-	*dest = 0;
-}
-
-void Q_strncpy (char *dest, char *src, int count)
-{
-	while (*src && count--)
-	{
-		*dest++ = *src++;
-	}
-	if (count)
-		*dest = 0;
-}
-
-int Q_strlen (char *str)
-{
-	int             count;
-	
-	count = 0;
-	while (str[count])
-		count++;
-
-	return count;
-}
-
-char *Q_strrchr(char *s, char c)
-{
-    int len = Q_strlen(s);
-    s += len;
-    while (len--)
-	if (*--s == c) return s;
-    return 0;
-}
-
-void Q_strcat (char *dest, char *src)
-{
-	dest += Q_strlen(dest);
-	Q_strcpy (dest, src);
-}
-
-int Q_strcmp (char *s1, char *s2)
-{
-	while (1)
-	{
-		if (*s1 != *s2)
-			return -1;              // strings not equal    
-		if (!*s1)
-			return 0;               // strings are equal
-		s1++;
-		s2++;
-	}
-}
-
-int Q_strncmp (char *s1, char *s2, int count)
-{
-	while (1)
-	{
-		if (!count--)
-			return 0;
-		if (*s1 != *s2)
-			return -1;              // strings not equal    
-		if (!*s1)
-			return 0;               // strings are equal
-		s1++;
-		s2++;
-	}
-}
-
-int Q_strncasecmp (char *s1, char *s2, int n)
-{
-	int             c1, c2;
-	
-	while (1)
-	{
-		c1 = *s1++;
-		c2 = *s2++;
-
-		if (!n--)
-			return 0;               // strings are equal until end point
-		
-		if (c1 != c2)
-		{
-			if (c1 >= 'a' && c1 <= 'z')
-				c1 -= ('a' - 'A');
-			if (c2 >= 'a' && c2 <= 'z')
-				c2 -= ('a' - 'A');
-			if (c1 != c2)
-				return -1;              // strings not equal
-		}
-		if (!c1)
-			return 0;               // strings are equal
-	}
-}
-
-int Q_strcasecmp (char *s1, char *s2)
-{
-	return Q_strncasecmp (s1, s2, 99999);
-}
-
-int Q_atoi (char *str)
-{
-	int             val;
-	int             sign;
-	int             c;
-	
-	if (*str == '-')
-	{
-		sign = -1;
-		str++;
-	}
-	else
-		sign = 1;
-		
-	val = 0;
-
-//
-// check for hex
-//
-	if (str[0] == '0' && (str[1] == 'x' || str[1] == 'X') )
-	{
-		str += 2;
-		while (1)
-		{
-			c = *str++;
-			if (c >= '0' && c <= '9')
-				val = (val<<4) + c - '0';
-			else if (c >= 'a' && c <= 'f')
-				val = (val<<4) + c - 'a' + 10;
-			else if (c >= 'A' && c <= 'F')
-				val = (val<<4) + c - 'A' + 10;
-			else
-				return val*sign;
-		}
-	}
-	
-//
-// check for character
-//
-	if (str[0] == '\'')
-	{
-		return sign * str[1];
-	}
-	
-//
-// assume decimal
-//
-	while (1)
-	{
-		c = *str++;
-		if (c <'0' || c > '9')
-			return val*sign;
-		val = val*10 + c - '0';
-	}
-}
-
-
-float Q_atof (char *str)
-{
-	double			val;
-	int             sign;
-	int             c;
-	int             decimal, total;
-	
-	if (*str == '-')
-	{
-		sign = -1;
-		str++;
-	}
-	else
-		sign = 1;
-		
-	val = 0;
-
-//
-// check for hex
-//
-	if (str[0] == '0' && (str[1] == 'x' || str[1] == 'X') )
-	{
-		str += 2;
-		while (1)
-		{
-			c = *str++;
-			if (c >= '0' && c <= '9')
-				val = (val*16) + c - '0';
-			else if (c >= 'a' && c <= 'f')
-				val = (val*16) + c - 'a' + 10;
-			else if (c >= 'A' && c <= 'F')
-				val = (val*16) + c - 'A' + 10;
-			else
-				return val*sign;
-		}
-	}
-	
-//
-// check for character
-//
-	if (str[0] == '\'')
-	{
-		return sign * str[1];
-	}
-	
-//
-// assume decimal
-//
-	decimal = -1;
-	total = 0;
-	while (1)
-	{
-		c = *str++;
-		if (c == '.')
-		{
-			decimal = total;
-			continue;
-		}
-		if (c <'0' || c > '9')
-			break;
-		val = val*10 + c - '0';
-		total++;
-	}
-
-	if (decimal == -1)
-		return val*sign;
-	while (total > decimal)
-	{
-		val /= 10;
-		total--;
-	}
-	
-	return val*sign;
-}
-
-/*
-============================================================================
-
 					BYTE ORDER FUNCTIONS
 
 ============================================================================
@@ -552,7 +266,7 @@ void MSG_WriteString (sizebuf_t *sb, char *s)
 	if (!s)
 		SZ_Write (sb, "", 1);
 	else
-		SZ_Write (sb, s, Q_strlen(s)+1);
+		SZ_Write (sb, s, strlen(s)+1);
 }
 
 void MSG_WriteCoord (sizebuf_t *sb, float f)
@@ -702,17 +416,19 @@ float MSG_ReadAngle (void)
 
 //===========================================================================
 
-void SZ_Alloc (sizebuf_t *buf, int startsize)
+void
+SZ_Alloc(sizebuf_t *buf, int startsize)
 {
-	if (startsize < 256)
+	if(startsize < 256)
 		startsize = 256;
-	buf->data = Hunk_AllocName (startsize, "sizebuf");
+	buf->data = Hunk_AllocName(startsize, "sizebuf");
 	buf->maxsize = startsize;
 	buf->cursize = 0;
 }
 
 
-void SZ_Free (sizebuf_t *buf)
+void
+SZ_Free(sizebuf_t *buf)
 {
 //      Z_Free (buf->data);
 //      buf->data = nil;
@@ -720,50 +436,49 @@ void SZ_Free (sizebuf_t *buf)
 	buf->cursize = 0;
 }
 
-void SZ_Clear (sizebuf_t *buf)
+void
+SZ_Clear(sizebuf_t *buf)
 {
 	buf->cursize = 0;
 }
 
-void *SZ_GetSpace (sizebuf_t *buf, int length)
+void *
+SZ_GetSpace(sizebuf_t *buf, int length)
 {
-	void    *data;
+	void *data;
 	
-	if (buf->cursize + length > buf->maxsize)
-	{
-		if (!buf->allowoverflow)
-			Sys_Error ("SZ_GetSpace: overflow without allowoverflow set");
-		
-		if (length > buf->maxsize)
-			Sys_Error ("SZ_GetSpace: %d is > full buffer size", length);
-			
+	if(buf->cursize + length > buf->maxsize){
+		if(!buf->allowoverflow)
+			Sys_Error("SZ_GetSpace: overflow without allowoverflow set");
+		if(length > buf->maxsize)
+			Sys_Error("SZ_GetSpace: %d is > full buffer size", length);
 		buf->overflowed = true;
-		Con_Printf ("SZ_GetSpace: overflow");
-		SZ_Clear (buf); 
+		Con_Printf("SZ_GetSpace: overflow");
+		SZ_Clear(buf); 
 	}
-
 	data = buf->data + buf->cursize;
 	buf->cursize += length;
-	
+
 	return data;
 }
 
-void SZ_Write (sizebuf_t *buf, void *data, int length)
+void
+SZ_Write(sizebuf_t *buf, void *data, int length)
 {
-	Q_memcpy (SZ_GetSpace(buf,length),data,length);         
+	memcpy(SZ_GetSpace(buf, length), data, length);
 }
 
-void SZ_Print (sizebuf_t *buf, char *data)
+void
+SZ_Print(sizebuf_t *buf, char *data)
 {
-	int             len;
-	
-	len = Q_strlen(data)+1;
+	int len;
 
-// byte * cast to keep VC++ happy
-	if (buf->data[buf->cursize-1])
-		Q_memcpy ((byte *)SZ_GetSpace(buf, len),data,len); // no trailing 0
+	len = strlen(data)+1;
+
+	if(buf->data[buf->cursize-1])
+		memcpy(SZ_GetSpace(buf, len), data, len);	// no trailing 0
 	else
-		Q_memcpy ((byte *)SZ_GetSpace(buf, len-1)-1,data,len); // write over trailing 0
+		memcpy((uchar *)SZ_GetSpace(buf, len-1)-1, data, len);	// write over trailing 0
 }
 
 
@@ -969,7 +684,7 @@ int COM_CheckParm (char *parm)
 	{
 		if (!com_argv[i])
 			continue;               // NEXTSTEP sometimes clears appkit vars.
-		if (!Q_strcmp (parm,com_argv[i]))
+		if(strcmp(parm, com_argv[i]) == 0)
 			return i;
 	}
 		
@@ -1003,7 +718,7 @@ void COM_CheckRegistered (void)
 		return;
 	}
 
-	Sys_FileRead (h, check, sizeof(check));
+	eread(h, check, sizeof check);
 	COM_CloseFile (h);
 	
 	for (i=0 ; i<128 ; i++)
@@ -1056,7 +771,7 @@ void COM_InitArgv (int argc, char **argv)
 		 com_argc++)
 	{
 		largv[com_argc] = argv[com_argc];
-		if (!Q_strcmp ("-safe", argv[com_argc]))
+		if(strcmp("-safe", argv[com_argc]) == 0)
 			safe = true;
 	}
 
@@ -1137,16 +852,17 @@ varargs versions of all text functions.
 FIXME: make this buffer size safe someday
 ============
 */
-char    *va(char *format, ...)
+char *
+va(char *fmt, ...)
 {
-	va_list         argptr;
-	static char             string[1024];
-	
-	va_start (argptr, format);
-	vseprint (string,string+sizeof(string),format,argptr);
-	va_end (argptr);
+	va_list arg;
+	static char s[1024];
 
-	return string;  
+	va_start(arg, fmt);
+	vsnprint(s, sizeof s, fmt, arg);
+	va_end(arg);
+
+	return s;  
 }
 
 
@@ -1242,32 +958,20 @@ void COM_Path_f (void)
 	}
 }
 
-/*
-============
-COM_WriteFile
-
-The filename will be prefixed by the current game directory
-============
-*/
-void COM_WriteFile (char *filename, void *data, int len)
+void
+COM_WriteFile(char *filename, void *data, int len)
 {
-	int             handle;
-	char    name[MAX_OSPATH];
-	
-	sprint (name, "%s/%s", com_gamedir, filename);
+	int fd;
+	char path[MAX_OSPATH];
 
-	handle = Sys_FileOpenWrite (name);
-	if (handle == -1)
-	{
-		Sys_Printf ("COM_WriteFile: failed on %s\n", name);
-		return;
-	}
-	
-	Sys_Printf ("COM_WriteFile: %s\n", name);
-	Sys_FileWrite (handle, data, len);
-	Sys_FileClose (handle);
+	snprint(path, sizeof path, "%s/%s", com_gamedir, filename);
+	if((fd = create(path, OWRITE, 0666)) < 0)
+		sysfatal("COM_WriteFile:create: %r");
+
+	Sys_Printf("COM_WriteFile: %s\n", path);
+	ewrite(fd, data, len);
+	close(fd);
 }
-
 
 /*
 ============
@@ -1291,39 +995,36 @@ void    COM_CreatePath (char *path)
 	}
 }
 
-
-/*
-===========
-COM_CopyFile
-
-Copies a file over from the net to the local cache, creating any directories
-needed.  This is for the convenience of developers using ISDN from home.
-===========
-*/
-void COM_CopyFile (char *netpath, char *cachepath)
+/* Copies a file over from the net to the local cache, creating any directories
+ * needed. This is for the convenience of developers using ISDN from home. */
+void
+COM_CopyFile(char *netpath, char *cachepath)
 {
 	int             in, out;
 	int             count;
 	vlong		remaining;
 	char    buf[4096];
-	
-	remaining = Sys_FileOpenRead (netpath, &in);            
-	COM_CreatePath (cachepath);     // create directories up to the cache file
-	out = Sys_FileOpenWrite (cachepath);
-	
-	while (remaining)
-	{
-		if (remaining < sizeof(buf))
+
+	if((in = open(netpath, OREAD)) < 0)
+		sysfatal("COM_CopyFile:open: %r");
+	remaining = flen(in);
+
+	COM_CreatePath(cachepath);	// create directories up to the cache file
+	if((out = create(cachepath, OWRITE, 0666)) < 0)
+		sysfatal("COM_CopyFile:create: %r");
+
+	while(remaining){
+		if(remaining < sizeof buf)
 			count = remaining;
 		else
-			count = sizeof(buf);
-		Sys_FileRead (in, buf, count);
-		Sys_FileWrite (out, buf, count);
+			count = sizeof buf;
+		eread(in, buf, count);
+		ewrite(out, buf, count);
 		remaining -= count;
 	}
 
-	Sys_FileClose (in);
-	Sys_FileClose (out);    
+	close(in);
+	close(out);    
 }
 
 /*
@@ -1354,7 +1055,7 @@ int COM_FindFile (char *filename, int *handle, FILE **file)
 	search = com_searchpaths;
 	if (proghack)
 	{	// gross hack to use quake 1 progs with quake 2 maps
-		if (!strcmp(filename, "progs.dat"))
+		if(strcmp(filename, "progs.dat") == 0)
 			search = search->next;
 	}
 
@@ -1366,13 +1067,13 @@ int COM_FindFile (char *filename, int *handle, FILE **file)
 		// look through all the pak file elements
 			pak = search->pack;
 			for (i=0 ; i<pak->numfiles ; i++)
-				if (!strcmp (pak->files[i].name, filename))
+				if(strcmp(pak->files[i].name, filename) == 0)
 				{       // found it!
 					Sys_Printf ("PackFile: %s : %s\n",pak->filename, filename);
 					if (handle)
 					{
 						*handle = pak->handle;
-						Sys_FileSeek (pak->handle, pak->files[i].filepos);
+						seek(pak->handle, pak->files[i].filepos, 0);
 					}
 					else
 					{       // open a new file on the pakfile
@@ -1392,13 +1093,13 @@ int COM_FindFile (char *filename, int *handle, FILE **file)
 				if ( strchr (filename, '/') || strchr (filename,'\\'))
 					continue;
 			}
-			
-			sprint (netpath, "%s/%s",search->filename, filename);
-			
+
+			snprint(netpath, sizeof netpath, "%s/%s", search->filename, filename);
+
 			findtime = Sys_FileTime (netpath);
 			if (findtime == -1)
 				continue;
-				
+	
 		// see if the file needs to be updated in the cache
 			if (!com_cachedir[0])
 				strcpy (cachepath, netpath);
@@ -1411,15 +1112,20 @@ int COM_FindFile (char *filename, int *handle, FILE **file)
 				if (cachetime < findtime)
 					COM_CopyFile (netpath, cachepath);
 				strcpy (netpath, cachepath);
-			}	
+			}
 
-			Sys_Printf ("FindFile: %s\n",netpath);
-			com_filesize = Sys_FileOpenRead (netpath, &i);
-			if (handle)
+			Sys_Printf("FindFile: %s\n", netpath);
+			com_filesize = -1;
+			if((i = open(netpath, OREAD)) < 0)
+				fprint(2, "COM_FindFile:open: %r\n");
+			else
+				com_filesize = flen(i);
+
+			if(handle != nil)
 				*handle = i;
 			else
 			{
-				Sys_FileClose (i);
+				close(i);
 				*file = fopen (netpath, "rb");
 			}
 			return com_filesize;
@@ -1480,7 +1186,7 @@ void COM_CloseFile (int h)
 		if (s->pack && s->pack->handle == h)
 			return;
 			
-	Sys_FileClose (h);
+	close(h);
 }
 
 
@@ -1536,7 +1242,7 @@ byte *COM_LoadFile (char *path, int usehunk)
 	((byte *)buf)[len] = 0;
 
 	Draw_BeginDisc ();
-	Sys_FileRead (h, buf, len);                     
+	eread(h, buf, len);
 	COM_CloseFile (h);
 	Draw_EndDisc ();
 
@@ -1592,12 +1298,11 @@ pack_t *COM_LoadPackFile (char *packfile)
 	dpackfile_t             info[MAX_FILES_IN_PACK];
 	unsigned short          crc;
 
-	if (Sys_FileOpenRead (packfile, &packhandle) == -1)
-	{
-//              Con_Printf ("Couldn't open %s\n", packfile);
+	if((packhandle = open(packfile, OREAD)) < 0){
+		fprint(2, "open: %r\n");
 		return nil;
 	}
-	Sys_FileRead (packhandle, (void *)&header, sizeof(header));
+	eread(packhandle, &header, sizeof header);
 	if (header.id[0] != 'P' || header.id[1] != 'A'
 	|| header.id[2] != 'C' || header.id[3] != 'K')
 		Sys_Error ("%s is not a packfile", packfile);
@@ -1612,10 +1317,10 @@ pack_t *COM_LoadPackFile (char *packfile)
 	if (numpackfiles != PAK0_COUNT)
 		com_modified = true;    // not the original file
 
-	newfiles = Hunk_AllocName (numpackfiles * sizeof(packfile_t), "packfile");
+	newfiles = Hunk_AllocName(numpackfiles * sizeof *newfiles, "packfile");
 
-	Sys_FileSeek (packhandle, header.dirofs);
-	Sys_FileRead (packhandle, (void *)info, header.dirlen);
+	seek(packhandle, header.dirofs, 0);
+	eread(packhandle, info, header.dirlen);
 
 // crc the directory to check for modifications
 	CRC_Init (&crc);
@@ -1632,7 +1337,7 @@ pack_t *COM_LoadPackFile (char *packfile)
 		newfiles[i].filelen = LittleLong(info[i].filelen);
 	}
 
-	pack = Hunk_Alloc (sizeof (pack_t));
+	pack = Hunk_Alloc(sizeof *pack);
 	strcpy (pack->filename, packfile);
 	pack->handle = packhandle;
 	pack->numfiles = numpackfiles;
@@ -1663,7 +1368,7 @@ void COM_AddGameDirectory (char *dir)
 //
 // add the directory to the search path
 //
-	search = Hunk_Alloc (sizeof(searchpath_t));
+	search = Hunk_Alloc(sizeof *search);
 	strcpy (search->filename, dir);
 	search->next = com_searchpaths;
 	com_searchpaths = search;
@@ -1677,7 +1382,7 @@ void COM_AddGameDirectory (char *dir)
 		pak = COM_LoadPackFile (pakfile);
 		if (!pak)
 			break;
-		search = Hunk_Alloc (sizeof(searchpath_t));
+		search = Hunk_Alloc(sizeof *search);
 		search->pack = pak;
 		search->next = com_searchpaths;
 		com_searchpaths = search;               
@@ -1771,8 +1476,8 @@ void COM_InitFilesystem (void)
 			if (!com_argv[i] || com_argv[i][0] == '+' || com_argv[i][0] == '-')
 				break;
 			
-			search = Hunk_Alloc (sizeof(searchpath_t));
-			if ( !strcmp(COM_FileExtension(com_argv[i]), "pak") )
+			search = Hunk_Alloc(sizeof *search);
+			if(strcmp(COM_FileExtension(com_argv[i]), "pak") == 0)
 			{
 				search->pack = COM_LoadPackFile (com_argv[i]);
 				if (!search->pack)
@@ -1788,5 +1493,3 @@ void COM_InitFilesystem (void)
 	if (COM_CheckParm ("-proghack"))
 		proghack = true;
 }
-
-

@@ -24,7 +24,7 @@ static qboolean	snd_ambient = 1;
 qboolean		snd_initialized = false;
 
 // pointer should go away
-volatile dma_t  *shm = 0;
+volatile dma_t *shm;
 volatile dma_t sn;
 
 vec3_t		listener_origin;
@@ -177,22 +177,20 @@ void S_Init (void)
 		Con_Printf ("loading all sounds as 8bit\n");
 	}
 
-
-
 	snd_initialized = true;
 
 	S_Startup ();
 
 	SND_InitScaletable ();
 
-	known_sfx = Hunk_AllocName (MAX_SFX*sizeof(sfx_t), "sfx_t");
+	known_sfx = Hunk_AllocName(MAX_SFX * sizeof *known_sfx, "sfx_t");
 	num_sfx = 0;
 
 // create a piece of DMA memory
 
 	if (fakedma)
 	{
-		shm = (void *) Hunk_AllocName(sizeof(*shm), "shm");
+		shm = Hunk_AllocName(sizeof *shm, "shm");
 		shm->splitbuffer = 0;
 		shm->samplebits = 16;
 		shm->speed = 22050;
@@ -226,18 +224,14 @@ void S_Init (void)
 
 void S_Shutdown(void)
 {
-
-	if (!sound_started)
+	if(!sound_started)
 		return;
-
-	if (shm)
+	if(shm != nil)
 		shm->gamealive = 0;
-
-	//shm = 0;	/* why? */
-	sound_started = 0;
-
-	if (!fakedma)
+	if(!fakedma)
 		SNDDMA_Shutdown();
+	shm = nil;
+	sound_started = 0;
 }
 
 
@@ -259,15 +253,13 @@ sfx_t *S_FindName (char *name)
 	if (name == nil)
 		Sys_Error ("S_FindName: NULL\n");
 
-	if (Q_strlen(name) >= MAX_QPATH)
+	if(strlen(name) >= MAX_QPATH)
 		Sys_Error ("Sound name too long: %s", name);
 
 // see if already loaded
 	for (i=0 ; i < num_sfx ; i++)
-		if (!Q_strcmp(known_sfx[i].name, name))
-		{
+		if(strcmp(known_sfx[i].name, name) == 0)
 			return &known_sfx[i];
-		}
 
 	if (num_sfx == MAX_SFX)
 		Sys_Error ("S_FindName: out of sfx_t");
@@ -448,7 +440,7 @@ void S_StartSound(int entnum, int entchannel, sfx_t *sfx, vec3_t origin, float f
 		return;
 		
 // spatialize
-	memset (target_chan, 0, sizeof(*target_chan));
+	memset(target_chan, 0, sizeof *target_chan);
 	VectorCopy(origin, target_chan->origin);
 	target_chan->dist_mult = attenuation / sound_nominal_clip_dist;
 	target_chan->master_vol = vol;
@@ -520,7 +512,7 @@ void S_StopAllSounds(qboolean clear)
 		if (channels[i].sfx)
 			channels[i].sfx = nil;
 
-	Q_memset(channels, 0, MAX_CHANNELS * sizeof(channel_t));
+	memset(channels, 0, sizeof channels);
 
 	if (clear)
 		S_ClearBuffer ();
@@ -535,7 +527,7 @@ void S_ClearBuffer (void)
 {
 	int		clear;
 		
-	if (!sound_started || !shm || !shm->buffer)
+	if (!sound_started || shm == nil || shm->buffer == nil)
 		return;
 
 	if (shm->samplebits == 8)
@@ -543,7 +535,7 @@ void S_ClearBuffer (void)
 	else
 		clear = 0;
 
-	Q_memset(shm->buffer, clear, shm->samples * shm->samplebits/8);
+	memset(shm->buffer, clear, shm->samples * shm->samplebits/8);
 }
 
 
@@ -827,13 +819,13 @@ void S_Play(void)
 	i = 1;
 	while (i<Cmd_Argc())
 	{
-		if (!Q_strrchr(Cmd_Argv(i), '.'))
+		if(strrchr(Cmd_Argv(i), '.') == nil)
 		{
-			Q_strcpy(name, Cmd_Argv(i));
-			Q_strcat(name, ".wav");
+			strcpy(name, Cmd_Argv(i));
+			strcat(name, ".wav");
 		}
 		else
-			Q_strcpy(name, Cmd_Argv(i));
+			strcpy(name, Cmd_Argv(i));
 		sfx = S_PrecacheSound(name);
 		S_StartSound(hash++, 0, sfx, listener_origin, 1.0, 1.0);
 		i++;
@@ -851,15 +843,15 @@ void S_PlayVol(void)
 	i = 1;
 	while (i<Cmd_Argc())
 	{
-		if (!Q_strrchr(Cmd_Argv(i), '.'))
+		if(strrchr(Cmd_Argv(i), '.') == nil)
 		{
-			Q_strcpy(name, Cmd_Argv(i));
-			Q_strcat(name, ".wav");
+			strcpy(name, Cmd_Argv(i));
+			strcat(name, ".wav");
 		}
 		else
-			Q_strcpy(name, Cmd_Argv(i));
+			strcpy(name, Cmd_Argv(i));
 		sfx = S_PrecacheSound(name);
-		vol = Q_atof(Cmd_Argv(i+1));
+		vol = atof(Cmd_Argv(i+1));
 		S_StartSound(hash++, 0, sfx, listener_origin, vol, 1.0);
 		i+=2;
 	}

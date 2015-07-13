@@ -1,66 +1,91 @@
 qk1 - (9) quake
 ===============
-	- setup:
-		. mk install
-	- to install quake (shareware or registered):
-		. mkdir $home/lib/quake/id1
-		. cp /n/quakecd/id1/*.pak $home/lib/quake/id1
-	- to install an expansion or compatible mod (zB rogue):
-		. mkdir $home/lib/quake/rogue
-		. cp /n/quakecd/rogue/*.pak $home/lib/quake/rogue
-	- cdaudio, networking: PORTME
-	- high resolutions work up to 4096x4096 (arbitrary limit in r_shared.h)
-		. by default, quake uses a 8MB heap, which will be insufficient for higher
-		  resolutions → exits with a related error message (not a note)
-			→ use [-mem MB], e.g.:
-			; quake -mem 16
-		. resolutions under around 328x160 don't work, possibly because menu text
-		  isn't scaled down, or something
-	- mouse is grabbed using m_windowed cvar
-		. open console (~)
-		. type m_windowed 1 (can autocomplete w/ tab)
-		. setting saved on exit in id1/config.cfg
-	- tested on 386 and amd64 only (works ok on a pentium 4)
+port of linux/x11 quake to plan9front. tested on amd64 and 386 only.
+currently lacks networking and music. save for a rare crash and some stupid
+bugs, it works and plays reasonably well. on my machines.
 
 
-some params useful for workarounds
-----------------------------------
-	-nosound
-	-mem MB
-	(-noudp)
+installation
+------------
+besides building and installing qk1, you still need .pak files to play. both
+shareware and registered versions (should) work, as well as the official
+expansions, and mods.
+the data files are to be installed in $home/lib/quake/$gamename, where
+$gamename is 'id1' for plain old quake.
+
+% mk install
+% mkdir -p $home/lib/quake/id1
+% cp /n/quakecd/id1/*.pak $home/lib/quake/id1
+
+% quake
+
+installing an expansion or mod, for example rogue:
+
+% mkdir $home/lib/quake/rogue
+% cp /n/roguecd/*.pak $home/lib/quake/rogue
+
+then start with:
+
+% quake -game rogue
 
 
-port notes
-----------
-	- based on linux/x11 code from original release
-	- pr_strings: assumed 32bit pointer arithmetic: use PR_GetStr() instead of
-	  dealing with it directly; may be ass
-	- global cppdefotomy, removing code seen as useless for plan9
-	- vid_9.c: shitty, can probably improve performance a bit without screwing code
-	- *printf -> *print was (mostly) stupid
-	- removed some of the command line parameters
-		. -winsize, -width, -height: just set the window dimensions with rio/rc
-		. -condebug, -nostdout: can just redirect with rc to same effect
+todo
+----
+- udp/ip, plan9 style
+- cdaudio: reading and mixing music from e.g. cdfs(4)
+- more testing, cleanups and bug fixes (g '/\* FIXME')
+- (bjnh) bring asm for 386/amd64 back
+- (bjnh) plan9 code style everywhere
+- (bjnh) better performance
+- (bjnh) redesign everything to be super cool (e.g. pakfs, console shit,
+  args, etc.)
 
 
-todo/issues
------------
-	- compiling with PARANOID reveals several points of failure that are otherwise
-          ignored, resulting in abnormal exit (also on linux)
-	- leave running for a couple of hours → invalid write/reads → crash
-	- unrelated(?): after about 5 hours, sound dies
-	- compile with BAN_TEST -> net_dgrm build fails (struct sockaddr_in)
-	- sprites/particles not scaled correctly on high resolutions (also in quake2)
-	- m_windowed 1: can still look around in frozen world when paused
-	- m_windowed 1: mouse can still escape, mouse movement not very smooth
-	- net_9p.c
-	- cd_9.c,net_udp.c,net_dgrm.c: actuallyport
-	- manpages
-	- fix potential fp exceptions in code rather than ignoring them?
-	- g '/\* FIXME'
-	- port quakeworld and utilities +/- merge common code and mkmany
+differences with x11/linux original release
+-------------------------------------------
+- no fullscreen; screen resolution is just the window's dimensions;
+  any resolution (under the r_shared.h limits) is allowed; resize
+  by dragging window edges; removed -winsize, -height, -width
+- some stupid kbd/mouse bugs fixed; mouse grabbing actually grabs the mouse
+- removed -condebug, -nostdout: useless in plan9 (and unix?)
+- added m_windowed cvar (replacing _windowed_mouse), for mouse grabbing
+- ungrabs the mouse when main menu is accessed
+- removed -record, -playback: broken and unused
+
+
+shitty workarounds and other bullshit
+-------------------------------------
+- #pragma pack for stuff (structs) loaded from files
+- pr_strings assumed 32bit pointer arithmetic, so enter PR_GetStr(), which
+  completely sucks
+- text and code seen as useless for plan9 nuked from orbit (cpp defs, etc.)
+- arbitrary resolution limit (r_shared.h): 4096x4096 (was 1280x1024), which
+  inflates e.g. a bunch of arrays in the code
+- mouse handling is too heavy, all for the purpose of not letting the mouse
+  escape the window too easily (and the kludged up shit could probably be
+  done better)
+- removal of stdio stuff probably not really warranted and possibly introduced
+  bugs
+
+
+bugs
+----
+- crash in d_sprite.c:D_SpriteDrawSpans() after several hours of looping the
+  demos
+- sound dies after a few hours: (snd.c) wpos and SNDDMA_GetDMAPos() probably
+  wrong, mix buffer being overwritten while writing to /dev/audio, etc.
+- resolutions other than 4:3: some vertical and horizontal strips on the edge
+  of the screen aren't drawn
+- console color print is still screwed up (printf/print differences)
+- resolutions under around 328x160 don't work, possibly because menu text isn't
+  scaled down or something
+- #define PARANOID reveals several points of failure that are otherwise ignored
+- (?) sprites not scaled correctly on higher resolutions
+- m_windowed 1: in a paused game (in menu or console during sp game), can still
+  look around the frozen world
+- screenshot code outputs garbage
 
 
 legal
 -----
-Quake, hence qk1, is licensed under the GPLv2. See COPYING for details.
+Quake, hence qk1, is licensed under the GPLv2. see COPYING for details.

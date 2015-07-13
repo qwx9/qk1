@@ -60,7 +60,7 @@ void Z_ClearZone (memzone_t *zone, int size)
 // set the entire zone to one free block
 
 	zone->blocklist.next = zone->blocklist.prev = block =
-		(memblock_t *)( (byte *)zone + sizeof(memzone_t) );
+		(memblock_t *)((byte *)zone + sizeof(memzone_t));
 	zone->blocklist.tag = 1;	// in use block
 	zone->blocklist.id = 0;
 	zone->blocklist.size = 0;
@@ -85,7 +85,7 @@ void Z_Free (void *ptr)
 	if (!ptr)
 		Sys_Error ("Z_Free: NULL pointer");
 
-	block = (memblock_t *) ( (byte *)ptr - sizeof(memblock_t));
+	block = (memblock_t *)((uchar *)ptr - sizeof(memblock_t));
 	if (block->id != ZONEID)
 		Sys_Error ("Z_Free: freed a pointer without ZONEID");
 	if (block->tag == 0)
@@ -115,21 +115,15 @@ void Z_Free (void *ptr)
 	}
 }
 
-
-/*
-========================
-Z_Malloc
-========================
-*/
-void *Z_Malloc (int size)
+void *
+Z_Malloc(int size)
 {
-	void	*buf;
-	
-Z_CheckHeap ();	// DEBUG
-	buf = Z_TagMalloc (size, 1);
-	if (!buf)
-		Sys_Error ("Z_Malloc: failed on allocation of %d bytes",size);
-	Q_memset (buf, 0, size);
+	void *buf;
+
+	Z_CheckHeap();	// DEBUG
+	if((buf = Z_TagMalloc(size, 1)) == nil)
+		Sys_Error("Z_Malloc: failed on allocation of %d bytes", size);
+	memset(buf, 0, size);
 
 	return buf;
 }
@@ -349,7 +343,7 @@ void Hunk_Print (qboolean all)
 	//
 	// print the single block
 	//
-		memcpy (name, h->name, 8);
+		memcpy(name, h->name, 8);
 		if (all)
 			Con_Printf ("%8p :%8d %8s\n",h, h->size, name);
 			
@@ -399,11 +393,11 @@ void *Hunk_AllocName (int size, char *name)
 
 	Cache_FreeLow (hunk_low_used);
 
-	memset (h, 0, size);
+	memset(h, 0, size);
 	
 	h->size = size;
 	h->sentinal = HUNK_SENTINAL;
-	Q_strncpy (h->name, name, 8);
+	strncpy(h->name, name, 8);
 	
 	return (void *)(h+1);
 }
@@ -427,7 +421,7 @@ void Hunk_FreeToLowMark (int mark)
 {
 	if (mark < 0 || mark > hunk_low_used)
 		Sys_Error ("Hunk_FreeToLowMark: bad mark %d", mark);
-	memset (hunk_base + mark, 0, hunk_low_used - mark);
+	memset(hunk_base + mark, 0, hunk_low_used - mark);
 	hunk_low_used = mark;
 }
 
@@ -451,7 +445,7 @@ void Hunk_FreeToHighMark (int mark)
 	}
 	if (mark < 0 || mark > hunk_high_used)
 		Sys_Error ("Hunk_FreeToHighMark: bad mark %d", mark);
-	memset (hunk_base + hunk_size - hunk_high_used, 0, hunk_high_used - mark);
+	memset(hunk_base + hunk_size - hunk_high_used, 0, hunk_high_used - mark);
 	hunk_high_used = mark;
 }
 
@@ -491,10 +485,10 @@ void *Hunk_HighAllocName (int size, char *name)
 
 	h = (hunk_t *)(hunk_base + hunk_size - hunk_high_used);
 
-	memset (h, 0, size);
+	memset(h, 0, size);
 	h->size = size;
 	h->sentinal = HUNK_SENTINAL;
-	Q_strncpy (h->name, name, 8);
+	strncpy(h->name, name, 8);
 
 	return (void *)(h+1);
 }
@@ -564,9 +558,9 @@ void Cache_Move ( cache_system_t *c)
 	{
 //		Con_Printf ("cache_move ok\n");
 
-		Q_memcpy ( new+1, c+1, c->size - sizeof(cache_system_t) );
+		memcpy(new+1, c+1, c->size - sizeof *new);
 		new->user = c->user;
-		Q_memcpy (new->name, c->name, sizeof(new->name));
+		memcpy(new->name, c->name, sizeof new->name);
 		Cache_Free (c->user);
 		new->user->data = (void *)(new+1);
 	}
@@ -671,7 +665,7 @@ cache_system_t *Cache_TryAlloc (int size, qboolean nobottom)
 			Sys_Error ("Cache_TryAlloc: %d is greater then free hunk", size);
 
 		new = (cache_system_t *) (hunk_base + hunk_low_used);
-		memset (new, 0, sizeof(*new));
+		memset(new, 0, sizeof *new);
 		new->size = size;
 
 		cache_head.prev = cache_head.next = new;
@@ -692,7 +686,7 @@ cache_system_t *Cache_TryAlloc (int size, qboolean nobottom)
 		{
 			if ( (byte *)cs - (byte *)new >= size)
 			{	// found space
-				memset (new, 0, sizeof(*new));
+				memset(new, 0, sizeof *new);
 				new->size = size;
 				
 				new->next = cs;
@@ -715,7 +709,7 @@ cache_system_t *Cache_TryAlloc (int size, qboolean nobottom)
 // try to allocate one at the very end
 	if ( hunk_base + hunk_size - hunk_high_used - (byte *)new >= size)
 	{
-		memset (new, 0, sizeof(*new));
+		memset(new, 0, sizeof *new);
 		new->size = size;
 		
 		new->next = &cache_head;
@@ -860,7 +854,7 @@ void *Cache_Alloc (cache_user_t *c, int size, char *name)
 	if (size <= 0)
 		Sys_Error ("Cache_Alloc: size %d", size);
 
-	size = (size + sizeof(cache_system_t) + 15) & ~15;
+	size = (size + sizeof(*cs) + 15) & ~15;
 
 // find memory for it	
 	while (1)
@@ -907,7 +901,7 @@ void Memory_Init (void *buf, int size)
 	if (p)
 	{
 		if (p < com_argc-1)
-			zonesize = Q_atoi (com_argv[p+1]) * 1024;
+			zonesize = atoi(com_argv[p+1]) * 1024;
 		else
 			Sys_Error ("Memory_Init: you must specify a size in KB after -zone");
 	}

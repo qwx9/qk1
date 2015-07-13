@@ -97,7 +97,7 @@ void RotatePointAroundVector( vec3_t dst, const vec3_t dir, const vec3_t point, 
 	m[1][2] = vf[1];
 	m[2][2] = vf[2];
 
-	memcpy( im, m, sizeof( im ) );
+	memcpy(im, m, sizeof im);
 
 	im[0][1] = m[1][0];
 	im[0][2] = m[2][0];
@@ -106,7 +106,7 @@ void RotatePointAroundVector( vec3_t dst, const vec3_t dir, const vec3_t point, 
 	im[2][0] = m[0][2];
 	im[2][1] = m[1][2];
 
-	memset( zrot, 0, sizeof( zrot ) );
+	memset(zrot, 0, sizeof zrot);
 	zrot[0][0] = zrot[1][1] = zrot[2][2] = 1.0F;
 
 	zrot[0][0] = cos( DEG2RAD( degrees ) );
@@ -383,16 +383,6 @@ void VectorScale (vec3_t in, vec_t scale, vec3_t out)
 	out[1] = in[1]*scale;
 	out[2] = in[2]*scale;
 }
-
-
-int Q_log2(int val)
-{
-	int answer=0;
-	while (val>>=1)
-		answer++;
-	return answer;
-}
-
 
 /*
 ================

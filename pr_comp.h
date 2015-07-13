@@ -97,6 +97,7 @@ enum {
 	OP_BITOR
 };
 
+#pragma pack on
 
 typedef struct statement_s
 {
@@ -158,3 +159,4 @@ typedef struct
 	int		entityfields;
 } dprograms_t;
 
+#pragma pack off

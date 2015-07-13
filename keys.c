@@ -28,7 +28,6 @@ qboolean	consolekeys[256];	// if true, can't be rebound while in console
 qboolean	menubound[256];	// if true, can't be rebound while in menu
 int		keyshift[256];		// key to map to if shift held down in console
 int		key_repeats[256];	// if > 1, it is autorepeating
-qboolean	keydown[256];
 
 typedef struct
 {
@@ -166,8 +165,8 @@ void Key_Console (int key)
 			cmd = Cvar_CompleteVariable (key_lines[edit_line]+1);
 		if (cmd)
 		{
-			Q_strcpy (key_lines[edit_line]+1, cmd);
-			key_linepos = Q_strlen(cmd)+1;
+			strcpy(key_lines[edit_line]+1, cmd);
+			key_linepos = strlen(cmd)+1;
 			key_lines[edit_line][key_linepos] = ' ';
 			key_linepos++;
 			key_lines[edit_line][key_linepos] = 0;
@@ -191,8 +190,8 @@ void Key_Console (int key)
 				&& !key_lines[history_line][1]);
 		if (history_line == edit_line)
 			history_line = (edit_line+1)&31;
-		Q_strcpy(key_lines[edit_line], key_lines[history_line]);
-		key_linepos = Q_strlen(key_lines[edit_line]);
+		strcpy(key_lines[edit_line], key_lines[history_line]);
+		key_linepos = strlen(key_lines[edit_line]);
 		return;
 	}
 
@@ -212,8 +211,8 @@ void Key_Console (int key)
 		}
 		else
 		{
-			Q_strcpy(key_lines[edit_line], key_lines[history_line]);
-			key_linepos = Q_strlen(key_lines[edit_line]);
+			strcpy(key_lines[edit_line], key_lines[history_line]);
+			key_linepos = strlen(key_lines[edit_line]);
 		}
 		return;
 	}
@@ -310,32 +309,22 @@ void Key_Message (int key)
 	chat_buffer[chat_bufferlen] = 0;
 }
 
-//============================================================================
-
-
-/*
-===================
-Key_StringToKeynum
-
-Returns a key number to be used to index keybindings[] by looking at
-the given string.  Single ascii characters return themselves, while
-the K_* names are matched up.
-===================
-*/
-int Key_StringToKeynum (char *str)
+/* Returns a key number to be used to index keybindings[] by looking at the
+ * given string. Single ascii characters return themselves, while the K_* names
+ * are matched up. */
+int
+Key_StringToKeynum(char *s)
 {
-	keyname_t	*kn;
+	keyname_t *k;
 	
-	if (!str || !str[0])
+	if(s == nil || s[0] == 0)
 		return -1;
-	if (!str[1])
-		return str[0];
+	if(s[1] == 0)
+		return s[0];
 
-	for (kn=keynames ; kn->name ; kn++)
-	{
-		if (!Q_strcasecmp(str,kn->name))
-			return kn->keynum;
-	}
+	for(k = keynames; k->name != nil; k++)
+		if(cistrcmp(s, k->name) == 0)
+			return k->keynum;
 	return -1;
 }
 
@@ -391,9 +380,9 @@ void Key_SetBinding (int keynum, char *binding)
 	}
 			
 // allocate memory for new binding
-	l = Q_strlen (binding);	
+	l = strlen(binding);	
 	new = Z_Malloc (l+1);
-	Q_strcpy (new, binding);
+	strcpy(new, binding);
 	new[l] = 0;
 	keybindings[keynum] = new;	
 }
@@ -585,8 +574,6 @@ void Key_Event (int key, qboolean down)
 	char	*kb;
 	char	cmd[1024];
 
-	keydown[key] = down;
-
 	if (!down)
 		key_repeats[key] = 0;
 
@@ -724,20 +711,11 @@ void Key_Event (int key, qboolean down)
 	}
 }
 
-
-/*
-===================
-Key_ClearStates
-===================
-*/
-void Key_ClearStates (void)
+void
+Key_ClearStates(void)
 {
-	int		i;
+	int i;
 
-	for (i=0 ; i<256 ; i++)
-	{
-		keydown[i] = false;
+	for(i=0; i<256; i++)
 		key_repeats[i] = 0;
-	}
 }
-

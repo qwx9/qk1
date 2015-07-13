@@ -5,8 +5,9 @@
 #include "quakedef.h"
 
 qboolean isDedicated;
-mainstacksize = 512*1024;	/* FIXME */
-char end1[] =
+mainstacksize = 512*1024;
+
+static char end1[] =
 	"                QUAKE: The Doomed Dimension by id Software\n"
 	"  ----------------------------------------------------------------------------\n"
 	"           CALL 1-800-IDGAMES TO ORDER OR FOR TECHNICAL SUPPORT\n"
@@ -29,7 +30,7 @@ char end1[] =
 	"    Quake is a trademark of Id Software, inc., (c)1996 Id Software, inc.\n"
 	"     All rights reserved. NIN logo is a registered trademark licensed to\n"
 	"                 Nothing Interactive, Inc. All rights reserved.\n";
-char end2[] =
+static char end2[] =
 	"        QUAKE by id Software\n"
 	" -----------------------------------------------------------------------------\n"
 	"        Why did you quit from the registered version of QUAKE? Did the\n"
@@ -54,14 +55,14 @@ char end2[] =
 	"             to Nothing Interactive, Inc. All rights reserved.\n";
 
 
-void Sys_Printf (char *fmt, ...)
+void
+Sys_Printf(char *fmt, ...)
 {
-	char buf[1024];
-	char *p;
+	char buf[1024], *p;
 	va_list arg;
 
 	va_start(arg, fmt);
-	vseprint(buf, buf+sizeof(buf), fmt, arg);
+	vsnprint(buf, sizeof buf, fmt, arg);
 	va_end(arg);
 
 	for(p = buf; *p; p++){
@@ -73,7 +74,8 @@ void Sys_Printf (char *fmt, ...)
 	}
 }
 
-void Sys_Quit (void)
+void
+Sys_Quit(void)
 {
 	Host_Shutdown();
 	print("\n");
@@ -84,138 +86,130 @@ void Sys_Quit (void)
 	threadexitsall(nil);
 }
 
-void Sys_Error (char *error, ...)
+void
+Sys_Error(char *fmt, ...)
 {
-	char buf[1024], *out;
+	char buf[1024], *p;
 	va_list arg;
 
-	va_start(arg, error);
-	out = vseprint(buf, buf+sizeof(buf), error, arg);
+	va_start(arg, fmt);
+	p = vseprint(buf, buf+sizeof buf, fmt, arg);
 	va_end(arg);
-	out = seprint(out, buf+sizeof(buf), "\n");
-	write(2, buf, out-buf);
+	p = seprint(p, buf+sizeof buf, "\n");
+	ewrite(2, buf, p-buf);
 	Host_Shutdown();
 	sysfatal("ending.");
 } 
 
-int Sys_FileTime (char *path)
+ulong
+Sys_FileTime(char *path)
 {
-	uchar	sb[1024];
+	ulong t;
+	Dir *d;
 
-	if(stat(path, sb, sizeof sb) < 0){
-		Sys_Printf("Sys_FileTime:stat: %r\n");
+	if((d = dirstat(path)) == nil){
+		fprint(2, "dirstat: %r");
 		return -1;
 	}
-	return *((int *)(sb+25));
+	t = d->mtime;
+	free(d);
+	return t;
 }
 
-void Sys_mkdir (char *path)
+void
+Sys_mkdir(char *path)
 {
 	int d;
 
+	/* don't care if it isn't a directory, caller doesn't check */
+	if(access(path, AEXIST) == 0)
+		return;
 	if((d = create(path, OREAD, DMDIR|0777)) < 0)
-		Sys_Printf("Sys_mkdir:create: %r\n");
+		fprint(2, "Sys_mkdir:create: %r\n");
 	else
 		close(d);
 }
 
-vlong Sys_FileOpenRead (char *path, int *handle)
+vlong
+flen(int fd)
 {
-	int d;
-	uchar bs[1024];
+	vlong l;
+	Dir *d;
 
-	d = open (path, OREAD);
-	*handle = d;
-	if(d < 0)
-		return -1;
-	if(fstat(d, bs, sizeof bs) < 0)
-		Sys_Error("Sys_FileOpenRead:fstat: %r\n");
-	return *((vlong *)(bs+33));
+	if((d = dirfstat(fd)) == nil)	/* file assumed extant and readable */ 
+		sysfatal("flen: %r");
+	l = d->length;
+	free(d);
+	return l;
 }
 
-int Sys_FileOpenWrite (char *path)
+void
+eread(int fd, void *buf, long n)
 {
-	int d;
-
-	if((d = open(path, OREAD|OTRUNC)) < 0)
-		Sys_Error("Sys_FileOpenWrite:open: %r\n");
-	return d;
+	if(read(fd, buf, n) <= 0)
+		sysfatal("eread: %r");
 }
 
-int Sys_FileWrite (int handle, void *src, int count)
+void
+ewrite(int fd, void *buf, long n)
 {
-	return write(handle, src, count);
+	if(write(fd, buf, n) != n)
+		sysfatal("ewrite: %r");
 }
 
-void Sys_FileClose (int handle)
+double
+Sys_FloatTime(void)
 {
-	close(handle);
-}
-
-void Sys_FileSeek (int handle, int position)
-{
-	seek(handle, position, 0);
-}
-
-int Sys_FileRead (int handle, void *dest, int count)
-{
-	return read(handle, dest, count);
-}
-
-double Sys_FloatTime (void)
-{
-	static long	secbase;
+	static long secbase;
 
 	if(secbase == 0)
 		secbase = time(nil);
 	return nsec()/1000000000.0 - secbase;
 }
 
-char *Sys_ConsoleInput(void)
+void *
+emalloc(ulong b)
 {
-	static char	text[256];
-	int     len;
+	void *p;
 
-	if(cls.state == ca_dedicated){
-		if((len = read(0, text, sizeof(text))) < 1)
-			return nil;
-		text[len-1] = '\0';
-		return text;
-	}
-	return nil;
+	if((p = malloc(b)) == nil)
+		sysfatal("malloc %lud: %r", b);
+	return p;
 }
 
-void Sys_HighFPPrecision (void)
+void
+Sys_HighFPPrecision(void)
 {
 }
 
-void Sys_LowFPPrecision (void)
+void
+Sys_LowFPPrecision(void)
 {
 }
 
-void croak (void *, char *note)
+static void
+croak(void *, char *note)
 {
-	if(!strncmp(note, "sys:", 4)){
+	if(strncmp(note, "sys:", 4) == 0){
 		IN_Shutdown();
 		SNDDMA_Shutdown();
 	}
 	noted(NDFLT);
 }
 
-void threadmain (int c, char **v)
+void
+threadmain(int c, char **v)
 {
 	static char basedir[1024];
 	int j;
 	char *home;
 	double time, oldtime, newtime;
 	quakeparms_t parms;
-	extern int vcrFile;
-	extern int recording;
 
-	memset(&parms, 0, sizeof(parms));
+	memset(&parms, 0, sizeof parms);
 
-	/* ignore fp exceptions (bad), rendering shit assumes they are */
-	setfcr(getfcr() & ~(FPOVFL|FPUNFL|FPINVAL|FPZDIV));	/* FIXME */
+	/* ignore fp exceptions: rendering shit assumes they are */
+	setfcr(getfcr() & ~(FPOVFL|FPUNFL|FPINVAL|FPZDIV));
 	notify(croak);
 
 	COM_InitArgv(c, v);
@@ -225,8 +219,8 @@ void threadmain (int c, char **v)
 
 	parms.memsize = 8*1024*1024;
 	if(j = COM_CheckParm("-mem"))
-		parms.memsize = (int)(Q_atof(com_argv[j+1]) * 1024*1024);
-	parms.membase = malloc(parms.memsize);
+		parms.memsize = atoi(com_argv[j+1]) * 1024*1024;
+	parms.membase = emalloc(parms.memsize);
 
 	if(home = getenv("home")){
 		snprint(basedir, sizeof basedir, "%s/lib/quake", home);
@@ -237,8 +231,6 @@ void threadmain (int c, char **v)
 
 	Host_Init(&parms);
 
-	print("(9)quake %4.2f\n", (float)VERSION);
-
 	oldtime = Sys_FloatTime() - 0.1;
 	for(;;){
 		// find time spent rendering last frame
@@ -246,7 +238,7 @@ void threadmain (int c, char **v)
 		time = newtime - oldtime;
 
 		if(cls.state == ca_dedicated){   // play vcrfiles at max speed
-			if(time < sys_ticrate.value && (vcrFile == -1 || recording)){
+			if(time < sys_ticrate.value){
 				//usleep(1);
 				continue;       // not time to run a server only tic yet
 			}

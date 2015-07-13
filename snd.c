@@ -4,42 +4,45 @@
 #include <thread.h>
 #include "quakedef.h"
 
-int audio_fd;
-int sndon;
-uint wpos;
-int stid = -1;
 enum{
-	Nbuf	= 16
+	Nbuf	= 8
 };
-Channel *schan;
+static int afd;
+static int sndon;
+static uint wpos;
+static Channel *schan;
+static QLock sndlock;
 
 
-void sproc (void *)
+static void
+sproc(void *)
 {
-	int n;
+	int n, sz;
+
+	threadsetgrp(THsnd);
 
 	for(;;){
-		if(recv(schan, nil) < 0){
-			Con_Printf("sproc:recv %r\n");
+		if(recv(schan, nil) < 0)
 			break;
-		}
-		if((n = write(audio_fd, shm->buffer, shm->samplebits/8 * shm->samples)) < 0){
-			Con_Printf("sproc:write: %r\n");
+		sz = shm->samplebits/8 * shm->samples;
+		if((n = write(afd, shm->buffer, sz)) != sz)
 			break;
-		}
+		qlock(&sndlock);
 		wpos += n;
+		qunlock(&sndlock);
 	}
-	stid = -1;
+	fprint(2, "sproc %d: %r\n", threadpid(threadid()));
 }
 
-qboolean SNDDMA_Init(void)
+qboolean
+SNDDMA_Init(void)
 {
 	int i;
 
 	sndon = 0;
 
-	if((audio_fd = open("/dev/audio", OWRITE)) < 0){
-		Con_Printf("Could not open /dev/audio: %r\n");
+	if((afd = open("/dev/audio", OWRITE)) < 0){
+		fprint(2, "open: %r\n");
 		return 0;
 	}
 
@@ -64,37 +67,37 @@ qboolean SNDDMA_Init(void)
 	shm->submission_chunk = 1;
 
 	if((shm->buffer = mallocz(shm->samplebits/8 * shm->samples, 1)) == nil)
-		Sys_Error("SNDDMA_Init:mallocz: %r\n");
+		sysfatal("SNDDMA_Init:mallocz: %r\n");
 	shm->samplepos = 0;
 	sndon = 1;
-	schan = chancreate(sizeof(int), Nbuf);
-	if((stid = proccreate(sproc, nil, 8192)) < 0){
-		stid = -1;
-		SNDDMA_Shutdown();
-		Sys_Error("SNDDMA_Init:proccreate: %r\n");
-	}
+	wpos = 0;
+	if((schan = chancreate(sizeof(int), Nbuf)) == nil)
+		sysfatal("SNDDMA_Init:chancreate: %r");
+	if(proccreate(sproc, nil, 8192) < 0)
+		sysfatal("SNDDMA_Init:proccreate: %r");
 	return 1;
 }
 
-uint SNDDMA_GetDMAPos(void)
+uint
+SNDDMA_GetDMAPos(void)
 {
 	if(!sndon)
 		return 0;
+	qlock(&sndlock);
 	shm->samplepos = wpos / (shm->samplebits/8);
+	qunlock(&sndlock);
 	return shm->samplepos;
 }
 
-void SNDDMA_Shutdown(void)
+void
+SNDDMA_Shutdown(void)
 {
 	if(!sndon)
 		return;
 
-	close(audio_fd);
+	threadkillgrp(THsnd);
+	close(afd);
 	free(shm->buffer);
-	if(stid != -1){
-		threadkill(stid);
-		stid = -1;
-	}
 	if(schan != nil){
 		chanfree(schan);
 		schan = nil;
@@ -102,10 +105,11 @@ void SNDDMA_Shutdown(void)
 	sndon = 0;
 }
 
-void SNDDMA_Submit(void)
+void
+SNDDMA_Submit(void)
 {
 	if(nbsend(schan, nil) < 0){
-		Con_Printf("SNDDMA_Submit:nbsend: %r\n");
+		fprint(2, "SNDDMA_Submit:nbsend: %r\n");
 		SNDDMA_Shutdown();
 	}
 }

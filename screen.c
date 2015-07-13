@@ -551,11 +551,11 @@ void WritePCXfile (char *filename, byte *data, int width, int height,
 	pcx->ymax = LittleShort((short)(height-1));
 	pcx->hres = LittleShort((short)width);
 	pcx->vres = LittleShort((short)height);
-	Q_memset (pcx->palette,0,sizeof(pcx->palette));
+	memset(pcx->palette, 0, sizeof pcx->palette);
 	pcx->color_planes = 1;		// chunky image
 	pcx->bytes_per_line = LittleShort((short)width);
 	pcx->palette_type = LittleShort(2);		// not a grey scale
-	Q_memset (pcx->filler,0,sizeof(pcx->filler));
+	memset(pcx->filler, 0, sizeof pcx->filler);
 
 // pack the image
 	pack = &pcx->data;
@@ -575,7 +575,7 @@ void WritePCXfile (char *filename, byte *data, int width, int height,
 
 		data += rowbytes - width;
 	}
-			
+	
 // write the palette
 	*pack++ = 0x0c;	// palette ID byte
 	for (i=0 ; i<768 ; i++)
@@ -609,8 +609,8 @@ void SCR_ScreenShot_f (void)
 		pcxname[5] = i/10 + '0'; 
 		pcxname[6] = i%10 + '0'; 
 		sprint (checkname, "%s/%s", com_gamedir, pcxname);
-		if (Sys_FileTime(checkname) == -1)
-			break;	// file doesn't exist
+		if(access(checkname, AEXIST) == -1)
+			break;
 	} 
 	if (i==100) 
 	{

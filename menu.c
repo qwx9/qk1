@@ -681,8 +681,8 @@ void M_Menu_Setup_f (void)
 	key_dest = key_menu;
 	m_state = m_setup;
 	m_entersound = true;
-	Q_strcpy(setup_myname, cl_name.string);
-	Q_strcpy(setup_hostname, hostname.string);
+	strcpy(setup_myname, cl_name.string);
+	strcpy(setup_hostname, hostname.string);
 	setup_top = setup_oldtop = ((int)cl_color.value) >> 4;
 	setup_bottom = setup_oldbottom = ((int)cl_color.value) & 15;
 }
@@ -778,12 +778,12 @@ forward:
 			goto forward;
 
 		// setup_cursor == 4 (OK)
-		if (Q_strcmp(cl_name.string, setup_myname) != 0)
+		if(strcmp(cl_name.string, setup_myname) != 0)
 			Cbuf_AddText ( va ("name \"%s\"\n", setup_myname) );
-		if (Q_strcmp(hostname.string, setup_hostname) != 0)
+		if(strcmp(hostname.string, setup_hostname) != 0)
 			Cvar_Set("hostname", setup_hostname);
-		if (setup_top != setup_oldtop || setup_bottom != setup_oldbottom)
-			Cbuf_AddText( va ("color %d %d\n", setup_top, setup_bottom) );
+		if(setup_top != setup_oldtop || setup_bottom != setup_oldbottom)
+			Cbuf_AddText(va("color %d %d\n", setup_top, setup_bottom));
 		m_entersound = true;
 		M_Menu_MultiPlayer_f ();
 		break;
@@ -1292,7 +1292,7 @@ void M_FindKeysForCommand (char *command, int *twokeys)
 		b = keybindings[j];
 		if (!b)
 			continue;
-		if (!strncmp (b, command, l) )
+		if(strncmp(b, command, l) == 0)
 		{
 			twokeys[count] = j;
 			count++;
@@ -1315,7 +1315,7 @@ void M_UnbindCommand (char *command)
 		b = keybindings[j];
 		if (!b)
 			continue;
-		if (!strncmp (b, command, l) )
+		if(strncmp(b, command, l) == 0)
 			Key_SetBinding (j, "");
 	}
 }
@@ -1591,16 +1591,16 @@ void M_Quit_Key (int key)
 
 }
 
-
-void M_Quit_Draw (void)
+void
+M_Quit_Draw(void)
 {
-	if (wasInMenus)
-	{
+	if(wasInMenus){
 		m_state = m_quit_prevstate;
 		m_recursiveDraw = true;
-		M_Draw ();
+		M_Draw();
 		m_state = m_quit;
 	}
+
 	M_DrawTextBox (56, 76, 24, 4);
 	M_Print (64, 84,  quitMessage[msgNumber*4+0]);
 	M_Print (64, 92,  quitMessage[msgNumber*4+1]);
@@ -2263,7 +2263,7 @@ void M_LanConfig_Key (int key)
 		else
 			lanConfig_cursor = 0;
 
-	l =  Q_atoi(lanConfig_portname);
+	l = atoi(lanConfig_portname);
 	if (l < 65535)
 		lanConfig_port = l;
 	sprint(lanConfig_portname, "%ud", (uint)lanConfig_port);	/* FIXME */
@@ -2806,23 +2806,22 @@ void M_Menu_ServerList_f (void)
 
 void M_ServerList_Draw (void)
 {
-	int		n;
+	int n, i, j;
 	char	string [64];
 	qpic_t	*p;
+	hostcache_t temp;
 
 	if (!slist_sorted)
 	{
 		if (hostCacheCount > 1)
 		{
-			int	i,j;
-			hostcache_t temp;
 			for (i = 0; i < hostCacheCount; i++)
 				for (j = i+1; j < hostCacheCount; j++)
-					if (strcmp(hostcache[j].name, hostcache[i].name) < 0)
+					if(strcmp(hostcache[j].name, hostcache[i].name) < 0)
 					{
-						Q_memcpy(&temp, &hostcache[j], sizeof(hostcache_t));
-						Q_memcpy(&hostcache[j], &hostcache[i], sizeof(hostcache_t));
-						Q_memcpy(&hostcache[i], &temp, sizeof(hostcache_t));
+						memcpy(&temp, &hostcache[j], sizeof temp);
+						memcpy(&hostcache[j], &hostcache[i], sizeof temp);
+						memcpy(&hostcache[i], &temp, sizeof temp);
 					}
 		}
 		slist_sorted = true;

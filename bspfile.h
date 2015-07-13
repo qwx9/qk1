@@ -31,9 +31,10 @@
 
 //=============================================================================
 
-
 #define BSPVERSION	29
 #define	TOOLVERSION	2
+
+#pragma pack on
 
 typedef struct
 {
@@ -87,12 +88,10 @@ typedef struct miptex_s
 	unsigned	offsets[MIPLEVELS];		// four mip maps stored
 } miptex_t;
 
-
 typedef struct
 {
 	float	point[3];
 } dvertex_t;
-
 
 // 0-2 are axial planes
 #define	PLANE_X			0
@@ -202,6 +201,8 @@ typedef struct
 
 	byte		ambient_level[NUM_AMBIENTS];
 } dleaf_t;
+
+#pragma pack off
 
 
 //============================================================================

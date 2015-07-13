@@ -510,43 +510,43 @@ nextmsg:
 					ret = 2;
 				else
 					ret = 0;
-				if (Q_strncasecmp(s, "status", 6) == 0)
+				if (cistrncmp(s, "status", 6) == 0)
 					ret = 1;
-				else if (Q_strncasecmp(s, "god", 3) == 0)
+				else if (cistrncmp(s, "god", 3) == 0)
 					ret = 1;
-				else if (Q_strncasecmp(s, "notarget", 8) == 0)
+				else if (cistrncmp(s, "notarget", 8) == 0)
 					ret = 1;
-				else if (Q_strncasecmp(s, "fly", 3) == 0)
+				else if (cistrncmp(s, "fly", 3) == 0)
 					ret = 1;
-				else if (Q_strncasecmp(s, "name", 4) == 0)
+				else if (cistrncmp(s, "name", 4) == 0)
 					ret = 1;
-				else if (Q_strncasecmp(s, "noclip", 6) == 0)
+				else if (cistrncmp(s, "noclip", 6) == 0)
 					ret = 1;
-				else if (Q_strncasecmp(s, "say", 3) == 0)
+				else if (cistrncmp(s, "say", 3) == 0)
 					ret = 1;
-				else if (Q_strncasecmp(s, "say_team", 8) == 0)
+				else if (cistrncmp(s, "say_team", 8) == 0)
 					ret = 1;
-				else if (Q_strncasecmp(s, "tell", 4) == 0)
+				else if (cistrncmp(s, "tell", 4) == 0)
 					ret = 1;
-				else if (Q_strncasecmp(s, "color", 5) == 0)
+				else if (cistrncmp(s, "color", 5) == 0)
 					ret = 1;
-				else if (Q_strncasecmp(s, "kill", 4) == 0)
+				else if (cistrncmp(s, "kill", 4) == 0)
 					ret = 1;
-				else if (Q_strncasecmp(s, "pause", 5) == 0)
+				else if (cistrncmp(s, "pause", 5) == 0)
 					ret = 1;
-				else if (Q_strncasecmp(s, "spawn", 5) == 0)
+				else if (cistrncmp(s, "spawn", 5) == 0)
 					ret = 1;
-				else if (Q_strncasecmp(s, "begin", 5) == 0)
+				else if (cistrncmp(s, "begin", 5) == 0)
 					ret = 1;
-				else if (Q_strncasecmp(s, "prespawn", 8) == 0)
+				else if (cistrncmp(s, "prespawn", 8) == 0)
 					ret = 1;
-				else if (Q_strncasecmp(s, "kick", 4) == 0)
+				else if (cistrncmp(s, "kick", 4) == 0)
 					ret = 1;
-				else if (Q_strncasecmp(s, "ping", 4) == 0)
+				else if (cistrncmp(s, "ping", 4) == 0)
 					ret = 1;
-				else if (Q_strncasecmp(s, "give", 4) == 0)
+				else if (cistrncmp(s, "give", 4) == 0)
 					ret = 1;
-				else if (Q_strncasecmp(s, "ban", 3) == 0)
+				else if (cistrncmp(s, "ban", 3) == 0)
 					ret = 1;
 				if (ret == 2)
 					Cbuf_InsertText (s);
@@ -596,7 +596,7 @@ void SV_RunClients (void)
 		if (!host_client->spawned)
 		{
 		// clear client movement until a new packet is received
-			memset (&host_client->cmd, 0, sizeof(host_client->cmd));
+			memset(&host_client->cmd, 0, sizeof host_client->cmd);
 			continue;
 		}
 
