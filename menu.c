@@ -217,34 +217,25 @@ void M_DrawTextBox (int x, int y, int width, int lines)
 
 int m_save_demonum;
 
-/*
-================
-M_ToggleMenu_f
-================
-*/
-void M_ToggleMenu_f (void)
+void
+M_ToggleMenu_f(void)
 {
 	m_entersound = true;
 
-	IN_Grabm(0);
-	if (key_dest == key_menu)
-	{
-		if (m_state != m_main)
-		{
-			M_Menu_Main_f ();
+	if(key_dest == key_menu){
+		if(m_state != m_main){
+			M_Menu_Main_f();
 			return;
 		}
 		key_dest = key_game;
 		m_state = m_none;
 		return;
 	}
-	if (key_dest == key_console)
-	{
-		Con_ToggleConsole_f ();
-	}
-	else
-	{
-		M_Menu_Main_f ();
+	if(key_dest == key_console)
+		Con_ToggleConsole_f();
+	else{
+		IN_Grabm(0);
+		M_Menu_Main_f();
 	}
 }
 
@@ -293,9 +284,10 @@ void M_Main_Key (int key)
 		key_dest = key_game;
 		m_state = m_none;
 		cls.demonum = m_save_demonum;
-		if (cls.demonum != -1 && !cls.demoplayback && cls.state != ca_connected)
-			CL_NextDemo ();
-		IN_Grabm(1);
+		if(cls.state != ca_connected && !cls.demoplayback && cls.demonum != -1)
+			CL_NextDemo();
+		if(cls.state == ca_connected || cls.demoplayback)
+			IN_Grabm(1);
 		break;
 
 	case K_DOWNARROW:
@@ -403,7 +395,6 @@ void M_SinglePlayer_Key (int key)
 				Cbuf_AddText ("disconnect\n");
 			Cbuf_AddText ("maxplayers 1\n");
 			Cbuf_AddText ("map start\n");
-			IN_Grabm(1);
 			break;
 
 		case 1:
@@ -531,7 +522,6 @@ void M_Load_Key (int k)
 
 	// issue the load command
 		Cbuf_AddText (va ("load s%d\n", load_cursor) );
-		IN_Grabm(1);
 		return;
 
 	case K_UPARROW:
@@ -3025,85 +3015,66 @@ void M_Draw (void)
 	VID_LockBuffer ();
 }
 
-
-void M_Keydown (int key)
+void
+M_Keydown(int key)
 {
-	switch (m_state)
-	{
+	switch(m_state){
 	case m_none:
 		return;
-
 	case m_main:
-		M_Main_Key (key);
-		return;
-
-	case m_singleplayer:
-		M_SinglePlayer_Key (key);
-		return;
-
-	case m_load:
-		M_Load_Key (key);
-		return;
-
-	case m_save:
-		M_Save_Key (key);
-		return;
-
-	case m_multiplayer:
-		M_MultiPlayer_Key (key);
-		return;
-
-	case m_setup:
-		M_Setup_Key (key);
-		return;
-
-	case m_net:
-		M_Net_Key (key);
-		return;
-
-	case m_options:
-		M_Options_Key (key);
-		return;
-
-	case m_keys:
-		M_Keys_Key (key);
-		return;
-
-	case m_video:
-		M_Video_Key (key);
-		return;
-
-	case m_help:
-		M_Help_Key (key);
-		return;
-
-	case m_quit:
-		M_Quit_Key (key);
-		return;
-
-	case m_serialconfig:
-		M_SerialConfig_Key (key);
-		return;
-
-	case m_modemconfig:
-		M_ModemConfig_Key (key);
-		return;
-
-	case m_lanconfig:
-		M_LanConfig_Key (key);
-		return;
-
-	case m_gameoptions:
-		M_GameOptions_Key (key);
-		return;
-
-	case m_search:
-		M_Search_Key (key);
+		M_Main_Key(key);
 		break;
-
+	case m_singleplayer:
+		M_SinglePlayer_Key(key);
+		break;
+	case m_load:
+		M_Load_Key(key);
+		break;
+	case m_save:
+		M_Save_Key(key);
+		break;
+	case m_multiplayer:
+		M_MultiPlayer_Key(key);
+		break;
+	case m_setup:
+		M_Setup_Key(key);
+		break;
+	case m_net:
+		M_Net_Key(key);
+		break;
+	case m_options:
+		M_Options_Key(key);
+		break;
+	case m_keys:
+		M_Keys_Key(key);
+		break;
+	case m_video:
+		M_Video_Key(key);
+		break;
+	case m_help:
+		M_Help_Key(key);
+		break;
+	case m_quit:
+		M_Quit_Key(key);
+		break;
+	case m_serialconfig:
+		M_SerialConfig_Key(key);
+		break;
+	case m_modemconfig:
+		M_ModemConfig_Key(key);
+		break;
+	case m_lanconfig:
+		M_LanConfig_Key(key);
+		break;
+	case m_gameoptions:
+		M_GameOptions_Key(key);
+		break;
+	case m_search:
+		M_Search_Key(key);
+		break;
 	case m_slist:
-		M_ServerList_Key (key);
-		return;
+		M_ServerList_Key(key);
+		break;
 	}
 }
 

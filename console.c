@@ -37,30 +37,24 @@ int			con_notifylines;		// scan lines to clear for notify lines
 
 extern void M_Menu_Main_f (void);
 
-/*
-================
-Con_ToggleConsole_f
-================
-*/
-void Con_ToggleConsole_f (void)
+
+void
+Con_ToggleConsole_f(void)
 {
-	if (key_dest == key_console)
-	{
-		if (cls.state == ca_connected)
-		{
+	if(key_dest == key_console){
+		if(cls.state == ca_connected){
 			key_dest = key_game;
 			key_lines[edit_line][1] = 0;	// clear any typing
 			key_linepos = 1;
-		}
-		else
-		{
-			M_Menu_Main_f ();
-		}
-	}
-	else
+			IN_Grabm(1);
+		}else
+			M_Menu_Main_f();
+	}else{
 		key_dest = key_console;
-	
-	SCR_EndLoadingPlaque ();
+		IN_Grabm(0);
+	}
+
+	SCR_EndLoadingPlaque();
 	memset(con_times, 0, sizeof con_times);
 }
 

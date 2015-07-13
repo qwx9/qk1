@@ -1150,7 +1150,8 @@ void SV_SpawnServer (char *server)
 	for (i=0,host_client = svs.clients ; i<svs.maxclients ; i++, host_client++)
 		if (host_client->active)
 			SV_SendServerinfo (host_client);
-	
+
+	IN_Grabm(1);
 	Con_DPrintf ("Server spawned.\n");
 }
 
