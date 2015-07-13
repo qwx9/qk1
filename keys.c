@@ -580,9 +580,7 @@ void Key_Event (int key, qboolean down)
 	key_lastpress = key;
 	key_count++;
 	if (key_count <= 0)
-	{
-		return;		// just catching keys for Con_NotifyBox
-	}
+		return;
 
 // update auto-repeat status
 	if (down)
