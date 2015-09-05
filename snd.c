@@ -5,10 +5,10 @@
 #include "quakedef.h"
 
 enum{
-	Nbuf	= 8
+	Nbuf = 8
 };
 static int afd;
-static int sndon;
+static int stid = -1;
 static uint wpos;
 static Channel *schan;
 static QLock sndlock;
@@ -17,30 +17,22 @@ static QLock sndlock;
 static void
 sproc(void *)
 {
-	int n, sz;
-
-	threadsetgrp(THsnd);
+	int n;
 
 	for(;;){
 		if(recv(schan, nil) < 0)
 			break;
-		sz = shm->samplebits/8 * shm->samples;
-		if((n = write(afd, shm->buffer, sz)) != sz)
+		if((n = write(afd, shm->buffer, SNBUF)) != SNBUF)
 			break;
 		qlock(&sndlock);
 		wpos += n;
 		qunlock(&sndlock);
 	}
-	fprint(2, "sproc %d: %r\n", threadpid(threadid()));
 }
 
 qboolean
 SNDDMA_Init(void)
 {
-	int i;
-
-	sndon = 0;
-
 	if((afd = open("/dev/audio", OWRITE)) < 0){
 		fprint(2, "open: %r\n");
 		return 0;
@@ -48,32 +40,19 @@ SNDDMA_Init(void)
 
 	shm = &sn;
 	shm->splitbuffer = 0;
-
-	if((i = COM_CheckParm("-sndbits")) != 0)
-		shm->samplebits = atoi(com_argv[i+1]);
-	if(shm->samplebits != 16 && shm->samplebits != 8)
-		shm->samplebits = 16;
-
-	if((i = COM_CheckParm("-sndspeed")) != 0)
-		shm->speed = atoi(com_argv[i+1]);
-	else
-		shm->speed = 44100;
-
-	shm->channels = 2;
-	if(COM_CheckParm("-sndmono") != 0)
-		shm->channels = 1;
-
-	shm->samples = 4096;
 	shm->submission_chunk = 1;
-
-	if((shm->buffer = mallocz(shm->samplebits/8 * shm->samples, 1)) == nil)
-		sysfatal("SNDDMA_Init:mallocz: %r\n");
+	shm->samplebits = SAMPLESZ;
+	shm->speed = RATE;
+	shm->channels = 2;
+	shm->samples = NSAMPLE;
 	shm->samplepos = 0;
-	sndon = 1;
+	if((shm->buffer = mallocz(SNBUF, 1)) == nil)
+		sysfatal("mallocz: %r\n");
+
 	wpos = 0;
 	if((schan = chancreate(sizeof(int), Nbuf)) == nil)
 		sysfatal("SNDDMA_Init:chancreate: %r");
-	if(proccreate(sproc, nil, 8192) < 0)
+	if((stid = proccreate(sproc, nil, 8192)) < 0)
 		sysfatal("SNDDMA_Init:proccreate: %r");
 	return 1;
 }
@@ -81,10 +60,10 @@ SNDDMA_Init(void)
 uint
 SNDDMA_GetDMAPos(void)
 {
-	if(!sndon)
+	if(stid < 0)
 		return 0;
 	qlock(&sndlock);
-	shm->samplepos = wpos / (shm->samplebits/8);
+	shm->samplepos = wpos / SAMPLEB;
 	qunlock(&sndlock);
 	return shm->samplepos;
 }
@@ -92,17 +71,16 @@ SNDDMA_GetDMAPos(void)
 void
 SNDDMA_Shutdown(void)
 {
-	if(!sndon)
+	if(stid < 0)
 		return;
 
-	threadkillgrp(THsnd);
+	threadint(stid);
+	stid = -1;
 	close(afd);
 	free(shm->buffer);
-	if(schan != nil){
+	if(schan != nil)
 		chanfree(schan);
-		schan = nil;
-	}
-	sndon = 0;
+	schan = nil;
 }
 
 void

@@ -21,7 +21,7 @@ int			total_channels;
 
 int				snd_blocked = 0;
 static qboolean	snd_ambient = 1;
-qboolean		snd_initialized = false;
+static qboolean	snd_initialized;
 
 // pointer should go away
 volatile dma_t *shm;

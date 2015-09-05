@@ -1,7 +1,12 @@
 // sound.h -- client sound i/o functions
 
-#ifndef __SOUND__
-#define __SOUND__
+enum{
+	NSAMPLE = 4096,
+	SAMPLESZ = 16,
+	SAMPLEB = SAMPLESZ / 8,
+	RATE = 44100,
+	SNBUF = SAMPLEB * NSAMPLE
+};
 
 #define DEFAULT_SOUND_PACKET_VOLUME 255
 #define DEFAULT_SOUND_PACKET_ATTENUATION 1.0
@@ -140,8 +145,6 @@ extern	cvar_t loadas8bit;
 extern	cvar_t bgmvolume;
 extern	cvar_t volume;
 
-extern qboolean	snd_initialized;
-
 extern int		snd_blocked;
 
 void S_LocalSound (char *s);
@@ -154,5 +157,3 @@ void SNDDMA_Submit(void);
 
 void S_AmbientOff (void);
 void S_AmbientOn (void);
-
-#endif

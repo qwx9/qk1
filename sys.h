@@ -2,7 +2,6 @@
 
 enum{
 	THin	= 1,
-	THsnd	= 2,
 	THnet	= 3
 };
 
