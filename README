@@ -59,7 +59,7 @@ shitty workarounds and other bullshit
 - pr_strings assumed 32bit pointer arithmetic, so enter PR_GetStr(), which
   completely sucks
 - text and code seen as useless for plan9 nuked from orbit (cpp defs, etc.)
-- arbitrary resolution limit (r_shared.h): 4096x4096 (was 1280x1024), which
+- arbitrary resolution limit (r_shared.h): 2048x2048 (was 1280x1024), which
   inflates e.g. a bunch of arrays in the code
 - mouse handling is too heavy, all for the purpose of not letting the mouse
   escape the window too easily (and the kludged up shit could probably be
