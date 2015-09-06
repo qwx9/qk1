@@ -11,6 +11,7 @@ static int cdvol;
 static int chtrk;
 static int ntrk;
 static int trk;
+static char trtype;
 static int ctid = -1;
 static Reprog *pat;
 
@@ -29,8 +30,11 @@ cdinfo(void)
 		goto err;
 	close(fd);
 	for(i = 0; i < n; i++)
-		if(regexec(pat, d[i].name, nil, 0))
+		if(regexec(pat, d[i].name, nil, 0)){
+			if(!trtype)
+				trtype = d[i].name[0];
 			ntrk++;
+		}
 	free(d);
 	if(ntrk < 1)
 		return -1;
@@ -57,7 +61,7 @@ cproc(void *)
 		if(chtrk > 0){
 			close(fd);
 			trk = chtrk;
-			snprint(s, sizeof s, "/mnt/cd/a%03ud", trk);
+			snprint(s, sizeof s, "/mnt/cd/%c%03ud", trtype, trk);
 			if((fd = open(s, OREAD)) < 0)
 				fprint(2, "cproc: %r");
 			chtrk = 0;
@@ -93,6 +97,7 @@ CDAudio_Play(byte nt, qboolean loop)
 {
 	if(ctid < 0)
 		return;
+	nt -= 1;	/* d001 was assumed part of the track list */
 	if(nt < 1 || nt > ntrk){
 		Con_Printf("cd: invalid track number %ud\n", nt);
 		return;
@@ -147,7 +152,7 @@ CD_f(void)
 		CDAudio_Resume();
 		return;
 	}else if(cistrcmp(cmd, "info") == 0){
-		Con_Printf("track %ud/%ud; loop %d; vol %f\n", trk, ntrk, cdloop, cdvol);
+		Con_Printf("track %ud/%ud; loop %d; vol %d\n", trk, ntrk, cdloop, cdvol);
 		return;
 	}
 }
@@ -170,7 +175,7 @@ CDAudio_Init(void)
 {
 	if(cls.state == ca_dedicated)
 		return -1;
-	pat = regcomp("a[0-9][0-9][0-9]");
+	pat = regcomp("[au][0-9][0-9][0-9]");
 	if(cdinfo() < 0)
 		return -1;
 	if((ctid = proccreate(cproc, nil, 16384)) < 0)

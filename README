@@ -19,7 +19,7 @@ $gamename is 'id1' for plain old quake.
 
 % quake
 
-qk1 reads /mnt/cd/aNNN files as in cdfs(1) to play music. the directory needn't
+qk1 reads /mnt/cd/[au]NNN files as in cdfs(1) to play music. the directory needn't
 be populated by cdfs(1), so long as the files are in the format described by
 audio(3). this currently requires the use of mixfs(1).
 
