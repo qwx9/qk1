@@ -132,9 +132,9 @@ resetfb(void)
 	D_InitCaches(surfcache, scachesz);
 
 	free(framebuf);
-	framebuf = emalloc(Dx(screen->r) * Dy(screen->r) * screen->depth/8 * sizeof *framebuf);
+	framebuf = emalloc(Dx(screen->r) * Dy(screen->r) * 32/8 * sizeof *framebuf);
 	vid.buffer = framebuf;
-	vid.rowbytes = Dx(screen->r) * screen->depth/8;
+	vid.rowbytes = Dx(screen->r) * 32/8;
 	vid.aspect = (float)vid.height / (float)vid.width * (320.0/240.0);
 	vid.conbuffer = vid.buffer;
 	vid.conrowbytes = vid.rowbytes;
@@ -142,7 +142,7 @@ resetfb(void)
 	vid.conheight = vid.height;
 	center = addpt(screen->r.min, Pt(Dx(screen->r)/2, Dy(screen->r)/2));
 	freeimage(fbim);
-	if((fbim = allocimage(display, Rect(0, 0, vid.width, vid.height), screen->chan, 1, DNofill)) == nil)
+	if((fbim = allocimage(display, Rect(0, 0, vid.width, vid.height), XRGB32, 1, DNofill)) == nil)
 		sysfatal("resetfb:allocimage: %r");
 }
 
