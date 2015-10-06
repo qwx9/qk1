@@ -1,17 +1,17 @@
 qk1 - (9) quake
 ===============
-port of linux/x11 quake to plan9front. tested on amd64 and 386 only.
-currently lacks networking. save for a rare crash and some stupid bugs,
-it works and plays reasonably well. on my machines.
+Port of linux/x11 quake to plan9front. Tested on amd64 and 386 only.
+Currently lacks networking. Save for a rare crash and some stupid bugs, it works
+and plays reasonably well. On my machines.
 
 
-installation
+Installation
 ------------
-besides building and installing qk1, you still need .pak files to play. both
+Besides building and installing qk1, you still need .pak files to play. Both
 shareware and registered versions (should) work, as well as the official
 expansions, and mods.
-the data files are to be installed in $home/lib/quake/$gamename, where
-$gamename is 'id1' for plain old quake.
+The data files are to be installed in $home/lib/quake/$gamename, where $gamename
+is 'id1' for plain old quake.
 
 % mk install
 % mkdir -p $home/lib/quake/id1
@@ -19,57 +19,75 @@ $gamename is 'id1' for plain old quake.
 
 % quake
 
-qk1 reads /mnt/cd/[au]NNN files as in cdfs(1) to play music. the directory needn't
-be populated by cdfs(1), so long as the files are in the format described by
-audio(3). this currently requires the use of mixfs(1).
+By default, qk1 allocates 8 MB of memory for its internal heap. This amount can
+be controlled via the -mem command line parameter like so:
 
-installing an expansion or mod, for example rogue:
+% quake -mem 16
+
+It is necessary to increase it when playing on larger resolutions, else qk1
+might crash with errors such as 'Hunk_Alloc: failed on 548512 bytes'.
+
+qk1 reads /mnt/cd/[au]NNN files as in cdfs(1) to play music. The directory
+needn't be populated by cdfs(1), so long as the files are in the format
+described by audio(3). This currently requires the use of mixfs(1).
+
+Installing an expansion or mod, for example rogue:
 
 % mkdir $home/lib/quake/rogue
 % cp /n/roguecd/*.pak $home/lib/quake/rogue
 
-then start with:
+Then start with:
 
 % quake -game rogue
 
 
-todo/bugs
+Todo/bugs
 ---------
 - udp/ip, plan9 style
+- port quakeworld: mkmany, merging common code
+- don't use threadkill like an idiot
 - sound: don't require mixfs and fix soundbuffer write race
+- lurking fuckups cause a window whiteout on exit, probably in proc management
 - crash in d_sprite.c:D_SpriteDrawSpans after several hours of looping the
   demos
+- (amd64) entities visible through walls right when emerging from/immerging into
+  water
+- handle mousewheel
+- fix mouse handling better: don't just fprint all the time
+- (?) add keyboard autorepeat for console?
 - resolutions other than 4:3: some vertical and horizontal strips on the edge
   of the screen aren't drawn
 - console print recently screwed anew; console color print still screwed up
   (printf/print differences)
 - #define PARANOID reveals several points of failure that are otherwise ignored
 - (?) sprites not scaled correctly on higher resolutions
-- screenshot code outputs garbage
 - more testing, cleanups and bug fixes (g '/\* FIXME')
-- (bjnh) bring asm for 386/amd64 back
+- manpage
+- (bjnh) bring asm for 386/amd64 back, write asm for arm
 - (bjnh) style(6)
 - (bjnh) make it run super fast on a pentium 2
 - (bjnh) redesign everything to be super cool (e.g. pakfs, console shit,
   args, etc.)
 
 
-differences with x11/linux original release
+Differences with x11/linux original release
 -------------------------------------------
-- no fullscreen; screen resolution is just the window's dimensions;
-  any resolution (under the r_shared.h limits) is allowed; resize
-  by dragging window edges; removed -winsize, -height, -width
+- removed cvars:
+	-winsize, -height, -width
+	-condebug, -nostdout: useless
+	-record, -playback: broken and unused
+	-sndbits, -sndspeed, -sndmono
+	-cddev, -nocdaudio
+- no fullscreen; screen resolution is just the window's dimensions; any
+  resolution (under the r_shared.h limits) is allowed; resize by dragging window
+  edges
 - some stupid kbd/mouse bugs fixed; mouse grabbing actually grabs the mouse
-- removed -condebug, -nostdout: useless in plan9 (and unix?)
 - added m_windowed cvar (replacing _windowed_mouse), for mouse grabbing
 - ungrabs the mouse when main menu is accessed
-- removed -record, -playback: broken and unused
-- removed -sndbits, -sndspeed, -sndmono
-- removed -cddev -nocdaudio; cdaudio is just reading files
-- removed cd [on|off|reset|remap]: not quake's problem
+- removed cd [on|off|reset|remap] commands: not quake's problem
 
 
-shitty workarounds and other bullshit
+Shitty workarounds and other bullshit
 -------------------------------------
 - #pragma pack for stuff (structs) loaded from files
 - pr_strings assumed 32bit pointer arithmetic, so enter PR_GetStr(), which
@@ -82,8 +100,10 @@ shitty workarounds and other bullshit
   done better)
 - removal of stdio stuff probably not really warranted and possibly introduced
   bugs
+- pcx screenshots: the only reason to keep this code around is to be able to do
+  screenshots without tearing. that's it.
 
 
-legal
+Legal
 -----
 Quake, hence qk1, is licensed under the GPLv2. see COPYING for details.
