@@ -7,7 +7,7 @@
 #include <keyboard.h>
 #include "quakedef.h"
 
-/* vid_9.c */
+/* vid.c */
 extern int resized;
 extern Point center;
 
@@ -33,7 +33,6 @@ static float oldmx;
 static float oldmy;
 static int mb;
 static int oldmb;
-static int iop;
 static int pfd[2];
 
 
@@ -43,8 +42,6 @@ Sys_ConsoleInput(void)
 	char buf[256];
 
 	if(cls.state == ca_dedicated){
-		if(iop < 0)
-			return nil;
 		if(flen(pfd[1]) < 1)	/* only poll for input */
 			return nil;
 		if(read(pfd[1], buf, sizeof buf) < 0)
@@ -240,6 +237,7 @@ mproc(void *)
 	for(;;){
 		if((n = read(fd, buf, sizeof buf)) != 1+4*12){
 			fprint(2, "mproc:read: bad count %d not 49: %r\n", n);
+			sleep(1);	/* why */
 			if(n < 0 || ++nerr > 10)
 				break;
 			continue;
@@ -253,6 +251,9 @@ mproc(void *)
 			if(!mouseon)
 				break;
 
+			/* FIXME: this sucks: mouse movement is much smoother
+			 * and cursor rarely escapes the window, at the expense
+			 * of much more cpu and devmouse use */
 			x = atoi(buf+1+0*12) - center.x;
 			y = atoi(buf+1+1*12) - center.y;
 			b = atoi(buf+1+2*12);
@@ -277,8 +278,6 @@ iproc(void *)
 
 	threadsetgrp(THin);
 
-	if((iop = pipe(pfd)) < 0)
-		sysfatal("iproc:pipe: %r");
 	for(;;){
 		if((n = read(0, s, sizeof s)) <= 0)
 			break;
@@ -286,7 +285,6 @@ iproc(void *)
 		if((write(pfd[0], s, n)) != n)
 			break;
 	}
-	fprint(2, "iproc %d: %r\n", threadpid(threadid()));
 }
 
 void
@@ -313,7 +311,7 @@ void
 IN_Shutdown(void)
 {
 	IN_Grabm(0);
-	threadkillgrp(THin);
+	threadintgrp(THin);
 	close(pfd[0]);
 	close(pfd[1]);
 	if(kchan != nil){
@@ -326,6 +324,8 @@ void
 IN_Init(void)
 {
 	if(cls.state == ca_dedicated){
+		if(pipe(pfd) < 0)
+			sysfatal("iproc:pipe: %r");
 		if(proccreate(iproc, nil, 8192) < 0)
 			sysfatal("proccreate iproc: %r");
 		return;

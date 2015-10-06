@@ -45,9 +45,7 @@ Todo/bugs
 ---------
 - udp/ip, plan9 style
 - port quakeworld: mkmany, merging common code
-- don't use threadkill like an idiot
 - sound: don't require mixfs and fix soundbuffer write race
-- lurking fuckups cause a window whiteout on exit, probably in proc management
 - crash in d_sprite.c:D_SpriteDrawSpans after several hours of looping the
   demos
 - (amd64) entities visible through walls right when emerging from/immerging into
