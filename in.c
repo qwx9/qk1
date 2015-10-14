@@ -68,7 +68,7 @@ Sys_SendKeyEvents(void)
 	while((r = nbrecv(kchan, &ev)) > 0)
 		Key_Event(ev.key, ev.down);
 	if(r < 0)
-		fprint(2, "Sys_SendKeyEvents:nbrecv: %r\n");
+		fprint(2, "Sys_SendKeyEvents: %r\n");
 }
 
 void
@@ -196,7 +196,7 @@ kproc(void *)
 						ev.key = k;
 						ev.down = true;
 						if(nbsend(kchan, &ev) < 0)
-							fprint(2, "kproc:nbsend: %r\n");
+							fprint(2, "kproc: %r\n");
 					}
 				}
 			}
@@ -210,7 +210,7 @@ kproc(void *)
 						ev.key = k;
 						ev.down = false;
 						if(nbsend(kchan, &ev) < 0)
-							fprint(2, "kproc:nbsend: %r\n");
+							fprint(2, "kproc: %r\n");
 					}
 				}
 			}
@@ -218,7 +218,6 @@ kproc(void *)
 		}
 		strcpy(kdown, buf);
 	}
-	close(fd);
 }
 
 static void
@@ -236,10 +235,9 @@ mproc(void *)
 	nerr = 0;
 	for(;;){
 		if((n = read(fd, buf, sizeof buf)) != 1+4*12){
-			fprint(2, "mproc:read: bad count %d not 49: %r\n", n);
-			sleep(1);	/* why */
 			if(n < 0 || ++nerr > 10)
 				break;
+			fprint(2, "mproc: bad count %d not 49: %r\n", n);
 			continue;
 		}
 		nerr = 0;
@@ -267,7 +265,6 @@ mproc(void *)
 			break;
 		}
 	}
-	close(fd);
 }
 
 static void

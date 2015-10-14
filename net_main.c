@@ -754,9 +754,9 @@ void NET_Init (void)
 		}
 
 	if (*my_ipx_address)
-		Con_DPrintf("IPX address %s\n", my_ipx_address);
+		print("IPX address %s\n", my_ipx_address);
 	if (*my_tcpip_address)
-		Con_DPrintf("TCP/IP address %s\n", my_tcpip_address);
+		print("TCP/IP address %s\n", my_tcpip_address);
 }
 
 /*

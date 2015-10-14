@@ -45,7 +45,7 @@ Todo/bugs
 ---------
 - udp/ip, plan9 style
 - port quakeworld: mkmany, merging common code
-- sound: don't require mixfs and fix soundbuffer write race
+- sound: don't require mixfs (for cdaudio) and fix soundbuffer write race
 - crash in d_sprite.c:D_SpriteDrawSpans after several hours of looping the
   demos
 - (amd64) entities visible through walls right when emerging from/immerging into
@@ -76,13 +76,14 @@ Differences with x11/linux original release
 	-record, -playback: broken and unused
 	-sndbits, -sndspeed, -sndmono
 	-cddev, -nocdaudio
+	-developer
 - no fullscreen; screen resolution is just the window's dimensions; any
   resolution (under the r_shared.h limits) is allowed; resize by dragging window
   edges
 - some stupid kbd/mouse bugs fixed; mouse grabbing actually grabs the mouse
 - added m_windowed cvar (replacing _windowed_mouse), for mouse grabbing
-- ungrabs the mouse when main menu is accessed
-- removed cd [on|off|reset|remap] commands: not quake's problem
+- ungrabs the mouse when main menu or console is accessed
+- removed cd [on|off|reset|remap|eject] commands: not quake's problem
 
 
 Shitty workarounds and other bullshit

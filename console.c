@@ -205,16 +205,11 @@ void Con_Linefeed (void)
 	memset(&con_text[(con_current%con_totallines)*con_linewidth], ' ', con_linewidth);
 }
 
-/*
-================
-Con_Print
-
-Handles cursor positioning, line wrapping, etc
-All console printing must go through this in order to be logged to disk
-If no console is visible, the notify window will pop up.
-================
-*/
-void Con_Print (char *txt)
+/* handles cursor positioning, line wrapping, etc. all console printing must go
+ * through this in order to be logged to disk. if no console is visible, the
+ * notify window will pop up. */
+static void
+Con_Print(char *txt)
 {
 	int		y;
 	int		c, l;
@@ -290,29 +285,35 @@ void Con_Print (char *txt)
 	}
 }
 
+/* all this because of the color printing hack */
+static void
+print1(char *s, int n)
+{
+	char buf[4096], *p, *d;
 
-#define	MAXPRINTMSG	4096
+	p = s;
+	d = buf;
+	while(*p)
+		*d++ = *p++ & 0x7f;
+	write(1, buf, n);
+}
 
 /* Handles cursor positioning, line wrapping, etc */
 void
 Con_Printf(char *fmt, ...)
 {
+	int n;
 	va_list arg;
-	char c, *p, msg[MAXPRINTMSG];
+	char msg[4096];
 	static qboolean	inupdate;
 
 	/* FIXME: Con_Print() above uses 1<<7 bit for color printing select
 	 * letters, notably in mods. this does not amuse print(2) (dofmt()?). */
 	va_start(arg, fmt);
-	vsnprintf(msg, sizeof msg, fmt, arg);
+	n = vsnprintf(msg, sizeof msg, fmt, arg);
 	va_end(arg);
-	for(p = msg; *p; p++){
-		c = *p & 0x7f;
-		if(c < 32 && c != 10 && c != 13 && c != 9)
-			print("[%02x]", c);
-		else
-			print("%c", c);
-	}
+
+	print1(msg, n);
 
 	if(!con_initialized)
 		return;
@@ -322,7 +323,7 @@ Con_Printf(char *fmt, ...)
 
 // write it to the scrollable buffer
 	Con_Print(msg);
-	
+
 // update the screen if the console is displayed
 	if(cls.signon != SIGNONS && !scr_disabled_for_loading){
 		/* protect against infinite loop if something in
@@ -333,22 +334,6 @@ Con_Printf(char *fmt, ...)
 			inupdate = false;
 		}
 	}
-}
-
-void
-Con_DPrintf(char *fmt, ...)
-{
-	va_list arg;
-	char s[MAXPRINTMSG];
-
-	if(!developer.value)
-		return;	// don't confuse non-developers with techie stuff...
-
-	va_start(arg, fmt);
-	vsnprint(s, sizeof s, fmt, arg);
-	va_end(arg);
-
-	Con_Printf("%s", s);
 }
 
 /*

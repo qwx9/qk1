@@ -6,13 +6,11 @@ enum{
 };
 
 void	Sys_Error(char *, ...);
-void	Sys_Printf(char *, ...);
 void	Sys_Quit(void);
 void	Sys_LowFPPrecision(void);
 void	Sys_HighFPPrecision(void);
 void*	emalloc(ulong);
 ulong	Sys_FileTime(char *);
-void	Sys_mkdir(char *);
 vlong	flen(int);
 void	eread(int, void *, long);
 void	ewrite(int, void *, long);

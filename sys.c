@@ -56,25 +56,6 @@ static char end2[] =
 
 
 void
-Sys_Printf(char *fmt, ...)
-{
-	char buf[1024], *p;
-	va_list arg;
-
-	va_start(arg, fmt);
-	vsnprint(buf, sizeof buf, fmt, arg);
-	va_end(arg);
-
-	for(p = buf; *p; p++){
-		*p &= 0x7f;
-		if(*p < 32 && *p != 10 && *p != 13 && *p != 9)
-			print("[%02x]", *p);
-		else
-			print("%c", *p);
-	}
-}
-
-void
 Sys_Quit(void)
 {
 	Host_Shutdown();
@@ -107,27 +88,11 @@ Sys_FileTime(char *path)
 	ulong t;
 	Dir *d;
 
-	if((d = dirstat(path)) == nil){
-		fprint(2, "dirstat: %r");
+	if((d = dirstat(path)) == nil)
 		return -1;
-	}
 	t = d->mtime;
 	free(d);
 	return t;
-}
-
-void
-Sys_mkdir(char *path)
-{
-	int d;
-
-	/* don't care if it isn't a directory, caller doesn't check */
-	if(access(path, AEXIST) == 0)
-		return;
-	if((d = create(path, OREAD, DMDIR|0777)) < 0)
-		fprint(2, "Sys_mkdir:create: %r\n");
-	else
-		close(d);
 }
 
 vlong

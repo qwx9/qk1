@@ -176,7 +176,7 @@ void SV_SendServerinfo (client_t *client)
 	char			message[2048];
 
 	MSG_WriteByte (&client->message, svc_print);
-	sprint (message, "%c\nVERSION %4.2f SERVER (%ud CRC)", 2, VERSION, pr_crc);
+	sprint(message, "%c\nVERSION %4.2f SERVER (%ud CRC)\n", 2, VERSION, pr_crc);
 	MSG_WriteString (&client->message,message);
 
 	MSG_WriteByte (&client->message, svc_serverinfo);
@@ -234,7 +234,7 @@ void SV_ConnectClient (int clientnum)
 
 	client = svs.clients + clientnum;
 
-	Con_DPrintf("Client %s connected\n", client->netconnection->address);
+	print("client %s connected\n", client->netconnection->address);
 
 	edictnum = clientnum+1;
 
@@ -1018,7 +1018,7 @@ void SV_SpawnServer (char *server)
 		Cvar_Set ("hostname", "UNNAMED");
 	scr_centertime_off = 0;
 
-	Con_DPrintf ("SpawnServer: %s\n",server);
+	print("SV_SpawnServer: %s\n", server);
 	svs.changelevel_issued = false;		// now safe to issue another
 
 //
@@ -1152,6 +1152,6 @@ void SV_SpawnServer (char *server)
 			SV_SendServerinfo (host_client);
 
 	IN_Grabm(1);
-	Con_DPrintf ("Server spawned.\n");
+	print("server spawned\n");
 }
 

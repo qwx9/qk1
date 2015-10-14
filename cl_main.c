@@ -96,7 +96,7 @@ void CL_Disconnect (void)
 		if (cls.demorecording)
 			CL_Stop_f ();
 
-		Con_DPrintf ("Sending clc_disconnect\n");
+		print("CL_Disconnect: sending clc_disconnect...\n");
 		SZ_Clear (&cls.message);
 		MSG_WriteByte (&cls.message, clc_disconnect);
 		NET_SendUnreliableMessage (cls.netcon, &cls.message);
@@ -142,7 +142,7 @@ void CL_EstablishConnection (char *host)
 	cls.netcon = NET_Connect (host);
 	if (!cls.netcon)
 		Host_Error ("CL_Connect: connect failed\n");
-	Con_DPrintf ("CL_EstablishConnection: connected to %s\n", host);
+	print("CL_EstablishConnection: connected to %s\n", host);
 	
 	cls.demonum = -1;			// not in the demo loop now
 	cls.state = ca_connected;
@@ -160,7 +160,7 @@ void CL_SignonReply (void)
 {
 	char 	str[8192];
 
-Con_DPrintf ("CL_SignonReply: %d\n", cls.signon);
+	print("CL_SignonReply: got %d\n", cls.signon);
 
 	switch (cls.signon)
 	{
@@ -658,7 +658,7 @@ void CL_SendCmd (void)
 	
 	if (!NET_CanSendMessage (cls.netcon))
 	{
-		Con_DPrintf ("CL_WriteToServer: can't send\n");
+		fprint(2, "CL_WriteToServer: can't send\n");
 		return;
 	}
 

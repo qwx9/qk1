@@ -862,15 +862,11 @@ void PF_findradius (void)
 	RETURN_EDICT(chain);
 }
 
-
-/*
-=========
-PF_dprint
-=========
-*/
-void PF_dprint (void)
+void
+PF_dprint(void)
 {
-	Con_DPrintf ("%s",PF_VarString(0));
+	/* just always print it, but not on the console */
+	fprint(2, "%s", PF_VarString(0));
 }
 
 char	pr_string_temp[128];

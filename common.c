@@ -966,31 +966,27 @@ COM_WriteFile(char *filename, void *data, int len)
 
 	snprint(path, sizeof path, "%s/%s", com_gamedir, filename);
 	if((fd = create(path, OWRITE, 0666)) < 0)
-		sysfatal("COM_WriteFile:create: %r");
-
-	Sys_Printf("COM_WriteFile: %s\n", path);
+		sysfatal("COM_WriteFile: %r");
 	ewrite(fd, data, len);
 	close(fd);
 }
 
-/*
-============
-COM_CreatePath
-
-Only used for CopyFile
-============
-*/
-void    COM_CreatePath (char *path)
+/* create directories needed to resolve a path */
+static void
+mkdirp(char *path)
 {
-	char    *ofs;
-	
-	for (ofs = path+1 ; *ofs ; ofs++)
-	{
-		if (*ofs == '/')
-		{       // create the directory
-			*ofs = 0;
-			Sys_mkdir (path);
-			*ofs = '/';
+	int fd;
+	char *s;
+
+	for(s = path+1; *s; s++){
+		if(*s == '/'){     
+			*s = 0;
+			if(access(path, AEXIST) < 0){
+				if((fd = create(path, OREAD, DMDIR|0777)) < 0)
+					sysfatal("mkdirp: %r");
+				close(fd);
+			}
+			*s = '/';
 		}
 	}
 }
@@ -1009,9 +1005,9 @@ COM_CopyFile(char *netpath, char *cachepath)
 		sysfatal("COM_CopyFile:open: %r");
 	remaining = flen(in);
 
-	COM_CreatePath(cachepath);	// create directories up to the cache file
+	mkdirp(cachepath);
 	if((out = create(cachepath, OWRITE, 0666)) < 0)
-		sysfatal("COM_CopyFile:create: %r");
+		sysfatal("COM_CopyFile: %r");
 
 	while(remaining){
 		if(remaining < sizeof buf)
@@ -1069,7 +1065,6 @@ int COM_FindFile (char *filename, int *handle, FILE **file)
 			for (i=0 ; i<pak->numfiles ; i++)
 				if(strcmp(pak->files[i].name, filename) == 0)
 				{       // found it!
-					Sys_Printf ("PackFile: %s : %s\n",pak->filename, filename);
 					if (handle)
 					{
 						*handle = pak->handle;
@@ -1114,7 +1109,6 @@ int COM_FindFile (char *filename, int *handle, FILE **file)
 				strcpy (netpath, cachepath);
 			}
 
-			Sys_Printf("FindFile: %s\n", netpath);
 			com_filesize = -1;
 			if((i = open(netpath, OREAD)) < 0)
 				fprint(2, "COM_FindFile:open: %r\n");
@@ -1129,12 +1123,11 @@ int COM_FindFile (char *filename, int *handle, FILE **file)
 				*file = fopen (netpath, "rb");
 			}
 			return com_filesize;
-		}
-		
+		}	
 	}
-	
-	Sys_Printf ("FindFile: can't find %s\n", filename);
-	
+
+	fprint(2, "FindFile: no such file %s\n", filename);
+
 	if (handle)
 		*handle = -1;
 	else
@@ -1299,7 +1292,7 @@ pack_t *COM_LoadPackFile (char *packfile)
 	unsigned short          crc;
 
 	if((packhandle = open(packfile, OREAD)) < 0){
-		fprint(2, "open: %r\n");
+		fprint(2, "COM_LoadPackFile: %r\n");
 		return nil;
 	}
 	eread(packhandle, &header, sizeof header);

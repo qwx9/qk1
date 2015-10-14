@@ -50,8 +50,6 @@ cvar_t	teamplay = {"teamplay","0",false,true};
 cvar_t	samelevel = {"samelevel","0"};
 cvar_t	noexit = {"noexit","0",false,true};
 
-cvar_t	developer = {"developer","0"};
-
 cvar_t	skill = {"skill","1"};						// 0 - 3
 cvar_t	deathmatch = {"deathmatch","0"};			// 0, 1, or 2
 cvar_t	coop = {"coop","0"};			// 0 or 1
@@ -75,7 +73,7 @@ void Host_EndGame (char *fmt, ...)
 	vsnprint(s, sizeof s, fmt, arg);
 	va_end(arg);
 
-	Con_DPrintf("Host_EndGame: %s\n", s);
+	print("Host_EndGame: %s\n", s);
 
 	if(sv.active)
 		Host_ShutdownServer(false);
@@ -197,7 +195,6 @@ void Host_InitLocal (void)
 	Cvar_RegisterVariable (&samelevel);
 	Cvar_RegisterVariable (&noexit);
 	Cvar_RegisterVariable (&skill);
-	Cvar_RegisterVariable (&developer);
 	Cvar_RegisterVariable (&deathmatch);
 	Cvar_RegisterVariable (&coop);
 
@@ -339,7 +336,7 @@ void SV_DropClient (qboolean crash)
 			pr_global_struct->self = saveSelf;
 		}
 
-		Sys_Printf ("Client %s removed\n",host_client->name);
+		print("client %s removed\n", host_client->name);
 	}
 
 // break the net connection
@@ -450,7 +447,7 @@ not reinitialize anything.
 */
 void Host_ClearMemory (void)
 {
-	Con_DPrintf ("Clearing memory\n");
+	print("Clearing memory\n");
 	D_FlushCaches ();
 	Mod_ClearAll ();
 	if (host_hunklevel)
@@ -758,9 +755,7 @@ void Host_Init (quakeparms_t *parms)
 	Hunk_AllocName (0, "-HOST_HUNKLEVEL-");
 	host_hunklevel = Hunk_LowMark ();
 
-	host_initialized = true;
-	
-	Sys_Printf ("========Quake Initialized=========\n");	
+	host_initialized = true;	
 }
 
 
@@ -797,6 +792,5 @@ void Host_Shutdown(void)
 	{
 		VID_Shutdown();
 	}
-	IN_Shutdown();
 }
 

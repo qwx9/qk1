@@ -42,7 +42,7 @@ cdinfo(void)
 
 err:
 	close(fd);
-	fprint(2, "cdinfo: %r");
+	fprint(2, "cdinfo: %r\n");
 	return -1;
 }
 

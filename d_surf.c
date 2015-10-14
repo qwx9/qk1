@@ -190,21 +190,15 @@ D_CheckCacheGuard ();   // DEBUG
 	return new;
 }
 
-
-/*
-=================
-D_SCDump
-=================
-*/
-void D_SCDump (void)
+void
+D_SCDump(void)
 {
-	surfcache_t             *test;
+	surfcache_t *s;
 
-	for (test = sc_base ; test ; test = test->next)
-	{
-		if (test == sc_rover)
-			Sys_Printf ("ROVER:\n");
-		print ("%p : %d bytes     %ud width\n",test, test->size, test->width);
+	for(s = sc_base; s != nil; s = s->next){
+		if(s == sc_rover)
+			print("ROVER:\n");
+		print("%p : %d bytes     %ud width\n", s, s->size, s->width);
 	}
 }
 

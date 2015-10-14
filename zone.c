@@ -738,42 +738,12 @@ void Cache_Flush (void)
 		Cache_Free ( cache_head.next->user );	// reclaim the space
 }
 
-
-/*
-============
-Cache_Print
-
-============
-*/
-void Cache_Print (void)
+void
+Cache_Report(void)
 {
-	cache_system_t	*cd;
-
-	for (cd = cache_head.next ; cd != &cache_head ; cd = cd->next)
-	{
-		Con_Printf ("%8d : %s\n", cd->size, cd->name);
-	}
-}
-
-/*
-============
-Cache_Report
-
-============
-*/
-void Cache_Report (void)
-{
-	Con_DPrintf ("%4.1f megabyte data cache\n", (hunk_size - hunk_high_used - hunk_low_used) / (float)(1024*1024) );
-}
-
-/*
-============
-Cache_Compact
-
-============
-*/
-void Cache_Compact (void)
-{
+	print("%4.1f megabyte data cache\n",
+		(hunk_size - hunk_high_used - hunk_low_used)
+		/ (float)(1024*1024));
 }
 
 /*
