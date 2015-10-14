@@ -75,8 +75,11 @@ cproc(void *)
 		if(n == 0){
 			if(cdloop)
 				seek(fd, 0, 0);
-			else
-				break;
+			else{
+				close(fd);
+				fd = -1;
+			}
+			continue;
 		}
 		p = (short *)buf;
 		while((uintptr)p < (uintptr)(buf + sizeof buf)){
