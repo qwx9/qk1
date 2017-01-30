@@ -86,7 +86,7 @@ typedef struct
 	cactive_t	state;
 
 // personalization data sent to server	
-	char		mapstring[MAX_QPATH];
+	char		mapstring[Npath];
 	char		spawnparms[MAX_MAPSTRING];	// to restart a level
 
 // demo loop control
@@ -99,7 +99,6 @@ typedef struct
 	qboolean	demoplayback;
 	qboolean	timedemo;
 	int			forcetrack;			// -1 = use normal cd track
-	FILE		*demofile;
 	int			td_lastframe;		// to meter out one message a frame
 	int			td_startframe;		// host_framecount at start
 	float		td_starttime;		// realtime at second frame of timedemo
@@ -220,8 +219,6 @@ extern	cvar_t	cl_pitchspeed;
 
 extern	cvar_t	cl_anglespeedkey;
 
-extern	cvar_t	cl_autofire;
-
 extern	cvar_t	cl_shownet;
 extern	cvar_t	cl_nolerp;
 
@@ -304,17 +301,6 @@ void CL_BaseMove (usercmd_t *cmd);
 
 float CL_KeyState (kbutton_t *key);
 char *Key_KeynumToString (int keynum);
-
-//
-// cl_demo.c
-//
-void CL_StopPlayback (void);
-int CL_GetMessage (void);
-
-void CL_Stop_f (void);
-void CL_Record_f (void);
-void CL_PlayDemo_f (void);
-void CL_TimeDemo_f (void);
 
 //
 // cl_parse.c

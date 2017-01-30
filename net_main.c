@@ -140,7 +140,7 @@ void NET_FreeQSocket(qsocket_t *sock)
 				break;
 			}
 		if (!s)
-			Sys_Error ("NET_FreeQSocket: not active\n");
+			fatal ("NET_FreeQSocket: not active\n");
 	}
 
 	// add it to free list
@@ -202,9 +202,9 @@ static void MaxPlayers_f (void)
 
 	svs.maxclients = n;
 	if (n == 1)
-		Cvar_Set ("deathmatch", "0");
+		setcvar ("deathmatch", "0");
 	else
-		Cvar_Set ("deathmatch", "1");
+		setcvar ("deathmatch", "1");
 }
 
 
@@ -699,7 +699,7 @@ void NET_Init (void)
 		if (i < com_argc-1)
 			DEFAULTnet_hostport = atoi(com_argv[i+1]);
 		else
-			Sys_Error ("NET_Init: you must specify a number after -port");
+			fatal ("NET_Init: you must specify a number after -port");
 	}
 	net_hostport = DEFAULTnet_hostport;
 

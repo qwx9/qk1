@@ -78,7 +78,7 @@ void Host_EndGame (char *fmt, ...)
 	if(sv.active)
 		Host_ShutdownServer(false);
 	if(cls.state == ca_dedicated)
-		Sys_Error("Host_EndGame: %s\n", s);	// dedicated servers exit
+		fatal("Host_EndGame: %s\n", s);	// dedicated servers exit
 	if(cls.demonum != -1)
 		CL_NextDemo();
 	else
@@ -101,7 +101,7 @@ void Host_Error (char *fmt, ...)
 	static qboolean inerror = false;
 	
 	if(inerror)
-		Sys_Error("Host_Error: recursively entered");
+		fatal("Host_Error: recursively entered");
 	inerror = true;
 	
 	SCR_EndLoadingPlaque();	// reenable screen updates
@@ -115,7 +115,7 @@ void Host_Error (char *fmt, ...)
 	if(sv.active)
 		Host_ShutdownServer(false);
 	if(cls.state == ca_dedicated)
-		Sys_Error("Host_Error: %s\n", s);	// dedicated servers exit
+		fatal("Host_Error: %s\n", s);	// dedicated servers exit
 	CL_Disconnect();
 	cls.demonum = -1;
 
@@ -151,7 +151,7 @@ void	Host_FindMaxClients (void)
 	if (i)
 	{
 		if (cls.state == ca_dedicated)
-			Sys_Error ("Only one of -dedicated or -listen can be specified");
+			fatal ("Only one of -dedicated or -listen can be specified");
 		if (i != (com_argc - 1))
 			svs.maxclients = atoi(com_argv[i+1]);
 		else
@@ -168,9 +168,9 @@ void	Host_FindMaxClients (void)
 	svs.clients = Hunk_AllocName(svs.maxclientslimit * sizeof *svs.clients, "clients");
 
 	if (svs.maxclients > 1)
-		Cvar_SetValue ("deathmatch", 1.0);
+		setcvarv ("deathmatch", 1.0);
 	else
-		Cvar_SetValue ("deathmatch", 0.0);
+		setcvarv ("deathmatch", 0.0);
 }
 
 
@@ -223,7 +223,7 @@ void Host_WriteConfiguration (void)
 // config.cfg cvars
 	if (host_initialized & !isDedicated)
 	{
-		f = fopen (va("%s/config.cfg",com_gamedir), "w");
+		f = fopen (va("%s/config.cfg",fsdir), "w");
 		if (!f)
 		{
 			Con_Printf ("Couldn't write config.cfg.\n");
@@ -703,7 +703,7 @@ void Host_Init (quakeparms_t *parms)
 	host_parms = *parms;
 
 	if (parms->memsize < minimum_memory)
-		Sys_Error ("Only %4.1f megs of memory available, can't execute game", parms->memsize / (float)0x100000);
+		fatal ("Only %4.1f megs of memory available, can't execute game", parms->memsize / (float)0x100000);
 
 	com_argc = parms->argc;
 	com_argv = parms->argv;
@@ -713,7 +713,7 @@ void Host_Init (quakeparms_t *parms)
 	Cmd_Init ();	
 	V_Init ();
 	Chase_Init ();
-	COM_Init (parms->basedir);
+	initfs();
 	Host_InitLocal ();
 	W_LoadWadFile ("gfx.wad");
 	Key_Init ();
@@ -731,12 +731,12 @@ void Host_Init (quakeparms_t *parms)
  
 	if (cls.state != ca_dedicated)
 	{
-		host_basepal = (byte *)COM_LoadHunkFile ("gfx/palette.lmp");
-		if (!host_basepal)
-			Sys_Error ("Couldn't load gfx/palette.lmp");
-		host_colormap = (byte *)COM_LoadHunkFile ("gfx/colormap.lmp");
-		if (!host_colormap)
-			Sys_Error ("Couldn't load gfx/colormap.lmp");
+		host_basepal = loadhunklmp("gfx/palette.lmp", nil);
+		if(host_basepal == nil)
+			fatal("Host_Init: failed to load gfx/palette.lmp: %r");
+		host_colormap = loadhunklmp("gfx/colormap.lmp", nil);
+		if(host_colormap == nil)
+			fatal("Host_Init: failed to load gfx/colormap.lmp: %r");
 
 		VID_Init (host_basepal);
 
@@ -763,7 +763,7 @@ void Host_Init (quakeparms_t *parms)
 ===============
 Host_Shutdown
 
-FIXME: this is a callback from Sys_Quit and Sys_Error.  It would be better
+FIXME: this is a callback from Sys_Quit and fatal.  It would be better
 to run quit through here before the final handoff to the sys code.
 ===============
 */
@@ -787,6 +787,7 @@ void Host_Shutdown(void)
 	NET_Shutdown ();
 	S_Shutdown();
 	IN_Shutdown ();
+	unloadfs();
 
 	if (cls.state != ca_dedicated)
 	{

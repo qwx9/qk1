@@ -239,7 +239,7 @@ command from the console.  Active clients are kicked off.
 void Host_Map_f (void)
 {
 	int		i;
-	char	name[MAX_QPATH];
+	char	name[Npath];
 
 	if (cmd_source != src_command)
 		return;
@@ -289,7 +289,7 @@ Goes to a new map, taking all clients along
 */
 void Host_Changelevel_f (void)
 {
-	char	level[MAX_QPATH];
+	char	level[Npath];
 
 	if (Cmd_Argc() != 2)
 	{
@@ -315,7 +315,7 @@ Restarts the current server for a dead player
 */
 void Host_Restart_f (void)
 {
-	char	mapname[MAX_QPATH];
+	char	mapname[Npath];
 
 	if (cls.demoplayback || !sv.active)
 		return;
@@ -350,12 +350,12 @@ User command to connect to server
 */
 void Host_Connect_f (void)
 {
-	char	name[MAX_QPATH];
+	char	name[Npath];
 	
 	cls.demonum = -1;		// stop demo loop in case this fails
 	if (cls.demoplayback)
 	{
-		CL_StopPlayback ();
+		abortdemo ();
 		CL_Disconnect ();
 	}
 	strcpy (name, Cmd_Argv(1));
@@ -453,9 +453,9 @@ void Host_Savegame_f (void)
 		}
 	}
 
-	sprint (name, "%s/%s", com_gamedir, Cmd_Argv(1));
-	COM_DefaultExtension (name, ".sav");
-	
+	sprint (name, "%s/%s", fsdir, Cmd_Argv(1));
+	ext(name, ".sav");
+
 	Con_Printf ("Saving game to %s...\n", name);
 	f = fopen (name, "w");
 	if (!f)
@@ -502,9 +502,9 @@ Host_Loadgame_f
 */
 void Host_Loadgame_f (void)
 {
-	char	name[MAX_OSPATH];
+	char	name[Nfspath];
 	FILE	*f;
-	char	mapname[MAX_QPATH];
+	char	mapname[Npath];
 	float	time, tfloat;
 	char	str[32768], *start;
 	int		i, r;
@@ -524,9 +524,9 @@ void Host_Loadgame_f (void)
 
 	cls.demonum = -1;		// stop demo loop in case this fails
 
-	sprint (name, "%s/%s", com_gamedir, Cmd_Argv(1));
-	COM_DefaultExtension (name, ".sav");
-	
+	sprint (name, "%s/%s", fsdir, Cmd_Argv(1));
+	ext(name, ".sav");
+
 // we can't call SCR_BeginLoadingPlaque, because too much stack space has
 // been used.  The menu calls it before stuffing loadgame command
 //	SCR_BeginLoadingPlaque ();
@@ -552,7 +552,7 @@ void Host_Loadgame_f (void)
 // this silliness is so we can load 1.06 save files, which have float skill values
 	fscanf (f, "%f\n", &tfloat);
 	current_skill = (int)(tfloat + 0.1);
-	Cvar_SetValue ("skill", (float)current_skill);
+	setcvarv ("skill", (float)current_skill);
 
 	fscanf (f, "%s\n",mapname);
 	fscanf (f, "%f\n",&time);
@@ -594,13 +594,13 @@ void Host_Loadgame_f (void)
 			}
 		}
 		if (i == sizeof(str)-1)
-			Sys_Error ("Loadgame buffer overflow");
+			fatal ("Loadgame buffer overflow");
 		str[i] = 0;
 		start = COM_Parse(str);
 		if (!com_token[0])
 			break;		// end of file
 		if(strcmp(com_token, "{") != 0)
-			Sys_Error ("First token isn't a brace");
+			fatal ("First token isn't a brace");
 			
 		if (entnum == -1)
 		{	// parse the global vars
@@ -664,7 +664,7 @@ void Host_Name_f (void)
 	{
 		if(strcmp(cl_name.string, newName) == 0)
 			return;
-		Cvar_Set ("_cl_name", newName);
+		setcvar ("_cl_name", newName);
 		if (cls.state == ca_connected)
 			Cmd_ForwardToServer ();
 		return;
@@ -907,7 +907,7 @@ void Host_Color_f(void)
 
 	if (cmd_source == src_command)
 	{
-		Cvar_SetValue ("_cl_color", playercolor);
+		setcvarv ("_cl_color", playercolor);
 		if (cls.state == ca_connected)
 			Cmd_ForwardToServer ();
 		return;
@@ -1604,7 +1604,7 @@ void Host_Stopdemo_f (void)
 		return;
 	if (!cls.demoplayback)
 		return;
-	CL_StopPlayback ();
+	abortdemo ();
 	CL_Disconnect ();
 }
 

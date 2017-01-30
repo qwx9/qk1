@@ -90,11 +90,11 @@ void CL_Disconnect (void)
 
 // if running a local server, shut it down
 	if (cls.demoplayback)
-		CL_StopPlayback ();
+		abortdemo ();
 	else if (cls.state == ca_connected)
 	{
 		if (cls.demorecording)
-			CL_Stop_f ();
+			stopdemo();
 
 		print("CL_Disconnect: sending clc_disconnect...\n");
 		SZ_Clear (&cls.message);
@@ -599,7 +599,7 @@ int CL_ReadFromServer (void)
 	
 	do
 	{
-		ret = CL_GetMessage ();
+		ret = clmsg ();
 		if (ret == -1)
 			Host_Error ("CL_ReadFromServer: lost server connection");
 		if (!ret)
@@ -703,14 +703,11 @@ void CL_Init (void)
 	Cvar_RegisterVariable (&m_yaw);
 	Cvar_RegisterVariable (&m_forward);
 	Cvar_RegisterVariable (&m_side);
-
-//	Cvar_RegisterVariable (&cl_autofire);
 	
 	Cmd_AddCommand ("entities", CL_PrintEntities_f);
 	Cmd_AddCommand ("disconnect", CL_Disconnect_f);
-	Cmd_AddCommand ("record", CL_Record_f);
-	Cmd_AddCommand ("stop", CL_Stop_f);
-	Cmd_AddCommand ("playdemo", CL_PlayDemo_f);
-	Cmd_AddCommand ("timedemo", CL_TimeDemo_f);
+	Cmd_AddCommand("stop", stopdemo);
+	Cmd_AddCommand("record", recdemo);
+	Cmd_AddCommand("playdemo", playdemo);
+	Cmd_AddCommand("timedemo", timedemo);
 }
-

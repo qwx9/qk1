@@ -69,7 +69,7 @@ typedef struct client_s
 
 	sizebuf_t		message;			// can be added to at any time,
 										// copied and clear once per frame
-	byte			msgbuf[MAX_MSGLEN];
+	byte			msgbuf[Nmsg];
 	edict_t			*edict;				// EDICT_NUM(clientnum+1)
 	char			name[32];			// for printing to other people
 	int				colors;
@@ -202,3 +202,6 @@ void SV_CheckForNewClients (void);
 void SV_RunClients (void);
 void SV_SaveSpawnparms (void);
 void SV_SpawnServer (char *server);
+
+#pragma varargck	argpos	SV_ClientPrintf	1
+#pragma varargck	argpos	SV_BroadcastPrintf	1

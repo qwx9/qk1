@@ -42,7 +42,7 @@ void D_CheckCacheGuard (void)
 	s = (byte *)sc_base + sc_size;
 	for (i=0 ; i<GUARDSIZE ; i++)
 		if (s[i] != (byte)i)
-			Sys_Error ("D_CheckCacheGuard: failed");
+			fatal ("D_CheckCacheGuard: failed");
 }
 
 void D_ClearCacheGuard (void)
@@ -115,15 +115,15 @@ surfcache_t     *D_SCAlloc (int width, uintptr size)
 	qboolean                wrapped_this_time;
 
 	if ((width < 0) || (width > 256))
-		Sys_Error ("D_SCAlloc: bad cache width %d\n", width);
+		fatal ("D_SCAlloc: bad cache width %d\n", width);
 
 	if ((size <= 0) || (size > 0x10000))
-		Sys_Error ("D_SCAlloc: bad cache size %d\n", size);
+		fatal ("D_SCAlloc: bad cache size %zud\n", size);
 	
 	size = (uintptr)&((surfcache_t *)0)->data[size];
 	size = (size + 3) & ~3;
 	if (size > sc_size)
-		Sys_Error ("D_SCAlloc: %d > cache size",size);
+		fatal ("D_SCAlloc: %zud > cache size",size);
 
 // if there is not size bytes after the rover, reset to the start
 	wrapped_this_time = false;
@@ -147,7 +147,7 @@ surfcache_t     *D_SCAlloc (int width, uintptr size)
 	// free another
 		sc_rover = sc_rover->next;
 		if (!sc_rover)
-			Sys_Error ("D_SCAlloc: hit the end of memory");
+			fatal ("D_SCAlloc: hit the end of memory");
 		if (sc_rover->owner)
 			*sc_rover->owner = nil;
 			

@@ -79,52 +79,6 @@ char *Cvar_CompleteVariable (char *partial)
 	return NULL;
 }
 
-
-/*
-============
-Cvar_Set
-============
-*/
-void Cvar_Set (char *var_name, char *value)
-{
-	cvar_t	*var;
-	qboolean changed;
-	
-	var = Cvar_FindVar (var_name);
-	if (!var)
-	{	// there is an error in C code if this happens
-		Con_Printf ("Cvar_Set: variable %s not found\n", var_name);
-		return;
-	}
-
-	changed = strcmp(var->string, value);
-	
-	Z_Free (var->string);	// free the old value string
-	
-	var->string = Z_Malloc(strlen(value)+1);
-	strcpy(var->string, value);
-	var->value = atof(var->string);
-	if (var->server && changed)
-	{
-		if (sv.active)
-			SV_BroadcastPrintf ("\"%s\" changed to \"%s\"\n", var->name, var->string);
-	}
-}
-
-/*
-============
-Cvar_SetValue
-============
-*/
-void Cvar_SetValue (char *var_name, float value)
-{
-	char	val[32];
-	
-	sprint (val, "%f",value);
-	Cvar_Set (var_name, val);
-}
-
-
 /*
 ============
 Cvar_RegisterVariable
@@ -184,7 +138,7 @@ qboolean	Cvar_Command (void)
 		return true;
 	}
 
-	Cvar_Set (v->name, Cmd_Argv(1));
+	setcvar (v->name, Cmd_Argv(1));
 	return true;
 }
 
@@ -206,3 +160,29 @@ void Cvar_WriteVariables (FILE *f)
 			fprintf (f, "%s \"%s\"\n", var->name, var->string);
 }
 
+void
+setcvar(char *k, char *v)
+{
+	int n;
+	cvar_t *cv;
+
+	cv = Cvar_FindVar(k);
+	if(cv == nil)
+		fatal("setcvar: no such cvar %s", k);
+	n = strcmp(cv->string, k);
+	Z_Free(cv->string);
+	cv->string = Z_Malloc(strlen(v)+1);
+	strcpy(cv->string, v);
+	cv->value = atof(v);
+	if(n && cv->server && sv.active)
+		SV_BroadcastPrintf("\"%s\" changed to \"%s\"\n", cv->name, cv->string);
+}
+
+void
+setcvarv(char *k, float v)
+{
+	char u[32];
+
+	sprint(u, "%f", v);
+	setcvar(k, u);
+}

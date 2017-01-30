@@ -25,7 +25,7 @@ qpic_t		*draw_backtile;
 
 typedef struct cachepic_s
 {
-	char		name[MAX_QPATH];
+	char		name[Npath];
 	cache_user_t	cache;
 } cachepic_t;
 
@@ -57,7 +57,7 @@ qpic_t	*Draw_CachePic (char *path)
 	if (i == menu_numcachepics)
 	{
 		if (menu_numcachepics == MAX_CACHED_PICS)
-			Sys_Error ("menu_numcachepics == MAX_CACHED_PICS");
+			fatal ("menu_numcachepics == MAX_CACHED_PICS");
 		menu_numcachepics++;
 		strcpy (pic->name, path);
 	}
@@ -70,13 +70,9 @@ qpic_t	*Draw_CachePic (char *path)
 //
 // load the pic from disk
 //
-	COM_LoadCacheFile (path, &pic->cache);
-	
-	dat = (qpic_t *)pic->cache.data;
-	if (!dat)
-	{
-		Sys_Error ("Draw_CachePic: failed to load %s", path);
-	}
+	dat = loadcachelmp(path, &pic->cache);
+	if(dat == nil)
+		fatal("Draw_CachePic: failed to load %s: %r", path);
 
 	SwapPic (dat);
 
@@ -127,9 +123,9 @@ void Draw_Character (int x, int y, int num)
 
 #ifdef PARANOID
 	if (y > vid.height - 8 || x < 0 || x > vid.width - 8)
-		Sys_Error ("Con_DrawCharacter: (%d, %d)", x, y);
+		fatal ("Con_DrawCharacter: (%d, %d)", x, y);
 	if (num < 0 || num > 255)
-		Sys_Error ("Con_DrawCharacter: char %d", num);
+		fatal ("Con_DrawCharacter: char %d", num);
 #endif
 
 	row = num>>4;
@@ -277,7 +273,7 @@ void Draw_Pic (int x, int y, qpic_t *pic)
 		(y < 0) ||
 		(y + pic->height > vid.height))
 	{
-		Sys_Error ("Draw_Pic: bad coordinates");
+		fatal ("Draw_Pic: bad coordinates");
 	}
 
 	source = pic->data;
@@ -326,7 +322,7 @@ void Draw_TransPic (int x, int y, qpic_t *pic)
 	if (x < 0 || (unsigned)(x + pic->width) > vid.width || y < 0 ||
 		 (unsigned)(y + pic->height) > vid.height)
 	{
-		Sys_Error ("Draw_TransPic: bad coordinates");
+		fatal ("Draw_TransPic: bad coordinates");
 	}
 		
 	source = pic->data;
@@ -413,7 +409,7 @@ void Draw_TransPicTranslate (int x, int y, qpic_t *pic, byte *translation)
 	if (x < 0 || (unsigned)(x + pic->width) > vid.width || y < 0 ||
 		 (unsigned)(y + pic->height) > vid.height)
 	{
-		Sys_Error ("Draw_TransPic: bad coordinates");
+		fatal ("Draw_TransPic: bad coordinates");
 	}
 		
 	source = pic->data;

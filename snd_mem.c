@@ -100,15 +100,13 @@ sfxcache_t *S_LoadSound (sfx_t *s)
 
 //	Con_Printf ("loading %s\n",namebuffer);
 
-	data = COM_LoadStackFile(namebuffer, stackbuf, sizeof stackbuf);
-
-	if (!data)
-	{
-		Con_Printf ("Couldn't load %s\n", namebuffer);
+	data = loadstklmp(namebuffer, stackbuf, sizeof stackbuf, &len);
+	if(data == nil){
+		Con_Printf("Couldn't load %s: %r\n", namebuffer);
 		return nil;
 	}
 
-	info = GetWavinfo (s->name, data, com_filesize);
+	info = GetWavinfo (s->name, data, len);
 	if (info.channels != 1)
 	{
 		Con_Printf ("%s is a stereo sample\n",s->name);
@@ -195,7 +193,7 @@ void FindNextChunk(char *name)
 			return;
 		}
 //		if (iff_chunk_len > 1024*1024)
-//			Sys_Error ("FindNextChunk: %d length is past the 1 meg sanity limit", iff_chunk_len);
+//			fatal ("FindNextChunk: %d length is past the 1 meg sanity limit", iff_chunk_len);
 		data_p -= 8;
 		last_chunk = data_p + 8 + ( (iff_chunk_len + 1) & ~1 );
 		if(strncmp((char *)data_p, name, 4) == 0)
@@ -221,7 +219,7 @@ void DumpChunks(void)
 		memcpy (str, data_p, 4);
 		data_p += 4;
 		iff_chunk_len = GetLittleLong();
-		Con_Printf ("0x%x : %s (%d)\n", (uintptr)(data_p - 4), str, iff_chunk_len);
+		Con_Printf ("0x%zud : %s (%d)\n", (uintptr)(data_p - 4), str, iff_chunk_len);
 		data_p += (iff_chunk_len + 1) & ~1;
 	} while (data_p < iff_end);
 }
@@ -315,7 +313,7 @@ wavinfo_t GetWavinfo (char *name, byte *wav, vlong wavlength)
 	if (info.samples)
 	{
 		if (samples < info.samples)
-			Sys_Error ("Sound %s has a bad loop length", name);
+			fatal ("Sound %s has a bad loop length", name);
 	}
 	else
 		info.samples = samples;

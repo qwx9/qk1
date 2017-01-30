@@ -349,10 +349,10 @@ void R_SetupFrame (void)
 // don't allow cheats in multiplayer
 	if (cl.maxclients > 1)
 	{
-		Cvar_Set ("r_draworder", "0");
-		Cvar_Set ("r_fullbright", "0");
-		Cvar_Set ("r_ambient", "0");
-		Cvar_Set ("r_drawflat", "0");
+		setcvar ("r_draworder", "0");
+		setcvar ("r_fullbright", "0");
+		setcvar ("r_ambient", "0");
+		setcvar ("r_drawflat", "0");
 	}
 
 	if (r_numsurfs.value)
@@ -360,7 +360,7 @@ void R_SetupFrame (void)
 		if ((surface_p - surfaces) > r_maxsurfsseen)
 			r_maxsurfsseen = surface_p - surfaces;
 
-		Con_Printf ("Used %d of %d surfs; %d max\n", surface_p - surfaces,
+		Con_Printf ("Used %zd of %zd surfs; %d max\n", surface_p - surfaces,
 				surf_max - surfaces, r_maxsurfsseen);
 	}
 

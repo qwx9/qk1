@@ -5,8 +5,6 @@
 #include <stdio.h>
 #include "quakedef.h"
 
-void Sys_Error (char *error, ...);
-
 vec3_t vec3_origin = {0,0,0};
 int nanmask = 255<<23;
 
@@ -146,7 +144,7 @@ Split out like this for ASM to call.
 */
 void BOPS_Error (void)
 {
-	Sys_Error ("BoxOnPlaneSide:  Bad signbits");
+	fatal ("BoxOnPlaneSide:  Bad signbits");
 }
 
 
@@ -251,7 +249,7 @@ dist2 = p->normal[0]*emaxs[0] + p->normal[1]*emaxs[1] + p->normal[2]*emaxs[2];
 
 #ifdef PARANOID
 if (sides == 0)
-	Sys_Error ("BoxOnPlaneSide: sides==0");
+	fatal ("BoxOnPlaneSide: sides==0");
 #endif
 
 	return sides;
@@ -464,9 +462,9 @@ void FloorDivMod (double numer, double denom, int *quotient,
 
 #ifdef PARANOID
 	if (denom <= 0.0)
-		Sys_Error ("FloorDivMod: bad denominator %d\n", denom);
+		fatal ("FloorDivMod: bad denominator %d\n", denom);
 	if (floor(numer) != numer || floor(denom) != denom)
-		Sys_Error ("FloorDivMod: non-integer numer or denom %f %f\n", numer, denom);
+		fatal ("FloorDivMod: non-integer numer or denom %f %f\n", numer, denom);
 #endif
 
 	if (numer >= 0.0)

@@ -18,3 +18,5 @@ void Con_Clear_f (void);
 void Con_DrawNotify (void);
 void Con_ClearNotify (void);
 void Con_ToggleConsole_f (void);
+
+#pragma varargck	argpos	Con_Printf	1

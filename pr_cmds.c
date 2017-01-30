@@ -553,13 +553,13 @@ void PF_sound (void)
 	attenuation = G_FLOAT(OFS_PARM4);
 	
 	if (volume < 0 || volume > 255)
-		Sys_Error ("SV_StartSound: volume = %d", volume);
+		fatal ("SV_StartSound: volume = %d", volume);
 
 	if (attenuation < 0 || attenuation > 4)
-		Sys_Error ("SV_StartSound: attenuation = %f", attenuation);
+		fatal ("SV_StartSound: attenuation = %f", attenuation);
 
 	if (channel < 0 || channel > 7)
-		Sys_Error ("SV_StartSound: channel = %d", channel);
+		fatal ("SV_StartSound: channel = %d", channel);
 
 	SV_StartSound (entity, channel, sample, volume, attenuation);
 }
@@ -818,7 +818,7 @@ void PF_cvar_set (void)
 	var = G_STRING(OFS_PARM0);
 	val = G_STRING(OFS_PARM1);
 	
-	Cvar_Set (var, val);
+	setcvar (var, val);
 }
 
 /*

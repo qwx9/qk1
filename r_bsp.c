@@ -376,7 +376,7 @@ void R_DrawSolidClippedSubmodelPolygons (model_t *pmodel)
 			}
 			else
 			{
-				Sys_Error ("no edges in bmodel");
+				fatal ("no edges in bmodel");
 			}
 		}
 	}

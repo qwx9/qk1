@@ -29,6 +29,7 @@ typedef struct particle_s
 	float		die;
 	ptype_t		type;
 } particle_t;
+extern particle_t	*active_particles, *free_particles;
 
 #define PARTICLE_Z_CLIP	8.0
 

@@ -96,14 +96,14 @@ void S_SoundInfo_f(void)
 		Con_Printf ("sound system not started\n");
 		return;
 	}
-	
+
     Con_Printf("%5d stereo\n", shm->channels - 1);
     Con_Printf("%5d samples\n", shm->samples);
     Con_Printf("%5d samplepos\n", shm->samplepos);
     Con_Printf("%5d samplebits\n", shm->samplebits);
     Con_Printf("%5d submission_chunk\n", shm->submission_chunk);
     Con_Printf("%5d speed\n", shm->speed);
-    Con_Printf("0x%x dma buffer\n", shm->buffer);
+    Con_Printf("%#p dma buffer\n", shm->buffer);
 	Con_Printf("%5d total_channels\n", total_channels);
 }
 
@@ -173,7 +173,7 @@ void S_Init (void)
 
 	if (host_parms.memsize < 0x800000)
 	{
-		Cvar_Set ("loadas8bit", "1");
+		setcvar("loadas8bit", "1");
 		Con_Printf ("loading all sounds as 8bit\n");
 	}
 
@@ -251,10 +251,10 @@ sfx_t *S_FindName (char *name)
 	sfx_t	*sfx;
 
 	if (name == nil)
-		Sys_Error ("S_FindName: NULL\n");
+		fatal ("S_FindName: NULL\n");
 
-	if(strlen(name) >= MAX_QPATH)
-		Sys_Error ("Sound name too long: %s", name);
+	if(strlen(name) >= Npath)
+		fatal ("Sound name too long: %s", name);
 
 // see if already loaded
 	for (i=0 ; i < num_sfx ; i++)
@@ -262,7 +262,7 @@ sfx_t *S_FindName (char *name)
 			return &known_sfx[i];
 
 	if (num_sfx == MAX_SFX)
-		Sys_Error ("S_FindName: out of sfx_t");
+		fatal ("S_FindName: out of sfx_t");
 	
 	sfx = &known_sfx[i];
 	strcpy (sfx->name, name);

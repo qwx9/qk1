@@ -15,8 +15,6 @@ globalvars_t	*pr_global_struct;
 float			*pr_globals;			// same as pr_global_struct
 int				pr_edict_size;	// in bytes
 
-unsigned short		pr_crc;
-
 int		type_size[8] = {1,sizeof(string_t)/4,1,3,1,1,sizeof(func_t)/4,sizeof(void *)/4};
 
 ddef_t *ED_FieldAtOfs (int ofs);
@@ -94,7 +92,7 @@ edict_t *ED_Alloc (void)
 	}
 	
 	if (i == MAX_EDICTS)
-		Sys_Error ("ED_Alloc: no free edicts");
+		fatal ("ED_Alloc: no free edicts");
 		
 	sv.num_edicts++;
 	e = EDICT_NUM(i);
@@ -650,17 +648,17 @@ void ED_ParseGlobals (char *data)
 		if (com_token[0] == '}')
 			break;
 		if (!data)
-			Sys_Error ("ED_ParseEntity: EOF without closing brace");
+			fatal ("ED_ParseEntity: EOF without closing brace");
 
 		strcpy (keyname, com_token);
 
 	// parse value	
 		data = COM_Parse (data);
 		if (!data)
-			Sys_Error ("ED_ParseEntity: EOF without closing brace");
+			fatal ("ED_ParseEntity: EOF without closing brace");
 
 		if (com_token[0] == '}')
-			Sys_Error ("ED_ParseEntity: closing brace without data");
+			fatal ("ED_ParseEntity: closing brace without data");
 
 		key = ED_FindGlobal (keyname);
 		if (!key)
@@ -813,7 +811,7 @@ char *ED_ParseEdict (char *data, edict_t *ent)
 		if (com_token[0] == '}')
 			break;
 		if (!data)
-			Sys_Error ("ED_ParseEntity: EOF without closing brace");
+			fatal ("ED_ParseEntity: EOF without closing brace");
 		
 // anglehack is to allow QuakeEd to write single scalar angles
 // and allow them to be turned into vectors. (FIXME...)
@@ -842,10 +840,10 @@ if (!strcmp(com_token, "light"))
 	// parse value	
 		data = COM_Parse (data);
 		if (!data)
-			Sys_Error ("ED_ParseEntity: EOF without closing brace");
+			fatal ("ED_ParseEntity: EOF without closing brace");
 
 		if (com_token[0] == '}')
-			Sys_Error ("ED_ParseEntity: closing brace without data");
+			fatal ("ED_ParseEntity: closing brace without data");
 
 		init = true;	
 
@@ -912,7 +910,7 @@ void ED_LoadFromFile (char *data)
 		if (!data)
 			break;
 		if (com_token[0] != '{')
-			Sys_Error ("ED_LoadFromFile: found %s when expecting {",com_token);
+			fatal ("ED_LoadFromFile: found %s when expecting {",com_token);
 
 		if (!ent)
 			ent = EDICT_NUM(0);
@@ -976,30 +974,30 @@ PR_LoadProgs
 */
 void PR_LoadProgs (void)
 {
-	int		i;
+	int i, n;
 
 // flush the non-C variable lookup cache
 	for (i=0 ; i<GEFV_CACHESIZE ; i++)
 		gefvCache[i].field[0] = 0;
 
-	CRC_Init (&pr_crc);
+	initcrc();
 
-	progs = (dprograms_t *)COM_LoadHunkFile ("progs.dat");
-	if (!progs)
-		Sys_Error ("PR_LoadProgs: couldn't load progs.dat");
-	print("Programs occupy %lldK.\n", com_filesize/1024);
+	progs = loadhunklmp("progs.dat", &n);
+	if(progs == nil)
+		fatal("PR_LoadProgs: failed to load progs.dat: %r");
+	print("Programs occupy %dK.\n", n/1024);
 
-	for (i=0 ; i<com_filesize ; i++)
-		CRC_ProcessByte (&pr_crc, ((byte *)progs)[i]);
+	for (i=0 ; i<n ; i++)
+		crc (((byte *)progs)[i]);
 
 // byte swap the header
 	for (i=0 ; i<sizeof(*progs)/4 ; i++)
 		((int *)progs)[i] = LittleLong ( ((int *)progs)[i] );		
 
 	if (progs->version != PROG_VERSION)
-		Sys_Error ("progs.dat has wrong version number (%d should be %d)", progs->version, PROG_VERSION);
+		fatal ("progs.dat has wrong version number (%d should be %d)", progs->version, PROG_VERSION);
 	if (progs->crc != PROGHEADER_CRC)
-		Sys_Error ("progs.dat system vars have been modified, progdefs.h is out of date");
+		fatal ("progs.dat system vars have been modified, progdefs.h is out of date");
 
 	pr_functions = (dfunction_t *)((byte *)progs + progs->ofs_functions);
 	pr_strings = (char *)progs + progs->ofs_strings;
@@ -1042,7 +1040,7 @@ void PR_LoadProgs (void)
 	{
 		pr_fielddefs[i].type = LittleShort (pr_fielddefs[i].type);
 		if (pr_fielddefs[i].type & DEF_SAVEGLOBAL)
-			Sys_Error ("PR_LoadProgs: pr_fielddefs[i].type & DEF_SAVEGLOBAL");
+			fatal ("PR_LoadProgs: pr_fielddefs[i].type & DEF_SAVEGLOBAL");
 		pr_fielddefs[i].ofs = LittleShort (pr_fielddefs[i].ofs);
 		pr_fielddefs[i].s_name = LittleLong (pr_fielddefs[i].s_name);
 	}
@@ -1081,7 +1079,7 @@ void PR_Init (void)
 edict_t *EDICT_NUM(int n)
 {
 	if (n < 0 || n >= sv.max_edicts)
-		Sys_Error ("EDICT_NUM: bad number %d", n);
+		fatal ("EDICT_NUM: bad number %d", n);
 	return (edict_t *)((byte *)sv.edicts+ (n)*pr_edict_size);
 }
 
@@ -1093,6 +1091,6 @@ int NUM_FOR_EDICT(edict_t *e)
 	b = b / pr_edict_size;
 	
 	if (b < 0 || b >= sv.num_edicts)
-		Sys_Error ("NUM_FOR_EDICT: bad pointer");
+		fatal ("NUM_FOR_EDICT: bad pointer");
 	return b;
 }

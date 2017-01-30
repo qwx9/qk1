@@ -274,10 +274,9 @@ void Cmd_Exec_f (void)
 	}
 
 	mark = Hunk_LowMark ();
-	f = (char *)COM_LoadHunkFile (Cmd_Argv(1));
-	if (!f)
-	{
-		Con_Printf ("couldn't exec %s\n",Cmd_Argv(1));
+	f = loadhunklmp(Cmd_Argv(1), nil);
+	if(f == nil){
+		Con_Printf("couldn't exec %s: %r\n", Cmd_Argv(1));
 		return;
 	}
 	Con_Printf ("execing %s\n",Cmd_Argv(1));
@@ -512,7 +511,7 @@ void	Cmd_AddCommand (char *cmd_name, xcommand_t function)
 	cmd_function_t	*cmd;
 	
 	if (host_initialized)	// because hunk allocation would get stomped
-		Sys_Error ("Cmd_AddCommand after host_initialized");
+		fatal ("Cmd_AddCommand after host_initialized");
 		
 // fail if the command is a variable name
 	if (Cvar_VariableString(cmd_name)[0])
@@ -673,7 +672,7 @@ int Cmd_CheckParm (char *parm)
 	int i;
 	
 	if (parm == nil)
-		Sys_Error ("Cmd_CheckParm: nil");
+		fatal ("Cmd_CheckParm: nil");
 
 	for (i = 1; i < Cmd_Argc (); i++)
 		if(cistrcmp(parm, Cmd_Argv(i)) == 0)

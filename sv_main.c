@@ -108,13 +108,13 @@ void SV_StartSound (edict_t *entity, int channel, char *sample, int volume,
 	int			ent;
 	
 	if (volume < 0 || volume > 255)
-		Sys_Error ("SV_StartSound: volume = %d", volume);
+		fatal ("SV_StartSound: volume = %d", volume);
 
 	if (attenuation < 0 || attenuation > 4)
-		Sys_Error ("SV_StartSound: attenuation = %f", attenuation);
+		fatal ("SV_StartSound: attenuation = %f", attenuation);
 
 	if (channel < 0 || channel > 7)
-		Sys_Error ("SV_StartSound: channel = %d", channel);
+		fatal ("SV_StartSound: channel = %d", channel);
 
 	if (sv.datagram.cursize > MAX_DATAGRAM-16)
 		return;	
@@ -176,7 +176,7 @@ void SV_SendServerinfo (client_t *client)
 	char			message[2048];
 
 	MSG_WriteByte (&client->message, svc_print);
-	sprint(message, "%c\nVERSION %4.2f SERVER (%ud CRC)\n", 2, VERSION, pr_crc);
+	sprint(message, "%c\nVERSION %4.2f SERVER (%ud CRC)\n", 2, VERSION, crcn);
 	MSG_WriteString (&client->message,message);
 
 	MSG_WriteByte (&client->message, svc_serverinfo);
@@ -303,7 +303,7 @@ void SV_CheckForNewClients (void)
 			if (!svs.clients[i].active)
 				break;
 		if (i == svs.maxclients)
-			Sys_Error ("Host_CheckForNewClients: no free clients");
+			fatal ("Host_CheckForNewClients: no free clients");
 		
 		svs.clients[i].netconnection = ret;
 		SV_ConnectClient (i);	
@@ -883,7 +883,7 @@ int SV_ModelIndex (char *name)
 		if (!strcmp(sv.model_precache[i], name))
 			return i;
 	if (i==MAX_MODELS || !sv.model_precache[i])
-		Sys_Error ("SV_ModelIndex: model %s not precached", name);
+		fatal ("SV_ModelIndex: model %s not precached", name);
 	return i;
 }
 
@@ -1015,7 +1015,7 @@ void SV_SpawnServer (char *server)
 
 	// let's not have any servers with no name
 	if (hostname.string[0] == 0)
-		Cvar_Set ("hostname", "UNNAMED");
+		setcvar ("hostname", "UNNAMED");
 	scr_centertime_off = 0;
 
 	print("SV_SpawnServer: %s\n", server);
@@ -1033,14 +1033,14 @@ void SV_SpawnServer (char *server)
 // make cvars consistant
 //
 	if (coop.value)
-		Cvar_SetValue ("deathmatch", 0);
+		setcvarv ("deathmatch", 0);
 	current_skill = (int)(skill.value + 0.5);
 	if (current_skill < 0)
 		current_skill = 0;
 	if (current_skill > 3)
 		current_skill = 3;
 
-	Cvar_SetValue ("skill", (float)current_skill);
+	setcvarv ("skill", (float)current_skill);
 	
 //
 // set up the new server

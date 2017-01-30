@@ -41,11 +41,11 @@ int UDP_Init (void)
 	if(strcmp(hostname.string, "UNNAMED") == 0)
 	{
 		buff[15] = 0;
-		Cvar_Set ("hostname", buff);
+		setcvar ("hostname", buff);
 	}
 
 	if ((net_controlsocket = UDP_OpenSocket (0)) == -1)
-		Sys_Error("UDP_Init: Unable to open control socket\n");
+		fatal("UDP_Init: Unable to open control socket\n");
 
 	((struct sockaddr_in *)&broadcastaddr)->sin_family = AF_INET;
 	((struct sockaddr_in *)&broadcastaddr)->sin_addr.s_addr = INADDR_BROADCAST;
@@ -80,7 +80,7 @@ void UDP_Listen (qboolean /*state*/)
 		if (net_acceptsocket != -1)
 			return;
 		if ((net_acceptsocket = UDP_OpenSocket (net_hostport)) == -1)
-			Sys_Error ("UDP_Listen: Unable to open accept socket\n");
+			fatal ("UDP_Listen: Unable to open accept socket\n");
 		return;
 	}
 
@@ -204,7 +204,7 @@ int UDP_CheckNewConnections (void)
 		return -1;
 
 	if (ioctl (net_acceptsocket, FIONREAD, &available) == -1)
-		Sys_Error ("UDP: ioctlsocket (FIONREAD) failed\n");
+		fatal ("UDP: ioctlsocket (FIONREAD) failed\n");
 	if (available)
 		return net_acceptsocket;
 	return -1;
@@ -249,7 +249,7 @@ int UDP_Broadcast (int /*socket*/, byte */*buf*/, int /*len*/)
 	if (socket != net_broadcastsocket)
 	{
 		if (net_broadcastsocket != 0)
-			Sys_Error("Attempted to use multiple broadcasts sockets\n");
+			fatal("Attempted to use multiple broadcasts sockets\n");
 		ret = UDP_MakeSocketBroadcastCapable (socket);
 		if (ret == -1)
 		{

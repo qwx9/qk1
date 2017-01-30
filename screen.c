@@ -183,7 +183,7 @@ float CalcFov (float fov_x, float width, float height)
         float   x;
 
         if (fov_x < 1 || fov_x > 179)
-                Sys_Error ("Bad fov: %f", fov_x);
+                fatal ("Bad fov: %f", fov_x);
 
         x = width/tan(fov_x/360*M_PI);
 
@@ -217,15 +217,15 @@ static void SCR_CalcRefdef (void)
 	
 // bound viewsize
 	if (scr_viewsize.value < 30)
-		Cvar_Set ("viewsize","30");
+		setcvar ("viewsize","30");
 	if (scr_viewsize.value > 120)
-		Cvar_Set ("viewsize","120");
+		setcvar ("viewsize","120");
 
 // bound field of view
 	if (scr_fov.value < 10)
-		Cvar_Set ("fov","10");
+		setcvar ("fov","10");
 	if (scr_fov.value > 170)
-		Cvar_Set ("fov","170");
+		setcvar ("fov","170");
 
 	r_refdef.fov_x = scr_fov.value;
 	r_refdef.fov_y = CalcFov (r_refdef.fov_x, r_refdef.vrect.width, r_refdef.vrect.height);
@@ -271,7 +271,7 @@ Keybinding command
 */
 void SCR_SizeUp_f (void)
 {
-	Cvar_SetValue ("viewsize",scr_viewsize.value+10);
+	setcvarv ("viewsize",scr_viewsize.value+10);
 	vid.recalc_refdef = 1;
 }
 
@@ -285,7 +285,7 @@ Keybinding command
 */
 void SCR_SizeDown_f (void)
 {
-	Cvar_SetValue ("viewsize",scr_viewsize.value-10);
+	setcvarv ("viewsize",scr_viewsize.value-10);
 	vid.recalc_refdef = 1;
 }
 
@@ -561,14 +561,15 @@ pcxout(char *path, byte *src, int dx, int dy, int xlen, byte *pal)
 	for(i=0; i<3*256; i++)
 		*p++ = *pal++;
 
-	COM_WriteFile(path, buf, p - buf);
+	USED(path);
+	/*COM_WriteFile(path, buf, p - buf);*/
 } 
 
 static void
 dopcx(void)
 {
 	int i; 
-	char pcxname[12], checkname[MAX_OSPATH];
+	char pcxname[12], checkname[Nfspath];
 
 	writepcx = 0;
 
@@ -577,7 +578,7 @@ dopcx(void)
 	for(i=0; i<100; i++){
 		pcxname[5] = i / 10 + '0';
 		pcxname[6] = i % 10 + '0';
-		sprint(checkname, "%s/%s", com_gamedir, pcxname);
+		sprint(checkname, "%s/%s", fsdir, pcxname);
 		if(access(checkname, AEXIST) == -1)
 			break;
 	}

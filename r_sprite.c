@@ -170,7 +170,7 @@ void R_SetupAndDrawSprite (void)
 		if (nump < 3)
 			return;
 		if (nump >= MAXWORKINGVERTS)
-			Sys_Error("R_SetupAndDrawSprite: too many points");
+			fatal("R_SetupAndDrawSprite: too many points");
 	}
 
 // transform vertices into viewspace and project
@@ -372,7 +372,7 @@ void R_DrawSprite (void)
 	}
 	else
 	{
-		Sys_Error ("R_DrawSprite: Bad sprite type %d", psprite->type);
+		fatal ("R_DrawSprite: Bad sprite type %d", psprite->type);
 	}
 
 	R_RotateSprite (psprite->beamlength);

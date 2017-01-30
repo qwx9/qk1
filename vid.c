@@ -186,7 +186,6 @@ VID_SetPalette(uchar *palette)
 void
 VID_Shutdown(void)
 {
-	Con_Printf("VID_Shutdown\n");
 	free(framebuf);
 	freeimage(fbim);
 }

@@ -146,11 +146,11 @@ void CL_KeepaliveMessage (void)
 	
 	do
 	{
-		ret = CL_GetMessage ();
+		ret = clmsg ();
 		switch (ret)
 		{
 		default:
-			Host_Error ("CL_KeepaliveMessage: CL_GetMessage failed");		
+			Host_Error ("CL_KeepaliveMessage: clmsg failed");		
 		case 0:
 			break;	// nothing waiting
 		case 1:
@@ -190,8 +190,8 @@ void CL_ParseServerInfo (void)
 	char	*str;
 	int		i;
 	int		nummodels, numsounds;
-	char	model_precache[MAX_MODELS][MAX_QPATH];
-	char	sound_precache[MAX_SOUNDS][MAX_QPATH];
+	char	model_precache[MAX_MODELS][Npath];
+	char	sound_precache[MAX_SOUNDS][Npath];
 
 	print("CL_ParseServerInfo: parsing serverinfo pkt...\n");
 //
@@ -390,7 +390,7 @@ if (bits&(1<<i))
 	else
 	{
 		if (i > cl.maxclients)
-			Sys_Error ("i >= cl.maxclients");
+			fatal ("i >= cl.maxclients");
 		ent->colormap = cl.scores[i-1].translations;
 	}
 
@@ -599,7 +599,7 @@ void CL_NewTranslation (int slot)
 	byte	*dest, *source;
 	
 	if (slot > cl.maxclients)
-		Sys_Error ("CL_NewTranslation: slot > cl.maxclients");
+		fatal ("CL_NewTranslation: slot > cl.maxclients");
 	dest = cl.scores[slot].translations;
 	source = vid.colormap;
 	memcpy(dest, vid.colormap, sizeof cl.scores[slot].translations);
@@ -784,7 +784,7 @@ void CL_ParseServerMessage (void)
 		case svc_lightstyle:
 			i = MSG_ReadByte ();
 			if (i >= MAX_LIGHTSTYLES)
-				Sys_Error ("svc_lightstyle > MAX_LIGHTSTYLES");
+				fatal ("svc_lightstyle > MAX_LIGHTSTYLES");
 			strcpy(cl_lightstyle[i].map,  MSG_ReadString());
 			cl_lightstyle[i].length = strlen(cl_lightstyle[i].map);
 			break;
@@ -869,7 +869,7 @@ void CL_ParseServerMessage (void)
 		case svc_updatestat:
 			i = MSG_ReadByte ();
 			if (i < 0 || i >= MAX_CL_STATS)
-				Sys_Error ("svc_updatestat: %d is invalid", i);
+				fatal ("svc_updatestat: %d is invalid", i);
 			cl.stats[i] = MSG_ReadLong ();;
 			break;
 			
@@ -880,7 +880,7 @@ void CL_ParseServerMessage (void)
 		case svc_cdtrack:
 			cl.cdtrack = MSG_ReadByte ();
 			cl.looptrack = MSG_ReadByte ();
-			if ( (cls.demoplayback || cls.demorecording) && (cls.forcetrack != -1) )
+			if((cls.demoplayback || cls.demorecording) && cls.forcetrack > 0)
 				CDAudio_Play ((byte)cls.forcetrack, true);
 			else
 				CDAudio_Play ((byte)cl.cdtrack, true);

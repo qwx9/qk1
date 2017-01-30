@@ -13,7 +13,6 @@ OFILES=\
 	cmd.$O\
 	common.$O\
 	console.$O\
-	crc.$O\
 	cvar.$O\
 	draw.$O\
 	d_edge.$O\
@@ -28,6 +27,7 @@ OFILES=\
 	d_surf.$O\
 	d_vars.$O\
 	d_zpoint.$O\
+	fs.$O\
 	host.$O\
 	host_cmd.$O\
 	keys.$O\
@@ -42,6 +42,7 @@ OFILES=\
 	pr_cmds.$O\
 	pr_edict.$O\
 	pr_exec.$O\
+	qk1.$O\
 	r_aclip.$O\
 	r_alias.$O\
 	r_bsp.$O\
@@ -77,6 +78,8 @@ OFILES=\
 	net_udp.$O\
 
 HFILES=\
+	dat.h\
+	fns.h\
 	adivtab.h\
 	anorms.h\
 	bspfile.h\
@@ -85,7 +88,6 @@ HFILES=\
 	cmd.h\
 	common.h\
 	console.h\
-	crc.h\
 	cvar.h\
 	d_iface.h\
 	d_local.h\

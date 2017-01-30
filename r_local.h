@@ -221,7 +221,6 @@ qboolean R_AliasCheckBBox (void);
 void R_DrawParticles (void);
 void R_InitParticles (void);
 void R_ClearParticles (void);
-void R_ReadPointFile_f (void);
 void R_SurfacePatch (void);
 
 extern int		r_amodels_drawn;

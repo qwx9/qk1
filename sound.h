@@ -20,7 +20,7 @@ typedef struct
 
 typedef struct sfx_s
 {
-	char 	name[MAX_QPATH];
+	char 	name[Npath];
 	cache_user_t	cache;
 } sfx_t;
 

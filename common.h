@@ -1,20 +1,6 @@
-// comndef.h  -- general definitions
-
-#ifndef BYTE_DEFINED
-typedef unsigned char 		byte;
-#define BYTE_DEFINED 1
-#endif
-
-#undef true
-#undef false
-
-typedef enum {false, true}	qboolean;
-
-//============================================================================
-
 typedef struct sizebuf_s
 {
-	qboolean	allowoverflow;	// if false, do a Sys_Error
+	qboolean	allowoverflow;	// if false, do a fatal
 	qboolean	overflowed;		// set to true if the buffer size failed
 	byte	*data;
 	int		maxsize;
@@ -66,8 +52,6 @@ void InsertLinkAfter (link_t *l, link_t *after);
 
 //============================================================================
 
-extern	qboolean		bigendien;
-
 extern	short	(*BigShort) (short l);
 extern	short	(*LittleShort) (short l);
 extern	int	(*BigLong) (int l);
@@ -110,15 +94,10 @@ char *COM_Parse (char *data);
 
 extern	int		com_argc;
 extern	char	**com_argv;
+extern char com_cmdline[];
 
 int COM_CheckParm (char *parm);
-void COM_Init (char *path);
 void COM_InitArgv (int argc, char **argv);
-
-char *COM_SkipPath (char *pathname);
-void COM_StripExtension (char *in, char *out);
-void COM_FileBase (char *in, char *out);
-void COM_DefaultExtension (char *path, char *extension);
 
 char	*va(char *format, ...);
 // does a varargs printf into a temp buffer
@@ -126,22 +105,11 @@ char	*va(char *format, ...);
 
 //============================================================================
 
-extern vlong com_filesize;
 struct cache_user_s;
 
-extern	char	com_gamedir[MAX_OSPATH];
-
-void COM_WriteFile (char *filename, void *data, int len);
-int COM_OpenFile (char *filename, int *hndl);
-int COM_FOpenFile (char *filename, FILE **file);
-void COM_CloseFile (int h);
-
-byte *COM_LoadStackFile (char *path, void *buffer, int bufsize);
-byte *COM_LoadTempFile (char *path);
-byte *COM_LoadHunkFile (char *path);
-void COM_LoadCacheFile (char *path, struct cache_user_s *cu);
-
-
-extern	struct cvar_s	registered;
+extern cvar_t registered;
+extern cvar_t cmdline;
 
 extern qboolean		standard_quake, rogue, hipnotic;
+
+#pragma varargck	argpos	va	1

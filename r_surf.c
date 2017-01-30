@@ -197,9 +197,9 @@ texture_t *R_TextureAnimation (texture_t *base)
 	{
 		base = base->anim_next;
 		if (!base)
-			Sys_Error ("R_TextureAnimation: broken cycle");
+			fatal ("R_TextureAnimation: broken cycle");
 		if (++count > 100)
-			Sys_Error ("R_TextureAnimation: infinite cycle");
+			fatal ("R_TextureAnimation: infinite cycle");
 	}
 
 	return base;
@@ -634,7 +634,7 @@ void R_GenTile (msurface_t *psurf, void *pdest)
 	}
 	else
 	{
-		Sys_Error ("Unknown tile type");
+		fatal ("Unknown tile type");
 	}
 }
 

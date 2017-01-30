@@ -53,10 +53,10 @@ void W_LoadWadFile (char *filename)
 	wadinfo_t		*header;
 	unsigned		i;
 	int				infotableofs;
-	
-	wad_base = COM_LoadHunkFile (filename);
-	if (!wad_base)
-		Sys_Error ("W_LoadWadFile: couldn't load %s", filename);
+
+	wad_base = loadhunklmp(filename, nil);
+	if(wad_base == nil)
+		fatal("W_LoadWadFile: failed to load %s: %r", filename);
 
 	header = (wadinfo_t *)wad_base;
 	
@@ -64,7 +64,7 @@ void W_LoadWadFile (char *filename)
 	|| header->identification[1] != 'A'
 	|| header->identification[2] != 'D'
 	|| header->identification[3] != '2')
-		Sys_Error ("Wad file %s doesn't have WAD2 id\n",filename);
+		fatal ("Wad file %s doesn't have WAD2 id\n",filename);
 		
 	wad_numlumps = LittleLong(header->numlumps);
 	infotableofs = LittleLong(header->infotableofs);
@@ -100,7 +100,7 @@ lumpinfo_t	*W_GetLumpinfo (char *name)
 			return lump_p;
 	}
 	
-	Sys_Error ("W_GetLumpinfo: %s not found", name);
+	fatal ("W_GetLumpinfo: %s not found", name);
 	return nil;
 }
 
@@ -118,7 +118,7 @@ void *W_GetLumpNum (int num)
 	lumpinfo_t	*lump;
 	
 	if (num < 0 || num > wad_numlumps)
-		Sys_Error ("W_GetLumpNum: bad number: %d", num);
+		fatal ("W_GetLumpNum: bad number: %d", num);
 		
 	lump = wad_lumps + num;
 	

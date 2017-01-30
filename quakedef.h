@@ -1,5 +1,3 @@
-// quakedef.h -- primary header for client
-
 #define	QUAKE_GAME			// as opposed to utilities
 #define	VERSION				1.09
 //#define	PARANOID			// speed sapping error checking
@@ -30,13 +28,8 @@
 // fall over
 #define	ROLL	2
 
-
-#define	MAX_QPATH		64			// max length of a quake game pathname
-#define	MAX_OSPATH		128			// max length of a filesystem pathname
-
 #define	ON_EPSILON		0.1			// point on plane side epsilon
 
-#define	MAX_MSGLEN		8000		// max length of a reliable message
 #define	MAX_DATAGRAM	1024		// max length of unreliable message
 
 //
@@ -147,6 +140,10 @@
 // Use for multiplayer testing only - VERY dangerous!!!
 // #define IDGODS
 
+typedef unsigned char 		byte;
+typedef enum {false, true}	qboolean;
+
+#include "cvar.h"
 #include "common.h"
 #include "bspfile.h"
 #include "vid.h"
@@ -165,9 +162,10 @@ typedef struct
 	int		effects;
 } entity_state_t;
 
+#include "dat.h"
+#include "fns.h"
 #include "wad.h"
 #include "draw.h"
-#include "cvar.h"
 #include "screen.h"
 #include "net.h"
 #include "protocol.h"
@@ -186,7 +184,6 @@ typedef struct
 #include "console.h"
 #include "view.h"
 #include "menu.h"
-#include "crc.h"
 #include "cdaudio.h"
 
 /* included here to avoid type incompatibilities errors from 2c(1),2l(1) */
@@ -202,7 +199,6 @@ typedef struct
 typedef struct
 {
 	char	*basedir;
-	char	*cachedir;		// for development over ISDN lines
 	int		argc;
 	char	**argv;
 	void	*membase;
@@ -262,3 +258,7 @@ extern	cvar_t	chase_active;
 void Chase_Init (void);
 void Chase_Reset (void);
 void Chase_Update (void);
+
+#pragma varargck	argpos	Host_Error	1
+#pragma varargck	argpos	Host_EndGame	1
+#pragma varargck	argpos	Host_ClientCommands	1

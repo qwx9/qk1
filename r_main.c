@@ -171,7 +171,7 @@ void R_Init (void)
 	R_InitTurb ();
 	
 	Cmd_AddCommand ("timerefresh", R_TimeRefresh_f);	
-	Cmd_AddCommand ("pointfile", R_ReadPointFile_f);	
+	Cmd_AddCommand("pointfile", pointlmp);
 
 	Cvar_RegisterVariable (&r_draworder);
 	Cvar_RegisterVariable (&r_speeds);
@@ -195,8 +195,8 @@ void R_Init (void)
 	Cvar_RegisterVariable (&r_aliastransbase);
 	Cvar_RegisterVariable (&r_aliastransadj);
 
-	Cvar_SetValue ("r_maxedges", (float)NUMSTACKEDGES);
-	Cvar_SetValue ("r_maxsurfs", (float)NUMSTACKSURFACES);
+	setcvarv ("r_maxedges", (float)NUMSTACKEDGES);
+	setcvarv ("r_maxsurfs", (float)NUMSTACKSURFACES);
 
 	view_clipplanes[0].leftedge = true;
 	view_clipplanes[1].rightedge = true;
@@ -927,7 +927,7 @@ void R_RenderView_ (void)
 	Sys_LowFPPrecision ();
 
 	if (!cl_entities[0].model || !cl.worldmodel)
-		Sys_Error ("R_RenderView: NULL worldmodel");
+		fatal ("R_RenderView: NULL worldmodel");
 		
 	if (!r_dspeeds.value)
 	{
@@ -1006,16 +1006,16 @@ void R_RenderView (void)
 	
 	delta = (byte *)&dummy - r_stack_start;
 	if (delta < -10000 || delta > 10000)
-		Sys_Error ("R_RenderView: called without enough stack");
+		fatal ("R_RenderView: called without enough stack");
 
 	if ( Hunk_LowMark() & 3 )
-		Sys_Error ("Hunk is missaligned");
+		fatal ("Hunk is missaligned");
 
 	if ( (uintptr)(&dummy) & 3 )
-		Sys_Error ("Stack is missaligned");
+		fatal ("Stack is missaligned");
 
 	if ( (uintptr)(&r_warpbuffer) & 3 )
-		Sys_Error ("Globals are missaligned");
+		fatal ("Globals are missaligned");
 
 	R_RenderView_ ();
 }
