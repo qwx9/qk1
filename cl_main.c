@@ -31,7 +31,7 @@ client_state_t	cl;
 efrag_t			cl_efrags[MAX_EFRAGS];
 entity_t		cl_entities[MAX_EDICTS];
 entity_t		cl_static_entities[MAX_STATIC_ENTITIES];
-lightstyle_t	cl_lightstyle[MAX_LIGHTSTYLES];
+lightstyle_t	cl_lightstyle[Nlights];
 dlight_t		cl_dlights[MAX_DLIGHTS];
 
 int				cl_numvisedicts;
@@ -599,7 +599,7 @@ int CL_ReadFromServer (void)
 	
 	do
 	{
-		ret = clmsg ();
+		ret = readcl ();
 		if (ret == -1)
 			Host_Error ("CL_ReadFromServer: lost server connection");
 		if (!ret)

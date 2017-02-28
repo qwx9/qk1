@@ -29,7 +29,7 @@ typedef struct
 	char		*model_precache[MAX_MODELS];	// NULL terminated
 	struct model_s	*models[MAX_MODELS];
 	char		*sound_precache[MAX_SOUNDS];	// NULL terminated
-	char		*lightstyles[MAX_LIGHTSTYLES];
+	char		*lightstyles[Nlights];
 	int			num_edicts;
 	int			max_edicts;
 	edict_t		*edicts;			// can NOT be array indexed, because
@@ -49,7 +49,6 @@ typedef struct
 
 
 #define	NUM_PING_TIMES		16
-#define	NUM_SPAWN_PARMS		16
 
 typedef struct client_s
 {
@@ -78,7 +77,7 @@ typedef struct client_s
 	int				num_pings;			// ping_times[num_pings%NUM_PING_TIMES]
 
 // spawn parms are carried from level to level
-	float			spawn_parms[NUM_SPAWN_PARMS];
+	float			spawn_parms[Nparms];
 
 // client known data for deltas	
 	int				old_frags;

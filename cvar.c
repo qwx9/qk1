@@ -142,24 +142,6 @@ qboolean	Cvar_Command (void)
 	return true;
 }
 
-
-/*
-============
-Cvar_WriteVariables
-
-Writes lines containing "set variable value" for all variables
-with the archive flag set to true.
-============
-*/
-void Cvar_WriteVariables (FILE *f)
-{
-	cvar_t	*var;
-	
-	for (var = cvar_vars ; var ; var = var->next)
-		if (var->archive)
-			fprintf (f, "%s \"%s\"\n", var->name, var->string);
-}
-
 void
 setcvar(char *k, char *v)
 {

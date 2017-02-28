@@ -309,8 +309,10 @@ IN_Shutdown(void)
 {
 	IN_Grabm(0);
 	threadintgrp(THin);
-	close(pfd[0]);
-	close(pfd[1]);
+	if(pfd[0] > 0)
+		close(pfd[0]);
+	if(pfd[1] > 0)
+		close(pfd[1]);
 	if(kchan != nil){
 		chanfree(kchan);
 		kchan = nil;

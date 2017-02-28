@@ -99,17 +99,64 @@ static u16int crct[] ={
 	0xef1f,	0xff3e,	0xcf5d,	0xdf7c,	0xaf9b,	0xbfba,	0x8fd9,	0x9ff8,
 	0x6e17,	0x7e36,	0x4e55,	0x5e74,	0x2e93,	0x3eb2,	0x0ed1,	0x1ef0
 };
-static int notid1;
 
+static int notid1;
 static int loadsize;
 static uchar *loadbuf;
 static cache_user_t *loadcache;
-
 static Biobuf *demobf;
 static vlong demoofs;
 
 #define	GBIT32(p)	((p)[0]|((p)[1]<<8)|((p)[2]<<16)|((p)[3]<<24))
 #define	PBIT32(p,v)	(p)[0]=(v);(p)[1]=(v)>>8;(p)[2]=(v)>>16;(p)[3]=(v)>>24
+
+void
+crc(u8int v)
+{
+	crcn = crcn << 8 ^ crct[crcn >> 8 ^ v];
+}
+
+void
+initcrc(void)
+{
+	crcn = Ncrc0;
+}
+
+char *
+ext(char *f, char *e)
+{
+	return strrchr(f, '.') > strrchr(f, '/') ? "" : e;
+}
+
+void
+radix(char *f, char *d)
+{
+	char *s, *e;
+
+	s = strrchr(f, '/');
+	e = strrchr(f, '.');
+	if(s == nil)
+		s = f;
+	s++;
+	if(e - s < 1)
+		strcpy(d, "?model?");
+	else{
+		strncpy(d, s, e - s);
+		d[e - s] = 0;
+	}
+}
+
+static void
+path(void)
+{
+	Paklist *pl;
+
+	for(pl=pkl; pl!=nil; pl=pl->pl)
+		if(pl->p)
+			Con_Printf("%s (%zd files)\n", pl->p->f, pl->p->e - pl->p->l);
+		else
+			Con_Printf("%s\n", pl->f);
+}
 
 static Biobuf *
 bopen(char *f, int m, int arm)
@@ -225,10 +272,504 @@ bsize(Biobuf *bf)
 
 	d = dirfstat(Bfildes(bf));
 	if(d == nil)
-		sysfatal("bstat: %r");
+		fatal("bstat: %r");
 	n = d->length;
 	free(d);
 	return n;
+}
+
+static void
+closelmp(Biobuf *bf)
+{
+	Paklist *pl;
+
+	for(pl=pkl; pl!=nil; pl=pl->pl)
+		if(pl->p && pl->p->bf == bf)
+			return;
+	Bterm(bf);
+}
+
+static Biobuf *
+openlmp(char *f, int *len)
+{
+	char d[Nfspath];
+	Biobuf *bf;
+	Paklist *pl;
+	Pak *p;
+	Lump *l;
+
+	for(pl=pkl; pl != nil; pl=pl->pl){
+		if(pl->p != nil){
+			p = pl->p;
+			l = p->l;
+			while(l < p->e){
+				if(strcmp(l->f, f) == 0){
+					Bseek(p->bf, l->ofs, 0);
+					if(len != nil)
+						*len = l->len;
+					return p->bf;
+				}
+				l++;
+			}
+			continue;
+		}
+		snprint(d, sizeof d, "%s/%s", pl->f, f);
+		if(access(d, AREAD) < 0)
+			continue;
+		bf = bopen(d, OREAD, 1);
+		if(bf == nil)
+			return nil;
+		if(len != nil)
+			*len = bsize(bf);
+		return bf;
+	}
+	werrstr("openlmp %s: not found", f);
+	return nil;
+}
+
+static uchar *
+loadlmp(char *f, int mth, int *n)
+{
+	int m;
+	char r[32];
+	uchar *buf;
+	Biobuf *bf;
+
+	bf = openlmp(f, &m);
+	if(bf == nil)
+		return nil;
+	radix(f, r);
+	buf = nil;
+	switch(mth){
+	case Fhunk: buf = Hunk_AllocName(m + 1, r); break;
+	case Fcache: buf = Cache_Alloc(loadcache, m + 1, r); break;
+	case Fstack: buf = m+1 <= loadsize ? loadbuf : Hunk_TempAlloc(m+1);
+	}
+	if(buf == nil)
+		fatal("loadlmp %s %d: memory allocation failed: %r", f, m+1);
+	buf[m] = 0;
+	Draw_BeginDisc();
+	eread(bf, buf, m);
+	closelmp(bf);
+	Draw_EndDisc();
+	if(n != nil)
+		*n = m;
+	return buf;
+}
+
+void *
+loadhunklmp(char *f, int *n)
+{
+	return loadlmp(f, Fhunk, n);
+}
+
+void *
+loadcachelmp(char *f, cache_user_t *c)
+{
+	loadcache = c;
+	loadlmp(f, Fcache, nil);
+	return c->data;
+}
+
+void *
+loadstklmp(char *f, void *buf, int nbuf, int *n)
+{
+	loadbuf = buf;
+	loadsize = nbuf;
+	return loadlmp(f, Fstack, n);
+}
+
+void
+loadpoints(void)
+{
+	int i, n, nv;
+	Biobuf *bf;
+	vec3_t v3;
+	vec_t *v;
+	particle_t *p;
+
+	bf = openlmp(va("maps/%s.pts", sv.name), &n);
+	if(bf == nil){
+		Con_Printf("loadpoints: %r\n");
+		return;
+	}
+	nv = 0;
+	for(;;){
+		if(n < 3*4+3)
+			break;
+		for(i=0, v=v3; i<3; i++){
+			*v++ = getfl(bf);
+			Bseek(bf, 1, 1);
+		}
+		n -= 3*4+3;
+		nv++;
+		if(free_particles == nil){
+			Con_Printf("loadpoints: insufficient free particles\n");
+			break;
+		}
+		p = free_particles;
+		free_particles = p->next;
+		p->next = active_particles;
+		active_particles = p;
+		p->die = 99999;
+		p->color = -nv & 15;
+		p->type = pt_static;
+		VectorCopy(vec3_origin, p->vel);
+		VectorCopy(v3, p->org);
+	}
+	closelmp(bf);
+	Con_Printf("loadpoints: %d points read\n", nv);
+}
+
+static void
+dumpcvars(Biobuf *bf)
+{
+	cvar_t *c;
+
+	for(c=cvar_vars; c!=nil; c=c->next)
+		if(c->archive)
+			if(Bprint(bf, "%s \"%s\"\n", c->name, c->string) == Beof)
+				fatal("dumpcvars: %r");
+}
+
+static void
+dumpkeys(Biobuf *bf)
+{
+	char **k;
+
+	for(k=keybindings; k<keybindings+256; k++)
+		if(*k != nil && **k != 0)
+			Bprint(bf, "bind \"%s\" \"%s\"\n",
+				Key_KeynumToString(k-keybindings), *k);
+}
+
+void
+dumpcfg(void)
+{
+	Biobuf *bf;
+
+	if(!host_initialized || isDedicated)
+		return;
+	bf = bopen(va("%s/config.cfg", fsdir), OWRITE, 1);
+	if(bf == nil){
+		fprint(2, "dumpcfg: %r\n");
+		return;
+	}
+	dumpkeys(bf);
+	dumpcvars(bf);
+	Bterm(bf);
+}
+
+void
+savnames(void)
+{
+	int n, *canld;
+	char (*e)[Nsavcm], (*s)[Nsavcm], *p;
+	Biobuf *bf;
+
+	s = savs;
+	canld = savcanld;
+	for(n=0, e=savs+Nsav; s<e; n++, s++, canld++){
+		*canld = 0;
+		memset(*s, 0, sizeof *s);
+		strcpy(*s, "--- UNUSED SLOT ---");
+		bf = bopen(va("%s/s%d.sav", fsdir, n), OREAD, 1);
+		if(bf == nil){
+			dprint("savnames: %r");
+			continue;
+		}
+		if((p = Brdline(bf, '\n'), p == nil)	/* discard version */
+		|| (p = Brdline(bf, '\n'), p == nil)){
+			dprint("savnames: short read: %r");
+			continue;
+		}
+		strncpy(*s, p, sizeof(*s)-1);
+		for(p=*s; p<*(s+1); p++)
+			if(*p == '_')
+				*p = ' ';
+		*canld = 1;
+		Bterm(bf);
+	}
+}
+
+static void
+dumpedicts(Biobuf *bf, edict_t *ed)
+{
+	int *vp, *ve;
+	char *s;
+	uchar *ev;
+	ddef_t *d, *de;
+	eval_t *v;
+
+	Bprint(bf, "{\n");
+	if(ed->free)
+		goto end;
+	ev = (uchar *)&ed->v;
+	de = pr_fielddefs + progs->numfielddefs;
+	for(d=pr_fielddefs+1; d<de; d++){
+		s = PR_Str(d->s_name);
+		if(s[strlen(s)-2] == '_')
+			continue;
+		/* TODO: pragma pack hazard */
+		vp = (int *)(ev + d->ofs * 4);
+		ve = vp + type_size[d->type & ~DEF_SAVEGLOBAL];
+		v = (eval_t *)vp;
+		for(; vp<ve; vp++)
+			if(*vp != 0)
+				break;
+		if(vp == ve)
+			continue;
+		Bprint(bf, "\"%s\" ", s);
+		Bprint(bf, "\"%s\"\n", PR_UglyValueString(d->type, v));
+	}
+end:
+	Bprint(bf, "}\n");
+}
+
+static void
+dumpdefs(Biobuf *bf)
+{
+	ushort t;
+	ddef_t *d, *de;
+
+	Bprint(bf, "{\n");
+	de = pr_globaldefs + progs->numglobaldefs;
+	for(d=pr_globaldefs; d<de; d++){
+		t = d->type;
+		if((t & DEF_SAVEGLOBAL) == 0)
+			continue;
+		t &= ~DEF_SAVEGLOBAL;
+		if(t != ev_string && t != ev_float && t != ev_entity)
+			continue;
+		Bprint(bf, "\"%s\" \"%s\"\n", PR_Str(d->s_name),
+			PR_UglyValueString(t, (eval_t *)&pr_globals[d->ofs]));		
+	}
+	Bprint(bf, "}\n");
+}
+
+int
+dumpsav(char *f, char *cm)
+{
+	int i;
+	char **s, **e;
+	float *fs, *fe;
+	Biobuf *bf;
+
+	bf = bopen(f, OWRITE, 1);
+	if(bf == nil)
+		return -1;
+	Bprint(bf, "%d\n%s\n", Nsavver, cm);
+	fs = svs.clients->spawn_parms;
+	fe = fs + nelem(svs.clients->spawn_parms);
+	while(fs < fe)
+		Bprint(bf, "%f\n", *fs++);
+	Bprint(bf, "%d\n%s\n%f\n", current_skill, sv.name, sv.time);
+	s = sv.lightstyles;
+	e = s + nelem(sv.lightstyles);
+	while(s < e){
+		Bprint(bf, "%s\n", *s != nil ? *s : "m");
+		s++;
+	}
+	dumpdefs(bf);
+	for(i=0; i<sv.num_edicts; i++)
+		dumpedicts(bf, EDICT_NUM(i));
+	Bterm(bf);
+	return 0;
+}
+
+static void
+loadedicts(Biobuf *bf)
+{
+	int ent, c;
+	char sb[32768], *s;
+	edict_t *ed;
+
+	ent = -1;
+	c = 0;
+	do{
+		for(s=sb; s<sb+sizeof(sb)-1; s++){
+			c = Bgetc(bf);
+			if(c == Beof || c == 0)
+				break;
+			*s = c;
+			if(c == '}'){
+				s++;
+				break;
+			}
+		}
+		if(s == sb + sizeof(sb) - 1)
+			fatal("loadgame: buffer overflow");
+		*s = 0;
+		s = COM_Parse(sb);
+		if(com_token[0] == 0)
+			break;
+		if(strcmp(com_token, "{") != 0)
+			fatal("loadgame: missing opening brace");
+		if(ent == -1)
+			ED_ParseGlobals(s);
+		else{
+			ed = EDICT_NUM(ent);
+			/* TODO: pragma pack hazard */
+			memset(&ed->v, 0, progs->entityfields * 4);
+			ed->free = 0;
+			ED_ParseEdict(s, ed);
+			if(!ed->free)
+				SV_LinkEdict(ed, 0);
+		}
+		ent++;
+	}while(c != Beof);
+	sv.num_edicts = ent;
+}
+
+static int
+loadparms(Biobuf *bf, char *f)
+{
+	int r;
+	float sp[Nparms], *p;
+	char *s, **lp;
+
+	r = -1;
+	p = sp;
+	while(p < sp + nelem(sp)){
+		if(s = Brdline(bf, '\n'), s == nil)
+			goto exit;
+		*p++ = (float)strtod(s, nil);
+	}
+	if(s = Brdline(bf, '\n'), s == nil)
+		goto exit;
+	current_skill = (int)(strtod(s, nil) + 0.1);
+	setcvarv("skill", (float)current_skill);
+	if(s = Brdstr(bf, '\n', 1), s == nil)
+		goto exit;
+	CL_Disconnect_f();
+	SV_SpawnServer(s);
+	free(s);
+	if(!sv.active){
+		werrstr("failed to load map %s", f);
+		goto exit;
+	}
+	sv.paused = 1;
+	sv.loadgame = 1;
+	if(s = Brdline(bf, '\n'), s == nil)
+		goto exit;
+	sv.time = strtod(s, nil);
+	lp = sv.lightstyles;
+	while(lp < sv.lightstyles + nelem(sv.lightstyles)){
+		if(s = Brdstr(bf, '\n', 1), s == nil)
+			goto exit;
+		*lp = Hunk_Alloc(strlen(s)+1);
+		strcpy(*lp++, s);
+		free(s);
+	}
+	r = 0;
+	loadedicts(bf);
+	memcpy(svs.clients->spawn_parms, sp, sizeof sp);
+exit:
+	return r;
+}
+
+int
+loadsav(char *f)
+{
+	int n, r;
+	char *s;
+	Biobuf *bf;
+
+	bf = bopen(f, OREAD, 0);
+	if(bf == nil)
+		return -1;
+	r = -1;
+	if(s = Brdline(bf, '\n'), s == nil)
+		goto exit;
+	n = strtol(s, nil, 10);
+	if(n != Nsavver){
+		werrstr("invalid version %d\n", n);
+		goto exit;
+	}
+	Brdline(bf, '\n');
+	r = loadparms(bf, f);
+exit:
+	Bterm(bf);
+	return r;
+}
+
+void
+closedm(void)
+{
+	if(demobf == nil)
+		return;
+	closelmp(demobf);
+	demobf = nil;
+}
+
+void
+writedm(void)
+{
+	int i;
+
+	put32(demobf, net_message.cursize);
+	for(i=0; i<3; i++)
+		putfl(demobf, cl.viewangles[i]);
+	ewrite(demobf, net_message.data, net_message.cursize);
+}
+
+int
+readdm(void)
+{
+	int n;
+	vec_t *f;
+
+	Bseek(demobf, demoofs, 0);
+	net_message.cursize = get32(demobf);
+	VectorCopy(cl.mviewangles[0], cl.mviewangles[1]);
+	for(n=0, f=cl.mviewangles[0]; n<3; n++)
+		*f++ = getfl(demobf);
+	if(net_message.cursize > Nmsg)
+		fatal("readdm: invalid message size %d\n", net_message.cursize);
+	n = Bread(demobf, net_message.data, net_message.cursize);
+	demoofs = Bseek(demobf, 0, 1);
+	if(n < 0)
+		dprint("readdm: bad read: %r");
+	if(n != net_message.cursize){
+		dprint("readdm: short read: %r");
+		n = -1;
+	}
+	return n;
+}
+
+int
+loaddm(char *f)
+{
+	int n;
+	char *s;
+
+	demobf = openlmp(f, &n);
+	if(demobf == nil)
+		return -1;
+	s = Brdline(demobf, '\n');
+	n = Blinelen(demobf) - 1;
+	if(s == nil || n < 0 || n > 11){
+		dprint("loaddm: invalid trk field");
+		closelmp(demobf);
+		return -1;
+	}
+	demoofs = Bseek(demobf, 0, 1);
+	s[n] = 0;
+	cls.forcetrack =  strtol(s, nil, 10);
+	return 0;
+}
+
+int
+opendm(char *f, int trk)
+{
+	char s[16];
+
+	demobf = bopen(f, OWRITE, 0);
+	if(demobf == nil)
+		return -1;
+	sprint(s, "%d\n", trk);
+	ewrite(demobf, s, strlen(s));
+	return 0;
 }
 
 static Pak *
@@ -295,7 +836,7 @@ pakdir(char *d)
 		snprint(f, sizeof f, "%s/pak%d.pak", d, n);
 		p = pak(f);
 		if(p == nil){
-			dprint("pakdir: can't open %s: %r", f);
+			dprint("pakdir: %r");
 			break;
 		}
 		pl = Hunk_Alloc(sizeof *pl);
@@ -332,97 +873,6 @@ initns(void)
 	}
 }
 
-static Biobuf *
-openlmp(char *f, int *len)
-{
-	char d[Nfspath];
-	Biobuf *bf;
-	Paklist *pl;
-	Pak *p;
-	Lump *l;
-
-	for(pl=pkl; pl != nil; pl=pl->pl){
-		if(pl->p != nil){
-			p = pl->p;
-			l = p->l;
-			while(l < p->e){
-				if(strcmp(l->f, f) == 0){
-					Bseek(p->bf, l->ofs, 0);
-					if(len != nil)
-						*len = l->len;
-					return p->bf;
-				}
-				l++;
-			}
-			continue;
-		}
-		snprint(d, sizeof d, "%s/%s", pl->f, f);
-		if(access(d, AREAD) < 0)
-			continue;
-		bf = bopen(d, OREAD, 1);
-		if(bf == nil)
-			return nil;
-		if(len != nil)
-			*len = bsize(bf);
-		return bf;
-	}
-	werrstr("openlmp %s: not found", f);
-	return nil;
-}
-
-static void
-closelmp(Biobuf *bf)
-{
-	Paklist *pl;
-
-	for(pl=pkl; pl!=nil; pl=pl->pl)
-		if(pl->p && pl->p->bf == bf)
-			return;
-	Bterm(bf);
-}
-
-static uchar *
-loadlmp(char *f, int mth, int *n)
-{
-	int m;
-	char r[32];
-	uchar *buf;
-	Biobuf *bf;
-
-	bf = openlmp(f, &m);
-	if(bf == nil)
-		return nil;
-	radix(f, r);
-	buf = nil;
-	switch(mth){
-	case Fhunk: buf = Hunk_AllocName(m + 1, r); break;
-	case Fcache: buf = Cache_Alloc(loadcache, m + 1, r); break;
-	case Fstack: buf = m+1 <= loadsize ? loadbuf : Hunk_TempAlloc(m+1);
-	}
-	if(buf == nil)
-		fatal("loadlmp %s %d: memory allocation failed: %r", f, m+1);
-	buf[m] = 0;
-	Draw_BeginDisc();
-	eread(bf, buf, m);
-	closelmp(bf);
-	Draw_EndDisc();
-	if(n != nil)
-		*n = m;
-	return buf;
-}
-
-static void
-path(void)
-{
-	Paklist *pl;
-
-	for(pl=pkl; pl!=nil; pl=pl->pl)
-		if(pl->p)
-			Con_Printf("%s (%zd files)\n", pl->p->f, pl->p->e - pl->p->l);
-		else
-			Con_Printf("%s\n", pl->f);
-}
-
 static void
 chkreg(void)
 {
@@ -444,200 +894,6 @@ chkreg(void)
 	closelmp(bf);
 	setcvar("registered", "1");
 	dprint("chkreg: registered version");
-}
-
-void *
-loadhunklmp(char *f, int *n)
-{
-	return loadlmp(f, Fhunk, n);
-}
-
-void *
-loadcachelmp(char *f, cache_user_t *c)
-{
-	loadcache = c;
-	loadlmp(f, Fcache, nil);
-	return c->data;
-}
-
-void *
-loadstklmp(char *f, void *buf, int nbuf, int *n)
-{
-	loadbuf = buf;
-	loadsize = nbuf;
-	return loadlmp(f, Fstack, n);
-}
-
-void
-pointlmp(void)
-{
-	int i, n, nv;
-	char f[Nfspath];
-	Biobuf *bf;
-	vec3_t v3;
-	vec_t *v;
-	particle_t *p;
-
-	snprint(f, sizeof f, "maps/%s.pts", sv.name);
-	bf = openlmp(f, &n);
-	if(bf == nil){
-		Con_Printf("pointlmp: can't open %s: %r\n", f);
-		return;
-	}
-	nv = 0;
-	for(;;){
-		if(n < 3*4+3)
-			break;
-		for(i=0, v=v3; i<3; i++){
-			*v++ = getfl(bf);
-			Bseek(bf, 1, 1);
-		}
-		n -= 3*4+3;
-		nv++;
-		if(free_particles == nil){
-			Con_Printf("pointlmp: insufficient free particles\n");
-			break;
-		}
-		p = free_particles;
-		free_particles = p->next;
-		p->next = active_particles;
-		active_particles = p;
-		p->die = 99999;
-		p->color = -nv & 15;
-		p->type = pt_static;
-		VectorCopy(vec3_origin, p->vel);
-		VectorCopy(v3, p->org);
-	}
-	closelmp(bf);
-	Con_Printf("pointlmp: %d points read\n", nv);
-}
-
-void
-endlmp(void)
-{
-	closelmp(demobf);
-	demobf = nil;
-}
-
-int
-rlmpmsg(void)
-{
-	int n;
-	vec_t *f;
-
-	Bseek(demobf, demoofs, 0);
-	net_message.cursize = get32(demobf);
-	VectorCopy(cl.mviewangles[0], cl.mviewangles[1]);
-	for(n=0, f=cl.mviewangles[0]; n<3; n++)
-		*f++ = getfl(demobf);
-	if(net_message.cursize > Nmsg)
-		fatal("rlmpmsg: invalid message size %d\n", net_message.cursize);
-	n = Bread(demobf, net_message.data, net_message.cursize);
-	demoofs = Bseek(demobf, 0, 1);
-	if(n < 0)
-		dprint("rlmpmsg: bad read: %r");
-	if(n != net_message.cursize){
-		dprint("rlmpmsg: short read: %r");
-		n = -1;
-	}
-	return n;
-}
-
-void
-wlmpmsg(void)
-{
-	int i;
-
-	put32(demobf, net_message.cursize);
-	for(i=0; i<3; i++)
-		putfl(demobf, cl.viewangles[i]);
-	ewrite(demobf, net_message.data, net_message.cursize);
-}
-
-int
-reclmp(char *f, int trk)
-{
-	char s[16];
-
-	demobf = bopen(f, OWRITE, 0);
-	if(demobf == nil)
-		return -1;
-	sprint(s, "%d\n", trk);
-	ewrite(demobf, s, strlen(s));
-	return 0;
-}
-
-demolmp(char *f)
-{
-	int n;
-	char *s;
-
-	demobf = openlmp(f, &n);
-	if(demobf == nil)
-		return -1;
-	s = Brdline(demobf, '\n');
-	n = Blinelen(demobf) - 1;
-	if(s == nil || n < 0 || n > 11){
-		dprint("demolmp: invalid trk field");
-		closelmp(demobf);
-		return -1;
-	}
-	demoofs = Bseek(demobf, 0, 1);
-	s[n] = 0;
-	cls.forcetrack =  strtol(s, nil, 10);
-	return 0;
-}
-
-void
-crc(u8int v)
-{
-	crcn = crcn << 8 ^ crct[crcn >> 8 ^ v];
-}
-
-void
-initcrc(void)
-{
-	crcn = Ncrc0;
-}
-
-void
-ext(char *f, char *e)
-{
-	char *s, *d;
-
-	s = strrchr(f, '/');
-	d = strrchr(f, '.');
-	if(d > s)
-		return;
-	strcat(f, e);
-}
-
-void
-radix(char *f, char *d)
-{
-	char *s, *e;
-
-	s = strrchr(f, '/');
-	e = strrchr(f, '.');
-	if(s == nil)
-		s = f;
-	s++;
-	if(e - s < 1)
-		strcpy(d, "?model?");
-	else{
-		strncpy(d, s, e - s);
-		d[e - s] = 0;
-	}
-}
-
-void
-unloadfs(void)
-{
-	Paklist *pl;
-
-	for(pl=pkl; pl!=nil; pl=pl->pl)
-		if(pl->p != nil)
-			Bterm(pl->p->bf);
 }
 
 /* TODO: nuke these from orbit */

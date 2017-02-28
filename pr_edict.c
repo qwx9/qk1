@@ -465,53 +465,6 @@ void ED_Print (edict_t *ed)
 	}
 }
 
-/*
-=============
-ED_Write
-
-For savegames
-=============
-*/
-void ED_Write (FILE *f, edict_t *ed)
-{
-	ddef_t	*d;
-	int		*v;
-	int		i, j;
-	char	*name;
-	int		type;
-
-	fprintf (f, "{\n");
-
-	if (ed->free)
-	{
-		fprintf (f, "}\n");
-		return;
-	}
-	
-	for (i=1 ; i<progs->numfielddefs ; i++)
-	{
-		d = &pr_fielddefs[i];
-		name = PR_Str(d->s_name);
-		if (name[strlen(name)-2] == '_')
-			continue;	// skip _x, _y, _z vars
-			
-		v = (int *)((char *)&ed->v + d->ofs*4);
-
-	// if the value is still all 0, skip the field
-		type = d->type & ~DEF_SAVEGLOBAL;
-		for (j=0 ; j<type_size[type] ; j++)
-			if (v[j])
-				break;
-		if (j == type_size[type])
-			continue;
-	
-		fprintf (f,"\"%s\" ",name);
-		fprintf (f,"\"%s\"\n", PR_UglyValueString(d->type, (eval_t *)v));		
-	}
-
-	fprintf (f, "}\n");
-}
-
 void ED_PrintNum (int ent)
 {
 	ED_Print (EDICT_NUM(ent));
@@ -597,39 +550,6 @@ void ED_Count (void)
 FIXME: need to tag constants, doesn't really work
 ==============================================================================
 */
-
-/*
-=============
-ED_WriteGlobals
-=============
-*/
-void ED_WriteGlobals (FILE *f)
-{
-	ddef_t		*def;
-	int			i;
-	char		*name;
-	int			type;
-
-	fprintf (f,"{\n");
-	for (i=0 ; i<progs->numglobaldefs ; i++)
-	{
-		def = &pr_globaldefs[i];
-		type = def->type;
-		if ( !(def->type & DEF_SAVEGLOBAL) )
-			continue;
-		type &= ~DEF_SAVEGLOBAL;
-
-		if (type != ev_string
-		&& type != ev_float
-		&& type != ev_entity)
-			continue;
-
-		name = PR_Str(def->s_name);		
-		fprintf (f,"\"%s\" ", name);
-		fprintf (f,"\"%s\"\n", PR_UglyValueString(type, (eval_t *)&pr_globals[def->ofs]));		
-	}
-	fprintf (f,"}\n");
-}
 
 /*
 =============
@@ -984,7 +904,7 @@ void PR_LoadProgs (void)
 
 	progs = loadhunklmp("progs.dat", &n);
 	if(progs == nil)
-		fatal("PR_LoadProgs: failed to load progs.dat: %r");
+		fatal("PR_LoadProgs: %r");
 	print("Programs occupy %dK.\n", n/1024);
 
 	for (i=0 ; i<n ; i++)

@@ -256,7 +256,7 @@ model_t *Mod_LoadModel (model_t *mod, qboolean crash)
 	buf = loadstklmp(mod->name, stackbuf, sizeof stackbuf, nil);
 	if(buf == nil){
 		if(crash)
-			fatal("Mod_LoadModel %s: not found: %r", mod->name);
+			fatal("Mod_LoadModel: %r");
 		return nil;
 	}
 

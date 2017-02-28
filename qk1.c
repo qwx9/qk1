@@ -19,13 +19,17 @@ dprint(char *fmt, ...)
 	fprint(2, "%s\n", s);
 }
 
+/* FIXME: merge dprint/fatal? */
 void
 fatal(char *fmt, ...)
 {
+	char s[1024];
 	va_list arg;
 
-	Host_Shutdown();
 	va_start(arg, fmt);
-	sysfatal(fmt, arg);
+	vseprint(s, s+sizeof s, fmt, arg);
 	va_end(arg);
+	Host_Shutdown();
+	fprint(2, "%s: %s\n", argv0, s);
+	exits(s);
 }

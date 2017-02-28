@@ -146,11 +146,11 @@ void CL_KeepaliveMessage (void)
 	
 	do
 	{
-		ret = clmsg ();
+		ret = readcl ();
 		switch (ret)
 		{
 		default:
-			Host_Error ("CL_KeepaliveMessage: clmsg failed");		
+			Host_Error ("CL_KeepaliveMessage: readcl failed");		
 		case 0:
 			break;	// nothing waiting
 		case 1:
@@ -783,8 +783,8 @@ void CL_ParseServerMessage (void)
 					
 		case svc_lightstyle:
 			i = MSG_ReadByte ();
-			if (i >= MAX_LIGHTSTYLES)
-				fatal ("svc_lightstyle > MAX_LIGHTSTYLES");
+			if (i >= Nlights)
+				fatal ("svc_lightstyle > Nlights");
 			strcpy(cl_lightstyle[i].map,  MSG_ReadString());
 			cl_lightstyle[i].length = strlen(cl_lightstyle[i].map);
 			break;

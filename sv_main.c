@@ -227,7 +227,7 @@ once for a player each game, not once for each level change.
 void SV_ConnectClient (int clientnum)
 {
 	int i, edictnum;
-	float spawn_parms[NUM_SPAWN_PARMS];
+	float spawn_parms[Nparms];
 	edict_t *ent;
 	client_t *client;
 	struct qsocket_s *netconnection;
@@ -268,7 +268,7 @@ void SV_ConnectClient (int clientnum)
 	else{
 		// call the progs to get default spawn parms for the new client
 		PR_ExecuteProgram(pr_global_struct->SetNewParms);
-		for(i=0; i<NUM_SPAWN_PARMS; i++)
+		for(i=0; i<Nparms; i++)
 			client->spawn_parms[i] = (&pr_global_struct->parm1)[i];
 	}
 
@@ -993,7 +993,7 @@ void SV_SaveSpawnparms (void)
 	// call the progs to get default spawn parms for the new client
 		pr_global_struct->self = EDICT_TO_PROG(host_client->edict);
 		PR_ExecuteProgram (pr_global_struct->SetChangeParms);
-		for (j=0 ; j<NUM_SPAWN_PARMS ; j++)
+		for (j=0 ; j<Nparms ; j++)
 			host_client->spawn_parms[j] = (&pr_global_struct->parm1)[j];
 	}
 }

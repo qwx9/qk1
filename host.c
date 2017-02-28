@@ -207,37 +207,6 @@ void Host_InitLocal (void)
 	host_time = 1.0;		// so a think at time 0 won't get called
 }
 
-
-/*
-===============
-Host_WriteConfiguration
-
-Writes key bindings and archived cvars to config.cfg
-===============
-*/
-void Host_WriteConfiguration (void)
-{
-	FILE	*f;
-
-// dedicated servers initialize the host but don't parse and set the
-// config.cfg cvars
-	if (host_initialized & !isDedicated)
-	{
-		f = fopen (va("%s/config.cfg",fsdir), "w");
-		if (!f)
-		{
-			Con_Printf ("Couldn't write config.cfg.\n");
-			return;
-		}
-		
-		Key_WriteBindings (f);
-		Cvar_WriteVariables (f);
-
-		fclose (f);
-	}
-}
-
-
 /*
 =================
 SV_ClientPrintf
@@ -781,13 +750,12 @@ void Host_Shutdown(void)
 // keep Con_Printf from trying to update the screen
 	scr_disabled_for_loading = true;
 
-	Host_WriteConfiguration (); 
+	dumpcfg(); 
 
 	CDAudio_Shutdown ();
 	NET_Shutdown ();
 	S_Shutdown();
 	IN_Shutdown ();
-	unloadfs();
 
 	if (cls.state != ca_dedicated)
 	{

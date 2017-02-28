@@ -36,11 +36,9 @@
 // per-level limits
 //
 #define	MAX_EDICTS		600			// FIXME: ouch! ouch! ouch!
-#define	MAX_LIGHTSTYLES	64
+#define	Nlights	64
 #define	MAX_MODELS		256			// these are sent over the net as bytes
 #define	MAX_SOUNDS		256			// so they cannot be blindly increased
-
-#define	SAVEGAME_COMMENT_LENGTH	39
 
 #define	MAX_STYLESTRING	64
 
@@ -240,6 +238,7 @@ void Host_Quit_f (void);
 void Host_ClientCommands (char *fmt, ...);
 void Host_ShutdownServer (qboolean crash);
 
+extern cvar_t	pausable;
 extern qboolean		msg_suppress_1;		// suppresses resolution and cache size console output
 										//  an fullscreen DIB focus gain/loss
 extern int			current_skill;		// skill level for currently loaded level (in case
