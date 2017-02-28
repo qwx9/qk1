@@ -1,9 +1,8 @@
-// sv_edict.c -- entity dictionary
-
 #include <u.h>
 #include <libc.h>
-#include <stdio.h>
+#include "dat.h"
 #include "quakedef.h"
+#include "fns.h"
 
 dprograms_t		*progs;
 dfunction_t		*pr_functions;

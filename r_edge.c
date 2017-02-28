@@ -1,7 +1,8 @@
 #include <u.h>
 #include <libc.h>
-#include <stdio.h>
+#include "dat.h"
 #include "quakedef.h"
+#include "fns.h"
 
 /* FIXME
 the complex cases add new polys on most lines, so dont optimize for keeping them the same

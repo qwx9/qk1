@@ -38,7 +38,6 @@ OFILES=\
 	net_main.$O\
 	net_dgrm.$O\
 	net_bsd.$O\
-	nonintel.$O\
 	pr_cmds.$O\
 	pr_edict.$O\
 	pr_exec.$O\

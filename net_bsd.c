@@ -1,7 +1,8 @@
 #include <u.h>
 #include <libc.h>
-#include <stdio.h>
+#include "dat.h"
 #include "quakedef.h"
+#include "fns.h"
 
 net_driver_t net_drivers[MAX_NET_DRIVERS] =
 {

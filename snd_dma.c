@@ -1,9 +1,8 @@
-// snd_dma.c -- main control for any streaming sound output device
-
 #include <u.h>
 #include <libc.h>
-#include <stdio.h>
+#include "dat.h"
 #include "quakedef.h"
+#include "fns.h"
 
 void S_Play(void);
 void S_PlayVol(void);

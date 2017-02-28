@@ -1,9 +1,8 @@
-// host.c -- coordinates spawning and killing of local servers
-
 #include <u.h>
 #include <libc.h>
-#include <stdio.h>
+#include "dat.h"
 #include "quakedef.h"
+#include "fns.h"
 
 /*
 

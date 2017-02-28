@@ -1,8 +1,9 @@
 #include <u.h>
 #include <libc.h>
-#include <stdio.h>
 #include <thread.h>
+#include "dat.h"
 #include "quakedef.h"
+#include "fns.h"
 
 qboolean isDedicated;
 mainstacksize = 512*1024;

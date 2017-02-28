@@ -1,9 +1,8 @@
-// view.c -- player eye positioning
-
 #include <u.h>
 #include <libc.h>
-#include <stdio.h>
+#include "dat.h"
 #include "quakedef.h"
+#include "fns.h"
 
 /*
 

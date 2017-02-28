@@ -1,9 +1,8 @@
-// cl_main.c  -- client main loop
-
 #include <u.h>
 #include <libc.h>
-#include <stdio.h>
+#include "dat.h"
 #include "quakedef.h"
+#include "fns.h"
 
 // we need to declare some mouse variables here, because the menu system
 // references them even when on a unix system.

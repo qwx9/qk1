@@ -1,9 +1,8 @@
-// sv_move.c -- monster movement
-
 #include <u.h>
 #include <libc.h>
-#include <stdio.h>
+#include "dat.h"
 #include "quakedef.h"
+#include "fns.h"
 
 #define	STEPSIZE	18
 

@@ -1,9 +1,8 @@
-// mathlib.c -- math primitives
-
 #include <u.h>
 #include <libc.h>
-#include <stdio.h>
+#include "dat.h"
 #include "quakedef.h"
+#include "fns.h"
 
 vec3_t vec3_origin = {0,0,0};
 int nanmask = 255<<23;

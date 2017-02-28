@@ -1,7 +1,8 @@
 #include <u.h>
 #include <libc.h>
-#include <stdio.h>
+#include "dat.h"
 #include "quakedef.h"
+#include "fns.h"
 
 #define MAX_PARTICLES			2048	// default max # of particles at one
 										//  time

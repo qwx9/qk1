@@ -1,9 +1,10 @@
 #include <u.h>
 #include <libc.h>
-#include <stdio.h>
 #include <thread.h>
 #include <regexp.h>
+#include "dat.h"
 #include "quakedef.h"
+#include "fns.h"
 
 static int cdread;
 static int cdloop;

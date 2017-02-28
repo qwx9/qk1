@@ -1,8 +1,9 @@
 #include <u.h>
 #include <libc.h>
 #include <draw.h>
-#include <stdio.h>
+#include "dat.h"
 #include "quakedef.h"
+#include "fns.h"
 
 viddef_t vid;		/* global video state */
 int resized;

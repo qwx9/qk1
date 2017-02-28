@@ -1,9 +1,8 @@
-// screen.c -- master for refresh, status bar, console, chat, notify, etc
-
 #include <u.h>
 #include <libc.h>
-#include <stdio.h>
+#include "dat.h"
 #include "quakedef.h"
+#include "fns.h"
 
 // only the refresh window will be updated unless these variables are flagged 
 int			scr_copytop;

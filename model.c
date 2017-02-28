@@ -1,12 +1,8 @@
-// models.c -- model loading and caching
-
-// models are the only shared resource between a client and server running
-// on the same machine.
-
 #include <u.h>
 #include <libc.h>
-#include <stdio.h>
+#include "dat.h"
 #include "quakedef.h"
+#include "fns.h"
 
 model_t	*loadmodel;
 char	loadname[32];	// for hunk tags

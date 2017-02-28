@@ -1,9 +1,8 @@
-// r_surf.c: surface-related refresh code
-
 #include <u.h>
 #include <libc.h>
-#include <stdio.h>
+#include "dat.h"
 #include "quakedef.h"
+#include "fns.h"
 
 drawsurf_t	r_drawsurf;
 

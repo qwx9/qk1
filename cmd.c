@@ -1,9 +1,8 @@
-// cmd.c -- Quake script command processing module
-
 #include <u.h>
 #include <libc.h>
-#include <stdio.h>
+#include "dat.h"
 #include "quakedef.h"
+#include "fns.h"
 
 void Cmd_ForwardToServer (void);
 

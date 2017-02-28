@@ -1,9 +1,8 @@
-// snd_mem.c: sound caching
-
 #include <u.h>
 #include <libc.h>
-#include <stdio.h>
+#include "dat.h"
 #include "quakedef.h"
+#include "fns.h"
 
 int			cache_full_cycle;
 

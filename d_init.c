@@ -1,9 +1,8 @@
-// d_init.c: rasterization driver initialization
-
 #include <u.h>
 #include <libc.h>
-#include <stdio.h>
+#include "dat.h"
 #include "quakedef.h"
+#include "fns.h"
 
 #define NUM_MIPS	4
 

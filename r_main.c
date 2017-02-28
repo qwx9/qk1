@@ -1,7 +1,8 @@
 #include <u.h>
 #include <libc.h>
-#include <stdio.h>
+#include "dat.h"
 #include "quakedef.h"
+#include "fns.h"
 
 //define	PASSAGES
 
@@ -244,7 +245,6 @@ void R_NewMap (void)
 	// surface 0 doesn't really exist; it's just a dummy because index 0
 	// is used to indicate no edge attached to surface
 		surfaces--;
-		R_SurfacePatch ();
 	}
 	else
 	{
@@ -850,7 +850,6 @@ void R_EdgeDrawing (void)
 	// surface 0 doesn't really exist; it's just a dummy because index 0
 	// is used to indicate no edge attached to surface
 		surfaces--;
-		R_SurfacePatch ();
 	}
 
 	R_BeginEdgeFrame ();

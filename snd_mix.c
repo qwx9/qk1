@@ -1,9 +1,8 @@
-// snd_mix.c -- portable code to mix sounds for snd_dma.c
-
 #include <u.h>
 #include <libc.h>
-#include <stdio.h>
+#include "dat.h"
 #include "quakedef.h"
+#include "fns.h"
 
 #define DWORD	u32int
 

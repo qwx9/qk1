@@ -160,8 +160,6 @@ typedef struct
 	int		effects;
 } entity_state_t;
 
-#include "dat.h"
-#include "fns.h"
 #include "wad.h"
 #include "draw.h"
 #include "screen.h"

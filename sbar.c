@@ -1,9 +1,8 @@
-// sbar.c -- status bar code
-
 #include <u.h>
 #include <libc.h>
-#include <stdio.h>
+#include "dat.h"
 #include "quakedef.h"
+#include "fns.h"
 
 
 int			sb_updates;		// if >= vid.numpages, no update needed

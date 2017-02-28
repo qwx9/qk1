@@ -1,9 +1,8 @@
-// world.c -- world query functions
-
 #include <u.h>
 #include <libc.h>
-#include <stdio.h>
+#include "dat.h"
 #include "quakedef.h"
+#include "fns.h"
 
 /*
 

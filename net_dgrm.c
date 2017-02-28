@@ -1,7 +1,8 @@
 #include <u.h>
 #include <libc.h>
-#include <stdio.h>
+#include "dat.h"
 #include "quakedef.h"
+#include "fns.h"
 
 // This is enables a simple IP banning mechanism
 //#define BAN_TEST	/* FIXME */

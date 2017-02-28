@@ -1,9 +1,8 @@
-// cvar.c -- dynamic variable tracking
-
 #include <u.h>
 #include <libc.h>
-#include <stdio.h>
+#include "dat.h"
 #include "quakedef.h"
+#include "fns.h"
 
 cvar_t	*cvar_vars;
 char	*cvar_null_string = "";

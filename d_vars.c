@@ -1,9 +1,8 @@
-// r_vars.c: global refresh variables
-
 #include <u.h>
 #include <libc.h>
-#include <stdio.h>
+#include "dat.h"
 #include "quakedef.h"
+#include "fns.h"
 
 // all global and static refresh variables are collected in a contiguous block
 // to avoid cache conflicts.

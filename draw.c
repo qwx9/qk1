@@ -1,10 +1,8 @@
-// draw.c -- this is the only file outside the refresh that touches the
-// vid buffer
-
 #include <u.h>
 #include <libc.h>
-#include <stdio.h>
+#include "dat.h"
 #include "quakedef.h"
+#include "fns.h"
 
 typedef struct {
 	vrect_t	rect;

@@ -1,9 +1,8 @@
-// cl_parse.c  -- parse a message received from the server
-
 #include <u.h>
 #include <libc.h>
-#include <stdio.h>
+#include "dat.h"
 #include "quakedef.h"
+#include "fns.h"
 
 char *svc_strings[] =
 {

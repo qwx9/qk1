@@ -1,9 +1,8 @@
-// sv_user.c -- server code for moving users
-
 #include <u.h>
 #include <libc.h>
-#include <stdio.h>
+#include "dat.h"
 #include "quakedef.h"
+#include "fns.h"
 
 edict_t	*sv_player;
 
