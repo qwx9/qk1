@@ -135,9 +135,9 @@ void SV_StartSound (edict_t *entity, int channel, char *sample, int volume,
 	channel = (ent<<3) | channel;
 
 	field_mask = 0;
-	if (volume != DEFAULT_SOUND_PACKET_VOLUME)
+	if (volume != Spktvol)
 		field_mask |= SND_VOLUME;
-	if (attenuation != DEFAULT_SOUND_PACKET_ATTENUATION)
+	if (attenuation != Spktatt)
 		field_mask |= SND_ATTENUATION;
 
 // directed messages go only to the entity the are targeted on

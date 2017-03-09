@@ -177,15 +177,6 @@ typedef struct
 	int			lightofs;		// start of [numstyles*surfsize] samples
 } dface_t;
 
-
-
-#define	AMBIENT_WATER	0
-#define	AMBIENT_SKY		1
-#define	AMBIENT_SLIME	2
-#define	AMBIENT_LAVA	3
-
-#define	NUM_AMBIENTS			4		// automatic ambient sounds
-
 // leaf 0 is the generic CONTENTS_SOLID leaf, used for all solid areas
 // all other leafs need visibility info
 typedef struct
@@ -199,7 +190,7 @@ typedef struct
 	unsigned short		firstmarksurface;
 	unsigned short		nummarksurfaces;
 
-	byte		ambient_level[NUM_AMBIENTS];
+	byte		ambient_level[Namb];
 } dleaf_t;
 
 #pragma pack off

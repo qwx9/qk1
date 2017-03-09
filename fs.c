@@ -344,10 +344,10 @@ loadlmp(char *f, int mth, int *n)
 	switch(mth){
 	case Fhunk: buf = Hunk_AllocName(m + 1, r); break;
 	case Fcache: buf = Cache_Alloc(loadcache, m + 1, r); break;
-	case Fstack: buf = m+1 <= loadsize ? loadbuf : Hunk_TempAlloc(m+1);
+	case Fstack: buf = m + 1 <= loadsize ? loadbuf : Hunk_TempAlloc(m + 1); break;
 	}
 	if(buf == nil)
-		fatal("loadlmp %s %d: memory allocation failed: %r", f, m+1);
+		fatal("loadlmp %s %d: memory allocation failed: %r", f, m + 1);
 	buf[m] = 0;
 	Draw_BeginDisc();
 	eread(bf, buf, m);
@@ -684,7 +684,7 @@ loadsav(char *f)
 		goto exit;
 	n = strtol(s, nil, 10);
 	if(n != Nsavver){
-		werrstr("invalid version %d\n", n);
+		werrstr("invalid version %d", n);
 		goto exit;
 	}
 	Brdline(bf, '\n');

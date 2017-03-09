@@ -57,7 +57,6 @@ cvar_t	pausable = {"pausable","1"};
 
 cvar_t	temp1 = {"temp1","0"};
 
-
 /*
 ================
 Host_EndGame
@@ -426,41 +425,6 @@ void Host_ClearMemory (void)
 	memset(&cl, 0, sizeof cl);
 }
 
-
-//============================================================================
-
-
-/*
-===================
-Host_FilterTime
-
-Returns false if the time is too short to run a frame
-===================
-*/
-qboolean Host_FilterTime (float time)
-{
-	realtime += time;
-
-	if (!cls.timedemo && realtime - oldrealtime < 1.0/72.0)
-		return false;		// framerate is too high
-
-	host_frametime = realtime - oldrealtime;
-	oldrealtime = realtime;
-
-	if (host_framerate.value > 0)
-		host_frametime = host_framerate.value;
-	else
-	{	// don't allow really long or short frames
-		if (host_frametime > 0.1)
-			host_frametime = 0.1;
-		if (host_frametime < 0.001)
-			host_frametime = 0.001;
-	}
-	
-	return true;
-}
-
-
 /*
 ===================
 Host_GetConsoleCommands
@@ -511,15 +475,21 @@ void Host_ServerFrame (void)
 	SV_SendClientMessages ();
 }
 
+static int
+boundfps(float t)
+{
+	realtime += t;
+	if(!cls.timedemo && realtime - oldrealtime < 1.0 / Fpsmax)
+		return -1;
+	host_frametime = realtime - oldrealtime;
+	oldrealtime = realtime;
+	if(host_framerate.value > 0)
+		host_frametime = host_framerate.value;
+	else if(host_frametime > 1.0 / Fpsmin)
+		host_frametime = 1.0 / Fpsmin;
+	return 0;
+}
 
-
-/*
-==================
-Host_Frame
-
-Runs all active servers
-==================
-*/
 void _Host_Frame (float time)
 {
 	static double		time1 = 0;
@@ -532,10 +502,9 @@ void _Host_Frame (float time)
 
 // keep the random time dependent
 	rand ();
-	
-// decide the simulation time
-	if (!Host_FilterTime (time))
-		return;			// don't run too fast, or packets will flood out
+
+	if(boundfps(time) < 0)
+		return;
 		
 // get new key events
 	Sys_SendKeyEvents ();
@@ -595,11 +564,11 @@ void _Host_Frame (float time)
 // update audio
 	if (cls.signon == SIGNONS)
 	{
-		S_Update (r_origin, vpn, vright, vup);
+		stepsnd (r_origin, vpn, vright, vup);
 		CL_DecayLights ();
 	}
 	else
-		S_Update (vec3_origin, vec3_origin, vec3_origin, vec3_origin);
+		stepsnd (vec3_origin, vec3_origin, vec3_origin, vec3_origin);
 	
 	CDAudio_Update();
 
@@ -711,7 +680,8 @@ void Host_Init (quakeparms_t *parms)
 		Draw_Init ();
 		SCR_Init ();
 		R_Init ();
-		S_Init ();
+		if(initsnd() < 0)
+			fprint(2, "initsnd: %r\n");
 		CDAudio_Init ();
 		Sbar_Init ();
 		CL_Init ();
@@ -753,7 +723,7 @@ void Host_Shutdown(void)
 
 	CDAudio_Shutdown ();
 	NET_Shutdown ();
-	S_Shutdown();
+	shutsnd();
 	IN_Shutdown ();
 
 	if (cls.state != ca_dedicated)

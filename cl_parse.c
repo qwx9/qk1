@@ -96,12 +96,12 @@ void CL_ParseStartSoundPacket(void)
     if (field_mask & SND_VOLUME)
 		volume = MSG_ReadByte ();
 	else
-		volume = DEFAULT_SOUND_PACKET_VOLUME;
+		volume = Spktvol;
 	
     if (field_mask & SND_ATTENUATION)
 		attenuation = MSG_ReadByte () / 64.0;
 	else
-		attenuation = DEFAULT_SOUND_PACKET_ATTENUATION;
+		attenuation = Spktatt;
 	
 	channel = MSG_ReadShort ();
 	sound_num = MSG_ReadByte ();
@@ -115,7 +115,7 @@ void CL_ParseStartSoundPacket(void)
 	for (i=0 ; i<3 ; i++)
 		pos[i] = MSG_ReadCoord ();
  
-    S_StartSound (ent, channel, cl.sound_precache[sound_num], pos, volume/255.0, attenuation);
+    startsfx (ent, channel, cl.sound_precache[sound_num], pos, volume/255.0, attenuation);
 }       
 
 /*
@@ -261,7 +261,7 @@ void CL_ParseServerInfo (void)
 			return;
 		}
 		strcpy (sound_precache[numsounds], str);
-		S_TouchSound (str);
+		touchsfx (str);
 	}
 
 //
@@ -279,13 +279,11 @@ void CL_ParseServerInfo (void)
 		CL_KeepaliveMessage ();
 	}
 
-	S_BeginPrecaching ();
 	for (i=1 ; i<numsounds ; i++)
 	{
-		cl.sound_precache[i] = S_PrecacheSound (sound_precache[i]);
+		cl.sound_precache[i] = precachesfx (sound_precache[i]);
 		CL_KeepaliveMessage ();
 	}
-	S_EndPrecaching ();
 
 
 // local state
@@ -667,7 +665,7 @@ void CL_ParseStaticSound (void)
 	vol = MSG_ReadByte ();
 	atten = MSG_ReadByte ();
 	
-	S_StaticSound (cl.sound_precache[sound_num], org, vol, atten);
+	staticsfx (cl.sound_precache[sound_num], org, vol, atten);
 }
 
 
@@ -794,7 +792,7 @@ void CL_ParseServerMessage (void)
 			
 		case svc_stopsound:
 			i = MSG_ReadShort();
-			S_StopSound(i>>3, i&7);
+			stopsfx(i>>3, i&7);
 			break;
 		
 		case svc_updatename:

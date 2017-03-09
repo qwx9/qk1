@@ -167,7 +167,15 @@ typedef struct
 #include "protocol.h"
 #include "cmd.h"
 #include "sbar.h"
-#include "sound.h"
+
+struct Sfx{
+	char s[Npath];
+	cache_user_t cu;
+};
+
+extern cvar_t bgmvolume;
+extern cvar_t volume;
+
 #include "render.h"
 #include "client.h"
 #include "progs.h"

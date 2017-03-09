@@ -52,7 +52,7 @@ cproc(void *)
 {
 	int a, n, afd, fd;
 	char s[24];
-	uchar buf[SNBUF];
+	uchar buf[8192];
 	short *p;
 
 	if((afd = open("/dev/audio", OWRITE)) < 0)

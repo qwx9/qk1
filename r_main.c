@@ -881,13 +881,6 @@ void R_EdgeDrawing (void)
 		db_time2 = Sys_FloatTime ();
 		se_time1 = db_time2;
 	}
-
-	if (!r_dspeeds.value)
-	{
-		VID_UnlockBuffer ();
-		S_ExtraUpdate ();	// don't let sound get messed up if going slow
-		VID_LockBuffer ();
-	}
 	
 	if (!(r_drawpolys | r_drawculledpolys))
 		R_ScanEdges ();
@@ -927,22 +920,8 @@ void R_RenderView_ (void)
 
 	if (!cl_entities[0].model || !cl.worldmodel)
 		fatal ("R_RenderView: NULL worldmodel");
-		
-	if (!r_dspeeds.value)
-	{
-		VID_UnlockBuffer ();
-		S_ExtraUpdate ();	// don't let sound get messed up if going slow
-		VID_LockBuffer ();
-	}
 	
 	R_EdgeDrawing ();
-
-	if (!r_dspeeds.value)
-	{
-		VID_UnlockBuffer ();
-		S_ExtraUpdate ();	// don't let sound get messed up if going slow
-		VID_LockBuffer ();
-	}
 	
 	if (r_dspeeds.value)
 	{

@@ -609,7 +609,7 @@ SCR_BeginLoadingPlaque
 */
 void SCR_BeginLoadingPlaque (void)
 {
-	S_StopAllSounds (true);
+	stopallsfx();
 
 	if (cls.state != ca_connected)
 		return;
@@ -702,9 +702,6 @@ int SCR_ModalMessage (char *text)
 	scr_drawdialog = true;
 	SCR_UpdateScreen ();
 	scr_drawdialog = false;
-	
-	S_ClearBuffer ();		// so dma doesn't loop current sound
-
 	do
 	{
 		key_count = -1;		// wait for a key down and up

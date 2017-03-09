@@ -1,3 +1,13 @@
+void	stepsnd(vec3_t, vec3_t, vec3_t, vec3_t);
+void	stopallsfx(void);
+void	stopsfx(int, int);
+void	startsfx(int, int, Sfx *, vec3_t, float, float);
+void	localsfx(char *);
+void	staticsfx(Sfx *, vec3_t, float, float);
+void	touchsfx(char *);
+Sfx*	precachesfx(char *);
+void	shutsnd(void);
+int	initsnd(void);
 void	setcvar(char*, char*);
 void	setcvarv(char*, float);
 void	abortdemo(void);

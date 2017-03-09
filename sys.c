@@ -61,10 +61,8 @@ Sys_LowFPPrecision(void)
 static void
 croak(void *, char *note)
 {
-	if(strncmp(note, "sys:", 4) == 0){
+	if(strncmp(note, "sys:", 4) == 0)
 		IN_Shutdown();
-		SNDDMA_Shutdown();
-	}
 	noted(NDFLT);
 }
 
@@ -102,7 +100,7 @@ threadmain(int c, char **v)
 
 	Host_Init(&parms);
 
-	oldtime = Sys_FloatTime() - 0.1;
+	oldtime = Sys_FloatTime() - 1.0 / Fpsmax;
 	for(;;){
 		// find time spent rendering last frame
 		newtime = Sys_FloatTime();

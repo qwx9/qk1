@@ -4,6 +4,7 @@ BIN=$home/bin/$objtype
 TARG=quake
 
 OFILES=\
+	cd.$O\
 	cl_demo.$O\
 	cl_input.$O\
 	cl_main.$O\
@@ -30,14 +31,16 @@ OFILES=\
 	fs.$O\
 	host.$O\
 	host_cmd.$O\
+	in.$O\
 	keys.$O\
-	menu.$O\
 	mathlib.$O\
+	menu.$O\
 	model.$O\
+	net_bsd.$O\
+	net_dgrm.$O\
 	net_loop.$O\
 	net_main.$O\
-	net_dgrm.$O\
-	net_bsd.$O\
+	net_udp.$O\
 	pr_cmds.$O\
 	pr_edict.$O\
 	pr_exec.$O\
@@ -45,36 +48,30 @@ OFILES=\
 	r_aclip.$O\
 	r_alias.$O\
 	r_bsp.$O\
-	r_light.$O\
 	r_draw.$O\
 	r_efrag.$O\
 	r_edge.$O\
-	r_misc.$O\
+	r_light.$O\
 	r_main.$O\
+	r_misc.$O\
+	r_part.$O\
 	r_sky.$O\
 	r_sprite.$O\
 	r_surf.$O\
-	r_part.$O\
 	r_vars.$O\
 	screen.$O\
 	sbar.$O\
+	snd.$O\
 	sv_main.$O\
-	sv_phys.$O\
 	sv_move.$O\
+	sv_phys.$O\
 	sv_user.$O\
-	zone.$O\
+	sys.$O\
+	vid.$O\
 	view.$O\
 	wad.$O\
 	world.$O\
-	snd_dma.$O\
-	snd_mem.$O\
-	snd_mix.$O\
-	in.$O\
-	sys.$O\
-	vid.$O\
-	snd.$O\
-	cd.$O\
-	net_udp.$O\
+	zone.$O\
 
 HFILES=\
 	dat.h\
@@ -109,7 +106,6 @@ HFILES=\
 	sbar.h\
 	screen.h\
 	server.h\
-	sound.h\
 	spritegn.h\
 	sys.h\
 	vid.h\
