@@ -841,9 +841,9 @@ void CL_ParseServerMessage (void)
 				cl.paused = MSG_ReadByte ();
 
 				if (cl.paused)
-					CDAudio_Pause ();
+					pausecd();
 				else
-					CDAudio_Resume ();
+					resumecd();
 			}
 			break;
 			
@@ -876,11 +876,11 @@ void CL_ParseServerMessage (void)
 
 		case svc_cdtrack:
 			cl.cdtrack = MSG_ReadByte ();
-			cl.looptrack = MSG_ReadByte ();
+			MSG_ReadByte();	/* looptrack */
 			if((cls.demoplayback || cls.demorecording) && cls.forcetrack > 0)
-				CDAudio_Play ((byte)cls.forcetrack, true);
+				startcd(cls.forcetrack, 1);
 			else
-				CDAudio_Play ((byte)cl.cdtrack, true);
+				startcd(cl.cdtrack, 1);
 			break;
 
 		case svc_intermission:

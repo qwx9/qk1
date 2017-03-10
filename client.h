@@ -193,7 +193,7 @@ typedef struct
 	int			num_statics;	// held in cl_staticentities array
 	entity_t	viewent;			// the gun model
 
-	int			cdtrack, looptrack;	// cd audio
+	int cdtrack;
 
 // frag scoreboard
 	scoreboard_t	*scores;		// [cl.maxclients]

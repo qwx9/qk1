@@ -4,7 +4,6 @@ BIN=$home/bin/$objtype
 TARG=quake
 
 OFILES=\
-	cd.$O\
 	cl_demo.$O\
 	cl_input.$O\
 	cl_main.$O\
@@ -79,7 +78,6 @@ HFILES=\
 	adivtab.h\
 	anorms.h\
 	bspfile.h\
-	cdaudio.h\
 	client.h\
 	cmd.h\
 	common.h\

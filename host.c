@@ -570,7 +570,7 @@ void _Host_Frame (float time)
 	else
 		stepsnd (vec3_origin, vec3_origin, vec3_origin, vec3_origin);
 	
-	CDAudio_Update();
+	stepcd();
 
 	if (host_speeds.value)
 	{
@@ -682,7 +682,8 @@ void Host_Init (quakeparms_t *parms)
 		R_Init ();
 		if(initsnd() < 0)
 			fprint(2, "initsnd: %r\n");
-		CDAudio_Init ();
+		if(initcd() < 0)
+			fprint(2, "initcd: %r\n");
 		Sbar_Init ();
 		CL_Init ();
 	}
@@ -721,8 +722,8 @@ void Host_Shutdown(void)
 
 	dumpcfg(); 
 
-	CDAudio_Shutdown ();
 	NET_Shutdown ();
+	shutcd();
 	shutsnd();
 	IN_Shutdown ();
 

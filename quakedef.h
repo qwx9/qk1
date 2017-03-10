@@ -188,7 +188,6 @@ extern cvar_t volume;
 #include "console.h"
 #include "view.h"
 #include "menu.h"
-#include "cdaudio.h"
 
 /* included here to avoid type incompatibilities errors from 2c(1),2l(1) */
 #include "r_local.h"
