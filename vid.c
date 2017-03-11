@@ -7,6 +7,7 @@
 
 viddef_t vid;		/* global video state */
 int resized;
+int dumpwin;
 Point center;		/* of window */
 int d_con_indirect;
 void (*vid_menudrawfn)(void);
@@ -191,6 +192,31 @@ VID_Shutdown(void)
 	freeimage(fbim);
 }
 
+/* only exists to allow taking tear-free screenshots ingame... */
+static int
+writebit(void)
+{
+	int n, fd;
+	char *s;
+
+	for(n=0, s=nil; n<100; n++){
+		s = va("%s/quake%02d.bit", fsdir, n);
+		if(access(s, AEXIST) == -1)
+			break;
+	}
+	if(n == 100){
+		werrstr("at static file limit");
+		return -1;
+	}
+	if(fd = create(s, OWRITE, 0644), fd < 0)
+		return -1;
+	n = writeimage(fd, fbim, 0);
+	close(fd);
+	if(n >= 0)
+		Con_Printf("Wrote %s\n", s);
+	return n;
+}
+
 /* flush given rectangles from view buffer to the screen */
 void
 VID_Update(vrect_t *rects)
@@ -217,6 +243,11 @@ VID_Update(vrect_t *rects)
 	loadimage(fbim, fbim->r, framebuf, vid.height * vid.rowbytes);
 	draw(screen, screen->r, fbim, nil, ZP);
 	flushimage(display, 1);
+	if(dumpwin){
+		if(writebit() < 0)
+			Con_Printf("writebit: %r\n");
+		dumpwin = 0;
+	}
 }
 
 /* direct drawing of the "accessing disk" icon */

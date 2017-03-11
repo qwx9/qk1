@@ -44,10 +44,6 @@ qboolean	scr_skipupdate;
 
 qboolean	block_drawing;
 
-static int writepcx;
-
-void SCR_ScreenShot_f (void);
-
 /*
 ===============================================================================
 
@@ -288,13 +284,12 @@ void SCR_SizeDown_f (void)
 	vid.recalc_refdef = 1;
 }
 
-//============================================================================
+static void
+screenshot(void) 
+{ 
+	dumpwin++;
+}
 
-/*
-==================
-SCR_Init
-==================
-*/
 void SCR_Init (void)
 {
 	Cvar_RegisterVariable (&scr_fov);
@@ -305,11 +300,7 @@ void SCR_Init (void)
 	Cvar_RegisterVariable (&scr_showpause);
 	Cvar_RegisterVariable (&scr_centertime);
 	Cvar_RegisterVariable (&scr_printspeed);
-
-//
-// register our commands
-//
-	Cmd_AddCommand ("screenshot",SCR_ScreenShot_f);
+	Cmd_AddCommand("screenshot", screenshot);
 	Cmd_AddCommand ("sizeup",SCR_SizeUp_f);
 	Cmd_AddCommand ("sizedown",SCR_SizeDown_f);
 
@@ -495,111 +486,6 @@ void SCR_DrawConsole (void)
 			Con_DrawNotify ();	// only draw notify in game
 	}
 }
-
-
-/* 
-============================================================================== 
- 
-						SCREEN SHOTS 
- 
-============================================================================== 
-*/ 
-
-void
-SCR_ScreenShot_f(void) 
-{ 
-	writepcx++;
-}
-
-static void
-pcxout(char *path, byte *src, int dx, int dy, int xlen, byte *pal)
-{
-	int i, j;
-	uchar *buf, *p;
-
-	if((buf = Hunk_TempAlloc(dx * dy * 2 + 1000)) == nil){
-		Con_Printf("writepcx: not enough memory\n");
-		return;
-	}
-	p = buf;
-
-	/* pcx header */
-	memset(p, 0, 128);
-	p[0] = 0x0a;
-	p[1] = 5;	/* version: 24bit pcx */
-	p[2] = 1;
-	p[3] = 8;	/* bits per pixel */
-	p[8] = dx - 1;
-	p[9] = dx - 1 >> 8;
-	p[10] = dy - 1;
-	p[11] = dy - 1 >> 8;
-	p[12] = dx;	/* HDpi and VDpi */
-	p[13] = dx >> 8;
-	p[14] = dy;
-	p[15] = dy >> 8;
-	p[65] = 1;	/* number of color planes */
-	p[66] = dx;	/* scanline length */
-	p[67] = dx >> 8;
-	p[68] = 2;	/* palette type: not-greyscale greyscale */
-
-	p = buf + 128;
-	for(i=0; i<dy; i++){
-		for(j=0; j<dx; j++){
-			if((*src & 0xc0) != 0xc0)
-				*p++ = *src++;
-			else{
-				*p++ = 0xc1;
-				*p++ = *src++;
-			}
-		}
-		src += xlen - dx;
-	}
-
-	/* palette */
-	*p++ = 0x0c;
-	for(i=0; i<3*256; i++)
-		*p++ = *pal++;
-
-	USED(path);
-	/*COM_WriteFile(path, buf, p - buf);*/
-} 
-
-static void
-dopcx(void)
-{
-	int i; 
-	char pcxname[12], checkname[Nfspath];
-
-	writepcx = 0;
-
-	/* find a file name to save it to */
-	strcpy(pcxname, "quake00.pcx");
-	for(i=0; i<100; i++){
-		pcxname[5] = i / 10 + '0';
-		pcxname[6] = i % 10 + '0';
-		sprint(checkname, "%s/%s", fsdir, pcxname);
-		if(access(checkname, AEXIST) == -1)
-			break;
-	}
-	if(i == 100){
-		Con_Printf("dopcx: no free slots\n"); 
-		return;
- 	}
-
-	/* save the pcx file */
-	D_EnableBackBufferAccess();
-	pcxout(pcxname, vid.buffer, vid.width, vid.height, vid.rowbytes,
-		host_basepal);
-	/* for adapters that can't stay mapped in for linear writes all the
-	 * time */
-	D_DisableBackBufferAccess();
-
-	Con_Printf("Wrote %s\n", pcxname);
-} 
-
-
-//=============================================================================
-
 
 /*
 ===============
@@ -885,10 +771,6 @@ void SCR_UpdateScreen (void)
 	}
 
 	V_UpdatePalette ();
-
-	/* needs to be done before vid.buffer is transformed in st3_fixup */
-	if(writepcx)
-		dopcx();
 
 //
 // update one of three areas

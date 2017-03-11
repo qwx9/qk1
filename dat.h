@@ -35,3 +35,5 @@ enum{
 	Spktvol = 255
 };
 #define Spktatt 1.0
+
+extern int dumpwin;
