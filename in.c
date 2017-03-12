@@ -177,7 +177,7 @@ kproc(void *)
 	Rune r;
 	Kev ev;
 
-	threadsetgrp(THin);
+	threadsetgrp(1);
 
 	kdown[1] = kdown[0] = 0;
 	if((fd = open("/dev/kbd", OREAD)) < 0)
@@ -228,7 +228,7 @@ mproc(void *)
 	char buf[1+5*12];
 	float x, y;
 
-	threadsetgrp(THin);
+	threadsetgrp(1);
 
 	if((fd = open("/dev/mouse", ORDWR)) < 0)
 		sysfatal("open /dev/mouse: %r");
@@ -274,7 +274,7 @@ iproc(void *)
 	int n;
 	char s[256];
 
-	threadsetgrp(THin);
+	threadsetgrp(1);
 
 	for(;;){
 		if((n = read(0, s, sizeof s)) <= 0)
@@ -309,7 +309,7 @@ void
 IN_Shutdown(void)
 {
 	IN_Grabm(0);
-	threadintgrp(THin);
+	threadintgrp(1);
 	if(pfd[0] > 0)
 		close(pfd[0]);
 	if(pfd[1] > 0)

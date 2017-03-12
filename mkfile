@@ -65,7 +65,6 @@ OFILES=\
 	sv_move.$O\
 	sv_phys.$O\
 	sv_user.$O\
-	sys.$O\
 	vid.$O\
 	view.$O\
 	wad.$O\
@@ -105,7 +104,6 @@ HFILES=\
 	screen.h\
 	server.h\
 	spritegn.h\
-	sys.h\
 	vid.h\
 	view.h\
 	wad.h\

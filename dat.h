@@ -1,5 +1,8 @@
 typedef struct Sfx Sfx;
 
+extern uchar *membase;
+extern int memsize;
+
 enum{
 	Npath = 64,
 	Nfspath = 128,

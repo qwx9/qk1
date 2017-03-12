@@ -13,10 +13,6 @@
 // !!! if this is changed, it must be changed in d_ifacea.h too !!!
 #define CACHE_SIZE	32		// used to align key data structures
 
-/* FIXME? wrong on !386? */
-#define	MINIMUM_MEMORY			0x550000
-#define	MINIMUM_MEMORY_LEVELPAK	(MINIMUM_MEMORY + 0x100000)
-
 #define MAX_NUM_ARGVS	50
 
 // up / down
@@ -145,7 +141,6 @@ typedef enum {false, true}	qboolean;
 #include "common.h"
 #include "bspfile.h"
 #include "vid.h"
-#include "sys.h"
 #include "zone.h"
 #include "mathlib.h"
 
@@ -193,34 +188,12 @@ extern cvar_t volume;
 #include "r_local.h"
 #include "d_local.h"
 
-//=============================================================================
-
-// the host system specifies the base of the directory tree, the
-// command line parms passed to the program, and the amount of memory
-// available for the program to use
-
-typedef struct
-{
-	char	*basedir;
-	int		argc;
-	char	**argv;
-	void	*membase;
-	int		memsize;
-} quakeparms_t;
-
-
-//=============================================================================
-
-
-
 extern qboolean noclip_anglehack;
 
 
 //
 // host
 //
-extern	quakeparms_t host_parms;
-
 extern	cvar_t		sys_ticrate;
 
 extern	qboolean	host_initialized;		// true if into command execution
@@ -234,7 +207,7 @@ extern	double		realtime;		// not bounded in any way, changed at
 void Host_ClearMemory (void);
 void Host_ServerFrame (void);
 void Host_InitCommands (void);
-void Host_Init (quakeparms_t *parms);
+void Host_Init (void);
 void Host_Shutdown(void);
 void Host_Error (char *error, ...);
 void Host_EndGame (char *message, ...);
@@ -249,10 +222,6 @@ extern qboolean		msg_suppress_1;		// suppresses resolution and cache size consol
 extern int			current_skill;		// skill level for currently loaded level (in case
 										//  the user changes the cvar while the level is
 										//  running, this reflects the level actually in use)
-
-extern qboolean		isDedicated;
-
-extern int			minimum_memory;
 
 //
 // chase

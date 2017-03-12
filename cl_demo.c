@@ -158,7 +158,7 @@ playdemo(void)
 	CL_Disconnect();
 	a = Cmd_Argv(1);
 	s = va("%s%s", a, ext(a, ".dem"));
-	dprint("playdemo: writing to file %s\n", s);
+	dprint("playdemo: reading file %s\n", s);
 	if(loaddm(s) < 0){
 		Con_Printf("playdemo: %r\n");
 		cls.demonum = -1;

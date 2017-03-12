@@ -1,3 +1,5 @@
+char*	Sys_ConsoleInput(void);
+void	Sys_SendKeyEvents(void);
 void	stepcd(void);
 void	stepsnd(vec3_t, vec3_t, vec3_t, vec3_t);
 void	stopcd(void);
@@ -43,6 +45,12 @@ int	opendm(char*, int);
 void	initfs(void);
 void	dprint(char*, ...);
 void	fatal(char*, ...);
+void*	emalloc(ulong);
+vlong	flen(int);
+double	dtime(void);
+void	fppsgl(void);
+void	fppdbl(void);
+void	shutdown(void);
 
 #pragma	varargck	argpos	dprint	1
 #pragma varargck	argpos	fatal	1

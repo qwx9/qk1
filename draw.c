@@ -70,7 +70,7 @@ qpic_t	*Draw_CachePic (char *path)
 //
 	dat = loadcachelmp(path, &pic->cache);
 	if(dat == nil)
-		fatal("Draw_CachePic: failed to load %s: %r", path);
+		fatal("Draw_CachePic: %r");
 
 	SwapPic (dat);
 

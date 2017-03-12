@@ -15,8 +15,6 @@ Memory is cleared / released when a server or client begins, not when they end.
 
 */
 
-quakeparms_t host_parms;
-
 qboolean	host_initialized;		// true if into command execution
 
 double		host_frametime;
@@ -26,8 +24,6 @@ double		oldrealtime;			// last frame run
 int			host_framecount;
 
 int			host_hunklevel;
-
-int			minimum_memory;
 
 client_t	*host_client;			// current client
 
@@ -358,7 +354,7 @@ void Host_ShutdownServer(qboolean crash)
 		CL_Disconnect ();
 
 // flush any pending messages - like the score!!!
-	start = Sys_FloatTime();
+	start = dtime();
 	do
 	{
 		count = 0;
@@ -378,7 +374,7 @@ void Host_ShutdownServer(qboolean crash)
 				}
 			}
 		}
-		if ((Sys_FloatTime() - start) > 3.0)
+		if ((dtime() - start) > 3.0f)
 			break;
 	}
 	while (count);
@@ -554,12 +550,12 @@ void _Host_Frame (float time)
 
 // update video
 	if (host_speeds.value)
-		time1 = Sys_FloatTime ();
+		time1 = dtime ();
 		
 	SCR_UpdateScreen ();
 
 	if (host_speeds.value)
-		time2 = Sys_FloatTime ();
+		time2 = dtime ();
 		
 // update audio
 	if (cls.signon == SIGNONS)
@@ -575,7 +571,7 @@ void _Host_Frame (float time)
 	if (host_speeds.value)
 	{
 		pass1 = (time1 - time3)*1000;
-		time3 = Sys_FloatTime ();
+		time3 = dtime ();
 		pass2 = (time2 - time1)*1000;
 		pass3 = (time3 - time2)*1000;
 		Con_Printf ("%3d tot %3d server %3d gfx %3d snd\n",
@@ -598,9 +594,9 @@ void Host_Frame (float time)
 		return;
 	}
 	
-	time1 = Sys_FloatTime ();
+	time1 = dtime ();
 	_Host_Frame (time);
-	time2 = Sys_FloatTime ();	
+	time2 = dtime ();	
 	
 	timetotal += time2 - time1;
 	timecount++;
@@ -626,26 +622,9 @@ void Host_Frame (float time)
 Host_Init
 ====================
 */
-void Host_Init (quakeparms_t *parms)
+void Host_Init (void)
 {
-
-	if (standard_quake)
-		minimum_memory = MINIMUM_MEMORY;
-	else
-		minimum_memory = MINIMUM_MEMORY_LEVELPAK;
-
-	if (COM_CheckParm ("-minmemory"))
-		parms->memsize = minimum_memory;
-
-	host_parms = *parms;
-
-	if (parms->memsize < minimum_memory)
-		fatal ("Only %4.1f megs of memory available, can't execute game", parms->memsize / (float)0x100000);
-
-	com_argc = parms->argc;
-	com_argv = parms->argv;
-
-	Memory_Init (parms->membase, parms->memsize);
+	Memory_Init();
 	Cbuf_Init ();
 	Cmd_Init ();	
 	V_Init ();
@@ -660,20 +639,17 @@ void Host_Init (quakeparms_t *parms)
 	Mod_Init ();
 	NET_Init ();
 	SV_Init ();
-
-	Con_Printf ("Exe: 00:00:00 Jun 22 1996\n");
-	Con_Printf ("%4.1f megabyte heap\n",parms->memsize/ (1024*1024.0));
-	
+	dprint("%4.1f megabyte heap\n", memsize / (1024 * 1024.0));
 	R_InitTextures ();		// needed even for dedicated servers
  
 	if (cls.state != ca_dedicated)
 	{
 		host_basepal = loadhunklmp("gfx/palette.lmp", nil);
 		if(host_basepal == nil)
-			fatal("Host_Init: failed to load gfx/palette.lmp: %r");
+			fatal("Host_Init: %r");
 		host_colormap = loadhunklmp("gfx/colormap.lmp", nil);
 		if(host_colormap == nil)
-			fatal("Host_Init: failed to load gfx/colormap.lmp: %r");
+			fatal("Host_Init: %r");
 
 		VID_Init (host_basepal);
 
@@ -702,7 +678,7 @@ void Host_Init (quakeparms_t *parms)
 ===============
 Host_Shutdown
 
-FIXME: this is a callback from Sys_Quit and fatal.  It would be better
+FIXME: this is a callback from shutdown and fatal.  It would be better
 to run quit through here before the final handoff to the sys code.
 ===============
 */

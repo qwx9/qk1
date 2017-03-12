@@ -315,11 +315,8 @@ openlmp(char *f, int *len)
 			continue;
 		}
 		snprint(d, sizeof d, "%s/%s", pl->f, f);
-		if(access(d, AREAD) < 0)
+		if(bf = bopen(d, OREAD, 1), bf == nil)
 			continue;
-		bf = bopen(d, OREAD, 1);
-		if(bf == nil)
-			return nil;
 		if(len != nil)
 			*len = bsize(bf);
 		return bf;
@@ -449,7 +446,7 @@ dumpcfg(void)
 {
 	Biobuf *bf;
 
-	if(!host_initialized || isDedicated)
+	if(!host_initialized)
 		return;
 	bf = bopen(va("%s/config.cfg", fsdir), OWRITE, 1);
 	if(bf == nil){
@@ -543,7 +540,7 @@ dumpdefs(Biobuf *bf)
 		if(t != ev_string && t != ev_float && t != ev_entity)
 			continue;
 		Bprint(bf, "\"%s\" \"%s\"\n", PR_Str(d->s_name),
-			PR_UglyValueString(t, (eval_t *)&pr_globals[d->ofs]));		
+			PR_UglyValueString(t, (eval_t *)&pr_globals[d->ofs]));
 	}
 	Bprint(bf, "}\n");
 }
@@ -843,7 +840,7 @@ pakdir(char *d)
 		pl = Hunk_Alloc(sizeof *pl);
 		pl->p = p;
 		pl->pl = pkl;
-		pkl = pl;       
+		pkl = pl;
 	}
 }
 
@@ -851,17 +848,27 @@ static void
 initns(void)
 {
 	int i;
-	char d[Nfspath], *e;
+	char d[Nfspath], *e, *home;
 
 	memset(d, 0, sizeof d);
 	i = COM_CheckParm("-basedir");
-	if(i != 0 && i < com_argc - 1)
+	if(i != 0 && i < com_argc - 1){
 		strncpy(d, com_argv[i+1], sizeof(d)-1);
-	else
-		strncpy(d, host_parms.basedir, sizeof(d)-1);
-	e = d + strlen(d) - 1;
-	if(e > d && *e == '/')
-		*e = 0;
+		e = d + strlen(d) - 1;
+		if(e > d && *e == '/')
+			*e = 0;
+	}else if(home = getenv("home"), home != nil){
+		snprint(d, sizeof d, "%s/lib/quake", home);
+		free(home);
+	}
+	if(strlen(d) == 0 || access(d, AREAD) < 0){
+		strncpy(d, "/sys/games/lib/quake", sizeof(d)-1);
+		if(access(d, AREAD) < 0){
+			strncpy(d, "/sys/lib/quake", sizeof(d)-1);
+			if(access(d, AREAD) < 0)
+				fatal("no accessible game directory");
+		}
+	}
 	pakdir(va("%s%s", d, "/id1"));
 	if(COM_CheckParm("-rogue"))
 		pakdir(va("%s%s", d, "/rogue"));

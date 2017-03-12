@@ -275,7 +275,7 @@ void Cmd_Exec_f (void)
 	mark = Hunk_LowMark ();
 	f = loadhunklmp(Cmd_Argv(1), nil);
 	if(f == nil){
-		Con_Printf("couldn't exec %s: %r\n", Cmd_Argv(1));
+		Con_Printf("exec: %r\n");
 		return;
 	}
 	Con_Printf ("execing %s\n",Cmd_Argv(1));

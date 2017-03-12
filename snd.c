@@ -607,7 +607,7 @@ startcd(int nt, int loop)
 		return;
 	nt -= 1;	/* d001 assumed part of track list */
 	if(nt < 1 || nt > ntrk){
-		fprint(2, "startcd: invalid track number %ud\n", nt);
+		fprint(2, "startcd: invalid track number %d\n", nt);
 		return;
 	}
 	if(cdfd = open(va("%s%03d", cdfile, nt), OREAD), cdfd < 0){
@@ -972,7 +972,7 @@ initsnd(void)
 	Cvar_RegisterVariable(&ambient_level);
 	Cvar_RegisterVariable(&ambient_fade);
 
-	if(host_parms.memsize < 0x800000){
+	if(memsize < 0x800000){
 		setcvar("loadas8bit", "1");
 		fprint(2, "initsnd: forcing 8bit width\n");
 	}

@@ -856,7 +856,7 @@ void R_EdgeDrawing (void)
 
 	if (r_dspeeds.value)
 	{
-		rw_time1 = Sys_FloatTime ();
+		rw_time1 = dtime ();
 	}
 
 	R_RenderWorld ();
@@ -870,7 +870,7 @@ void R_EdgeDrawing (void)
 
 	if (r_dspeeds.value)
 	{
-		rw_time2 = Sys_FloatTime ();
+		rw_time2 = dtime ();
 		db_time1 = rw_time2;
 	}
 
@@ -878,7 +878,7 @@ void R_EdgeDrawing (void)
 
 	if (r_dspeeds.value)
 	{
-		db_time2 = Sys_FloatTime ();
+		db_time2 = dtime ();
 		se_time1 = db_time2;
 	}
 	
@@ -901,7 +901,7 @@ void R_RenderView_ (void)
 	r_warpbuffer = warpbuffer;
 
 	if (r_timegraph.value || r_speeds.value || r_dspeeds.value)
-		r_time1 = Sys_FloatTime ();
+		r_time1 = dtime ();
 
 	R_SetupFrame ();
 
@@ -916,7 +916,7 @@ void R_RenderView_ (void)
 // while, so we don't do it globally.  This also sets chop mode, and we do it
 // here so that setup stuff like the refresh area calculations match what's
 // done in screen.c
-	Sys_LowFPPrecision ();
+	fppsgl ();
 
 	if (!cl_entities[0].model || !cl.worldmodel)
 		fatal ("R_RenderView: NULL worldmodel");
@@ -925,7 +925,7 @@ void R_RenderView_ (void)
 	
 	if (r_dspeeds.value)
 	{
-		se_time2 = Sys_FloatTime ();
+		se_time2 = dtime ();
 		de_time1 = se_time2;
 	}
 
@@ -933,7 +933,7 @@ void R_RenderView_ (void)
 
 	if (r_dspeeds.value)
 	{
-		de_time2 = Sys_FloatTime ();
+		de_time2 = dtime ();
 		dv_time1 = de_time2;
 	}
 
@@ -941,14 +941,14 @@ void R_RenderView_ (void)
 
 	if (r_dspeeds.value)
 	{
-		dv_time2 = Sys_FloatTime ();
-		dp_time1 = Sys_FloatTime ();
+		dv_time2 = dtime ();
+		dp_time1 = dtime ();
 	}
 
 	R_DrawParticles ();
 
 	if (r_dspeeds.value)
-		dp_time2 = Sys_FloatTime ();
+		dp_time2 = dtime ();
 
 	if (r_dowarp)
 		D_WarpScreen ();
@@ -974,7 +974,7 @@ void R_RenderView_ (void)
 		Con_Printf ("Short roughly %d edges\n", r_outofedges * 2 / 3);
 
 // back to high floating-point precision
-	Sys_HighFPPrecision ();
+	fppdbl ();
 }
 
 void R_RenderView (void)
