@@ -133,19 +133,21 @@ resetfb(void)
 	surfcache = (byte *)d_pzbuffer + vid.width * vid.height * sizeof *d_pzbuffer;
 	D_InitCaches(surfcache, scachesz);
 
-	free(framebuf);
-	framebuf = emalloc(Dx(screen->r) * Dy(screen->r) * 32/8 * sizeof *framebuf);
-	vid.buffer = framebuf;
-	vid.rowbytes = Dx(screen->r) * 32/8;
+	vid.rowbytes = vid.width * 32/8;
 	vid.aspect = (float)vid.height / (float)vid.width * (320.0/240.0);
-	vid.conbuffer = vid.buffer;
 	vid.conrowbytes = vid.rowbytes;
 	vid.conwidth = vid.width;
 	vid.conheight = vid.height;
-	center = addpt(screen->r.min, Pt(Dx(screen->r)/2, Dy(screen->r)/2));
+
+	center = addpt(screen->r.min, Pt(vid.width/2, vid.height/2));
 	freeimage(fbim);
-	if((fbim = allocimage(display, Rect(0, 0, vid.width, vid.height), XRGB32, 1, DNofill)) == nil)
-		sysfatal("resetfb:allocimage: %r");
+	free(framebuf);
+	fbim = allocimage(display, Rect(0,0,vid.width,vid.height), XRGB32, 0, 0);
+	if(fbim == nil)
+		sysfatal("resetfb: %r");
+	framebuf = emalloc(vid.width * vid.height * 32/8 * sizeof *framebuf);
+	vid.buffer = framebuf;
+	vid.conbuffer = framebuf;
 }
 
 // Called at startup to set up translation tables, takes 256 8 bit RGB values
@@ -236,7 +238,7 @@ VID_Update(vrect_t *rects)
 
 	scr_fullupdate = 0;	/* force full update if not 8bit (cf. screen.h) */
 
-	while(rects){
+	while(rects != nil){
 		st3_fixup(framebuf, rects->x, rects->y, rects->width, rects->height);
 		rects = rects->pnext;
 	}
