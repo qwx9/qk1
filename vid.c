@@ -9,6 +9,7 @@ viddef_t vid;		/* global video state */
 int resized;
 int dumpwin;
 Point center;		/* of window */
+Rectangle grabr;
 int d_con_indirect;
 void (*vid_menudrawfn)(void);
 void (*vid_menukeyfn)(int key);
@@ -116,6 +117,7 @@ resetfb(void)
 	static int highhunk;
 	void *surfcache;
 	int hunkvbuf, scachesz;
+	Point p;
 
 	if(d_pzbuffer != nil){
 		D_FlushCaches();
@@ -140,6 +142,8 @@ resetfb(void)
 	vid.conheight = vid.height;
 
 	center = addpt(screen->r.min, Pt(vid.width/2, vid.height/2));
+	p = Pt(vid.width/4, vid.height/4);
+	grabr = Rpt(subpt(center, p), addpt(center, p));
 	freeimage(fbim);
 	free(framebuf);
 	fbim = allocimage(display, Rect(0,0,vid.width,vid.height), XRGB32, 0, 0);

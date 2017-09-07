@@ -1,5 +1,6 @@
 #include <u.h>
 #include <libc.h>
+#include <bio.h>
 #include <draw.h>
 #include <thread.h>
 #include <mouse.h>
@@ -11,45 +12,57 @@
 /* vid.c */
 extern int resized;
 extern Point center;
+extern Rectangle grabr;
 
 typedef struct Kev Kev;
 
 enum{
-	Nbuf = 24
+	Nbuf = 20
 };
-
 struct Kev{
 	int key;
 	int down;
 };
-static Channel *kchan;
+static Channel *inchan;
+static QLock mlck;
 
 static cvar_t m_windowed = {"m_windowed", "0", true};
 static cvar_t m_filter = {"m_filter", "0", true};
-static int mouseon;
+static int mouseon, fixms;
 static int oldmwin;
-static float mx;
-static float my;
-static float oldmx;
-static float oldmy;
-static int mb;
-static int oldmb;
-static int pfd[2];
+static float olddx, olddy;
+static int mΔx, mΔy, mb, oldmb;
 
-
-char *
-Sys_ConsoleInput(void)
+void
+conscmd(void)
 {
-	char buf[256];
+	char *p;
 
-	if(cls.state == ca_dedicated){
-		if(flen(pfd[1]) < 1)	/* only poll for input */
-			return nil;
-		if(read(pfd[1], buf, sizeof buf) < 0)
-			sysfatal("Sys_ConsoleInput:read: %r");
-		return buf;
+	if(cls.state != ca_dedicated)
+		return;
+	while(p = nbrecvp(inchan), p != nil){
+		Cbuf_AddText(p);
+		free(p);
 	}
-	return nil;
+}
+
+static void
+cproc(void *)
+{
+	char *s;
+	Biobuf *bf;
+
+	if(bf = Bfdopen(0, OREAD), bf == nil)
+		sysfatal("Bfdopen: %r");
+	for(;;){
+		if(s = Brdstr(bf, '\n', 1), s == nil)
+			break;
+		if(sendp(inchan, s) < 0){
+			free(s);
+			break;
+		}
+	}
+	Bterm(bf);
 }
 
 void
@@ -58,15 +71,14 @@ Sys_SendKeyEvents(void)
 	Kev ev;
 	int r;
 
-	if(kchan == nil)
+	if(cls.state == ca_dedicated)
 		return;
-
 	if(oldmwin != (int)m_windowed.value){
 		oldmwin = (int)m_windowed.value;
 		IN_Grabm(oldmwin);
 	}
 
-	while((r = nbrecv(kchan, &ev)) > 0)
+	while(r = nbrecv(inchan, &ev), r > 0)
 		Key_Event(ev.key, ev.down);
 	if(r < 0)
 		fprint(2, "Sys_SendKeyEvents: %r\n");
@@ -75,54 +87,63 @@ Sys_SendKeyEvents(void)
 void
 IN_Commands(void)
 {
-	int i, r;
+	int b, i, k, r;
 
-	if(!mouseon)
+	if(!mouseon || cls.state == ca_dedicated)
 		return;
-
-	for(i=0; i<3; i++){
-		r = mb & 1<<i;
+	qlock(&mlck);
+	b = mb;
+	qunlock(&mlck);
+	b = b & 0x19 | (b & 2) << 1 | (b & 4) >> 1;
+	for(i=0, k=K_MOUSE1; i<5; i++, k++){
+		if(i == 3)
+			k = K_MWHEELUP;
+		r = b & 1<<i;
 		if(r ^ oldmb & 1<<i)
-			Key_Event(K_MOUSE1+i, r);
+			Key_Event(k, r);
 	}
-	oldmb = mb;
+	oldmb = b & 7;
 }
 
 void
 IN_Move(usercmd_t *cmd)
 {
+	float dx, dy;
+
 	if(!mouseon)
 		return;
-   
+	qlock(&mlck);
+	dx = mΔx;
+	dy = mΔy;
+	mΔx = 0;
+	mΔy = 0;
+	qunlock(&mlck);
 	if(m_filter.value){
-		mx = (mx + oldmx) * 0.5;
-		my = (my + oldmy) * 0.5;
+		dx = (dx + olddx) * 0.5;
+		dy = (dy + olddy) * 0.5;
 	}
-	oldmx = mx;
-	oldmy = my;
-	mx *= sensitivity.value;
-	my *= sensitivity.value;
-   
+	olddx = dx;
+	olddy = dy;
+	dx *= sensitivity.value;
+	dy *= sensitivity.value;
 	if(in_strafe.state & 1 || lookstrafe.value && in_mlook.state & 1)
-		cmd->sidemove += m_side.value * mx;
+		cmd->sidemove += m_side.value * dx;
 	else
-		cl.viewangles[YAW] -= m_yaw.value * mx;
+		cl.viewangles[YAW] -= m_yaw.value * dx;
 	if(in_mlook.state & 1)
 		V_StopPitchDrift();
-   
 	if(in_mlook.state & 1 && ~in_strafe.state & 1){
-		cl.viewangles[PITCH] += m_pitch.value * my;
+		cl.viewangles[PITCH] += m_pitch.value * dy;
 		if(cl.viewangles[PITCH] > 80)
 			cl.viewangles[PITCH] = 80;
 		if(cl.viewangles[PITCH] < -70)
 			cl.viewangles[PITCH] = -70;
 	}else{
 		if(in_strafe.state & 1 && noclip_anglehack)
-			cmd->upmove -= m_forward.value * my;
+			cmd->upmove -= m_forward.value * dy;
 		else
-			cmd->forwardmove -= m_forward.value * my;
+			cmd->forwardmove -= m_forward.value * dy;
 	}
-	mx = my = 0.0;
 }
 
 static int
@@ -173,49 +194,56 @@ static void
 kproc(void *)
 {
 	int n, k, fd;
-	char buf[128], kdown[128], *s;
+	char buf[256], kdown[128], *s, *p;
 	Rune r;
-	Kev ev;
+	Kev ev, evc;
 
-	threadsetgrp(1);
-
-	kdown[1] = kdown[0] = 0;
-	if((fd = open("/dev/kbd", OREAD)) < 0)
+	fd = open("/dev/kbd", OREAD);
+	if(fd < 0)
 		sysfatal("open /dev/kbd: %r");
-	while((n = read(fd, buf, sizeof buf)) > 0){
-		buf[n-1] = 0;
-		switch(*buf){
+	memset(buf, 0, sizeof buf);
+	evc.key = K_ENTER;
+	evc.down = true;
+	for(;;){
+		if(buf[0] != 0){
+			n = strlen(buf)+1;
+			memmove(buf, buf+n, sizeof(buf)-n);
+		}
+		if(buf[0] == 0){
+			if(n = read(fd, buf, sizeof(buf)-1), n <= 0)
+				break;
+			buf[n-1] = 0;
+			buf[n] = 0;
+		}
+		switch(buf[0]){
 		case 'c':
+			if(send(inchan, &evc) < 0)
+				threadexits(nil);
 		default:
 			continue;
 		case 'k':
+			ev.down = true;
 			s = buf+1;
-			while(*s){
-				s += chartorune(&r, s);
-				if(utfrune(kdown+1, r) == nil){
-					if(k = runetokey(r)){
-						ev.key = k;
-						ev.down = true;
-						if(nbsend(kchan, &ev) < 0)
-							fprint(2, "kproc: %r\n");
-					}
-				}
-			}
+			p = kdown+1;
 			break;
 		case 'K':
+			ev.down = false;
 			s = kdown+1;
-			while(*s){
-				s += chartorune(&r, s);
-				if(utfrune(buf+1, r) == nil){
-					if(k = runetokey(r)){
-						ev.key = k;
-						ev.down = false;
-						if(nbsend(kchan, &ev) < 0)
-							fprint(2, "kproc: %r\n");
-					}
-				}
-			}
+			p = buf+1;
 			break;
+		}
+		while(*s != 0){
+			s += chartorune(&r, s);
+			if(utfrune(p, r) == nil){
+				k = runetokey(r);
+				if(k == 0)
+					continue;
+				ev.key = k;
+				if(send(inchan, &ev) < 0)
+					threadexits(nil);
+				if(ev.down)
+					evc.key = k;
+			}
 		}
 		strcpy(kdown, buf);
 	}
@@ -226,16 +254,15 @@ mproc(void *)
 {
 	int b, n, nerr, fd;
 	char buf[1+5*12];
-	float x, y;
+	Point p, o;
 
-	threadsetgrp(1);
-
-	if((fd = open("/dev/mouse", ORDWR)) < 0)
+	fd = open("/dev/mouse", ORDWR);
+	if(fd < 0)
 		sysfatal("open /dev/mouse: %r");
-
 	nerr = 0;
+	o = center;
 	for(;;){
-		if((n = read(fd, buf, sizeof buf)) != 1+4*12){
+		if(n = read(fd, buf, sizeof buf), n != 1+4*12){
 			if(n < 0 || ++nerr > 10)
 				break;
 			fprint(2, "mproc: bad count %d not 49: %r\n", n);
@@ -249,39 +276,26 @@ mproc(void *)
 		case 'm':
 			if(!mouseon)
 				break;
-
-			/* FIXME: this sucks: mouse movement is much smoother
-			 * and cursor rarely escapes the window, at the expense
-			 * of much more cpu and devmouse use */
-			x = atoi(buf+1+0*12) - center.x;
-			y = atoi(buf+1+1*12) - center.y;
+			if(fixms){
+				fixms = 0;
+				goto res;
+			}
+			p.x = atoi(buf+1+0*12);
+			p.y = atoi(buf+1+1*12);
 			b = atoi(buf+1+2*12);
-
-			mx += x;
-			my += y;
-			if(x != 0.0 ||  y != 0.0)
+			qlock(&mlck);
+			mΔx += p.x - o.x;
+			mΔy += p.y - o.y;
+			mb = b;
+			qunlock(&mlck);
+			if(!ptinrect(p, grabr)){
+		res:
 				fprint(fd, "m%d %d", center.x, center.y);
-
-			mb = b&1 | (b&2)<<1 | (b&4)>>1;
+				p = center;
+			}
+			o = p;
 			break;
 		}
-	}
-}
-
-static void
-iproc(void *)
-{
-	int n;
-	char s[256];
-
-	threadsetgrp(1);
-
-	for(;;){
-		if((n = read(0, s, sizeof s)) <= 0)
-			break;
-		s[n-1] = 0;
-		if((write(pfd[0], s, n)) != n)
-			break;
 	}
 }
 
@@ -294,11 +308,13 @@ IN_Grabm(int on)
 	if(mouseon == on)
 		return;
 	if(mouseon = on && m_windowed.value){
-		if((fd = open("/dev/cursor", ORDWR|OCEXEC)) < 0){
+		fd = open("/dev/cursor", ORDWR|OCEXEC);
+		if(fd < 0){
 			fprint(2, "IN_Grabm:open: %r\n");
 			return;
 		}
 		write(fd, nocurs, sizeof nocurs);
+		fixms++;
 	}else if(fd >= 0){
 		close(fd);
 		fd = -1;
@@ -308,37 +324,26 @@ IN_Grabm(int on)
 void
 IN_Shutdown(void)
 {
+	chanfree(inchan);
 	IN_Grabm(0);
-	threadintgrp(1);
-	if(pfd[0] > 0)
-		close(pfd[0]);
-	if(pfd[1] > 0)
-		close(pfd[1]);
-	if(kchan != nil){
-		chanfree(kchan);
-		kchan = nil;
-	}
 }
 
 void
 IN_Init(void)
 {
 	if(cls.state == ca_dedicated){
-		if(pipe(pfd) < 0)
-			sysfatal("iproc:pipe: %r");
-		if(proccreate(iproc, nil, 8192) < 0)
+		if(inchan = chancreate(sizeof(void *), 2), inchan == nil)
+			sysfatal("chancreate: %r");
+		if(proccreate(cproc, nil, 8192) < 0)
 			sysfatal("proccreate iproc: %r");
 		return;
 	}
 	Cvar_RegisterVariable(&m_windowed);
 	Cvar_RegisterVariable(&m_filter);
-	if((kchan = chancreate(sizeof(Kev), Nbuf)) == nil)
-		sysfatal("chancreate kchan: %r");
+	if(inchan = chancreate(sizeof(Kev), Nbuf), inchan == nil)
+		sysfatal("chancreate: %r");
 	if(proccreate(kproc, nil, 8192) < 0)
 		sysfatal("proccreate kproc: %r");
-	if(COM_CheckParm("-nomouse"))
-		return;
 	if(proccreate(mproc, nil, 8192) < 0)
 		sysfatal("proccreate mproc: %r");
-	mx = my = 0.0;
 }

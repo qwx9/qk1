@@ -1,4 +1,4 @@
-char*	Sys_ConsoleInput(void);
+void	conscmd(void);
 void	Sys_SendKeyEvents(void);
 void	stepcd(void);
 void	stepsnd(vec3_t, vec3_t, vec3_t, vec3_t);

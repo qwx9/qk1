@@ -13,9 +13,6 @@ char	com_cmdline[256];
 static char     *largv[MAX_NUM_ARGVS + NUM_SAFE_ARGVS + 1];
 static char     *argvdummy = " ";
 
-static char     *safeargvs[NUM_SAFE_ARGVS] =
-	{"-stdvid", "-nolan", "-nosound", "-nojoy", "-nomouse", "-dibonly"};
-
 qboolean		msg_suppress_1 = 0;
 
 char	com_token[1024];
@@ -490,7 +487,6 @@ COM_InitArgv
 */
 void COM_InitArgv (int argc, char **argv)
 {
-	qboolean        safe;
 	int             i, j, n;
 
 // reconstitute the command line for the cmdline externally visible cvar
@@ -513,25 +509,10 @@ void COM_InitArgv (int argc, char **argv)
 
 	com_cmdline[n] = 0;
 
-	safe = false;
-
 	for (com_argc=0 ; (com_argc<MAX_NUM_ARGVS) && (com_argc < argc) ;
 		 com_argc++)
 	{
 		largv[com_argc] = argv[com_argc];
-		if(strcmp("-safe", argv[com_argc]) == 0)
-			safe = true;
-	}
-
-	if (safe)
-	{
-	// force all the safe-mode switches. Note that we reserved extra space in
-	// case we need to add these, so we don't need an overflow check
-		for (i=0 ; i<NUM_SAFE_ARGVS ; i++)
-		{
-			largv[com_argc] = safeargvs[i];
-			com_argc++;
-		}
 	}
 
 	largv[com_argc] = argvdummy;

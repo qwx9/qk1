@@ -148,8 +148,10 @@ setcvar(char *k, char *v)
 	cvar_t *cv;
 
 	cv = Cvar_FindVar(k);
-	if(cv == nil)
-		fatal("setcvar: no such cvar %s", k);
+	if(cv == nil){
+		fprint(2, "setcvar: no such cvar %s\n", k);
+		return;
+	}
 	n = strcmp(cv->string, k);
 	Z_Free(cv->string);
 	cv->string = Z_Malloc(strlen(v)+1);
