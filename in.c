@@ -202,6 +202,7 @@ kproc(void *)
 	if(fd < 0)
 		sysfatal("open /dev/kbd: %r");
 	memset(buf, 0, sizeof buf);
+	memset(kdown, 0, sizeof kdown);
 	evc.key = K_ENTER;
 	evc.down = true;
 	for(;;){
