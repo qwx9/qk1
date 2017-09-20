@@ -325,7 +325,8 @@ IN_Grabm(int on)
 void
 IN_Shutdown(void)
 {
-	chanfree(inchan);
+	if(inchan != nil)
+		chanfree(inchan);
 	IN_Grabm(0);
 }
 
