@@ -517,8 +517,7 @@ void V_UpdatePalette (void)
 		newpal[2] = gammatable[b];
 		newpal += 3;
 	}
-
-	VID_ShiftPalette (pal);	
+	setpal(pal);	
 }
 
 
@@ -786,10 +785,6 @@ void V_CalcRefdef (void)
 		view->origin[2] += 1;
 	else if (scr_viewsize.value == 100)
 		view->origin[2] += 2;
-	else if (scr_viewsize.value == 90)
-		view->origin[2] += 1;
-	else if (scr_viewsize.value == 80)
-		view->origin[2] += 0.5;
 
 	view->model = cl.model_precache[cl.stats[STAT_WEAPON]];
 	view->frame = cl.stats[STAT_WEAPONFRAME];

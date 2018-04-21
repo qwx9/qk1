@@ -346,10 +346,8 @@ loadlmp(char *f, int mth, int *n)
 	if(buf == nil)
 		fatal("loadlmp %s %d: memory allocation failed: %r", f, m + 1);
 	buf[m] = 0;
-	Draw_BeginDisc();
 	eread(bf, buf, m);
 	closelmp(bf);
-	Draw_EndDisc();
 	if(n != nil)
 		*n = m;
 	return buf;

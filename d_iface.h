@@ -108,26 +108,16 @@ extern qboolean	r_recursiveaffinetriangles;	// true if a driver wants to use
 											//  driver)
 extern float	r_aliasuvscale;		// scale-up factor for screen u and v
 									//  on Alias vertices passed to driver
-extern int		r_pixbytes;
 extern qboolean	r_dowarp;
 
 extern affinetridesc_t	r_affinetridesc;
 extern spritedesc_t		r_spritedesc;
 extern zpointdesc_t		r_zpointdesc;
 extern polydesc_t		r_polydesc;
-
-extern int		d_con_indirect;	// if 0, Quake will draw console directly
-								//  to vid.buffer; if 1, Quake will
-								//  draw console via D_DrawRect. Must be
-								//  defined by driver
-
 extern vec3_t	r_pright, r_pup, r_ppn;
 
 
 void D_Aff8Patch (void *pcolormap);
-void D_BeginDirectRect (int x, int y, byte *pbitmap, int width, int height);
-void D_DisableBackBufferAccess (void);
-void D_EndDirectRect (int x, int y, int width, int height);
 void D_PolysetDraw (void);
 void D_PolysetDrawFinalVerts (finalvert_t *fv, int numverts);
 void D_DrawParticle (particle_t *pparticle);
@@ -135,7 +125,6 @@ void D_DrawPoly (void);
 void D_DrawSprite (void);
 void D_DrawSurfaces (void);
 void D_DrawZPoint (void);
-void D_EnableBackBufferAccess (void);
 void D_EndParticles (void);
 void D_Init (void);
 void D_ViewChanged (void);

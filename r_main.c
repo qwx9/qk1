@@ -15,7 +15,6 @@ qboolean	r_drawpolys;
 qboolean	r_drawculledpolys;
 qboolean	r_worldpolysbacktofront;
 qboolean	r_recursiveaffinetriangles = true;
-int			r_pixbytes = 1;
 float		r_aliasuvscale = 1.0;
 int			r_outofsurfaces;
 int			r_outofedges;
@@ -170,8 +169,7 @@ void R_Init (void)
 	r_stack_start = (byte *)&dummy;
 	
 	R_InitTurb ();
-	
-	Cmd_AddCommand ("timerefresh", R_TimeRefresh_f);	
+
 	Cmd_AddCommand("pointfile", loadpoints);
 
 	Cvar_RegisterVariable (&r_draworder);
@@ -286,16 +284,12 @@ void R_SetVrect (vrect_t *pvrectin, vrect_t *pvrect, int lineadj)
 	int		h;
 	float	size;
 
-	size = scr_viewsize.value > 100 ? 100 : scr_viewsize.value;
-	if (cl.intermission)
-	{
-		size = 100;
+	if(cl.intermission)
 		lineadj = 0;
-	}
-	size /= 100;
+	size = 1;
 
 	h = pvrectin->height - lineadj;
-	pvrect->width = pvrectin->width * size;
+	pvrect->width = pvrectin->width;
 	if (pvrect->width < 96)
 	{
 		size = 96.0 / pvrectin->width;
@@ -863,10 +857,6 @@ void R_EdgeDrawing (void)
 
 	if (r_drawculledpolys)
 		R_ScanEdges ();
-
-// only the world can be drawn back to front with no z reads or compares, just
-// z writes, so have the driver turn z compares on now
-	D_TurnZOn ();
 
 	if (r_dspeeds.value)
 	{

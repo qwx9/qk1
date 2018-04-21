@@ -116,12 +116,10 @@ void R_RenderBmodelFace (bedge_t *pedges, msurface_t *psurf);
 void R_TransformPlane (mplane_t *p, float *normal, float *dist);
 void R_TransformFrustum (void);
 void R_SetSkyFrame (void);
-void R_DrawSurfaceBlock16 (void);
 void R_DrawSurfaceBlock8 (void);
 texture_t *R_TextureAnimation (texture_t *base);
 
 void R_GenSkyTile (void *pdest);
-void R_GenSkyTile16 (void *pdest);
 void R_DrawSubmodelPolygons (model_t *pmodel, int clipflags);
 void R_DrawSolidClippedSubmodelPolygons (model_t *pmodel);
 
@@ -235,7 +233,6 @@ extern	edge_t	edge_head;
 extern	edge_t	edge_tail;
 extern	edge_t	edge_aftertail;
 extern int		r_bmodelactive;
-extern vrect_t	*pconupdate;
 
 extern float		aliasxscale, aliasyscale, aliasxcenter, aliasycenter;
 extern float		r_aliastransition, r_resfudge;
@@ -266,7 +263,6 @@ extern int		r_dlightframecount;
 extern qboolean	r_fov_greater_than_90;
 
 void R_StoreEfrags (efrag_t **ppefrag);
-void R_TimeRefresh_f (void);
 void R_TimeGraph (void);
 void R_PrintAliasStats (void);
 void R_PrintTimes (void);

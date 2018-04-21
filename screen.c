@@ -34,7 +34,6 @@ int			clearnotify;
 
 viddef_t	vid;				// global video state
 
-vrect_t		*pconupdate;
 vrect_t		scr_vrect;
 
 qboolean	scr_disabled_for_loading;
@@ -211,8 +210,8 @@ static void SCR_CalcRefdef (void)
 //========================================
 	
 // bound viewsize
-	if (scr_viewsize.value < 30)
-		setcvar ("viewsize","30");
+	if (scr_viewsize.value < 100)
+		setcvar ("viewsize","100");
 	if (scr_viewsize.value > 120)
 		setcvar ("viewsize","120");
 
@@ -620,7 +619,7 @@ void SCR_BringDownConsole (void)
 		SCR_UpdateScreen ();
 
 	cl.cshifts[0].percent = 0;		// no area contents palette on next frame
-	VID_SetPalette (host_basepal);
+	setpal(host_basepal);
 }
 
 
@@ -637,9 +636,7 @@ needs almost the entire 256k of stack space!
 */
 void SCR_UpdateScreen (void)
 {
-	static float	oldscr_viewsize;
 	static float	oldlcd_x;
-	vrect_t		vrect;
 	
 	if (scr_skipupdate || block_drawing)
 		return;
@@ -663,12 +660,6 @@ void SCR_UpdateScreen (void)
 
 	if (!scr_initialized || !con_initialized)
 		return;				// not initialized yet
-
-	if (scr_viewsize.value != oldscr_viewsize)
-	{
-		oldscr_viewsize = scr_viewsize.value;
-		vid.recalc_refdef = 1;
-	}
 	
 //
 // check for vid changes
@@ -700,31 +691,17 @@ void SCR_UpdateScreen (void)
 //
 // do 3D refresh drawing, and then update the screen
 //
-	D_EnableBackBufferAccess ();	// of all overlay stuff if drawing directly
-
 	if (scr_fullupdate++ < vid.numpages)
 	{	// clear the entire screen
 		scr_copyeverything = 1;
 		Draw_TileClear (0,0,vid.width,vid.height);
 		Sbar_Changed ();
 	}
-
-	pconupdate = nil;
-
-
 	SCR_SetUpToDrawConsole ();
 	SCR_EraseCenterString ();
-
-	D_DisableBackBufferAccess ();	// for adapters that can't stay mapped in
 									//  for linear writes all the time
 
-	VID_LockBuffer ();
-
 	V_RenderView ();
-
-	VID_UnlockBuffer ();
-
-	D_EnableBackBufferAccess ();	// of all overlay stuff if drawing directly
 
 	if (scr_drawdialog)
 	{
@@ -762,60 +739,8 @@ void SCR_UpdateScreen (void)
 		SCR_DrawConsole ();
 		M_Draw ();
 	}
-
-	D_DisableBackBufferAccess ();	// for adapters that can't stay mapped in
-									//  for linear writes all the time
-	if (pconupdate)
-	{
-		D_UpdateRects (pconupdate);
-	}
-
 	V_UpdatePalette ();
 
-//
-// update one of three areas
-//
-
-	if (scr_copyeverything)
-	{
-		vrect.x = 0;
-		vrect.y = 0;
-		vrect.width = vid.width;
-		vrect.height = vid.height;
-		vrect.pnext = 0;
-	
-		VID_Update (&vrect);
-	}
-	else if (scr_copytop)
-	{
-		vrect.x = 0;
-		vrect.y = 0;
-		vrect.width = vid.width;
-		vrect.height = vid.height - sb_lines;
-		vrect.pnext = 0;
-	
-		VID_Update (&vrect);
-	}	
-	else
-	{
-		vrect.x = scr_vrect.x;
-		vrect.y = scr_vrect.y;
-		vrect.width = scr_vrect.width;
-		vrect.height = scr_vrect.height;
-		vrect.pnext = 0;
-	
-		VID_Update (&vrect);
-	}
-}
-
-
-/*
-==================
-SCR_UpdateWholeScreen
-==================
-*/
-void SCR_UpdateWholeScreen (void)
-{
-	scr_fullupdate = 0;
-	SCR_UpdateScreen ();
+	flipfb(scr_copyeverything ? vid.height :
+		scr_copytop ? vid.height-sb_lines : scr_vrect.height);
 }

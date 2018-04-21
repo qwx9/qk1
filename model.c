@@ -1310,25 +1310,13 @@ void * Mod_LoadAliasGroup (void * pin, int *pframeindex, int numv,
 void *
 Mod_LoadAliasSkin(void * pin, int *pskinindex, int skinsize, aliashdr_t *pheader)
 {
-	int i;
 	uchar *pskin, *pinskin;
-	ushort *pusskin;
 
-	pskin = Hunk_AllocName(skinsize * r_pixbytes, loadname);
+	pskin = Hunk_AllocName(skinsize, loadname);
 	pinskin = (uchar *)pin;
 	*pskinindex = (uchar *)pskin - (uchar *)pheader;
-
-	if(r_pixbytes == 1)
-		memcpy(pskin, pinskin, skinsize);
-	else if(r_pixbytes == 2){
-		pusskin = (ushort *)pskin;
-		for(i=0; i<skinsize; i++)
-			pusskin[i] = d_8to16table[pinskin[i]];
-	}else
-		fatal("Mod_LoadAliasSkin: invalid r_pixbytes: %d\n", r_pixbytes);
-
+	memcpy(pskin, pinskin, skinsize);
 	pinskin += skinsize;
-
 	return (void *)pinskin;
 }
 
@@ -1615,9 +1603,7 @@ void Mod_LoadAliasModel (model_t *mod, void *buffer)
 void *
 Mod_LoadSpriteFrame(void * pin, mspriteframe_t **ppframe)
 {
-	int i, width, height, size, origin[2];
-	ushort *ppixout;
-	uchar *ppixin;
+	int width, height, size, origin[2];
 	dspriteframe_t *pinframe;
 	mspriteframe_t *pspriteframe;
 
@@ -1627,7 +1613,7 @@ Mod_LoadSpriteFrame(void * pin, mspriteframe_t **ppframe)
 	height = LittleLong(pinframe->height);
 	size = width * height;
 
-	pspriteframe = Hunk_AllocName(size*r_pixbytes + sizeof *pspriteframe, loadname);
+	pspriteframe = Hunk_AllocName(size + sizeof *pspriteframe, loadname);
 
 	memset(pspriteframe, 0, size + sizeof *pspriteframe);
 	*ppframe = pspriteframe;
@@ -1642,17 +1628,7 @@ Mod_LoadSpriteFrame(void * pin, mspriteframe_t **ppframe)
 	pspriteframe->left = origin[0];
 	pspriteframe->right = width + origin[0];
 
-	if(r_pixbytes == 1)
-		memcpy(&pspriteframe->pixels[0], (uchar *)(pinframe + 1), size);
-	else if(r_pixbytes == 2){
-		ppixin = (uchar *)(pinframe + 1);
-		ppixout = (ushort *)&pspriteframe->pixels[0];
-
-		for(i=0 ; i<size ; i++)
-			ppixout[i] = d_8to16table[ppixin[i]];
-	}else
-		fatal("Mod_LoadSpriteFrame: invalid r_pixbytes: %d\n", r_pixbytes);
-
+	memcpy(&pspriteframe->pixels[0], (uchar *)(pinframe + 1), size);
 	return (void *)((byte *)pinframe + size + sizeof *pinframe);
 }
 

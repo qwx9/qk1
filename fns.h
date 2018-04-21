@@ -1,3 +1,6 @@
+void	setpal(uchar*);
+void	flipfb(int);
+void	initfb(void);
 void	conscmd(void);
 void	Sys_SendKeyEvents(void);
 void	stepcd(void);

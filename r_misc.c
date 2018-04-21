@@ -20,68 +20,6 @@ void R_CheckVariables (void)
 	}
 }
 
-
-/*
-============
-Show
-
-Debugging use
-============
-*/
-void Show (void)
-{
-	vrect_t	vr;
-
-	vr.x = vr.y = 0;
-	vr.width = vid.width;
-	vr.height = vid.height;
-	vr.pnext = nil;
-	VID_Update (&vr);
-}
-
-
-/*
-====================
-R_TimeRefresh_f
-
-For program optimization
-====================
-*/
-void R_TimeRefresh_f (void)
-{
-	int			i;
-	float		start, stop, time;
-	int			startangle;
-	vrect_t		vr;
-
-	startangle = r_refdef.viewangles[1];
-	
-	start = dtime ();
-	for (i=0 ; i<128 ; i++)
-	{
-		r_refdef.viewangles[1] = i/128.0*360.0;
-
-		VID_LockBuffer ();
-
-		R_RenderView ();
-
-		VID_UnlockBuffer ();
-
-		vr.x = r_refdef.vrect.x;
-		vr.y = r_refdef.vrect.y;
-		vr.width = r_refdef.vrect.width;
-		vr.height = r_refdef.vrect.height;
-		vr.pnext = nil;
-		VID_Update (&vr);
-	}
-	stop = dtime ();
-	time = stop-start;
-	Con_Printf ("%f seconds (%f fps)\n", time, 128/time);
-	
-	r_refdef.viewangles[1] = startangle;
-}
-
-
 /*
 ================
 R_LineGraph
@@ -242,7 +180,7 @@ void WarpPalette (void)
 		}
 	}
 	
-	VID_ShiftPalette (newpalette);
+	setpal(newpalette);
 }
 
 

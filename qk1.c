@@ -119,6 +119,7 @@ threadmain(int c, char **v)
 	if(n = COM_CheckParm("-mem"))
 		memsize = atoi(com_argv[n+1]) * KB;
 	membase = emalloc(memsize);
+	srand(getpid());
 	Host_Init();
 	t = dtime() - 1.0 / Fpsmax;
 	for(;;){

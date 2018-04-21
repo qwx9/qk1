@@ -630,7 +630,7 @@ void Host_Init (void)
 		if(host_colormap == nil)
 			fatal("Host_Init: %r");
 
-		VID_Init (host_basepal);
+		initfb();
 
 		Draw_Init ();
 		SCR_Init ();
@@ -681,10 +681,5 @@ void Host_Shutdown(void)
 	shutcd();
 	shutsnd();
 	IN_Shutdown ();
-
-	if (cls.state != ca_dedicated)
-	{
-		VID_Shutdown();
-	}
 }
 

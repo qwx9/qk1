@@ -7,11 +7,7 @@
 char savs[Nsav][Nsavcm];
 int savcanld[Nsav];
 
-/* FIXME: useless and redefined in vid.c? */
-void (*vid_menudrawfn)(void);
-void (*vid_menukeyfn)(int key);
-
-enum {m_none, m_main, m_singleplayer, m_load, m_save, m_multiplayer, m_setup, m_net, m_options, m_video, m_keys, m_help, m_quit, m_serialconfig, m_modemconfig, m_lanconfig, m_gameoptions, m_search, m_slist} m_state;
+enum {m_none, m_main, m_singleplayer, m_load, m_save, m_multiplayer, m_setup, m_net, m_options, m_keys, m_help, m_quit, m_serialconfig, m_modemconfig, m_lanconfig, m_gameoptions, m_search, m_slist} m_state;
 
 void M_Menu_Main_f (void);
 	void M_Menu_SinglePlayer_f (void);
@@ -22,7 +18,6 @@ void M_Menu_Main_f (void);
 		void M_Menu_Net_f (void);
 	void M_Menu_Options_f (void);
 		void M_Menu_Keys_f (void);
-		void M_Menu_Video_f (void);
 	void M_Menu_Help_f (void);
 	void M_Menu_Quit_f (void);
 void M_Menu_SerialConfig_f (void);
@@ -41,7 +36,6 @@ void M_Main_Draw (void);
 		void M_Net_Draw (void);
 	void M_Options_Draw (void);
 		void M_Keys_Draw (void);
-		void M_Video_Draw (void);
 	void M_Help_Draw (void);
 	void M_Quit_Draw (void);
 void M_SerialConfig_Draw (void);
@@ -60,7 +54,6 @@ void M_Main_Key (int key);
 		void M_Net_Key (int key);
 	void M_Options_Key (int key);
 		void M_Keys_Key (int key);
-		void M_Video_Key (int key);
 	void M_Help_Key (int key);
 	void M_Quit_Key (int key);
 void M_SerialConfig_Key (int key);
@@ -989,8 +982,8 @@ void M_AdjustSliders (int dir)
 	{
 	case 3:	// screen size
 		scr_viewsize.value += dir * 10;
-		if (scr_viewsize.value < 30)
-			scr_viewsize.value = 30;
+		if (scr_viewsize.value < 100)
+			scr_viewsize.value = 100;
 		if (scr_viewsize.value > 120)
 			scr_viewsize.value = 120;
 		setcvarv ("viewsize", scr_viewsize.value);
@@ -1099,7 +1092,7 @@ void M_Options_Draw (void)
 	M_Print (16, 48, "     Reset to defaults");
 
 	M_Print (16, 56, "           Screen size");
-	r = (scr_viewsize.value - 30) / (120 - 30);
+	r = (scr_viewsize.value - 100) / (120 - 100);
 	M_DrawSlider (220, 56, r);
 
 	M_Print (16, 64, "            Brightness");
@@ -1130,9 +1123,6 @@ void M_Options_Draw (void)
 	M_Print (16, 120, "            Lookstrafe");
 	M_DrawCheckbox (220, 120, lookstrafe.value);
 
-	if (vid_menudrawfn)
-		M_Print (16, 128, "         Video Options");
-
 // cursor
 	M_DrawCharacter (200, 32 + options_cursor*8, 12+((int)(realtime*4)&1));
 }
@@ -1159,9 +1149,6 @@ void M_Options_Key (int k)
 			break;
 		case 2:
 			Cbuf_AddText ("exec default.cfg\n");
-			break;
-		case 12:
-			M_Menu_Video_f ();
 			break;
 		default:
 			M_AdjustSliders (1);
@@ -1192,8 +1179,7 @@ void M_Options_Key (int k)
 		break;
 	}
 
-	if (options_cursor == 12 && vid_menudrawfn == NULL)
-	{
+	if(options_cursor == 12){
 		if (k == K_UPARROW)
 			options_cursor = 11;
 		else
@@ -1387,28 +1373,6 @@ void M_Keys_Key (int k)
 		M_UnbindCommand (bindnames[keys_cursor][0]);
 		break;
 	}
-}
-
-//=============================================================================
-/* VIDEO MENU */
-
-void M_Menu_Video_f (void)
-{
-	key_dest = key_menu;
-	m_state = m_video;
-	m_entersound = true;
-}
-
-
-void M_Video_Draw (void)
-{
-	(*vid_menudrawfn) ();
-}
-
-
-void M_Video_Key (int key)
-{
-	(*vid_menukeyfn) (key);
 }
 
 //=============================================================================
@@ -2867,7 +2831,6 @@ void M_Init (void)
 	Cmd_AddCommand ("menu_setup", M_Menu_Setup_f);
 	Cmd_AddCommand ("menu_options", M_Menu_Options_f);
 	Cmd_AddCommand ("menu_keys", M_Menu_Keys_f);
-	Cmd_AddCommand ("menu_video", M_Menu_Video_f);
 	Cmd_AddCommand ("help", M_Menu_Help_f);
 	Cmd_AddCommand ("menu_quit", M_Menu_Quit_f);
 }
@@ -2933,10 +2896,6 @@ void M_Draw (void)
 
 	case m_keys:
 		M_Keys_Draw ();
-		break;
-
-	case m_video:
-		M_Video_Draw ();
 		break;
 
 	case m_help:
@@ -3011,9 +2970,6 @@ M_Keydown(int key)
 		break;
 	case m_keys:
 		M_Keys_Key(key);
-		break;
-	case m_video:
-		M_Video_Key(key);
 		break;
 	case m_help:
 		M_Help_Key(key);
