@@ -7,13 +7,48 @@
 
 viddef_t vid;		/* global video state */
 int resized;
-int dumpwin;
+int dumpwin, scaleon;
 Point center;		/* of window */
 Rectangle grabr;
 
-static int fbpal[256];
-static uchar *fb;
+static int scale = 1;
+static s32int fbpal[256];
+static uchar *fb, *fbs;
 static Image *fbi;
+static Rectangle fbr;
+
+static void
+scalefb(int dy)
+{
+	int *p, c, *s;
+
+	if(scale < 2)
+		return;
+	p = (s32int *)fbs;
+	s = (s32int *)fb;
+	dy *= vid.width;
+	while(dy-- > 0){
+		c = *s++;
+		switch(scale){
+		case 16: p[15] = c;
+		case 15: p[14] = c;
+		case 14: p[13] = c;
+		case 13: p[12] = c;
+		case 12: p[11] = c;
+		case 11: p[10] = c;
+		case 10: p[9] = c;
+		case 9: p[8] = c;
+		case 8: p[7] = c;
+		case 7: p[6] = c;
+		case 6: p[5] = c;
+		case 5: p[4] = c;
+		case 4: p[3] = c;
+		case 3: p[2] = c;
+		case 2: p[1] = c; p[0] = c;
+		}
+		p += scale;
+	}
+}
 
 static void
 drawfb(int dy)
@@ -52,8 +87,16 @@ resetfb(void)
 	int hunkvbuf, scachesz;
 	Point p;
 
-	vid.width = Dx(screen->r);
-	vid.height = Dy(screen->r);
+	if(scaleon){
+		scale = Dx(screen->r) / vid.width;
+		if(scale <= 0)
+			scale = 1;
+		else if(scale > 16)
+			scale = 16;
+	}else{
+		vid.width = Dx(screen->r);
+		vid.height = Dy(screen->r);
+	}
 	if(d_pzbuffer != nil){
 		D_FlushCaches();
 		Hunk_FreeToHighMark(highhunk);
@@ -76,17 +119,26 @@ resetfb(void)
 	vid.conwidth = vid.width;
 	vid.conheight = vid.height;
 
-	center = addpt(screen->r.min, Pt(vid.width/2, vid.height/2));
+	center = divpt(addpt(screen->r.min, screen->r.max), 2);
+	p = Pt(scale * vid.width/2, scale * vid.height/2);
+	fbr = Rpt(subpt(center, p), addpt(center, p));
 	p = Pt(vid.width/4, vid.height/4);
 	grabr = Rpt(subpt(center, p), addpt(center, p));
 	freeimage(fbi);
 	free(fb);
-	fbi = allocimage(display, Rect(0,0,vid.width,vid.height), XRGB32, 0, 0);
+	fbi = allocimage(display,
+		Rect(0, 0, vid.width * scale, scale > 1 ? 1 : vid.height),
+		XRGB32, scale > 1, 0);
 	if(fbi == nil)
-		sysfatal("resetfb: %r");
-	fb = emalloc(vid.rowbytes * vid.height * sizeof *fb);
+		sysfatal("resetfb: %r (%d %d)", vid.width, vid.height);
+	fb = emalloc(vid.rowbytes * vid.height);
+	if(scaleon){
+		free(fbs);
+		fbs = emalloc(vid.rowbytes * scale * vid.height);
+	}
 	vid.buffer = fb;
 	vid.conbuffer = fb;
+	draw(screen, screen->r, display->black, nil, ZP);
 }
 
 /* only exists to allow taking tear-free screenshots ingame... */
@@ -125,12 +177,26 @@ flipfb(int dy)
 		vid.recalc_refdef = 1;	/* force a surface cache flush */
 		Con_CheckResize();
 		Con_Clear_f();
-		return;
 	}
 	drawfb(dy);
-	loadimage(fbi, Rect(0,0,vid.width,dy), fb, dy * vid.rowbytes);
-	draw(screen, Rpt(screen->r.min, Pt(screen->r.max.x,
-		screen->r.max.y - vid.height + dy)), fbi, nil, ZP);
+	scalefb(dy);
+	if(scale == 1){
+		loadimage(fbi, Rect(0,0,vid.width,dy), fb, dy * vid.rowbytes);
+		draw(screen, Rpt(fbr.min, Pt(fbr.max.x,
+			fbr.max.y - vid.height + dy)), fbi, nil, ZP);
+	}else{
+		Rectangle r;
+		uchar *p;
+
+		p = fbs;
+		r = fbr;
+		while(r.min.y < fbr.max.y){
+			r.max.y = r.min.y + scale;
+			p += loadimage(fbi, fbi->r, p, vid.rowbytes * scale);
+			draw(screen, r, fbi, nil, ZP);
+			r.min.y = r.max.y;
+		}
+	}
 	flushimage(display, 1);
 	if(dumpwin){
 		if(writebit() < 0)
