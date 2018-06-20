@@ -8,10 +8,11 @@
 mainstacksize = 512*1024;
 uchar *membase;
 int memsize;
+char *game;
 
 enum{
 	KB = 1024*1024,
-	Nmem = 8 * KB
+	Nmem = 12 * KB
 };
 
 static int debug;
@@ -104,22 +105,40 @@ croak(void *, char *note)
 	noted(NDFLT);
 }
 
-void
-threadmain(int c, char **v)
+static void
+usage(void)
 {
-	int n;
+	fprint(2, "usage: %s [-dl] [-g game] [-m kB]\n", argv0);
+	exits("usage");
+}
+
+void
+threadmain(int argc, char **argv)
+{
 	double t, t´, Δt;
 
+	memsize = Nmem;
+	ARGBEGIN{
+	case 'd':
+		dedicated = 1;
+	case 'l':
+		listener = 1;
+		break;
+	case 'g':
+		game = EARGF(usage());
+		break;
+	case 'm':
+		memsize = strtol(EARGF(usage()), nil, 0) * KB;
+		if(memsize <= 0)
+			sysfatal("invalid memsize");
+		break;
+	default: usage();
+	}ARGEND
+	membase = emalloc(memsize);
+	srand(getpid());
 	/* ignore fp exceptions: rendering shit assumes they are */
 	setfcr(getfcr() & ~(FPOVFL|FPUNFL|FPINVAL|FPZDIV));
 	notify(croak);
-	COM_InitArgv(c, v);
-	argv0 = *v;
-	memsize = Nmem;
-	if(n = COM_CheckParm("-mem"))
-		memsize = atoi(com_argv[n+1]) * KB;
-	membase = emalloc(memsize);
-	srand(getpid());
 	Host_Init();
 	t = dtime() - 1.0 / Fpsmax;
 	for(;;){

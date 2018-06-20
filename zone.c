@@ -848,21 +848,12 @@ void *Cache_Alloc (cache_user_t *c, int size, char *name)
 
 void Memory_Init (void)
 {
-	int p;
 	int zonesize = DYNAMIC_SIZE;
 
 	hunk_low_used = 0;
 	hunk_high_used = 0;
 	
 	Cache_Init ();
-	p = COM_CheckParm ("-zone");
-	if (p)
-	{
-		if (p < com_argc-1)
-			zonesize = atoi(com_argv[p+1]) * 1024;
-		else
-			fatal ("Memory_Init: you must specify a size in KB after -zone");
-	}
 	mainzone = Hunk_AllocName (zonesize, "zone" );
 	Z_ClearZone (mainzone, zonesize);
 }

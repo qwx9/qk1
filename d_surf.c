@@ -16,12 +16,6 @@ surfcache_t                     *sc_rover, *sc_base;
 int     D_SurfaceCacheForRes (int width, int height)
 {
 	int             size, pix;
-
-	if (COM_CheckParm ("-surfcachesize"))
-	{
-		size = atoi(com_argv[COM_CheckParm("-surfcachesize")+1]) * 1024;
-		return size;
-	}
 	
 	size = SURFCACHE_SIZE_AT_320X200;
 

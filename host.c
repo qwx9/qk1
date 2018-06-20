@@ -14,6 +14,7 @@ A client can NOT be started if the system started as a dedicated server.
 Memory is cleared / released when a server or client begins, not when they end.
 
 */
+int dedicated;
 
 qboolean	host_initialized;		// true if into command execution
 
@@ -125,31 +126,12 @@ Host_FindMaxClients
 */
 void	Host_FindMaxClients (void)
 {
-	int		i;
-
 	svs.maxclients = 1;
-		
-	i = COM_CheckParm ("-dedicated");
-	if (i)
-	{
-		cls.state = ca_dedicated;
-		if(i != com_argc-1)
-			svs.maxclients = atoi(com_argv[i+1]);
-		else
-			svs.maxclients = 8;
-	}
-	else
-		cls.state = ca_disconnected;
-
-	i = COM_CheckParm ("-listen");
-	if (i)
-	{
-		if (cls.state == ca_dedicated)
-			fatal ("Only one of -dedicated or -listen can be specified");
-		if (i != (com_argc - 1))
-			svs.maxclients = atoi(com_argv[i+1]);
-		else
-			svs.maxclients = 8;
+	cls.state = ca_disconnected;
+	if(listener){
+		if(dedicated)
+			cls.state = ca_dedicated;
+		svs.maxclients = MAX_SCOREBOARD;
 	}
 	if (svs.maxclients < 1)
 		svs.maxclients = 8;

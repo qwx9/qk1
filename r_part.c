@@ -24,15 +24,7 @@ vec3_t			r_pright, r_pup, r_ppn;
 void
 R_InitParticles(void)
 {
-	int i;
-
-	if((i = COM_CheckParm("-particles")) != 0){
-		r_numparticles = atoi(com_argv[i+1]);
-		if(r_numparticles < ABSOLUTE_MIN_PARTICLES)
-			r_numparticles = ABSOLUTE_MIN_PARTICLES;
-	}else
-		r_numparticles = MAX_PARTICLES;
-
+	r_numparticles = MAX_PARTICLES;
 	particles = Hunk_AllocName(r_numparticles * sizeof *particles, "particles");
 }
 

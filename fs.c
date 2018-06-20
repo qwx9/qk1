@@ -845,37 +845,25 @@ pakdir(char *d)
 static void
 initns(void)
 {
-	int i;
-	char d[Nfspath], *e, *home;
+	char *home;
 
-	memset(d, 0, sizeof d);
-	i = COM_CheckParm("-basedir");
-	if(i != 0 && i < com_argc - 1){
-		strncpy(d, com_argv[i+1], sizeof(d)-1);
-		e = d + strlen(d) - 1;
-		if(e > d && *e == '/')
-			*e = 0;
-	}else if(home = getenv("home"), home != nil){
-		snprint(d, sizeof d, "%s/lib/quake", home);
+	pakdir("/sys/games/lib/quake/id1");
+	if(game != nil){
+		if(strcmp(game, "rogue") == 0){
+			rogue = 1;
+			standard_quake = 0;
+		}else if(strcmp(game, "hipnotic") == 0){
+			hipnotic = 1;
+			standard_quake = 0;
+		}else
+			notid1 = 1;
+		pakdir(va("/sys/games/lib/quake/%s", game));
+	}
+	if((home = getenv("home")) != nil){
+		pakdir(va("%s/lib/quake/id1", home));
+		if(game != nil)
+			pakdir(va("%s/lib/quake/%s", home, game));
 		free(home);
-	}
-	if(strlen(d) == 0 || access(d, AREAD) < 0){
-		strncpy(d, "/sys/games/lib/quake", sizeof(d)-1);
-		if(access(d, AREAD) < 0){
-			strncpy(d, "/sys/lib/quake", sizeof(d)-1);
-			if(access(d, AREAD) < 0)
-				fatal("no accessible game directory");
-		}
-	}
-	pakdir(va("%s%s", d, "/id1"));
-	if(COM_CheckParm("-rogue"))
-		pakdir(va("%s%s", d, "/rogue"));
-	if(COM_CheckParm("-hipnotic"))
-		pakdir(va("%s%s", d, "/hipnotic"));
-	i = COM_CheckParm("-game");
-	if(i != 0 && i < com_argc - 1){
-		notid1 = 1;
-		pakdir(va("%s/%s", d, com_argv[i+1]));
 	}
 }
 
@@ -978,6 +966,4 @@ initfs(void)
 	initns();
 	chkreg();
 	Cmd_AddCommand("path", path);
-	Cvar_RegisterVariable(&cmdline);
-	setcvar("cmdline", com_cmdline);
 }

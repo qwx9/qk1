@@ -23,7 +23,7 @@ void (*SetComPortConfig) (int portNumber, int port, int irq, int baud, qboolean 
 void (*GetModemConfig) (int portNumber, char *dialType, char *clear, char *init, char *hangup);
 void (*SetModemConfig) (int portNumber, char *dialType, char *clear, char *init, char *hangup);
 
-static qboolean	listening = false;
+int listener;
 
 qboolean	slistInProgress = false;
 qboolean	slistSilent = false;
@@ -155,17 +155,17 @@ static void NET_Listen_f (void)
 {
 	if (Cmd_Argc () != 2)
 	{
-		Con_Printf ("\"listen\" is \"%ud\"\n", listening ? 1 : 0);
+		Con_Printf ("\"listen\" is \"%ud\"\n", listener ? 1 : 0);
 		return;
 	}
 
-	listening = atoi(Cmd_Argv(1)) ? true : false;
+	listener = atoi(Cmd_Argv(1)) ? true : false;
 
 	for (net_driverlevel=0 ; net_driverlevel<net_numdrivers; net_driverlevel++)
 	{
 		if (net_drivers[net_driverlevel].initialized == false)
 			continue;
-		dfunc.Listen (listening);
+		dfunc.Listen (listener);
 	}
 }
 
@@ -195,10 +195,10 @@ static void MaxPlayers_f (void)
 		Con_Printf ("\"maxplayers\" set to \"%ud\"\n", n);
 	}
 
-	if ((n == 1) && listening)
+	if ((n == 1) && listener)
 		Cbuf_AddText ("listen 0\n");
 
-	if ((n > 1) && (!listening))
+	if ((n > 1) && (!listener))
 		Cbuf_AddText ("listen 1\n");
 
 	svs.maxclients = n;
@@ -229,7 +229,7 @@ static void NET_Port_f (void)
 	DEFAULTnet_hostport = n;
 	net_hostport = n;
 
-	if (listening)
+	if (listener)
 	{
 		// force a change to the new port
 		Cbuf_AddText ("listen 0\n");
@@ -429,7 +429,7 @@ qsocket_t *NET_CheckNewConnections (void)
 	{
 		if (net_drivers[net_driverlevel].initialized == false)
 			continue;
-		if (net_driverlevel && listening == false)
+		if (net_driverlevel && listener == false)
 			continue;
 		ret = dfunc.CheckNewConnections ();
 		if(ret)
@@ -689,23 +689,7 @@ void NET_Init (void)
 	int			controlSocket;
 	qsocket_t	*s;
 
-	i = COM_CheckParm ("-port");
-	if (!i)
-		i = COM_CheckParm ("-udpport");
-	if (!i)
-		i = COM_CheckParm ("-ipxport");
-
-	if (i)
-	{
-		if (i < com_argc-1)
-			DEFAULTnet_hostport = atoi(com_argv[i+1]);
-		else
-			fatal ("NET_Init: you must specify a number after -port");
-	}
 	net_hostport = DEFAULTnet_hostport;
-
-	if (COM_CheckParm("-listen") || cls.state == ca_dedicated)
-		listening = true;
 	net_numsockets = svs.maxclientslimit;
 	if (cls.state != ca_dedicated)
 		net_numsockets++;
@@ -750,7 +734,7 @@ void NET_Init (void)
 			continue;
 		net_drivers[net_driverlevel].initialized = true;
 		net_drivers[net_driverlevel].controlSock = controlSocket;
-		if (listening)
+		if (listener)
 			net_drivers[net_driverlevel].Listen (true);
 		}
 

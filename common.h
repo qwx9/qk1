@@ -34,10 +34,6 @@ void InsertLinkAfter (link_t *l, link_t *after);
 
 //============================================================================
 
-#ifndef NULL
-#define NULL ((void *)0)
-#endif
-
 #define Q_MAXCHAR ((char)0x7f)
 #define Q_MAXSHORT ((short)0x7fff)
 #define Q_MAXINT	((int)0x7fffffff)
@@ -90,25 +86,17 @@ extern	char		com_token[1024];
 extern	qboolean	com_eof;
 
 char *COM_Parse (char *data);
-
-
 extern	int		com_argc;
 extern	char	**com_argv;
-extern char com_cmdline[];
-
-int COM_CheckParm (char *parm);
-void COM_InitArgv (int argc, char **argv);
 
 char	*va(char *format, ...);
 // does a varargs printf into a temp buffer
-
 
 //============================================================================
 
 struct cache_user_s;
 
 extern cvar_t registered;
-extern cvar_t cmdline;
 
 extern qboolean		standard_quake, rogue, hipnotic;
 

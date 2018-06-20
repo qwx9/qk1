@@ -1,5 +1,6 @@
 typedef struct Sfx Sfx;
 
+extern char *game;
 extern uchar *membase;
 extern int memsize;
 
@@ -20,6 +21,8 @@ extern u16int crcn;
 
 extern char savs[][Nsavcm];
 extern int savcanld[];
+
+extern int dedicated, listener;
 
 enum{
 	Fpsmin = 10,

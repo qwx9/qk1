@@ -19,8 +19,7 @@ cvar_t *Cvar_FindVar (char *var_name)
 	for (var=cvar_vars ; var ; var=var->next)
 		if(strcmp(var_name, var->name) == 0)
 			return var;
-
-	return NULL;
+	return nil;
 }
 
 /*
@@ -66,16 +65,13 @@ char *Cvar_CompleteVariable (char *partial)
 	int			len;
 	
 	len = strlen(partial);
-	
 	if (!len)
-		return NULL;
-		
+		return nil;
 // check functions
 	for (cvar=cvar_vars ; cvar ; cvar=cvar->next)
 		if(strncmp(partial, cvar->name, len) == 0)
 			return cvar->name;
-
-	return NULL;
+	return nil;
 }
 
 /*
