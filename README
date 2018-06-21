@@ -7,41 +7,42 @@ Port of linux/x11 quake to plan9front.
 
 Installation
 ------------
-Besides building and installing qk1, you still need .pak files to play. Both
-shareware and registered versions (should) work, as well as the official
-expansions, and mods.
-The data files are to be installed in $home/lib/quake/$gamename, where $gamename
-is 'id1' for plain old quake.
+Besides building and installing qk1, you still need .pak files to play.  Both
+shareware and registered versions work, as well as the official expansions,
+and mods.
+The data files are to be installed in /sys/games/lib/quake/$gamename, where
+$gamename is 'id1' for plain old quake.  Savegames, configuration files and
+other user-specific data is saved in $home/lib/quake/$gamename, if it exists.
 
-% mk install
-% mkdir -p $home/lib/quake/id1
-% cp /n/quakecd/id1/*.pak $home/lib/quake/id1
+; mk install
+; mkdir -p $home/lib/quake/id1
+; cp /n/quakecd/id1/*.pak $home/lib/quake/id1
+; quake >/dev/null
 
-% quake
+By default, qk1 allocates 12 MB of memory for its internal heap.  This amount
+can be controlled via the -m command line parameter like so:
 
-By default, qk1 allocates 8 MB of memory for its internal heap. This amount can
-be controlled via the -mem command line parameter like so:
-
-% quake -mem 16
+; quake -m 16
 
 It is necessary to increase it when playing on larger resolutions, else qk1
 might crash with errors such as 'Hunk_Alloc: failed on 548512 bytes'.
 
-qk1 reads /mnt/cd/[au]NNN files as in cdfs(1) to play music. The directory
+qk1 reads /mnt/cd/[au]NNN files as in cdfs(1) to play music.  The directory
 needn't be populated by cdfs(1), so long as the files are in the format
-described by audio(3). Reading from actual cdroms is currently broken.
+described by audio(3).  Reading from actual cdroms is currently broken.
 
 On lower framerates, devaudio's delay must be increased appropriately, up to
-4410, or sound will cut up.
+4410 (for a rate of 44.1 kHz), or sound will cut up.
 
 Installing an expansion or mod, for example rogue:
 
-% mkdir $home/lib/quake/rogue
-% cp /n/roguecd/*.pak $home/lib/quake/rogue
+; mkdir /sys/games/lib/quake/rogue
+; cp /n/roguecd/*.pak /sys/games/lib/quake/rogue
+; mkdir $home/lib/quake/rogue
 
 Then start with:
 
-% quake -game rogue
+; quake -g rogue
 
 
 Todo/bugs
@@ -50,39 +51,19 @@ Todo/bugs
 - fix arm graphics issues
 - cd: buffer reading from actual cdroms
 - do away with PR_Str shit
-- input: don't recenter mouse all the time, refactor and remove cargocult
-  bullshit, handle mousewheel events, fix grab issues, reimplement dedicated
-  server async input, add keyboard autorepeat for prompts
 - udp/ip, plan9 style
 - manpages
 - port quakeworld: mkmany, merging common code
 - random crashes in d_sprite.c:D_SpriteDrawSpans
-- (amd64) entities visible through walls right when emerging from/immerging into
-  water
+- infinite loop in SV_TouchLinks
+- (amd64) entities visible through walls right when emerging from/immerging
+  into water
 - fix stdio console color print
 - resolutions other than 4:3: some vertical and horizontal strips on the edge
   of the screen aren't drawn
 - #define PARANOID reveals several points of failure that are otherwise ignored
 - (?) sprites not scaled correctly on higher resolutions
 - more testing, cleanups and bug fixes (g '/\* FIXME')
-
-
-Differences with x11/linux original release
--------------------------------------------
-- removed args/cvars:
-	-winsize, -height, -width
-	-condebug, -nostdout: useless
-	-record, -playback: broken and unused
-	-sndbits, -sndspeed, -sndmono
-	-cddev, -nocdaudio
-	-developer
-- no fullscreen; screen resolution is just the window's dimensions; any
-  resolution (under the r_shared.h limits) is allowed; resize by dragging window
-  edges
-- some stupid kbd/mouse bugs fixed; mouse grabbing actually grabs the mouse
-- added m_windowed cvar (replacing _windowed_mouse), for mouse grabbing
-- ungrabs the mouse when main menu or console is accessed
-- removed cd [on|off|reset|remap|eject] commands: not quake's problem
 
 
 Shitty workarounds and other bullshit
