@@ -1,0 +1,151 @@
+</$objtype/mkfile
+BIN=$home/bin/$objtype
+TARG=\
+	qwcl\
+	qwsv\
+
+CLOBJ=\
+	cl_cam.$O\
+	cl_demo.$O\
+	cl_ents.$O\
+	cl_input.$O\
+	cl_main.$O\
+	cl_parse.$O\
+	cl_pred.$O\
+	cl_tent.$O\
+	cmd.$O\
+	common.$O\
+	console.$O\
+	crc.$O\
+	cvar.$O\
+	d_edge.$O\
+	d_fill.$O\
+	d_init.$O\
+	d_modech.$O\
+	d_part.$O\
+	d_polyse.$O\
+	d_scan.$O\
+	d_sky.$O\
+	d_sprite.$O\
+	d_surf.$O\
+	d_vars.$O\
+	d_zpoint.$O\
+	draw.$O\
+	in.$O\
+	keys.$O\
+	mathlib.$O\
+	md4.$O\
+	menu.$O\
+	model.$O\
+	net_chan.$O\
+	net_udp.$O\
+	nonintel.$O\
+	pmove.$O\
+	pmovetst.$O\
+	qwcl.$O\
+	r_aclip.$O\
+	r_alias.$O\
+	r_bsp.$O\
+	r_draw.$O\
+	r_edge.$O\
+	r_efrag.$O\
+	r_light.$O\
+	r_main.$O\
+	r_misc.$O\
+	r_part.$O\
+	r_sky.$O\
+	r_sprite.$O\
+	r_surf.$O\
+	r_vars.$O\
+	sbar.$O\
+	screen.$O\
+	skin.$O\
+	snd.$O\
+	snd_dma.$O\
+	snd_mem.$O\
+	snd_mix.$O\
+	sys.$O\
+	vid.$O\
+	view.$O\
+	wad.$O\
+	zone.$O\
+
+SVOBJ=\
+	cmd.$O\
+	common.$O\
+	crc.$O\
+	cvar.$O\
+	mathlib.$O\
+	md4.$O\
+	net_chan.$O\
+	net_udp.$O\
+	pmove.$O\
+	pmovetst.$O\
+	pr_cmds.$O\
+	pr_edict.$O\
+	pr_exec.$O\
+	qwsv.$O\
+	sv_ccmds.$O\
+	sv_ents.$O\
+	sv_init.$O\
+	sv_main.$O\
+	sv_move.$O\
+	sv_nchan.$O\
+	sv_phys.$O\
+	sv_send.$O\
+	sv_user.$O\
+	svmodel.$O\
+	sys.$O\
+	world.$O\
+	zone.$O\
+
+HFILES=\
+	../adivtab.h\
+	anorm_dots.h\
+	anorms.h\
+	bspfile.h\
+	cdaudio.h\
+	client.h\
+	cmd.h\
+	common.h\
+	console.h\
+	crc.h\
+	cvar.h\
+	d_iface.h\
+	d_local.h\
+	draw.h\
+	input.h\
+	keys.h\
+	mathlib.h\
+	menu.h\
+	model.h\
+	modelgen.h\
+	net.h\
+	pmove.h\
+	pr_comp.h\
+	progdefs.h\
+	progs.h\
+	protocol.h\
+	quakedef.h\
+	r_local.h\
+	r_shared.h\
+	render.h\
+	sbar.h\
+	screen.h\
+	server.h\
+	sound.h\
+	spritegn.h\
+	sys.h\
+	vid.h\
+	view.h\
+	wad.h\
+	world.h\
+	zone.h\
+
+</sys/src/cmd/mkmany
+
+$O.qwcl: $CLOBJ
+	$LD -o $target $prereq
+
+$O.qwsv: $SVOBJ
+	$LD -o $target $prereq
