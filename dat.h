@@ -13,7 +13,9 @@ enum{
 	Nsavver = 5,
 	Nparms = 16,
 
-	Te9 = 1000000000
+	Te9 = 1000000000,
+
+	Udpport = 26000,
 };
 
 extern char fsdir[];
@@ -22,7 +24,7 @@ extern u16int crcn;
 extern char savs[][Nsavcm];
 extern int savcanld[];
 
-extern int dedicated, listener;
+extern int dedicated;
 
 enum{
 	Fpsmin = 10,

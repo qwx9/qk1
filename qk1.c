@@ -6,6 +6,7 @@
 #include "fns.h"
 
 mainstacksize = 512*1024;
+char *netmtpt = "/net";
 uchar *membase;
 int memsize;
 char *game;
@@ -108,7 +109,7 @@ croak(void *, char *note)
 static void
 usage(void)
 {
-	fprint(2, "usage: %s [-dl] [-g game] [-m kB] [-s width height]\n", argv0);
+	fprint(2, "usage: %s [-d] [-g game] [-m kB] [-s width height] [-x netmtpt]\n", argv0);
 	exits("usage");
 }
 
@@ -121,8 +122,6 @@ threadmain(int argc, char **argv)
 	ARGBEGIN{
 	case 'd':
 		dedicated = 1;
-	case 'l':
-		listener = 1;
 		break;
 	case 'g':
 		game = EARGF(usage());
@@ -138,6 +137,9 @@ threadmain(int argc, char **argv)
 		vid.height = strtol(EARGF(usage()), nil, 0);
 		if(vid.width < 320 || vid.height < 200)
 			sysfatal("invalid scale resolution");
+		break;
+	case 'x':
+		netmtpt = EARGF(usage());
 		break;
 	default: usage();
 	}ARGEND

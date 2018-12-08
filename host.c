@@ -128,9 +128,8 @@ void	Host_FindMaxClients (void)
 {
 	svs.maxclients = 1;
 	cls.state = ca_disconnected;
-	if(listener){
-		if(dedicated)
-			cls.state = ca_dedicated;
+	if(dedicated){
+		cls.state = ca_dedicated;
 		svs.maxclients = MAX_SCOREBOARD;
 	}
 	if (svs.maxclients < 1)
@@ -328,7 +327,7 @@ void Host_ShutdownServer(qboolean crash)
 
 	if (!sv.active)
 		return;
-
+	UDP_Listen(0);
 	sv.active = false;
 
 // stop all client sounds immediately
@@ -471,8 +470,6 @@ void _Host_Frame (float time)
 
 // process console commands
 	Cbuf_Execute ();
-
-	NET_Poll();
 
 // if running the server locally, make intentions now
 	if (sv.active)

@@ -255,13 +255,6 @@ void SV_ConnectClient (int clientnum)
 	client->message.maxsize = sizeof client->msgbuf;
 	client->message.allowoverflow = true;		// we can catch it
 
-#ifdef IDGODS
-	client->privileged = IsID(&client->netconnection->addr);
-#endif
-#ifndef IDGODS
-	client->privileged = false;				
-#endif
-
 	if(sv.loadgame)
 		memcpy(client->spawn_parms, spawn_parms, sizeof spawn_parms);
 	else{
@@ -1144,6 +1137,8 @@ void SV_SpawnServer (char *server)
 
 // create a baseline for more efficient communications
 	SV_CreateBaseline ();
+
+	UDP_Listen(svs.maxclients > 1);
 
 // send serverinfo to all connected clients
 	for (i=0,host_client = svs.clients ; i<svs.maxclients ; i++, host_client++)

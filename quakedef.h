@@ -130,10 +130,6 @@
 
 #define	SOUND_CHANNELS		8
 
-// This makes anyone on id's net privileged
-// Use for multiplayer testing only - VERY dangerous!!!
-// #define IDGODS
-
 typedef unsigned char 		byte;
 typedef enum {false, true}	qboolean;
 

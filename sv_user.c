@@ -504,10 +504,7 @@ nextmsg:
 				
 			case clc_stringcmd:	
 				s = MSG_ReadString ();
-				if (host_client->privileged)
-					ret = 2;
-				else
-					ret = 0;
+				ret = 0;
 				if (cistrncmp(s, "status", 6) == 0)
 					ret = 1;
 				else if (cistrncmp(s, "god", 3) == 0)
