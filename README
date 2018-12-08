@@ -2,7 +2,6 @@ qk1 - (9) quake
 ===============
 Port of linux/x11 quake to plan9front.
 - Works on amd64 and 386, broken on arm and probably other arches
-- Lacks networking
 
 
 Installation
@@ -51,7 +50,6 @@ Todo/bugs
 - fix arm graphics issues
 - cd: buffer reading from actual cdroms
 - do away with PR_Str shit
-- udp/ip, plan9 style
 - manpages
 - port quakeworld: mkmany, merging common code
 - random crashes in d_sprite.c:D_SpriteDrawSpans

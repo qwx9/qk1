@@ -2,7 +2,6 @@
 #include <libc.h>
 #include <stdio.h>
 #include "quakedef.h"
-#include "r_local.h"
 
 
 /*
@@ -12,7 +11,7 @@ R_CheckVariables
 */
 void R_CheckVariables (void)
 {
-#if 0
+/*
 	static float	oldbright;
 
 	if (r_fullbright.value != oldbright)
@@ -20,7 +19,7 @@ void R_CheckVariables (void)
 		oldbright = r_fullbright.value;
 		D_FlushCaches ();	// so all lighting changes
 	}
-#endif
+*/
 }
 
 
@@ -123,13 +122,13 @@ void R_LineGraph (int x, int y, int h)
 		dest[0] = color;
 //		*(dest-vid.rowbytes) = 0x30;
 	}
-#if 0
+/*
 	for ( ; i<s ; i++, dest -= vid.rowbytes*2)
 	{
 		dest[0] = 0x30;
 		*(dest-vid.rowbytes) = 0x30;
 	}
-#endif
+*/
 }
 
 /*
@@ -146,13 +145,12 @@ void R_TimeGraph (void)
 {
 	static	int		timex;
 	int		a;
-	float	r_time2;
 	static byte	r_timings[MAX_TIMINGS];
 	int		x;
 	
-	r_time2 = Sys_DoubleTime ();
+	//float r_time2 = Sys_DoubleTime ();
 
-	a = (r_time2-r_time1)/0.01;
+//	a = (r_time2-r_time1)/0.01;
 //a = fabs(mouse_y * 0.05);
 //a = (int)((r_refdef.vieworg[2] + 1024)/1)%(int)r_graphheight.value;
 //a = (int)((pmove.velocity[2] + 500)/10);
@@ -192,7 +190,6 @@ R_NetGraph
 void R_NetGraph (void)
 {
 	int		a, x, y, y2, w, i;
-	frame_t	*frame;
 	int lost;
 	char st[80];
 
@@ -350,8 +347,6 @@ void R_TransformFrustum (void)
 }
 
 
-#if !id386
-
 /*
 ================
 TransformVector
@@ -363,8 +358,6 @@ void TransformVector (vec3_t in, vec3_t out)
 	out[1] = DotProduct(in,vup);
 	out[2] = DotProduct(in,vpn);		
 }
-
-#endif
 
 
 /*
@@ -471,14 +464,14 @@ r_drawflat.value = 0;
 	numbtofpolys = 0;
 
 // debugging
-#if 0
+/*
 r_refdef.vieworg[0]=  80;
 r_refdef.vieworg[1]=      64;
 r_refdef.vieworg[2]=      40;
 r_refdef.viewangles[0]=    0;
 r_refdef.viewangles[1]=    46.763641357;
 r_refdef.viewangles[2]=    0;
-#endif
+*/
 
 // build the transformation matrix for the given view angles
 	VectorCopy (r_refdef.vieworg, modelorg);

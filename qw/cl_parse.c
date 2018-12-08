@@ -100,7 +100,6 @@ int CL_CalcNet (void)
 	int		a, i;
 	frame_t	*frame;
 	int lost;
-	char st[80];
 
 	for (i=cls.netchan.outgoing_sequence-UPDATE_BACKUP+1
 		; i <= cls.netchan.outgoing_sequence
@@ -308,6 +307,22 @@ void CL_RequestNextDownload (void)
 	}
 }
 
+static void
+rename(char *old, char *new)
+{
+	char *p;
+	Dir d;
+
+	if((p = strrchr(new, '/')) == nil)
+		p = new;
+	else
+		p++;
+	nulldir(&d);
+	d.name = p;
+	if(dirwstat(old, &d) < 0)
+		fprint(2, "rename: %r\n");
+}
+
 /*
 =====================
 CL_ParseDownload
@@ -318,9 +333,7 @@ A download message has been received from the server
 void CL_ParseDownload (void)
 {
 	int		size, percent;
-	byte	name[1024];
-	int		r;
-
+	char	name[1024];
 
 	// read the data
 	size = MSG_ReadShort ();
@@ -348,10 +361,10 @@ void CL_ParseDownload (void)
 	// open the file if not opened yet
 	if (!cls.download)
 	{
-		if (strncmp(cls.downloadtempname,"skins/",6))
-			sprintf (name, "%s/%s", com_gamedir, cls.downloadtempname);
+		if(strncmp(cls.downloadtempname, "skins/", 6))
+			sprint(name, "%s/%s", com_gamedir, cls.downloadtempname);
 		else
-			sprintf (name, "qw/%s", cls.downloadtempname);
+			sprint(name, "qw/%s", cls.downloadtempname);
 
 		COM_CreatePath (name);
 
@@ -372,14 +385,14 @@ void CL_ParseDownload (void)
 	{
 // change display routines by zoid
 		// request next block
-#if 0
+/*
 		Con_Printf (".");
 		if (10*(percent/10) != cls.downloadpercent)
 		{
 			cls.downloadpercent = 10*(percent/10);
 			Con_Printf ("%i%%", cls.downloadpercent);
 		}
-#endif
+*/
 		cls.downloadpercent = percent;
 
 		MSG_WriteByte (&cls.netchan.message, clc_stringcmd);
@@ -390,24 +403,22 @@ void CL_ParseDownload (void)
 		char	oldn[MAX_OSPATH];
 		char	newn[MAX_OSPATH];
 
-#if 0
+/*
 		Con_Printf ("100%%\n");
-#endif
+*/
 
 		fclose (cls.download);
 
 		// rename the temp file to it's final name
 		if (strcmp(cls.downloadtempname, cls.downloadname)) {
 			if (strncmp(cls.downloadtempname,"skins/",6)) {
-				sprintf (oldn, "%s/%s", com_gamedir, cls.downloadtempname);
-				sprintf (newn, "%s/%s", com_gamedir, cls.downloadname);
+				sprint(oldn, "%s/%s", com_gamedir, cls.downloadtempname);
+				sprint(newn, "%s/%s", com_gamedir, cls.downloadname);
 			} else {
-				sprintf (oldn, "qw/%s", cls.downloadtempname);
-				sprintf (newn, "qw/%s", cls.downloadname);
+				sprint(oldn, "qw/%s", cls.downloadtempname);
+				sprint(newn, "qw/%s", cls.downloadname);
 			}
-			r = rename (oldn, newn);
-			if (r)
-				Con_Printf ("failed to rename.\n");
+			rename(oldn, newn);
 		}
 
 		cls.download = NULL;
@@ -533,7 +544,7 @@ void CL_ParseServerData (void)
 	// game directory
 	str = MSG_ReadString ();
 
-	if (stricmp(gamedirfile, str)) {
+	if (cistrcmp(gamedirfile, str)) {
 		// save current config
 		Host_WriteConfiguration (); 
 		cflag = true;
@@ -854,13 +865,6 @@ CL_NewTranslation
 */
 void CL_NewTranslation (int slot)
 {
-#ifdef GLQUAKE
-	if (slot > MAX_CLIENTS)
-		Sys_Error ("CL_NewTranslation: slot > MAX_CLIENTS");
-
-	R_TranslatePlayerSkin(slot);
-#else
-
 	int		i, j;
 	int		top, bottom;
 	byte	*dest, *source;
@@ -874,7 +878,7 @@ void CL_NewTranslation (int slot)
 
 	strcpy(s, Info_ValueForKey(player->userinfo, "skin"));
 	COM_StripExtension(s, s);
-	if (player->skin && !stricmp(s, player->skin->name))
+	if (player->skin && !cistrcmp(s, player->skin->name))
 		player->skin = NULL;
 
 	if (player->_topcolor != player->topcolor ||
@@ -909,7 +913,6 @@ void CL_NewTranslation (int slot)
 					dest[BOTTOM_RANGE+j] = source[bottom+15-j];		
 		}
 	}
-#endif
 }
 
 /*
@@ -992,8 +995,6 @@ CL_ServerInfo
 */
 void CL_ServerInfo (void)
 {
-	int		slot;
-	player_info_t	*player;
 	char key[MAX_MSGLEN];
 	char value[MAX_MSGLEN];
 
@@ -1047,12 +1048,6 @@ void CL_MuzzleFlash (void)
 
 	if ((unsigned)(i-1) >= MAX_CLIENTS)
 		return;
-
-#ifdef GLQUAKE
-	// don't draw our own muzzle flash in gl if flashblending
-	if (i-1 == cl.playernum && gl_flashblend.value)
-		return;
-#endif
 
 	pl = &cl.frames[parsecountmod].playerstate[i-1];
 
@@ -1181,8 +1176,8 @@ void CL_ParseServerMessage (void)
 			i = MSG_ReadByte ();
 			if (i >= MAX_LIGHTSTYLES)
 				Sys_Error ("svc_lightstyle > MAX_LIGHTSTYLES");
-			Q_strcpy (cl_lightstyle[i].map,  MSG_ReadString());
-			cl_lightstyle[i].length = Q_strlen(cl_lightstyle[i].map);
+			strcpy(cl_lightstyle[i].map, MSG_ReadString());
+			cl_lightstyle[i].length = strlen(cl_lightstyle[i].map);
 			break;
 			
 		case svc_sound:

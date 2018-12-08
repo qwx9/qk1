@@ -17,7 +17,6 @@ void M_Menu_Main_f (void);
 		void M_Menu_Net_f (void);
 	void M_Menu_Options_f (void);
 		void M_Menu_Keys_f (void);
-		void M_Menu_Video_f (void);
 	void M_Menu_Help_f (void);
 	void M_Menu_Quit_f (void);
 void M_Menu_SerialConfig_f (void);
@@ -36,7 +35,6 @@ void M_Main_Draw (void);
 		void M_Net_Draw (void);
 	void M_Options_Draw (void);
 		void M_Keys_Draw (void);
-		void M_Video_Draw (void);
 	void M_Help_Draw (void);
 	void M_Quit_Draw (void);
 void M_SerialConfig_Draw (void);
@@ -55,7 +53,6 @@ void M_Main_Key (int key);
 		void M_Net_Key (int key);
 	void M_Options_Key (int key);
 		void M_Keys_Key (int key);
-		void M_Video_Key (int key);
 	void M_Help_Key (int key);
 	void M_Quit_Key (int key);
 void M_SerialConfig_Key (int key);
@@ -229,6 +226,7 @@ void M_ToggleMenu_f (void)
 {
 	m_entersound = true;
 
+	IN_Grabm(0);
 	if (key_dest == key_menu)
 	{
 		if (m_state != m_main)
@@ -297,6 +295,7 @@ void M_Main_Key (int key)
 		cls.demonum = m_save_demonum;
 		if (cls.demonum != -1 && !cls.demoplayback && cls.state == ca_disconnected)
 			CL_NextDemo ();
+		IN_Grabm(1);
 		break;
 		
 	case K_DOWNARROW:
@@ -343,7 +342,7 @@ void M_Main_Key (int key)
 //=============================================================================
 /* OPTIONS MENU */
 
-#define	OPTIONS_ITEMS	16
+#define	OPTIONS_ITEMS	15
 
 #define	SLIDER_RANGE	10
 
@@ -388,11 +387,7 @@ void M_AdjustSliders (int dir)
 		Cvar_SetValue ("sensitivity", sensitivity.value);
 		break;
 	case 6:	// music volume
-#ifdef _WIN32
-		bgmvolume.value += dir * 1.0;
-#else
 		bgmvolume.value += dir * 0.1;
-#endif
 		if (bgmvolume.value < 0)
 			bgmvolume.value = 0;
 		if (bgmvolume.value > 1)
@@ -439,9 +434,10 @@ void M_AdjustSliders (int dir)
 
 	case 13:
 		Cvar_SetValue ("cl_hudswap", !cl_hudswap.value);
+		break;
 
-	case 15:	// _windowed_mouse
-		Cvar_SetValue ("_windowed_mouse", !_windowed_mouse.value);
+	case 14:
+		Cvar_SetValue ("m_windowed", !m_windowed.value);
 		break;
 	}
 }
@@ -464,84 +460,75 @@ void M_DrawSlider (int x, int y, float range)
 
 void M_DrawCheckbox (int x, int y, int on)
 {
-#if 0
+/*
 	if (on)
 		M_DrawCharacter (x, y, 131);
 	else
 		M_DrawCharacter (x, y, 129);
-#endif
+*/
 	if (on)
 		M_Print (x, y, "on");
 	else
 		M_Print (x, y, "off");
 }
 
-void M_Options_Draw (void)
+void
+M_Options_Draw(void)
 {
-	float		r;
-	qpic_t	*p;
-	
-	M_DrawTransPic (16, 4, Draw_CachePic ("gfx/qplaque.lmp") );
-	p = Draw_CachePic ("gfx/p_option.lmp");
-	M_DrawPic ( (320-p->width)/2, 4, p);
-	
-	M_Print (16, 32, "    Customize controls");
-	M_Print (16, 40, "         Go to console");
-	M_Print (16, 48, "     Reset to defaults");
+	float r;
+	qpic_t *p;
 
-	M_Print (16, 56, "           Screen size");
+	M_DrawTransPic(16, 4, Draw_CachePic("gfx/qplaque.lmp"));
+	p = Draw_CachePic("gfx/p_option.lmp");
+	M_DrawPic((320-p->width)/2, 4, p);
+	
+	M_Print(16, 32, "    Customize controls");
+	M_Print(16, 40, "         Go to console");
+	M_Print(16, 48, "     Reset to defaults");
+
+	M_Print(16, 56, "           Screen size");
 	r = (scr_viewsize.value - 30) / (120 - 30);
-	M_DrawSlider (220, 56, r);
+	M_DrawSlider(220, 56, r);
 
-	M_Print (16, 64, "            Brightness");
+	M_Print(16, 64, "            Brightness");
 	r = (1.0 - v_gamma.value) / 0.5;
-	M_DrawSlider (220, 64, r);
+	M_DrawSlider(220, 64, r);
 
-	M_Print (16, 72, "           Mouse Speed");
+	M_Print(16, 72, "           Mouse Speed");
 	r = (sensitivity.value - 1)/10;
-	M_DrawSlider (220, 72, r);
+	M_DrawSlider(220, 72, r);
 
-	M_Print (16, 80, "       CD Music Volume");
+	M_Print(16, 80, "       CD Music Volume");
 	r = bgmvolume.value;
-	M_DrawSlider (220, 80, r);
+	M_DrawSlider(220, 80, r);
 
-	M_Print (16, 88, "          Sound Volume");
+	M_Print(16, 88, "          Sound Volume");
 	r = volume.value;
-	M_DrawSlider (220, 88, r);
+	M_DrawSlider(220, 88, r);
 
-	M_Print (16, 96,  "            Always Run");
-	M_DrawCheckbox (220, 96, cl_forwardspeed.value > 200);
+	M_Print(16, 96,  "            Always Run");
+	M_DrawCheckbox(220, 96, cl_forwardspeed.value > 200);
 
-	M_Print (16, 104, "          Invert Mouse");
-	M_DrawCheckbox (220, 104, m_pitch.value < 0);
+	M_Print(16, 104, "          Invert Mouse");
+	M_DrawCheckbox(220, 104, m_pitch.value < 0);
 
-	M_Print (16, 112, "            Lookspring");
-	M_DrawCheckbox (220, 112, lookspring.value);
+	M_Print(16, 112, "            Lookspring");
+	M_DrawCheckbox(220, 112, lookspring.value);
 
-	M_Print (16, 120, "            Lookstrafe");
-	M_DrawCheckbox (220, 120, lookstrafe.value);
+	M_Print(16, 120, "            Lookstrafe");
+	M_DrawCheckbox(220, 120, lookstrafe.value);
 
-	M_Print (16, 128, "    Use old status bar");
-	M_DrawCheckbox (220, 128, cl_sbar.value);
+	M_Print(16, 128, "    Use old status bar");
+	M_DrawCheckbox(220, 128, cl_sbar.value);
 
-	M_Print (16, 136, "      HUD on left side");
-	M_DrawCheckbox (220, 136, cl_hudswap.value);
+	M_Print(16, 136, "      HUD on left side");
+	M_DrawCheckbox(220, 136, cl_hudswap.value);
 
-	if (vid_menudrawfn)
-		M_Print (16, 144, "         Video Options");
-
-#ifdef _WIN32
-	if (modestate == MS_WINDOWED)
-	{
-#endif
-		M_Print (16, 152, "             Use Mouse");
-		M_DrawCheckbox (220, 152, _windowed_mouse.value);
-#ifdef _WIN32
-	}
-#endif
+	M_Print(16, 144, "            Grab Mouse");
+	M_DrawCheckbox(220, 144, m_windowed.value);
 
 // cursor
-	M_DrawCharacter (200, 32 + options_cursor*8, 12+((int)(realtime*4)&1));
+	M_DrawCharacter(200, 32 + options_cursor*8, 12+((int)(realtime*4)&1));
 }
 
 
@@ -566,9 +553,6 @@ void M_Options_Key (int k)
 			break;
 		case 2:
 			Cbuf_AddText ("exec default.cfg\n");
-			break;
-		case 14:
-			M_Menu_Video_f ();
 			break;
 		default:
 			M_AdjustSliders (1);
@@ -597,26 +581,6 @@ void M_Options_Key (int k)
 	case K_RIGHTARROW:
 		M_AdjustSliders (1);
 		break;
-	}
-
-	if (options_cursor == 14 && vid_menudrawfn == NULL)
-	{
-		if (k == K_UPARROW)
-			options_cursor = 13;
-		else
-			options_cursor = 0;
-	}
-
-	if ((options_cursor == 15) 
-#ifdef _WIN32
-	&& (modestate != MS_WINDOWED)
-#endif
-	)
-	{
-		if (k == K_UPARROW)
-			options_cursor = 14;
-		else
-			options_cursor = 0;
 	}
 }
 
@@ -706,7 +670,7 @@ void M_UnbindCommand (char *command)
 
 void M_Keys_Draw (void)
 {
-	int		i, l;
+	int		i;
 	int		keys[2];
 	char	*name;
 	int		x, y;
@@ -727,7 +691,7 @@ void M_Keys_Draw (void)
 
 		M_Print (16, y, bindnames[i][1]);
 
-		l = strlen (bindnames[i][0]);
+		//int l = strlen (bindnames[i][0]);
 		
 		M_FindKeysForCommand (bindnames[i][0], keys);
 		
@@ -763,11 +727,7 @@ void M_Keys_Key (int k)
 	if (bind_grab)
 	{	// defining a key
 		S_LocalSound ("misc/menu1.wav");
-		if (k == K_ESCAPE)
-		{
-			bind_grab = false;
-		}
-		else if (k != '`')
+		if (k != '`')
 		{
 			sprintf (cmd, "bind %s \"%s\"\n", Key_KeynumToString (k), bindnames[keys_cursor][0]);			
 			Cbuf_InsertText (cmd);
@@ -813,28 +773,6 @@ void M_Keys_Key (int k)
 		M_UnbindCommand (bindnames[keys_cursor][0]);
 		break;
 	}
-}
-
-//=============================================================================
-/* VIDEO MENU */
-
-void M_Menu_Video_f (void)
-{
-	key_dest = key_menu;
-	m_state = m_video;
-	m_entersound = true;
-}
-
-
-void M_Video_Draw (void)
-{
-	(*vid_menudrawfn) ();
-}
-
-
-void M_Video_Key (int key)
-{
-	(*vid_menukeyfn) (key);
 }
 
 //=============================================================================
@@ -1000,7 +938,7 @@ void M_SinglePlayer_Draw (void) {
 
 }
 
-void M_SinglePlayer_Key (key) {
+void M_SinglePlayer_Key (int key) {
 	if (key == K_ESCAPE || key==K_ENTER)
 		m_state = m_main;
 }
@@ -1040,7 +978,7 @@ void M_Quit_Draw (void)
 	char *cmsg[] = {
 //    0123456789012345678901234567890123456789
 	"0            QuakeWorld",
-	"1    version " VSTR2(VERSION) " by id Software",
+	"1    version 2.40 by id Software",
 	"0Programming",
 	"1 John Carmack    Michael Abrash",
 	"1 John Cash       Christian Antkow",
@@ -1072,7 +1010,13 @@ void M_Quit_Draw (void)
 		M_Draw ();
 		m_state = m_quit;
 	}
-#if 1
+/*
+	M_DrawTextBox (56, 76, 24, 4);
+	M_Print (64, 84,  quitMessage[msgNumber*4+0]);
+	M_Print (64, 92,  quitMessage[msgNumber*4+1]);
+	M_Print (64, 100, quitMessage[msgNumber*4+2]);
+	M_Print (64, 108, quitMessage[msgNumber*4+3]);
+*/
 	M_DrawTextBox (0, 0, 38, 23);
 	y = 12;
 	for (p = cmsg; *p; p++, y += 8) {
@@ -1081,13 +1025,6 @@ void M_Quit_Draw (void)
 		else
 			M_Print (16, y,	*p + 1);
 	}
-#else
-	M_DrawTextBox (56, 76, 24, 4);
-	M_Print (64, 84,  quitMessage[msgNumber*4+0]);
-	M_Print (64, 92,  quitMessage[msgNumber*4+1]);
-	M_Print (64, 100, quitMessage[msgNumber*4+2]);
-	M_Print (64, 108, quitMessage[msgNumber*4+3]);
-#endif
 }
 
 
@@ -1103,7 +1040,6 @@ void M_Init (void)
 	Cmd_AddCommand ("menu_main", M_Menu_Main_f);
 	Cmd_AddCommand ("menu_options", M_Menu_Options_f);
 	Cmd_AddCommand ("menu_keys", M_Menu_Keys_f);
-	Cmd_AddCommand ("menu_video", M_Menu_Video_f);
 	Cmd_AddCommand ("help", M_Menu_Help_f);
 	Cmd_AddCommand ("menu_quit", M_Menu_Quit_f);
 }
@@ -1174,10 +1110,6 @@ void M_Draw (void)
 
 	case m_keys:
 		M_Keys_Draw ();
-		break;
-
-	case m_video:
-		M_Video_Draw ();
 		break;
 
 	case m_help:
@@ -1266,10 +1198,6 @@ void M_Keydown (int key)
 
 	case m_keys:
 		M_Keys_Key (key);
-		return;
-
-	case m_video:
-		M_Video_Key (key);
 		return;
 
 	case m_help:

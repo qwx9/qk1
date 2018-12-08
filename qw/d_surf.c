@@ -4,8 +4,6 @@
 #include <libc.h>
 #include <stdio.h>
 #include "quakedef.h"
-#include "d_local.h"
-#include "r_local.h"
 
 float           surfscale;
 qboolean        r_cache_thrash;         // set if surface cache is thrashing
@@ -121,11 +119,8 @@ surfcache_t     *D_SCAlloc (int width, int size)
 	if ((size <= 0) || (size > 0x10000))
 		Sys_Error ("D_SCAlloc: bad cache size %d\n", size);
 	
-#ifdef __alpha__
-	size = (int)((long)&((surfcache_t *)0)->data[size]);
-#else
-	size = (int)&((surfcache_t *)0)->data[size];
-#endif
+	size = (uintptr)&((surfcache_t *)0)->data[size];
+
 	size = (size + 3) & ~3;
 	if (size > sc_size)
 		Sys_Error ("D_SCAlloc: %i > cache size",size);

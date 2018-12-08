@@ -1,7 +1,7 @@
 #include <u.h>
 #include <libc.h>
 #include <stdio.h>
-#include "qwsvdef.h"
+#include "quakedef.h"
 
 /*
 =============================================================================
@@ -63,7 +63,7 @@ given point.
 byte *SV_FatPVS (vec3_t org)
 {
 	fatbytes = (sv.worldmodel->numleafs+31)>>3;
-	Q_memset (fatpvs, 0, fatbytes);
+	memset (fatpvs, 0, fatbytes);
 	SV_AddToFatPVS (org, sv.worldmodel->nodes);
 	return fatpvs;
 }

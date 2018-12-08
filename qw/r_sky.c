@@ -2,9 +2,6 @@
 #include <libc.h>
 #include <stdio.h>
 #include "quakedef.h"
-#include "r_local.h"
-#include "d_local.h"
-
 
 int		iskyspeed = 8;
 int		iskyspeed2 = 2;
@@ -100,35 +97,29 @@ void R_MakeSky (void)
 		baseofs = ((y+yshift) & SKYMASK) * 131;
 
 // FIXME: clean this up
-#ifdef UNALIGNED_OK
+		if(UNALIGNED_OK){
+			for (x=0 ; x<SKYSIZE ; x += 4)
+			{
+				ofs = baseofs + ((x+xshift) & SKYMASK);
 
-		for (x=0 ; x<SKYSIZE ; x += 4)
-		{
-			ofs = baseofs + ((x+xshift) & SKYMASK);
+			// PORT: unaligned dword access to bottommask and bottomsky
 
-		// PORT: unaligned dword access to bottommask and bottomsky
-
-			*pnewsky = (*(pnewsky + (128 / sizeof (unsigned))) &
+				*pnewsky = (*(pnewsky + (128 / sizeof (unsigned))) &
 						*(unsigned *)&bottommask[ofs]) |
 						*(unsigned *)&bottomsky[ofs];
-			pnewsky++;
-		}
+				pnewsky++;
+			}
+		}else{
+			for (x=0 ; x<SKYSIZE ; x++)
+			{
+				ofs = baseofs + ((x+xshift) & SKYMASK);
 
-#endif
-#ifndef UNALIGNED_OK
-
-		for (x=0 ; x<SKYSIZE ; x++)
-		{
-			ofs = baseofs + ((x+xshift) & SKYMASK);
-
-			*(byte *)pnewsky = (*((byte *)pnewsky + 128) &
+				*(byte *)pnewsky = (*((byte *)pnewsky + 128) &
 						*(byte *)&bottommask[ofs]) |
 						*(byte *)&bottomsky[ofs];
-			pnewsky = (unsigned *)((byte *)pnewsky + 1);
+				pnewsky = (unsigned *)((byte *)pnewsky + 1);
+			}
 		}
-
-#endif
-
 		pnewsky += 128 / sizeof (unsigned);
 	}
 
@@ -160,37 +151,31 @@ void R_GenSkyTile (void *pdest)
 		baseofs = ((y+yshift) & SKYMASK) * 131;
 
 // FIXME: clean this up
-#ifdef UNALIGNED_OK
+		if(UNALIGNED_OK){
+			for (x=0 ; x<SKYSIZE ; x += 4)
+			{
+				ofs = baseofs + ((x+xshift) & SKYMASK);
 
-		for (x=0 ; x<SKYSIZE ; x += 4)
-		{
-			ofs = baseofs + ((x+xshift) & SKYMASK);
+			// PORT: unaligned dword access to bottommask and bottomsky
 
-		// PORT: unaligned dword access to bottommask and bottomsky
-
-			*pd = (*(pnewsky + (128 / sizeof (unsigned))) &
+				*pd = (*(pnewsky + (128 / sizeof (unsigned))) &
 				   *(unsigned *)&bottommask[ofs]) |
 				   *(unsigned *)&bottomsky[ofs];
-			pnewsky++;
-			pd++;
-		}
+				pnewsky++;
+				pd++;
+			}
+		}else{
+			for (x=0 ; x<SKYSIZE ; x++)
+			{
+				ofs = baseofs + ((x+xshift) & SKYMASK);
 
-#endif
-#ifndef UNALIGNED_OK
-
-		for (x=0 ; x<SKYSIZE ; x++)
-		{
-			ofs = baseofs + ((x+xshift) & SKYMASK);
-
-			*(byte *)pd = (*((byte *)pnewsky + 128) &
+				*(byte *)pd = (*((byte *)pnewsky + 128) &
 						*(byte *)&bottommask[ofs]) |
 						*(byte *)&bottomsky[ofs];
-			pnewsky = (unsigned *)((byte *)pnewsky + 1);
-			pd = (unsigned *)((byte *)pd + 1);
+				pnewsky = (unsigned *)((byte *)pnewsky + 1);
+				pd = (unsigned *)((byte *)pd + 1);
+			}
 		}
-
-#endif
-
 		pnewsky += 128 / sizeof (unsigned);
 	}
 }

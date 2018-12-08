@@ -2,11 +2,8 @@
 #include <libc.h>
 #include <stdio.h>
 #include "quakedef.h"
-/*
 
-key up events are sent even if in console mode
-
-*/
+/* key up events are sent even if in console mode */
 
 
 #define		MAXCMDLINE	256
@@ -168,8 +165,8 @@ void CompleteCommand (void)
 	if (cmd)
 	{
 		key_lines[edit_line][1] = '/';
-		Q_strcpy (key_lines[edit_line]+2, cmd);
-		key_linepos = Q_strlen(cmd)+2;
+		strcpy (key_lines[edit_line]+2, cmd);
+		key_linepos = strlen(cmd)+2;
 		key_lines[edit_line][key_linepos] = ' ';
 		key_linepos++;
 		key_lines[edit_line][key_linepos] = 0;
@@ -186,13 +183,6 @@ Interactive line editing and console scrollback
 */
 void Key_Console (int key)
 {
-#ifdef _WIN32
-	char	*cmd, *s;
-	int		i;
-	HANDLE	th;
-	char	*clipText, *textCopied;
-#endif
-	
 	if (key == K_ENTER)
 	{	// backslash text are commands, else chat
 		if (key_lines[edit_line][1] == '\\' || key_lines[edit_line][1] == '/')
@@ -240,8 +230,8 @@ void Key_Console (int key)
 				&& !key_lines[history_line][1]);
 		if (history_line == edit_line)
 			history_line = (edit_line+1)&31;
-		Q_strcpy(key_lines[edit_line], key_lines[history_line]);
-		key_linepos = Q_strlen(key_lines[edit_line]);
+		strcpy(key_lines[edit_line], key_lines[history_line]);
+		key_linepos = strlen(key_lines[edit_line]);
 		return;
 	}
 
@@ -261,8 +251,8 @@ void Key_Console (int key)
 		}
 		else
 		{
-			Q_strcpy(key_lines[edit_line], key_lines[history_line]);
-			key_linepos = Q_strlen(key_lines[edit_line]);
+			strcpy(key_lines[edit_line], key_lines[history_line]);
+			key_linepos = strlen(key_lines[edit_line]);
 		}
 		return;
 	}
@@ -292,45 +282,16 @@ void Key_Console (int key)
 		con->display = con->current;
 		return;
 	}
-	
-#ifdef _WIN32
-	if ((key=='V' || key=='v') && GetKeyState(VK_CONTROL)<0) {
-		if (OpenClipboard(NULL)) {
-			th = GetClipboardData(CF_TEXT);
-			if (th) {
-				clipText = GlobalLock(th);
-				if (clipText) {
-					textCopied = malloc(GlobalSize(th)+1);
-					strcpy(textCopied, clipText);
-	/* Substitutes a NULL for every token */strtok(textCopied, "\n\r\b");
-					i = strlen(textCopied);
-					if (i+key_linepos>=MAXCMDLINE)
-						i=MAXCMDLINE-key_linepos;
-					if (i>0) {
-						textCopied[i]=0;
-						strcat(key_lines[edit_line], textCopied);
-						key_linepos+=i;;
-					}
-					free(textCopied);
-				}
-				GlobalUnlock(th);
-			}
-			CloseClipboard();
-		return;
-		}
-	}
-#endif
 
 	if (key < 32 || key > 127)
 		return;	// non printable
-		
+	
 	if (key_linepos < MAXCMDLINE-1)
 	{
 		key_lines[edit_line][key_linepos] = key;
 		key_linepos++;
 		key_lines[edit_line][key_linepos] = 0;
 	}
-
 }
 
 //============================================================================
@@ -408,7 +369,7 @@ int Key_StringToKeynum (char *str)
 
 	for (kn=keynames ; kn->name ; kn++)
 	{
-		if (!Q_strcasecmp(str,kn->name))
+		if (!cistrcmp(str, kn->name))
 			return kn->keynum;
 	}
 	return -1;
@@ -466,9 +427,9 @@ void Key_SetBinding (int keynum, char *binding)
 	}
 			
 // allocate memory for new binding
-	l = Q_strlen (binding);	
+	l = strlen (binding);	
 	new = Z_Malloc (l+1);
-	Q_strcpy (new, binding);
+	strcpy (new, binding);
 	new[l] = 0;
 	keybindings[keynum] = new;	
 }

@@ -4,15 +4,12 @@
 #include <libc.h>
 #include <stdio.h>
 #include "quakedef.h"
-#include "r_local.h"
 
 /*
-
 The view is allowed to move slightly from it's true position for bobbing,
 but if it exceeds 8 pixels linear distance (spherical, not box), the list of
 entities sent from the server may not include everything in the pvs, especially
 when crossing a water boudnary.
-
 */
 
 cvar_t	lcd_x = {"lcd_x", "0"};	// FIXME: make this work sometime...
@@ -42,10 +39,6 @@ cvar_t	crosshaircolor = {"crosshaircolor", "79", true};
 
 cvar_t  cl_crossx = {"cl_crossx", "0", true};
 cvar_t  cl_crossy = {"cl_crossy", "0", true};
-
-#ifdef GLQUAKE
-cvar_t	gl_cshiftpercent = {"gl_cshiftpercent", "100", false};
-#endif
 
 cvar_t  v_contentblend = {"v_contentblend", "1", false};
 
@@ -135,12 +128,8 @@ cvar_t	v_centerspeed = {"v_centerspeed","500"};
 
 void V_StartPitchDrift (void)
 {
-#if 1
 	if (cl.laststop == cl.time)
-	{
 		return;		// something else is keeping it from drifting
-	}
-#endif
 	if (cl.nodrift || !cl.pitchvel)
 	{
 		cl.pitchvel = v_centerspeed.value;
@@ -250,11 +239,6 @@ cvar_t		v_gamma = {"gamma", "1", true};
 
 byte		gammatable[256];	// palette is sent through this
 
-
-#ifdef	GLQUAKE
-byte		ramps[3][256];
-float		v_blend[4];		// rgba 0.0 - 1.0
-#endif	// GLQUAKE
 
 void BuildGammaTable (float g)
 {
@@ -469,146 +453,6 @@ void V_CalcPowerupCshift (void)
 
 /*
 =============
-V_CalcBlend
-=============
-*/
-#ifdef	GLQUAKE
-void V_CalcBlend (void)
-{
-	float	r, g, b, a, a2;
-	int		j;
-
-	r = 0;
-	g = 0;
-	b = 0;
-	a = 0;
-
-	for (j=0 ; j<NUM_CSHIFTS ; j++)	
-	{
-		if (!gl_cshiftpercent.value)
-			continue;
-
-		a2 = ((cl.cshifts[j].percent * gl_cshiftpercent.value) / 100.0) / 255.0;
-
-//		a2 = (cl.cshifts[j].percent/2)/255.0;
-		if (!a2)
-			continue;
-		a = a + a2*(1-a);
-//Con_Printf ("j:%i a:%f\n", j, a);
-		a2 = a2/a;
-		r = r*(1-a2) + cl.cshifts[j].destcolor[0]*a2;
-		g = g*(1-a2) + cl.cshifts[j].destcolor[1]*a2;
-		b = b*(1-a2) + cl.cshifts[j].destcolor[2]*a2;
-	}
-
-	v_blend[0] = r/255.0;
-	v_blend[1] = g/255.0;
-	v_blend[2] = b/255.0;
-	v_blend[3] = a;
-	if (v_blend[3] > 1)
-		v_blend[3] = 1;
-	if (v_blend[3] < 0)
-		v_blend[3] = 0;
-}
-#endif
-
-/*
-=============
-V_UpdatePalette
-=============
-*/
-#ifdef	GLQUAKE
-void V_UpdatePalette (void)
-{
-	int		i, j;
-	qboolean	new;
-	byte	*basepal, *newpal;
-	byte	pal[768];
-	float	r,g,b,a;
-	int		ir, ig, ib;
-	qboolean force;
-
-	V_CalcPowerupCshift ();
-	
-	new = false;
-	
-	for (i=0 ; i<NUM_CSHIFTS ; i++)
-	{
-		if (cl.cshifts[i].percent != cl.prev_cshifts[i].percent)
-		{
-			new = true;
-			cl.prev_cshifts[i].percent = cl.cshifts[i].percent;
-		}
-		for (j=0 ; j<3 ; j++)
-			if (cl.cshifts[i].destcolor[j] != cl.prev_cshifts[i].destcolor[j])
-			{
-				new = true;
-				cl.prev_cshifts[i].destcolor[j] = cl.cshifts[i].destcolor[j];
-			}
-	}
-
-// drop the damage value
-	cl.cshifts[CSHIFT_DAMAGE].percent -= host_frametime*150;
-	if (cl.cshifts[CSHIFT_DAMAGE].percent <= 0)
-		cl.cshifts[CSHIFT_DAMAGE].percent = 0;
-
-// drop the bonus value
-	cl.cshifts[CSHIFT_BONUS].percent -= host_frametime*100;
-	if (cl.cshifts[CSHIFT_BONUS].percent <= 0)
-		cl.cshifts[CSHIFT_BONUS].percent = 0;
-
-	force = V_CheckGamma ();
-	if (!new && !force)
-		return;
-
-	V_CalcBlend ();
-
-//Con_Printf("b: %4.2f %4.2f %4.2f %4.6f\n", v_blend[0],	v_blend[1],	v_blend[2],	v_blend[3]);
-
-	a = v_blend[3];
-	r = 255*v_blend[0]*a;
-	g = 255*v_blend[1]*a;
-	b = 255*v_blend[2]*a;
-
-	a = 1-a;
-	for (i=0 ; i<256 ; i++)
-	{
-		ir = i*a + r;
-		ig = i*a + g;
-		ib = i*a + b;
-		if (ir > 255)
-			ir = 255;
-		if (ig > 255)
-			ig = 255;
-		if (ib > 255)
-			ib = 255;
-
-		ramps[0][i] = gammatable[ir];
-		ramps[1][i] = gammatable[ig];
-		ramps[2][i] = gammatable[ib];
-	}
-
-	basepal = host_basepal;
-	newpal = pal;
-	
-	for (i=0 ; i<256 ; i++)
-	{
-		ir = basepal[0];
-		ig = basepal[1];
-		ib = basepal[2];
-		basepal += 3;
-		
-		newpal[0] = ramps[0][ir];
-		newpal[1] = ramps[1][ig];
-		newpal[2] = ramps[2][ib];
-		newpal += 3;
-	}
-
-	VID_ShiftPalette (pal);	
-}
-#else	// !GLQUAKE
-/*
-=============
 V_UpdatePalette
 =============
 */
@@ -679,8 +523,6 @@ void V_UpdatePalette (void)
 
 	VID_ShiftPalette (pal);	
 }
-
-#endif	// !GLQUAKE
 
 /* 
 ============================================================================== 
@@ -998,11 +840,8 @@ cl.simangles[ROLL] = 0;	// FIXME @@@
 	R_PushDlights ();
 	R_RenderView ();
 	
-#ifndef GLQUAKE
 	if (crosshair.value)
-		Draw_Crosshair();
-#endif
-		
+		Draw_Crosshair();		
 }
 
 //============================================================================
@@ -1035,9 +874,6 @@ void V_Init (void)
 	Cvar_RegisterVariable (&crosshair);
 	Cvar_RegisterVariable (&cl_crossx);
 	Cvar_RegisterVariable (&cl_crossy);
-#ifdef GLQUAKE
-	Cvar_RegisterVariable (&gl_cshiftpercent);
-#endif
 
 	Cvar_RegisterVariable (&cl_rollspeed);
 	Cvar_RegisterVariable (&cl_rollangle);

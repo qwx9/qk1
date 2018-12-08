@@ -72,14 +72,13 @@ typedef struct
 
 #define	NUM_SPAWN_PARMS			16
 
-typedef enum
-{
+typedef enum{
 	cs_free,		// can be reused for a new connection
 	cs_zombie,		// client has been disconnected, but don't reuse
 					// connection for a couple seconds
 	cs_connected,	// has been assigned to a client_t, but not in game yet
 	cs_spawned		// client is fully in game
-} client_state_t;
+}State;
 
 typedef struct
 {
@@ -95,7 +94,7 @@ typedef struct
 
 typedef struct client_s
 {
-	client_state_t	state;
+	State state;
 
 	int				spectator;			// non-interactive
 
@@ -271,14 +270,6 @@ typedef struct
 #define	FL_PARTIALGROUND		1024	// not all corners are valid
 #define	FL_WATERJUMP			2048	// player jumping out of water
 
-// entity effects
-
-//define	EF_BRIGHTFIELD			1
-//define	EF_MUZZLEFLASH 			2
-#define	EF_BRIGHTLIGHT 			4
-#define	EF_DIMLIGHT 			8
-
-
 #define	SPAWNFLAG_NOT_EASY			256
 #define	SPAWNFLAG_NOT_MEDIUM		512
 #define	SPAWNFLAG_NOT_HARD			1024
@@ -293,6 +284,8 @@ typedef struct
 #define	MULTICAST_PVS_R			5
 
 //============================================================================
+
+extern cvar_t sv_highchars;
 
 extern	cvar_t	sv_mintic, sv_maxtic;
 extern	cvar_t	sv_maxspeed;
@@ -332,6 +325,7 @@ void SV_DropClient (client_t *drop);
 
 int SV_CalcPing (client_t *cl);
 void SV_FullClientUpdate (client_t *client, sizebuf_t *buf);
+void SV_FullClientUpdateToClient (client_t *, client_t *);
 
 int SV_ModelIndex (char *name);
 
@@ -351,7 +345,6 @@ void SV_InitOperatorCommands (void);
 
 void SV_SendServerinfo (client_t *client);
 void SV_ExtractFromUserinfo (client_t *cl);
-
 
 void Master_Heartbeat (void);
 void Master_Packet (void);
@@ -433,3 +426,5 @@ void ClientReliableWrite_Short(client_t *cl, int c);
 void ClientReliableWrite_String(client_t *cl, char *s);
 void ClientReliableWrite_SZ(client_t *cl, void *data, int len);
 
+qboolean	ServerPaused(void);
+void	SV_SendServerInfoChange(char *key, char *value);

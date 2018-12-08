@@ -3,15 +3,10 @@
 #include <u.h>
 #include <libc.h>
 #include <stdio.h>
-#include <ctype.h>
-
-#ifdef SERVERONLY 
-#include "qwsvdef.h"
-#else
 #include "quakedef.h"
-#endif
 
-#define MAX_NUM_ARGVS	50
+cvar_t sv_highchars = {"sv_highchars", "1"};
+
 #define NUM_SAFE_ARGVS	6
 
 usercmd_t nullcmd; // guarenteed to be zero
@@ -117,163 +112,6 @@ void InsertLinkAfter (link_t *l, link_t *after)
 ============================================================================
 */
 
-#if 0
-void Q_memset (void *dest, int fill, int count)
-{
-	int		i;
-	
-	if ( (((long)dest | count) & 3) == 0)
-	{
-		count >>= 2;
-		fill = fill | (fill<<8) | (fill<<16) | (fill<<24);
-		for (i=0 ; i<count ; i++)
-			((int *)dest)[i] = fill;
-	}
-	else
-		for (i=0 ; i<count ; i++)
-			((byte *)dest)[i] = fill;
-}
-
-void Q_memcpy (void *dest, void *src, int count)
-{
-	int		i;
-	
-	if (( ( (long)dest | (long)src | count) & 3) == 0 )
-	{
-		count>>=2;
-		for (i=0 ; i<count ; i++)
-			((int *)dest)[i] = ((int *)src)[i];
-	}
-	else
-		for (i=0 ; i<count ; i++)
-			((byte *)dest)[i] = ((byte *)src)[i];
-}
-
-int Q_memcmp (void *m1, void *m2, int count)
-{
-	while(count)
-	{
-		count--;
-		if (((byte *)m1)[count] != ((byte *)m2)[count])
-			return -1;
-	}
-	return 0;
-}
-
-void Q_strcpy (char *dest, char *src)
-{
-	while (*src)
-	{
-		*dest++ = *src++;
-	}
-	*dest++ = 0;
-}
-
-void Q_strncpy (char *dest, char *src, int count)
-{
-	while (*src && count--)
-	{
-		*dest++ = *src++;
-	}
-	if (count)
-		*dest++ = 0;
-}
-
-int Q_strlen (char *str)
-{
-	int		count;
-	
-	count = 0;
-	while (str[count])
-		count++;
-
-	return count;
-}
-
-char *Q_strrchr(char *s, char c)
-{
-    int len = Q_strlen(s);
-    s += len;
-    while (len--)
-        if (*--s == c) return s;
-    return 0;
-}
-
-void Q_strcat (char *dest, char *src)
-{
-	dest += Q_strlen(dest);
-	Q_strcpy (dest, src);
-}
-
-int Q_strcmp (char *s1, char *s2)
-{
-	while (1)
-	{
-		if (*s1 != *s2)
-			return -1;		// strings not equal	
-		if (!*s1)
-			return 0;		// strings are equal
-		s1++;
-		s2++;
-	}
-	
-	return -1;
-}
-
-int Q_strncmp (char *s1, char *s2, int count)
-{
-	while (1)
-	{
-		if (!count--)
-			return 0;
-		if (*s1 != *s2)
-			return -1;		// strings not equal	
-		if (!*s1)
-			return 0;		// strings are equal
-		s1++;
-		s2++;
-	}
-	
-	return -1;
-}
-
-int Q_strncasecmp (char *s1, char *s2, int n)
-{
-	int		c1, c2;
-	
-	while (1)
-	{
-		c1 = *s1++;
-		c2 = *s2++;
-
-		if (!n--)
-			return 0;		// strings are equal until end point
-		
-		if (c1 != c2)
-		{
-			if (c1 >= 'a' && c1 <= 'z')
-				c1 -= ('a' - 'A');
-			if (c2 >= 'a' && c2 <= 'z')
-				c2 -= ('a' - 'A');
-			if (c1 != c2)
-				return -1;		// strings not equal
-		}
-		if (!c1)
-			return 0;		// strings are equal
-//		s1++;
-//		s2++;
-	}
-	
-	return -1;
-}
-
-int Q_strcasecmp (char *s1, char *s2)
-{
-	return Q_strncasecmp (s1, s2, 99999);
-}
-
-#endif
-
 int Q_atoi (char *str)
 {
 	int		val;
@@ -328,8 +166,6 @@ int Q_atoi (char *str)
 			return val*sign;
 		val = val*10 + c - '0';
 	}
-	
-	return 0;
 }
 
 
@@ -563,7 +399,7 @@ void MSG_WriteString (sizebuf_t *sb, char *s)
 	if (!s)
 		SZ_Write (sb, "", 1);
 	else
-		SZ_Write (sb, s, Q_strlen(s)+1);
+		SZ_Write (sb, s, strlen(s)+1);
 }
 
 void MSG_WriteCoord (sizebuf_t *sb, float f)
@@ -862,19 +698,19 @@ void *SZ_GetSpace (sizebuf_t *buf, int length)
 
 void SZ_Write (sizebuf_t *buf, void *data, int length)
 {
-	Q_memcpy (SZ_GetSpace(buf,length),data,length);		
+	memcpy (SZ_GetSpace(buf,length),data,length);		
 }
 
 void SZ_Print (sizebuf_t *buf, char *data)
 {
 	int		len;
 	
-	len = Q_strlen(data)+1;
+	len = strlen(data)+1;
 
 	if (!buf->cursize || buf->data[buf->cursize-1])
-		Q_memcpy ((byte *)SZ_GetSpace(buf, len),data,len); // no trailing 0
+		memcpy ((byte *)SZ_GetSpace(buf, len),data,len); // no trailing 0
 	else
-		Q_memcpy ((byte *)SZ_GetSpace(buf, len-1)-1,data,len); // write over trailing 0
+		memcpy ((byte *)SZ_GetSpace(buf, len-1)-1,data,len); // write over trailing 0
 }
 
 
@@ -1075,7 +911,7 @@ int COM_CheckParm (char *parm)
 	{
 		if (!com_argv[i])
 			continue;		// NEXTSTEP sometimes clears appkit vars.
-		if (!Q_strcmp (parm,com_argv[i]))
+		if (!strcmp (parm,com_argv[i]))
 			return i;
 	}
 		
@@ -1104,11 +940,10 @@ void COM_CheckRegistered (void)
 	if (!h)
 	{
 		Con_Printf ("Playing shareware version.\n");
-#ifndef SERVERONLY
-// FIXME DEBUG -- only temporary
-		if (com_modified)
+		/*
+		if(!svonly && com_modified)
 			Sys_Error ("You must have the registered version to play QuakeWorld");
-#endif
+		*/
 		return;
 	}
 
@@ -1142,7 +977,7 @@ void COM_InitArgv (int argc, char **argv)
 		 com_argc++)
 	{
 		largv[com_argc] = argv[com_argc];
-		if (!Q_strcmp ("-safe", argv[com_argc]))
+		if (!strcmp ("-safe", argv[com_argc]))
 			safe = true;
 	}
 
@@ -1294,7 +1129,7 @@ typedef struct
 #define	MAX_FILES_IN_PACK	2048
 
 char	com_gamedir[MAX_OSPATH];
-char	com_basedir[MAX_OSPATH];
+char	com_basedir[MAX_OSPATH] = "/sys/games/lib/quake";
 
 typedef struct searchpath_s
 {
@@ -1571,14 +1406,10 @@ byte *COM_LoadFile (char *path, int usehunk)
 		Sys_Error ("COM_LoadFile: not enough space for %s", path);
 		
 	((byte *)buf)[len] = 0;
-#ifndef SERVERONLY
-	Draw_BeginDisc ();
-#endif
+	Draw_BeginDisc();
 	fread (buf, 1, len, h);
 	fclose (h);
-#ifndef SERVERONLY
-	Draw_EndDisc ();
-#endif
+	Draw_EndDisc();
 
 	return buf;
 }
@@ -1653,7 +1484,7 @@ pack_t *COM_LoadPackFile (char *packfile)
 	newfiles = Z_Malloc (numpackfiles * sizeof(packfile_t));
 
 	fseek (packhandle, header.dirofs, SEEK_SET);
-	fread (&info, 1, header.dirlen, packhandle);
+	fread (info, 1, header.dirlen, packhandle);
 
 // crc the directory to check for modifications
 	crc = CRC_Block((byte *)info, header.dirlen);
@@ -1813,6 +1644,7 @@ COM_InitFilesystem
 void COM_InitFilesystem (void)
 {
 	int		i;
+	char *p;
 
 //
 // -basedir <path>
@@ -1821,14 +1653,17 @@ void COM_InitFilesystem (void)
 	i = COM_CheckParm ("-basedir");
 	if (i && i < com_argc-1)
 		strcpy (com_basedir, com_argv[i+1]);
-	else
-		strcpy (com_basedir, host_parms.basedir);
 
 //
 // start up with id1 by default
 //
-	COM_AddGameDirectory (va("%s/id1", com_basedir) );
-	COM_AddGameDirectory (va("%s/qw", com_basedir) );
+	COM_AddGameDirectory ("/sys/games/lib/quake/id1");
+	COM_AddGameDirectory ("/sys/games/lib/quake/qw");
+	if(p = getenv("home")){
+		COM_AddGameDirectory (va("%s/lib/quake/id1", p) );
+		COM_AddGameDirectory (va("%s/lib/quake/qw", p) );
+		free(p);
+	}
 
 	// any set gamedirs will be freed up to here
 	com_base_searchpaths = com_searchpaths;
@@ -1992,9 +1827,6 @@ void Info_SetValueForStarKey (char *s, char *key, char *value, int maxsize)
 {
 	char	new[1024], *v;
 	int		c;
-#ifdef SERVERONLY
-	extern cvar_t sv_highchars;
-#endif
 
 	if (strstr (key, "\\") || strstr (value, "\\") )
 	{
@@ -2041,23 +1873,23 @@ void Info_SetValueForStarKey (char *s, char *key, char *value, int maxsize)
 	while (*v)
 	{
 		c = (unsigned char)*v++;
-#ifndef SERVERONLY
-		// client only allows highbits on name
-		if (stricmp(key, "name") != 0) {
-			c &= 127;
-			if (c < 32 || c > 127)
-				continue;
-			// auto lowercase team
-			if (stricmp(key, "team") == 0)
-				c = tolower(c);
+		if(!svonly){
+			// client only allows highbits on name
+			if(cistrcmp(key, "name") != 0){
+				c &= 127;
+				if(c < 32 || c > 127)
+					continue;
+				// auto lowercase team
+				if(cistrcmp(key, "team") == 0)
+					c = tolower(c);
+			}
+		}else{
+			if(!sv_highchars.value){
+				c &= 127;
+				if(c < 32 || c > 127)
+					continue;
+			}
 		}
-#else
-		if (!sv_highchars.value) {
-			c &= 127;
-			if (c < 32 || c > 127)
-				continue;
-		}
-#endif
 //		c &= 127;		// strip high bits
 		if (c > 13) // && c < 127)
 			*s++ = c;
@@ -2161,14 +1993,7 @@ static byte chkbuf[16 + 60 + 4];
 
 static unsigned last_mapchecksum = 0;
 
-#if 0
-/*
-====================
-COM_BlockSequenceCheckByte
-
-For proxy protecting
-====================
-*/
+/* For proxy protecting
 byte	COM_BlockSequenceCheckByte (byte *base, int length, int sequence, unsigned mapchecksum)
 {
 	int		checksum;
@@ -2205,7 +2030,7 @@ byte	COM_BlockSequenceCheckByte (byte *base, int length, int sequence, unsigned 
 
 	return checksum;
 }
-#endif
+*/
 
 /*
 ====================

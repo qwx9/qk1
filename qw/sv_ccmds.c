@@ -1,12 +1,12 @@
 #include <u.h>
 #include <libc.h>
 #include <stdio.h>
-#include "qwsvdef.h"
+#include "quakedef.h"
 
 qboolean	sv_allow_cheats;
 
 int fp_messages=4, fp_persecond=4, fp_secondsdead=10;
-char fp_msg[255] = { 0 };
+char fp_msg[255];
 extern cvar_t cl_warncmd;
 	extern		redirect_t	sv_redirected;
 
@@ -32,7 +32,7 @@ void SV_SetMaster_f (void)
 	char	data[2];
 	int		i;
 
-	memset (&master_adr, 0, sizeof(master_adr));
+	memset (master_adr, 0, sizeof(master_adr));
 
 	for (i=1 ; i<Cmd_Argc() ; i++)
 	{
@@ -295,13 +295,13 @@ void SV_Map_f (void)
 	}
 	strcpy (level, Cmd_Argv(1));
 
-#if 0
+	/*
 	if (!strcmp (level, "e1m8"))
 	{	// QuakeWorld can't go to e1m8
 		SV_BroadcastPrintf (PRINT_HIGH, "can't go to low grav level in QuakeWorld...\n");
 		strcpy (level, "e1m5");
 	}
-#endif
+	*/
 
 	// check to make sure the level exists
 	sprintf (expanded, "maps/%s.bsp", level);
@@ -375,7 +375,7 @@ void SV_Status_f (void)
 	avg = 1000*svs.stats.latched_active / STATFRAMES;
 	pak = (float)svs.stats.latched_packets/ STATFRAMES;
 
-	Con_Printf ("net address      : %s\n",NET_AdrToString (net_local_adr));
+	Con_Printf ("net address      : %s\n",NET_AdrToString (laddr));
 	Con_Printf ("cpu utilization  : %3i%%\n",(int)cpu);
 	Con_Printf ("avg response time: %i ms\n",(int)avg);
 	Con_Printf ("packets/frame    : %5.2f (%d)\n", pak, num_prstr);
@@ -477,16 +477,16 @@ void SV_ConSay_f(void)
 	if (Cmd_Argc () < 2)
 		return;
 
-	Q_strcpy (text, "console: ");
+	strcpy (text, "console: ");
 	p = Cmd_Args();
 
 	if (*p == '"')
 	{
 		p++;
-		p[Q_strlen(p)-1] = 0;
+		p[strlen(p)-1] = 0;
 	}
 
-	Q_strcat(text, p);
+	strcat(text, p);
 
 	for (j = 0, client = svs.clients; j < MAX_CLIENTS; j++, client++)
 	{

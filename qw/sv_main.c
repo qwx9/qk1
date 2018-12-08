@@ -1,7 +1,7 @@
 #include <u.h>
 #include <libc.h>
 #include <stdio.h>
-#include "qwsvdef.h"
+#include "quakedef.h"
 
 quakeparms_t host_parms;
 
@@ -34,8 +34,6 @@ cvar_t	allow_download_skins = {"allow_download_skins", "1"};
 cvar_t	allow_download_models = {"allow_download_models", "1"};
 cvar_t	allow_download_sounds = {"allow_download_sounds", "1"};
 cvar_t	allow_download_maps = {"allow_download_maps", "1"};
-
-cvar_t sv_highchars = {"sv_highchars", "1"};
 
 cvar_t sv_phs = {"sv_phs", "1"};
 
@@ -79,6 +77,7 @@ Quake calls this before calling Sys_Quit or Sys_Error
 */
 void SV_Shutdown (void)
 {
+	killiop();
 	Master_Shutdown ();
 	if (sv_logfile)
 	{
@@ -537,7 +536,7 @@ void SVC_DirectConnect (void)
 	if (s[0] && strcmp(s, "0"))
 	{
 		if (spectator_password.string[0] && 
-			stricmp(spectator_password.string, "none") &&
+			cistrcmp(spectator_password.string, "none") &&
 			strcmp(spectator_password.string, s) )
 		{	// failed
 			Con_Printf ("%s:spectator password failed\n", NET_AdrToString (net_from));
@@ -552,7 +551,7 @@ void SVC_DirectConnect (void)
 	{
 		s = Info_ValueForKey (userinfo, "password");
 		if (password.string[0] && 
-			stricmp(password.string, "none") &&
+			cistrcmp(password.string, "none") &&
 			strcmp(password.string, s) )
 		{
 			Con_Printf ("%s:password failed\n", NET_AdrToString (net_from));
@@ -1050,10 +1049,8 @@ void SV_ReadPackets (void)
 {
 	int			i;
 	client_t	*cl;
-	qboolean	good;
 	int			qport;
 
-	good = false;
 	while (NET_GetPacket ())
 	{
 		if (SV_FilterPacket ())
@@ -1093,7 +1090,6 @@ void SV_ReadPackets (void)
 			if (Netchan_Process(&cl->netchan))
 			{	// this is a valid, sequenced packet, so process it
 				svs.stats.packets++;
-				good = true;
 				cl->send_message = true;	// reply at end of frame
 				if (cl->state != cs_zombie)
 					SV_ExecuteClientMessage (cl);
@@ -1479,7 +1475,7 @@ void SV_ExtractFromUserinfo (client_t *cl)
 		val = Info_ValueForKey (cl->userinfo, "name");
 	}
 
-	if (!val[0] || !stricmp(val, "console")) {
+	if (!val[0] || !cistrcmp(val, "console")) {
 		Info_SetValueForKey (cl->userinfo, "name", "unnamed", MAX_INFO_STRING);
 		val = Info_ValueForKey (cl->userinfo, "name");
 	}
@@ -1489,7 +1485,7 @@ void SV_ExtractFromUserinfo (client_t *cl)
 		for (i=0, client = svs.clients ; i<MAX_CLIENTS ; i++, client++) {
 			if (client->state != cs_spawned || client == cl)
 				continue;
-			if (!stricmp(client->name, val))
+			if (!cistrcmp(client->name, val))
 				break;
 		}
 		if (i != MAX_CLIENTS) { // dup name
@@ -1622,7 +1618,7 @@ void SV_Init (quakeparms_t *parms)
 
 	host_initialized = true;
 	
-	Con_Printf ("Exe: "__TIME__" "__DATE__"\n");
+	Con_Printf ("Exe: 00:00:00 Dec 17 1996\n");
 	Con_Printf ("%4.1f megabyte heap\n",parms->memsize/ (1024*1024.0));	
 
 	Con_Printf ("\nServer Version %4.2f\n\n", VERSION);

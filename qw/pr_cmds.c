@@ -1,7 +1,7 @@
 #include <u.h>
 #include <libc.h>
 #include <stdio.h>
-#include "qwsvdef.h"
+#include "quakedef.h"
 
 #define	RETURN_EDICT(e) (((int *)pr_globals)[OFS_RETURN] = EDICT_TO_PROG(e))
 #define	RETURN_STRING(s) (((int *)pr_globals)[OFS_RETURN] = PR_SetString(s))
@@ -1145,11 +1145,10 @@ void PF_aim (void)
 	int		i, j;
 	trace_t	tr;
 	float	dist, bestdist;
-	float	speed;
 	char	*noaim;
 
 	ent = G_EDICT(OFS_PARM0);
-	speed = G_FLOAT(OFS_PARM1);
+	/*float speed = G_FLOAT(OFS_PARM1);*/
 
 	VectorCopy (ent->v.origin, start);
 	start[2] += 20;
@@ -1283,9 +1282,7 @@ MESSAGE WRITING
 
 sizebuf_t *WriteDest (void)
 {
-	int		entnum;
 	int		dest;
-	edict_t	*ent;
 
 	dest = G_FLOAT(OFS_PARM0);
 	switch (dest)
@@ -1295,13 +1292,13 @@ sizebuf_t *WriteDest (void)
 	
 	case MSG_ONE:
 		SV_Error("Shouldn't be at MSG_ONE");
-#if 0
-		ent = PROG_TO_EDICT(pr_global_struct->msg_entity);
-		entnum = NUM_FOR_EDICT(ent);
+/*
+		edict *ent = PROG_TO_EDICT(pr_global_struct->msg_entity);
+		int entnum = NUM_FOR_EDICT(ent);
 		if (entnum < 1 || entnum > MAX_CLIENTS)
 			PR_RunError ("WriteDest: not a client");
 		return &svs.clients[entnum-1].netchan.message;
-#endif
+*/
 		
 	case MSG_ALL:
 		return &sv.reliable_datagram;

@@ -115,22 +115,16 @@ void Z_Free (void *ptr)
 	}
 }
 
-
-/*
-========================
-Z_Malloc
-========================
-*/
-void *Z_Malloc (int size)
+void *
+Z_Malloc(int size)
 {
-	void	*buf;
+	void *buf;
 	
-Z_CheckHeap ();	// DEBUG
-	buf = Z_TagMalloc (size, 1);
-	if (!buf)
-		Sys_Error ("Z_Malloc: failed on allocation of %i bytes",size);
-	Q_memset (buf, 0, size);
+	Z_CheckHeap();	// DEBUG
+	if((buf = Z_TagMalloc(size, 1)) == nil)
+		Sys_Error("Z_Malloc: failed on allocation of %d bytes", size);
 
+	memset(buf, 0, size);
 	return buf;
 }
 
@@ -392,12 +386,7 @@ void *Hunk_AllocName (int size, char *name)
 	size = sizeof(hunk_t) + ((size+15)&~15);
 	
 	if (hunk_size - hunk_low_used - hunk_high_used < size)
-//		Sys_Error ("Hunk_Alloc: failed on %i bytes",size);
-#ifdef _WIN32
-	  	Sys_Error ("Not enough RAM allocated.  Try starting using \"-heapsize 16000\" on the QuakeWorld command line.");
-#else
-	  	Sys_Error ("Not enough RAM allocated.  Try starting using \"-mem 16\" on the QuakeWorld command line.");
-#endif
+		Sys_Error ("Hunk_Alloc: failed on %i bytes",size);
 	
 	h = (hunk_t *)(hunk_base + hunk_low_used);
 	hunk_low_used += size;
@@ -408,7 +397,7 @@ void *Hunk_AllocName (int size, char *name)
 	
 	h->size = size;
 	h->sentinal = HUNK_SENTINAL;
-	Q_strncpy (h->name, name, 8);
+	strncpy(h->name, name, 8);
 	
 	return (void *)(h+1);
 }
@@ -499,7 +488,7 @@ void *Hunk_HighAllocName (int size, char *name)
 	memset (h, 0, size);
 	h->size = size;
 	h->sentinal = HUNK_SENTINAL;
-	Q_strncpy (h->name, name, 8);
+	strncpy(h->name, name, 8);
 
 	return (void *)(h+1);
 }
@@ -569,9 +558,9 @@ void Cache_Move ( cache_system_t *c)
 	{
 //		Con_Printf ("cache_move ok\n");
 
-		Q_memcpy ( new+1, c+1, c->size - sizeof(cache_system_t) );
+		memcpy(new+1, c+1, c->size - sizeof(cache_system_t));
 		new->user = c->user;
-		Q_memcpy (new->name, c->name, sizeof(new->name));
+		memcpy(new->name, c->name, sizeof(new->name));
 		Cache_Free (c->user);
 		new->user->data = (void *)(new+1);
 	}

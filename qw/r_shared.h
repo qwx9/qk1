@@ -1,18 +1,13 @@
-#ifndef GLQUAKE
-// r_shared.h: general refresh-related stuff shared between the refresh and the
-// driver
+// r_shared.h: general refresh-related stuff shared between the refresh and the driver
 
 // FIXME: clean up and move into d_iface.h
-
-#ifndef _R_SHARED_H_
-#define _R_SHARED_H_
 
 #define	MAXVERTS	16					// max points in a surface polygon
 #define MAXWORKINGVERTS	(MAXVERTS+4)	// max points in an intermediate
 										//  polygon (while processing)
 // !!! if this is changed, it must be changed in d_ifacea.h too !!!
-#define	MAXHEIGHT	1024
-#define	MAXWIDTH	1280
+#define	MAXHEIGHT	4096
+#define	MAXWIDTH	4096
 
 #define INFINITE_DISTANCE	0x10000		// distance that's always guaranteed to
 										//  be farther away than anything in
@@ -114,8 +109,7 @@ extern int	ubasestep, errorterm, erroradjustup, erroradjustdown;
 #define ALIAS_BOTTOM_CLIP			0x0008
 #define ALIAS_Z_CLIP				0x0010
 // !!! if this is changed, it must be changed in d_ifacea.h too !!!
-#define ALIAS_ONSEAM				0x0020	// also defined in modelgen.h;
-											//  must be kept in sync
+#define ALIAS_ONSEAM				0x0020
 #define ALIAS_XY_CLIP_MASK			0x000F
 
 // !!! if this is changed, it must be changed in asm_draw.h too !!!
@@ -129,7 +123,3 @@ typedef struct edge_s
 	float			nearzi;
 	medge_t			*owner;
 } edge_t;
-
-#endif	// _R_SHARED_H_
-
-#endif	// GLQUAKE

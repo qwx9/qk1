@@ -1,3 +1,5 @@
+// vid.h -- video driver defs
+
 #define VID_CBITS	6
 #define VID_GRADES	(1 << VID_CBITS)
 
@@ -35,8 +37,6 @@ typedef struct
 extern	viddef_t	vid;				// global video state
 extern	unsigned short	d_8to16table[256];
 extern	unsigned	d_8to24table[256];
-extern void (*vid_menudrawfn)(void);
-extern void (*vid_menukeyfn)(int key);
 
 void	VID_SetPalette (unsigned char *palette);
 // called at startup and after any gamma correction
@@ -64,8 +64,3 @@ void VID_HandlePause (qboolean pause);
 
 void VID_LockBuffer (void);
 void VID_UnlockBuffer (void);
-
-#ifdef GLQUAKE
-qboolean VID_Is8bit(void);
-#endif
-

@@ -59,8 +59,8 @@ CL_ClearTEnts
 */
 void CL_ClearTEnts (void)
 {
-	memset (&cl_beams, 0, sizeof(cl_beams));
-	memset (&cl_explosions, 0, sizeof(cl_explosions));
+	memset (cl_beams, 0, sizeof(cl_beams));
+	memset (cl_explosions, 0, sizeof(cl_explosions));
 }
 
 /*

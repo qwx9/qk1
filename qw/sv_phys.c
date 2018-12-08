@@ -1,11 +1,9 @@
 #include <u.h>
 #include <libc.h>
 #include <stdio.h>
-#include "qwsvdef.h"
+#include "quakedef.h"
 
 /*
-
-
 pushmove objects do not obey gravity, and do not interact with each other or trigger fields, but block normal movement and push normal objects when they move.
 
 onground is set for toss objects when they come to a complete rest.  it is set for steping or walking objects 
@@ -18,7 +16,6 @@ walking monsters are SOLID_SLIDEBOX and MOVETYPE_STEP
 flying/floating monsters are SOLID_SLIDEBOX and MOVETYPE_FLY
 
 solid_edge items only clip against bsp models.
-
 */
 
 cvar_t	sv_maxvelocity = {"sv_maxvelocity","2000"}; 
@@ -130,8 +127,6 @@ qboolean SV_RunThink (edict_t *ent)
 		if (ent->free)
 			return false;
 	} while (1);
-
-	return true;
 }
 
 /*

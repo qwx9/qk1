@@ -4,11 +4,9 @@
 #include <libc.h>
 #include <stdio.h>
 #include "quakedef.h"
-#include "d_local.h"
 
 #define NUM_MIPS	4
 
-cvar_t	d_subdiv16 = {"d_subdiv16", "1"};
 cvar_t	d_mipcap = {"d_mipcap", "0"};
 cvar_t	d_mipscale = {"d_mipscale", "1"};
 
@@ -31,10 +29,8 @@ D_Init
 */
 void D_Init (void)
 {
-
 	r_skydirect = 1;
 
-	Cvar_RegisterVariable (&d_subdiv16);
 	Cvar_RegisterVariable (&d_mipcap);
 	Cvar_RegisterVariable (&d_mipscale);
 
@@ -51,17 +47,13 @@ void D_Init (void)
 D_CopyRects
 ===============
 */
-void D_CopyRects (vrect_t *prects, int transparent)
+void D_CopyRects (vrect_t */*prects*/, int /*transparent*/)
 {
-
 // this function is only required if the CPU doesn't have direct access to the
 // back buffer, and there's some driver interface function that the driver
 // doesn't support and requires Quake to do in software (such as drawing the
 // console); Quake will then draw into wherever the driver points vid.buffer
 // and will call this function before swapping buffers
-
-	USED(prects);
-	USED(transparent);
 }
 
 
@@ -72,7 +64,6 @@ D_EnableBackBufferAccess
 */
 void D_EnableBackBufferAccess (void)
 {
-
 	VID_LockBuffer ();
 }
 
@@ -130,29 +121,16 @@ void D_SetupFrame (void)
 	for (i=0 ; i<(NUM_MIPS-1) ; i++)
 		d_scalemip[i] = basemip[i] * d_mipscale.value;
 
-#if	id386
-				if (d_subdiv16.value)
-					d_drawspans = D_DrawSpans16;
-				else
-					d_drawspans = D_DrawSpans8;
-#else
-				d_drawspans = D_DrawSpans8;
-#endif
-
+	d_drawspans = D_DrawSpans8;	/* no DrawSpans16 for non-asm heathens */
 	d_aflatcolor = 0;
 }
-
 
 /*
 ===============
 D_UpdateRects
 ===============
 */
-void D_UpdateRects (vrect_t *prect)
+void D_UpdateRects (vrect_t */*prect*/)
 {
-
 // the software driver draws these directly to the vid buffer
-
-	USED(prect);
 }
-

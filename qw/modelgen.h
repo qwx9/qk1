@@ -1,31 +1,8 @@
-//
 // modelgen.h: header file for model generation program
-//
-
-// *********************************************************
-// * This file must be identical in the modelgen directory *
-// * and in the Quake directory, because it's used to      *
-// * pass data from one to the other via model files.      *
-// *********************************************************
-
-#ifdef INCLUDELIBS
-
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
-#include <string.h>
-
-#include "cmdlib.h"
-#include "scriplib.h"
-#include "trilib.h"
-#include "lbmlib.h"
-#include "mathlib.h"
-
-#endif
 
 #define ALIAS_VERSION	6
 
-#define ALIAS_ONSEAM				0x0020
+#pragma pack on
 
 // must match definition in spritegn.h
 #ifndef SYNCTYPE_T
@@ -113,3 +90,4 @@ typedef struct {
 #define IDPOLYHEADER	(('O'<<24)+('P'<<16)+('D'<<8)+'I')
 														// little-endian "IDPO"
 
+#pragma pack off

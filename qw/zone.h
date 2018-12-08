@@ -1,7 +1,4 @@
-/*
- memory allocation
-
-
+/* memory allocation
 H_??? The hunk manages the entire memory block given to quake.  It must be
 contiguous.  Memory can be allocated from either the low or high end in a
 stack fashion.  The only way memory is released is by resetting one of the
@@ -59,9 +56,6 @@ startup hunk allocations
 Zone block
 
 ----- Bottom of Memory -----
-
-
-
 */
 
 void Memory_Init (void *buf, int size);
@@ -107,6 +101,3 @@ void *Cache_Alloc (cache_user_t *c, int size, char *name);
 // wasn't enough room.
 
 void Cache_Report (void);
-
-
-

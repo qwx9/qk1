@@ -3,7 +3,7 @@
 #include <u.h>
 #include <libc.h>
 #include <stdio.h>
-#include "qwsvdef.h"
+#include "quakedef.h"
 
 // check to see if client block will fit, if not, rotate buffers
 void ClientReliableCheckBlock(client_t *cl, int maxsize)

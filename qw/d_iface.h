@@ -115,11 +115,6 @@ extern spritedesc_t		r_spritedesc;
 extern zpointdesc_t		r_zpointdesc;
 extern polydesc_t		r_polydesc;
 
-extern int		d_con_indirect;	// if 0, Quake will draw console directly
-								//  to vid.buffer; if 1, Quake will
-								//  draw console via D_DrawRect. Must be
-								//  defined by driver
-
 extern vec3_t	r_pright, r_pup, r_ppn;
 
 

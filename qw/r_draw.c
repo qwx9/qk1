@@ -2,8 +2,6 @@
 #include <libc.h>
 #include <stdio.h>
 #include "quakedef.h"
-#include "r_local.h"
-#include "d_local.h"	// FIXME: shouldn't need to include this
 
 #define MAXLEFTCLIPEDGES		100
 
@@ -50,8 +48,6 @@ int				r_ceilv1;
 
 qboolean	r_lastvertvalid;
 
-
-#if	!id386
 
 /*
 ================
@@ -333,8 +329,6 @@ void R_ClipEdge (mvertex_t *pv0, mvertex_t *pv1, clipplane_t *clip)
 	R_EmitEdge (pv0, pv1);
 }
 
-#endif	// !id386
-
 
 /*
 ================
@@ -345,7 +339,7 @@ void R_EmitCachedEdge (void)
 {
 	edge_t		*pedge_t;
 
-	pedge_t = (edge_t *)((unsigned long)r_edges + r_pedge->cachededgeoffset);
+	pedge_t = (edge_t *)((uintptr)r_edges + r_pedge->cachededgeoffset);
 
 	if (!pedge_t->surfs[0])
 		pedge_t->surfs[0] = surface_p - surfaces;
@@ -432,9 +426,9 @@ void R_RenderFace (msurface_t *fa, int clipflags)
 				}
 				else
 				{
-					if ((((unsigned long)edge_p - (unsigned long)r_edges) >
+					if ((((uintptr)edge_p - (uintptr)r_edges) >
 						 r_pedge->cachededgeoffset) &&
-						(((edge_t *)((unsigned long)r_edges +
+						(((edge_t *)((uintptr)r_edges +
 						 r_pedge->cachededgeoffset))->owner == r_pedge))
 					{
 						R_EmitCachedEdge ();
@@ -478,9 +472,9 @@ void R_RenderFace (msurface_t *fa, int clipflags)
 				{
 				// it's cached if the cached edge is valid and is owned
 				// by this medge_t
-					if ((((unsigned long)edge_p - (unsigned long)r_edges) >
+					if ((((uintptr)edge_p - (uintptr)r_edges) >
 						 r_pedge->cachededgeoffset) &&
-						(((edge_t *)((unsigned long)r_edges +
+						(((edge_t *)((uintptr)r_edges +
 						 r_pedge->cachededgeoffset))->owner == r_pedge))
 					{
 						R_EmitCachedEdge ();
@@ -886,4 +880,3 @@ void R_ZDrawSubmodelPolys (model_t *pmodel)
 		}
 	}
 }
-

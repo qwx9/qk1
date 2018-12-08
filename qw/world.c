@@ -3,14 +3,12 @@
 #include <u.h>
 #include <libc.h>
 #include <stdio.h>
-#include "qwsvdef.h"
+#include "quakedef.h"
 
 /*
-
 entities never clip against themselves, or their owner
 
 line of sight checks trace->crosscontent, but bullets don't
-
 */
 
 
@@ -426,8 +424,6 @@ POINT TESTING IN HULLS
 ===============================================================================
 */
 
-#if	!id386
-
 /*
 ==================
 SV_HullPointContents
@@ -460,9 +456,6 @@ int SV_HullPointContents (hull_t *hull, int num, vec3_t p)
 	
 	return num;
 }
-
-#endif	// !id386
-
 
 /*
 ==================
@@ -560,18 +553,17 @@ qboolean SV_RecursiveHullCheck (hull_t *hull, int num, float p1f, float p2f, vec
 		t1 = DotProduct (plane->normal, p1) - plane->dist;
 		t2 = DotProduct (plane->normal, p2) - plane->dist;
 	}
-	
-#if 1
-	if (t1 >= 0 && t2 >= 0)
-		return SV_RecursiveHullCheck (hull, node->children[0], p1f, p2f, p1, p2, trace);
-	if (t1 < 0 && t2 < 0)
-		return SV_RecursiveHullCheck (hull, node->children[1], p1f, p2f, p1, p2, trace);
-#else
+
+	/*
 	if ( (t1 >= DIST_EPSILON && t2 >= DIST_EPSILON) || (t2 > t1 && t1 >= 0) )
 		return SV_RecursiveHullCheck (hull, node->children[0], p1f, p2f, p1, p2, trace);
 	if ( (t1 <= -DIST_EPSILON && t2 <= -DIST_EPSILON) || (t2 < t1 && t1 <= 0) )
 		return SV_RecursiveHullCheck (hull, node->children[1], p1f, p2f, p1, p2, trace);
-#endif
+	*/
+	if (t1 >= 0 && t2 >= 0)
+		return SV_RecursiveHullCheck (hull, node->children[0], p1f, p2f, p1, p2, trace);
+	if (t1 < 0 && t2 < 0)
+		return SV_RecursiveHullCheck (hull, node->children[1], p1f, p2f, p1, p2, trace);
 
 // put the crosspoint DIST_EPSILON pixels on the near side
 	if (t1 < 0)
@@ -594,10 +586,9 @@ qboolean SV_RecursiveHullCheck (hull_t *hull, int num, float p1f, float p2f, vec
 		return false;
 
 #ifdef PARANOID
-	if (SV_HullPointContents (sv_hullmodel, mid, node->children[side])
-	== CONTENTS_SOLID)
-	{
-		Con_Printf ("mid PointInHullSolid\n");
+//	if (SV_HullPointContents (sv_hullmodel, mid, node->children[side]) == CONTENTS_SOLID)
+	if(SV_HullPointContents(hull, node->children[side], mid) == CONTENTS_SOLID){
+		Con_Printf("mid PointInHullSolid\n");
 		return false;
 	}
 #endif
@@ -778,11 +769,11 @@ SV_MoveBounds
 */
 void SV_MoveBounds (vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end, vec3_t boxmins, vec3_t boxmaxs)
 {
-#if 0
-// debug to test against everything
-boxmins[0] = boxmins[1] = boxmins[2] = -9999;
-boxmaxs[0] = boxmaxs[1] = boxmaxs[2] = 9999;
-#else
+	/* debug to test against everything
+	boxmins[0] = boxmins[1] = boxmins[2] = -9999;
+	boxmaxs[0] = boxmaxs[1] = boxmaxs[2] = 9999;
+	*/
+
 	int		i;
 	
 	for (i=0 ; i<3 ; i++)
@@ -798,7 +789,6 @@ boxmaxs[0] = boxmaxs[1] = boxmaxs[2] = 9999;
 			boxmaxs[i] = start[i] + maxs[i] + 1;
 		}
 	}
-#endif
 }
 
 /*

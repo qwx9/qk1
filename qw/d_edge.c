@@ -2,7 +2,6 @@
 #include <libc.h>
 #include <stdio.h>
 #include "quakedef.h"
-#include "d_local.h"
 
 static int	miplevel;
 
@@ -104,13 +103,10 @@ D_CalcGradients
 */
 void D_CalcGradients (msurface_t *pface)
 {
-	mplane_t	*pplane;
 	float		mipscale;
 	vec3_t		p_temp1;
 	vec3_t		p_saxis, p_taxis;
 	float		t;
-
-	pplane = pface->plane;
 
 	mipscale = 1.0 / (float)(1 << miplevel);
 
@@ -177,11 +173,7 @@ void D_DrawSurfaces (void)
 			d_zistepv = s->d_zistepv;
 			d_ziorigin = s->d_ziorigin;
 
-#ifdef __alpha__
-			D_DrawSolidSurface (s, (int)((long)s->data & 0xFF));
-#else
-			D_DrawSolidSurface (s, (int)s->data & 0xFF);
-#endif
+			D_DrawSolidSurface (s, (uintptr)s->data & 0xFF);
 			D_DrawZSpans (s->spans);
 		}
 	}

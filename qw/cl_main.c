@@ -2,9 +2,13 @@
 
 #include <u.h>
 #include <libc.h>
+#include <ctype.h>
 #include <stdio.h>
 #include "quakedef.h"
 
+enum{
+	Iploopback	= 0x0100007f
+};
 
 // we need to declare some mouse variables here, because the menu system
 // references them even when on a unix system.
@@ -92,8 +96,6 @@ int			host_hunklevel;
 byte		*host_basepal;
 byte		*host_colormap;
 
-netadr_t	master_adr;				// address of the master server
-
 cvar_t	host_speeds = {"host_speeds","0"};			// set for running times
 cvar_t	show_fps = {"show_fps","0"};			// set for running times
 cvar_t	developer = {"developer","0"};
@@ -144,7 +146,7 @@ CL_Version_f
 void CL_Version_f (void)
 {
 	Con_Printf ("Version %4.2f\n", VERSION);
-	Con_Printf ("Exe: "__TIME__" "__DATE__"\n");
+	Con_Printf ("Exe: 00:00:00 Dec 17 1996\n");
 }
 
 
@@ -172,13 +174,6 @@ void CL_SendConnectPacket (void)
 	if (!NET_StringToAdr (cls.servername, &adr))
 	{
 		Con_Printf ("Bad server address\n");
-		connect_time = -1;
-		return;
-	}
-
-	if (!NET_IsClientLegal(&adr))
-	{
-		Con_Printf ("Illegal server address\n");
 		connect_time = -1;
 		return;
 	}
@@ -224,12 +219,6 @@ void CL_CheckForResend (void)
 	if (!NET_StringToAdr (cls.servername, &adr))
 	{
 		Con_Printf ("Bad server address\n");
-		connect_time = -1;
-		return;
-	}
-	if (!NET_IsClientLegal(&adr))
-	{
-		Con_Printf ("Illegal server address\n");
 		connect_time = -1;
 		return;
 	}
@@ -387,10 +376,6 @@ void CL_Disconnect (void)
 
 	connect_time = -1;
 
-#ifdef _WIN32
-	SetWindowText (mainwindow, "QuakeWorld: disconnected");
-#endif
-
 // stop sounds (especially looping!)
 	S_StopAllSounds (true);
 	
@@ -403,7 +388,7 @@ void CL_Disconnect (void)
 			CL_Stop_f ();
 
 		final[0] = clc_stringcmd;
-		strcpy (final+1, "drop");
+		strcpy((char *)final+1, "drop");
 		Netchan_Transmit (&cls.netchan, 6, final);
 		Netchan_Transmit (&cls.netchan, 6, final);
 		Netchan_Transmit (&cls.netchan, 6, final);
@@ -603,7 +588,7 @@ void CL_FullInfo_f (void)
 		if (*s)
 			s++;
 
-		if (!stricmp(key, pmodel_name) || !stricmp(key, emodel_name))
+		if (!cistrcmp(key, pmodel_name) || !cistrcmp(key, emodel_name))
 			continue;
 
 		Info_SetValueForKey (cls.userinfo, key, value, MAX_INFO_STRING);
@@ -629,7 +614,7 @@ void CL_SetInfo_f (void)
 		Con_Printf ("usage: setinfo [ <key> <value> ]\n");
 		return;
 	}
-	if (!stricmp(Cmd_Argv(1), pmodel_name) || !strcmp(Cmd_Argv(1), emodel_name))
+	if (!cistrcmp(Cmd_Argv(1), pmodel_name) || !strcmp(Cmd_Argv(1), emodel_name))
 		return;
 
 	Info_SetValueForKey (cls.userinfo, Cmd_Argv(1), Cmd_Argv(2), MAX_INFO_STRING);
@@ -810,16 +795,12 @@ void CL_ConnectionlessPacket (void)
 
 		Con_Printf ("client command\n");
 
-		if ((*(unsigned *)net_from.ip != *(unsigned *)net_local_adr.ip
-			&& *(unsigned *)net_from.ip != htonl(INADDR_LOOPBACK)) )
+		if ((*(unsigned *)net_from.ip != *(unsigned *)laddr.ip
+			&& *(unsigned *)net_from.ip != Iploopback) )
 		{
 			Con_Printf ("Command packet from remote host.  Ignored.\n");
 			return;
 		}
-#ifdef _WIN32
-		ShowWindow (mainwindow, SW_RESTORE);
-		SetForegroundWindow (mainwindow);
-#endif
 		s = MSG_ReadString ();
 
 		strncpy(cmdtext, s, sizeof(cmdtext) - 1);
@@ -879,7 +860,7 @@ void CL_ConnectionlessPacket (void)
 		data[4] = A2A_ACK;
 		data[5] = 0;
 		
-		NET_SendPacket (6, &data, net_from);
+		NET_SendPacket (6, data, net_from);
 		return;
 	}
 
@@ -892,14 +873,14 @@ void CL_ConnectionlessPacket (void)
 		return;
 	}
 
-#if 0
+/*
 	if (c == svc_disconnect) {
 		Con_Printf ("disconnect\n");
 
 		Host_EndGame ("Server disconnected");
 		return;
 	}
-#endif
+*/
 
 	Con_Printf ("unknown:  %c\n", c);
 }
@@ -1005,21 +986,6 @@ void CL_Download_f (void)
 	SZ_Print (&cls.netchan.message, va("download %s\n",Cmd_Argv(1)));
 }
 
-#ifdef _WINDOWS
-#include <windows.h>
-/*
-=================
-CL_Minimize_f
-=================
-*/
-void CL_Windows_f (void) {
-//	if (modestate == MS_WINDOWED)
-//		ShowWindow(mainwindow, SW_MINIMIZE);
-//	else
-		SendMessage(mainwindow, WM_SYSKEYUP, VK_TAB, 1 | (0x0F << 16) | (1<<29));
-}
-#endif
-
 /*
 =================
 CL_Init
@@ -1038,7 +1004,7 @@ void CL_Init (void)
 	Info_SetValueForKey (cls.userinfo, "bottomcolor", "0", MAX_INFO_STRING);
 	Info_SetValueForKey (cls.userinfo, "rate", "2500", MAX_INFO_STRING);
 	Info_SetValueForKey (cls.userinfo, "msg", "1", MAX_INFO_STRING);
-	sprintf (st, "%4.2f", VERSION);
+	sprint(st, "%4.2f", VERSION);
 	Info_SetValueForStarKey (cls.userinfo, "*ver", st, MAX_INFO_STRING);
 
 	CL_InitInput ();
@@ -1146,13 +1112,6 @@ void CL_Init (void)
 	Cmd_AddCommand ("say", NULL);
 	Cmd_AddCommand ("say_team", NULL);
 	Cmd_AddCommand ("serverinfo", NULL);
-
-//
-//  Windows commands
-//
-#ifdef _WINDOWS
-	Cmd_AddCommand ("windows", CL_Windows_f);
-#endif
 }
 
 
@@ -1242,7 +1201,6 @@ void Host_WriteConfiguration (void)
 
 //============================================================================
 
-#if 0
 /*
 ==================
 Host_SimulationTime
@@ -1250,6 +1208,7 @@ Host_SimulationTime
 This determines if enough time has passed to run a simulation frame
 ==================
 */
+/*
 qboolean Host_SimulationTime(float time)
 {
 	float fps;
@@ -1258,15 +1217,15 @@ qboolean Host_SimulationTime(float time)
 		oldrealtime = 0;
 
 	if (cl_maxfps.value)
-		fps = max(30.0, min(cl_maxfps.value, 72.0));
+		fps = Max(30.0, Min(cl_maxfps.value, 72.0));
 	else
-		fps = max(30.0, min(rate.value/80.0, 72.0));
+		fps = Max(30.0, Min(rate.value/80.0, 72.0));
 
 	if (!cls.timedemo && (realtime + time) - oldrealtime < 1.0/fps)
 		return false;			// framerate is too high
 	return true;
 }
-#endif
+*/
 
 
 /*
@@ -1293,9 +1252,9 @@ void Host_Frame (float time)
 		oldrealtime = 0;
 
 	if (cl_maxfps.value)
-		fps = max(30.0, min(cl_maxfps.value, 72.0));
+		fps = Max(30.0, Min(cl_maxfps.value, 72.0));
 	else
-		fps = max(30.0, min(rate.value/80.0, 72.0));
+		fps = Max(30.0, Min(rate.value/80.0, 72.0));
 
 	if (!cls.timedemo && realtime - oldrealtime < 1.0/fps)
 		return;			// framerate is too high
@@ -1394,11 +1353,11 @@ Host_Init
 */
 void Host_Init (quakeparms_t *parms)
 {
+	int p, port;
+
 	COM_InitArgv (parms->argc, parms->argv);
 	COM_AddParm ("-game");
 	COM_AddParm ("qw");
-
-	Sys_mkdir("qw");
 
 	if (COM_CheckParm ("-minmemory"))
 		parms->memsize = MINIMUM_MEMORY;
@@ -1416,8 +1375,15 @@ void Host_Init (quakeparms_t *parms)
 	COM_Init ();
 
 	Host_FixupModelNames();
-	
-	NET_Init (PORT_CLIENT);
+
+	port = PORT_CLIENT;
+	p = COM_CheckParm ("-cport");
+	if (p && p < com_argc)
+	{
+		port = atoi(com_argv[p+1]);
+		Con_Printf ("Client port: %i\n", port);
+	}
+	NET_Init (port);
 	Netchan_Init ();
 
 	W_LoadWadFile ("gfx.wad");
@@ -1425,47 +1391,28 @@ void Host_Init (quakeparms_t *parms)
 	Con_Init ();	
 	M_Init ();	
 	Mod_Init ();
-	
-//	Con_Printf ("Exe: "__TIME__" "__DATE__"\n");
-	Con_Printf ("%4.1f megs RAM used.\n",parms->memsize/ (1024*1024.0));
-	
+
+	Con_Printf ("%4.1f megs RAM used.\n", parms->memsize/(1024*1024.0));
+
 	R_InitTextures ();
- 
+
 	host_basepal = (byte *)COM_LoadHunkFile ("gfx/palette.lmp");
 	if (!host_basepal)
 		Sys_Error ("Couldn't load gfx/palette.lmp");
 	host_colormap = (byte *)COM_LoadHunkFile ("gfx/colormap.lmp");
 	if (!host_colormap)
 		Sys_Error ("Couldn't load gfx/colormap.lmp");
-#ifdef __linux__
+
 	IN_Init ();
 	CDAudio_Init ();
 	VID_Init (host_basepal);
 	Draw_Init ();
 	SCR_Init ();
 	R_Init ();
-
-//	S_Init ();		// S_Init is now done as part of VID. Sigh.
-	
+	S_Init ();
 	cls.state = ca_disconnected;
 	Sbar_Init ();
 	CL_Init ();
-#else
-	VID_Init (host_basepal);
-	Draw_Init ();
-	SCR_Init ();
-	R_Init ();
-//	S_Init ();		// S_Init is now done as part of VID. Sigh.
-#ifdef GLQUAKE
-	S_Init();
-#endif
-
-	cls.state = ca_disconnected;
-	CDAudio_Init ();
-	Sbar_Init ();
-	CL_Init ();
-	IN_Init ();
-#endif
 
 	Cbuf_InsertText ("exec quake.rc\n");
 	Cbuf_AddText ("echo Type connect <internet address> or use GameSpy to connect to a game.\n");

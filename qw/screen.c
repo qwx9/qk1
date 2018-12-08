@@ -4,7 +4,6 @@
 #include <libc.h>
 #include <stdio.h>
 #include "quakedef.h"
-#include "r_local.h"
 
 /*
 
@@ -155,7 +154,7 @@ void SCR_EraseCenterString (void)
 		y = 48;
 
 	scr_copytop = 1;
-	Draw_TileClear (0, y, vid.width, min(8*scr_erase_lines, vid.height - y - 1));
+	Draw_TileClear (0, y, vid.width, Min(8*scr_erase_lines, vid.height - y - 1));
 }
 
 void SCR_DrawCenterString (void)
@@ -593,11 +592,11 @@ void WritePCXfile (char *filename, byte *data, int width, int height,
 	pcx->ymax = LittleShort((short)(height-1));
 	pcx->hres = LittleShort((short)width);
 	pcx->vres = LittleShort((short)height);
-	Q_memset (pcx->palette,0,sizeof(pcx->palette));
+	memset(pcx->palette, 0, sizeof(pcx->palette));
 	pcx->color_planes = 1;		// chunky image
 	pcx->bytes_per_line = LittleShort((short)width);
 	pcx->palette_type = LittleShort(2);		// not a grey scale
-	Q_memset (pcx->filler,0,sizeof(pcx->filler));
+	memset(pcx->filler, 0, sizeof(pcx->filler));
 
 // pack the image
 	pack = &pcx->data;
@@ -683,9 +682,8 @@ Find closest color in the palette for named color
 */
 int MipColor(int r, int g, int b)
 {
-	int i;
+	int i, best = 0;
 	float dist;
-	int best;
 	float bestdist;
 	int r1, g1, b1;
 	static int lr = -1, lg = -1, lb = -1;
@@ -762,19 +760,16 @@ SCR_RSShot_f
 */  
 void SCR_RSShot_f (void) 
 { 
-	int     i, x, y;
+	int     x, y;
 	unsigned char		*src, *dest;
-	char		pcxname[80]; 
-	char		checkname[MAX_OSPATH];
-	unsigned char		*newbuf, *srcbuf;
-	int srcrowbytes;
+	char		pcxname[80];
+	unsigned char		*newbuf;
 	int w, h;
 	int dx, dy, dex, dey, nx;
 	int r, b, g;
 	int count;
 	float fracw, frach;
 	char st[80];
-	time_t now;
 
 	if (CL_IsUploading())
 		return; // already one pending
@@ -791,7 +786,7 @@ void SCR_RSShot_f (void)
 
 	Con_Printf("Remote screen shot requested.\n");
 
-#if 0
+/*
 // 
 // find a file name to save it to 
 // 
@@ -810,7 +805,7 @@ void SCR_RSShot_f (void)
 		Con_Printf ("SCR_ScreenShot_f: Couldn't create a PCX"); 
 		return;
 	}
-#endif
+*/
  
 // 
 // save the pcx file 
@@ -857,8 +852,7 @@ void SCR_RSShot_f (void)
 		}
 	}
 
-	time(&now);
-	strcpy(st, ctime(&now));
+	strcpy(st, ctime(time(nil)));
 	st[strlen(st) - 1] = 0;
 	SCR_DrawStringToSnap (st, newbuf, w - strlen(st)*8, 0, w);
 
@@ -996,15 +990,6 @@ void SCR_UpdateScreen (void)
 
 	if (scr_disabled_for_loading)
 		return;
-
-#ifdef _WIN32
-	{	// don't suck up any cpu if minimized
-		extern int Minimized;
-
-		if (Minimized)
-			return;
-	}
-#endif
 
 	scr_copytop = 0;
 	scr_copyeverything = 0;

@@ -3,7 +3,7 @@
 #include <u.h>
 #include <libc.h>
 #include <stdio.h>
-#include "qwsvdef.h"
+#include "quakedef.h"
 
 dprograms_t		*progs;
 dfunction_t		*pr_functions;
@@ -219,7 +219,7 @@ dfunction_t *ED_FindFunction (char *name)
 
 eval_t *GetEdictFieldValue(edict_t *ed, char *field)
 {
-	ddef_t			*def = NULL;
+	ddef_t			*def;
 	int				i;
 	static int		rep = 0;
 

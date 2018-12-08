@@ -1,12 +1,4 @@
-//
 // spritegn.h: header file for sprite generation program
-//
-
-// **********************************************************
-// * This file must be identical in the spritegen directory *
-// * and in the Quake directory, because it's used to       *
-// * pass data from one to the other via .spr files.        *
-// **********************************************************
 
 //-------------------------------------------------------
 // This program generates .spr sprite package files.
@@ -23,22 +15,6 @@
 // <endrepeat>
 //-------------------------------------------------------
 
-#ifdef INCLUDELIBS
-
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
-#include <string.h>
-
-#include "cmdlib.h"
-#include "scriplib.h"
-#include "dictlib.h"
-#include "trilib.h"
-#include "lbmlib.h"
-#include "mathlib.h"
-
-#endif
-
 #define SPRITE_VERSION	1
 
 // must match definition in modelgen.h
@@ -46,6 +22,8 @@
 #define SYNCTYPE_T
 typedef enum {ST_SYNC=0, ST_RAND } synctype_t;
 #endif
+
+#pragma pack on
 
 // TODO: shorten these?
 typedef struct {
@@ -89,3 +67,4 @@ typedef struct {
 #define IDSPRITEHEADER	(('P'<<24)+('S'<<16)+('D'<<8)+'I')
 														// little-endian "IDSP"
 
+#pragma pack off

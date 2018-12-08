@@ -2,10 +2,8 @@
 #include <libc.h>
 #include <stdio.h>
 #include "quakedef.h"
-#include "r_local.h"
 
-#if 0
-// FIXME
+/* FIXME
 the complex cases add new polys on most lines, so dont optimize for keeping them the same
 have multiple free span lists to try to get better coherence?
 low depth complexity -- 1 to 3 or so
@@ -13,7 +11,7 @@ low depth complexity -- 1 to 3 or so
 this breaks spans at every edge, even hidden ones (bad)
 
 have a sentinal at both ends?
-#endif
+*/
 
 
 edge_t	*auxedges;
@@ -140,8 +138,6 @@ void R_BeginEdgeFrame (void)
 }
 
 
-#if	!id386
-
 /*
 ==============
 R_InsertNewEdges
@@ -183,10 +179,6 @@ addedge:
 	} while ((edgestoadd = next_edge) != NULL);
 }
 
-#endif	// !id386
-	
-
-#if	!id386
 
 /*
 ==============
@@ -203,10 +195,6 @@ void R_RemoveEdges (edge_t *pedge)
 	} while ((pedge = pedge->nextremove) != NULL);
 }
 
-#endif	// !id386
-
-
-#if	!id386
 
 /*
 ==============
@@ -273,15 +261,13 @@ pushback:
 	}
 }
 
-#endif	// !id386
-
 
 /*
 ==============
 R_CleanupSpan
 ==============
 */
-void R_CleanupSpan ()
+void R_CleanupSpan (void)
 {
 	surf_t	*surf;
 	int		iu;
@@ -431,8 +417,6 @@ void R_TrailingEdge (surf_t *surf, edge_t *edge)
 	}
 }
 
-
-#if	!id386
 
 /*
 ==============
@@ -598,8 +582,6 @@ void R_GenerateSpans (void)
 	R_CleanupSpan ();
 }
 
-#endif	// !id386
-
 
 /*
 ==============
@@ -650,7 +632,7 @@ void R_ScanEdges (void)
 	surf_t	*s;
 
 	basespan_p = (espan_t *)
-			((long)(basespans + CACHE_SIZE - 1) & ~(CACHE_SIZE - 1));
+			((uintptr)(basespans + CACHE_SIZE - 1) & ~(CACHE_SIZE - 1));
 	max_span_p = &basespan_p[MAXSPANS - r_refdef.vrect.width];
 
 	span_p = basespan_p;
@@ -748,5 +730,3 @@ void R_ScanEdges (void)
 	else
 		D_DrawSurfaces ();
 }
-
-

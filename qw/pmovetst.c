@@ -203,18 +203,17 @@ qboolean PM_RecursiveHullCheck (hull_t *hull, int num, float p1f, float p2f, vec
 		t1 = DotProduct (plane->normal, p1) - plane->dist;
 		t2 = DotProduct (plane->normal, p2) - plane->dist;
 	}
-	
-#if 1
-	if (t1 >= 0 && t2 >= 0)
-		return PM_RecursiveHullCheck (hull, node->children[0], p1f, p2f, p1, p2, trace);
-	if (t1 < 0 && t2 < 0)
-		return PM_RecursiveHullCheck (hull, node->children[1], p1f, p2f, p1, p2, trace);
-#else
+
+/*
 	if ( (t1 >= DIST_EPSILON && t2 >= DIST_EPSILON) || (t2 > t1 && t1 >= 0) )
 		return PM_RecursiveHullCheck (hull, node->children[0], p1f, p2f, p1, p2, trace);
 	if ( (t1 <= -DIST_EPSILON && t2 <= -DIST_EPSILON) || (t2 < t1 && t1 <= 0) )
 		return PM_RecursiveHullCheck (hull, node->children[1], p1f, p2f, p1, p2, trace);
-#endif
+*/
+	if (t1 >= 0 && t2 >= 0)
+		return PM_RecursiveHullCheck (hull, node->children[0], p1f, p2f, p1, p2, trace);
+	if (t1 < 0 && t2 < 0)
+		return PM_RecursiveHullCheck (hull, node->children[1], p1f, p2f, p1, p2, trace);
 
 // put the crosspoint DIST_EPSILON pixels on the near side
 	if (t1 < 0)
@@ -237,10 +236,9 @@ qboolean PM_RecursiveHullCheck (hull_t *hull, int num, float p1f, float p2f, vec
 		return false;
 
 #ifdef PARANOID
-	if (PM_HullPointContents (pm_hullmodel, mid, node->children[side])
-	== CONTENTS_SOLID)
-	{
-		Con_Printf ("mid PointInHullSolid\n");
+//	if (PM_HullPointContents (pm_hullmodel, mid, node->children[side]) == CONTENTS_SOLID)
+	if(PM_HullPointContents(hull, node->children[side], mid) == CONTENTS_SOLID){
+		Con_Printf("mid PointInHullSolid\n");
 		return false;
 	}
 #endif

@@ -4,9 +4,6 @@
 #include <libc.h>
 #include <stdio.h>
 #include "quakedef.h"
-#include "r_local.h"
-#include "d_local.h"	// FIXME: shouldn't be needed (is needed for patch
-						// right now, but that should move)
 
 #define LIGHT_MIN	5		// lowest light value we'll allow, to avoid the
 							//  need for inner-loop light clamping
@@ -433,8 +430,6 @@ void R_AliasTransformFinalVert (finalvert_t *fv, auxvert_t *av,
 }
 
 
-#if	!id386
-
 /*
 ================
 R_AliasTransformAndProjectFinalVerts
@@ -486,8 +481,6 @@ void R_AliasTransformAndProjectFinalVerts (finalvert_t *fv, stvert_t *pstverts)
 		fv->v[4] = temp;
 	}
 }
-
-#endif
 
 
 /*
@@ -709,7 +702,7 @@ void R_AliasDrawModel (alight_t *plighting)
 
 // cache align
 	pfinalverts = (finalvert_t *)
-			(((long)&finalverts[0] + CACHE_SIZE - 1) & ~(CACHE_SIZE - 1));
+			(((uintptr)&finalverts[0] + CACHE_SIZE - 1) & ~(CACHE_SIZE - 1));
 	pauxverts = &auxverts[0];
 
 	paliashdr = (aliashdr_t *)Mod_Extradata (currententity->model);
@@ -727,15 +720,7 @@ void R_AliasDrawModel (alight_t *plighting)
 			r_recursiveaffinetriangles;
 
 	if (r_affinetridesc.drawtype)
-	{
 		D_PolysetUpdateTables ();		// FIXME: precalc...
-	}
-	else
-	{
-#if id386
-		D_Aff8Patch (currententity->colormap);
-#endif
-	}
 
 	acolormap = currententity->colormap;
 
@@ -749,4 +734,3 @@ void R_AliasDrawModel (alight_t *plighting)
 	else
 		R_AliasPreparePoints ();
 }
-

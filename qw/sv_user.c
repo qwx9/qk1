@@ -3,7 +3,7 @@
 #include <u.h>
 #include <libc.h>
 #include <stdio.h>
-#include "qwsvdef.h"
+#include "quakedef.h"
 
 edict_t	*sv_player;
 
@@ -408,8 +408,8 @@ SV_Begin_f
 */
 void SV_Begin_f (void)
 {
-	unsigned pmodel = 0, emodel = 0;
-	int		i;
+	int i;
+	uint pmodel, emodel;
 
 	if (host_client->state == cs_spawned)
 		return; // don't begin again
@@ -478,8 +478,7 @@ void SV_Begin_f (void)
 		SV_ClientPrintf(host_client, PRINT_HIGH, "Server is paused.\n");
 	}
 
-#if 0
-//
+/*
 // send a fixangle over the reliable channel to make sure it gets there
 // Never send a roll angle, because savegames can catch the server
 // in a state where it is expecting the client to correct the angle
@@ -490,7 +489,7 @@ void SV_Begin_f (void)
 	for (i=0 ; i < 2 ; i++)
 		MSG_WriteAngle (&host_client->netchan.message, ent->v.angles[i] );
 	MSG_WriteAngle (&host_client->netchan.message, 0 );
-#endif
+*/
 }
 
 //=============================================================================
@@ -557,11 +556,8 @@ SV_NextUpload
 */
 void SV_NextUpload (void)
 {
-	byte	buffer[1024];
-	int		r;
 	int		percent;
 	int		size;
-	client_t *client;
 
 	if (!*host_client->uploadfn) {
 		SV_ClientPrintf(host_client, PRINT_HIGH, "Upload denied\n");
@@ -762,11 +758,11 @@ void SV_Say (qboolean team)
 	if (*p == '"')
 	{
 		p++;
-		p[Q_strlen(p)-1] = 0;
+		p[strlen(p)-1] = 0;
 	}
 
-	Q_strcat(text, p);
-	Q_strcat(text, "\n");
+	strcat(text, p);
+	strcat(text, "\n");
 
 	Sys_Printf ("%s", text);
 
@@ -898,8 +894,6 @@ SV_Pause_f
 */
 void SV_Pause_f (void)
 {
-	int i;
-	client_t *cl;
 	char st[sizeof(host_client->name) + 32];
 
 	if (!pausable.value) {
@@ -1430,26 +1424,16 @@ void SV_RunCmd (usercmd_t *ucmd)
 		pmove_mins[i] = pmove.origin[i] - 256;
 		pmove_maxs[i] = pmove.origin[i] + 256;
 	}
-#if 1
-	AddLinksToPmove ( sv_areanodes );
-#else
-	AddAllEntsToPmove ();
-#endif
+	AddLinksToPmove ( sv_areanodes );	/*AddAllEntsToPmove ();*/
 
-#if 0
-{
-	int before, after;
-
-before = PM_TestPlayerPosition (pmove.origin);
+	/*
+	int before = PM_TestPlayerPosition (pmove.origin);
 	PlayerMove ();
-after = PM_TestPlayerPosition (pmove.origin);
-
-if (sv_player->v.health > 0 && before && !after )
-	Con_Printf ("player %s got stuck in playermove!!!!\n", host_client->name);
-}
-#else
+	int after = PM_TestPlayerPosition (pmove.origin);
+	if (sv_player->v.health > 0 && before && !after )
+		Con_Printf ("player %s got stuck in playermove!!!!\n", host_client->name);
+	*/
 	PlayerMove ();
-#endif
 
 	host_client->oldbuttons = pmove.oldbuttons;
 	sv_player->v.teleport_time = pmove.waterjumptime;
@@ -1465,13 +1449,11 @@ if (sv_player->v.health > 0 && before && !after )
 	for (i=0 ; i<3 ; i++)
 		sv_player->v.origin[i] = pmove.origin[i] - (sv_player->v.mins[i] - player_mins[i]);
 
-#if 0
-	// truncate velocity the same way the net protocol will
+	/* truncate velocity the same way the net protocol will
 	for (i=0 ; i<3 ; i++)
 		sv_player->v.velocity[i] = (int)pmove.velocity[i];
-#else
+	*/
 	VectorCopy (pmove.velocity, sv_player->v.velocity);
-#endif
 
 	VectorCopy (pmove.angles, sv_player->v.v_angle);
 

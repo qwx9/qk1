@@ -2,7 +2,6 @@
 #include <libc.h>
 #include <stdio.h>
 #include "quakedef.h"
-#include "r_local.h"
 
 static int				clip_current;
 static vec5_t			clip_verts[2][MAXWORKINGVERTS];
@@ -69,7 +68,7 @@ int R_ClipSpriteFace (int nump, clipplane_t *pclipplane)
 	
 // handle wraparound case
 	dists[nump] = dists[0];
-	Q_memcpy (instep, in, sizeof (vec5_t));
+	memcpy (instep, in, sizeof (vec5_t));
 
 
 // clip the winding
@@ -80,7 +79,7 @@ int R_ClipSpriteFace (int nump, clipplane_t *pclipplane)
 	{
 		if (dists[i] >= 0)
 		{
-			Q_memcpy (outstep, instep, sizeof (vec5_t));
+			memcpy (outstep, instep, sizeof (vec5_t));
 			outstep += sizeof (vec5_t) / sizeof (float);
 			outcount++;
 		}
@@ -115,7 +114,7 @@ int R_ClipSpriteFace (int nump, clipplane_t *pclipplane)
 R_SetupAndDrawSprite
 ================
 */
-void R_SetupAndDrawSprite ()
+void R_SetupAndDrawSprite (void)
 {
 	int			i, nump;
 	float		dot, scale, *pv;
@@ -200,7 +199,7 @@ void R_SetupAndDrawSprite ()
 		scale = yscale * pout->zi;
 		pout->v = (ycenter - scale * transformed[1]);
 
-		pv += sizeof (vec5_t) / sizeof (pv);
+		pv += sizeof (vec5_t) / sizeof (*pv);
 	}
 
 // draw it
@@ -380,4 +379,3 @@ void R_DrawSprite (void)
 
 	R_SetupAndDrawSprite ();
 }
-

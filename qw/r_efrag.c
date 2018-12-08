@@ -2,7 +2,6 @@
 #include <libc.h>
 #include <stdio.h>
 #include "quakedef.h"
-#include "r_local.h"
 
 mnode_t	*r_pefragtopnode;
 

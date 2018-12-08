@@ -196,7 +196,7 @@ qboolean CL_GetDemoMessage (void)
 		cls.netchan.outgoing_sequence++;
 		for (i=0 ; i<3 ; i++)
 		{
-			r = fread (&f, 4, 1, cls.demofile);
+			fread (&f, 4, 1, cls.demofile);
 			cl.viewangles[i] = LittleFloat (f);
 		}
 		break;
@@ -361,7 +361,7 @@ void CL_Record_f (void)
 	int		c;
 	char	name[MAX_OSPATH];
 	sizebuf_t	buf;
-	char	buf_data[MAX_MSGLEN];
+	uchar	buf_data[MAX_MSGLEN];
 	int n, i, j;
 	char *s;
 	entity_t *ent;
@@ -618,7 +618,7 @@ void CL_Record_f (void)
 		}
 	}
 
-#if 0
+/*
 	MSG_WriteByte (&buf, svc_updatestatlong);
 	MSG_WriteByte (&buf, STAT_TOTALMONSTERS);
 	MSG_WriteLong (&buf, cl.stats[STAT_TOTALMONSTERS]);
@@ -630,18 +630,16 @@ void CL_Record_f (void)
 	MSG_WriteByte (&buf, svc_updatestatlong);
 	MSG_WriteByte (&buf, STAT_MONSTERS);
 	MSG_WriteLong (&buf, cl.stats[STAT_MONSTERS]);
-#endif
+*/
 
 	// get the client to check and download skins
 	// when that is completed, a begin command will be issued
 	MSG_WriteByte (&buf, svc_stufftext);
 	MSG_WriteString (&buf, va("skins\n") );
 
-	CL_WriteRecordDemoMessage (&buf, seq++);
+	CL_WriteRecordDemoMessage (&buf, seq);
 
 	CL_WriteSetDemoMessage();
-
-	// done
 }
 
 /*

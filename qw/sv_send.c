@@ -3,7 +3,7 @@
 #include <u.h>
 #include <libc.h>
 #include <stdio.h>
-#include "qwsvdef.h"
+#include "quakedef.h"
 
 #define CHAN_AUTO   0
 #define CHAN_WEAPON 1
@@ -334,7 +334,6 @@ void SV_StartSound (edict_t *entity, int channel, char *sample, int volume,
     float attenuation)
 {       
     int         sound_num;
-    int			field_mask;
     int			i;
 	int			ent;
 	vec3_t		origin;
@@ -379,7 +378,6 @@ void SV_StartSound (edict_t *entity, int channel, char *sample, int volume,
 
 	channel = (ent<<3) | channel;
 
-	field_mask = 0;
 	if (volume != DEFAULT_SOUND_PACKET_VOLUME)
 		channel |= SND_VOLUME;
 	if (attenuation != DEFAULT_SOUND_PACKET_ATTENUATION)
@@ -670,11 +668,6 @@ void SV_UpdateToReliableMessages (void)
 	SZ_Clear (&sv.datagram);
 }
 
-#ifdef _WIN32
-#pragma optimize( "", off )
-#endif
-
-
 
 /*
 =======================
@@ -762,11 +755,6 @@ void SV_SendClientMessages (void)
 			
 	}
 }
-
-#ifdef _WIN32
-#pragma optimize( "", on )
-#endif
-
 
 
 /*

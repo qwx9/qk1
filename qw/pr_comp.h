@@ -1,5 +1,3 @@
-// this file is shared by quake and qcc
-
 typedef int	func_t;
 typedef int	string_t;
 
@@ -97,6 +95,7 @@ enum {
 	OP_BITOR
 };
 
+#pragma pack on
 
 typedef struct statement_s
 {
@@ -158,3 +157,4 @@ typedef struct
 	int		entityfields;
 } dprograms_t;
 
+#pragma pack off

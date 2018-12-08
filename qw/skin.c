@@ -231,9 +231,6 @@ void Skin_NextDownload (void)
 		if (!sc->name[0])
 			continue;
 		Skin_Cache (sc->skin);
-#ifdef GLQUAKE
-		sc->skin = NULL;
-#endif
 	}
 
 	if (cls.state != ca_active)

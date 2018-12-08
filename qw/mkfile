@@ -1,11 +1,11 @@
 </$objtype/mkfile
+
 BIN=$home/bin/$objtype
 TARG=\
 	qwcl\
 	qwsv\
 
 CLOBJ=\
-	cl_cam.$O\
 	cl_demo.$O\
 	cl_ents.$O\
 	cl_input.$O\
@@ -13,6 +13,7 @@ CLOBJ=\
 	cl_parse.$O\
 	cl_pred.$O\
 	cl_tent.$O\
+	cl_cam.$O\
 	cmd.$O\
 	common.$O\
 	console.$O\
@@ -31,18 +32,15 @@ CLOBJ=\
 	d_vars.$O\
 	d_zpoint.$O\
 	draw.$O\
-	in.$O\
 	keys.$O\
 	mathlib.$O\
 	md4.$O\
 	menu.$O\
 	model.$O\
 	net_chan.$O\
-	net_udp.$O\
 	nonintel.$O\
 	pmove.$O\
 	pmovetst.$O\
-	qwcl.$O\
 	r_aclip.$O\
 	r_alias.$O\
 	r_bsp.$O\
@@ -60,44 +58,48 @@ CLOBJ=\
 	sbar.$O\
 	screen.$O\
 	skin.$O\
-	snd.$O\
 	snd_dma.$O\
 	snd_mem.$O\
 	snd_mix.$O\
-	sys.$O\
-	vid.$O\
 	view.$O\
 	wad.$O\
 	zone.$O\
+	cd.$O\
+	vid.$O\
+	snd.$O\
+	in.$O\
+	sys.$O\
+	net_udp.$O\
+	qwcl.$O\
 
 SVOBJ=\
+	pr_cmds.$O\
+	pr_edict.$O\
+	pr_exec.$O\
+	sv_init.$O\
+	sv_main.$O\
+	sv_nchan.$O\
+	sv_ents.$O\
+	sv_send.$O\
+	sv_move.$O\
+	sv_phys.$O\
+	sv_user.$O\
+	sv_ccmds.$O\
+	world.$O\
+	svmodel.$O\
 	cmd.$O\
 	common.$O\
 	crc.$O\
 	cvar.$O\
 	mathlib.$O\
 	md4.$O\
-	net_chan.$O\
-	net_udp.$O\
+	zone.$O\
 	pmove.$O\
 	pmovetst.$O\
-	pr_cmds.$O\
-	pr_edict.$O\
-	pr_exec.$O\
-	qwsv.$O\
-	sv_ccmds.$O\
-	sv_ents.$O\
-	sv_init.$O\
-	sv_main.$O\
-	sv_move.$O\
-	sv_nchan.$O\
-	sv_phys.$O\
-	sv_send.$O\
-	sv_user.$O\
-	svmodel.$O\
+	net_chan.$O\
 	sys.$O\
-	world.$O\
-	zone.$O\
+	net_udp.$O\
+	qwsv.$O\
 
 HFILES=\
 	../adivtab.h\

@@ -4,7 +4,6 @@
 #include <libc.h>
 #include <stdio.h>
 #include "quakedef.h"
-#include "d_local.h"
 
 
 /*
@@ -27,9 +26,6 @@ void D_StartParticles (void)
 {
 // not used by software driver
 }
-
-
-#if	!id386
 
 /*
 ==============
@@ -186,6 +182,3 @@ void D_DrawParticle (particle_t *pparticle)
 		break;
 	}
 }
-
-#endif	// !id386
-

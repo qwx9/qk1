@@ -2,21 +2,15 @@
 
 #include <u.h>
 #include <libc.h>
-#include <stdio.h>
 
 /* POINTER defines a generic pointer type */
-typedef unsigned char *POINTER;
+typedef uchar *POINTER;
 
 /* UINT2 defines a two byte word */
-typedef unsigned short int UINT2;
+typedef ushort UINT2;
 
 /* UINT4 defines a four byte word */
-#ifdef __alpha__
-typedef unsigned int UINT4;
-#else
-typedef unsigned long int UINT4;
-#endif
-
+typedef ulong UINT4;
   
 /* MD4.H - header file for MD4C.C */
 

@@ -1,6 +1,4 @@
-/* ZOID
- *
- * Player camera tracking in Spectator mode
+/* Player camera tracking in Spectator mode
  *
  * This takes over player controls for spectator automatic camera.
  * Player moves as a spectator, but the camera tracks and enemy player
@@ -118,13 +116,13 @@ void Cam_Lock(int playernum)
 
 pmtrace_t Cam_DoTrace(vec3_t vec1, vec3_t vec2)
 {
-#if 0
+/*
 	memset(&pmove, 0, sizeof(pmove));
 
 	pmove.numphysent = 1;
 	VectorCopy (vec3_origin, pmove.physents[0].origin);
 	pmove.physents[0].model = cl.worldmodel;
-#endif
+*/
 
 	VectorCopy (vec1, pmove.origin);
 	return PM_PlayerMove(pmove.origin, vec2);
@@ -342,7 +340,7 @@ void Cam_Track(usercmd_t *cmd)
 
 		VectorCopy(player->viewangles, cl.viewangles);
 		VectorCopy(player->origin, desired_position);
-		if (memcmp(&desired_position, &self->origin, sizeof(desired_position)) != 0) {
+		if (memcmp(desired_position, self->origin, sizeof(desired_position)) != 0) {
 			MSG_WriteByte (&cls.netchan.message, clc_tmove);
 			MSG_WriteCoord (&cls.netchan.message, desired_position[0]);
 			MSG_WriteCoord (&cls.netchan.message, desired_position[1]);
@@ -374,7 +372,7 @@ void Cam_Track(usercmd_t *cmd)
 	}
 }
 
-#if 0
+/*
 static float adjustang(float current, float ideal, float speed)
 {
 	float move;
@@ -410,9 +408,9 @@ static float adjustang(float current, float ideal, float speed)
 //Con_Printf("c/i: %4.2f/%4.2f move: %4.2f\n", current, ideal, move);
 	return anglemod (current + move);
 }
-#endif
+*/
 
-#if 0
+/*
 void Cam_SetView(void)
 {
 	return;
@@ -443,7 +441,7 @@ void Cam_SetView(void)
 	VectorCopy(cam_viewangles, cl.viewangles);
 	VectorCopy(cl.viewangles, cl.simangles);
 }
-#endif
+*/
 
 void Cam_FinishMove(usercmd_t *cmd)
 {
@@ -457,7 +455,7 @@ void Cam_FinishMove(usercmd_t *cmd)
 	if (!cl.spectator) // only in spectator mode
 		return;
 
-#if 0
+/*
 	if (autocam && locked) {
 		frame = &cl.frames[cls.netchan.incoming_sequence & UPDATE_MASK];
 		player = frame->playerstate + spec_track;
@@ -477,7 +475,7 @@ void Cam_FinishMove(usercmd_t *cmd)
 		}
 		VectorCopy(cam_viewangles, cl.viewangles);
 	}
-#endif
+*/
 
 	if (cmd->buttons & BUTTON_ATTACK) {
 		if (!(oldbuttons & BUTTON_ATTACK)) {

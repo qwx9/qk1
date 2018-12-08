@@ -1,11 +1,9 @@
 // r_vars.c: global refresh variables
 
-#if	!id386
-
 #include <u.h>
 #include <libc.h>
 #include <stdio.h>
-#include	"quakedef.h"
+#include "quakedef.h"
 
 // all global and static refresh variables are collected in a contiguous block
 // to avoid cache conflicts.
@@ -29,6 +27,3 @@ pixel_t			*d_viewbuffer;
 short			*d_pzbuffer;
 unsigned int	d_zrowbytes;
 unsigned int	d_zwidth;
-
-#endif	// !id386
-

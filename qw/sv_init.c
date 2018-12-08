@@ -1,7 +1,7 @@
 #include <u.h>
 #include <libc.h>
 #include <stdio.h>
-#include "qwsvdef.h"
+#include "quakedef.h"
 
 server_static_t	svs;				// persistant server info
 server_t		sv;					// local server

@@ -5,13 +5,10 @@
 #include <stdio.h>
 #include "quakedef.h"
 
-#ifdef _WIN32
-#endif
-
 void S_Play(void);
 void S_PlayVol(void);
 void S_SoundList(void);
-void S_Update_();
+void S_Update_(void);
 void S_StopAllSounds(qboolean clear);
 void S_StopAllSoundsC(void);
 
@@ -133,9 +130,7 @@ void S_Startup (void)
 
 		if (!rc)
 		{
-#ifndef	_WIN32
 			Con_Printf("S_Startup: SNDDMA_Init failed.\n");
-#endif
 			sound_started = 0;
 			return;
 		}
@@ -234,19 +229,16 @@ void S_Init (void)
 void S_Shutdown(void)
 {
 
-	if (!sound_started)
+	if(!sound_started)
 		return;
 
-	if (shm)
+	if(shm != nil)
 		shm->gamealive = 0;
 
+	if(!fakedma)
+		SNDDMA_Shutdown();
 	shm = 0;
 	sound_started = 0;
-
-	if (!fakedma)
-	{
-		SNDDMA_Shutdown();
-	}
 }
 
 
@@ -265,18 +257,16 @@ sfx_t *S_FindName (char *name)
 	int		i;
 	sfx_t	*sfx;
 
-	if (!name)
+	if(name == nil)
 		Sys_Error ("S_FindName: NULL\n");
 
-	if (Q_strlen(name) >= MAX_QPATH)
+	if(strlen(name) >= MAX_QPATH)
 		Sys_Error ("Sound name too long: %s", name);
 
 // see if already loaded
 	for (i=0 ; i < num_sfx ; i++)
-		if (!Q_strcmp(known_sfx[i].name, name))
-		{
+		if(!strcmp(known_sfx[i].name, name))
 			return &known_sfx[i];
-		}
 
 	if (num_sfx == MAX_SFX)
 		Sys_Error ("S_FindName: out of sfx_t");
@@ -387,7 +377,6 @@ void SND_Spatialize(channel_t *ch)
     vec_t dist;
     vec_t lscale, rscale, scale;
     vec3_t source_vec;
-	sfx_t *snd;
 
 // anything coming from the view entity will allways be full volume
 	if (ch->entnum == cl.viewentity)
@@ -399,7 +388,6 @@ void SND_Spatialize(channel_t *ch)
 
 // calculate stereo seperation and distance attenuation
 
-	snd = ch->sfx;
 	VectorSubtract(ch->origin, listener_origin, source_vec);
 	
 	dist = VectorNormalize(source_vec) * ch->dist_mult;
@@ -531,7 +519,7 @@ void S_StopAllSounds(qboolean clear)
 		if (channels[i].sfx)
 			channels[i].sfx = NULL;
 
-	Q_memset(channels, 0, MAX_CHANNELS * sizeof(channel_t));
+	memset(channels, 0, MAX_CHANNELS * sizeof(channel_t));
 
 	if (clear)
 		S_ClearBuffer ();
@@ -546,11 +534,7 @@ void S_ClearBuffer (void)
 {
 	int		clear;
 		
-#ifdef _WIN32
-	if (!sound_started || !shm || (!shm->buffer && !pDSBuf))
-#else
 	if (!sound_started || !shm || !shm->buffer)
-#endif
 		return;
 
 	if (shm->samplebits == 8)
@@ -558,43 +542,7 @@ void S_ClearBuffer (void)
 	else
 		clear = 0;
 
-#ifdef _WIN32
-	if (pDSBuf)
-	{
-		DWORD	dwSize;
-		DWORD	*pData;
-		int		reps;
-		HRESULT	hresult;
-
-		reps = 0;
-
-		while ((hresult = pDSBuf->lpVtbl->Lock(pDSBuf, 0, gSndBufSize, &pData, &dwSize, NULL, NULL, 0)) != DS_OK)
-		{
-			if (hresult != DSERR_BUFFERLOST)
-			{
-				Con_Printf ("S_ClearBuffer: DS::Lock Sound Buffer Failed\n");
-				S_Shutdown ();
-				return;
-			}
-
-			if (++reps > 10000)
-			{
-				Con_Printf ("S_ClearBuffer: DS: couldn't restore buffer\n");
-				S_Shutdown ();
-				return;
-			}
-		}
-
-		Q_memset(pData, clear, shm->samples * shm->samplebits/8);
-
-		pDSBuf->lpVtbl->Unlock(pDSBuf, pData, dwSize, NULL, 0);
-	
-	}
-	else
-#endif
-	{
-		Q_memset(shm->buffer, clear, shm->samples * shm->samplebits/8);
-	}
+	memset(shm->buffer, clear, shm->samples * shm->samplebits/8);
 }
 
 
@@ -824,11 +772,6 @@ void GetSoundtime(void)
 
 void S_ExtraUpdate (void)
 {
-
-#ifdef _WIN32
-	IN_Accumulate ();
-#endif
-
 	if (snd_noextraupdate.value)
 		return;		// don't pollute timings
 	S_Update_();
@@ -860,25 +803,6 @@ void S_Update_(void)
 	if (endtime - soundtime > samps)
 		endtime = soundtime + samps;
 
-#ifdef _WIN32
-// if the buffer was lost or stopped, restore it and/or restart it
-	{
-		DWORD	dwStatus;
-
-		if (pDSBuf)
-		{
-			if (pDSBuf->lpVtbl->GetStatus (pDSBuf, &dwStatus) != DD_OK)
-				Con_Printf ("Couldn't get sound buffer status\n");
-			
-			if (dwStatus & DSBSTATUS_BUFFERLOST)
-				pDSBuf->lpVtbl->Restore (pDSBuf);
-			
-			if (!(dwStatus & DSBSTATUS_PLAYING))
-				pDSBuf->lpVtbl->Play(pDSBuf, 0, 0, DSBPLAY_LOOPING);
-		}
-	}
-#endif
-
 	S_PaintChannels (endtime);
 
 	SNDDMA_Submit ();
@@ -902,13 +826,13 @@ void S_Play(void)
 	i = 1;
 	while (i<Cmd_Argc())
 	{
-		if (!Q_strrchr(Cmd_Argv(i), '.'))
+		if(strrchr(Cmd_Argv(i), '.') == nil)
 		{
-			Q_strcpy(name, Cmd_Argv(i));
-			Q_strcat(name, ".wav");
+			strcpy(name, Cmd_Argv(i));
+			strcat(name, ".wav");
 		}
 		else
-			Q_strcpy(name, Cmd_Argv(i));
+			strcpy(name, Cmd_Argv(i));
 		sfx = S_PrecacheSound(name);
 		S_StartSound(hash++, 0, sfx, listener_origin, 1.0, 1.0);
 		i++;
@@ -926,13 +850,13 @@ void S_PlayVol(void)
 	i = 1;
 	while (i<Cmd_Argc())
 	{
-		if (!Q_strrchr(Cmd_Argv(i), '.'))
+		if(strrchr(Cmd_Argv(i), '.') == nil)
 		{
-			Q_strcpy(name, Cmd_Argv(i));
-			Q_strcat(name, ".wav");
+			strcpy(name, Cmd_Argv(i));
+			strcat(name, ".wav");
 		}
 		else
-			Q_strcpy(name, Cmd_Argv(i));
+			strcpy(name, Cmd_Argv(i));
 		sfx = S_PrecacheSound(name);
 		vol = Q_atof(Cmd_Argv(i+1));
 		S_StartSound(hash++, 0, sfx, listener_origin, vol, 1.0);

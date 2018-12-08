@@ -1,15 +1,7 @@
-#ifndef __MODEL__
-#define __MODEL__
-
-#include "modelgen.h"
-#include "spritegn.h"
-
 /*
-
-d*_t structures are on-disk representations
-m*_t structures are in-memory
-
-*/
+ * d*_t structures are on-disk representations
+ * m*_t structures are in-memory
+ */
 
 // entity effects
 
@@ -378,5 +370,3 @@ void	Mod_TouchModel (char *name);
 
 mleaf_t *Mod_PointInLeaf (float *p, model_t *model);
 byte	*Mod_LeafPVS (mleaf_t *leaf, model_t *model);
-
-#endif	// __MODEL__

@@ -1,5 +1,4 @@
-// draw.c -- this is the only file outside the refresh that touches the
-// vid buffer
+// draw.c -- this is the only file outside the refresh that touches the vid buffer
 
 #include <u.h>
 #include <libc.h>
@@ -346,7 +345,7 @@ void Draw_Pic (int x, int y, qpic_t *pic)
 
 		for (v=0 ; v<pic->height ; v++)
 		{
-			Q_memcpy (dest, source, pic->width);
+			memcpy (dest, source, pic->width);
 			dest += vid.rowbytes;
 			source += pic->width;
 		}
@@ -397,7 +396,7 @@ void Draw_SubPic(int x, int y, qpic_t *pic, int srcx, int srcy, int width, int h
 
 		for (v=0 ; v<height ; v++)
 		{
-			Q_memcpy (dest, source, width);
+			memcpy (dest, source, width);
 			dest += vid.rowbytes;
 			source += pic->width;
 		}
@@ -645,11 +644,7 @@ void Draw_ConsoleBackground (int lines)
 		sprintf (ver, "%4.2f", VERSION);
 		dest = conback->data + 320 + 320*186 - 11 - 8*strlen(ver);
 	} else {
-#if defined(__linux__)
-		sprintf (ver, "Linux (%4.2f) QuakeWorld %4.2f", LINUX_VERSION, VERSION);
-#else
-		sprintf (ver, "QuakeWorld %4.2f", VERSION);
-#endif
+		sprint(ver, "(9) %4.2f QuakeWorld %4.2f", PLAN9_VERSION, VERSION);
 		dest = conback->data + 320 - (strlen(ver)*8 + 11) + 320*186;
 	}
 

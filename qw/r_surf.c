@@ -4,7 +4,6 @@
 #include <libc.h>
 #include <stdio.h>
 #include "quakedef.h"
-#include "r_local.h"
 
 drawsurf_t	r_drawsurf;
 
@@ -300,7 +299,6 @@ void R_DrawSurface (void)
 
 //=============================================================================
 
-#if	!id386
 
 /*
 ================
@@ -543,13 +541,11 @@ void R_DrawSurfaceBlock16 (void)
 		pbasesource += sourcetstep;
 		lightright += lightrightstep;
 		lightleft += lightleftstep;
-		prowdest = (unsigned short *)((long)prowdest + surfrowbytes);
+		prowdest = (ushort *)((uintptr)prowdest + surfrowbytes);
 	}
 
 	prowdestbase = prowdest;
 }
-
-#endif
 
 
 //============================================================================

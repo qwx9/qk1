@@ -1,8 +1,5 @@
 // sound.h -- client sound i/o functions
 
-#ifndef __SOUND__
-#define __SOUND__
-
 // !!! if this is changed, it much be changed in asm_i386.h too !!!
 typedef struct
 {
@@ -151,5 +148,3 @@ void SNDDMA_Submit(void);
 
 void S_AmbientOff (void);
 void S_AmbientOn (void);
-
-#endif

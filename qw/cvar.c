@@ -3,11 +3,7 @@
 #include <u.h>
 #include <libc.h>
 #include <stdio.h>
-#ifdef SERVERONLY 
-#include "qwsvdef.h"
-#else
 #include "quakedef.h"
-#endif
 
 cvar_t	*cvar_vars;
 char	*cvar_null_string = "";
@@ -22,7 +18,7 @@ cvar_t *Cvar_FindVar (char *var_name)
 	cvar_t	*var;
 	
 	for (var=cvar_vars ; var ; var=var->next)
-		if (!Q_strcmp (var_name, var->name))
+		if (!strcmp (var_name, var->name))
 			return var;
 
 	return NULL;
@@ -70,7 +66,7 @@ char *Cvar_CompleteVariable (char *partial)
 	cvar_t		*cvar;
 	int			len;
 	
-	len = Q_strlen(partial);
+	len = strlen(partial);
 	
 	if (!len)
 		return NULL;
@@ -82,16 +78,12 @@ char *Cvar_CompleteVariable (char *partial)
 
 	// check partial match
 	for (cvar=cvar_vars ; cvar ; cvar=cvar->next)
-		if (!Q_strncmp (partial,cvar->name, len))
+		if (!strncmp (partial,cvar->name, len))
 			return cvar->name;
 
 	return NULL;
 }
 
-
-#ifdef SERVERONLY
-void SV_SendServerInfoChange(char *key, char *value);
-#endif
 
 /*
 ============
@@ -109,29 +101,24 @@ void Cvar_Set (char *var_name, char *value)
 		return;
 	}
 
-#ifdef SERVERONLY
-	if (var->info)
-	{
-		Info_SetValueForKey (svs.info, var_name, value, MAX_SERVERINFO_STRING);
-		SV_SendServerInfoChange(var_name, value);
-//		SV_BroadcastCommand ("fullserverinfo \"%s\"\n", svs.info);
-	}
-#else
-	if (var->info)
-	{
-		Info_SetValueForKey (cls.userinfo, var_name, value, MAX_INFO_STRING);
-		if (cls.state >= ca_connected)
-		{
-			MSG_WriteByte (&cls.netchan.message, clc_stringcmd);
-			SZ_Print (&cls.netchan.message, va("setinfo \"%s\" \"%s\"\n", var_name, value));
+	if(var->info){
+		if(svonly){
+			Info_SetValueForKey(svs.info, var_name, value, MAX_SERVERINFO_STRING);
+			SV_SendServerInfoChange(var_name, value);
+//			SV_BroadcastCommand("fullserverinfo \"%s\"\n", svs.info);
+		}else{
+			Info_SetValueForKey(cls.userinfo, var_name, value, MAX_INFO_STRING);
+			if(cls.state >= ca_connected){
+				MSG_WriteByte(&cls.netchan.message, clc_stringcmd);
+				SZ_Print(&cls.netchan.message, va("setinfo \"%s\" \"%s\"\n", var_name, value));
+			}
 		}
 	}
-#endif
 	
 	Z_Free (var->string);	// free the old value string
 	
-	var->string = Z_Malloc (Q_strlen(value)+1);
-	Q_strcpy (var->string, value);
+	var->string = Z_Malloc (strlen(value)+1);
+	strcpy (var->string, value);
 	var->value = Q_atof (var->string);
 }
 

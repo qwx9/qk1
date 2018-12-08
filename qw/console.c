@@ -23,8 +23,6 @@ float		con_times[NUM_CON_TIMES];	// realtime time the line was generated
 int			con_vislines;
 int			con_notifylines;		// scan lines to clear for notify lines
 
-qboolean	con_debuglog;
-
 #define		MAXCMDLINE	256
 extern	char	key_lines[32][MAXCMDLINE];
 extern	int		edit_line;
@@ -87,8 +85,8 @@ Con_Clear_f
 */
 void Con_Clear_f (void)
 {
-	Q_memset (con_main.text, ' ', CON_TEXTSIZE);
-	Q_memset (con_chat.text, ' ', CON_TEXTSIZE);
+	memset (con_main.text, ' ', CON_TEXTSIZE);
+	memset (con_chat.text, ' ', CON_TEXTSIZE);
 }
 
 						
@@ -149,7 +147,7 @@ void Con_Resize (console_t *con)
 		width = 38;
 		con_linewidth = width;
 		con_totallines = CON_TEXTSIZE / con_linewidth;
-		Q_memset (con->text, ' ', CON_TEXTSIZE);
+		memset (con->text, ' ', CON_TEXTSIZE);
 	}
 	else
 	{
@@ -167,8 +165,8 @@ void Con_Resize (console_t *con)
 		if (con_linewidth < numchars)
 			numchars = con_linewidth;
 
-		Q_memcpy (tbuf, con->text, CON_TEXTSIZE);
-		Q_memset (con->text, ' ', CON_TEXTSIZE);
+		memcpy (tbuf, con->text, CON_TEXTSIZE);
+		memset (con->text, ' ', CON_TEXTSIZE);
 
 		for (i=0 ; i<numlines ; i++)
 		{
@@ -209,8 +207,6 @@ Con_Init
 */
 void Con_Init (void)
 {
-	con_debuglog = COM_CheckParm("-condebug");
-
 	con = &con_main;
 	con_linewidth = -1;
 	Con_CheckResize ();
@@ -242,7 +238,7 @@ void Con_Linefeed (void)
 	if (con->display == con->current)
 		con->display++;
 	con->current++;
-	Q_memset (&con->text[(con->current%con_totallines)*con_linewidth]
+	memset (&con->text[(con->current%con_totallines)*con_linewidth]
 	, ' ', con_linewidth);
 }
 
@@ -344,10 +340,6 @@ void Con_Printf (char *fmt, ...)
 	
 // also echo to debugging console
 	Sys_Printf ("%s", msg);	// also echo to debugging console
-
-// log all messages to file
-	if (con_debuglog)
-		Sys_DebugLog(va("%s/qconsole.log",com_gamedir), "%s", msg);
 		
 	if (!con_initialized)
 		return;
@@ -409,7 +401,6 @@ The input line scrolls horizontally if typing goes beyond the right edge
 */
 void Con_DrawInput (void)
 {
-	int		y;
 	int		i;
 	char	*text;
 
@@ -430,7 +421,7 @@ void Con_DrawInput (void)
 		text += 1 + key_linepos - con_linewidth;
 		
 // draw it
-	y = con_vislines-22;
+	//int y = con_vislines-22;
 
 	for (i=0 ; i<con_linewidth ; i++)
 		Draw_Character ( (i+1)<<3, con_vislines - 22, text[i]);
@@ -586,7 +577,7 @@ void Con_DrawConsole (int lines)
 			strcpy(dlbar, text);
 		strcat(dlbar, ": ");
 		i = strlen(dlbar);
-		dlbar[i++] = '\x80';
+		dlbar[i++] = 0x80;
 		// where's the dot go?
 		if (cls.downloadpercent == 0)
 			n = 0;
@@ -595,10 +586,10 @@ void Con_DrawConsole (int lines)
 			
 		for (j = 0; j < y; j++)
 			if (j == n)
-				dlbar[i++] = '\x83';
+				dlbar[i++] = 0x83;
 			else
-				dlbar[i++] = '\x81';
-		dlbar[i++] = '\x82';
+				dlbar[i++] = 0x81;
+		dlbar[i++] = 0x82;
 		dlbar[i] = 0;
 
 		sprintf(dlbar + strlen(dlbar), " %02d%%", cls.downloadpercent);
