@@ -5,14 +5,16 @@
 #include "quakedef.h"
 
 mainstacksize = 512*1024;
-Channel *fuckchan;
-
 
 /* FIXME: stupid-ass linking kludges */
 server_static_t	svs;
-qboolean ServerPaused(void){return 0;}
-void SV_SendServerInfoChange(char *, char *){}
-
+qboolean ServerPaused(void)
+{
+	return 0;
+}
+void SV_SendServerInfoChange(char *, char *)
+{
+}
 
 static void
 croak(void *, char *note)

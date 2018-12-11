@@ -7,8 +7,6 @@
 #include <keyboard.h>
 #include "quakedef.h"
 
-extern Channel *fuckchan;	/* main fuck receptor */
-
 /* vid_9.c */
 extern int resized;
 extern Point center;

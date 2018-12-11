@@ -1544,7 +1544,7 @@ void PF_infokey (void)
 			value = Info_ValueForKey(localinfo, key);
 	} else if (e1 <= MAX_CLIENTS) {
 		if (!strcmp(key, "ip"))
-			value = strcpy(ov, NET_BaseAdrToString (svs.clients[e1-1].netchan.remote_address));
+			value = strcpy(ov, svs.clients[e1-1].netchan.remote_address.addr);
 		else if (!strcmp(key, "ping")) {
 			int ping = SV_CalcPing (&svs.clients[e1-1]);
 			sprintf(ov, "%d", ping);

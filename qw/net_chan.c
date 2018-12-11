@@ -85,7 +85,7 @@ Netchan_OutOfBand
 Sends an out-of-band datagram
 ================
 */
-void Netchan_OutOfBand (netadr_t adr, int length, byte *data)
+void Netchan_OutOfBand (netadr_t *adr, int length, byte *data)
 {
 	sizebuf_t	send;
 	byte		send_buf[MAX_MSGLEN + PACKET_HEADER];
@@ -111,7 +111,7 @@ Netchan_OutOfBandPrint
 Sends a text message in an out-of-band datagram
 ================
 */
-void Netchan_OutOfBandPrint (netadr_t adr, char *format, ...)
+void Netchan_OutOfBandPrint (netadr_t *adr, char *format, ...)
 {
 	va_list		argptr;
 	static char		string[8192];		// ??? why static?
@@ -132,11 +132,12 @@ Netchan_Setup
 called to open a channel to a remote system
 ==============
 */
-void Netchan_Setup (netchan_t *chan, netadr_t adr, int qport)
+void Netchan_Setup (netchan_t *chan, netadr_t *adr, int qport)
 {
 	memset (chan, 0, sizeof(*chan));
-	
-	chan->remote_address = adr;
+
+	if(adr != nil)
+		memcpy(&chan->remote_address, adr, sizeof *adr);
 	chan->last_received = realtime;
 	
 	chan->message.data = chan->message_buf;
@@ -202,7 +203,7 @@ void Netchan_Transmit (netchan_t *chan, int length, byte *data)
 	{
 		chan->fatal_error = true;
 		Con_Printf ("%s:Outgoing message overflow\n"
-			, NET_AdrToString (chan->remote_address));
+			, chan->remote_address.addr);
 		return;
 	}
 
@@ -258,7 +259,7 @@ void Netchan_Transmit (netchan_t *chan, int length, byte *data)
 
 	//zoid, no input in demo playback mode
 	if(svonly || !cls.demoplayback)
-		NET_SendPacket (send.cursize, send.data, chan->remote_address);
+		NET_SendPacket (send.cursize, send.data, &chan->remote_address);
 
 	if (chan->cleartime < realtime)
 		chan->cleartime = realtime + send.cursize*chan->rate;
@@ -291,7 +292,7 @@ qboolean Netchan_Process (netchan_t *chan)
 	unsigned		reliable_ack, reliable_message;
 	int			qport;
 
-	if((svonly || !cls.demoplayback) && !NET_CompareAdr(net_from, chan->remote_address))
+	if((svonly || !cls.demoplayback) && !NET_CompareAdr(net_from, &chan->remote_address))
 		return false;
 
 // get sequence numbers		
@@ -319,35 +320,6 @@ qboolean Netchan_Process (netchan_t *chan)
 			, reliable_ack
 			, net_message.cursize);
 
-/* get a rate estimation
-	if (chan->outgoing_sequence - sequence_ack < MAX_LATENT)
-	{
-		int				i;
-		double			time, rate;
-	
-		i = sequence_ack & (MAX_LATENT - 1);
-		time = realtime - chan->outgoing_time[i];
-		time -= 0.1;	// subtract 100 ms
-		if (time <= 0)
-		{	// gotta be a digital link for <100 ms ping
-			if (chan->rate > 1.0/5000)
-				chan->rate = 1.0/5000;
-		}
-		else
-		{
-			if (chan->outgoing_size[i] < 512)
-			{	// only deal with small messages
-				rate = chan->outgoing_size[i]/time;
-				if (rate > 5000)
-					rate = 5000;
-				rate = 1.0/rate;
-				if (chan->rate > rate)
-					chan->rate = rate;
-			}
-		}
-	}
-*/
-
 //
 // discard stale or duplicated packets
 //
@@ -355,7 +327,7 @@ qboolean Netchan_Process (netchan_t *chan)
 	{
 		if (showdrop.value)
 			Con_Printf ("%s:Out of order packet %i at %i\n"
-				, NET_AdrToString (chan->remote_address)
+				, chan->remote_address.addr
 				,  sequence
 				, chan->incoming_sequence);
 		return false;
@@ -371,7 +343,7 @@ qboolean Netchan_Process (netchan_t *chan)
 
 		if (showdrop.value)
 			Con_Printf ("%s:Dropped %i packets at %i\n"
-			, NET_AdrToString (chan->remote_address)
+			, chan->remote_address.addr
 			, sequence-(chan->incoming_sequence+1)
 			, sequence);
 	}
@@ -406,4 +378,3 @@ qboolean Netchan_Process (netchan_t *chan)
 
 	return true;
 }
-

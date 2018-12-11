@@ -404,7 +404,7 @@ void SVC_Log (void)
 		return;
 	}
 
-	Con_DPrintf ("sending log %i to %s\n", svs.logsequence-1, NET_AdrToString(net_from));
+	Con_DPrintf ("sending log %i to %s\n", svs.logsequence-1, net_from->sys);
 
 	sprintf (data, "stdlog %i\n", svs.logsequence-1);
 	strcat (data, (char *)svs.log_buf[((svs.logsequence-1)&1)]);
@@ -451,7 +451,7 @@ void SVC_GetChallenge (void)
 	// see if we already have a challenge for this ip
 	for (i = 0 ; i < MAX_CHALLENGES ; i++)
 	{
-		if (NET_CompareBaseAdr (net_from, svs.challenges[i].adr))
+		if (NET_CompareBaseAdr (net_from, &svs.challenges[i].adr))
 			break;
 		if (svs.challenges[i].time < oldestTime)
 		{
@@ -464,7 +464,7 @@ void SVC_GetChallenge (void)
 	{
 		// overwrite the oldest
 		svs.challenges[oldest].challenge = (rand() << 16) ^ rand();
-		svs.challenges[oldest].adr = net_from;
+		svs.challenges[oldest].adr = *net_from;
 		svs.challenges[oldest].time = realtime;
 		i = oldest;
 	}
@@ -517,7 +517,7 @@ void SVC_DirectConnect (void)
 	// see if the challenge is valid
 	for (i=0 ; i<MAX_CHALLENGES ; i++)
 	{
-		if (NET_CompareBaseAdr (net_from, svs.challenges[i].adr))
+		if (NET_CompareBaseAdr (net_from, &svs.challenges[i].adr))
 		{
 			if (challenge == svs.challenges[i].challenge)
 				break;		// good
@@ -539,7 +539,7 @@ void SVC_DirectConnect (void)
 			cistrcmp(spectator_password.string, "none") &&
 			strcmp(spectator_password.string, s) )
 		{	// failed
-			Con_Printf ("%s:spectator password failed\n", NET_AdrToString (net_from));
+			Con_Printf ("%s:spectator password failed\n", net_from->sys);
 			Netchan_OutOfBandPrint (net_from, "%c\nrequires a spectator password\n\n", A2C_PRINT);
 			return;
 		}
@@ -554,7 +554,7 @@ void SVC_DirectConnect (void)
 			cistrcmp(password.string, "none") &&
 			strcmp(password.string, s) )
 		{
-			Con_Printf ("%s:password failed\n", NET_AdrToString (net_from));
+			Con_Printf ("%s:password failed\n", net_from->sys);
 			Netchan_OutOfBandPrint (net_from, "%c\nserver requires a password\n\n", A2C_PRINT);
 			return;
 		}
@@ -562,7 +562,7 @@ void SVC_DirectConnect (void)
 		Info_RemoveKey (userinfo, "password"); // remove passwd
 	}
 
-	adr = net_from;
+	adr = *net_from;
 	userid++;	// so every client gets a unique id
 
 	newcl = &temp;
@@ -586,17 +586,17 @@ void SVC_DirectConnect (void)
 	{
 		if (cl->state == cs_free)
 			continue;
-		if (NET_CompareBaseAdr (adr, cl->netchan.remote_address)
+		if (NET_CompareBaseAdr (&adr, &cl->netchan.remote_address)
 			&& ( cl->netchan.qport == qport 
-			|| adr.port == cl->netchan.remote_address.port ))
+			|| strcmp(adr.srv, cl->netchan.remote_address.srv) == 0))
 		{
 			if (cl->state == cs_connected) {
-				Con_Printf("%s:dup connect\n", NET_AdrToString (adr));
+				Con_Printf("%s:dup connect\n", adr.sys);
 				userid--;
 				return;
 			}
 
-			Con_Printf ("%s:reconnect\n", NET_AdrToString (adr));
+			Con_Printf ("%s:reconnect\n", adr.sys);
 			SV_DropClient (cl);
 			break;
 		}
@@ -625,8 +625,8 @@ void SVC_DirectConnect (void)
 	if ( (spectator && spectators >= (int)maxspectators.value)
 		|| (!spectator && clients >= (int)maxclients.value) )
 	{
-		Con_Printf ("%s:full connect\n", NET_AdrToString (adr));
-		Netchan_OutOfBandPrint (adr, "%c\nserver is full\n\n", A2C_PRINT);
+		Con_Printf ("%s:full connect\n", adr.sys);
+		Netchan_OutOfBandPrint (&adr, "%c\nserver is full\n\n", A2C_PRINT);
 		return;
 	}
 
@@ -652,11 +652,11 @@ void SVC_DirectConnect (void)
 	// this is the only place a client_t is ever initialized
 	*newcl = temp;
 
-	Netchan_OutOfBandPrint (adr, "%c", S2C_CONNECTION );
+	Netchan_OutOfBandPrint (&adr, "%c", S2C_CONNECTION );
 
 	edictnum = (newcl-svs.clients)+1;
 	
-	Netchan_Setup (&newcl->netchan , adr, qport);
+	Netchan_Setup (&newcl->netchan , &adr, qport);
 
 	newcl->state = cs_connected;
 
@@ -719,7 +719,7 @@ void SVC_RemoteCommand (void)
 
 	if (!Rcon_Validate ()) {
 		Con_Printf ("Bad rcon from %s:\n%s\n"
-			, NET_AdrToString (net_from), net_message.data+4);
+			, net_from->sys, net_message.data+4);
 
 		SV_BeginRedirect (RD_PACKET);
 
@@ -728,7 +728,7 @@ void SVC_RemoteCommand (void)
 	} else {
 
 		Con_Printf ("Rcon from %s:\n%s\n"
-			, NET_AdrToString (net_from), net_message.data+4);
+			, net_from->sys, net_message.data+4);
 
 		SV_BeginRedirect (RD_PACKET);
 
@@ -779,7 +779,7 @@ void SV_ConnectionlessPacket (void)
 	}
 	if (c[0] == A2A_ACK && (c[1] == 0 || c[1] == '\n') )
 	{
-		Con_Printf ("A2A_ACK from %s\n", NET_AdrToString (net_from));
+		Con_Printf ("A2A_ACK from %s\n", net_from->sys);
 		return;
 	}
 	else if (!strcmp(c,"status"))
@@ -806,7 +806,7 @@ void SV_ConnectionlessPacket (void)
 		SVC_RemoteCommand ();
 	else
 		Con_Printf ("bad connectionless packet from %s:\n%s\n"
-		, NET_AdrToString (net_from), s);
+		, net_from->sys, s);
 }
 
 /*
@@ -840,66 +840,12 @@ If 0, then only addresses matching the list will be allowed.  This lets you easi
 ==============================================================================
 */
 
-
-typedef struct
-{
-	unsigned	mask;
-	unsigned	compare;
-} ipfilter_t;
-
 #define	MAX_IPFILTERS	1024
 
-ipfilter_t	ipfilters[MAX_IPFILTERS];
+netadr_t ipfilters[MAX_IPFILTERS];
 int			numipfilters;
 
 cvar_t	filterban = {"filterban", "1"};
-
-/*
-=================
-StringToFilter
-=================
-*/
-qboolean StringToFilter (char *s, ipfilter_t *f)
-{
-	char	num[128];
-	int		i, j;
-	byte	b[4];
-	byte	m[4];
-	
-	for (i=0 ; i<4 ; i++)
-	{
-		b[i] = 0;
-		m[i] = 0;
-	}
-	
-	for (i=0 ; i<4 ; i++)
-	{
-		if (*s < '0' || *s > '9')
-		{
-			Con_Printf ("Bad filter address: %s\n", s);
-			return false;
-		}
-		
-		j = 0;
-		while (*s >= '0' && *s <= '9')
-		{
-			num[j++] = *s++;
-		}
-		num[j] = 0;
-		b[i] = atoi(num);
-		if (b[i] != 0)
-			m[i] = 255;
-
-		if (!*s)
-			break;
-		s++;
-	}
-	
-	f->mask = *(unsigned *)m;
-	f->compare = *(unsigned *)b;
-	
-	return true;
-}
 
 /*
 =================
@@ -909,22 +855,14 @@ SV_AddIP_f
 void SV_AddIP_f (void)
 {
 	int		i;
-	
-	for (i=0 ; i<numipfilters ; i++)
-		if (ipfilters[i].compare == 0xffffffff)
-			break;		// free spot
-	if (i == numipfilters)
-	{
-		if (numipfilters == MAX_IPFILTERS)
-		{
-			Con_Printf ("IP filter list is full\n");
-			return;
-		}
-		numipfilters++;
+
+	i = numipfilters;
+	if(i == MAX_IPFILTERS){
+		Con_Printf("IP filter list is full\n");
+		return;
 	}
-	
-	if (!StringToFilter (Cmd_Argv(1), &ipfilters[i]))
-		ipfilters[i].compare = 0xffffffff;
+	numipfilters++;
+	NET_StringToAdr(Cmd_Argv(1), &ipfilters[i], nil);
 }
 
 /*
@@ -934,15 +872,13 @@ SV_RemoveIP_f
 */
 void SV_RemoveIP_f (void)
 {
-	ipfilter_t	f;
+	netadr_t a;
 	int			i, j;
 
-	if (!StringToFilter (Cmd_Argv(1), &f))
+	if(!NET_StringToAdr(Cmd_Argv(1), &a, nil))
 		return;
 	for (i=0 ; i<numipfilters ; i++)
-		if (ipfilters[i].mask == f.mask
-		&& ipfilters[i].compare == f.compare)
-		{
+		if(strcmp(a.addr, ipfilters[i].addr) == 0){
 			for (j=i+1 ; j<numipfilters ; j++)
 				ipfilters[j-1] = ipfilters[j];
 			numipfilters--;
@@ -960,14 +896,10 @@ SV_ListIP_f
 void SV_ListIP_f (void)
 {
 	int		i;
-	byte	b[4];
 
 	Con_Printf ("Filter list:\n");
 	for (i=0 ; i<numipfilters ; i++)
-	{
-		*(unsigned *)b = ipfilters[i].compare;
-		Con_Printf ("%3i.%3i.%3i.%3i\n", b[0], b[1], b[2], b[3]);
-	}
+		Con_Printf ("%s\n", ipfilters[i].addr);
 }
 
 /*
@@ -979,7 +911,6 @@ void SV_WriteIP_f (void)
 {
 	FILE	*f;
 	char	name[MAX_OSPATH];
-	byte	b[4];
 	int		i;
 
 	sprintf (name, "%s/listip.cfg", com_gamedir);
@@ -994,10 +925,7 @@ void SV_WriteIP_f (void)
 	}
 	
 	for (i=0 ; i<numipfilters ; i++)
-	{
-		*(unsigned *)b = ipfilters[i].compare;
-		fprintf (f, "addip %i.%i.%i.%i\n", b[0], b[1], b[2], b[3]);
-	}
+		fprintf (f, "addip %s\n", ipfilters[i].addr);
 	
 	fclose (f);
 }
@@ -1027,12 +955,9 @@ SV_FilterPacket
 qboolean SV_FilterPacket (void)
 {
 	int		i;
-	unsigned	in;
-	
-	in = *(unsigned *)net_from.ip;
 
 	for (i=0 ; i<numipfilters ; i++)
-		if ( (in & ipfilters[i].mask) == ipfilters[i].compare)
+		if(strcmp(net_from->addr, ipfilters[i].addr) == 0)
 			return filterban.value;
 
 	return !filterban.value;
@@ -1078,14 +1003,14 @@ void SV_ReadPackets (void)
 		{
 			if (cl->state == cs_free)
 				continue;
-			if (!NET_CompareBaseAdr (net_from, cl->netchan.remote_address))
+			if (!NET_CompareBaseAdr (net_from, &cl->netchan.remote_address))
 				continue;
 			if (cl->netchan.qport != qport)
 				continue;
-			if (cl->netchan.remote_address.port != net_from.port)
+			if(strcmp(cl->netchan.remote_address.srv, net_from->srv) != 0)
 			{
 				Con_DPrintf ("SV_ReadPackets: fixing up a translated port\n");
-				cl->netchan.remote_address.port = net_from.port;
+				strcpy(cl->netchan.remote_address.srv, net_from->srv);
 			}
 			if (Netchan_Process(&cl->netchan))
 			{	// this is a valid, sequenced packet, so process it
@@ -1143,6 +1068,7 @@ void SV_CheckTimeouts (void)
 			realtime - cl->connection_started > zombietime.value)
 		{
 			cl->state = cs_free;	// can now be reused
+			NET_Close(&cl->netchan.remote_address);
 		}
 	}
 	if (sv.paused && !nclients) {
@@ -1398,10 +1324,10 @@ void Master_Heartbeat (void)
 
 	// send to group master
 	for (i=0 ; i<MAX_MASTERS ; i++)
-		if (master_adr[i].port)
+		if (strlen(master_adr[i].srv) > 0)
 		{
-			Con_Printf ("Sending heartbeat to %s\n", NET_AdrToString (master_adr[i]));
-			NET_SendPacket (strlen(string), string, master_adr[i]);
+			Con_Printf ("Sending heartbeat to %s\n", master_adr[i].sys);
+			NET_SendPacket (strlen(string), string, &master_adr[i]);
 		}
 }
 
@@ -1421,10 +1347,10 @@ void Master_Shutdown (void)
 
 	// send to group master
 	for (i=0 ; i<MAX_MASTERS ; i++)
-		if (master_adr[i].port)
+		if(strlen(master_adr[i].srv) > 0)
 		{
-			Con_Printf ("Sending heartbeat to %s\n", NET_AdrToString (master_adr[i]));
-			NET_SendPacket (strlen(string), string, master_adr[i]);
+			Con_Printf ("Sending heartbeat to %s\n", master_adr[i].sys);
+			NET_SendPacket (strlen(string), string, &master_adr[i]);
 		}
 }
 
@@ -1573,7 +1499,6 @@ void SV_InitNet (void)
 
 	// heartbeats will allways be sent to the id master
 	svs.last_heartbeat = -99999;		// send immediately
-//	NET_StringToAdr ("192.246.40.70:27000", &idmaster_adr);
 }
 
 

@@ -171,27 +171,24 @@ void CL_SendConnectPacket (void)
 
 	t1 = Sys_DoubleTime ();
 
-	if (!NET_StringToAdr (cls.servername, &adr))
+	if (!NET_StringToAdr (cls.servername, &adr, nil))
 	{
 		Con_Printf ("Bad server address\n");
 		connect_time = -1;
 		return;
 	}
-
-	if (adr.port == 0)
-		adr.port = BigShort (27500);
 	t2 = Sys_DoubleTime ();
 
 	connect_time = realtime+t2-t1;	// for retransmit requests
 
 	cls.qport = Cvar_VariableValue("qport");
 
-	Info_SetValueForStarKey (cls.userinfo, "*ip", NET_AdrToString(adr), MAX_INFO_STRING);
+	Info_SetValueForStarKey (cls.userinfo, "*ip", adr.addr, MAX_INFO_STRING);
 
 //	Con_Printf ("Connecting to %s...\n", cls.servername);
 	sprintf (data, "%c%c%c%cconnect %i %i %i \"%s\"\n",
 		255, 255, 255, 255,	PROTOCOL_VERSION, cls.qport, cls.challenge, cls.userinfo);
-	NET_SendPacket (strlen(data), data, adr);
+	NET_SendPacket (strlen(data), data, &adr);
 }
 
 /*
@@ -216,22 +213,19 @@ void CL_CheckForResend (void)
 		return;
 
 	t1 = Sys_DoubleTime ();
-	if (!NET_StringToAdr (cls.servername, &adr))
+	if (!NET_StringToAdr (cls.servername, &adr, nil))
 	{
 		Con_Printf ("Bad server address\n");
 		connect_time = -1;
 		return;
 	}
-
-	if (adr.port == 0)
-		adr.port = BigShort (27500);
 	t2 = Sys_DoubleTime ();
 
 	connect_time = realtime+t2-t1;	// for retransmit requests
 
 	Con_Printf ("Connecting to %s...\n", cls.servername);
 	sprintf (data, "%c%c%c%cgetchallenge\n", 255, 255, 255, 255);
-	NET_SendPacket (strlen(data), data, adr);
+	NET_SendPacket (strlen(data), data, &adr);
 }
 
 void CL_BeginServerConnect(void)
@@ -315,11 +309,10 @@ void CL_Rcon_f (void)
 
 			return;
 		}
-		NET_StringToAdr (rcon_address.string, &to);
+		NET_StringToAdr (rcon_address.string, &to, nil);
 	}
 	
-	NET_SendPacket (strlen(message)+1, message
-		, to);
+	NET_SendPacket (strlen(message)+1, message, &to);
 }
 
 
@@ -392,6 +385,7 @@ void CL_Disconnect (void)
 		Netchan_Transmit (&cls.netchan, 6, final);
 		Netchan_Transmit (&cls.netchan, 6, final);
 		Netchan_Transmit (&cls.netchan, 6, final);
+		NET_Close(&cls.netchan.remote_address);
 
 		cls.state = ca_disconnected;
 
@@ -644,7 +638,7 @@ void CL_Packet_f (void)
 		return;
 	}
 
-	if (!NET_StringToAdr (Cmd_Argv(1), &adr))
+	if (!NET_StringToAdr (Cmd_Argv(1), &adr, nil))
 	{
 		Con_Printf ("Bad address\n");
 		return;
@@ -667,7 +661,7 @@ void CL_Packet_f (void)
 	}
 	*out = 0;
 
-	NET_SendPacket (out-send, send, adr);
+	NET_SendPacket (out-send, send, &adr);
 }
 
 
@@ -769,7 +763,7 @@ void CL_ConnectionlessPacket (void)
 
 	c = MSG_ReadByte ();
 	if (!cls.demoplayback)
-		Con_Printf ("%s: ", NET_AdrToString (net_from));
+		Con_Printf ("%s: ", net_from->sys);
 //	Con_DPrintf ("%s", net_message.data + 5);
 	if (c == S2C_CONNECTION)
 	{
@@ -794,13 +788,6 @@ void CL_ConnectionlessPacket (void)
 		char	cmdtext[2048];
 
 		Con_Printf ("client command\n");
-
-		if ((*(unsigned *)net_from.ip != *(unsigned *)laddr.ip
-			&& *(unsigned *)net_from.ip != Iploopback) )
-		{
-			Con_Printf ("Command packet from remote host.  Ignored.\n");
-			return;
-		}
 		s = MSG_ReadString ();
 
 		strncpy(cmdtext, s, sizeof(cmdtext) - 1);
@@ -907,7 +894,7 @@ void CL_ReadPackets (void)
 
 		if (net_message.cursize < 8)
 		{
-			Con_Printf ("%s: Runt packet\n",NET_AdrToString(net_from));
+			Con_Printf ("%s: Runt packet\n", net_from->sys);
 			continue;
 		}
 
@@ -915,10 +902,10 @@ void CL_ReadPackets (void)
 		// packet from server
 		//
 		if (!cls.demoplayback && 
-			!NET_CompareAdr (net_from, cls.netchan.remote_address))
+			!NET_CompareAdr (net_from, &cls.netchan.remote_address))
 		{
 			Con_DPrintf ("%s:sequenced packet without connection\n"
-				,NET_AdrToString(net_from));
+				, net_from->sys);
 			continue;
 		}
 		if (!Netchan_Process(&cls.netchan))
@@ -1353,8 +1340,6 @@ Host_Init
 */
 void Host_Init (quakeparms_t *parms)
 {
-	int p, port;
-
 	COM_InitArgv (parms->argc, parms->argv);
 	COM_AddParm ("-game");
 	COM_AddParm ("qw");
@@ -1376,14 +1361,7 @@ void Host_Init (quakeparms_t *parms)
 
 	Host_FixupModelNames();
 
-	port = PORT_CLIENT;
-	p = COM_CheckParm ("-cport");
-	if (p && p < com_argc)
-	{
-		port = atoi(com_argv[p+1]);
-		Con_Printf ("Client port: %i\n", port);
-	}
-	NET_Init (port);
+	NET_Init(0);
 	Netchan_Init ();
 
 	W_LoadWadFile ("gfx.wad");

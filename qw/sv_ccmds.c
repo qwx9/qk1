@@ -36,21 +36,18 @@ void SV_SetMaster_f (void)
 
 	for (i=1 ; i<Cmd_Argc() ; i++)
 	{
-		if (!strcmp(Cmd_Argv(i), "none") || !NET_StringToAdr (Cmd_Argv(i), &master_adr[i-1]))
+		if (!strcmp(Cmd_Argv(i), "none") || !NET_StringToAdr (Cmd_Argv(i), &master_adr[i-1], "27000"))
 		{
 			Con_Printf ("Setting nomaster mode.\n");
 			return;
 		}
-		if (master_adr[i-1].port == 0)
-			master_adr[i-1].port = BigShort (27000);
-
-		Con_Printf ("Master server at %s\n", NET_AdrToString (master_adr[i-1]));
+		Con_Printf ("Master server at %s\n", master_adr[i-1].sys);
 
 		Con_Printf ("Sending a ping.\n");
 
 		data[0] = A2A_PING;
 		data[1] = 0;
-		NET_SendPacket (2, data, master_adr[i-1]);
+		NET_SendPacket (2, data, &master_adr[i-1]);
 	}
 
 	svs.last_heartbeat = -99999;
@@ -375,7 +372,6 @@ void SV_Status_f (void)
 	avg = 1000*svs.stats.latched_active / STATFRAMES;
 	pak = (float)svs.stats.latched_packets/ STATFRAMES;
 
-	Con_Printf ("net address      : %s\n",NET_AdrToString (laddr));
 	Con_Printf ("cpu utilization  : %3i%%\n",(int)cpu);
 	Con_Printf ("avg response time: %i ms\n",(int)avg);
 	Con_Printf ("packets/frame    : %5.2f (%d)\n", pak, num_prstr);
@@ -400,7 +396,7 @@ void SV_Status_f (void)
 			else			
 				Con_Printf("\n");
 
-			s = NET_BaseAdrToString ( cl->netchan.remote_address);
+			s = cl->netchan.remote_address.addr;
 			Con_Printf ("  %-16.16s", s);
 			if (cl->state == cs_connected)
 			{
@@ -426,7 +422,7 @@ void SV_Status_f (void)
 				continue;
 			Con_Printf ("%5i %6i ", (int)cl->edict->v.frags,  cl->userid);
 
-			s = NET_BaseAdrToString ( cl->netchan.remote_address);
+			s = cl->netchan.remote_address.addr;
 			Con_Printf ("%s", s);
 			l = 16 - strlen(s);
 			for (j=0 ; j<l ; j++)

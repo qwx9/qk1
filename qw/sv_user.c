@@ -546,7 +546,7 @@ void OutofBandPrintf(netadr_t where, char *fmt, ...)
 	vsprintf (send+5, fmt, argptr);
 	va_end (argptr);
 
-	NET_SendPacket (strlen(send)+1, send, where);
+	NET_SendPacket (strlen(send)+1, send, &where);
 }
 
 /*

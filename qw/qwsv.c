@@ -4,20 +4,20 @@
 #include <thread.h>
 #include "quakedef.h"
 
-mainstacksize = 512*1024;
-Channel *fuckchan;
+mainstacksize = 256*1024;
+
+extern Channel *echan;
+extern netadr_t cons[MAX_CLIENTS];
+
 quakeparms_t q;
 
-static cvar_t extrasleep = {"extrasleep", "0"};	/* in ms */
 static int iop = -1, pfd[2];
-
 
 /* FIXME: stupid-ass linking kludges */
 client_static_t	cls;
 void Draw_BeginDisc(void){}
 void Draw_EndDisc(void){}
 void Host_Shutdown(void){}
-
 
 char *
 Sys_ConsoleInput(void)
@@ -36,6 +36,8 @@ Sys_ConsoleInput(void)
 void
 killiop(void)
 {
+	if(iop < 0)
+		return;
 	threadkillgrp(THin);
 	close(pfd[0]);
 	close(pfd[1]);
@@ -58,52 +60,38 @@ iproc(void *)
 		s[n-1] = 0;
 		if((write(pfd[0], s, n)) != n)
 			break;
-		if(nbsend(fuckchan, nil) < 0)
-			sysfatal("chan really wanted to, but it's just too tired. %r");
+		send(echan, nil);
 	}
-	fprint(2, "iproc %d: %r\n", threadpid(threadid()));
 	iop = -1;
-}
-
-static void
-croak(void *, char *note)
-{
-	if(!strncmp(note, "sys:", 4)){
-		killiop();
-		NET_Shutdown();
-	}
-	noted(NDFLT);
 }
 
 void
 threadmain(int argc, char *argv[])
 {
 	double time, oldtime, newtime;
+	netadr_t *a;
 
 	svonly = 1;
 	COM_InitArgv (argc, argv);
 	initparm(&q);
-	notify(croak);
-	if((fuckchan = chancreate(sizeof(int), 1)) == nil)
-		sysfatal("chancreate fuckchan: %r");
+	if((echan = chancreate(sizeof(int), 1)) == nil)
+		sysfatal("chancreate: %r");
 	SV_Init(&q);
-	Cvar_RegisterVariable(&extrasleep);
 	if(proccreate(iproc, nil, 8192) < 0)
 		sysfatal("proccreate iproc: %r");
-
 	SV_Frame(0.1);	/* run one frame immediately for first heartbeat */
-
 	oldtime = Sys_DoubleTime() - 0.1;
 	for(;;){
-		recv(fuckchan, nil);	/* we just don't give any for free */
-
-		newtime = Sys_DoubleTime();	/* time since last docking */
+		if(nbrecv(echan, nil) == 0){
+			for(a=cons; a<cons+nelem(cons); a++)
+				if(a->fd >= 0 && flen(a->fd) > 0)
+					break;
+			if(a == cons + nelem(cons))	
+				sleep(1);
+		}
+		newtime = Sys_DoubleTime();
 		time = newtime - oldtime;
 		oldtime = newtime;
-		SV_Frame(time);		
-
-		/* just a way to screw up fucking conformation on purpose */
-		if(extrasleep.value)
-			sleep(extrasleep.value);
+		SV_Frame(time);
 	}	
 }
