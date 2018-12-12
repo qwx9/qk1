@@ -33,45 +33,11 @@ static float olddx, olddy;
 static int mΔx, mΔy, mb, oldmb;
 
 void
-conscmd(void)
-{
-	char *p;
-
-	if(cls.state != ca_dedicated)
-		return;
-	while(p = nbrecvp(inchan), p != nil){
-		Cbuf_AddText(p);
-		free(p);
-	}
-}
-
-static void
-cproc(void *)
-{
-	char *s;
-	Biobuf *bf;
-
-	if(bf = Bfdopen(0, OREAD), bf == nil)
-		sysfatal("Bfdopen: %r");
-	for(;;){
-		if(s = Brdstr(bf, '\n', 1), s == nil)
-			break;
-		if(sendp(inchan, s) < 0){
-			free(s);
-			break;
-		}
-	}
-	Bterm(bf);
-}
-
-void
 Sys_SendKeyEvents(void)
 {
 	Kev ev;
 	int r;
 
-	if(cls.state == ca_dedicated)
-		return;
 	if(oldmwin != (int)m_windowed.value){
 		oldmwin = (int)m_windowed.value;
 		IN_Grabm(oldmwin);
@@ -88,7 +54,7 @@ IN_Commands(void)
 {
 	int b, i, k, r;
 
-	if(!mouseon || cls.state == ca_dedicated)
+	if(!mouseon)
 		return;
 	qlock(&mlck);
 	b = mb;
@@ -332,13 +298,6 @@ IN_Shutdown(void)
 void
 IN_Init(void)
 {
-	if(cls.state == ca_dedicated){
-		if(inchan = chancreate(sizeof(void *), 2), inchan == nil)
-			sysfatal("chancreate: %r");
-		if(proccreate(cproc, nil, 8192) < 0)
-			sysfatal("proccreate iproc: %r");
-		return;
-	}
 	Cvar_RegisterVariable(&m_windowed);
 	Cvar_RegisterVariable(&m_filter);
 	if(inchan = chancreate(sizeof(Kev), Nbuf), inchan == nil)

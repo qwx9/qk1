@@ -2,6 +2,7 @@
 #include <libc.h>
 #include <stdio.h>
 #include <thread.h>
+#include <bio.h>
 #include "quakedef.h"
 
 mainstacksize = 256*1024;
@@ -11,7 +12,7 @@ extern netadr_t cons[MAX_CLIENTS];
 
 quakeparms_t q;
 
-static int iop = -1, pfd[2];
+static Channel *inchan;
 
 /* FIXME: stupid-ass linking kludges */
 client_static_t	cls;
@@ -22,47 +23,27 @@ void Host_Shutdown(void){}
 char *
 Sys_ConsoleInput(void)
 {
-	static char buf[256];
-
-	if(iop < 0)
-		return nil;
-	if(flen(pfd[1]) < 1)	/* only poll for input */
-		return nil;
-	if(read(pfd[1], buf, sizeof buf) < 0)
-		sysfatal("Sys_ConsoleInput:read: %r");
-	return buf;
-}
-
-void
-killiop(void)
-{
-	if(iop < 0)
-		return;
-	threadkillgrp(THin);
-	close(pfd[0]);
-	close(pfd[1]);
-	iop = -1;
+	return nbrecvp(inchan);
 }
 
 static void
-iproc(void *)
+cproc(void *)
 {
-	int n;
-	char s[256];
+	char *s;
+	Biobuf *bf;
 
-	threadsetgrp(THin);
-
-	if((iop = pipe(pfd)) < 0)
-		sysfatal("iproc:pipe: %r");
+	if(bf = Bfdopen(0, OREAD), bf == nil)
+		sysfatal("Bfdopen: %r");
 	for(;;){
-		if((n = read(0, s, sizeof s)) <= 0)
+		if(s = Brdstr(bf, '\n', 1), s == nil)
 			break;
-		s[n-1] = 0;
-		if((write(pfd[0], s, n)) != n)
+		if(sendp(inchan, s) < 0){
+			free(s);
 			break;
+		}
 		send(echan, nil);
 	}
-	iop = -1;
+	Bterm(bf);
 }
 
 void
@@ -74,10 +55,11 @@ threadmain(int argc, char *argv[])
 	svonly = 1;
 	COM_InitArgv (argc, argv);
 	initparm(&q);
-	if((echan = chancreate(sizeof(int), 1)) == nil)
+	if((echan = chancreate(sizeof(int), 1)) == nil
+	|| (inchan = chancreate(sizeof(void *), 2)) == nil)
 		sysfatal("chancreate: %r");
 	SV_Init(&q);
-	if(proccreate(iproc, nil, 8192) < 0)
+	if(proccreate(cproc, nil, 8192) < 0)
 		sysfatal("proccreate iproc: %r");
 	SV_Frame(0.1);	/* run one frame immediately for first heartbeat */
 	oldtime = Sys_DoubleTime() - 0.1;

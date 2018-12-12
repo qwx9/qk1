@@ -77,7 +77,6 @@ Quake calls this before calling Sys_Quit or Sys_Error
 */
 void SV_Shutdown (void)
 {
-	killiop();
 	Master_Shutdown ();
 	if (sv_logfile)
 	{
@@ -1086,14 +1085,11 @@ Add them exactly as if they had been typed at the console
 */
 void SV_GetConsoleCommands (void)
 {
-	char	*cmd;
+	char *p;
 
-	while (1)
-	{
-		cmd = Sys_ConsoleInput ();
-		if (!cmd)
-			break;
-		Cbuf_AddText (cmd);
+	while((p = Sys_ConsoleInput()) != nil){
+		Cbuf_AddText(p);
+		free(p);
 	}
 }
 
