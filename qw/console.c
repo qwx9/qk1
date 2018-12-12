@@ -49,11 +49,15 @@ void Con_ToggleConsole_f (void)
 
 	if (key_dest == key_console)
 	{
-		if (cls.state == ca_active)
+		if (cls.state == ca_active){
 			key_dest = key_game;
+			IN_Grabm(1);
+		}
 	}
-	else
+	else{
 		key_dest = key_console;
+		IN_Grabm(0);
+	}
 	
 	Con_ClearNotify ();
 }

@@ -130,6 +130,7 @@ void CL_PredictMove (void)
 
 		cls.state = ca_active;
 		sprintf (text, "QuakeWorld: %s", cls.servername);
+		IN_Grabm(key_dest == key_game);
 	}
 
 	if (cl_nopred.value)

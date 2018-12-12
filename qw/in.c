@@ -40,7 +40,7 @@ Sys_SendKeyEvents(void)
 
 	if(oldmwin != (int)m_windowed.value){
 		oldmwin = (int)m_windowed.value;
-		IN_Grabm(oldmwin);
+		IN_Grabm(oldmwin && cls.state == ca_active);
 	}
 
 	while(r = nbrecv(inchan, &ev), r > 0)

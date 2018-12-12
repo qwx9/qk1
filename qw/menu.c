@@ -226,7 +226,6 @@ void M_ToggleMenu_f (void)
 {
 	m_entersound = true;
 
-	IN_Grabm(0);
 	if (key_dest == key_menu)
 	{
 		if (m_state != m_main)
@@ -244,6 +243,7 @@ void M_ToggleMenu_f (void)
 	}
 	else
 	{
+		IN_Grabm(0);
 		M_Menu_Main_f ();
 	}
 }
@@ -295,7 +295,7 @@ void M_Main_Key (int key)
 		cls.demonum = m_save_demonum;
 		if (cls.demonum != -1 && !cls.demoplayback && cls.state == ca_disconnected)
 			CL_NextDemo ();
-		IN_Grabm(1);
+		IN_Grabm(cls.state == ca_active || cls.demoplayback);
 		break;
 		
 	case K_DOWNARROW:
