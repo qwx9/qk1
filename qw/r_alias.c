@@ -50,7 +50,7 @@ static aedge_t	aedges[12] = {
 #define NUMVERTEXNORMALS	162
 
 float	r_avertexnormals[NUMVERTEXNORMALS][3] = {
-#include "anorms.h"
+#include "../anorms.h"
 };
 
 void R_AliasTransformAndProjectFinalVerts (finalvert_t *fv,

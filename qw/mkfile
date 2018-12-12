@@ -99,8 +99,7 @@ SVOBJ=\
 
 HFILES=\
 	../adivtab.h\
-	anorm_dots.h\
-	anorms.h\
+	../anorms.h\
 	bspfile.h\
 	cdaudio.h\
 	client.h\
@@ -114,7 +113,7 @@ HFILES=\
 	draw.h\
 	input.h\
 	keys.h\
-	mathlib.h\
+	../mathlib.h\
 	menu.h\
 	model.h\
 	modelgen.h\
