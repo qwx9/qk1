@@ -64,24 +64,22 @@ typedef struct
 	int		dataofs;		// chunk starts this many bytes from file start
 } wavinfo_t;
 
-void S_Init (void);
+int	initsnd(quakeparms_t*);
 void S_Startup (void);
-void S_Shutdown (void);
-void S_StartSound (int entnum, int entchannel, sfx_t *sfx, vec3_t origin, float fvol,  float attenuation);
-void S_StaticSound (sfx_t *sfx, vec3_t origin, float vol, float attenuation);
-void S_StopSound (int entnum, int entchannel);
-void S_StopAllSounds(qboolean clear);
-void S_ClearBuffer (void);
-void S_Update (vec3_t origin, vec3_t v_forward, vec3_t v_right, vec3_t v_up);
-void S_ExtraUpdate (void);
+void shutsnd (void);
+void startsfx (int entnum, int entchannel, sfx_t *sfx, vec3_t origin, float fvol,  float attenuation);
+void staticsfx (sfx_t *sfx, vec3_t origin, float vol, float attenuation);
+void stopsfx (int entnum, int entchannel);
+void stopallsfx(void);
+void stepsnd (vec3_t origin, vec3_t v_forward, vec3_t v_right, vec3_t v_up);
 
-sfx_t *S_PrecacheSound (char *sample);
+sfx_t*	precachesfx(char*);
 void S_TouchSound (char *sample);
 void S_ClearPrecache (void);
 void S_BeginPrecaching (void);
 void S_EndPrecaching (void);
 void S_PaintChannels(int endtime);
-void S_InitPaintChannels (void);
+void initsndPaintChannels (void);
 
 // picks a channel based on priorities, empty slots, number of channels
 channel_t *SND_PickChannel(int entnum, int entchannel);
@@ -116,21 +114,16 @@ extern	int			total_channels;
 //
 // Fake dma is a synchronous faking of the DMA progress used for
 // isolating performance in the renderer.  The fakedma_updates is
-// number of times S_Update() is called per second.
+// number of times stepsnd() is called per second.
 //
 
 extern qboolean 		fakedma;
 extern int 			fakedma_updates;
 extern int		paintedtime;
-extern vec3_t listener_origin;
-extern vec3_t listener_forward;
-extern vec3_t listener_right;
-extern vec3_t listener_up;
 extern volatile dma_t *shm;
 extern volatile dma_t sn;
 extern vec_t sound_nominal_clip_dist;
 
-extern	cvar_t loadas8bit;
 extern	cvar_t bgmvolume;
 extern	cvar_t volume;
 
@@ -138,10 +131,8 @@ extern qboolean	snd_initialized;
 
 extern int		snd_blocked;
 
-void S_LocalSound (char *s);
+void localsfx (char *s);
 sfxcache_t *S_LoadSound (sfx_t *s);
-
-wavinfo_t GetWavinfo (char *name, byte *wav, int wavlength);
 
 void SND_InitScaletable (void);
 void SNDDMA_Submit(void);

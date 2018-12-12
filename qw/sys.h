@@ -27,3 +27,4 @@ void Sys_Init(void);
 void initparm(quakeparms_t *);
 
 void killiop(void);
+void*	emalloc(ulong);

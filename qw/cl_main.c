@@ -326,7 +326,7 @@ void CL_ClearState (void)
 {
 	int			i;
 
-	S_StopAllSounds (true);
+	stopallsfx();
 
 	Con_DPrintf ("Clearing memory\n");
 	D_FlushCaches ();
@@ -370,7 +370,7 @@ void CL_Disconnect (void)
 	connect_time = -1;
 
 // stop sounds (especially looping!)
-	S_StopAllSounds (true);
+	stopallsfx();
 	
 // if running a local server, shut it down
 	if (cls.demoplayback)
@@ -709,7 +709,7 @@ void CL_Changing_f (void)
 	if (cls.download)  // don't change when downloading
 		return;
 
-	S_StopAllSounds (true);
+	stopallsfx();
 	cl.intermission = 0;
 	cls.state = ca_connected;	// not active anymore, but not disconnected
 	Con_Printf ("\nChanging map...\n");
@@ -728,7 +728,7 @@ void CL_Reconnect_f (void)
 	if (cls.download)  // don't change when downloading
 		return;
 
-	S_StopAllSounds (true);
+	stopallsfx();
 
 	if (cls.state == ca_connected) {
 		Con_Printf ("reconnecting...\n");
@@ -1185,36 +1185,6 @@ void Host_WriteConfiguration (void)
 	}
 }
 
-
-//============================================================================
-
-/*
-==================
-Host_SimulationTime
-
-This determines if enough time has passed to run a simulation frame
-==================
-*/
-/*
-qboolean Host_SimulationTime(float time)
-{
-	float fps;
-
-	if (oldrealtime > realtime)
-		oldrealtime = 0;
-
-	if (cl_maxfps.value)
-		fps = Max(30.0, Min(cl_maxfps.value, 72.0));
-	else
-		fps = Max(30.0, Min(rate.value/80.0, 72.0));
-
-	if (!cls.timedemo && (realtime + time) - oldrealtime < 1.0/fps)
-		return false;			// framerate is too high
-	return true;
-}
-*/
-
-
 /*
 ==================
 Host_Frame
@@ -1294,13 +1264,13 @@ void Host_Frame (float time)
 	// update audio
 	if (cls.state == ca_active)
 	{
-		S_Update (r_origin, vpn, vright, vup);
+		stepsnd (r_origin, vpn, vright, vup);
 		CL_DecayLights ();
 	}
 	else
-		S_Update (vec3_origin, vec3_origin, vec3_origin, vec3_origin);
+		stepsnd (vec3_origin, vec3_origin, vec3_origin, vec3_origin);
 	
-	CDAudio_Update();
+	stepcd();
 
 	if (host_speeds.value)
 	{
@@ -1382,12 +1352,12 @@ void Host_Init (quakeparms_t *parms)
 		Sys_Error ("Couldn't load gfx/colormap.lmp");
 
 	IN_Init ();
-	CDAudio_Init ();
+	initcd ();
 	VID_Init (host_basepal);
 	Draw_Init ();
 	SCR_Init ();
 	R_Init ();
-	S_Init ();
+	initsnd (parms);
 	cls.state = ca_disconnected;
 	Sbar_Init ();
 	CL_Init ();
@@ -1428,9 +1398,9 @@ void Host_Shutdown(void)
 
 	Host_WriteConfiguration (); 
 		
-	CDAudio_Shutdown ();
+	shutcd ();
 	NET_Shutdown ();
-	S_Shutdown();
+	shutsnd();
 	IN_Shutdown ();
 	if (host_basepal)
 		VID_Shutdown();

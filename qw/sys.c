@@ -6,6 +6,16 @@
 
 int svonly;
 
+void *
+emalloc(ulong n)
+{
+	void *p;
+
+	if(p = mallocz(n, 1), p == nil)
+		sysfatal("emalloc %r");
+	setmalloctag(p, getcallerpc(&n));
+	return p;
+}
 
 void
 Sys_Printf(char *fmt, ...)

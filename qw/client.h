@@ -121,7 +121,8 @@ ca_disconnected, 	// full screen console with no connection
 ca_demostart,		// starting up a demo
 ca_connected,		// netchan_t established, waiting for svc_serverdata
 ca_onserver,		// processing data lists, donwloading, etc
-ca_active			// everything is in, so frames can be rendered
+ca_active,		// everything is in, so frames can be rendered
+ca_dedicated
 } cactive_t;
 
 typedef enum {
@@ -300,7 +301,6 @@ extern	cvar_t	m_forward;
 extern	cvar_t	m_side;
 
 extern cvar_t		m_windowed;
-
 extern	cvar_t	name;
 
 

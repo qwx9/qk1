@@ -6,7 +6,6 @@ TARG=\
 	qwsv\
 
 CLOBJ=\
-	cd.$O\
 	cl_cam.$O\
 	cl_demo.$O\
 	cl_ents.$O\
@@ -63,9 +62,6 @@ CLOBJ=\
 	screen.$O\
 	skin.$O\
 	snd.$O\
-	snd_dma.$O\
-	snd_mem.$O\
-	snd_mix.$O\
 	sys.$O\
 	vid.$O\
 	view.$O\

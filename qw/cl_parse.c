@@ -267,7 +267,7 @@ void Sound_NextDownload (void)
 	{
 		if (!cl.sound_name[i][0])
 			break;
-		cl.sound_precache[i] = S_PrecacheSound (cl.sound_name[i]);
+		cl.sound_precache[i] = precachesfx(cl.sound_name[i]);
 	}
 
 	// done with sounds, request models now
@@ -762,7 +762,7 @@ void CL_ParseStaticSound (void)
 	vol = MSG_ReadByte ();
 	atten = MSG_ReadByte ();
 	
-	S_StaticSound (cl.sound_precache[sound_num], org, vol, atten);
+	staticsfx (cl.sound_precache[sound_num], org, vol, atten);
 }
 
 
@@ -812,7 +812,7 @@ void CL_ParseStartSoundPacket(void)
 	if (ent > MAX_EDICTS)
 		Host_EndGame ("CL_ParseStartSoundPacket: ent = %i", ent);
 	
-    S_StartSound (ent, channel, cl.sound_precache[sound_num], pos, volume/255.0, attenuation);
+    startsfx (ent, channel, cl.sound_precache[sound_num], pos, volume/255.0, attenuation);
 }       
 
 
@@ -1139,7 +1139,7 @@ void CL_ParseServerMessage (void)
 			i = MSG_ReadByte ();
 			if (i == PRINT_CHAT)
 			{
-				S_LocalSound ("misc/talk.wav");
+				localsfx ("misc/talk.wav");
 				con_ormask = 128;
 			}
 			Con_Printf ("%s", MSG_ReadString ());
@@ -1186,7 +1186,7 @@ void CL_ParseServerMessage (void)
 			
 		case svc_stopsound:
 			i = MSG_ReadShort();
-			S_StopSound(i>>3, i&7);
+			stopsfx(i>>3, i&7);
 			break;
 		
 		case svc_updatefrags:
@@ -1255,7 +1255,7 @@ void CL_ParseServerMessage (void)
 
 		case svc_cdtrack:
 			cl.cdtrack = MSG_ReadByte ();
-			CDAudio_Play ((byte)cl.cdtrack, true);
+			startcd ((byte)cl.cdtrack, true);
 			break;
 
 		case svc_intermission:
@@ -1348,9 +1348,9 @@ void CL_ParseServerMessage (void)
 		case svc_setpause:
 			cl.paused = MSG_ReadByte ();
 			if (cl.paused)
-				CDAudio_Pause ();
+				pausecd ();
 			else
-				CDAudio_Resume ();
+				resumecd ();
 			break;
 
 		}

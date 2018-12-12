@@ -19,11 +19,8 @@ void SV_SendServerInfoChange(char *, char *)
 static void
 croak(void *, char *note)
 {
-	if(!strncmp(note, "sys:", 4)){
-		IN_Shutdown();
-		SNDDMA_Shutdown();
-		NET_Shutdown();
-	}
+	if(!strncmp(note, "sys:", 4))
+		IN_Grabm(0);
 	noted(NDFLT);
 }
 

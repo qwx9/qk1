@@ -639,14 +639,14 @@ void Key_Event (int key, qboolean down)
 // update auto-repeat status
 	if (down)
 	{
-		key_repeats[key]++;
-		if (key != K_BACKSPACE 
-			&& key != K_PAUSE 
-			&& key != K_PGUP 
-			&& key != K_PGDN
-			&& key_repeats[key] > 1)
-			return;	// ignore most autorepeats
-			
+		if(key != K_MWHEELUP && key != K_MWHEELDOWN)
+			key_repeats[key]++;
+		/* ignore cons event immediately following kbd down event */
+		if(key_repeats[key] == 2)
+			return;
+		if(key_repeats[key] > 2 && (key == K_ESCAPE || key == K_ENTER
+		|| key == '`' || key_dest == key_game))
+			return;
 		if (key >= 200 && !keybindings[key])
 			Con_Printf ("%s is unbound, hit F4 to set.\n", Key_KeynumToString (key) );
 	}

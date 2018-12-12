@@ -930,8 +930,6 @@ int SCR_ModalMessage (char *text)
 	scr_drawdialog = true;
 	SCR_UpdateScreen ();
 	scr_drawdialog = false;
-	
-	S_ClearBuffer ();		// so dma doesn't loop current sound
 
 	do
 	{
@@ -1128,7 +1126,7 @@ void SCR_UpdateScreen (void)
 		vrect.pnext = 0;
 	
 		VID_Update (&vrect);
-	}	
+	}
 }
 
 /*

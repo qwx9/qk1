@@ -416,5 +416,4 @@ void D_DrawSprite (void)
 	D_SpriteScanLeftEdge ();
 	D_SpriteScanRightEdge ();
 	D_SpriteDrawSpans (sprite_spans);
-	print("D_DrawSprite: ok\n");
 }
