@@ -1,6 +1,6 @@
 qk1 - (9) quake
 ===============
-Port of linux/x11 quake to plan9front.
+Port of linux/x11 quake and quakeworld to plan9front.
 - Works on amd64 and 386, broken on arm and probably other arches
 
 
@@ -18,6 +18,11 @@ other user-specific data is saved in $home/lib/quake/$gamename, if it exists.
 ; cp /n/quakecd/id1/*.pak $home/lib/quake/id1
 ; quake >/dev/null
 
+To install quakeworld:
+
+; cd qw
+; mk install
+
 By default, qk1 allocates 12 MB of memory for its internal heap.  This amount
 can be controlled via the -m command line parameter like so:
 
@@ -31,7 +36,8 @@ needn't be populated by cdfs(1), so long as the files are in the format
 described by audio(3).  Reading from actual cdroms is currently broken.
 
 On lower framerates, devaudio's delay must be increased appropriately, up to
-4410 (for a rate of 44.1 kHz), or sound will cut up.
+4410 (for a rate of 44.1 kHz), or sound will cut up.  This applies to
+quakeworld as well, for which the framerate is capped lower by default.
 
 Installing an expansion or mod, for example rogue:
 
@@ -51,7 +57,7 @@ Todo/bugs
 - cd: buffer reading from actual cdroms
 - do away with PR_Str shit
 - manpages
-- port quakeworld: mkmany, merging common code
+- merge quakeworld: mkmany, etc
 - random crashes in d_sprite.c:D_SpriteDrawSpans
 - infinite loop in SV_TouchLinks
 - (amd64) entities visible through walls right when emerging from/immerging
@@ -72,13 +78,8 @@ Shitty workarounds and other bullshit
 - text and code seen as useless for plan9 nuked from orbit (cpp defs, etc.)
 - arbitrary resolution limit (r_shared.h): 2048x2048 (was 1280x1024), which
   inflates e.g. a bunch of arrays in the code
-- mouse handling is too heavy, all for the purpose of not letting the mouse
-  escape the window too easily (and the kludged up shit could probably be
-  done better)
 - removal of stdio stuff probably not really warranted and possibly introduced
   bugs
-- pcx screenshots: the only reason to keep this code around is to be able to do
-  screenshots without tearing. that's it.
 
 
 Legal
