@@ -148,13 +148,9 @@ writebit(void)
 	int n, fd;
 	char *s;
 
-	for(n=0, s=nil; n<100; n++){
-		s = va("%s/quake%02d.bit", fsdir, n);
-		if(access(s, AEXIST) == -1)
-			break;
-	}
-	if(n == 100){
-		werrstr("at static file limit");
+	s = va("%s/quake.%ld.bit", fsdir, time(nil));
+	if(access(s, AEXIST) != -1){
+		werrstr("writebit: not overwriting %s", s);
 		return -1;
 	}
 	if(fd = create(s, OWRITE, 0644), fd < 0)

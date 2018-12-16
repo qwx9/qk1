@@ -35,6 +35,7 @@ typedef struct
 } viddef_t;
 
 extern	viddef_t	vid;				// global video state
+extern int dumpwin;
 
 void	VID_SetPalette (unsigned char *palette);
 // called at startup and after any gamma correction

@@ -629,53 +629,11 @@ void WritePCXfile (char *filename, byte *data, int width, int height,
 	else
 		COM_WriteFile (filename, pcx, length);
 } 
- 
 
-
-/* 
-================== 
-SCR_ScreenShot_f
-================== 
-*/  
 void SCR_ScreenShot_f (void) 
-{ 
-	int     i; 
-	char		pcxname[80]; 
-	char		checkname[MAX_OSPATH];
-
-// 
-// find a file name to save it to 
-// 
-	strcpy(pcxname,"quake00.pcx");
-		
-	for (i=0 ; i<=99 ; i++) 
-	{ 
-		pcxname[5] = i/10 + '0'; 
-		pcxname[6] = i%10 + '0'; 
-		sprintf (checkname, "%s/%s", com_gamedir, pcxname);
-		if (Sys_FileTime(checkname) == -1)
-			break;	// file doesn't exist
-	} 
-	if (i==100) 
-	{
-		Con_Printf ("SCR_ScreenShot_f: Couldn't create a PCX"); 
-		return;
-	}
- 
-// 
-// save the pcx file 
-// 
-	D_EnableBackBufferAccess ();	// enable direct drawing of console to back
-									//  buffer
-
-	WritePCXfile (pcxname, vid.buffer, vid.width, vid.height, vid.rowbytes,
-				  host_basepal, false);
-
-	D_DisableBackBufferAccess ();	// for adapters that can't stay mapped in
-									//  for linear writes all the time
-
-	Con_Printf ("Wrote %s\n", pcxname);
-} 
+{
+	dumpwin = 1;
+}
 
 /*
 Find closest color in the palette for named color
@@ -785,27 +743,6 @@ void SCR_RSShot_f (void)
 	}
 
 	Con_Printf("Remote screen shot requested.\n");
-
-/*
-// 
-// find a file name to save it to 
-// 
-	strcpy(pcxname,"mquake00.pcx");
-		
-	for (i=0 ; i<=99 ; i++) 
-	{ 
-		pcxname[6] = i/10 + '0'; 
-		pcxname[7] = i%10 + '0'; 
-		sprintf (checkname, "%s/%s", com_gamedir, pcxname);
-		if (Sys_FileTime(checkname) == -1)
-			break;	// file doesn't exist
-	} 
-	if (i==100) 
-	{
-		Con_Printf ("SCR_ScreenShot_f: Couldn't create a PCX"); 
-		return;
-	}
-*/
  
 // 
 // save the pcx file 

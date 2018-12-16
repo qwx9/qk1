@@ -189,6 +189,27 @@ VID_Shutdown(void)
 	freeimage(fbi);
 }
 
+/* only exists to allow taking tear-free screenshots ingame... */
+static int
+writebit(void)
+{
+	int n, fd;
+	char *s;
+
+	s = va("%s/quake.%d.bit", com_gamedir, time(nil));
+	if(access(s, AEXIST) != -1){
+		fprint(2, "writebit: not overwriting %s\n", s);
+		return -1;
+	}
+	if(fd = create(s, OWRITE, 0644), fd < 0)
+		return -1;
+	n = writeimage(fd, fbi, 0);
+	close(fd);
+	if(n >= 0)
+		Con_Printf("Wrote %s\n", s);
+	return n;
+}
+
 void
 VID_Update(vrect_t *)
 {
@@ -220,6 +241,11 @@ VID_Update(vrect_t *)
 		}
 	}
 	flushimage(display, 1);
+	if(dumpwin){
+		if(writebit() < 0)
+			Con_Printf("Could not write screenshot.\n");
+		dumpwin = 0;
+	}
 }
 
 /* direct drawing of the "accessing disk" icon */
