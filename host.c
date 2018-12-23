@@ -367,7 +367,7 @@ void Host_ShutdownServer(qboolean crash)
 	MSG_WriteByte(&buf, svc_disconnect);
 	count = NET_SendToAll(&buf, 5);
 	if (count)
-		Con_Printf("Host_ShutdownServer: NET_SendToAll failed for %ud clients\n", count);
+		Con_Printf("Host_ShutdownServer: NET_SendToAll failed for %d clients\n", count);
 
 	for (i=0, host_client = svs.clients ; i<svs.maxclients ; i++, host_client++)
 		if (host_client->active)

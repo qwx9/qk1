@@ -167,7 +167,7 @@ static void MaxPlayers_f (void)
 
 	if (Cmd_Argc () != 2)
 	{
-		Con_Printf ("\"maxplayers\" is \"%ud\"\n", svs.maxclients);
+		Con_Printf ("\"maxplayers\" is \"%d\"\n", svs.maxclients);
 		return;
 	}
 
@@ -183,7 +183,7 @@ static void MaxPlayers_f (void)
 	if (n > svs.maxclientslimit)
 	{
 		n = svs.maxclientslimit;
-		Con_Printf ("\"maxplayers\" set to \"%ud\"\n", n);
+		Con_Printf ("\"maxplayers\" set to \"%d\"\n", n);
 	}
 
 	svs.maxclients = n;

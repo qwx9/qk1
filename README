@@ -1,7 +1,7 @@
 qk1 - (9) quake
 ===============
 Port of linux/x11 quake and quakeworld to plan9front.
-- Works on amd64 and 386, broken on arm and probably other arches
+- Works on amd64 and 386, broken on zynq
 
 
 Installation
@@ -53,7 +53,7 @@ Then start with:
 Todo/bugs
 ---------
 - don't use #pragma pack and do not read in structs directly
-- fix arm graphics issues
+- fix zynq graphics issues
 - cd: buffer reading from actual cdroms
 - do away with PR_Str shit
 - manpages
@@ -62,7 +62,6 @@ Todo/bugs
 - infinite loop in SV_TouchLinks
 - (amd64) entities visible through walls right when emerging from/immerging
   into water
-- fix stdio console color print
 - resolutions other than 4:3: some vertical and horizontal strips on the edge
   of the screen aren't drawn
 - #define PARANOID reveals several points of failure that are otherwise ignored
@@ -78,8 +77,7 @@ Shitty workarounds and other bullshit
 - text and code seen as useless for plan9 nuked from orbit (cpp defs, etc.)
 - arbitrary resolution limit (r_shared.h): 2048x2048 (was 1280x1024), which
   inflates e.g. a bunch of arrays in the code
-- removal of stdio stuff probably not really warranted and possibly introduced
-  bugs
+- both stdio and print(2) are used due to the way colored strings are handled
 
 
 Legal

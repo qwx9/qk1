@@ -196,7 +196,7 @@ flipfb(int dy)
 	flushimage(display, 1);
 	if(dumpwin){
 		if(writebit() < 0)
-			Con_Printf("writebit: %r\n");
+			Con_Printf(va("writebit: %r\n"));
 		dumpwin = 0;
 	}
 }

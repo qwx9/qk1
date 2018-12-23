@@ -284,9 +284,9 @@ int	Datagram_GetMessage (qsocket_t *sock)
 
 void PrintStats(qsocket_t *s)
 {
-	Con_Printf("canSend = %4ud   \n", s->canSend);
-	Con_Printf("sendSeq = %4ud   ", s->sendSequence);
-	Con_Printf("recvSeq = %4ud   \n", s->receiveSequence);
+	Con_Printf("canSend = %4d   \n", s->canSend);
+	Con_Printf("sendSeq = %4d   ", s->sendSequence);
+	Con_Printf("recvSeq = %4d   \n", s->receiveSequence);
 	Con_Printf("\n");
 }
 

@@ -154,7 +154,7 @@ path(void)
 
 	for(pl=pkl; pl!=nil; pl=pl->pl)
 		if(pl->p)
-			Con_Printf("%s (%zd files)\n", pl->p->f, pl->p->e - pl->p->l);
+			Con_Printf(va("%s (%zd files)\n", pl->p->f, pl->p->e - pl->p->l));
 		else
 			Con_Printf("%s\n", pl->f);
 }
@@ -386,7 +386,7 @@ loadpoints(void)
 
 	bf = openlmp(va("maps/%s.pts", sv.name), &n);
 	if(bf == nil){
-		Con_Printf("loadpoints: %r\n");
+		Con_Printf(va("loadpoints: %r\n"));
 		return;
 	}
 	nv = 0;

@@ -134,7 +134,7 @@ recdemo(void)
 	s = va("%s/%s%s", fsdir, a, ext(a, ".dem"));
 	dprint("recdemo: writing to file %s\n", s);
 	if(opendm(s, trk) < 0){
-		Con_Printf("recdemo: %r\n");
+		Con_Printf(va("recdemo: %r\n"));
 		return;
 	}
 	cls.demorecording = 1;
@@ -160,7 +160,7 @@ playdemo(void)
 	s = va("%s%s", a, ext(a, ".dem"));
 	dprint("playdemo: reading file %s\n", s);
 	if(loaddm(s) < 0){
-		Con_Printf("playdemo: %r\n");
+		Con_Printf(va("playdemo: %r\n"));
 		cls.demonum = -1;
 		return;
 	}
