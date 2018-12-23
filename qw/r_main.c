@@ -1031,7 +1031,7 @@ void R_InitTurb (void)
 {
 	int		i;
 	
-	for (i=0 ; i<1280 ; i++)
+	for (i=0 ; i<nelem(sintable) ; i++)
 	{
 		sintable[i] = AMP + sin(i*3.14159*2/CYCLE)*AMP;
 		intsintable[i] = AMP2 + sin(i*3.14159*2/CYCLE)*AMP2;	// AMP2, not 20
