@@ -173,6 +173,7 @@ flipfb(int dy)
 		vid.recalc_refdef = 1;	/* force a surface cache flush */
 		Con_CheckResize();
 		Con_Clear_f();
+		return;
 	}
 	drawfb(dy);
 	scalefb(dy);

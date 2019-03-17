@@ -221,6 +221,7 @@ VID_Update(vrect_t *)
 		vid.recalc_refdef = 1;	/* force a surface cache flush */
 		Con_CheckResize();
 		Con_Clear_f();
+		return;
 	}
 	drawfb();
 	scalefb();
