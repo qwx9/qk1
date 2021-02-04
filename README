@@ -3,6 +3,8 @@ qk1 - (9) quake
 Port of linux/x11 quake and quakeworld to plan9front.
 - Works on amd64 and 386, broken on zynq
 
+For details, see: http://nopenopenope.net/posts/quake
+
 
 Installation
 ------------
@@ -48,6 +50,8 @@ Installing an expansion or mod, for example rogue:
 Then start with:
 
 ; quake -g rogue
+
+To enable grabbing the mouse, set the m_windowed console variable to 1.
 
 
 Todo/bugs
