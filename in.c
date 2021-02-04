@@ -183,6 +183,7 @@ runetokey(Rune r)
 	case Kalt:
 	case Kaltgr:	k = K_ALT; break;
 	case Kins:	k = K_INS; break;
+	case L'§':	k = '~'; break;
 	default:
 		if(r < 0x80)
 			k = r;
