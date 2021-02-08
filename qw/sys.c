@@ -106,11 +106,7 @@ Sys_FileOpenWrite(char *path)
 double
 Sys_DoubleTime(void)
 {
-	static long secbase;
-
-	if(secbase == 0)
-		secbase = time(nil);
-	return nsec()/1000000000.0 - secbase;
+	return nanosec()/1000000000.0;
 }
 
 void

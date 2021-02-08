@@ -25,5 +25,6 @@ void Sys_HighFPPrecision(void);
 void Sys_SetFPCW(void);
 void Sys_Init(void);
 void initparm(quakeparms_t *);
+uvlong nanosec(void);
 
 void*	emalloc(ulong);

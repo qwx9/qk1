@@ -78,7 +78,7 @@ dtime(void)
 
 	if(t0 == 0.0)
 		t0 = time(nil);
-	return nsec() / 1000000000.0 - t0;
+	return nanosec() / 1000000000.0 - t0;
 }
 
 void

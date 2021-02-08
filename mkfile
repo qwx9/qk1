@@ -35,6 +35,7 @@ OFILES=\
 	mathlib.$O\
 	menu.$O\
 	model.$O\
+	nanosec.$O\
 	net_dgrm.$O\
 	net_loop.$O\
 	net_main.$O\

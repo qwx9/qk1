@@ -54,6 +54,7 @@ double	dtime(void);
 void	fppsgl(void);
 void	fppdbl(void);
 void	shutdown(void);
+uvlong	nanosec(void);
 
 #pragma	varargck	argpos	dprint	1
 #pragma varargck	argpos	fatal	1

@@ -38,6 +38,7 @@ CLOBJ=\
 	md4.$O\
 	menu.$O\
 	model.$O\
+	nanosec.$O\
 	net_chan.$O\
 	net_udp.$O\
 	nonintel.$O\
@@ -75,6 +76,7 @@ SVOBJ=\
 	cvar.$O\
 	mathlib.$O\
 	md4.$O\
+	nanosec.$O\
 	net_chan.$O\
 	net_udp.$O\
 	pmove.$O\
