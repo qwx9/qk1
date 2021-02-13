@@ -203,7 +203,10 @@ void PR_Profile_f (void)
 	int			max;
 	int			num;
 	int			i;
-	
+
+	if(!sv.active)
+		return;
+
 	num = 0;	
 	do
 	{
