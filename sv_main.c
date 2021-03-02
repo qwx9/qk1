@@ -7,7 +7,7 @@
 server_t		sv;
 server_static_t	svs;
 
-char	localmodels[MAX_MODELS][5];			// inline model names for precache
+char	localmodels[MAX_MODELS][8];			// inline model names for precache
 
 //============================================================================
 
