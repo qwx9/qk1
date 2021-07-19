@@ -233,13 +233,15 @@ void M_ToggleMenu_f (void)
 			M_Menu_Main_f ();
 			return;
 		}
-		key_dest = key_game;
+		key_dest = cls.state == ca_active ? key_game : key_console;
 		m_state = m_none;
 		return;
 	}
 	if (key_dest == key_console)
 	{
 		Con_ToggleConsole_f ();
+		if(key_dest == key_console && cls.state != ca_active)
+			M_Menu_Main_f();
 	}
 	else
 	{
@@ -290,7 +292,7 @@ void M_Main_Key (int key)
 	switch (key)
 	{
 	case K_ESCAPE:
-		key_dest = key_game;
+		key_dest = cls.state == ca_active ? key_game : key_console;
 		m_state = m_none;
 		cls.demonum = m_save_demonum;
 		if (cls.demonum != -1 && !cls.demoplayback && cls.state == ca_disconnected)
@@ -901,7 +903,7 @@ void M_Quit_Key (int key)
 		}
 		else
 		{
-			key_dest = key_game;
+			key_dest = cls.state == ca_active ? key_game : key_console;
 			m_state = m_none;
 		}
 		break;

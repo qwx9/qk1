@@ -15,7 +15,7 @@ int		key_lastpress;
 int		edit_line=0;
 int		history_line=0;
 
-keydest_t	key_dest;
+keydest_t	key_dest = key_console;
 
 int		key_count;			// incremented every key event
 
