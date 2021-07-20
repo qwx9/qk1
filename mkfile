@@ -1,6 +1,6 @@
 </$objtype/mkfile
 
-BIN=$home/bin/$objtype
+BIN=/$objtype/bin/games
 TARG=quake
 
 OFILES=\
