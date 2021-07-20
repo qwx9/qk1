@@ -1373,7 +1373,7 @@ void Host_Init (quakeparms_t *parms)
 
 	Con_Printf ("\nClient Version %4.2f\n\n", VERSION);
 
-	Con_Printf ("������� QuakeWorld Initialized �������\n");	
+	Con_Printf("\x80\x81\x81\x81\x81\x81\x81 QuakeWorld Initialized \x81\x81\x81\x81\x81\x81\x82\n");
 }
 
 
