@@ -26,7 +26,7 @@ cvar_t	cl_shownet = {"cl_shownet","0"};	// can be 0, 1, or 2
 
 cvar_t	cl_sbar		= {"cl_sbar", "0", true};
 cvar_t	cl_hudswap	= {"cl_hudswap", "0", true};
-cvar_t	cl_maxfps	= {"cl_maxfps", "0", true};
+cvar_t	cl_maxfps	= {"cl_maxfps", "72", true};
 
 cvar_t	lookspring = {"lookspring","0", true};
 cvar_t	lookstrafe = {"lookstrafe","0", true};
