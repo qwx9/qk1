@@ -1,13 +1,16 @@
 qk1 - (9) quake
 ===============
-Port of linux/x11 quake and quakeworld to plan9front.
-- Works on amd64 and 386, broken on zynq
+Port of linux/x11 quake and quakeworld to plan9front.  Tested and known to
+work on amd64, 386 and arm, but currently broken on zynq.
 
 For details, see: http://nopenopenope.net/posts/quake
 
+Hereafter `qk1' refers to the project as a whole, and `quake' and `quakeworld'
+refer to the actual games.
 
-Installation
-------------
+
+Installation and start up
+-------------------------
 Besides building and installing qk1, you still need .pak files to play.  Both
 shareware and registered versions work, as well as the official expansions,
 and mods.
@@ -15,73 +18,139 @@ The data files are to be installed in /sys/games/lib/quake/$gamename, where
 $gamename is 'id1' for plain old quake.  Savegames, configuration files and
 other user-specific data is saved in $home/lib/quake/$gamename, if it exists.
 
-; mk install
-; mkdir -p $home/lib/quake/id1
-; cp /n/quakecd/id1/*.pak $home/lib/quake/id1
-; quake >/dev/null
+To install quake:
+
+	; mk install
+	; mkdir -p $home/lib/quake/id1
+	; cp /n/quakecd/id1/*.pak $home/lib/quake/id1
+	; games/quake >/dev/null
 
 To install quakeworld:
 
-; cd qw
-; mk install
+	; cd qw
+	; mk install
+
+To install an expansion or mod, for example rogue:
+
+	; mkdir /sys/games/lib/quake/rogue
+	; cp /n/roguecd/*.pak /sys/games/lib/quake/rogue
+	; mkdir $home/lib/quake/rogue
+
+To start quake:
+
+	; games/quake >/dev/null
+
+Mods:
+
+	; games/quake -g rogue >/dev/null
+
+quakeworld's client:
+
+	; games/qwcl >/dev/null
+
+quakeworld's server:
+
+	; games/qwsv
+
+
+Memory limit
+------------
 
 By default, qk1 allocates 12 MB of memory for its internal heap.  This amount
 can be controlled via the -m command line parameter like so:
 
-; quake -m 16
+	; quake -m 16
 
 It is necessary to increase it when playing on larger resolutions, else qk1
 might crash with errors such as 'Hunk_Alloc: failed on 548512 bytes'.
+
+
+Mouse usage
+-----------
+
+Both quake and quakeworld now grab the mouse and have free mouse look by
+default.  Mouse grabbing is controled via a console variable at runtime:
+
+	] m_windowed 1
+
+Mouse look on the other hand is enabled with a command:
+
+	] +mlook
+
+To disable mouse look, use `-mlook'.
+
+
+Screen resolution
+-----------------
+
+The rio(1) window running qk1 can be resized at will and at runtime, but must
+the drawing area's size must be between 328x160 and 2047x2048.  To help with
+drawing speed, scaling up from a fixed resolution has been implemented.  When
+enabled, qk1 will behave like doom(1), where window size determines at
+runtime a scaling factor.  Currently, the way to enable this is different
+between quake and quakeworld.
+
+quake:
+	
+	; games/quake -s 320 200
+
+quakeworld:
+
+	; games/qwcl -scale 320 200
+
+
+Framerate and performance
+-------------------------
+
+To play the games comfortably the framerate should be above 72.  There are
+several things to note:
+
+- lowering the resolution (window size) improves performance
+- scaling up graphics from a lower resolution improves performance
+- performance influences sound output and can cause underflows (see below)
+
+In quakeworld, the framerate is controlled by one of two console variables,
+`cl_maxfps' and `rate' and can be between 30 and 72.  If `cl_maxfps' is not
+set, framerate is set to `rate' / 80.  `cl_maxfps' is now set to 72 by
+default.
+
+A simple way to benchmark is to play a demo with an uncapped framerate (one
+must be provided for quakeworld beforehand):
+
+	] timedemo demo2
+
+
+Audio and music
+---------------
+
+On low framerates, devaudio's delay must be increased appropriately, up to
+4410 (for a rate of 44.1 kHz), or sound will cut up.  This applies to
+quakeworld as well, for which the framerate can also be capped lower.
 
 qk1 reads /mnt/cd/[au]NNN files as in cdfs(1) to play music.  The directory
 needn't be populated by cdfs(1), so long as the files are in the format
 described by audio(3).  Reading from actual cdroms is currently broken.
 
-On lower framerates, devaudio's delay must be increased appropriately, up to
-4410 (for a rate of 44.1 kHz), or sound will cut up.  This applies to
-quakeworld as well, for which the framerate is capped lower by default.
 
-Installing an expansion or mod, for example rogue:
+Known bugs
+----------
 
-; mkdir /sys/games/lib/quake/rogue
-; cp /n/roguecd/*.pak /sys/games/lib/quake/rogue
-; mkdir $home/lib/quake/rogue
-
-Then start with:
-
-; quake -g rogue
-
-To enable grabbing the mouse, set the m_windowed console variable to 1.
-
-
-Todo/bugs
----------
-- don't use #pragma pack and do not read in structs directly
-- fix zynq graphics issues
-- cd: buffer reading from actual cdroms
-- do away with PR_Str shit
-- manpages
-- merge quakeworld: mkmany, etc
-- random crashes in d_sprite.c:D_SpriteDrawSpans
-- infinite loop in SV_TouchLinks
+- rendering broken on zynq
+- regression: cd audio with actual cd's broken
+- a rare crash at d_sprite.c:/D_SpriteDrawSpansd can occur when running for
+a long time
+- an infinite loop in world.c:/SV_TouchLinks can sometimes occur
 - (amd64) entities visible through walls right when emerging from/immerging
   into water
 - resolutions other than 4:3: some vertical and horizontal strips on the edge
   of the screen aren't drawn
+- sprites are not scaled correctly on higher resolutions and become=
+disproportionate
 - #define PARANOID reveals several points of failure that are otherwise ignored
-- (?) sprites not scaled correctly on higher resolutions
-- more testing, cleanups and bug fixes (g '/\* FIXME')
-
-
-Shitty workarounds and other bullshit
--------------------------------------
-- #pragma pack for stuff (structs) loaded from files
-- pr_strings assumed 32bit pointer arithmetic, so enter PR_GetStr(), which
-  completely sucks
-- text and code seen as useless for plan9 nuked from orbit (cpp defs, etc.)
-- arbitrary resolution limit (r_shared.h): 2048x2048 (was 1280x1024), which
-  inflates e.g. a bunch of arrays in the code
-- both stdio and print(2) are used due to the way colored strings are handled
+- both stdio(2) and print(2) are used due to the way colored strings are, how
+to handle this gracefully is unknown
+- questionable pr_edict.c:/PR_Str hack may cause problems
+- refactoring: manpages, command line args, merge quakeworld, FIXME's in code
 
 
 Legal
