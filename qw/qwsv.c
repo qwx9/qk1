@@ -53,6 +53,8 @@ threadmain(int argc, char *argv[])
 	netadr_t *a;
 
 	svonly = 1;
+	/* ignore fp exceptions, assumed by code */
+	setfcr(getfcr() & ~(FPOVFL|FPUNFL|FPINVAL|FPZDIV));
 	COM_InitArgv (argc, argv);
 	initparm(&q);
 	if((echan = chancreate(sizeof(int), 1)) == nil
