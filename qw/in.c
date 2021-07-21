@@ -25,7 +25,7 @@ struct Kev{
 static Channel *inchan;
 static QLock mlck;
 
-cvar_t m_windowed = {"m_windowed", "0", true};
+cvar_t m_windowed = {"m_windowed", "1", true};
 static cvar_t m_filter = {"m_filter", "0", true};
 static int mouseon, fixms;
 static int oldmwin;

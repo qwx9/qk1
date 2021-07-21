@@ -1362,6 +1362,7 @@ void Host_Init (quakeparms_t *parms)
 	Sbar_Init ();
 	CL_Init ();
 
+	Cbuf_InsertText ("+mlook\n");
 	Cbuf_InsertText ("exec quake.rc\n");
 	Cbuf_AddText ("echo Type connect <internet address> or use GameSpy to connect to a game.\n");
 	Cbuf_AddText ("cl_warncmd 1\n");

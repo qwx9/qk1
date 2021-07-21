@@ -623,6 +623,7 @@ void Host_Init (void)
 	}
 	IN_Init ();
 
+	Cbuf_InsertText ("+mlook\n");
 	Cbuf_InsertText ("exec quake.rc\n");
 
 	Hunk_AllocName (0, "-HOST_HUNKLEVEL-");
