@@ -13,7 +13,7 @@ char *game;
 
 enum{
 	KB = 1024*1024,
-	Nmem = 12 * KB
+	Nmem = 64 * KB
 };
 
 static int debug;

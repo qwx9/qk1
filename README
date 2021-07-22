@@ -56,13 +56,16 @@ quakeworld's server:
 Memory limit
 ------------
 
-By default, qk1 allocates 12 MB of memory for its internal heap.  This amount
+By default, qk1 allocates 64 MB of memory for its internal heap.  This amount
 can be controlled via the -m command line parameter like so:
 
-	; quake -m 16
+	# same for games/qwcl, games/qwsv
+	; games/quake -m 192
 
 It is necessary to increase it when playing on larger resolutions, else qk1
-might crash with errors such as 'Hunk_Alloc: failed on 548512 bytes'.
+might crash with errors such as 'Hunk_Alloc: failed on 548512 bytes'.  Mods
+may require more memory as well.  The old default was 12 MB, so it can also
+be lowered in the unlikely case that it's necessary.
 
 
 Mouse usage
@@ -117,7 +120,7 @@ default.
 A simple way to benchmark is to play a demo with an uncapped framerate (one
 must be provided for quakeworld beforehand):
 
-	] timedemo demo2
+	] timedemo demo3
 
 
 Audio and music

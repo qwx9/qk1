@@ -127,7 +127,7 @@ initparm(quakeparms_t *q)
 	memset(q, 0, sizeof *q);
 	q->argc = com_argc;
 	q->argv = com_argv;
-	q->memsize = 16*1024*1024;
+	q->memsize = 64*1024*1024;
 
 	if(i = COM_CheckParm("-mem"))
 		q->memsize = atoi(com_argv[i+1]) * 1024*1024;
