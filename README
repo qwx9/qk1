@@ -59,8 +59,10 @@ Memory limit
 By default, qk1 allocates 64 MB of memory for its internal heap.  This amount
 can be controlled via the -m command line parameter like so:
 
-	# same for games/qwcl, games/qwsv
 	; games/quake -m 192
+	# quakeworld:
+	; games/qwcl -mem 192
+	; games/qwsv -mem 192
 
 It is necessary to increase it when playing on larger resolutions, else qk1
 might crash with errors such as 'Hunk_Alloc: failed on 548512 bytes'.  Mods
