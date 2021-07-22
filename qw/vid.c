@@ -94,8 +94,15 @@ resetfb(void)
 		else if(scale > 16)
 			scale = 16;
 	}else{
+		/* lower than 320x240 doesn't really make sense,
+		 * but at least this prevents a crash, beyond that
+		 * it's your funeral */
 		vid.width = Dx(screen->r);
+		if(vid.width < 320)
+			vid.width = 320;
 		vid.height = Dy(screen->r);
+		if(vid.height < 160)
+			vid.height = 160;
 	}
 	if(d_pzbuffer != nil){
 		D_FlushCaches();
