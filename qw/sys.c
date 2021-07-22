@@ -38,18 +38,16 @@ Sys_Printf(char *fmt, ...)
 }
 
 void
-Sys_Error(char *error, ...)
+Sys_Error(char *fmt, ...)
 { 
-	char buf[1024], *out;
+	char s[1024];
 	va_list arg;
 
-	va_start(arg, error);
-	out = vseprint(buf, buf+sizeof(buf), error, arg);
+	va_start(arg, fmt);
+	vseprint(s, s+sizeof s, fmt, arg);
 	va_end(arg);
-	out = seprint(out, buf+sizeof(buf), "\n");
-	write(2, buf, out-buf);
 	Host_Shutdown();
-	sysfatal("ending.");
+	sysfatal("%s", s);
 }
 
 int

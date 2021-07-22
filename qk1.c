@@ -43,8 +43,7 @@ fatal(char *fmt, ...)
 	vseprint(s, s+sizeof s, fmt, arg);
 	va_end(arg);
 	Host_Shutdown();
-	fprint(2, "%s: %s\n", argv0, s);
-	exits(s);
+	sysfatal("%s", s);
 }
 
 void *
