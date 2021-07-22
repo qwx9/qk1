@@ -89,7 +89,7 @@ Screen resolution
 -----------------
 
 The rio(1) window running qk1 can be resized at will and at runtime, but must
-the drawing area's size must be between 328x160 and 2047x2048.  To help with
+the drawing area's size must be between 320x160 and 2047x2048.  To help with
 drawing speed, scaling up from a fixed resolution has been implemented.  When
 enabled, qk1 will behave like doom(1), where window size determines at
 runtime a scaling factor.  Currently, the way to enable this is different
