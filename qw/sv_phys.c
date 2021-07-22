@@ -321,7 +321,7 @@ int SV_FlyMove (edict_t *ent, float time, trace_t *steptrace)
 		{	// go along the crease
 			if (numplanes != 2)
 			{
-//				Con_Printf ("clip velocity, numplanes == %i\n",numplanes);
+//				Con_Printf ("clip velocity, numplanes == %d\n",numplanes);
 				VectorCopy (vec3_origin, ent->v.velocity);
 				return 7;
 			}
@@ -838,7 +838,7 @@ void SV_RunEntity (edict_t *ent)
 		SV_Physics_Toss (ent);
 		break;
 	default:
-		SV_Error ("SV_Physics: bad movetype %i", (int)ent->v.movetype);			
+		SV_Error ("SV_Physics: bad movetype %d", (int)ent->v.movetype);			
 	}
 }
 

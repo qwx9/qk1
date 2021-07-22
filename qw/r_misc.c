@@ -212,7 +212,7 @@ void R_NetGraph (void)
 		i = (cls.netchan.outgoing_sequence-a) & NET_TIMINGSMASK;
 		R_LineGraph (x+w-1-a, y, packet_latency[i]);
 	}
-	sprintf(st, "%3i%% packet loss", lost);
+	sprintf(st, "%3d%% packet loss", lost);
 	Draw_String(8, y2, st);
 }
 
@@ -255,7 +255,7 @@ void R_PrintTimes (void)
 
 	ms = 1000* (r_time2 - r_time1);
 	
-	Con_Printf ("%5.1f ms %3i/%3i/%3i poly %3i surf\n",
+	Con_Printf ("%5.1f ms %3d/%3d/%3d poly %3d surf\n",
 				ms, c_faceclip, r_polycount, r_drawnpolycount, c_surf);
 	c_surf = 0;
 }
@@ -280,7 +280,7 @@ void R_PrintDSpeeds (void)
 	dv_time = (dv_time2 - dv_time1) * 1000;
 	ms = (r_time2 - r_time1) * 1000;
 
-	Con_Printf ("%3i %4.1fp %3iw %4.1fb %3is %4.1fe %4.1fv\n",
+	Con_Printf ("%3d %4.1fp %3dw %4.1fb %3ds %4.1fe %4.1fv\n",
 				(int)ms, dp_time, (int)rw_time, db_time, (int)se_time, de_time,
 				dv_time);
 }
@@ -293,7 +293,7 @@ R_PrintAliasStats
 */
 void R_PrintAliasStats (void)
 {
-	Con_Printf ("%3i polygon model drawn\n", r_amodels_drawn);
+	Con_Printf ("%3d polygon model drawn\n", r_amodels_drawn);
 }
 
 

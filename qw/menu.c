@@ -283,7 +283,7 @@ void M_Main_Draw (void)
 
 	f = (int)(realtime * 10)%6;
 	
-	M_DrawTransPic (54, 32 + m_main_cursor * 20,Draw_CachePic( va("gfx/menudot%i.lmp", f+1 ) ) );
+	M_DrawTransPic (54, 32 + m_main_cursor * 20,Draw_CachePic( va("gfx/menudot%d.lmp", f+1 ) ) );
 }
 
 
@@ -796,7 +796,7 @@ void M_Menu_Help_f (void)
 
 void M_Help_Draw (void)
 {
-	M_DrawPic (0, 0, Draw_CachePic ( va("gfx/help%i.lmp", help_page)) );
+	M_DrawPic (0, 0, Draw_CachePic ( va("gfx/help%d.lmp", help_page)) );
 }
 
 

@@ -339,7 +339,7 @@ void SVC_Status (void)
 			top = (top < 0) ? 0 : ((top > 13) ? 13 : top);
 			bottom = (bottom < 0) ? 0 : ((bottom > 13) ? 13 : bottom);
 			ping = SV_CalcPing (cl);
-			Con_Printf ("%i %i %i %i \"%s\" \"%s\" %i %i\n", cl->userid, 
+			Con_Printf ("%d %d %d %d \"%s\" \"%s\" %d %d\n", cl->userid, 
 				cl->old_frags, (int)(realtime - cl->connection_started)/60,
 				ping, cl->name, Info_ValueForKey (cl->userinfo, "skin"), top, bottom);
 		}
@@ -371,7 +371,7 @@ void SV_CheckLog (void)
 		svs.logsequence++;
 		sz = &svs.log[svs.logsequence&1];
 		sz->cursize = 0;
-		Con_Printf ("beginning fraglog sequence %i\n", svs.logsequence);
+		Con_Printf ("beginning fraglog sequence %d\n", svs.logsequence);
 	}
 
 }
@@ -403,9 +403,9 @@ void SVC_Log (void)
 		return;
 	}
 
-	Con_DPrintf ("sending log %i to %s\n", svs.logsequence-1, net_from->sys);
+	Con_DPrintf ("sending log %d to %s\n", svs.logsequence-1, net_from->sys);
 
-	sprintf (data, "stdlog %i\n", svs.logsequence-1);
+	sprintf (data, "stdlog %d\n", svs.logsequence-1);
 	strcat (data, (char *)svs.log_buf[((svs.logsequence-1)&1)]);
 
 	NET_SendPacket (strlen(data)+1, data, net_from);
@@ -469,7 +469,7 @@ void SVC_GetChallenge (void)
 	}
 
 	// send it back
-	Netchan_OutOfBandPrint (net_from, "%c%i", S2C_CHALLENGE, 
+	Netchan_OutOfBandPrint (net_from, "%c%d", S2C_CHALLENGE, 
 			svs.challenges[i].challenge);
 }
 
@@ -501,7 +501,7 @@ void SVC_DirectConnect (void)
 	if (version != PROTOCOL_VERSION)
 	{
 		Netchan_OutOfBandPrint (net_from, "%c\nServer is version %4.2f.\n", A2C_PRINT, VERSION);
-		Con_Printf ("* rejected connect from version %i\n", version);
+		Con_Printf ("* rejected connect from version %d\n", version);
 		return;
 	}
 
@@ -1119,7 +1119,7 @@ void SV_CheckVars (void)
 	if (!v)
 		Info_SetValueForKey (svs.info, "needpass", "", MAX_SERVERINFO_STRING);
 	else
-		Info_SetValueForKey (svs.info, "needpass", va("%i",v), MAX_SERVERINFO_STRING);
+		Info_SetValueForKey (svs.info, "needpass", va("%d",v), MAX_SERVERINFO_STRING);
 }
 
 /*
@@ -1264,7 +1264,7 @@ void SV_InitLocal (void)
 	Cmd_AddCommand ("writeip", SV_WriteIP_f);
 
 	for (i=0 ; i<MAX_MODELS ; i++)
-		sprintf (localmodels[i], "*%i", i);
+		sprintf (localmodels[i], "*%d", i);
 
 	Info_SetValueForStarKey (svs.info, "*version", va("%4.2f", VERSION), MAX_SERVERINFO_STRING);
 
@@ -1314,7 +1314,7 @@ void Master_Heartbeat (void)
 			active++;
 
 	svs.heartbeat_sequence++;
-	sprintf (string, "%c\n%i\n%i\n", S2M_HEARTBEAT,
+	sprintf (string, "%c\n%d\n%d\n", S2M_HEARTBEAT,
 		svs.heartbeat_sequence, active);
 
 
@@ -1487,7 +1487,7 @@ void SV_InitNet (void)
 	if (p && p < com_argc)
 	{
 		port = atoi(com_argv[p+1]);
-		Con_Printf ("Port: %i\n", port);
+		Con_Printf ("Port: %d\n", port);
 	}
 	NET_Init (port);
 

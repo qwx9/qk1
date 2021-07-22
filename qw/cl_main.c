@@ -186,7 +186,7 @@ void CL_SendConnectPacket (void)
 	Info_SetValueForStarKey (cls.userinfo, "*ip", adr.addr, MAX_INFO_STRING);
 
 //	Con_Printf ("Connecting to %s...\n", cls.servername);
-	sprintf (data, "%c%c%c%cconnect %i %i %i \"%s\"\n",
+	sprintf (data, "%c%c%c%cconnect %d %d %d \"%s\"\n",
 		255, 255, 255, 255,	PROTOCOL_VERSION, cls.qport, cls.challenge, cls.userinfo);
 	NET_SendPacket (strlen(data), data, &adr);
 }
@@ -462,12 +462,12 @@ void CL_Users_f (void)
 	{
 		if (cl.players[i].name[0])
 		{
-			Con_Printf ("%6i %4i %s\n", cl.players[i].userid, cl.players[i].frags, cl.players[i].name);
+			Con_Printf ("%6d %4d %s\n", cl.players[i].userid, cl.players[i].frags, cl.players[i].name);
 			c++;
 		}
 	}
 
-	Con_Printf ("%i total users\n", c);
+	Con_Printf ("%d total users\n", c);
 }
 
 void CL_Color_f (void)
@@ -500,9 +500,9 @@ void CL_Color_f (void)
 	if (bottom > 13)
 		bottom = 13;
 	
-	sprintf (num, "%i", top);
+	sprintf (num, "%d", top);
 	Cvar_Set ("topcolor", num);
-	sprintf (num, "%i", bottom);
+	sprintf (num, "%d", bottom);
 	Cvar_Set ("bottomcolor", num);
 }
 
@@ -1278,7 +1278,7 @@ void Host_Frame (float time)
 		time3 = Sys_DoubleTime ();
 		pass2 = (time2 - time1)*1000;
 		pass3 = (time3 - time2)*1000;
-		Con_Printf ("%3i tot %3i server %3i gfx %3i snd\n",
+		Con_Printf ("%3d tot %3d server %3d gfx %3d snd\n",
 					pass1+pass2+pass3, pass1, pass2, pass3);
 	}
 

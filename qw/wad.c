@@ -118,7 +118,7 @@ void *W_GetLumpNum (int num)
 	lumpinfo_t	*lump;
 	
 	if (num < 0 || num > wad_numlumps)
-		Sys_Error ("W_GetLumpNum: bad number: %i", num);
+		Sys_Error ("W_GetLumpNum: bad number: %d", num);
 		
 	lump = wad_lumps + num;
 	

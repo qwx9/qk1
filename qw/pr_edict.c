@@ -269,7 +269,7 @@ char *PR_ValueString (etype_t type, eval_t *val)
 		sprintf (line, "%s", PR_GetString(val->string));
 		break;
 	case ev_entity:	
-		sprintf (line, "entity %i", NUM_FOR_EDICT(PROG_TO_EDICT(val->edict)) );
+		sprintf (line, "entity %d", NUM_FOR_EDICT(PROG_TO_EDICT(val->edict)) );
 		break;
 	case ev_function:
 		f = pr_functions + val->function;
@@ -292,7 +292,7 @@ char *PR_ValueString (etype_t type, eval_t *val)
 		sprintf (line, "pointer");
 		break;
 	default:
-		sprintf (line, "bad type %i", type);
+		sprintf (line, "bad type %d", type);
 		break;
 	}
 	
@@ -321,7 +321,7 @@ char *PR_UglyValueString (etype_t type, eval_t *val)
 		sprintf (line, "%s", PR_GetString(val->string));
 		break;
 	case ev_entity:	
-		sprintf (line, "%i", NUM_FOR_EDICT(PROG_TO_EDICT(val->edict)));
+		sprintf (line, "%d", NUM_FOR_EDICT(PROG_TO_EDICT(val->edict)));
 		break;
 	case ev_function:
 		f = pr_functions + val->function;
@@ -341,7 +341,7 @@ char *PR_UglyValueString (etype_t type, eval_t *val)
 		sprintf (line, "%f %f %f", val->vector[0], val->vector[1], val->vector[2]);
 		break;
 	default:
-		sprintf (line, "bad type %i", type);
+		sprintf (line, "bad type %d", type);
 		break;
 	}
 	
@@ -367,11 +367,11 @@ char *PR_GlobalString (int ofs)
 	val = (void *)&pr_globals[ofs];
 	def = ED_GlobalAtOfs(ofs);
 	if (!def)
-		sprintf (line,"%i(???)", ofs);
+		sprintf (line,"%d(???)", ofs);
 	else
 	{
 		s = PR_ValueString (def->type, val);
-		sprintf (line,"%i(%s)%s", ofs, PR_GetString(def->s_name), s);
+		sprintf (line,"%d(%s)%s", ofs, PR_GetString(def->s_name), s);
 	}
 	
 	i = strlen(line);
@@ -390,9 +390,9 @@ char *PR_GlobalStringNoContents (int ofs)
 	
 	def = ED_GlobalAtOfs(ofs);
 	if (!def)
-		sprintf (line,"%i(???)", ofs);
+		sprintf (line,"%d(???)", ofs);
 	else
-		sprintf (line,"%i(%s)", ofs, PR_GetString(def->s_name));
+		sprintf (line,"%d(%s)", ofs, PR_GetString(def->s_name));
 	
 	i = strlen(line);
 	for ( ; i<20 ; i++)
@@ -515,10 +515,10 @@ void ED_PrintEdicts (void)
 {
 	int		i;
 	
-	Con_Printf ("%i entities\n", sv.num_edicts);
+	Con_Printf ("%d entities\n", sv.num_edicts);
 	for (i=0 ; i<sv.num_edicts ; i++)
 	{
-		Con_Printf ("\nEDICT %i:\n",i);
+		Con_Printf ("\nEDICT %d:\n",i);
 		ED_PrintNum (i);
 	}
 }
@@ -535,7 +535,7 @@ void ED_PrintEdict_f (void)
 	int		i;
 	
 	i = Q_atoi (Cmd_Argv(1));
-	Con_Printf ("\n EDICT %i:\n",i);
+	Con_Printf ("\n EDICT %d:\n",i);
 	ED_PrintNum (i);
 }
 
@@ -567,11 +567,11 @@ void ED_Count (void)
 			step++;
 	}
 
-	Con_Printf ("num_edicts:%3i\n", sv.num_edicts);
-	Con_Printf ("active    :%3i\n", active);
-	Con_Printf ("view      :%3i\n", models);
-	Con_Printf ("touch     :%3i\n", solid);
-	Con_Printf ("step      :%3i\n", step);
+	Con_Printf ("num_edicts:%3d\n", sv.num_edicts);
+	Con_Printf ("active    :%3d\n", active);
+	Con_Printf ("view      :%3d\n", models);
+	Con_Printf ("touch     :%3d\n", solid);
+	Con_Printf ("step      :%3d\n", step);
 
 }
 
@@ -930,7 +930,7 @@ void ED_LoadFromFile (char *data)
 		SV_FlushSignon();
 	}	
 
-	Con_DPrintf ("%i entities inhibited\n", inhibit);
+	Con_DPrintf ("%d entities inhibited\n", inhibit);
 }
 
 
@@ -954,10 +954,10 @@ void PR_LoadProgs (void)
 		progs = (dprograms_t *)COM_LoadHunkFile ("progs.dat");
 	if (!progs)
 		SV_Error ("PR_LoadProgs: couldn't load progs.dat");
-	Con_DPrintf ("Programs occupy %iK.\n", com_filesize/1024);
+	Con_DPrintf ("Programs occupy %dK.\n", com_filesize/1024);
 
 // add prog crc to the serverinfo
-	sprintf (num, "%i", CRC_Block ((byte *)progs, com_filesize));
+	sprintf (num, "%d", CRC_Block ((byte *)progs, com_filesize));
 	Info_SetValueForStarKey (svs.info, "*progs", num, MAX_SERVERINFO_STRING);
 
 // byte swap the header
@@ -965,7 +965,7 @@ void PR_LoadProgs (void)
 		((int *)progs)[i] = LittleLong ( ((int *)progs)[i] );		
 
 	if (progs->version != PROG_VERSION)
-		SV_Error ("progs.dat has wrong version number (%i should be %i)", progs->version, PROG_VERSION);
+		SV_Error ("progs.dat has wrong version number (%d should be %d)", progs->version, PROG_VERSION);
 	if (progs->crc != PROGHEADER_CRC)
 		SV_Error ("You must have the progs.dat from QuakeWorld installed");
 
@@ -1050,7 +1050,7 @@ void PR_Init (void)
 edict_t *EDICT_NUM(int n)
 {
 	if (n < 0 || n >= MAX_EDICTS)
-		SV_Error ("EDICT_NUM: bad number %i", n);
+		SV_Error ("EDICT_NUM: bad number %d", n);
 	return (edict_t *)((byte *)sv.edicts+ (n)*pr_edict_size);
 }
 

@@ -307,7 +307,7 @@ void CL_ParsePacketEntities (qboolean delta)
 		{
 			while (oldindex < oldp->num_entities)
 			{	// copy all the rest of the entities from the old packet
-//Con_Printf ("copy %i\n", oldp->entities[oldindex].number);
+//Con_Printf ("copy %d\n", oldp->entities[oldindex].number);
 				if (newindex >= MAX_PACKET_ENTITIES)
 					Host_EndGame ("CL_ParsePacketEntities: newindex == MAX_PACKET_ENTITIES");
 				newp->entities[newindex] = oldp->entities[oldindex];
@@ -328,7 +328,7 @@ void CL_ParsePacketEntities (qboolean delta)
 				return;
 			}
 
-//Con_Printf ("copy %i\n", oldnum);
+//Con_Printf ("copy %d\n", oldnum);
 			// copy one of the old entities over to the new packet unchanged
 			if (newindex >= MAX_PACKET_ENTITIES)
 				Host_EndGame ("CL_ParsePacketEntities: newindex == MAX_PACKET_ENTITIES");
@@ -340,7 +340,7 @@ void CL_ParsePacketEntities (qboolean delta)
 
 		if (newnum < oldnum)
 		{	// new from baseline
-//Con_Printf ("baseline %i\n", newnum);
+//Con_Printf ("baseline %d\n", newnum);
 			if (word & U_REMOVE)
 			{
 				if (full)
@@ -371,7 +371,7 @@ void CL_ParsePacketEntities (qboolean delta)
 				oldindex++;
 				continue;
 			}
-//Con_Printf ("delta %i\n",newnum);
+//Con_Printf ("delta %d\n",newnum);
 			CL_ParseDelta (&oldp->entities[oldindex], &newp->entities[newindex], word);
 			newindex++;
 			oldindex++;
@@ -852,7 +852,7 @@ void CL_LinkPlayers (void)
 			if (msec > 255)
 				msec = 255;
 			state->command.msec = msec;
-//Con_DPrintf ("predict: %i\n", msec);
+//Con_DPrintf ("predict: %d\n", msec);
 
 			oldphysent = pmove.numphysent;
 			CL_SetSolidPlayers (j);
@@ -974,7 +974,7 @@ void CL_SetUpPlayerPrediction(qboolean dopred)
 				if (msec > 255)
 					msec = 255;
 				state->command.msec = msec;
-	//Con_DPrintf ("predict: %i\n", msec);
+	//Con_DPrintf ("predict: %d\n", msec);
 
 				CL_PredictUsercmd (state, &exact, &state->command, false);
 				VectorCopy (exact.origin, pplayer->origin);

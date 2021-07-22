@@ -233,7 +233,7 @@ void Model_NextDownload (void)
 
 	// done with modellist, request first of static signon messages
 	MSG_WriteByte (&cls.netchan.message, clc_stringcmd);
-//	MSG_WriteString (&cls.netchan.message, va("prespawn %i 0 %i", cl.servercount, cl.worldmodel->checksum2));
+//	MSG_WriteString (&cls.netchan.message, va("prespawn %d 0 %d", cl.servercount, cl.worldmodel->checksum2));
 	MSG_WriteString (&cls.netchan.message, va(prespawn_name, cl.servercount, cl.worldmodel->checksum2));
 }
 
@@ -276,7 +276,7 @@ void Sound_NextDownload (void)
 	cl_spikeindex = -1;
 	cl_flagindex = -1;
 	MSG_WriteByte (&cls.netchan.message, clc_stringcmd);
-//	MSG_WriteString (&cls.netchan.message, va("modellist %i 0", cl.servercount));
+//	MSG_WriteString (&cls.netchan.message, va("modellist %d 0", cl.servercount));
 	MSG_WriteString (&cls.netchan.message, va(modellist_name, cl.servercount, 0));
 }
 
@@ -390,7 +390,7 @@ void CL_ParseDownload (void)
 		if (10*(percent/10) != cls.downloadpercent)
 		{
 			cls.downloadpercent = 10*(percent/10);
-			Con_Printf ("%i%%", cls.downloadpercent);
+			Con_Printf ("%d%%", cls.downloadpercent);
 		}
 */
 		cls.downloadpercent = percent;
@@ -537,7 +537,7 @@ void CL_ParseServerData (void)
 	protover = MSG_ReadLong ();
 	if (protover != PROTOCOL_VERSION && 
 		!(cls.demoplayback && (protover == 26 || protover == 27 || protover == 28)))
-		Host_EndGame ("Server returned version %i, not %i\nYou probably need to upgrade.\nCheck http://www.quakeworld.net/", protover, PROTOCOL_VERSION);
+		Host_EndGame ("Server returned version %d, not %d\nYou probably need to upgrade.\nCheck http://www.quakeworld.net/", protover, PROTOCOL_VERSION);
 
 	cl.servercount = MSG_ReadLong ();
 
@@ -596,7 +596,7 @@ void CL_ParseServerData (void)
 	// ask for the sound list next
 	memset(cl.sound_name, 0, sizeof(cl.sound_name));
 	MSG_WriteByte (&cls.netchan.message, clc_stringcmd);
-//	MSG_WriteString (&cls.netchan.message, va("soundlist %i 0", cl.servercount));
+//	MSG_WriteString (&cls.netchan.message, va("soundlist %d 0", cl.servercount));
 	MSG_WriteString (&cls.netchan.message, va(soundlist_name, cl.servercount, 0));
 
 	// now waiting for downloads, etc
@@ -633,7 +633,7 @@ void CL_ParseSoundlist (void)
 
 	if (n) {
 		MSG_WriteByte (&cls.netchan.message, clc_stringcmd);
-//		MSG_WriteString (&cls.netchan.message, va("soundlist %i %i", cl.servercount, n));
+//		MSG_WriteString (&cls.netchan.message, va("soundlist %d %d", cl.servercount, n));
 		MSG_WriteString (&cls.netchan.message, va(soundlist_name, cl.servercount, n));
 		return;
 	}
@@ -679,7 +679,7 @@ void CL_ParseModellist (void)
 
 	if (n) {
 		MSG_WriteByte (&cls.netchan.message, clc_stringcmd);
-//		MSG_WriteString (&cls.netchan.message, va("modellist %i %i", cl.servercount, n));
+//		MSG_WriteString (&cls.netchan.message, va("modellist %d %d", cl.servercount, n));
 		MSG_WriteString (&cls.netchan.message, va(modellist_name, cl.servercount, n));
 		return;
 	}
@@ -810,7 +810,7 @@ void CL_ParseStartSoundPacket(void)
 	channel &= 7;
 
 	if (ent > MAX_EDICTS)
-		Host_EndGame ("CL_ParseStartSoundPacket: ent = %i", ent);
+		Host_EndGame ("CL_ParseStartSoundPacket: ent = %d", ent);
 	
     startsfx (ent, channel, cl.sound_precache[sound_num], pos, volume/255.0, attenuation);
 }       
@@ -1017,7 +1017,7 @@ void CL_SetStat (int stat, int value)
 {
 	int	j;
 	if (stat < 0 || stat >= MAX_CL_STATS)
-		Sys_Error ("CL_SetStat: %i is invalid", stat);
+		Sys_Error ("CL_SetStat: %d is invalid", stat);
 
 	Sbar_Changed ();
 	
@@ -1066,7 +1066,7 @@ void CL_MuzzleFlash (void)
 }
 
 
-#define SHOWNET(x) if(cl_shownet.value==2)Con_Printf ("%3i:%s\n", msg_readcount-1, x);
+#define SHOWNET(x) if(cl_shownet.value==2)Con_Printf ("%3d:%s\n", msg_readcount-1, x);
 /*
 =====================
 CL_ParseServerMessage
@@ -1087,7 +1087,7 @@ void CL_ParseServerMessage (void)
 // if recording demos, copy the message out
 //
 	if (cl_shownet.value == 1)
-		Con_Printf ("%i ",net_message.cursize);
+		Con_Printf ("%d ",net_message.cursize);
 	else if (cl_shownet.value == 2)
 		Con_Printf ("------------------\n");
 

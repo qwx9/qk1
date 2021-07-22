@@ -237,7 +237,7 @@ void Skin_NextDownload (void)
 	{	// get next signon phase
 		MSG_WriteByte (&cls.netchan.message, clc_stringcmd);
 		MSG_WriteString (&cls.netchan.message,
-			va("begin %i", cl.servercount));
+			va("begin %d", cl.servercount));
 		Cache_Report ();		// print remaining memory
 	}
 }

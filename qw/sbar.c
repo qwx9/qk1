@@ -117,8 +117,8 @@ void Sbar_Init (void)
 
 	for (i=0 ; i<10 ; i++)
 	{
-		sb_nums[0][i] = Draw_PicFromWad (va("num_%i",i));
-		sb_nums[1][i] = Draw_PicFromWad (va("anum_%i",i));
+		sb_nums[0][i] = Draw_PicFromWad (va("num_%d",i));
+		sb_nums[1][i] = Draw_PicFromWad (va("anum_%d",i));
 	}
 
 	sb_nums[0][10] = Draw_PicFromWad ("num_minus");
@@ -145,13 +145,13 @@ void Sbar_Init (void)
 	
 	for (i=0 ; i<5 ; i++)
 	{
-		sb_weapons[2+i][0] = Draw_PicFromWad (va("inva%i_shotgun",i+1));
-		sb_weapons[2+i][1] = Draw_PicFromWad (va("inva%i_sshotgun",i+1));
-		sb_weapons[2+i][2] = Draw_PicFromWad (va("inva%i_nailgun",i+1));
-		sb_weapons[2+i][3] = Draw_PicFromWad (va("inva%i_snailgun",i+1));
-		sb_weapons[2+i][4] = Draw_PicFromWad (va("inva%i_rlaunch",i+1));
-		sb_weapons[2+i][5] = Draw_PicFromWad (va("inva%i_srlaunch",i+1));
-		sb_weapons[2+i][6] = Draw_PicFromWad (va("inva%i_lightng",i+1));
+		sb_weapons[2+i][0] = Draw_PicFromWad (va("inva%d_shotgun",i+1));
+		sb_weapons[2+i][1] = Draw_PicFromWad (va("inva%d_sshotgun",i+1));
+		sb_weapons[2+i][2] = Draw_PicFromWad (va("inva%d_nailgun",i+1));
+		sb_weapons[2+i][3] = Draw_PicFromWad (va("inva%d_snailgun",i+1));
+		sb_weapons[2+i][4] = Draw_PicFromWad (va("inva%d_rlaunch",i+1));
+		sb_weapons[2+i][5] = Draw_PicFromWad (va("inva%d_srlaunch",i+1));
+		sb_weapons[2+i][6] = Draw_PicFromWad (va("inva%d_lightng",i+1));
 	}
 
 	sb_ammo[0] = Draw_PicFromWad ("sb_shells");
@@ -469,7 +469,7 @@ void Sbar_SoloScoreboard (void)
 	seconds = cl.time - 60*minutes;
 	tens = seconds / 10;
 	units = seconds - 10*tens;
-	sprintf (str,"Time :%3i:%i%i", minutes, tens, units);
+	sprintf (str,"Time :%3d:%d%d", minutes, tens, units);
 	Sbar_DrawString (184, 4, str);
 }
 
@@ -529,7 +529,7 @@ void Sbar_DrawInventory (void)
 // ammo counts
 	for (i=0 ; i<4 ; i++)
 	{
-		sprintf (num, "%3i",cl.stats[STAT_SHELLS+i] );
+		sprintf (num, "%3d",cl.stats[STAT_SHELLS+i] );
 		if (headsup) {
 //			Sbar_DrawSubPic(3, -24, sb_ibar, 3, 0, 42,11);
 			Sbar_DrawSubPic((hudswap) ? 0 : (vid.width-42), -24 - (4-i)*11, sb_ibar, 3+(i*48), 0, 42, 11);
@@ -630,7 +630,7 @@ void Sbar_DrawFrags (void)
 
 	// draw number
 		f = s->frags;
-		sprintf (num, "%3i",f);
+		sprintf (num, "%3d",f);
 		
 		Sbar_DrawCharacter ( (x+1)*8 , -24, num[0]);
 		Sbar_DrawCharacter ( (x+2)*8 , -24, num[1]);
@@ -916,7 +916,7 @@ void Sbar_TeamOverlay (void)
 		if (pavg < 0 || pavg > 999)
 			pavg = 999;
 
-		sprintf (num, "%3i/%3i/%3i", plow, pavg, phigh);
+		sprintf (num, "%3d/%3d/%3d", plow, pavg, phigh);
 		Draw_String ( x, y, num);
 
 	// draw team
@@ -925,11 +925,11 @@ void Sbar_TeamOverlay (void)
 		Draw_String (x + 104, y, team);
 
 	// draw total
-		sprintf (num, "%5i", tm->frags);
+		sprintf (num, "%5d", tm->frags);
 		Draw_String (x + 104 + 40, y, num);
 		
 	// draw players
-		sprintf (num, "%5i", tm->players);
+		sprintf (num, "%5d", tm->players);
 		Draw_String (x + 104 + 88, y, num);
 		
 		if (!strncmp(Info_ValueForKey(cl.players[cl.playernum].userinfo,
@@ -1029,12 +1029,12 @@ void Sbar_DeathmatchOverlay (int start)
 		p = s->ping;
 		if (p < 0 || p > 999)
 			p = 999;
-		sprintf (num, "%4i", p);
+		sprintf (num, "%4d", p);
 		Draw_String ( x, y, num);
 
 		// draw pl
 		p = s->pl;
-		sprintf (num, "%3i", p);
+		sprintf (num, "%3d", p);
 		if (p > 25)
 			Draw_Alt_String ( x+32, y, num);
 		else
@@ -1059,7 +1059,7 @@ void Sbar_DeathmatchOverlay (int start)
 		else
 			total = realtime - s->entertime;
 		minutes = (int)total/60;
-		sprintf (num, "%4i", minutes);
+		sprintf (num, "%4d", minutes);
 		Draw_String ( x+64 , y, num);
 
 		// draw background
@@ -1076,7 +1076,7 @@ void Sbar_DeathmatchOverlay (int start)
 
 	// draw number
 		f = s->frags;
-		sprintf (num, "%3i",f);
+		sprintf (num, "%3d",f);
 		
 		Draw_Character ( x+112 , y, num[0]);
 		Draw_Character ( x+120 , y, num[1]);
@@ -1188,7 +1188,7 @@ void Sbar_MiniDeathmatchOverlay (void)
 
 	// draw number
 		f = s->frags;
-		sprintf (num, "%3i",f);
+		sprintf (num, "%3d",f);
 		
 		Draw_Character ( x+8 , y, num[0]);
 		Draw_Character ( x+16, y, num[1]);
@@ -1241,7 +1241,7 @@ void Sbar_MiniDeathmatchOverlay (void)
 		Draw_String (x, y, team);
 
 	// draw total
-		sprintf (num, "%5i", tm->frags);
+		sprintf (num, "%5d", tm->frags);
 		Draw_String (x + 40, y, num);
 		
 		if (!strncmp(Info_ValueForKey(cl.players[cl.playernum].userinfo,

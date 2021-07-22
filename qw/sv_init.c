@@ -232,7 +232,7 @@ void SV_CalcPHS (void)
 				count++;
 	}
 
-	Con_Printf ("Average leafs visible / hearable / total: %i / %i / %i\n"
+	Con_Printf ("Average leafs visible / hearable / total: %d / %d / %d\n"
 		, vcount/num, count/num, num);
 }
 

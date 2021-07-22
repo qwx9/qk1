@@ -65,7 +65,7 @@ D_InitCaches
 void D_InitCaches (void *buffer, int size)
 {
 //	if (!msg_suppress_1)
-//		Con_Printf ("%ik surface cache\n", size/1024);
+//		Con_Printf ("%dk surface cache\n", size/1024);
 
 	sc_size = size - GUARDSIZE;
 	sc_base = (surfcache_t *)buffer;
@@ -123,7 +123,7 @@ surfcache_t     *D_SCAlloc (int width, int size)
 
 	size = (size + 3) & ~3;
 	if (size > sc_size)
-		Sys_Error ("D_SCAlloc: %i > cache size",size);
+		Sys_Error ("D_SCAlloc: %d > cache size",size);
 
 // if there is not size bytes after the rover, reset to the start
 	wrapped_this_time = false;
@@ -204,7 +204,7 @@ void D_SCDump (void)
 	{
 		if (test == sc_rover)
 			Sys_Printf ("ROVER:\n");
-		printf ("%p : %i bytes     %i width\n",test, test->size, test->width);
+		printf ("%p : %d bytes     %d width\n",test, test->size, test->width);
 	}
 }
 

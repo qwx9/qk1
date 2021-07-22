@@ -236,7 +236,7 @@ void SV_PreSpawn_f (void)
 		if (sv_mapcheck.value && check != sv.worldmodel->checksum &&
 			check != sv.worldmodel->checksum2) {
 			SV_ClientPrintf (host_client, PRINT_HIGH, 
-				"Map model file does not match (%s), %i != %i/%i.\n"
+				"Map model file does not match (%s), %d != %d/%d.\n"
 				"You may need a new version of the map, or the proper install files.\n",
 				sv.modelname, check, sv.worldmodel->checksum, sv.worldmodel->checksum2);
 			SV_DropClient (host_client); 
@@ -261,13 +261,13 @@ void SV_PreSpawn_f (void)
 	if (buf == sv.num_signon_buffers)
 	{	// all done prespawning
 		MSG_WriteByte (&host_client->netchan.message, svc_stufftext);
-		MSG_WriteString (&host_client->netchan.message, va("cmd spawn %i 0\n",svs.spawncount) );
+		MSG_WriteString (&host_client->netchan.message, va("cmd spawn %d 0\n",svs.spawncount) );
 	}
 	else
 	{	// need to prespawn more
 		MSG_WriteByte (&host_client->netchan.message, svc_stufftext);
 		MSG_WriteString (&host_client->netchan.message, 
-			va("cmd prespawn %i %i\n", svs.spawncount, buf) );
+			va("cmd prespawn %d %d\n", svs.spawncount, buf) );
 	}
 }
 
@@ -986,7 +986,7 @@ void SV_Rate_f (void)
 	
 	if (Cmd_Argc() != 2)
 	{
-		SV_ClientPrintf (host_client, PRINT_HIGH, "Current rate is %i\n",
+		SV_ClientPrintf (host_client, PRINT_HIGH, "Current rate is %d\n",
 			(int)(1.0/host_client->netchan.rate + 0.5));
 		return;
 	}
@@ -997,7 +997,7 @@ void SV_Rate_f (void)
 	if (rate > 10000)
 		rate = 10000;
 
-	SV_ClientPrintf (host_client, PRINT_HIGH, "Net rate set to %i\n", rate);
+	SV_ClientPrintf (host_client, PRINT_HIGH, "Net rate set to %d\n", rate);
 	host_client->netchan.rate = 1.0/rate;
 }
 
@@ -1013,14 +1013,14 @@ void SV_Msg_f (void)
 {	
 	if (Cmd_Argc() != 2)
 	{
-		SV_ClientPrintf (host_client, PRINT_HIGH, "Current msg level is %i\n",
+		SV_ClientPrintf (host_client, PRINT_HIGH, "Current msg level is %d\n",
 			host_client->messagelevel);
 		return;
 	}
 	
 	host_client->messagelevel = atoi(Cmd_Argv(1));
 
-	SV_ClientPrintf (host_client, PRINT_HIGH, "Msg level set to %i\n", host_client->messagelevel);
+	SV_ClientPrintf (host_client, PRINT_HIGH, "Msg level set to %d\n", host_client->messagelevel);
 }
 
 /*

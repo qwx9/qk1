@@ -179,7 +179,7 @@ int PM_FlyMove (void)
 		{	// go along the crease
 			if (numplanes != 2)
 			{
-//				Con_Printf ("clip velocity, numplanes == %i\n",numplanes);
+//				Con_Printf ("clip velocity, numplanes == %d\n",numplanes);
 				VectorCopy (vec3_origin, pmove.velocity);
 				break;
 			}

@@ -275,7 +275,7 @@ void SV_Multicast (vec3_t origin, int to)
 
 	default:
 		mask = NULL;
-		SV_Error ("SV_Multicast: bad to:%i", to);
+		SV_Error ("SV_Multicast: bad to:%d", to);
 	}
 
 	// send the data to all relevent clients
@@ -341,13 +341,13 @@ void SV_StartSound (edict_t *entity, int channel, char *sample, int volume,
 	qboolean	reliable = false;
 
 	if (volume < 0 || volume > 255)
-		SV_Error ("SV_StartSound: volume = %i", volume);
+		SV_Error ("SV_StartSound: volume = %d", volume);
 
 	if (attenuation < 0 || attenuation > 4)
 		SV_Error ("SV_StartSound: attenuation = %f", attenuation);
 
 	if (channel < 0 || channel > 15)
-		SV_Error ("SV_StartSound: channel = %i", channel);
+		SV_Error ("SV_StartSound: channel = %d", channel);
 
 // find precache number for sound
     for (sound_num=1 ; sound_num<MAX_SOUNDS

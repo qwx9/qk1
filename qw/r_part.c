@@ -110,7 +110,7 @@ void R_ReadPointFile_f (void)
 	}
 
 	fclose (f);
-	Con_Printf ("%i points read\n", c);
+	Con_Printf ("%d points read\n", c);
 }
 	
 /*

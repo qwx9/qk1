@@ -113,7 +113,7 @@ void SV_Fraglogfile_f (void)
 	// find an unused name
 	for (i=0 ; i<1000 ; i++)
 	{
-		sprintf (name, "%s/frag_%i.log", com_gamedir, i);
+		sprintf (name, "%s/frag_%d.log", com_gamedir, i);
 		sv_fraglogfile = fopen (name, "r");
 		if (!sv_fraglogfile)
 		{	// can't read it, so create this one
@@ -161,7 +161,7 @@ qboolean SV_SetPlayer (void)
 			return true;
 		}
 	}
-	Con_Printf ("Userid %i is not on the server\n", idnum);
+	Con_Printf ("Userid %d is not on the server\n", idnum);
 	return false;
 }
 
@@ -349,7 +349,7 @@ void SV_Kick_f (void)
 		}
 	}
 
-	Con_Printf ("Couldn't find user number %i\n", uid);
+	Con_Printf ("Couldn't find user number %d\n", uid);
 }
 
 
@@ -372,8 +372,8 @@ void SV_Status_f (void)
 	avg = 1000*svs.stats.latched_active / STATFRAMES;
 	pak = (float)svs.stats.latched_packets/ STATFRAMES;
 
-	Con_Printf ("cpu utilization  : %3i%%\n",(int)cpu);
-	Con_Printf ("avg response time: %i ms\n",(int)avg);
+	Con_Printf ("cpu utilization  : %3d%%\n",(int)cpu);
+	Con_Printf ("avg response time: %d ms\n",(int)avg);
 	Con_Printf ("packets/frame    : %5.2f (%d)\n", pak, num_prstr);
 	
 // min fps lat drp
@@ -390,7 +390,7 @@ void SV_Status_f (void)
 
 			Con_Printf ("%-16.16s  ", cl->name);
 
-			Con_Printf ("%6i %5i", cl->userid, (int)cl->edict->v.frags);
+			Con_Printf ("%6d %5d", cl->userid, (int)cl->edict->v.frags);
 			if (cl->spectator)
 				Con_Printf(" (s)\n");
 			else			
@@ -408,7 +408,7 @@ void SV_Status_f (void)
 				Con_Printf ("ZOMBIE\n");
 				continue;
 			}
-			Con_Printf ("%4i %4i %5.2f\n"
+			Con_Printf ("%4d %4d %5.2f\n"
 				, (int)(1000*cl->netchan.frame_rate)
 				, (int)SV_CalcPing (cl)
 				, 100.0*cl->netchan.drop_count / cl->netchan.incoming_sequence);
@@ -420,7 +420,7 @@ void SV_Status_f (void)
 		{
 			if (!cl->state)
 				continue;
-			Con_Printf ("%5i %6i ", (int)cl->edict->v.frags,  cl->userid);
+			Con_Printf ("%5d %6d ", (int)cl->edict->v.frags,  cl->userid);
 
 			s = cl->netchan.remote_address.addr;
 			Con_Printf ("%s", s);
@@ -442,7 +442,7 @@ void SV_Status_f (void)
 				Con_Printf ("ZOMBIE\n");
 				continue;
 			}
-			Con_Printf ("%4i %4i %3.1f %4i"
+			Con_Printf ("%4d %4d %3.1f %4d"
 				, (int)(1000*cl->netchan.frame_rate)
 				, (int)SV_CalcPing (cl)
 				, 100.0*cl->netchan.drop_count / cl->netchan.incoming_sequence

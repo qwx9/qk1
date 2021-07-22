@@ -683,7 +683,7 @@ void *SZ_GetSpace (sizebuf_t *buf, int length)
 			Sys_Error ("SZ_GetSpace: overflow without allowoverflow set (%d)", buf->maxsize);
 		
 		if (length > buf->maxsize)
-			Sys_Error ("SZ_GetSpace: %i is > full buffer size", length);
+			Sys_Error ("SZ_GetSpace: %d is > full buffer size", length);
 			
 		Sys_Printf ("SZ_GetSpace: overflow\n");	// because Con_Printf may be redirected
 		SZ_Clear (buf); 
@@ -1190,7 +1190,7 @@ void COM_Path_f (void)
 		if (s == com_base_searchpaths)
 			Con_Printf ("----------\n");
 		if (s->pack)
-			Con_Printf ("%s (%i files)\n", s->pack->filename, s->pack->numfiles);
+			Con_Printf ("%s (%d files)\n", s->pack->filename, s->pack->numfiles);
 		else
 			Con_Printf ("%s\n", s->filename);
 	}
@@ -1476,7 +1476,7 @@ pack_t *COM_LoadPackFile (char *packfile)
 	numpackfiles = header.dirlen / sizeof(dpackfile_t);
 
 	if (numpackfiles > MAX_FILES_IN_PACK)
-		Sys_Error ("%s has %i files", packfile, numpackfiles);
+		Sys_Error ("%s has %d files", packfile, numpackfiles);
 
 	if (numpackfiles != PAK0_COUNT)
 		com_modified = true;	// not the original file
@@ -1509,7 +1509,7 @@ pack_t *COM_LoadPackFile (char *packfile)
 	pack->numfiles = numpackfiles;
 	pack->files = newfiles;
 	
-	Con_Printf ("Added packfile %s (%i files)\n", packfile, numpackfiles);
+	Con_Printf ("Added packfile %s (%d files)\n", packfile, numpackfiles);
 	return pack;
 }
 
@@ -1549,7 +1549,7 @@ void COM_AddGameDirectory (char *dir)
 //
 	for (i=0 ; ; i++)
 	{
-		sprintf (pakfile, "%s/pak%i.pak", dir, i);
+		sprintf (pakfile, "%s/pak%d.pak", dir, i);
 		pak = COM_LoadPackFile (pakfile);
 		if (!pak)
 			break;
@@ -1625,7 +1625,7 @@ void COM_Gamedir (char *dir)
 	//
 	for (i=0 ; ; i++)
 	{
-		sprintf (pakfile, "%s/pak%i.pak", com_gamedir, i);
+		sprintf (pakfile, "%s/pak%d.pak", com_gamedir, i);
 		pak = COM_LoadPackFile (pakfile);
 		if (!pak)
 			break;
