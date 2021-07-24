@@ -1255,7 +1255,7 @@ void CL_ParseServerMessage (void)
 
 		case svc_cdtrack:
 			cl.cdtrack = MSG_ReadByte ();
-			startcd ((byte)cl.cdtrack, true);
+			playcd ((byte)cl.cdtrack, true);
 			break;
 
 		case svc_intermission:

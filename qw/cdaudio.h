@@ -1,5 +1,5 @@
 int	initcd(void);
-void	startcd(int, int);
+void	playcd(int, int);
 void	pausecd(void);
 void	resumecd(void);
 void	shutcd(void);

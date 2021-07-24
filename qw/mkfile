@@ -6,6 +6,7 @@ TARG=\
 	qwsv\
 
 CLOBJ=\
+	cd.$O\
 	cl_cam.$O\
 	cl_demo.$O\
 	cl_ents.$O\

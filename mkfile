@@ -4,6 +4,7 @@ BIN=/$objtype/bin/games
 TARG=quake
 
 OFILES=\
+	cd.$O\
 	cl_demo.$O\
 	cl_input.$O\
 	cl_main.$O\

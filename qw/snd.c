@@ -3,7 +3,6 @@
 #include <stdio.h>
 #include "quakedef.h"
 
-cvar_t bgmvolume = {"bgmvolume", "1", 1};
 cvar_t volume = {"volume", "0.7", 1};
 
 typedef struct Chan Chan;
@@ -46,11 +45,6 @@ static int sampbuf[Ssamp*Sch*sizeof(int)];
 static int scalt[32][256];
 
 static sfx_t *ambsfx[NUM_AMBIENTS];
-
-static char cdfile[13];
-static int ntrk;
-static int cdfd = -1;
-static int cdread, cdloop, cdvol;
 
 typedef struct
 {
@@ -333,26 +327,19 @@ loadsfx(sfx_t *sfx)
 	return sc;
 }
 
-void
-stepcd(void)
-{
-	cdvol = bgmvolume.value * 256;
-	cdread = cdfd >= 0 && cdvol > 0;
-}
-
 static void
 sndout(void)
 {
-	int v, vol, *pb, *pe;
+	int v, *pb, *pe;
 	uchar *p;
+	double vol;
 
-	vol = volume.value * 256;
+	vol = volume.value;
 	p = mixbuf;
 	pb = sampbuf;
 	pe = sampbuf + nsamp * 2;
 	while(pb < pe){
-		v = (short)(p[1] << 8 | p[0]) * cdvol >> 8;
-		v += *pb++ * vol >> 8;
+		v = *pb++ * vol;
 		if(v > 0x7fff)
 			v = 0x7fff;
 		else if(v < -0x8000)
@@ -440,46 +427,6 @@ samplesfx(void)
 		}
 	}
 	sndout();
-}
-
-void
-stopcd(void)
-{
-	if(cdfd >= 0)
-		close(cdfd);
-	cdread = 0;
-	cdloop = 0;
-}
-
-void
-pausecd(void)
-{
-	cdread = 0;
-}
-
-void
-resumecd(void)
-{
-	cdread = 1;
-}
-
-static void
-readcd(int ns)
-{
-	int n;
-
-	if(cdfd < 0 || !cdread)
-		return;
-	if(n = readn(cdfd, mixbuf, ns), n != ns){
-		if(n < 0 || !cdloop)
-			stopcd();
-		else{
-			seek(cdfd, 0, 0);
-			ns -= n;
-			if(n = readn(cdfd, mixbuf+n, ns), n != ns)
-				stopcd();
-		}
-	}
 }
 
 static void
@@ -593,33 +540,12 @@ stepsnd(vec3_t origin, vec3_t forward, vec3_t right, vec3_t up)
 	if(nsamp > Ssamp)
 		nsamp = Ssamp;
 	ns = nsamp * Sblk;
-	memset(mixbuf, 0, ns);
-	readcd(ns);
 	samplesfx();
 	if(write(afd, mixbuf, ns) != ns){
 		fprint(2, "sndwrite: %r\n");
 		shutsnd();
 	}
 	sndt = nanosec();
-}
-
-void
-startcd(int nt, int loop)
-{
-	if(ntrk < 1)
-		return;
-	nt -= 1;	/* d001 assumed part of track list */
-	if(nt < 1 || nt > ntrk){
-		fprint(2, "startcd: invalid track number %d\n", nt);
-		return;
-	}
-	if(cdfd = open(va("%s%03d", cdfile, nt), OREAD), cdfd < 0){
-		fprint(2, "startcd: open: %r\n");
-		return;
-	}
-	cdloop = loop;
-	if(cdvol > 0)
-		cdread = 1;
 }
 
 void
@@ -799,33 +725,6 @@ precachesfx(char *s)
 }
 
 static void
-cdcmd(void)
-{
-	char *c;
-
-	if(Cmd_Argc() < 2){
-usage:
-		Con_Printf("cd (play|loop|stop|pause|resume|info) [track]\n");
-		return;
-	}
-	c = Cmd_Argv(1);
-	if(cistrcmp(c, "play") == 0){
-		if(Cmd_Argc() < 2)
-			goto usage;
-		startcd(atoi(Cmd_Argv(2)), 0);
-	}else if(cistrcmp(c, "loop") == 0){
-		if(Cmd_Argc() < 2)
-			goto usage;
-		startcd(atoi(Cmd_Argv(2)), 1);
-	}else if(cistrcmp(c, "stop") == 0)
-		stopcd();
-	else if(cistrcmp(c, "pause") == 0)
-		pausecd();
-	else if(cistrcmp(c, "resume") == 0)
-		resumecd();
-}
-
-static void
 playsfx(void)
 {
 	static int hash = 345;
@@ -896,62 +795,11 @@ sfxlist(void)
 }
 
 void
-shutcd(void)
-{
-	stopcd();
-}
-
-void
 shutsnd(void)
 {
 	if(afd < 0)
 		return;
 	close(afd);
-}
-
-static int
-cdinfo(void)
-{
-	int fd, i, n, nt;
-	char *t, types[] = {'a', 'u', 0};
-	Dir *d;
-
-	ntrk = 0;
-	if(fd = open("/mnt/cd", OREAD), fd < 0)
-		return -1;
-	if(n = dirreadall(fd, &d), n < 0){
-		close(fd);
-		return -1;
-	}
-	close(fd);
-	t = types;
-	for(;;){
-		for(nt=0, i=0; i<n; i++)
-			if(strcmp(d[i].name, va("%c%03d", *t, ntrk+1)) == 0){
-				ntrk++;
-				nt = 1;
-			}
-		if(ntrk < 1){
-			if(*++t == 0){
-				werrstr("cdinfo: no tracks found");
-				break;
-			}
-		}else if(nt == 0){
-			snprint(cdfile, sizeof cdfile, "/mnt/cd/%c", *t);
-			break;
-		}
-	}
-	free(d);
-	return ntrk < 1 ? -1 : 0;
-}
-
-int
-initcd(void)
-{
-	if(cdinfo() < 0)
-		return -1;
-	Cmd_AddCommand("cd", cdcmd);
-	return 0;
 }
 
 int
@@ -971,7 +819,6 @@ initsnd(quakeparms_t *q)
 	Cvar_RegisterVariable(&volume);
 	Cvar_RegisterVariable(&precache);
 	Cvar_RegisterVariable(&loadas8bit);
-	Cvar_RegisterVariable(&bgmvolume);
 	Cvar_RegisterVariable(&ambient_level);
 	Cvar_RegisterVariable(&ambient_fade);
 	if(q->memsize < 0x800000){

@@ -8,7 +8,7 @@ void	stepsnd(vec3_t, vec3_t, vec3_t, vec3_t);
 void	stopcd(void);
 void	pausecd(void);
 void	resumecd(void);
-void	startcd(int, int);
+void	playcd(int, int);
 void	stopallsfx(void);
 void	stopsfx(int, int);
 void	startsfx(int, int, Sfx *, vec3_t, float, float);
