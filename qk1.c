@@ -100,8 +100,10 @@ shutdown(void)
 static void
 croak(void *, char *note)
 {
-	if(strncmp(note, "sys:", 4) == 0)
+	if(strncmp(note, "sys:", 4) == 0){
 		IN_Grabm(0);
+		threadkillgrp(0);
+	}
 	noted(NDFLT);
 }
 
