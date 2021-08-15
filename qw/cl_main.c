@@ -1168,10 +1168,13 @@ Writes key bindings and archived cvars to config.cfg
 void Host_WriteConfiguration (void)
 {
 	FILE	*f;
+	char *path;
 
 	if (host_initialized)
 	{
-		f = fopen (va("%s/config.cfg",com_gamedir), "w");
+		path = va("%s/config.cfg", com_gamedir);
+		COM_CreatePath(path);
+		f = fopen(path, "w");
 		if (!f)
 		{
 			Con_Printf ("Couldn't write config.cfg.\n");

@@ -1234,13 +1234,19 @@ Only used for CopyFile and download
 void	COM_CreatePath (char *path)
 {
 	char	*ofs;
-	
-	for (ofs = path+1 ; *ofs ; ofs++)
+
+	ofs = path;
+	if(ofs == nil || *ofs == 0)
+		return;
+	if(*ofs == '/')
+		ofs++;
+	for (; *ofs ; ofs++)
 	{
 		if (*ofs == '/')
 		{	// create the directory
 			*ofs = 0;
-			Sys_mkdir (path);
+			if(Sys_mkdir(path) < 0)
+				return;
 			*ofs = '/';
 		}
 	}

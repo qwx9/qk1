@@ -279,6 +279,43 @@ bsize(Biobuf *bf)
 	return n;
 }
 
+static int
+mkdir(char *path)
+{
+	int d;
+
+	if(access(path, AEXIST) == 0)
+		return 0;
+	if((d = create(path, OREAD, DMDIR|0777)) < 0){
+		fprint(2, "Sys_mkdir:create: %r\n");
+		return -1;
+	}
+	close(d);
+	return 0;
+}
+
+static int
+mkpath(char *path)
+{
+	char *d;
+
+	d = path;
+	if(d == nil || *d == 0)
+		return -1;
+	if(*d == '/')
+		d++;
+	while(*d != 0){
+		if(*d == '/'){
+			*d = 0;
+			if(mkdir(path) < 0)
+				return -1;
+			*d = '/';
+		}
+		d++;
+	}
+	return mkdir(path);
+}
+
 static void
 closelmp(Biobuf *bf)
 {
@@ -863,6 +900,7 @@ initns(void)
 		pakdir(va("%s/lib/quake/id1", home));
 		if(game != nil)
 			pakdir(va("%s/lib/quake/%s", home, game));
+		mkpath(fsdir);
 		free(home);
 	}
 }

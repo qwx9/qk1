@@ -60,15 +60,19 @@ Sys_FileTime(char *path)
 	return *((int *)(bs+2+2+4+1+4+8+4+4));	/* mtime[4] */
 }
 
-void
+int
 Sys_mkdir(char *path)
 {
 	int d;
 
-	if((d = create(path, OREAD, DMDIR|0777)) < 0)
+	if(access(path, AEXIST) == 0)
+		return 0;
+	if((d = create(path, OREAD, DMDIR|0777)) < 0){
 		fprint(2, "Sys_mkdir:create: %r\n");
-	else
-		close(d);
+		return -1;
+	}
+	close(d);
+	return 0;
 }
 
 vlong
@@ -81,24 +85,6 @@ flen(int fd)
 		return -1;
 	}
 	return *((vlong *)(bs+2+2+4+1+4+8+4+4+4));	/* length[8] */
-}
-
-vlong
-Sys_FileOpenRead(char *path, int *fd)
-{
-	if((*fd = open(path, OREAD)) < 0)
-		return -1;
-	return flen(*fd);
-}
-
-int
-Sys_FileOpenWrite(char *path)
-{
-	int fd;
-
-	if((fd = open(path, OREAD|OTRUNC)) < 0)
-		sysfatal("Sys_FileOpenWrite:open: %r");
-	return fd;
 }
 
 double

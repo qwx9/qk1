@@ -7,10 +7,8 @@ enum{
 };
 extern int svonly;
 
-vlong Sys_FileOpenRead(char *, int *);
-int Sys_FileOpenWrite(char *);
 int Sys_FileTime(char *);
-void Sys_mkdir(char *);
+int Sys_mkdir(char *);
 vlong flen(int);
 
 void Sys_Error(char *, ...);
