@@ -11,53 +11,75 @@ refer to the actual games.
 
 Installation and start up
 -------------------------
+
+	*Note*: all data filenames should be lowercased; exceptions are demo
+	files, maps and other non-hardcoded files.
+
 Besides building and installing qk1, you still need .pak files to play.  Both
 shareware and registered versions work, as well as the official expansions,
-and mods.
-The data files are to be installed in /sys/games/lib/quake/$gamename, where
-$gamename is 'id1' for plain old quake.  Savegames, configuration files and
-other user-specific data is saved in $home/lib/quake/$gamename, if it exists.
+and many mods.
+The data files are to be installed in the system directory,
+/sys/games/lib/quake/$gamename, where $gamename is `id1' for plain old quake,
+`qw' for quakeworld, `hipnotic' or `rogue' for the expansions, _reaper_ for
+the Reaper bot mod, etc.
+
+Savegames, configuration files and other user-specific data like demos is
+saved in $home/lib/quake/$gamename.  Shared demos can be installed in the
+system directory instead.
+
+	*Note*: demos in .pak files are a special case; they need to be
+	installed in a user directory, named using the next available .pak
+	index; for instance, the registered version has `pak0.pak' and
+	`pak1.pak', thus the additional .pak file will be `pak2.pak'.
 
 To install quake:
 
 	; mk install
-	; mkdir -p $home/lib/quake/id1
-	; cp /n/quakecd/id1/*.pak $home/lib/quake/id1
+	# installation from cd; both shareware and registered versions work
+	; cdfs
+	; cp /mnt/cd/id1/*.pak /sys/games/lib/quake/id1/
+	; unmount /mnt/cd
+	# launch!
 	; games/quake >/dev/null
 
-To install quakeworld:
+To install quakeworld, first install quake, then:
 
 	; cd qw
 	; mk install
-
-To install an expansion or mod, for example rogue:
-
-	; mkdir /sys/games/lib/quake/rogue
-	; cp /n/roguecd/*.pak /sys/games/lib/quake/rogue
-	; mkdir $home/lib/quake/rogue
-
-To start quake:
-
-	; games/quake >/dev/null
-
-Mods:
-
-	; games/quake -g rogue >/dev/null
-
-quakeworld's client:
-
+	# a qwprogs.dat file must be provided also, one is included
+	; cp qw/progs/qwprogs.dat /sys/games/lib/quake/qw/
+	# launch!
 	; games/qwcl >/dev/null
 
-quakeworld's server:
+To start a quakeworld dedicated server:
 
+	; echo scroll >/mnt/wsys/wctl
 	; games/qwsv
+
+To install an expansion (here from cd):
+
+	; mkdir /sys/games/lib/quake/$mod
+	# expansions provide at least .pak files
+	; cdfs
+	; cp /mnt/cd/$mod/*.pak /sys/games/lib/quake/$mod/
+	; unmount /mnt/cd
+	# launch!
+	; games/quake -g rogue >/dev/null
+
+To install a mod
+
+	; mkdir /sys/games/lib/quake/$mod
+	; dircp /n/hjdicks/$mod /sys/games/lib/quake/$mod
+	# launch!
+	; games/quake -g $mod >/dev/null
+
 
 
 Memory limit
 ------------
-
 By default, qk1 allocates 64 MB of memory for its internal heap.  This amount
-can be controlled via the -m command line parameter like so:
+can be controlled via a command line parameter, which is sadly different
+between games (i'm to blame):
 
 	; games/quake -m 192
 	# quakeworld:
@@ -67,12 +89,12 @@ can be controlled via the -m command line parameter like so:
 It is necessary to increase it when playing on larger resolutions, else qk1
 might crash with errors such as 'Hunk_Alloc: failed on 548512 bytes'.  Mods
 may require more memory as well.  The old default was 12 MB, so it can also
-be lowered in the unlikely case that it's necessary.
+be lowered in the unlikely case that it's necessary.  Typically, this
+needn't be touched.
 
 
 Mouse usage
 -----------
-
 Both quake and quakeworld now grab the mouse and have free mouse look by
 default.  Mouse grabbing is controled via a console variable at runtime:
 
@@ -87,13 +109,12 @@ To disable mouse look, use `-mlook'.
 
 Screen resolution
 -----------------
-
 The rio(1) window running qk1 can be resized at will and at runtime, but must
 the drawing area's size must be between 320x160 and 2047x2048.  To help with
 drawing speed, scaling up from a fixed resolution has been implemented.  When
 enabled, qk1 will behave like doom(1), where window size determines at
-runtime a scaling factor.  Currently, the way to enable this is different
-between quake and quakeworld.
+runtime a scaling factor.  Currently, the way to enable this is again
+different between quake and quakeworld.
 
 quake:
 	
@@ -106,18 +127,19 @@ quakeworld:
 
 Framerate and performance
 -------------------------
-
 To play the games comfortably the framerate should be above 72.  There are
 several things to note:
 
 - lowering the resolution (window size) improves performance
 - scaling up graphics from a lower resolution improves performance
 - performance influences sound output and can cause underflows (see below)
+- on slower or uniprocessor machines, the parallel cd audio process affects
+  performance
 
 In quakeworld, the framerate is controlled by one of two console variables,
 `cl_maxfps' and `rate' and can be between 30 and 72.  If `cl_maxfps' is not
 set, framerate is set to `rate' / 80.  `cl_maxfps' is now set to 72 by
-default.
+default and saved on exit.
 
 A simple way to benchmark is to play a demo with an uncapped framerate (one
 must be provided for quakeworld beforehand):
@@ -127,19 +149,18 @@ must be provided for quakeworld beforehand):
 
 Audio and music
 ---------------
-
 On low framerates, devaudio's delay must be increased appropriately, up to
 4410 (for a rate of 44.1 kHz), or sound will cut up.  This applies to
 quakeworld as well, for which the framerate can also be capped lower.
 
 qk1 reads /mnt/cd/[au]NNN files as in cdfs(1) to play music.  The directory
-needn't be populated by cdfs(1), so long as the files are in the format
-described by audio(3).  CD playback requires mixfs(1).
+needn't be populated by cdfs(1), so long as the files are raw signed little-
+endian 16-bit pcm audio, as described by audio(3).  CD playback requires
+mixfs(1).
 
 
 Known bugs
 ----------
-
 - rendering broken on zynq
 - regression: cd audio with actual cd's broken
 - a rare crash at d_sprite.c:/D_SpriteDrawSpansd can occur when running for
