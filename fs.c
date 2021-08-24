@@ -508,12 +508,12 @@ savnames(void)
 		strcpy(*s, "--- UNUSED SLOT ---");
 		bf = bopen(va("%s/s%d.sav", fsdir, n), OREAD, 1);
 		if(bf == nil){
-			dprint("savnames: %r");
+			dprint("savnames: %r\n");
 			continue;
 		}
 		if((p = Brdline(bf, '\n'), p == nil)	/* discard version */
 		|| (p = Brdline(bf, '\n'), p == nil)){
-			dprint("savnames: short read: %r");
+			dprint("savnames: short read: %r\n");
 			continue;
 		}
 		strncpy(*s, p, sizeof(*s)-1);
@@ -762,9 +762,9 @@ readdm(void)
 	n = Bread(demobf, net_message.data, net_message.cursize);
 	demoofs = Bseek(demobf, 0, 1);
 	if(n < 0)
-		dprint("readdm: bad read: %r");
+		dprint("readdm: bad read: %r\n");
 	if(n != net_message.cursize){
-		dprint("readdm: short read: %r");
+		dprint("readdm: short read: %r\n");
 		n = -1;
 	}
 	return n;
@@ -782,7 +782,7 @@ loaddm(char *f)
 	s = Brdline(demobf, '\n');
 	n = Blinelen(demobf) - 1;
 	if(s == nil || n < 0 || n > 11){
-		dprint("loaddm: invalid trk field");
+		dprint("loaddm: invalid trk field\n");
 		closelmp(demobf);
 		return -1;
 	}
@@ -869,7 +869,7 @@ pakdir(char *d)
 		snprint(f, sizeof f, "%s/pak%d.pak", d, n);
 		p = pak(f);
 		if(p == nil){
-			dprint("pakdir: %r");
+			dprint("pakdir: %r\n");
 			break;
 		}
 		pl = Hunk_Alloc(sizeof *pl);
@@ -914,7 +914,7 @@ chkreg(void)
 	Cvar_RegisterVariable(&registered);
 	bf = openlmp("gfx/pop.lmp", nil);
 	if(bf == nil){
-		dprint("chkreg: shareware version");
+		dprint("chkreg: shareware version\n");
 		if(notid1)
 			fatal("chkreg: phase error -- %r");
 		return;
@@ -925,7 +925,7 @@ chkreg(void)
 			fatal("chkreg: corrupted pop lump");
 	closelmp(bf);
 	setcvar("registered", "1");
-	dprint("chkreg: registered version");
+	dprint("chkreg: registered version\n");
 }
 
 /* TODO: nuke these from orbit */

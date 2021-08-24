@@ -10,13 +10,12 @@ char *netmtpt = "/net";
 uchar *membase;
 int memsize;
 char *game;
+int debug;
 
 enum{
 	KB = 1024*1024,
 	Nmem = 64 * KB
 };
-
-static int debug;
 
 void
 dprint(char *fmt, ...)
@@ -29,7 +28,7 @@ dprint(char *fmt, ...)
 	va_start(arg, fmt);
 	vseprint(s, s+sizeof s, fmt, arg);
 	va_end(arg);
-	fprint(2, "%s\n", s);
+	fprint(2, "%s", s);
 }
 
 /* FIXME: merge dprint/fatal? */
@@ -121,6 +120,9 @@ threadmain(int argc, char **argv)
 
 	memsize = Nmem;
 	ARGBEGIN{
+	case 'D':
+		debug = 1;
+		break;
 	case 'd':
 		dedicated = 1;
 		break;

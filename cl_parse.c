@@ -192,7 +192,7 @@ void CL_ParseServerInfo (void)
 	char	model_precache[MAX_MODELS][Npath];
 	char	sound_precache[MAX_SOUNDS][Npath];
 
-	print("CL_ParseServerInfo: parsing serverinfo pkt...\n");
+	dprint("CL_ParseServerInfo: parsing serverinfo pkt...\n");
 //
 // wipe the client_state_t struct
 //

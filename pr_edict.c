@@ -882,7 +882,7 @@ void ED_LoadFromFile (char *data)
 		PR_ExecuteProgram (func - pr_functions);
 	}	
 
-	print("%d entities inhibited\n", inhibit);
+	dprint("%d entities inhibited\n", inhibit);
 }
 
 
@@ -904,7 +904,7 @@ void PR_LoadProgs (void)
 	progs = loadhunklmp("progs.dat", &n);
 	if(progs == nil)
 		fatal("PR_LoadProgs: %r");
-	print("Programs occupy %dK.\n", n/1024);
+	dprint("Programs occupy %dK.\n", n/1024);
 
 	for (i=0 ; i<n ; i++)
 		crc (((byte *)progs)[i]);

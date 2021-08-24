@@ -78,7 +78,7 @@ readcl(void)
 		if(r != 1 && r != 2)
 			return r;
 		if(net_message.cursize == 1 && net_message.data[0] == svc_nop)
-			dprint("<-- server to client keepalive");
+			dprint("<-- server to client keepalive\n");
 		else
 			break;
 	}

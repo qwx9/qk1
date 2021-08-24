@@ -739,7 +739,7 @@ void Cache_Flush (void)
 void
 Cache_Report(void)
 {
-	print("%4.1f megabyte data cache\n",
+	dprint("%4.1f megabyte data cache\n",
 		(memsize - hunk_high_used - hunk_low_used)
 		/ (float)(1024*1024));
 }

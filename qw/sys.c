@@ -4,7 +4,7 @@
 #include <thread.h>
 #include "quakedef.h"
 
-int svonly;
+int svonly, debug;
 
 void *
 emalloc(ulong n)
@@ -24,16 +24,17 @@ Sys_Printf(char *fmt, ...)
 	char *p;
 	va_list arg;
 
+	if(!svonly && !debug)
+		return;
 	va_start(arg, fmt);
 	vseprint(buf, buf+sizeof(buf), fmt, arg);
 	va_end(arg);
-
 	for(p = buf; *p; p++){
 		*p &= 0x7f;
 		if(*p < 32 && *p != 10 && *p != 13 && *p != 9)
-			print("[%02x]", *p);
+			fprint(2, "[%02x]", *p);
 		else
-			print("%c", *p);
+			fprint(2, "%c", *p);
 	}
 }
 
@@ -115,6 +116,8 @@ initparm(quakeparms_t *q)
 
 	if(i = COM_CheckParm("-mem"))
 		q->memsize = atoi(com_argv[i+1]) * 1024*1024;
+	if(COM_CheckParm("-debug"))
+		debug = 1;
 	if((q->membase = malloc(q->memsize)) == nil)
 		sysfatal("initparm:malloc: %r");
 }

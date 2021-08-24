@@ -1395,7 +1395,7 @@ void Host_Shutdown(void)
 	
 	if (isdown)
 	{
-		printf ("recursive shutdown\n");
+		Sys_Printf ("recursive shutdown\n");
 		return;
 	}
 	isdown = true;

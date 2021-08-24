@@ -45,3 +45,4 @@ enum{
 #define Spktatt 1.0
 
 extern int dumpwin, scaleon;
+extern int debug;

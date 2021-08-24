@@ -204,7 +204,7 @@ void D_SCDump (void)
 	{
 		if (test == sc_rover)
 			Sys_Printf ("ROVER:\n");
-		printf ("%p : %d bytes     %d width\n",test, test->size, test->width);
+		Sys_Printf ("%p : %d bytes     %d width\n",test, test->size, test->width);
 	}
 }
 

@@ -293,6 +293,8 @@ print1(char *s, int n)
 {
 	char buf[4096], *p, *d;
 
+	if(!debug)
+		return;
 	p = s;
 	d = buf;
 	while(*p)

@@ -68,7 +68,7 @@ void Host_EndGame (char *fmt, ...)
 	vsnprint(s, sizeof s, fmt, arg);
 	va_end(arg);
 
-	print("Host_EndGame: %s\n", s);
+	dprint("Host_EndGame: %s\n", s);
 
 	if(sv.active)
 		Host_ShutdownServer(false);
@@ -280,7 +280,7 @@ void SV_DropClient (qboolean crash)
 			pr_global_struct->self = saveSelf;
 		}
 
-		print("client %s removed\n", host_client->name);
+		dprint("client %s removed\n", host_client->name);
 	}
 
 // break the net connection
@@ -391,7 +391,7 @@ not reinitialize anything.
 */
 void Host_ClearMemory (void)
 {
-	print("Clearing memory\n");
+	dprint("Clearing memory\n");
 	D_FlushCaches ();
 	Mod_ClearAll ();
 	if (host_hunklevel)
@@ -647,7 +647,7 @@ void Host_Shutdown(void)
 	
 	if (isdown)
 	{
-		print ("recursive shutdown\n");
+		fprint(2, "Host_Shutdown: recursive shutdown\n");
 		return;
 	}
 	isdown = true;

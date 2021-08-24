@@ -190,8 +190,8 @@ D_SCDump(void)
 
 	for(s = sc_base; s != nil; s = s->next){
 		if(s == sc_rover)
-			print("ROVER:\n");
-		print("%p : %d bytes     %ud width\n", s, s->size, s->width);
+			dprint("ROVER:\n");
+		dprint("%p : %d bytes     %ud width\n", s, s->size, s->width);
 	}
 }
 

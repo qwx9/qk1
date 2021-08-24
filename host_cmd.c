@@ -461,7 +461,7 @@ void Host_Say(qboolean teamonly)
 	}
 	host_client = save;
 
-	print("%s", &text[1]);
+	dprint("%s", &text[1]);
 }
 
 
@@ -718,7 +718,7 @@ void Host_Spawn_f (void)
 		PR_ExecuteProgram (pr_global_struct->ClientConnect);
 
 		if ((dtime() - host_client->netconnection->connecttime) <= sv.time)
-			print("%s entered the game\n", host_client->name);
+			dprint("%s entered the game\n", host_client->name);
 
 		PR_ExecuteProgram (pr_global_struct->PutClientInServer);	
 	}
