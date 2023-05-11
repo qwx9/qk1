@@ -54,11 +54,14 @@ Sys_Error(char *fmt, ...)
 int
 Sys_FileTime(char *path)
 {
-	uchar bs[1024];
+	Dir *d;
+	ulong t;
 
-	if(stat(path, bs, sizeof bs) < 0)
-		return -1;
-	return *((int *)(bs+2+2+4+1+4+8+4+4));	/* mtime[4] */
+	t = 0;
+	if((d = dirstat(path)) != nil)
+		t = d->mtime;
+	free(d);
+	return t;
 }
 
 int
@@ -79,13 +82,14 @@ Sys_mkdir(char *path)
 vlong
 flen(int fd)
 {
-	uchar bs[1024];
+	Dir *d;
+	vlong sz;
 
-	if(fstat(fd, bs, sizeof bs) < 0){
-		fprint(2, "flen:fstat: %r\n");
-		return -1;
-	}
-	return *((vlong *)(bs+2+2+4+1+4+8+4+4+4));	/* length[8] */
+	sz = -1;
+	if((d = dirfstat(fd)) != nil)
+		sz = d->length;
+	free(d);
+	return sz;
 }
 
 double
