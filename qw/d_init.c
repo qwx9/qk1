@@ -121,7 +121,7 @@ void D_SetupFrame (void)
 	for (i=0 ; i<(NUM_MIPS-1) ; i++)
 		d_scalemip[i] = basemip[i] * d_mipscale.value;
 
-	d_drawspans = D_DrawSpans8;	/* no DrawSpans16 for non-asm heathens */
+	d_drawspans = D_DrawSpans16;
 	d_aflatcolor = 0;
 }
 

@@ -307,8 +307,8 @@ R_DrawSurfaceBlock8_mip0
 */
 void R_DrawSurfaceBlock8_mip0 (void)
 {
-	int				v, i, b, lightstep, lighttemp, light;
-	unsigned char	pix, *psource, *prowdest;
+	int				v, i, lightstep, lighttemp, light;
+	unsigned char	*psource, *prowdest;
 
 	psource = pbasesource;
 	prowdest = prowdestbase;
@@ -330,14 +330,23 @@ void R_DrawSurfaceBlock8_mip0 (void)
 
 			light = lightright;
 
-			for (b=15; b>=0; b--)
-			{
-				pix = psource[b];
-				prowdest[b] = ((unsigned char *)vid.colormap)
-						[(light & 0xFF00) + pix];
-				light += lightstep;
-			}
-	
+			prowdest[15] = vid.colormap[((light += lightstep) & 0xFF00) + psource[15]];
+			prowdest[14] = vid.colormap[((light += lightstep) & 0xFF00) + psource[14]];
+			prowdest[13] = vid.colormap[((light += lightstep) & 0xFF00) + psource[13]];
+			prowdest[12] = vid.colormap[((light += lightstep) & 0xFF00) + psource[12]];
+			prowdest[11] = vid.colormap[((light += lightstep) & 0xFF00) + psource[11]];
+			prowdest[10] = vid.colormap[((light += lightstep) & 0xFF00) + psource[10]];
+			prowdest[9] = vid.colormap[((light += lightstep) & 0xFF00) + psource[9]];
+			prowdest[8] = vid.colormap[((light += lightstep) & 0xFF00) + psource[8]];
+			prowdest[7] = vid.colormap[((light += lightstep) & 0xFF00) + psource[7]];
+			prowdest[6] = vid.colormap[((light += lightstep) & 0xFF00) + psource[6]];
+			prowdest[5] = vid.colormap[((light += lightstep) & 0xFF00) + psource[5]];
+			prowdest[4] = vid.colormap[((light += lightstep) & 0xFF00) + psource[4]];
+			prowdest[3] = vid.colormap[((light += lightstep) & 0xFF00) + psource[3]];
+			prowdest[2] = vid.colormap[((light += lightstep) & 0xFF00) + psource[2]];
+			prowdest[1] = vid.colormap[((light += lightstep) & 0xFF00) + psource[1]];
+			prowdest[0] = vid.colormap[(light & 0xFF00) + psource[0]];
+
 			psource += sourcetstep;
 			lightright += lightrightstep;
 			lightleft += lightleftstep;
