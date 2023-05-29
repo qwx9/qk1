@@ -7,7 +7,6 @@ enum{
 };
 extern int svonly;
 
-int Sys_FileTime(char *);
 int Sys_mkdir(char *);
 vlong flen(int);
 

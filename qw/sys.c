@@ -52,19 +52,6 @@ Sys_Error(char *fmt, ...)
 }
 
 int
-Sys_FileTime(char *path)
-{
-	Dir *d;
-	ulong t;
-
-	t = 0;
-	if((d = dirstat(path)) != nil)
-		t = d->mtime;
-	free(d);
-	return t;
-}
-
-int
 Sys_mkdir(char *path)
 {
 	int d;
