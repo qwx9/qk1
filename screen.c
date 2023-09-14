@@ -20,6 +20,7 @@ cvar_t		scr_showram = {"showram","1"};
 cvar_t		scr_showturtle = {"showturtle","0"};
 cvar_t		scr_showpause = {"showpause","1"};
 cvar_t		scr_printspeed = {"scr_printspeed","8"};
+cvar_t		scr_showfps = {"showfps","0", true};
 
 qboolean	scr_initialized;		// ready to draw
 
@@ -299,6 +300,7 @@ void SCR_Init (void)
 	Cvar_RegisterVariable (&scr_showpause);
 	Cvar_RegisterVariable (&scr_centertime);
 	Cvar_RegisterVariable (&scr_printspeed);
+	Cvar_RegisterVariable(&scr_showfps);
 	Cmd_AddCommand("screenshot", screenshot);
 	Cmd_AddCommand ("sizeup",SCR_SizeUp_f);
 	Cmd_AddCommand ("sizedown",SCR_SizeDown_f);
@@ -351,6 +353,26 @@ void SCR_DrawTurtle (void)
 		return;
 
 	Draw_Pic (scr_vrect.x, scr_vrect.y, scr_turtle);
+}
+
+void SCR_DrawFPS (void)
+{
+	static uvlong lastframetime;
+	static int lastcnt, fps;
+	uvlong t;
+	int n;
+	char s[16];
+
+	if(!scr_showfps.value)
+		return;
+	t = nanosec();
+	if((t - lastframetime) >= 1000000000ULL){
+		fps = host_framecount - lastcnt;
+		lastcnt = host_framecount;
+		lastframetime = t;
+	}
+	n = snprint(s, sizeof(s), "%d", fps);
+	Draw_String(vid.width - n*8, 0, s);
 }
 
 /*
@@ -739,6 +761,7 @@ void SCR_UpdateScreen (void)
 		SCR_DrawConsole ();
 		M_Draw ();
 	}
+	SCR_DrawFPS();
 	V_UpdatePalette ();
 
 	flipfb(scr_copyeverything ? vid.height :
