@@ -1,109 +1,43 @@
 #include <u.h>
 #include <libc.h>
 #include <draw.h>
+#include <thread.h>
 #include "dat.h"
 #include "quakedef.h"
 #include "fns.h"
 
 viddef_t vid;		/* global video state */
 int resized;
-int dumpwin, scaleon;
 Point center;		/* of window */
 Rectangle grabr;
 
-static int scale = 1;
 static s32int fbpal[256];
-static uchar *fb, *fbs;
+static uchar *fbs;
 static Image *fbi;
 static Rectangle fbr;
+static u8int *vidbuffers[2];
+static int bufi = 0;
+static Channel *frame;
 
-static void
-scalefb(int dy)
-{
-	int *p, c, *s;
-
-	if(scale < 2)
-		return;
-	p = (s32int *)fbs;
-	s = (s32int *)fb;
-	dy *= vid.width;
-	while(dy-- > 0){
-		c = *s++;
-		switch(scale){
-		case 16: p[15] = c;
-		case 15: p[14] = c;
-		case 14: p[13] = c;
-		case 13: p[12] = c;
-		case 12: p[11] = c;
-		case 11: p[10] = c;
-		case 10: p[9] = c;
-		case 9: p[8] = c;
-		case 8: p[7] = c;
-		case 7: p[6] = c;
-		case 6: p[5] = c;
-		case 5: p[4] = c;
-		case 4: p[3] = c;
-		case 3: p[2] = c;
-		case 2: p[1] = c; p[0] = c;
-		}
-		p += scale;
-	}
-}
-
-static void
-drawfb(int dy)
-{
-	uchar *s;
-	int n, we, w8, wr, *d;
-
-	we = vid.width - 1;
-	w8 = vid.width + 7 >> 3;
-	wr = vid.width % 8;
-	dy *= vid.rowbytes;
-	while((dy -= vid.rowbytes) >= 0){
-		s = fb + dy;
-		d = ((int *)s) + we;
-		s += we;
-		n = w8;
-		switch(wr){
-		case 0:	do{	*d-- = fbpal[*s--];
-		case 7:		*d-- = fbpal[*s--];
-		case 6:		*d-- = fbpal[*s--];
-		case 5:		*d-- = fbpal[*s--];
-		case 4:		*d-- = fbpal[*s--];
-		case 3:		*d-- = fbpal[*s--];
-		case 2:		*d-- = fbpal[*s--];
-		case 1:		*d-- = fbpal[*s--];
-			}while(--n > 0);
-		}
-	}
-}
+void pal2xrgb(int n, s32int *pal, u8int *s, u32int *d);
 
 static void
 resetfb(void)
 {
 	static int highhunk;
 	void *surfcache;
-	int hunkvbuf, scachesz;
+	int hunkvbuf, scachesz, i;
 	Point p;
 
-	if(scaleon){
-		scale = Dx(screen->r) / vid.width;
-		if(scale <= 0)
-			scale = 1;
-		else if(scale > 16)
-			scale = 16;
-	}else{
-		/* lower than 320x240 doesn't really make sense,
-		 * but at least this prevents a crash, beyond that
-		 * it's your funeral */
-		vid.width = Dx(screen->r);
-		if(vid.width < 320)
-			vid.width = 320;
-		vid.height = Dy(screen->r);
-		if(vid.height < 160)
-			vid.height = 160;
-	}
+	/* lower than 320x240 doesn't really make sense,
+	 * but at least this prevents a crash, beyond that
+	 * it's your funeral */
+	vid.width = Dx(screen->r);
+	if(vid.width < 320)
+		vid.width = 320;
+	vid.height = Dy(screen->r);
+	if(vid.height < 160)
+		vid.height = 160;
 	if(d_pzbuffer != nil){
 		D_FlushCaches();
 		Hunk_FreeToHighMark(highhunk);
@@ -120,59 +54,64 @@ resetfb(void)
 	surfcache = (byte *)d_pzbuffer + vid.width * vid.height * sizeof *d_pzbuffer;
 	D_InitCaches(surfcache, scachesz);
 
-	vid.rowbytes = vid.width * sizeof *fbpal;
+	vid.rowbytes = vid.width;
 	vid.aspect = (float)vid.height / (float)vid.width * (320.0/240.0);
 	vid.conrowbytes = vid.rowbytes;
 	vid.conwidth = vid.width;
 	vid.conheight = vid.height;
 
 	center = divpt(addpt(screen->r.min, screen->r.max), 2);
-	p = Pt(scale * vid.width/2, scale * vid.height/2);
+	p = Pt(vid.width/2, vid.height/2);
 	fbr = Rpt(subpt(center, p), addpt(center, p));
 	p = Pt(vid.width/4, vid.height/4);
 	grabr = Rpt(subpt(center, p), addpt(center, p));
 	freeimage(fbi);
-	free(fb);
-	fbi = allocimage(display,
-		Rect(0, 0, vid.width * scale, scale > 1 ? 1 : vid.height),
-		XRGB32, scale > 1, 0);
+	for(i = 0; i < nelem(vidbuffers); i++){
+		free(vidbuffers[i]);
+		vidbuffers[i] = mallocalign(vid.width*vid.height*4, 64, 0, 0);
+	}
+	fbi = allocimage(display, Rect(0, 0, vid.width, vid.height), XRGB32, 0, 0);
 	if(fbi == nil)
 		sysfatal("resetfb: %r (%d %d)", vid.width, vid.height);
-	fb = emalloc(vid.rowbytes * vid.height);
-	if(scaleon){
-		free(fbs);
-		fbs = emalloc(vid.rowbytes * scale * vid.height);
-	}
-	vid.buffer = fb;
-	vid.conbuffer = fb;
+	bufi = 0;
+	vid.buffer = vidbuffers[0];
+	vid.conbuffer = vid.buffer;
 	draw(screen, screen->r, display->black, nil, ZP);
 }
 
-/* only exists to allow taking tear-free screenshots ingame... */
-static int
-writebit(void)
+static void
+loader(void *p)
 {
-	int n, fd;
-	char *s;
+	u8int *f, *fb;
 
-	s = va("%s/quake.%ld.bit", fsdir, time(nil));
-	if(access(s, AEXIST) != -1){
-		werrstr("writebit: not overwriting %s", s);
-		return -1;
+	fb = p;
+	for(;;){
+		if((f = recvp(frame)) == nil)
+			break;
+		pal2xrgb(vid.width * vid.height, fbpal, f, (u32int*)fb);
+		loadimage(fbi, Rect(0, 0, vid.width, vid.height), fb, vid.height*vid.rowbytes*4);
+		draw(screen, fbr, fbi, nil, ZP);
+		flushimage(display, 1);
 	}
-	if(fd = create(s, OWRITE, 0644), fd < 0)
-		return -1;
-	n = writeimage(fd, fbi, 0);
-	close(fd);
-	if(n >= 0)
-		Con_Printf("Wrote %s\n", s);
-	return n;
+	free(fb);
+	threadexits(nil);
 }
 
 void
-flipfb(int dy)
+stopfb(void)
+{
+	if(frame != nil){
+		sendp(frame, nil);
+		chanclose(frame);
+		frame = nil;
+	}
+}
+
+void
+flipfb(void)
 {
 	if(resized){		/* skip this frame if window resize */
+		stopfb();
 		resized = 0;
 		if(getwindow(display, Refnone) < 0)
 			sysfatal("getwindow: %r");
@@ -182,30 +121,14 @@ flipfb(int dy)
 		Con_Clear_f();
 		return;
 	}
-	drawfb(dy);
-	scalefb(dy);
-	if(scale == 1){
-		loadimage(fbi, Rect(0,0,vid.width,dy), fb, dy * vid.rowbytes);
-		draw(screen, Rpt(fbr.min, Pt(fbr.max.x,
-			fbr.max.y - vid.height + dy)), fbi, nil, ZP);
-	}else{
-		Rectangle r;
-		uchar *p;
-
-		p = fbs;
-		r = fbr;
-		while(r.min.y < fbr.max.y){
-			r.max.y = r.min.y + scale;
-			p += loadimage(fbi, fbi->r, p, vid.rowbytes * scale);
-			draw(screen, r, fbi, nil, ZP);
-			r.min.y = r.max.y;
-		}
+	if(frame == nil){
+		frame = chancreate(sizeof(u8int*), 0);
+		proccreate(loader, mallocalign(vid.width*vid.height*4+16, 64, 0, 0), 4096);
 	}
-	flushimage(display, 1);
-	if(dumpwin){
-		if(writebit() < 0)
-			Con_Printf(va("writebit: %r\n"));
-		dumpwin = 0;
+	if(sendp(frame, vidbuffers[bufi]) > 0){
+		bufi = (bufi+1) % nelem(vidbuffers);
+		vid.buffer = vidbuffers[bufi];
+		vid.conbuffer = vid.buffer;
 	}
 }
 
@@ -214,8 +137,9 @@ setpal(uchar *p)
 {
 	int *fp;
 
-	for(fp=fbpal; fp<fbpal+nelem(fbpal); p+=3)
-		*fp++ = p[0] << 16 | p[1] << 8 | p[2];
+	for(fp=fbpal; fp<fbpal+nelem(fbpal); p+=3, fp++)
+		*fp = p[0] << 16 | p[1] << 8 | p[2];
+
 	scr_fullupdate = 0;
 }
 

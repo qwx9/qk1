@@ -1,5 +1,6 @@
 #include <u.h>
 #include <libc.h>
+#include <thread.h>
 #include "dat.h"
 #include "quakedef.h"
 #include "fns.h"
@@ -36,8 +37,8 @@ struct Chan{
 };
 static Chan chans[Nchan], *che;
 
-static int afd = -1;
-static uchar mixbuf[Snbuf];
+static int afd = -1, mixbufi;
+static uchar mixbufs[2][Snbuf], *mixbuf = mixbufs[0];
 static vlong sndt, sampt;
 static int nsamp;
 static int sampbuf[Ssamp*Sch*sizeof(int)];
@@ -488,14 +489,43 @@ ambs(void)
 	}
 }
 
+static void
+auproc(void *p)
+{
+	long sz;
+	uchar *m;
+
+	for(;;){
+		if((sz = recvul(p)) == 0)
+			break;
+		m = mixbufs[0];
+		if(sz < 0){
+			m = mixbufs[1];
+			sz = -sz;
+		}
+		if(write(afd, m, sz) != sz){
+			fprint(2, "sndwrite: %r\n");
+			shutsnd();
+			break;
+		}
+	}
+	chanclose(p);
+	threadexits(nil);
+}
+
 void
 stepsnd(vec3_t origin, vec3_t forward, vec3_t right, vec3_t up)
 {
-	int ns;
+	long ns;
 	Chan *c, *sum;
+	static Channel *ach;
 
 	if(afd < 0)
 		return;
+	if(ach == nil){
+		ach = chancreate(sizeof(ulong), 0);
+		proccreate(auproc, ach, 4096);
+	}
 	VectorCopy(origin, listener_origin);
 	VectorCopy(forward, listener_forward);
 	VectorCopy(right, listener_right);
@@ -538,9 +568,10 @@ stepsnd(vec3_t origin, vec3_t forward, vec3_t right, vec3_t up)
 	ns = nsamp * Sblk;
 	samplesfx();
 	sampt += nsamp;
-	if(write(afd, mixbuf, ns) != ns){
-		fprint(2, "sndwrite: %r\n");
-		shutsnd();
+	if(ns != 0){
+		sendul(ach, mixbufi == 0 ? ns : -ns);
+		mixbufi = (mixbufi + 1) % 2;
+		mixbuf = mixbufs[mixbufi];
 	}
 	sndt = nanosec();
 }
@@ -797,6 +828,7 @@ shutsnd(void)
 	if(afd < 0)
 		return;
 	close(afd);
+	afd = -1;
 }
 
 int

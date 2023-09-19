@@ -284,12 +284,6 @@ void SCR_SizeDown_f (void)
 	vid.recalc_refdef = 1;
 }
 
-static void
-screenshot(void) 
-{ 
-	dumpwin++;
-}
-
 void SCR_Init (void)
 {
 	Cvar_RegisterVariable (&scr_fov);
@@ -301,7 +295,6 @@ void SCR_Init (void)
 	Cvar_RegisterVariable (&scr_centertime);
 	Cvar_RegisterVariable (&scr_printspeed);
 	Cvar_RegisterVariable(&scr_showfps);
-	Cmd_AddCommand("screenshot", screenshot);
 	Cmd_AddCommand ("sizeup",SCR_SizeUp_f);
 	Cmd_AddCommand ("sizedown",SCR_SizeDown_f);
 
@@ -764,6 +757,5 @@ void SCR_UpdateScreen (void)
 	SCR_DrawFPS();
 	V_UpdatePalette ();
 
-	flipfb(scr_copyeverything ? vid.height :
-		scr_copytop ? vid.height-sb_lines : scr_vrect.height);
+	flipfb();
 }

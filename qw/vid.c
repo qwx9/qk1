@@ -6,7 +6,7 @@
 
 viddef_t vid;		/* global video state */
 int resized;
-int dumpwin, scaleon;
+int dumpwin;
 Point center;		/* of window */
 Rectangle grabr;
 
@@ -87,23 +87,15 @@ resetfb(void)
 
 	Point p;
 
-	if(scaleon){
-		scale = Dx(screen->r) / vid.width;
-		if(scale <= 0)
-			scale = 1;
-		else if(scale > 16)
-			scale = 16;
-	}else{
-		/* lower than 320x240 doesn't really make sense,
-		 * but at least this prevents a crash, beyond that
-		 * it's your funeral */
-		vid.width = Dx(screen->r);
-		if(vid.width < 320)
-			vid.width = 320;
-		vid.height = Dy(screen->r);
-		if(vid.height < 160)
-			vid.height = 160;
-	}
+	/* lower than 320x240 doesn't really make sense,
+	 * but at least this prevents a crash, beyond that
+	 * it's your funeral */
+	vid.width = Dx(screen->r);
+	if(vid.width < 320)
+		vid.width = 320;
+	vid.height = Dy(screen->r);
+	if(vid.height < 160)
+		vid.height = 160;
 	if(d_pzbuffer != nil){
 		D_FlushCaches();
 		Hunk_FreeToHighMark(highhunk);
@@ -139,10 +131,6 @@ resetfb(void)
 	if(fbi == nil)
 		sysfatal("resetfb: %r (%d %d)", vid.width, vid.height);
 	fb = emalloc(vid.rowbytes * vid.height);
-	if(scaleon){
-		free(fbs);
-		fbs = emalloc(vid.rowbytes * scale * vid.height);
-	}
 	vid.buffer = fb;
 	vid.conbuffer = fb;
 	draw(screen, screen->r, display->black, nil, ZP);
@@ -153,14 +141,6 @@ VID_Init(uchar *)
 {
 	int n;
 
-	n = COM_CheckParm("-scale");
-	if(n && n < com_argc-2){
-		scaleon = 1;
-		vid.width = strtol(com_argv[n+1], nil, 0);
-		vid.height = strtol(com_argv[n+2], nil, 0);
-		if(vid.width < 320 || vid.height < 200)
-			sysfatal("invalid scale resolution");
-	}
 	vid.maxwarpwidth = WARP_WIDTH;
 	vid.maxwarpheight = WARP_HEIGHT;
 	vid.numpages = 2;

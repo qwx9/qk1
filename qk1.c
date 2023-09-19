@@ -92,6 +92,7 @@ fppsgl(void)
 void
 shutdown(void)
 {
+	stopfb();
 	Host_Shutdown();
 	threadexitsall(nil);
 }
@@ -109,7 +110,7 @@ croak(void *, char *note)
 static void
 usage(void)
 {
-	fprint(2, "usage: %s [-d] [-g game] [-m kB] [-s width height] [-x netmtpt]\n", argv0);
+	fprint(2, "usage: %s [-d] [-g game] [-m kB] [-x netmtpt]\n", argv0);
 	exits("usage");
 }
 
@@ -133,13 +134,6 @@ threadmain(int argc, char **argv)
 		memsize = strtol(EARGF(usage()), nil, 0) * KB;
 		if(memsize <= 0)
 			sysfatal("invalid memsize");
-		break;
-	case 's':
-		scaleon = 1;
-		vid.width = strtol(EARGF(usage()), nil, 0);
-		vid.height = strtol(EARGF(usage()), nil, 0);
-		if(vid.width < 320 || vid.height < 200)
-			sysfatal("invalid scale resolution");
 		break;
 	case 'x':
 		netmtpt = EARGF(usage());
