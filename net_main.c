@@ -390,7 +390,7 @@ int NET_SendUnreliableMessage (qsocket_t *sock, sizebuf_t *data)
 
 	if (sock->disconnected)
 	{
-		Con_Printf("NET_SendMessage: disconnected socket\n");
+		Con_Printf("NET_SendUnreliableMessage: disconnected socket\n");
 		return -1;
 	}
 

@@ -47,7 +47,7 @@ void *Mod_Extradata (model_t *mod)
 	Mod_LoadModel (mod, true);
 	
 	if (!mod->cache.data)
-		fatal ("Mod_Extradata: caching failed");
+		fatal ("Mod_Extradata: caching failed: %s", mod->name);
 	return mod->cache.data;
 }
 
@@ -229,7 +229,7 @@ Loads a model into the cache
 model_t *Mod_LoadModel (model_t *mod, qboolean crash)
 {
 	unsigned *buf;
-	byte	stackbuf[1024];		// avoid dirtying the cache heap
+	byte stackbuf[1024];		// avoid dirtying the cache heap
 
 	if (mod->type == mod_alias)
 	{
@@ -241,8 +241,9 @@ model_t *Mod_LoadModel (model_t *mod, qboolean crash)
 	}
 	else
 	{
-		if (mod->needload == NL_PRESENT)
+		if (mod->needload == NL_PRESENT){
 			return mod;
+		}
 	}
 
 //
@@ -253,6 +254,7 @@ model_t *Mod_LoadModel (model_t *mod, qboolean crash)
 	if(buf == nil){
 		if(crash)
 			fatal("Mod_LoadModel: %r");
+		fprint(2, "loadstklmp failed: %s\n", mod->name);
 		return nil;
 	}
 

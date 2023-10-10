@@ -224,19 +224,15 @@ void R_NewMap (void)
 
 	r_numallocatedbasespans = MAXSPANS;
 	r_basespans = Hunk_Alloc(r_numallocatedbasespans * sizeof(espan_t) + CACHE_SIZE);
-	r_viewleaf = nil;
-	R_ClearParticles ();
-
 	r_cnumsurfs = MAXSURFACES;
 	surfaces = Hunk_Alloc(r_cnumsurfs * sizeof *surfaces);
-	R_SetupSurfaces();
-
-	r_maxedgesseen = 0;
-	r_maxsurfsseen = 0;
-
 	r_numallocatededges = MAXEDGES;
 	r_edges = Hunk_Alloc(r_numallocatededges * sizeof *r_edges);
 
+	r_viewleaf = nil;
+	R_ClearParticles ();
+	r_maxedgesseen = 0;
+	r_maxsurfsseen = 0;
 	r_dowarpold = false;
 	r_viewchanged = false;
 #ifdef PASSAGES

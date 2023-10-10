@@ -1,3 +1,5 @@
+void Arr_AllocExtra(void **arr, int *nel, int needextra);
+
 typedef struct sizebuf_s
 {
 	qboolean	allowoverflow;	// if false, do a fatal

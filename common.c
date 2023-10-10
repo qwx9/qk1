@@ -306,6 +306,16 @@ float MSG_ReadAngle (void)
 //===========================================================================
 
 void
+Arr_AllocExtra(void **arr, int *nel, int needextra)
+{
+	while(needextra > 0){
+		*arr = Hunk_Double(*arr);
+		needextra -= *nel;
+		*nel *= 2;
+	}
+}
+
+void
 SZ_Alloc(sizebuf_t *buf, int startsize)
 {
 	if(startsize < 256)
@@ -313,6 +323,7 @@ SZ_Alloc(sizebuf_t *buf, int startsize)
 	buf->data = Hunk_Alloc(startsize);
 	buf->maxsize = startsize;
 	buf->cursize = 0;
+	setmalloctag(buf->data, getcallerpc(&buf));
 }
 
 

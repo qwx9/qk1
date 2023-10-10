@@ -36,7 +36,7 @@ extern	vec3_t	vright, base_vright;
 extern	entity_t		*currententity;
 
 // NOTE: these are only initial values. limits are supposed to scale up dynamically
-#define	MAXEDGES			32
+#define	MAXEDGES			2400
 #define MAXSURFACES			800
 #define	MAXSPANS			3000
 
