@@ -104,7 +104,7 @@ static u16int crct[] ={
 static int notid1;
 static int loadsize;
 static uchar *loadbuf;
-static cache_user_t *loadcache;
+static mem_user_t *loadcache;
 static Biobuf *demobf;
 static vlong demoofs;
 
@@ -376,8 +376,8 @@ loadlmp(char *f, int mth, int *n)
 	radix(f, r);
 	buf = nil;
 	switch(mth){
-	case Fhunk: buf = Hunk_AllocName(m + 1, r); break;
-	case Fcache: buf = Cache_Alloc(loadcache, m + 1, r); break;
+	case Fhunk: buf = Hunk_Alloc(m + 1); break;
+	case Fcache: buf = Cache_Alloc(loadcache, m + 1); break;
 	case Fstack: buf = m + 1 <= loadsize ? loadbuf : Hunk_TempAlloc(m + 1); break;
 	}
 	if(buf == nil)
@@ -397,7 +397,7 @@ loadhunklmp(char *f, int *n)
 }
 
 void *
-loadcachelmp(char *f, cache_user_t *c)
+loadcachelmp(char *f, mem_user_t *c)
 {
 	loadcache = c;
 	loadlmp(f, Fcache, nil);
@@ -828,7 +828,7 @@ pak(char *f)
 		fatal("pak %s: invalid lump number %d", f, nlmp);
 	if(nlmp != Npak0lmp)
 		notid1 = 1;
-	l = Hunk_AllocName(nlmp * sizeof *l, "pak");
+	l = Hunk_Alloc(nlmp * sizeof *l);
 	p = Hunk_Alloc(sizeof *p);
 	strncpy(p->f, f, sizeof(p->f)-1);
 	p->bf = bf;

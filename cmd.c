@@ -264,7 +264,7 @@ Cmd_Exec_f
 void Cmd_Exec_f (void)
 {
 	char	*f;
-	int		mark;
+	void	*mark;
 
 	if (Cmd_Argc () != 2)
 	{
@@ -272,7 +272,7 @@ void Cmd_Exec_f (void)
 		return;
 	}
 
-	mark = Hunk_LowMark ();
+	mark = Hunk_Mark ();
 	f = loadhunklmp(Cmd_Argv(1), nil);
 	if(f == nil){
 		Con_Printf(va("exec: %r\n"));
@@ -281,7 +281,7 @@ void Cmd_Exec_f (void)
 	Con_Printf ("execing %s\n",Cmd_Argv(1));
 	
 	Cbuf_InsertText (f);
-	Hunk_FreeToLowMark (mark);
+	Hunk_FreeToMark (mark);
 }
 
 

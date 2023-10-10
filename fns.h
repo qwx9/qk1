@@ -34,7 +34,7 @@ void	initcrc(void);
 char*	ext(char*, char*);
 void	radix(char*, char*);
 void*	loadhunklmp(char *, int *);
-void*	loadcachelmp(char *, cache_user_t *);
+void*	loadcachelmp(char *, mem_user_t *);
 void*	loadstklmp(char *, void *, int, int *);
 void	loadpoints(void);
 void	dumpcfg(void);

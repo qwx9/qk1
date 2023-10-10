@@ -310,7 +310,7 @@ SZ_Alloc(sizebuf_t *buf, int startsize)
 {
 	if(startsize < 256)
 		startsize = 256;
-	buf->data = Hunk_AllocName(startsize, "sizebuf");
+	buf->data = Hunk_Alloc(startsize);
 	buf->maxsize = startsize;
 	buf->cursize = 0;
 }

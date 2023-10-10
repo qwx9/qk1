@@ -1,8 +1,6 @@
 typedef struct Sfx Sfx;
 
 extern char *game;
-extern uchar *membase;
-extern int memsize;
 
 enum{
 	Npath = 64,

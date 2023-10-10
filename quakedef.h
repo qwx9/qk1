@@ -31,17 +31,17 @@
 //
 // per-level limits
 //
-#define	MAX_EDICTS		600			// FIXME: ouch! ouch! ouch!
+#define	MAX_EDICTS		32000			// FIXME: ouch! ouch! ouch!
 #define	Nlights	64
-#define	MAX_MODELS		256			// these are sent over the net as bytes
-#define	MAX_SOUNDS		256			// so they cannot be blindly increased
+#define	MAX_MODELS		4096			// these are sent over the net as bytes
+#define	MAX_SOUNDS		2048			// so they cannot be blindly increased
 
 #define	MAX_STYLESTRING	64
 
 //
 // stats are integers communicated to the client by the server
 //
-#define	MAX_CL_STATS		32
+#define	MAX_CL_STATS		256
 #define	STAT_HEALTH			0
 #define	STAT_FRAGS			1
 #define	STAT_WEAPON			2
@@ -161,7 +161,7 @@ typedef struct
 
 struct Sfx{
 	char s[Npath];
-	cache_user_t cu;
+	mem_user_t cu;
 };
 
 extern cvar_t bgmvolume;

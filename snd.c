@@ -311,7 +311,7 @@ loadsfx(Sfx *sfx)
 	stepscale = (float)info.rate / Srate;	
 	len = info.samples / stepscale;
 	len *= info.width * info.channels;
-	if(sc = Cache_Alloc(&sfx->cu, len + sizeof *sc, sfx->s), sc == nil)
+	if(sc = Cache_Alloc(&sfx->cu, len + sizeof *sc), sc == nil)
 		return nil;
 	sc->length = info.samples;
 	sc->loop = info.loopofs;
@@ -851,11 +851,7 @@ initsnd(void)
 	Cvar_RegisterVariable(&ambient_level);
 	Cvar_RegisterVariable(&ambient_fade);
 
-	if(memsize < 0x800000){
-		setcvar("loadas8bit", "1");
-		fprint(2, "initsnd: forcing 8bit width\n");
-	}
-	known_sfx = Hunk_AllocName(MAX_SFX * sizeof *known_sfx, "Sfx");
+	known_sfx = Hunk_Alloc(MAX_SFX * sizeof *known_sfx);
 	num_sfx = 0;
 	ambsfx[Ambwater] = precachesfx("ambience/water1.wav");
 	ambsfx[Ambsky] = precachesfx("ambience/wind2.wav");

@@ -40,16 +40,15 @@ resetfb(void)
 		vid.height = 160;
 	if(d_pzbuffer != nil){
 		D_FlushCaches();
-		Hunk_FreeToHighMark(highhunk);
+		free(d_pzbuffer);
 		d_pzbuffer = nil;
 	}
 
-	highhunk = Hunk_HighMark();
 	// alloc an extra line in case we want to wrap, and allocate the z-buffer
 	hunkvbuf = vid.width * vid.height * sizeof *d_pzbuffer;
 	scachesz = D_SurfaceCacheForRes(vid.width, vid.height);
 	hunkvbuf += scachesz;
-	if((d_pzbuffer = Hunk_HighAllocName(hunkvbuf, "video")) == nil)
+	if((d_pzbuffer = malloc(hunkvbuf)) == nil)
 		sysfatal("Not enough memory for video mode\n");
 	surfcache = (byte *)d_pzbuffer + vid.width * vid.height * sizeof *d_pzbuffer;
 	D_InitCaches(surfcache, scachesz);

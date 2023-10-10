@@ -24,7 +24,7 @@ qpic_t		*draw_backtile;
 typedef struct cachepic_s
 {
 	char		name[Npath];
-	cache_user_t	cache;
+	mem_user_t	cache;
 } cachepic_t;
 
 #define	MAX_CACHED_PICS		128

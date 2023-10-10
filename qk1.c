@@ -5,17 +5,10 @@
 #include "quakedef.h"
 #include "fns.h"
 
-mainstacksize = 512*1024;
+mainstacksize = 4*1024*1024;
 char *netmtpt = "/net";
-uchar *membase;
-int memsize;
 char *game;
 int debug;
-
-enum{
-	KB = 1024*1024,
-	Nmem = 64 * KB
-};
 
 void
 dprint(char *fmt, ...)
@@ -119,7 +112,6 @@ threadmain(int argc, char **argv)
 {
 	double t, t´, Δt;
 
-	memsize = Nmem;
 	ARGBEGIN{
 	case 'D':
 		debug = 1;
@@ -130,17 +122,11 @@ threadmain(int argc, char **argv)
 	case 'g':
 		game = EARGF(usage());
 		break;
-	case 'm':
-		memsize = strtol(EARGF(usage()), nil, 0) * KB;
-		if(memsize <= 0)
-			sysfatal("invalid memsize");
-		break;
 	case 'x':
 		netmtpt = EARGF(usage());
 		break;
 	default: usage();
 	}ARGEND
-	membase = emalloc(memsize);
 	srand(getpid());
 	/* ignore fp exceptions: rendering shit assumes they are */
 	setfcr(getfcr() & ~(FPOVFL|FPUNFL|FPINVAL|FPZDIV));

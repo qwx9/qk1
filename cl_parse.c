@@ -213,7 +213,7 @@ void CL_ParseServerInfo (void)
 		Con_Printf("Bad maxclients (%d) from server\n", cl.maxclients);
 		return;
 	}
-	cl.scores = Hunk_AllocName(cl.maxclients * sizeof *cl.scores, "scores");
+	cl.scores = Hunk_Alloc(cl.maxclients * sizeof *cl.scores);
 
 // parse gametype
 	cl.gametype = MSG_ReadByte ();
@@ -291,8 +291,6 @@ void CL_ParseServerInfo (void)
 	
 	R_NewMap ();
 
-	Hunk_Check ();		// make sure nothing is hurt
-	
 	noclip_anglehack = false;		// noclip is turned off at start	
 }
 

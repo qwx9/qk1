@@ -7,15 +7,11 @@
 #define MAXWORKINGVERTS	(MAXVERTS+4)	// max points in an intermediate
 										//  polygon (while processing)
 // !!! if this is changed, it must be changed in d_ifacea.h too !!!
-#define	MAXHEIGHT		2048
-#define	MAXWIDTH		2048
+#define	MAXHEIGHT		3840
+#define	MAXWIDTH		2160
 #define MAXDIMENSION	((MAXHEIGHT > MAXWIDTH) ? MAXHEIGHT : MAXWIDTH)
 
 #define SIN_BUFFER_SIZE	(MAXDIMENSION+CYCLE)
-
-#define INFINITE_DISTANCE	0x10000		// distance that's always guaranteed to
-										//  be farther away than anything in
-										//  the scene
 
 //===================================================================
 
@@ -39,11 +35,10 @@ extern	vec3_t	vpn, base_vpn;
 extern	vec3_t	vright, base_vright;
 extern	entity_t		*currententity;
 
-#define NUMSTACKEDGES		2400
-#define	MINEDGES			NUMSTACKEDGES
-#define NUMSTACKSURFACES	800
-#define MINSURFACES			NUMSTACKSURFACES
-#define	MAXSPANS			3000
+// NOTE: these are only initial values. limits are supposed to scale up dynamically
+#define	MAXEDGES			8192
+#define MAXSURFACES			8192
+#define	MAXSPANS			8192
 
 // !!! if this is changed, it must be changed in asm_draw.h too !!!
 typedef struct espan_s
@@ -74,6 +69,9 @@ typedef struct surf_s
 
 	int			pad[2];				// to 64 bytes
 } surf_t;
+
+extern int r_numallocatedbasespans;
+extern byte *r_basespans;
 
 extern	surf_t	*surfaces, *surface_p, *surf_max;
 

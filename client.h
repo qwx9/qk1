@@ -65,7 +65,7 @@ typedef struct
 	vec3_t	start, end;
 } beam_t;
 
-#define	MAX_EFRAGS		640
+#define	MAX_EFRAGS		4096
 
 #define	MAX_MAPSTRING	2048
 #define	MAX_DEMOS		8
@@ -267,7 +267,7 @@ void CL_Disconnect (void);
 void CL_Disconnect_f (void);
 void CL_NextDemo (void);
 
-#define			MAX_VISEDICTS	256
+#define			MAX_VISEDICTS	4096
 extern	int				cl_numvisedicts;
 extern	entity_t		*cl_visedicts[MAX_VISEDICTS];
 

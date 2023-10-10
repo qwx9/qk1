@@ -11,6 +11,8 @@ vec3_t		viewlightvec;
 alight_t	r_viewlighting = {128, 192, viewlightvec};
 float		r_time1;
 int			r_numallocatededges;
+int			r_numallocatedbasespans;
+byte		*r_basespans;
 qboolean	r_drawpolys;
 qboolean	r_drawculledpolys;
 qboolean	r_worldpolysbacktofront;
@@ -108,10 +110,8 @@ cvar_t	r_dspeeds = {"r_dspeeds","0"};
 cvar_t	r_drawflat = {"r_drawflat", "0"};
 cvar_t	r_ambient = {"r_ambient", "0"};
 cvar_t	r_reportsurfout = {"r_reportsurfout", "0"};
-cvar_t	r_maxsurfs = {"r_maxsurfs", "0"};
 cvar_t	r_numsurfs = {"r_numsurfs", "0"};
 cvar_t	r_reportedgeout = {"r_reportedgeout", "0"};
-cvar_t	r_maxedges = {"r_maxedges", "0"};
 cvar_t	r_numedges = {"r_numedges", "0"};
 cvar_t	r_aliastransbase = {"r_aliastransbase", "200"};
 cvar_t	r_aliastransadj = {"r_aliastransadj", "100"};
@@ -132,7 +132,7 @@ void	R_InitTextures (void)
 	byte	*dest;
 	
 // create a simple checkerboard texture for the default
-	r_notexture_mip = Hunk_AllocName(16*16+8*8+4*4+2*2 + sizeof *r_notexture_mip, "notexture");
+	r_notexture_mip = Hunk_Alloc(16*16+8*8+4*4+2*2 + sizeof *r_notexture_mip);
 	
 	r_notexture_mip->width = r_notexture_mip->height = 16;
 	r_notexture_mip->offsets[0] = sizeof *r_notexture_mip;
@@ -184,16 +184,11 @@ void R_Init (void)
 	Cvar_RegisterVariable (&r_aliasstats);
 	Cvar_RegisterVariable (&r_dspeeds);
 	Cvar_RegisterVariable (&r_reportsurfout);
-	Cvar_RegisterVariable (&r_maxsurfs);
 	Cvar_RegisterVariable (&r_numsurfs);
 	Cvar_RegisterVariable (&r_reportedgeout);
-	Cvar_RegisterVariable (&r_maxedges);
 	Cvar_RegisterVariable (&r_numedges);
 	Cvar_RegisterVariable (&r_aliastransbase);
 	Cvar_RegisterVariable (&r_aliastransadj);
-
-	setcvarv ("r_maxedges", (float)NUMSTACKEDGES);
-	setcvarv ("r_maxsurfs", (float)NUMSTACKSURFACES);
 
 	view_clipplanes[0].leftedge = true;
 	view_clipplanes[1].rightedge = true;
@@ -223,46 +218,25 @@ void R_NewMap (void)
 // FIXME: is this one short?
 	for (i=0 ; i<cl.worldmodel->numleafs ; i++)
 		cl.worldmodel->leafs[i].efrags = nil;
-		 	
+
+	r_numallocatedbasespans = MAXSPANS;
+	r_basespans = Hunk_Alloc(r_numallocatedbasespans * sizeof(espan_t) + CACHE_SIZE);
 	r_viewleaf = nil;
 	R_ClearParticles ();
 
-	r_cnumsurfs = r_maxsurfs.value;
-
-	if (r_cnumsurfs <= MINSURFACES)
-		r_cnumsurfs = MINSURFACES;
-
-	if (r_cnumsurfs > NUMSTACKSURFACES)
-	{
-		surfaces = Hunk_AllocName(r_cnumsurfs * sizeof *surfaces, "surfaces");
-		surface_p = surfaces;
-		surf_max = &surfaces[r_cnumsurfs];
-		r_surfsonstack = false;
+	r_cnumsurfs = MAXSURFACES;
+	surfaces = Hunk_Alloc(r_cnumsurfs * sizeof *surfaces);
+	surface_p = surfaces;
+	surf_max = &surfaces[r_cnumsurfs];
 	// surface 0 doesn't really exist; it's just a dummy because index 0
 	// is used to indicate no edge attached to surface
-		surfaces--;
-	}
-	else
-	{
-		r_surfsonstack = true;
-	}
+	surfaces--;
 
 	r_maxedgesseen = 0;
 	r_maxsurfsseen = 0;
 
-	r_numallocatededges = r_maxedges.value;
-
-	if (r_numallocatededges < MINEDGES)
-		r_numallocatededges = MINEDGES;
-
-	if (r_numallocatededges <= NUMSTACKEDGES)
-	{
-		auxedges = nil;
-	}
-	else
-	{
-		auxedges = Hunk_AllocName(r_numallocatededges * sizeof *auxedges, "edges");
-	}
+	r_numallocatededges = MAXEDGES;
+	r_edges = Hunk_Alloc(r_numallocatededges * sizeof *r_edges);
 
 	r_dowarpold = false;
 	r_viewchanged = false;
@@ -814,31 +788,6 @@ R_EdgeDrawing
 */
 void R_EdgeDrawing (void)
 {
-	edge_t	ledges[NUMSTACKEDGES +
-				((CACHE_SIZE - 1) / sizeof(edge_t)) + 1];
-	surf_t	lsurfs[NUMSTACKSURFACES +
-				((CACHE_SIZE - 1) / sizeof(surf_t)) + 1];
-
-	if (auxedges)
-	{
-		r_edges = auxedges;
-	}
-	else
-	{
-		r_edges =  (edge_t *)
-				(((uintptr)&ledges[0] + CACHE_SIZE - 1) & ~(CACHE_SIZE - 1));
-	}
-
-	if (r_surfsonstack)
-	{
-		surfaces =  (surf_t *)
-				(((uintptr)&lsurfs[0] + CACHE_SIZE - 1) & ~(CACHE_SIZE - 1));
-		surf_max = &surfaces[r_cnumsurfs];
-	// surface 0 doesn't really exist; it's just a dummy because index 0
-	// is used to indicate no edge attached to surface
-		surfaces--;
-	}
-
 	R_BeginEdgeFrame ();
 
 	if (r_dspeeds.value)
@@ -877,9 +826,9 @@ R_RenderView
 r_refdef must be set before the first call
 ================
 */
-void R_RenderView_ (void)
+void R_RenderView (void)
 {
-	byte	warpbuffer[WARP_WIDTH * WARP_HEIGHT];
+	static byte	warpbuffer[WARP_WIDTH * WARP_HEIGHT];
 
 	r_warpbuffer = warpbuffer;
 
@@ -958,27 +907,6 @@ void R_RenderView_ (void)
 
 // back to high floating-point precision
 	fppdbl ();
-}
-
-void R_RenderView (void)
-{
-	int		dummy;
-	int		delta;
-	
-	delta = (byte *)&dummy - r_stack_start;
-	if (delta < -10000 || delta > 10000)
-		fatal ("R_RenderView: called without enough stack");
-
-	if ( Hunk_LowMark() & 3 )
-		fatal ("Hunk is missaligned");
-
-	if ( (uintptr)(&dummy) & 3 )
-		fatal ("Stack is missaligned");
-
-	if ( (uintptr)(&r_warpbuffer) & 3 )
-		fatal ("Globals are missaligned");
-
-	R_RenderView_ ();
 }
 
 /*

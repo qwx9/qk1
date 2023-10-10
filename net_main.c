@@ -524,7 +524,7 @@ void NET_Init (void)
 
 	for (i = 0; i < net_numsockets; i++)
 	{
-		s = Hunk_AllocName(sizeof *s, "qsocket");
+		s = Hunk_Alloc(sizeof *s);
 		s->next = net_freeSockets;
 		net_freeSockets = s;
 		s->disconnected = true;

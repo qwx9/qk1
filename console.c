@@ -175,7 +175,7 @@ Con_Init
 */
 void Con_Init (void)
 {
-	con_text = Hunk_AllocName (CON_TEXTSIZE, "context");
+	con_text = Hunk_Alloc(CON_TEXTSIZE);
 	memset(con_text, ' ', CON_TEXTSIZE);
 	con_linewidth = -1;
 	Con_CheckResize ();

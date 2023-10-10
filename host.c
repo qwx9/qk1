@@ -24,7 +24,7 @@ double		realtime;				// without any filtering or bounding
 double		oldrealtime;			// last frame run
 int			host_framecount;
 
-int			host_hunklevel;
+void		*host_hunklevel;
 
 client_t	*host_client;			// current client
 
@@ -140,7 +140,7 @@ void	Host_FindMaxClients (void)
 	svs.maxclientslimit = svs.maxclients;
 	if (svs.maxclientslimit < 4)
 		svs.maxclientslimit = 4;
-	svs.clients = Hunk_AllocName(svs.maxclientslimit * sizeof *svs.clients, "clients");
+	svs.clients = Hunk_Alloc(svs.maxclientslimit * sizeof *svs.clients);
 
 	if (svs.maxclients > 1)
 		setcvarv ("deathmatch", 1.0);
@@ -395,7 +395,7 @@ void Host_ClearMemory (void)
 	D_FlushCaches ();
 	Mod_ClearAll ();
 	if (host_hunklevel)
-		Hunk_FreeToLowMark (host_hunklevel);
+		Hunk_FreeToMark (host_hunklevel);
 
 	cls.signon = 0;
 	memset(&sv, 0, sizeof sv);
@@ -597,7 +597,6 @@ void Host_Init (void)
 	Mod_Init ();
 	NET_Init ();
 	SV_Init ();
-	dprint("%4.1f megabyte heap\n", memsize / (1024 * 1024.0));
 	R_InitTextures ();		// needed even for dedicated servers
  
 	if (cls.state != ca_dedicated)
@@ -626,8 +625,7 @@ void Host_Init (void)
 	Cbuf_InsertText ("+mlook\n");
 	Cbuf_InsertText ("exec quake.rc\n");
 
-	Hunk_AllocName (0, "-HOST_HUNKLEVEL-");
-	host_hunklevel = Hunk_LowMark ();
+	host_hunklevel = Hunk_Mark ();
 
 	host_initialized = true;	
 }

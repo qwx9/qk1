@@ -4,7 +4,7 @@
 #include "quakedef.h"
 #include "fns.h"
 
-#define MAX_PARTICLES			2048	// default max # of particles at one
+#define MAX_PARTICLES			4096	// default max # of particles at one
 										//  time
 #define ABSOLUTE_MIN_PARTICLES	512		// no fewer than this no matter what's
 										//  on the command line
@@ -25,7 +25,7 @@ void
 R_InitParticles(void)
 {
 	r_numparticles = MAX_PARTICLES;
-	particles = Hunk_AllocName(r_numparticles * sizeof *particles, "particles");
+	particles = Hunk_Alloc(r_numparticles * sizeof *particles);
 }
 
 /*
