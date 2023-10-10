@@ -608,7 +608,7 @@ while (1)
 		{	// negative statements are built in functions
 			i = -newf->first_statement;
 			if (i >= pr_numbuiltins)
-				PR_RunError ("Bad builtin call number");
+				PR_RunError ("Bad builtin call number %d", i);
 			pr_builtins[i] ();
 			break;
 		}
