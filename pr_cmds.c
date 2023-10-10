@@ -1499,7 +1499,31 @@ void PF_Fixme (void)
 	PR_RunError ("unimplemented bulitin");
 }
 
+static const char *exts[] = {
+	"NEIN_QC", // yes, this is just a dummy
+};
 
+static void PF_checkextension (void)
+{
+	const char *ext = G_STRING(OFS_PARM0);
+	int i;
+
+	G_FLOAT(OFS_RETURN) = false;
+	//fprint(2, "checking extension %s\n", ext);
+	for(i = 0; i < nelem(exts); i++){
+		if(strcmp(ext, exts[i]) == 0){
+			G_FLOAT(OFS_RETURN) = true;
+			break;
+		}
+	}
+}
+
+static void PF_clientstat (void)
+{
+	// FIXME
+	// Arcane Dimensions will fall off if this one isn't defined
+	// even though it does *not* check for the extension
+}
 
 builtin_t pr_builtin[] =
 {
@@ -1589,7 +1613,10 @@ PF_precache_model,
 PF_precache_sound,		// precache_sound2 is different only for qcc
 PF_precache_file,
 
-PF_setspawnparms
+PF_setspawnparms, // #78
+
+[99] = PF_checkextension,
+[232] = PF_clientstat,
 };
 
 builtin_t *pr_builtins = pr_builtin;

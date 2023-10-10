@@ -30,6 +30,7 @@ cvar_t	saved1 = {"saved1", "0", true};
 cvar_t	saved2 = {"saved2", "0", true};
 cvar_t	saved3 = {"saved3", "0", true};
 cvar_t	saved4 = {"saved4", "0", true};
+cvar_t	pr_checkextension = {"pr_checkextension", "1"};
 
 #define	MAX_FIELD_LEN	64
 #define GEFV_CACHESIZE	2
@@ -991,6 +992,7 @@ void PR_Init (void)
 	Cvar_RegisterVariable (&saved2);
 	Cvar_RegisterVariable (&saved3);
 	Cvar_RegisterVariable (&saved4);
+	Cvar_RegisterVariable (&pr_checkextension);
 }
 
 
