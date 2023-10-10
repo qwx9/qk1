@@ -51,6 +51,40 @@ void R_LeadingEdge (edge_t *edge);
 void R_LeadingEdgeBackwards (edge_t *edge);
 void R_TrailingEdge (surf_t *surf, edge_t *edge);
 
+void R_SetupEdges(void)
+{
+	while(r_outofedges > 0){
+		r_edges = Hunk_Double(r_edges);
+		r_outofedges -= r_numallocatededges;
+		r_numallocatededges *= 2;
+	}
+	r_outofedges = 0;
+	edge_p = r_edges;
+	edge_max = &r_edges[r_numallocatededges];
+}
+
+void R_SetupSurfaces(void)
+{
+	while(r_outofsurfaces > 0){
+		surfaces = Hunk_Double(surfaces);
+		r_outofsurfaces -= r_cnumsurfs;
+		r_cnumsurfs *= 2;
+	}
+	r_outofsurfaces = 0;
+	surface_p = surfaces;
+	surf_max = &surfaces[r_cnumsurfs];
+}
+
+void R_SetupSpans(void)
+{
+	while(r_outofspans > 0){
+		r_basespans = Hunk_Double(r_basespans);
+		r_outofspans -= r_numallocatedbasespans;
+		r_numallocatedbasespans *= 2;
+	}
+	r_outofspans = 0;
+}
+
 
 //=============================================================================
 
@@ -97,7 +131,6 @@ void R_DrawCulledPolys (void)
 	}
 }
 
-
 /*
 ==============
 R_BeginEdgeFrame
@@ -107,8 +140,8 @@ void R_BeginEdgeFrame (void)
 {
 	int		v;
 
-	edge_p = r_edges;
-	edge_max = &r_edges[r_numallocatededges];
+	R_SetupEdges();
+	R_SetupSurfaces();
 
 	surface_p = &surfaces[2];	// background is surface 1,
 								//  surface 0 is a dummy
@@ -610,7 +643,6 @@ void R_GenerateSpansBackward (void)
 	R_CleanupSpan ();
 }
 
-
 /*
 ==============
 R_ScanEdges
@@ -629,10 +661,10 @@ void R_ScanEdges (void)
 	espan_t	*basespan_p;
 	surf_t	*s;
 
+	R_SetupSpans();
 	basespan_p = (espan_t *)
 			((uintptr)(r_basespans + CACHE_SIZE - 1) & ~(CACHE_SIZE - 1));
-	max_span_p = &basespan_p[MAXSPANS - r_refdef.vrect.width];
-
+	max_span_p = &basespan_p[r_numallocatedbasespans - r_refdef.vrect.width];
 	span_p = basespan_p;
 
 // clear active edges to just the background edges around the whole screen
@@ -686,6 +718,7 @@ void R_ScanEdges (void)
 	// the next scan
 		if (span_p >= max_span_p)
 		{
+			r_outofspans++;
 			if (r_drawculledpolys)
 			{
 				R_DrawCulledPolys ();

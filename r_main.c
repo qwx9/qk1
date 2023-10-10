@@ -20,6 +20,7 @@ qboolean	r_recursiveaffinetriangles = true;
 float		r_aliasuvscale = 1.0;
 int			r_outofsurfaces;
 int			r_outofedges;
+int			r_outofspans;
 
 qboolean	r_dowarp, r_dowarpold, r_viewchanged;
 
@@ -205,6 +206,8 @@ void R_Init (void)
 	D_Init ();
 }
 
+void R_SetupSurfaces(void);
+
 /*
 ===============
 R_NewMap
@@ -226,11 +229,7 @@ void R_NewMap (void)
 
 	r_cnumsurfs = MAXSURFACES;
 	surfaces = Hunk_Alloc(r_cnumsurfs * sizeof *surfaces);
-	surface_p = surfaces;
-	surf_max = &surfaces[r_cnumsurfs];
-	// surface 0 doesn't really exist; it's just a dummy because index 0
-	// is used to indicate no edge attached to surface
-	surfaces--;
+	R_SetupSurfaces();
 
 	r_maxedgesseen = 0;
 	r_maxsurfsseen = 0;
@@ -817,7 +816,6 @@ void R_EdgeDrawing (void)
 	if (!(r_drawpolys | r_drawculledpolys))
 		R_ScanEdges ();
 }
-
 
 /*
 ================

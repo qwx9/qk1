@@ -353,7 +353,6 @@ void R_EmitCachedEdge (void)
 	r_emitted = 1;
 }
 
-
 /*
 ================
 R_RenderFace

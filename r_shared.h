@@ -36,9 +36,9 @@ extern	vec3_t	vright, base_vright;
 extern	entity_t		*currententity;
 
 // NOTE: these are only initial values. limits are supposed to scale up dynamically
-#define	MAXEDGES			8192
-#define MAXSURFACES			8192
-#define	MAXSPANS			8192
+#define	MAXEDGES			32
+#define MAXSURFACES			800
+#define	MAXSPANS			3000
 
 // !!! if this is changed, it must be changed in asm_draw.h too !!!
 typedef struct espan_s

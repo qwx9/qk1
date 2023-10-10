@@ -76,6 +76,31 @@ Hunk_Alloc(int size)
 }
 
 void *
+Hunk_Double(void *p)
+{
+	mem_t *m, *n;
+	ulong t;
+
+	m = p;
+	m--;
+	t = getmalloctag(m);
+	n = realloc(m, sizeof(*m) + m->size*2);
+	if(m == nil)
+		sysfatal("Hunk_Double: %r");
+	if(hunk_head == m)
+		hunk_head = n;
+	m = n;
+	setmalloctag(m, t);
+	memset((byte*)(m+1) + m->size, 0, m->size);
+	m->size *= 2;
+	if(m->prev != nil)
+		m->prev->next = m;
+	if(m->next != nil)
+		m->next->prev = m;
+	return m+1;
+}
+
+void *
 Hunk_Mark(void)
 {
 	return hunk_head;
