@@ -62,7 +62,6 @@ Hunk_Alloc(int size)
 {
 	mem_t *m;
 
-	size = (size+15)&~15;
 	m = mallocz(sizeof(*m) + size, 1);
 	if(m == nil)
 		sysfatal("Hunk_Alloc: %r");
