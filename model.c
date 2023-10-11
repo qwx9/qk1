@@ -891,8 +891,8 @@ void Mod_LoadLeafs (lump_t *l)
 		out->contents = p;
 
 		out->firstmarksurface = loadmodel->marksurfaces +
-			LittleShort(in->firstmarksurface);
-		out->nummarksurfaces = LittleShort(in->nummarksurfaces);
+			(ushort)LittleShort(in->firstmarksurface);
+		out->nummarksurfaces = (ushort)LittleShort(in->nummarksurfaces);
 		
 		p = LittleLong(in->visofs);
 		if (p == -1)
