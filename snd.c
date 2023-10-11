@@ -35,7 +35,9 @@ struct Chan{
 	int p;
 	int n;
 };
-static Chan chans[Nchan], *che;
+
+static int nchan;
+static Chan *chans, *che;
 
 static int afd = -1, mixbufi;
 static uchar mixbufs[2][Snbuf], *mixbuf = mixbufs[0];
@@ -686,9 +688,9 @@ staticsfx(Sfx *sfx, vec3_t zp, float vol, float att)
 
 	if(sfx == nil)
 		return;
-	if(che >= chans + nelem(chans)){
-		fprint(2, "staticsfx: channel overflow\n");
-		return;
+	if(che >= chans + nchan){
+		nchan *= 2;
+		chans = realloc(chans, nchan*sizeof(*chans));
 	}
 	c = che++;
 	if(sc = loadsfx(sfx), sc == nil)
@@ -851,6 +853,8 @@ initsnd(void)
 	Cvar_RegisterVariable(&ambient_level);
 	Cvar_RegisterVariable(&ambient_fade);
 
+	nchan = Nchan;
+	chans = calloc(nchan, sizeof(*chans));
 	known_sfx = Hunk_Alloc(MAX_SFX * sizeof *known_sfx);
 	num_sfx = 0;
 	ambsfx[Ambwater] = precachesfx("ambience/water1.wav");
