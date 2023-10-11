@@ -635,11 +635,12 @@ void PF_checkpos (void)
 
 //============================================================================
 
-byte	checkpvs[MAX_MAP_LEAFS/8];
+static byte *checkpvs;
+static int checkpvs_size;
 
 int PF_newcheckclient (int check)
 {
-	int		i;
+	int		i, size;
 	byte	*pvs;
 	edict_t	*ent;
 	mleaf_t	*leaf;
@@ -682,7 +683,12 @@ int PF_newcheckclient (int check)
 	VectorAdd (ent->v.origin, ent->v.view_ofs, org);
 	leaf = Mod_PointInLeaf (org, sv.worldmodel);
 	pvs = Mod_LeafPVS (leaf, sv.worldmodel);
-	memcpy (checkpvs, pvs, (sv.worldmodel->numleafs+7)>>3 );
+	size = (sv.worldmodel->numleafs+7)>>3;
+	if(checkpvs == nil || size > checkpvs_size){
+		checkpvs = realloc(checkpvs, size);
+		checkpvs_size = size;
+	}
+	memcpy (checkpvs, pvs, size);
 
 	return i;
 }

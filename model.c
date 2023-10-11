@@ -12,7 +12,8 @@ void Mod_LoadBrushModel (model_t *mod, void *buffer);
 void Mod_LoadAliasModel (model_t *mod, void *buffer);
 model_t *Mod_LoadModel (model_t *mod, qboolean crash);
 
-byte	mod_novis[MAX_MAP_LEAFS/8];
+static byte *mod_novis;
+static int mod_novis_size;
 
 #define	MAX_MOD_KNOWN	4096
 model_t	*mod_known;
@@ -26,7 +27,6 @@ int		mod_numknown;
 void
 Mod_Init(void)
 {
-	memset(mod_novis, 0xff, sizeof mod_novis);
 	mod_known = Hunk_Alloc(MAX_MOD_KNOWN * sizeof(*mod_known));
 }
 
@@ -88,12 +88,17 @@ Mod_DecompressVis
 */
 byte *Mod_DecompressVis (byte *in, model_t *model)
 {
-	static byte	decompressed[MAX_MAP_LEAFS/8];
+	static byte	*decompressed;
+	static int decompressed_size;
 	int		c;
 	byte	*out;
 	int		row;
 
 	row = (model->numleafs+7)>>3;	
+	if(decompressed == nil || row > decompressed_size){
+		decompressed_size = (row + 15) & ~15;
+		decompressed = realloc(decompressed, decompressed_size);
+	}
 	out = decompressed;
 
 	if (!in)
@@ -128,8 +133,17 @@ byte *Mod_DecompressVis (byte *in, model_t *model)
 
 byte *Mod_LeafPVS (mleaf_t *leaf, model_t *model)
 {
-	if (leaf == model->leafs)
+	int sz;
+	sz = (model->numleafs+7)/8;
+	sz = (sz+3)&~3;
+	if (leaf == model->leafs) {
+		if(mod_novis == nil || mod_novis_size < sz){
+			mod_novis = realloc(mod_novis, sz);
+			mod_novis_size = sz;
+		}
+		memset(mod_novis, 0xff, mod_novis_size);
 		return mod_novis;
+	}
 	return Mod_DecompressVis (leaf->compressed_vis, model);
 }
 
@@ -849,13 +863,15 @@ void Mod_LoadNodes (lump_t *l)
 		
 		for (j=0 ; j<2 ; j++)
 		{
-			p = (unsigned short)LittleShort (in->children[j]);
+			p = (ushort)LittleShort (in->children[j]);
 			if (p < count)
 				out->children[j] = loadmodel->nodes + p;
 			else{
-				if((p = 0xffff - p) >= count)
-					p = 0;
-				out->children[j] = (mnode_t *)(loadmodel->leafs + p);
+				p = -1 - (signed)(0xffff0000 | p);
+				if(p >= 0 && p < loadmodel->numleafs)
+					out->children[j] = (mnode_t *)(loadmodel->leafs + p);
+				else
+					Con_Printf("Mod_LoadNodes: invalid node child\n");
 			}
 		}
 	}
@@ -917,7 +933,8 @@ Mod_LoadClipnodes
 */
 void Mod_LoadClipnodes (lump_t *l)
 {
-	dclipnode_t *in, *out;
+	dclipnode_t *in;
+	mclipnode_t	*out;
 	int			i, count;
 	hull_t		*hull;
 
@@ -976,7 +993,7 @@ Deplicate the drawing hull structure as a clipping hull
 void Mod_MakeHull0 (void)
 {
 	mnode_t		*in, *child;
-	dclipnode_t *out;
+	mclipnode_t *out;
 	int			i, j, count;
 	hull_t		*hull;
 	

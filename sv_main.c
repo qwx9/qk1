@@ -131,6 +131,9 @@ void SV_StartSound (edict_t *entity, int channel, char *sample, int volume,
     }
     
 	ent = NUM_FOR_EDICT(entity);
+	if(ent > 8191 || channel > 7 || sound_num > 255){ // FIXME(sigrid) - better protocol
+		return;
+	}
 
 	channel = (ent<<3) | channel;
 
@@ -336,8 +339,9 @@ crosses a waterline.
 =============================================================================
 */
 
-int		fatbytes;
-byte	fatpvs[MAX_MAP_LEAFS/8];
+static int fatbytes;
+static byte	*fatpvs;
+static int fatpvs_size;
 
 void SV_AddToFatPVS (vec3_t org, mnode_t *node)
 {
@@ -385,6 +389,10 @@ given point.
 byte *SV_FatPVS (vec3_t org)
 {
 	fatbytes = (sv.worldmodel->numleafs+31)>>3;
+	if(fatpvs == nil || fatbytes > fatpvs_size){
+		fatpvs = realloc(fatpvs, fatbytes);
+		fatpvs_size = fatbytes;
+	}
 	memset(fatpvs, 0, fatbytes);
 	SV_AddToFatPVS (org, sv.worldmodel->nodes);
 	return fatpvs;
@@ -416,11 +424,15 @@ void SV_WriteEntitiesToClient (edict_t	*clent, sizebuf_t *msg)
 	ent = NEXT_EDICT(sv.edicts);
 	for (e=1 ; e<sv.num_edicts ; e++, ent = NEXT_EDICT(ent))
 	{
+		if (e > 65535) // FIXME(sigrid) - better protocol
+			continue;
 // ignore if not touching a PV leaf
 		if (ent != clent)	// clent is ALLWAYS sent
 		{
 // ignore ents without visible models
 			if (!ent->v.modelindex || !*PR_Str(ent->v.model))
+				continue;
+			if(ent->v.modelindex > 0xff) // FIXME(sigrid) - better protocol
 				continue;
 
 			for (i=0 ; i < ent->num_leafs ; i++)
