@@ -46,7 +46,7 @@ void R_AddDynamicLights (void)
 	int			lnum;
 	int			sd, td;
 	float		dist, rad, minlight;
-	vec3_t		impact, local;
+	vec3_t		impact, local, entorigin;
 	int			s, t;
 	int			i;
 	int			smax, tmax;
@@ -63,7 +63,8 @@ void R_AddDynamicLights (void)
 			continue;		// not lit by this light
 
 		rad = cl_dlights[lnum].radius;
-		dist = DotProduct (cl_dlights[lnum].origin, surf->plane->normal) -
+		VectorSubtract(cl_dlights[lnum].origin, currententity->origin, entorigin);
+		dist = DotProduct (entorigin, surf->plane->normal) -
 				surf->plane->dist;
 		rad -= fabs(dist);
 		minlight = cl_dlights[lnum].minlight;
@@ -73,7 +74,7 @@ void R_AddDynamicLights (void)
 
 		for (i=0 ; i<3 ; i++)
 		{
-			impact[i] = cl_dlights[lnum].origin[i] -
+			impact[i] = entorigin[i] -
 					surf->plane->normal[i]*dist;
 		}
 
