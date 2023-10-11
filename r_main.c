@@ -155,6 +155,12 @@ void	R_InitTextures (void)
 	}	
 }
 
+static void
+fog(void)
+{
+	// FIXME - this was added early to shut up the spam
+}
+
 /*
 ===============
 R_Init
@@ -170,6 +176,7 @@ void R_Init (void)
 	R_InitTurb ();
 
 	Cmd_AddCommand("pointfile", loadpoints);
+	Cmd_AddCommand("fog", fog);
 
 	Cvar_RegisterVariable (&r_draworder);
 	Cvar_RegisterVariable (&r_speeds);

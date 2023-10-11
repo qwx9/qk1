@@ -92,7 +92,7 @@ qboolean R_AliasCheckBBox (void)
 // TODO: don't repeat this check when drawing?
 	if ((frame >= pmdl->numframes) || (frame < 0))
 	{
-		fprint(2, "No such frame %d %s\n", frame, pmodel->name);
+		//fprint(2, "No such frame %d %s\n", frame, pmodel->name);
 		frame = 0;
 	}
 
@@ -544,7 +544,7 @@ void R_AliasSetupSkin (void)
 	skinnum = currententity->skinnum;
 	if ((skinnum >= pmdl->numskins) || (skinnum < 0))
 	{
-		fprint(2, "R_AliasSetupSkin: no such skin # %d\n", skinnum);
+		//fprint(2, "R_AliasSetupSkin: no such skin # %d\n", skinnum);
 		skinnum = 0;
 	}
 
@@ -634,7 +634,7 @@ void R_AliasSetupFrame (void)
 	frame = currententity->frame;
 	if ((frame >= pmdl->numframes) || (frame < 0))
 	{
-		fprint(2, "R_AliasSetupFrame: no such frame %d\n", frame);
+		//fprint(2, "R_AliasSetupFrame: no such frame %d\n", frame);
 		frame = 0;
 	}
 
