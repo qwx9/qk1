@@ -102,7 +102,7 @@ R_BeginEdgeFrame
 */
 void R_BeginEdgeFrame (void)
 {
-	int		v;
+	int		v, n;
 
 	Arr_AllocExtra(&r_edges, &r_numallocatededges, r_outofedges);
 	edge_p = r_edges;
@@ -132,11 +132,10 @@ void R_BeginEdgeFrame (void)
 		r_currentkey = 0;
 	}
 
-// FIXME: set with memset
-	for (v=r_refdef.vrect.y ; v<r_refdef.vrectbottom ; v++)
-	{
-		newedges[v] = removeedges[v] = nil;
-	}
+	v = r_refdef.vrect.y;
+	n = r_refdef.vrectbottom - v;
+	memset(newedges+v, 0, n*sizeof(*newedges));
+	memset(removeedges+v, 0, n*sizeof(*removeedges));
 }
 
 
