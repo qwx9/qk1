@@ -15,7 +15,7 @@ model_t *Mod_LoadModel (model_t *mod, qboolean crash);
 byte	mod_novis[MAX_MAP_LEAFS/8];
 
 #define	MAX_MOD_KNOWN	4096
-model_t	mod_known[MAX_MOD_KNOWN];
+model_t	*mod_known;
 int		mod_numknown;
 
 // values for model_t's needload
@@ -27,6 +27,7 @@ void
 Mod_Init(void)
 {
 	memset(mod_novis, 0xff, sizeof mod_novis);
+	mod_known = Hunk_Alloc(MAX_MOD_KNOWN * sizeof(*mod_known));
 }
 
 /*
@@ -163,7 +164,7 @@ model_t *Mod_FindName (char *name)
 	model_t	*avail = nil;
 
 	if (!name[0])
-		fatal ("Mod_ForName: nil name");
+		fatal ("Mod_FindName: nil name");
 		
 //
 // search the currently loaded models
@@ -843,16 +844,19 @@ void Mod_LoadNodes (lump_t *l)
 		p = LittleLong(in->planenum);
 		out->plane = loadmodel->planes + p;
 
-		out->firstsurface = LittleShort (in->firstface);
-		out->numsurfaces = LittleShort (in->numfaces);
+		out->firstsurface = (ushort)LittleShort (in->firstface);
+		out->numsurfaces = (ushort)LittleShort (in->numfaces);
 		
 		for (j=0 ; j<2 ; j++)
 		{
-			p = LittleShort (in->children[j]);
-			if (p >= 0)
+			p = (unsigned short)LittleShort (in->children[j]);
+			if (p < count)
 				out->children[j] = loadmodel->nodes + p;
-			else
-				out->children[j] = (mnode_t *)(loadmodel->leafs + (-1 - p));
+			else{
+				if((p = 0xffff - p) >= count)
+					p = 0;
+				out->children[j] = (mnode_t *)(loadmodel->leafs + p);
+			}
 		}
 	}
 	
@@ -953,8 +957,12 @@ void Mod_LoadClipnodes (lump_t *l)
 	for (i=0 ; i<count ; i++, out++, in++)
 	{
 		out->planenum = LittleLong(in->planenum);
-		out->children[0] = LittleShort(in->children[0]);
-		out->children[1] = LittleShort(in->children[1]);
+		out->children[0] = (unsigned short)LittleShort(in->children[0]);
+		out->children[1] = (unsigned short)LittleShort(in->children[1]);
+		if(out->children[0] >= count)
+			out->children[0] -= 0x10000;
+		if(out->children[1] >= count)
+			out->children[1] -= 0x10000;
 	}
 }
 
@@ -1019,7 +1027,7 @@ void Mod_LoadMarksurfaces (lump_t *l)
 
 	for ( i=0 ; i<count ; i++)
 	{
-		j = LittleShort(in[i]);
+		j = (ushort)LittleShort(in[i]);
 		if (j >= loadmodel->numsurfaces)
 			fatal ("Mod_ParseMarksurfaces: bad surface number");
 		out[i] = loadmodel->surfaces + j;
@@ -1178,7 +1186,7 @@ void Mod_LoadBrushModel (model_t *mod, void *buffer)
 
 		if (i < mod->numsubmodels-1)
 		{	// duplicate the basic information
-			char	name[32];
+			char	name[12];
 
 			sprint (name, "*%d", i+1);
 			loadmodel = Mod_FindName (name);
