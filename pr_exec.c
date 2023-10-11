@@ -10,11 +10,11 @@ typedef struct
 	dfunction_t		*f;
 } prstack_t;
 
-#define	MAX_STACK_DEPTH		32
+#define	MAX_STACK_DEPTH		2048
 prstack_t	pr_stack[MAX_STACK_DEPTH];
 int			pr_depth;
 
-#define	LOCALSTACK_SIZE		2048
+#define	LOCALSTACK_SIZE		32768
 int			localstack[LOCALSTACK_SIZE];
 int			localstack_used;
 

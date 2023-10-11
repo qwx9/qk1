@@ -44,6 +44,7 @@ qsocket_t *Loop_Connect (char *host)
 	loop_client->receiveMessageLength = 0;
 	loop_client->sendMessageLength = 0;
 	loop_client->canSend = true;
+	loop_client->local = true;
 
 	if (!loop_server)
 	{
@@ -57,10 +58,11 @@ qsocket_t *Loop_Connect (char *host)
 	loop_server->receiveMessageLength = 0;
 	loop_server->sendMessageLength = 0;
 	loop_server->canSend = true;
+	loop_server->local = true;
 
 	loop_client->driverdata = (void *)loop_server;
 	loop_server->driverdata = (void *)loop_client;
-	
+
 	return loop_client;	
 }
 

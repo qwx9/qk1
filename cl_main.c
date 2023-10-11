@@ -27,14 +27,13 @@ cvar_t	m_side = {"m_side","0.8", true};
 client_static_t	cls;
 client_state_t	cl;
 // FIXME: put these on hunk?
-efrag_t			cl_efrags[MAX_EFRAGS];
-entity_t		cl_entities[MAX_EDICTS];
-entity_t		cl_static_entities[MAX_STATIC_ENTITIES];
+entity_t		**cl_visedicts;
+efrag_t			*cl_efrags;
+entity_t		*cl_entities;
+entity_t		*cl_static_entities;
 lightstyle_t	cl_lightstyle[Nlights];
 dlight_t		cl_dlights[MAX_DLIGHTS];
-
 int				cl_numvisedicts;
-entity_t		*cl_visedicts[MAX_VISEDICTS];
 
 /*
 =====================
@@ -674,6 +673,11 @@ CL_Init
 void CL_Init (void)
 {	
 	SZ_Alloc (&cls.message, 1024);
+
+	cl_visedicts = Hunk_Alloc(MAX_VISEDICTS * sizeof(*cl_visedicts));
+	cl_efrags = Hunk_Alloc(MAX_EFRAGS * sizeof(*cl_efrags));
+	cl_entities = Hunk_Alloc(MAX_EDICTS * sizeof(*cl_entities));
+	cl_static_entities = Hunk_Alloc(MAX_STATIC_ENTITIES * sizeof(*cl_static_entities));
 
 	CL_InitInput ();
 	CL_InitTEnts ();

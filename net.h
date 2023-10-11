@@ -11,7 +11,7 @@ extern char *netmtpt;
 
 enum{
 	NET_NAMELEN = 64,
-	NET_MAXMESSAGE = 8192,
+	NET_MAXMESSAGE = 65000,
 	NET_HEADERSIZE = 4 + 4,
 	NET_DATAGRAMSIZE = MAX_DATAGRAM + NET_HEADERSIZE,
 
@@ -61,6 +61,7 @@ typedef struct qsocket_s
 	qboolean		disconnected;
 	qboolean		canSend;
 	qboolean		sendNext;
+	qboolean		local;
 	
 	int				driver;
 	int				landriver;

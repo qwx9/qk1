@@ -426,12 +426,12 @@ void SV_WriteEntitiesToClient (edict_t	*clent, sizebuf_t *msg)
 			for (i=0 ; i < ent->num_leafs ; i++)
 				if (pvs[ent->leafnums[i] >> 3] & (1 << (ent->leafnums[i]&7) ))
 					break;
-				
+
 			if (i == ent->num_leafs)
 				continue;		// not visible
 		}
 
-		if (msg->maxsize - msg->cursize < 16)
+		if (msg->cursize + 18 > msg->maxsize)
 		{
 			Con_Printf ("packet overflow\n");
 			return;
@@ -439,7 +439,7 @@ void SV_WriteEntitiesToClient (edict_t	*clent, sizebuf_t *msg)
 
 // send an update
 		bits = 0;
-		
+
 		for (i=0 ; i<3 ; i++)
 		{
 			miss = ent->v.origin[i] - ent->baseline.origin[i];
@@ -682,11 +682,12 @@ SV_SendClientDatagram
 */
 qboolean SV_SendClientDatagram (client_t *client)
 {
-	byte		buf[MAX_DATAGRAM];
+	byte		buf[MAX_DATAGRAM_LOCAL];
 	sizebuf_t	msg;
-	
+
 	msg.data = buf;
-	msg.maxsize = sizeof buf;
+	// allow big messages locally, but otherwise (real world) we're forced to use 1400 at most
+	msg.maxsize = client->netconnection->local ? MAX_DATAGRAM_LOCAL : MAX_DATAGRAM;
 	msg.cursize = 0;
 
 	MSG_WriteByte (&msg, svc_time);

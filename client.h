@@ -56,7 +56,7 @@ typedef struct
 } dlight_t;
 
 
-#define	MAX_BEAMS	24
+#define	MAX_BEAMS	128
 typedef struct
 {
 	int		entity;
@@ -65,7 +65,7 @@ typedef struct
 	vec3_t	start, end;
 } beam_t;
 
-#define	MAX_EFRAGS		4096
+#define	MAX_EFRAGS		65536
 
 #define	MAX_MAPSTRING	2048
 #define	MAX_DEMOS		8
@@ -233,15 +233,15 @@ extern	cvar_t	m_forward;
 extern	cvar_t	m_side;
 
 
-#define	MAX_TEMP_ENTITIES	64			// lightning bolts, etc
-#define	MAX_STATIC_ENTITIES	128			// torches, etc
+#define	MAX_TEMP_ENTITIES	256			// lightning bolts, etc
+#define	MAX_STATIC_ENTITIES	8192			// torches, etc
 
 extern	client_state_t	cl;
 
 // FIXME, allocate dynamically
-extern	efrag_t			cl_efrags[MAX_EFRAGS];
-extern	entity_t		cl_entities[MAX_EDICTS];
-extern	entity_t		cl_static_entities[MAX_STATIC_ENTITIES];
+extern	efrag_t			*cl_efrags;
+extern	entity_t		*cl_entities;
+extern	entity_t		*cl_static_entities;
 extern	lightstyle_t	cl_lightstyle[Nlights];
 extern	dlight_t		cl_dlights[MAX_DLIGHTS];
 extern	entity_t		cl_temp_entities[MAX_TEMP_ENTITIES];
@@ -267,9 +267,9 @@ void CL_Disconnect (void);
 void CL_Disconnect_f (void);
 void CL_NextDemo (void);
 
-#define			MAX_VISEDICTS	4096
+#define			MAX_VISEDICTS	65536
 extern	int				cl_numvisedicts;
-extern	entity_t		*cl_visedicts[MAX_VISEDICTS];
+extern	entity_t		**cl_visedicts;
 
 //
 // cl_input

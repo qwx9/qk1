@@ -44,7 +44,7 @@ typedef struct
 	byte		reliable_datagram_buf[MAX_DATAGRAM];
 
 	sizebuf_t	signon;
-	byte		signon_buf[8192];
+	byte		signon_buf[32768];
 } server_t;
 
 
@@ -67,7 +67,7 @@ typedef struct client_s
 
 	sizebuf_t		message;			// can be added to at any time,
 										// copied and clear once per frame
-	byte			msgbuf[Nmsg];
+	byte			msgbuf[NET_MAXMESSAGE];
 	edict_t			*edict;				// EDICT_NUM(clientnum+1)
 	char			name[32];			// for printing to other people
 	int				colors;

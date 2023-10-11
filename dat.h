@@ -5,7 +5,6 @@ extern char *game;
 enum{
 	Npath = 64,
 	Nfspath = 128,
-	Nmsg = 8000,
 	Nsav = 12,
 	Nsavcm = 40,
 	Nsavver = 5,

@@ -488,7 +488,7 @@ void R_RecursiveWorldNode (mnode_t *node, int clipflags)
 		mark = pleaf->firstmarksurface;
 		c = pleaf->nummarksurfaces;
 
-		if (c)
+		if (c && mark)
 		{
 			do
 			{

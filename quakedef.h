@@ -26,12 +26,13 @@
 
 #define	ON_EPSILON		0.1			// point on plane side epsilon
 
-#define	MAX_DATAGRAM	1024		// max length of unreliable message
+#define	MAX_DATAGRAM	1400		// max length of unreliable message
+#define	MAX_DATAGRAM_LOCAL	65000	// on loopback we don't care
 
 //
 // per-level limits
 //
-#define	MAX_EDICTS		32000			// FIXME: ouch! ouch! ouch!
+#define	MAX_EDICTS		65536
 #define	Nlights	64
 #define	MAX_MODELS		4096			// these are sent over the net as bytes
 #define	MAX_SOUNDS		2048			// so they cannot be blindly increased
@@ -127,8 +128,6 @@
 
 #define	MAX_SCOREBOARD		16
 #define	MAX_SCOREBOARDNAME	32
-
-#define	SOUND_CHANNELS		8
 
 typedef unsigned char 		byte;
 typedef enum {false, true}	qboolean;

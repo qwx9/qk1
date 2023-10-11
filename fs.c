@@ -757,7 +757,7 @@ readdm(void)
 	VectorCopy(cl.mviewangles[0], cl.mviewangles[1]);
 	for(n=0, f=cl.mviewangles[0]; n<3; n++)
 		*f++ = getfl(demobf);
-	if(net_message.cursize > Nmsg)
+	if(net_message.cursize > NET_MAXMESSAGE)
 		fatal("readdm: invalid message size %d\n", net_message.cursize);
 	n = Bread(demobf, net_message.data, net_message.cursize);
 	demoofs = Bseek(demobf, 0, 1);
