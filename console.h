@@ -14,6 +14,7 @@ void Con_CheckResize (void);
 void Con_Init (void);
 void Con_DrawConsole (int lines, qboolean drawinput);
 void Con_Printf (char *fmt, ...);
+void Con_DPrintf (char *fmt, ...);
 void Con_Clear_f (void);
 void Con_DrawNotify (void);
 void Con_ClearNotify (void);

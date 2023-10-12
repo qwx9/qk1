@@ -876,8 +876,7 @@ void PF_findradius (void)
 void
 PF_dprint(void)
 {
-	/* just always print it, but not on the console */
-	fprint(2, "%s", PF_VarString(0));
+	Con_DPrintf("%s", PF_VarString(0));
 }
 
 void PF_ftos (void)

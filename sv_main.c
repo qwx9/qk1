@@ -7,6 +7,8 @@
 server_t		sv;
 server_static_t	svs;
 
+cvar_t developer = {"developer", "0"}; // show extra messages
+
 // we can't just change protocol mid-game, so it's saved here first
 static protocol_t *sv_protocol = &protos[PROTO_RMQ];
 
@@ -63,6 +65,7 @@ void SV_Init (void)
 	Cvar_RegisterVariable (&sv_idealpitchscale);
 	Cvar_RegisterVariable (&sv_aim);
 	Cvar_RegisterVariable (&sv_nostep);
+	Cvar_RegisterVariable (&developer);
 
 	Cmd_AddCommand("sv_protocol", SV_Protocol_f);
 

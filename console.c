@@ -10,6 +10,7 @@ int 		con_linewidth;
 float		con_cursorspeed = 4;
 
 #define		CON_TEXTSIZE	16384
+#define		MAXPRINTMSG		4096
 
 qboolean 	con_forcedup;		// because no entities to refresh
 
@@ -291,7 +292,7 @@ Con_Print(char *txt)
 static void
 print1(char *s, int n)
 {
-	char buf[4096], *p, *d;
+	char buf[MAXPRINTMSG], *p, *d;
 
 	if(!debug)
 		return;
@@ -308,7 +309,7 @@ Con_Printf(char *fmt, ...)
 {
 	int n;
 	va_list arg;
-	char msg[4096];
+	char msg[MAXPRINTMSG];
 	static qboolean	inupdate;
 
 	/* FIXME: Con_Print() above uses 1<<7 bit for color printing select
@@ -338,6 +339,28 @@ Con_Printf(char *fmt, ...)
 			inupdate = false;
 		}
 	}
+}
+
+/*
+================
+Con_DPrintf
+
+A Con_Printf that only shows up if the "developer" cvar is set
+================
+*/
+void Con_DPrintf (char *fmt, ...)
+{
+	va_list		argptr;
+	char		msg[MAXPRINTMSG];
+
+	if (!developer.value)
+		return;			// don't confuse non-developers with techie stuff...
+
+	va_start (argptr,fmt);
+	vsprintf (msg,fmt,argptr);
+	va_end (argptr);
+	
+	Con_Printf ("%s", msg);
 }
 
 /*
