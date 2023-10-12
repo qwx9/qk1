@@ -48,7 +48,6 @@ void *Mod_Extradata (model_t *mod)
 	Mod_LoadModel (mod, true);
 
 	if (!mod->cache.data){
-		assert(0);
 		fatal ("Mod_Extradata: caching failed: %s", mod->name);
 	}
 	return mod->cache.data;

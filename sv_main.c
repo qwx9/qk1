@@ -7,7 +7,7 @@
 server_t		sv;
 server_static_t	svs;
 
-char	localmodels[MAX_MODELS][8];			// inline model names for precache
+static char	localmodels[MAX_MODELS][8];			// inline model names for precache
 
 //============================================================================
 
@@ -694,7 +694,7 @@ SV_SendClientDatagram
 */
 qboolean SV_SendClientDatagram (client_t *client)
 {
-	byte		buf[MAX_DATAGRAM_LOCAL];
+	static byte		buf[MAX_DATAGRAM_LOCAL];
 	sizebuf_t	msg;
 
 	msg.data = buf;
