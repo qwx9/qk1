@@ -99,6 +99,16 @@ Hunk_Double(void *p)
 	return m+1;
 }
 
+void
+Hunk_Memset0(void *p)
+{
+	mem_t *m;
+
+	m = p;
+	m--;
+	memset(p, 0, m->size);
+}
+
 void *
 Hunk_Mark(void)
 {
@@ -123,12 +133,13 @@ Hunk_TempAlloc(int size)
 	static void	*buf;
 	static int bufsz;
 
-	if(bufsz > size)
-		return buf;
-	buf = realloc(buf, size);
-	if(buf == nil)
-		sysfatal("Hunk_TempAlloc: %r");
-	bufsz = size;
+	if(size > bufsz){
+		buf = realloc(buf, size);
+		if(buf == nil)
+			sysfatal("Hunk_TempAlloc: %r");
+		bufsz = size;
+	}
+	memset(buf, 0, size);
 
 	return buf;
 }
@@ -146,7 +157,6 @@ Cache_Flush(void)
 		
 	while(cache_head != nil){
 		s = cache_head->next;
-		cache_head->user->data = nil;
 		free(cache_head);
 		cache_head = s;
 	}
@@ -160,12 +170,13 @@ Cache_Free(mem_user_t *c)
 	if(!c->data)
 		fatal("Cache_Free: not allocated");
 
-	cs = ((mem_t *)c->data) - 1;
+	cs = (mem_t *)c->data - 1;
 	if(cs == cache_head)
 		cache_head = cs->next;
-	cs->prev->next = cs->next;
-	cs->next->prev = cs->prev;
-	cs->next = cs->prev = nil;
+	if(cs->prev != nil)
+		cs->prev->next = cs->next;
+	if(cs->next != nil)
+		cs->next->prev = cs->prev;
 
 	c->data = nil;
 	free(cs);

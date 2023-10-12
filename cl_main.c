@@ -26,7 +26,6 @@ cvar_t	m_side = {"m_side","0.8", true};
 
 client_static_t	cls;
 client_state_t	cl;
-// FIXME: put these on hunk?
 entity_t		**cl_visedicts;
 efrag_t			*cl_efrags;
 entity_t		*cl_entities;
@@ -54,11 +53,12 @@ void CL_ClearState (void)
 	SZ_Clear (&cls.message);
 
 // clear other arrays	
-	memset(cl_efrags, 0, sizeof cl_efrags);
-	memset(cl_entities, 0, sizeof cl_entities);
+	Hunk_Memset0(cl_efrags);
+	Hunk_Memset0(cl_entities);
+	Hunk_Memset0(cl_temp_entities);
+
 	memset(cl_dlights, 0, sizeof cl_dlights);
 	memset(cl_lightstyle, 0, sizeof cl_lightstyle);
-	memset(cl_temp_entities, 0, sizeof cl_temp_entities);
 	memset(cl_beams, 0, sizeof cl_beams);
 
 //

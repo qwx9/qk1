@@ -583,7 +583,7 @@ stopallsfx(void)
 {
 	if(afd < 0)
 		return;
-	memset(chans, 0, sizeof chans);
+	memset(chans, 0, sizeof(*chans)*nchan);
 	che = chans + Sstat;
 }
 
