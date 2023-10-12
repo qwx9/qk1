@@ -666,7 +666,7 @@ CL_Init
 */
 void CL_Init (void)
 {	
-	SZ_Alloc (&cls.message, 1024);
+	SZ_Alloc (&cls.message, MAX_DATAGRAM);
 
 	cl_visedicts = Hunk_Alloc(MAX_VISEDICTS * sizeof(*cl_visedicts));
 	cl_efrags = Hunk_Alloc(MAX_EFRAGS * sizeof(*cl_efrags));
