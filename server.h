@@ -11,21 +11,6 @@ typedef struct
 
 typedef enum {ss_loading, ss_active} server_state_t;
 
-enum {
-	PROTO_NQ,
-	PROTO_RMQ,
-	PROTO_NUM,
-};
-
-typedef struct {
-	int id;
-	char *name;
-	void (*MSG_WriteCoord)(sizebuf_t *sb, float f);
-	void (*MSG_WriteAngle)(sizebuf_t *sb, float f);
-	float (*MSG_ReadCoord)(void);
-	float (*MSG_ReadAngle)(void);
-}protocol_t;
-
 typedef struct
 {
 	qboolean	active;				// false if only a net client
@@ -101,62 +86,62 @@ typedef struct client_s
 
 //=============================================================================
 
-// edict->movetype values
-#define	MOVETYPE_NONE			0		// never moves
-#define	MOVETYPE_ANGLENOCLIP	1
-#define	MOVETYPE_ANGLECLIP		2
-#define	MOVETYPE_WALK			3		// gravity
-#define	MOVETYPE_STEP			4		// gravity, special edge handling
-#define	MOVETYPE_FLY			5
-#define	MOVETYPE_TOSS			6		// gravity
-#define	MOVETYPE_PUSH			7		// no clip to world, push and crush
-#define	MOVETYPE_NOCLIP			8
-#define	MOVETYPE_FLYMISSILE		9		// extra size to monsters
-#define	MOVETYPE_BOUNCE			10
+enum {
+	// edict->movetype values
+	MOVETYPE_NONE, // never moves
+	MOVETYPE_ANGLENOCLIP,
+	MOVETYPE_ANGLECLIP,
+	MOVETYPE_WALK, // gravity
+	MOVETYPE_STEP, // gravity, special edge handling
+	MOVETYPE_FLY,
+	MOVETYPE_TOSS, // gravity
+	MOVETYPE_PUSH, // no clip to world, push and crush
+	MOVETYPE_NOCLIP,
+	MOVETYPE_FLYMISSILE, // extra size to monsters
+	MOVETYPE_BOUNCE,
 
-// edict->solid values
-#define	SOLID_NOT				0		// no interaction with other objects
-#define	SOLID_TRIGGER			1		// touch on edge, but not blocking
-#define	SOLID_BBOX				2		// touch on edge, block
-#define	SOLID_SLIDEBOX			3		// touch on edge, but not an onground
-#define	SOLID_BSP				4		// bsp clip, touch on edge, block
+	// edict->solid values
+	SOLID_NOT = 0, // no interaction with other objects
+	SOLID_TRIGGER, // touch on edge, but not blocking
+	SOLID_BBOX, // touch on edge, block
+	SOLID_SLIDEBOX, // touch on edge, but not an onground
+	SOLID_BSP, // bsp clip, touch on edge, block
 
-// edict->deadflag values
-#define	DEAD_NO					0
-#define	DEAD_DYING				1
-#define	DEAD_DEAD				2
+	// edict->deadflag values
+	DEAD_NO = 0,
+	DEAD_DYING,
+	DEAD_DEAD,
 
-#define	DAMAGE_NO				0
-#define	DAMAGE_YES				1
-#define	DAMAGE_AIM				2
+	DAMAGE_NO = 0,
+	DAMAGE_YES,
+	DAMAGE_AIM,
 
-// edict->flags
-#define	FL_FLY					1
-#define	FL_SWIM					2
-//#define	FL_GLIMPSE				4
-#define	FL_CONVEYOR				4
-#define	FL_CLIENT				8
-#define	FL_INWATER				16
-#define	FL_MONSTER				32
-#define	FL_GODMODE				64
-#define	FL_NOTARGET				128
-#define	FL_ITEM					256
-#define	FL_ONGROUND				512
-#define	FL_PARTIALGROUND		1024	// not all corners are valid
-#define	FL_WATERJUMP			2048	// player jumping out of water
-#define	FL_JUMPRELEASED			4096	// for jump debouncing
+	// edict->flags
+	FL_FLY = 1<<0,
+	FL_SWIM = 1<<1,
+	FL_CONVEYOR = 1<<2,
+	FL_CLIENT = 1<<3,
+	FL_INWATER = 1<<4,
+	FL_MONSTER = 1<<5,
+	FL_GODMODE = 1<<6,
+	FL_NOTARGET = 1<<7,
+	FL_ITEM = 1<<8,
+	FL_ONGROUND = 1<<9,
+	FL_PARTIALGROUND = 1<<10, // not all corners are valid
+	FL_WATERJUMP = 1<<11, // player jumping out of water
+	FL_JUMPRELEASED = 1<<12, // for jump debouncing
 
-// entity effects
+	// entity effects
+	EF_BRIGHTFIELD = 1<<0,
+	EF_MUZZLEFLASH = 1<<1,
+	EF_BRIGHTLIGHT = 1<<2,
+	EF_DIMLIGHT = 1<<3,
 
-#define	EF_BRIGHTFIELD			1
-#define	EF_MUZZLEFLASH 			2
-#define	EF_BRIGHTLIGHT 			4
-#define	EF_DIMLIGHT 			8
-
-#define	SPAWNFLAG_NOT_EASY			256
-#define	SPAWNFLAG_NOT_MEDIUM		512
-#define	SPAWNFLAG_NOT_HARD			1024
-#define	SPAWNFLAG_NOT_DEATHMATCH	2048
+	SPAWNFLAG_NOT_EASY = 1<<8,
+	SPAWNFLAG_NOT_MEDIUM = 1<<9,
+	SPAWNFLAG_NOT_HARD = 1<<10,
+	SPAWNFLAG_NOT_DEATHMATCH = 1<<11,
+};
 
 //============================================================================
 

@@ -7,6 +7,7 @@
 dprograms_t		*progs;
 dfunction_t		*pr_functions;
 char			*pr_strings;
+static int		pr_strings_size;
 ddef_t			*pr_fielddefs;
 ddef_t			*pr_globaldefs;
 dstatement_t	*pr_statements;
@@ -81,6 +82,10 @@ PR_SetStr(char *s)
 {
 	int i;
 
+	if(s == nil)
+		return 0;
+	if(s >= pr_strings && s < pr_strings+pr_strings_size-1)
+		return s - pr_strings;
 	for(i = 0; i < num_prstr; i++){
 		if(s == prstr[i])
 			return -1-i;
@@ -958,7 +963,7 @@ void PR_LoadProgs (void)
 	if(prtempstr == nil)
 		prtempstr = malloc(MAX_PRTEMPSTR*PRTEMPSTR_SIZE);
 
-	memset(prstr, 0, MAX_PRSTR*sizeof(*prstr));
+	memset(prstr, 0, max_prstr*sizeof(*prstr));
 	memset(prtempstr, 0, MAX_PRTEMPSTR*PRTEMPSTR_SIZE);
 	num_prstr = 0;
 	num_prtempstr = 0;
@@ -985,6 +990,7 @@ void PR_LoadProgs (void)
 
 	pr_functions = (dfunction_t *)((byte *)progs + progs->ofs_functions);
 	pr_strings = (char *)progs + progs->ofs_strings;
+	pr_strings_size = progs->numstrings;
 	pr_globaldefs = (ddef_t *)((byte *)progs + progs->ofs_globaldefs);
 	pr_fielddefs = (ddef_t *)((byte *)progs + progs->ofs_fielddefs);
 	pr_statements = (dstatement_t *)((byte *)progs + progs->ofs_statements);

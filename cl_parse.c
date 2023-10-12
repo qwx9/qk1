@@ -47,7 +47,11 @@ char *svc_strings[] =
 	"svc_finale",			// [string] music [string] text
 	"svc_cdtrack",			// [byte] track [byte] looptrack
 	"svc_sellscreen",
-	"svc_cutscene"
+	"svc_cutscene",
+
+	"svc_spawnbaseline2",
+	"svc_spawnstatic2",
+	"svc_spawnstaticsound2",
 };
 
 //=============================================================================
@@ -91,28 +95,22 @@ void CL_ParseStartSoundPacket(void)
     float 	attenuation;  
 	           
     field_mask = MSG_ReadByte(); 
+    volume = (field_mask & SND_VOLUME) ? MSG_ReadByte() : Spktvol;
+	attenuation = (field_mask & SND_ATTENUATION) ? MSG_ReadByte()/64.0 : Spktatt;
+	if(field_mask & (sv.protocol->fl_large_entity | sv.protocol->fl_large_channel)){
+		ent = MSG_ReadShort();
+		channel = MSG_ReadByte();
+	}else{
+		channel = MSG_ReadShort ();
+		ent = channel >> 3;
+		channel &= 7;
+	}
+	sound_num = (field_mask & sv.protocol->fl_large_sound) ? MSG_ReadShort() : MSG_ReadByte();
 
-    if (field_mask & SND_VOLUME)
-		volume = MSG_ReadByte ();
-	else
-		volume = Spktvol;
-	
-    if (field_mask & SND_ATTENUATION)
-		attenuation = MSG_ReadByte () / 64.0;
-	else
-		attenuation = Spktatt;
-	
-	channel = MSG_ReadShort ();
-	sound_num = MSG_ReadByte ();
+	if(ent > MAX_EDICTS)
+		Host_Error("CL_ParseStartSoundPacket: ent = %d", ent);
 
-	ent = channel >> 3;
-	channel &= 7;
-
-	if (ent > MAX_EDICTS)
-		Host_Error ("CL_ParseStartSoundPacket: ent = %d", ent);
-
-	MSG_ReadVec(pos);
-
+	MSG_ReadVec(cl.protocol, pos);
     startsfx (ent, channel, cl.sound_precache[sound_num], pos, volume/255.0, attenuation);
 }       
 
@@ -185,10 +183,11 @@ CL_ParseServerInfo
 void CL_ParseServerInfo (void)
 {
 	char	*str;
-	int		i;
+	void	*p;
+	int		i, n;
 	int		nummodels, numsounds;
-	char	model_precache[MAX_MODELS][Npath];
-	char	sound_precache[MAX_SOUNDS][Npath];
+	static char	model_precache[MAX_MODELS][Npath];
+	static char	sound_precache[MAX_SOUNDS][Npath];
 
 	dprint("CL_ParseServerInfo: parsing serverinfo pkt...\n");
 //
@@ -198,11 +197,21 @@ void CL_ParseServerInfo (void)
 
 // parse protocol version number
 	i = MSG_ReadLong ();
-	if (i != PROTOCOL_VERSION)
-	{
-		Con_Printf ("Server returned version %d, not %d", i, PROTOCOL_VERSION);
+	free(cl.protocol);
+	p = nil;
+	for(n = 0; n < nelem(protos); n++){
+		if(protos[n].version == i){
+			p = &protos[n];
+			break;
+		}
+	}
+	if(p == nil){
+		Con_Printf ("Server returned unknown protocol version %d", i);
 		return;
 	}
+	cl.protocol = malloc(sizeof(*cl.protocol));
+	memmove(cl.protocol, p, sizeof(*cl.protocol));
+	cl.protocol->MSG_ReadProtocolInfo(cl.protocol);
 
 // parse maxclients
 	cl.maxclients = MSG_ReadByte ();
@@ -302,7 +311,7 @@ If an entities model or origin changes from frame to frame, it must be
 relinked.  Other attributes can change without relinking.
 ==================
 */
-int	bitcounts[16];
+static int	bitcounts[16];
 
 void CL_ParseUpdate (int bits)
 {
@@ -311,7 +320,7 @@ void CL_ParseUpdate (int bits)
 	int			modnum;
 	qboolean	forcelink;
 	entity_t	*ent;
-	int			num;
+	int			num, skin, colormap;
 
 	if (cls.signon == SIGNONS - 1)
 	{	// first update is the final signon stage
@@ -319,39 +328,66 @@ void CL_ParseUpdate (int bits)
 		CL_SignonReply ();
 	}
 
-	if (bits & U_MOREBITS)
-	{
-		i = MSG_ReadByte ();
-		bits |= (i<<8);
+	if (bits & U_MOREBITS){
+		bits |= MSG_ReadByte()<<8;
+		if(bits & U_MOREBITS2){
+			bits |= MSG_ReadByte()<<16;
+			if(bits & U_MOREBITS3)
+				bits |= MSG_ReadByte()<<24;
+		}
+		if(bits == -1)
+			Host_Error("CL_ParseUpdate: unexpected EOF while reading extended bits");
 	}
 
-	if (bits & U_LONGENTITY)	
-		num = MSG_ReadShort ();
-	else
-		num = MSG_ReadByte ();
-
+	num = (bits & U_LONGENTITY) ? MSG_ReadShort() : MSG_ReadByte ();
 	ent = CL_EntityNum (num);
 
-for (i=0 ; i<16 ; i++)
-if (bits&(1<<i))
-	bitcounts[i]++;
+	for (i=0 ; i<16 ; i++)
+		if (bits&(1<<i))
+			bitcounts[i]++;
 
-	if (ent->msgtime != cl.mtime[1])
-		forcelink = true;	// no previous frame to lerp from
-	else
-		forcelink = false;
-
+	forcelink = ent->msgtime != cl.mtime[1]; // no previous frame to lerp from
 	ent->msgtime = cl.mtime[0];
-	
-	if (bits & U_MODEL)
-	{
-		modnum = MSG_ReadByte ();
-		if (modnum >= MAX_MODELS)
-			Host_Error ("CL_ParseModel: bad modnum");
-	}
+
+// shift the known values for interpolation
+	VectorCopy (ent->msg_origins[0], ent->msg_origins[1]);
+	VectorCopy (ent->msg_angles[0], ent->msg_angles[1]);
+
+	modnum = (bits & U_MODEL) ? MSG_ReadByte() : ent->baseline.modelindex;
+	ent->frame = (bits & U_FRAME) ? MSG_ReadByte() : ent->baseline.frame;
+	colormap = (bits & U_COLORMAP) ? MSG_ReadByte() : ent->baseline.colormap;
+	skin = (bits & U_SKIN) ? MSG_ReadByte() : ent->baseline.skin;
+	ent->effects = (bits & U_EFFECTS) ? MSG_ReadByte() : ent->baseline.effects;
+
+	if(colormap == 0)
+		ent->colormap = vid.colormap;
+	else if(colormap > cl.maxclients)
+		fatal("colormap > cl.maxclients");
 	else
-		modnum = ent->baseline.modelindex;
-		
+		ent->colormap = cl.scores[colormap-1].translations;
+
+	if(skin != ent->skinnum && num >= 0 && num <= cl.maxclients){
+		// FIXME(sigrid): update the skin
+		ent->skinnum = skin;
+	}
+
+	ent->msg_origins[0][0] = (bits & U_ORIGIN1) ? cl.protocol->MSG_ReadCoord() : ent->baseline.origin[0];
+	ent->msg_angles[0][0] = (bits & U_ANGLE1) ? cl.protocol->MSG_ReadAngle() : ent->baseline.angles[0];
+	ent->msg_origins[0][1] = (bits & U_ORIGIN2) ? cl.protocol->MSG_ReadCoord() : ent->baseline.origin[1];
+	ent->msg_angles[0][1] = (bits & U_ANGLE2) ? cl.protocol->MSG_ReadAngle() : ent->baseline.angles[1];
+	ent->msg_origins[0][2] = (bits & U_ORIGIN3) ? cl.protocol->MSG_ReadCoord() : ent->baseline.origin[2];
+	ent->msg_angles[0][2] = (bits & U_ANGLE3) ? cl.protocol->MSG_ReadAngle() : ent->baseline.angles[2];
+
+	if(bits & U_NOLERP)
+		ent->forcelink = true;
+
+	if(bits & cl.protocol->fl_large_frame)
+		ent->frame |= MSG_ReadByte()<<8;
+	if(bits & cl.protocol->fl_large_model)
+		modnum |= MSG_ReadByte()<<8;
+
+	if(modnum < 0 || modnum >= MAX_MODELS)
+		Host_Error("CL_ParseModel: bad modnum: %d (bits 0x%08ux)", modnum, bits);
 	model = cl.model_precache[modnum];
 	if (model != ent->model)
 	{
@@ -368,68 +404,6 @@ if (bits&(1<<i))
 		else
 			forcelink = true;	// hack to make null model players work
 	}
-	
-	if (bits & U_FRAME)
-		ent->frame = MSG_ReadByte ();
-	else
-		ent->frame = ent->baseline.frame;
-
-	if (bits & U_COLORMAP)
-		i = MSG_ReadByte();
-	else
-		i = ent->baseline.colormap;
-	if (!i)
-		ent->colormap = vid.colormap;
-	else
-	{
-		if (i > cl.maxclients)
-			fatal ("i >= cl.maxclients");
-		ent->colormap = cl.scores[i-1].translations;
-	}
-
-	if (bits & U_SKIN)
-		ent->skinnum = MSG_ReadByte();
-	else
-		ent->skinnum = ent->baseline.skin;
-
-	if (bits & U_EFFECTS)
-		ent->effects = MSG_ReadByte();
-	else
-		ent->effects = ent->baseline.effects;
-
-// shift the known values for interpolation
-	VectorCopy (ent->msg_origins[0], ent->msg_origins[1]);
-	VectorCopy (ent->msg_angles[0], ent->msg_angles[1]);
-
-	if (bits & U_ORIGIN1)
-		ent->msg_origins[0][0] = sv.protocol->MSG_ReadCoord ();
-	else
-		ent->msg_origins[0][0] = ent->baseline.origin[0];
-	if (bits & U_ANGLE1)
-		ent->msg_angles[0][0] = sv.protocol->MSG_ReadAngle();
-	else
-		ent->msg_angles[0][0] = ent->baseline.angles[0];
-
-	if (bits & U_ORIGIN2)
-		ent->msg_origins[0][1] = sv.protocol->MSG_ReadCoord ();
-	else
-		ent->msg_origins[0][1] = ent->baseline.origin[1];
-	if (bits & U_ANGLE2)
-		ent->msg_angles[0][1] = sv.protocol->MSG_ReadAngle();
-	else
-		ent->msg_angles[0][1] = ent->baseline.angles[1];
-
-	if (bits & U_ORIGIN3)
-		ent->msg_origins[0][2] = sv.protocol->MSG_ReadCoord ();
-	else
-		ent->msg_origins[0][2] = ent->baseline.origin[2];
-	if (bits & U_ANGLE3)
-		ent->msg_angles[0][2] = sv.protocol->MSG_ReadAngle();
-	else
-		ent->msg_angles[0][2] = ent->baseline.angles[2];
-
-	if ( bits & U_NOLERP )
-		ent->forcelink = true;
 
 	if ( forcelink )
 	{	// didn't have an update last message
@@ -446,18 +420,19 @@ if (bits&(1<<i))
 CL_ParseBaseline
 ==================
 */
-void CL_ParseBaseline (entity_t *ent)
+void CL_ParseBaseline (int withbits, entity_t *ent)
 {
-	int			i;
-	
-	ent->baseline.modelindex = MSG_ReadByte ();
-	ent->baseline.frame = MSG_ReadByte ();
+	int i, bits;
+
+	bits = withbits ? MSG_ReadByte() : 0;
+	ent->baseline.modelindex = (bits & cl.protocol->fl_large_baseline_model) ? MSG_ReadShort() : MSG_ReadByte();
+	ent->baseline.frame = (bits & cl.protocol->fl_large_baseline_frame) ? MSG_ReadShort() : MSG_ReadByte();
 	ent->baseline.colormap = MSG_ReadByte();
 	ent->baseline.skin = MSG_ReadByte();
 	for (i=0 ; i<3 ; i++)
 	{
-		ent->baseline.origin[i] = sv.protocol->MSG_ReadCoord ();
-		ent->baseline.angles[i] = sv.protocol->MSG_ReadAngle ();
+		ent->baseline.origin[i] = cl.protocol->MSG_ReadCoord ();
+		ent->baseline.angles[i] = cl.protocol->MSG_ReadAngle ();
 	}
 }
 
@@ -471,113 +446,85 @@ Server information pertaining to this client only
 */
 void CL_ParseClientdata (unsigned int bits)
 {
-	int		i, j;
-	
-	if (bits & SU_VIEWHEIGHT)
-		cl.viewheight = MSG_ReadChar ();
-	else
-		cl.viewheight = DEFAULT_VIEWHEIGHT;
+	int		i, j, weaponmodel;
 
-	if (bits & SU_IDEALPITCH)
-		cl.idealpitch = MSG_ReadChar ();
-	else
-		cl.idealpitch = 0;
-	
-	VectorCopy (cl.mvelocity[0], cl.mvelocity[1]);
-	for (i=0 ; i<3 ; i++)
-	{
-		if (bits & (SU_PUNCH1<<i) )
-			cl.punchangle[i] = MSG_ReadChar();
-		else
-			cl.punchangle[i] = 0;
-		if (bits & (SU_VELOCITY1<<i) )
-			cl.mvelocity[0][i] = MSG_ReadChar()*16;
-		else
-			cl.mvelocity[0][i] = 0;
+	if(bits & SU_MOREBITS){
+		bits |= MSG_ReadByte() << 16;
+		if(bits & SU_MOREBITS2)
+			bits |= MSG_ReadByte() << 24;
 	}
 
-// [always sent]	if (bits & SU_ITEMS)
-		i = MSG_ReadLong ();
+	cl.viewheight = (bits & SU_VIEWHEIGHT) ? MSG_ReadChar() : DEFAULT_VIEWHEIGHT;
+	cl.idealpitch = (bits & SU_IDEALPITCH) ? MSG_ReadChar() : 0;
 
-	if (cl.items != i)
-	{	// set flash times
+	VectorCopy(cl.mvelocity[0], cl.mvelocity[1]);
+	for (i=0 ; i<3 ; i++)
+	{
+		cl.punchangle[i] = (bits & (SU_PUNCH1<<i)) ? MSG_ReadChar() : 0;
+		cl.mvelocity[0][i] = (bits & (SU_VELOCITY1<<i)) ? MSG_ReadChar()*16 : 0;
+	}
+
+	i = (bits & SU_ITEMS) ? MSG_ReadLong() : cl.items;
+	if(cl.items != i){ // set flash times
 		Sbar_Changed ();
 		for (j=0 ; j<32 ; j++)
 			if ( (i & (1<<j)) && !(cl.items & (1<<j)))
 				cl.item_gettime[j] = cl.time;
 		cl.items = i;
 	}
-		
+
 	cl.onground = (bits & SU_ONGROUND) != 0;
 	cl.inwater = (bits & SU_INWATER) != 0;
+	cl.stats[STAT_WEAPONFRAME] = (bits & SU_WEAPONFRAME) ? MSG_ReadByte() : 0;
 
-	if (bits & SU_WEAPONFRAME)
-		cl.stats[STAT_WEAPONFRAME] = MSG_ReadByte ();
-	else
-		cl.stats[STAT_WEAPONFRAME] = 0;
-
-	if (bits & SU_ARMOR)
-		i = MSG_ReadByte ();
-	else
-		i = 0;
-	if (cl.stats[STAT_ARMOR] != i)
-	{
+	i = (bits & SU_ARMOR) ? MSG_ReadByte() : 0;
+	if(cl.stats[STAT_ARMOR] != i){
 		cl.stats[STAT_ARMOR] = i;
 		Sbar_Changed ();
 	}
 
-	if (bits & SU_WEAPON)
-		i = MSG_ReadByte ();
-	else
-		i = 0;
-	if (cl.stats[STAT_WEAPON] != i)
-	{
-		cl.stats[STAT_WEAPON] = i;
-		Sbar_Changed ();
-	}
+	weaponmodel = (bits & SU_WEAPON) ? MSG_ReadByte() : 0;
 	
-	i = MSG_ReadShort ();
-	if (cl.stats[STAT_HEALTH] != i)
-	{
+	i = MSG_ReadShort();
+	if (cl.stats[STAT_HEALTH] != i){
 		cl.stats[STAT_HEALTH] = i;
-		Sbar_Changed ();
+		Sbar_Changed();
 	}
 
-	i = MSG_ReadByte ();
-	if (cl.stats[STAT_AMMO] != i)
-	{
+	i = MSG_ReadByte();
+	if(cl.stats[STAT_AMMO] != i){
 		cl.stats[STAT_AMMO] = i;
-		Sbar_Changed ();
+		Sbar_Changed();
 	}
 
-	for (i=0 ; i<4 ; i++)
-	{
-		j = MSG_ReadByte ();
-		if (cl.stats[STAT_SHELLS+i] != j)
-		{
+	for (i=0 ; i<4 ; i++){
+		j = MSG_ReadByte();
+		if(cl.stats[STAT_SHELLS+i] != j){
 			cl.stats[STAT_SHELLS+i] = j;
-			Sbar_Changed ();
+			Sbar_Changed();
 		}
 	}
 
-	i = MSG_ReadByte ();
-
-	if (standard_quake)
-	{
-		if (cl.stats[STAT_ACTIVEWEAPON] != i)
-		{
+	i = MSG_ReadByte();
+	if(standard_quake){
+		if(cl.stats[STAT_ACTIVEWEAPON] != i){
 			cl.stats[STAT_ACTIVEWEAPON] = i;
-			Sbar_Changed ();
+			Sbar_Changed();
 		}
+	}else if(cl.stats[STAT_ACTIVEWEAPON] != (1<<i)){
+		cl.stats[STAT_ACTIVEWEAPON] = (1<<i);
+		Sbar_Changed();
 	}
-	else
-	{
-		if (cl.stats[STAT_ACTIVEWEAPON] != (1<<i))
-		{
-			cl.stats[STAT_ACTIVEWEAPON] = (1<<i);
-			Sbar_Changed ();
-		}
+
+	if(bits & cl.protocol->fl_large_weaponmodel)
+		weaponmodel |= MSG_ReadByte() << 8;
+	if(cl.stats[STAT_WEAPON] != weaponmodel){
+		cl.stats[STAT_WEAPON] = weaponmodel;
+		Sbar_Changed();
 	}
+
+	if(bits & cl.protocol->fl_large_weaponframe)
+		cl.stats[STAT_WEAPONFRAME] |= MSG_ReadByte() << 8;
 
 	if(cl.viewent.model != cl.model_precache[cl.stats[STAT_WEAPON]]){
 		// FIXME(sigrid) - reset lerp
@@ -624,7 +571,7 @@ void CL_NewTranslation (int slot)
 CL_ParseStatic
 =====================
 */
-void CL_ParseStatic (void)
+void CL_ParseStatic (int withbits)
 {
 	entity_t *ent;
 	int		i;
@@ -634,7 +581,7 @@ void CL_ParseStatic (void)
 		Host_Error ("Too many static entities");
 	ent = &cl_static_entities[i];
 	cl.num_statics++;
-	CL_ParseBaseline (ent);
+	CL_ParseBaseline(withbits, ent);
 
 // copy it to the current state
 	ent->model = cl.model_precache[ent->baseline.modelindex];
@@ -653,17 +600,17 @@ void CL_ParseStatic (void)
 CL_ParseStaticSound
 ===================
 */
-void CL_ParseStaticSound (void)
+void CL_ParseStaticSound (int large_sound)
 {
 	vec3_t		org;
 	int			sound_num, vol, atten;
 
-	MSG_ReadVec(org);
-	sound_num = MSG_ReadByte ();
-	vol = MSG_ReadByte ();
-	atten = MSG_ReadByte ();
+	MSG_ReadVec(cl.protocol, org);
+	sound_num = large_sound ? MSG_ReadShort() : MSG_ReadByte();
+	vol = MSG_ReadByte();
+	atten = MSG_ReadByte();
 	
-	staticsfx (cl.sound_precache[sound_num], org, vol, atten);
+	staticsfx(cl.sound_precache[sound_num], org, vol, atten);
 }
 
 
@@ -676,8 +623,8 @@ CL_ParseServerMessage
 */
 void CL_ParseServerMessage (void)
 {
-	int			cmd;
-	int			i;
+	int cmd, i, n;
+	protocol_t *p;
 	
 //
 // if recording demos, copy the message out
@@ -700,17 +647,17 @@ void CL_ParseServerMessage (void)
 
 		cmd = MSG_ReadByte ();
 
-		if (cmd == -1)
+		if (cmd < 0)
 		{
 			SHOWNET("END OF MESSAGE");
 			return;		// end of message
 		}
 
 	// if the high bit of the command byte is set, it is a fast update
-		if (cmd & 128)
+		if (cmd & U_SIGNAL)
 		{
 			SHOWNET("fast update");
-			CL_ParseUpdate (cmd&127);
+			CL_ParseUpdate (cmd);
 			continue;
 		}
 
@@ -733,14 +680,21 @@ void CL_ParseServerMessage (void)
 			break;
 			
 		case svc_clientdata:
-			i = (ushort)MSG_ReadShort ();
-			CL_ParseClientdata (i);
+			CL_ParseClientdata((ushort)MSG_ReadShort());
 			break;
 		
 		case svc_version:
-			i = MSG_ReadLong ();
-			if (i != PROTOCOL_VERSION)
-				Host_Error ("CL_ParseServerMessage: Server is protocol %d instead of %d\n", i, PROTOCOL_VERSION);
+			i = MSG_ReadLong();
+			for(p = nil, n = 0; n < nelem(protos); n++){
+				if(protos[n].version == i){
+					p = &protos[n];
+					break;
+				}
+			}
+			if(p == nil)
+				Host_Error("CL_ParseServerMessage: server uses unknown protocol %d\n", i);
+			if(p->version != cl.protocol->version)
+				Host_Error("CL_ParseServerMessage: server decided to switch protocol to %d mid-game?\n", i);
 			break;
 			
 		case svc_disconnect:
@@ -769,7 +723,7 @@ void CL_ParseServerMessage (void)
 			
 		case svc_setangle:
 			for (i=0 ; i<3 ; i++)
-				cl.viewangles[i] = sv.protocol->MSG_ReadAngle ();
+				cl.viewangles[i] = cl.protocol->MSG_ReadAngle ();
 			break;
 			
 		case svc_setview:
@@ -823,15 +777,17 @@ void CL_ParseServerMessage (void)
 			break;
 
 		case svc_spawnbaseline:
-			i = MSG_ReadShort ();
+		case svc_spawnbaseline2:
+			i = MSG_ReadShort();
 			// must use CL_EntityNum() to force cl.num_entities up
-			CL_ParseBaseline (CL_EntityNum(i));
+			CL_ParseBaseline(cmd == svc_spawnbaseline2, CL_EntityNum(i));
 			break;
 		case svc_spawnstatic:
-			CL_ParseStatic ();
-			break;			
+		case svc_spawnstatic2:
+			CL_ParseStatic(cmd == svc_spawnstatic2);
+			break;
 		case svc_temp_entity:
-			CL_ParseTEnt ();
+			CL_ParseTEnt();
 			break;
 
 		case svc_setpause:
@@ -869,7 +825,8 @@ void CL_ParseServerMessage (void)
 			break;
 			
 		case svc_spawnstaticsound:
-			CL_ParseStaticSound ();
+		case svc_spawnstaticsound2:
+			CL_ParseStaticSound(cmd == svc_spawnstaticsound2);
 			break;
 
 		case svc_cdtrack:

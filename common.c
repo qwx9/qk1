@@ -175,7 +175,7 @@ void MSG_WriteAngle (sizebuf_t *sb, float f)
 
 void MSG_WriteAngleInt16 (sizebuf_t *sb, float f)
 {
-	MSG_WriteShort (sb, Qrint(f*65536.0/360.0));
+	MSG_WriteShort (sb, Qrint(f*65536.0/360.0) & 65535);
 }
 
 //

@@ -229,7 +229,6 @@ void PF_setmodel (void)
 	for (i=0, check = sv.model_precache ; *check ; i++, check++)
 		if (!strcmp(*check, m))
 			break;
-			
 	if (!*check)
 		PR_RunError ("no precache: %s\n", m);
 	e->v.model = PR_SetStr(m);
@@ -511,14 +510,21 @@ void PF_ambientsound (void)
 
 // add an svc_spawnambient command to the level signon packet
 
-	MSG_WriteByte (&sv.signon,svc_spawnstaticsound);
+	if(soundnum >= sv.protocol->limit_sound)
+		return;
+
+	MSG_WriteByte(
+		&sv.signon,
+		soundnum < sv.protocol->large_sound ?
+			svc_spawnstaticsound :
+			svc_spawnstaticsound2
+	);
 	for (i=0 ; i<3 ; i++)
 		sv.protocol->MSG_WriteCoord(&sv.signon, pos[i]);
 
-	MSG_WriteByte (&sv.signon, soundnum);
-
-	MSG_WriteByte (&sv.signon, vol*255);
-	MSG_WriteByte (&sv.signon, attenuation*64);
+	(soundnum < sv.protocol->large_sound ? MSG_WriteByte : MSG_WriteShort)(&sv.signon, soundnum);
+	MSG_WriteByte(&sv.signon, vol*255);
+	MSG_WriteByte(&sv.signon, attenuation*64);
 
 }
 
@@ -994,7 +1000,7 @@ void PF_precache_model (void)
 	
 	if (sv.state != ss_loading)
 		PR_RunError ("PF_Precache_*: Precache can only be done in spawn functions");
-		
+
 	s = G_STRING(OFS_PARM0);
 	G_INT(OFS_RETURN) = G_INT(OFS_PARM0);
 	PR_CheckEmptyString (s);

@@ -34,8 +34,8 @@
 //
 #define	MAX_EDICTS		65536
 #define	Nlights	64
-#define	MAX_MODELS		4096			// these are sent over the net as bytes
-#define	MAX_SOUNDS		2048			// so they cannot be blindly increased
+#define	MAX_MODELS		4096			// these are sent over the net as bytes with NQ
+#define	MAX_SOUNDS		2048
 
 #define	MAX_STYLESTRING	64
 

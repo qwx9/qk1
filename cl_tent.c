@@ -46,8 +46,8 @@ void CL_ParseBeam (model_t *m)
 	
 	ent = MSG_ReadShort ();
 
-	MSG_ReadVec(start);
-	MSG_ReadVec(end);
+	MSG_ReadVec(cl.protocol, start);
+	MSG_ReadVec(cl.protocol, end);
 
 // override any beam with the same entity
 	for (i=0, b=cl_beams ; i< MAX_BEAMS ; i++, b++)
@@ -94,19 +94,19 @@ void CL_ParseTEnt (void)
 	switch (type)
 	{
 	case TE_WIZSPIKE:			// spike hitting wall
-		MSG_ReadVec(pos);
+		MSG_ReadVec(cl.protocol, pos);
 		R_RunParticleEffect (pos, vec3_origin, 20, 30);
 		startsfx (-1, 0, cl_sfx_wizhit, pos, 1, 1);
 		break;
 		
 	case TE_KNIGHTSPIKE:			// spike hitting wall
-		MSG_ReadVec(pos);
+		MSG_ReadVec(cl.protocol, pos);
 		R_RunParticleEffect (pos, vec3_origin, 226, 20);
 		startsfx (-1, 0, cl_sfx_knighthit, pos, 1, 1);
 		break;
 		
 	case TE_SPIKE:			// spike hitting wall
-		MSG_ReadVec(pos);
+		MSG_ReadVec(cl.protocol, pos);
 		R_RunParticleEffect (pos, vec3_origin, 0, 10);
 		if ( rand() % 5 )
 			startsfx (-1, 0, cl_Sfxink1, pos, 1, 1);
@@ -122,7 +122,7 @@ void CL_ParseTEnt (void)
 		}
 		break;
 	case TE_SUPERSPIKE:			// super spike hitting wall
-		MSG_ReadVec(pos);
+		MSG_ReadVec(cl.protocol, pos);
 		R_RunParticleEffect (pos, vec3_origin, 0, 20);
 
 		if ( rand() % 5 )
@@ -140,12 +140,12 @@ void CL_ParseTEnt (void)
 		break;
 		
 	case TE_GUNSHOT:			// bullet hitting wall
-		MSG_ReadVec(pos);
+		MSG_ReadVec(cl.protocol, pos);
 		R_RunParticleEffect (pos, vec3_origin, 0, 20);
 		break;
 		
 	case TE_EXPLOSION:			// rocket explosion
-		MSG_ReadVec(pos);
+		MSG_ReadVec(cl.protocol, pos);
 		R_ParticleExplosion (pos);
 		dl = CL_AllocDlight (0);
 		VectorCopy (pos, dl->origin);
@@ -156,7 +156,7 @@ void CL_ParseTEnt (void)
 		break;
 		
 	case TE_TAREXPLOSION:			// tarbaby explosion
-		MSG_ReadVec(pos);
+		MSG_ReadVec(cl.protocol, pos);
 		R_BlobExplosion (pos);
 
 		startsfx (-1, 0, cl_sfx_r_exp3, pos, 1, 1);
@@ -181,17 +181,17 @@ void CL_ParseTEnt (void)
 // PGM 01/21/97
 
 	case TE_LAVASPLASH:	
-		MSG_ReadVec(pos);
+		MSG_ReadVec(cl.protocol, pos);
 		R_LavaSplash (pos);
 		break;
 	
 	case TE_TELEPORT:
-		MSG_ReadVec(pos);
+		MSG_ReadVec(cl.protocol, pos);
 		R_TeleportSplash (pos);
 		break;
 		
 	case TE_EXPLOSION2:				// color mapped explosion
-		MSG_ReadVec(pos);
+		MSG_ReadVec(cl.protocol, pos);
 		colorStart = MSG_ReadByte ();
 		colorLength = MSG_ReadByte ();
 		R_ParticleExplosion2 (pos, colorStart, colorLength);

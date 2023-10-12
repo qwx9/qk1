@@ -47,6 +47,7 @@ OFILES=\
 	pr_cmds.$O\
 	pr_edict.$O\
 	pr_exec.$O\
+	protocol.$O\
 	qk1.$O\
 	r_aclip.$O\
 	r_alias.$O\

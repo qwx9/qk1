@@ -228,14 +228,13 @@ void CL_PrintEntities_f (void)
 	
 	for (i=0,ent=cl_entities ; i<cl.num_entities ; i++,ent++)
 	{
-		Con_Printf ("%3d:",i);
 		if (!ent->model)
-		{
-			Con_Printf ("EMPTY\n");
 			continue;
-		}
-		Con_Printf ("%s:%2d  (%5.1f,%5.1f,%5.1f) [%5.1f %5.1f %5.1f]\n"
-		,ent->model->name,ent->frame, ent->origin[0], ent->origin[1], ent->origin[2], ent->angles[0], ent->angles[1], ent->angles[2]);
+		Con_Printf ("%3d:%s:%2d  (%5.1f,%5.1f,%5.1f) [%5.1f %5.1f %5.1f]\n",
+			i,ent->model->name,ent->frame,
+			ent->origin[0], ent->origin[1], ent->origin[2],
+			ent->angles[0], ent->angles[1], ent->angles[2]
+		);
 	}
 }
 

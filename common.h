@@ -36,6 +36,10 @@ void InsertLinkAfter (link_t *l, link_t *after);
 
 //============================================================================
 
+#define max(a,b) ((a)>(b)?(a):(b))
+#define min(a,b) ((a)<(b)?(a):(b))
+#define clamp(x,a,b) (min(max((x),(a)),(b)))
+
 #define Q_MAXCHAR ((char)0x7f)
 #define Q_MAXSHORT ((short)0x7fff)
 #define Q_MAXINT	((int)0x7fffffff)
@@ -58,8 +62,6 @@ extern	float	(*BigFloat) (float l);
 extern	float	(*LittleFloat) (float l);
 
 //============================================================================
-
-#define Qrint(f) (int)((f) + ((f) >= 0 ? 0.5 : -0.5))
 
 void MSG_WriteChar (sizebuf_t *sb, int c);
 void MSG_WriteByte (sizebuf_t *sb, int c);
@@ -88,10 +90,16 @@ float MSG_ReadCoordInt32 (void);
 float MSG_ReadAngle (void);
 float MSG_ReadAngleInt16 (void);
 
-#define MSG_ReadVec(d) do{ \
-	(d)[0] = sv.protocol->MSG_ReadCoord(); \
-	(d)[1] = sv.protocol->MSG_ReadCoord(); \
-	(d)[2] = sv.protocol->MSG_ReadCoord(); \
+#define MSG_ReadVec(proto, d) do{ \
+	(d)[0] = (proto)->MSG_ReadCoord(); \
+	(d)[1] = (proto)->MSG_ReadCoord(); \
+	(d)[2] = (proto)->MSG_ReadCoord(); \
+}while(0)
+
+#define MSG_WriteVec(proto, sb, s) do{ \
+	(proto)->MSG_WriteCoord(sb, (s)[0]); \
+	(proto)->MSG_WriteCoord(sb, (s)[1]); \
+	(proto)->MSG_WriteCoord(sb, (s)[2]); \
 }while(0)
 
 //============================================================================

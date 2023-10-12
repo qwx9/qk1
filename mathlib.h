@@ -17,6 +17,8 @@ struct mplane_s;
 extern vec3_t vec3_origin;
 extern	int nanmask;
 
+#define Qrint(f) (int)((f) + ((f) >= 0 ? 0.5 : -0.5))
+
 #define	IS_NAN(x) (((*(int *)&x)&nanmask)==nanmask)
 
 #define DotProduct(x,y) (x[0]*y[0]+x[1]*y[1]+x[2]*y[2])

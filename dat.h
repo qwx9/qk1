@@ -3,7 +3,7 @@ typedef struct Sfx Sfx;
 extern char *game;
 
 enum{
-	Npath = 64,
+	Npath = 128,
 	Nfspath = 128,
 	Nsav = 12,
 	Nsavcm = 40,

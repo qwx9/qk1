@@ -119,6 +119,7 @@ extern client_static_t	cls;
 //
 typedef struct
 {
+	protocol_t *protocol;
 	int			movemessages;	// since connecting to this server
 								// throw out the first couple, so the player
 								// doesn't accidentally do something the 
