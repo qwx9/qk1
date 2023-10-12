@@ -7,9 +7,47 @@
 server_t		sv;
 server_static_t	svs;
 
+static protocol_t protos[PROTO_NUM] = {
+	[PROTO_NQ] = {
+		.id = PROTO_NQ,
+		.name = "Quake",
+		.MSG_WriteCoord = MSG_WriteCoord,
+		.MSG_WriteAngle = MSG_WriteAngle,
+	},
+	[PROTO_RMQ] = {
+		.id = PROTO_RMQ,
+		.name = "RMQ",
+		.MSG_WriteCoord = MSG_WriteCoordInt32,
+		.MSG_WriteAngle = MSG_WriteAngleShort,
+	},
+};
+
+// we can't just change protocol mid-game, so it's saved here first
+static protocol_t *sv_protocol = &protos[PROTO_RMQ];
+
 static char	localmodels[MAX_MODELS][8];			// inline model names for precache
 
 //============================================================================
+
+static void
+SV_Protocol_f(void)
+{
+	int n;
+
+	n = Cmd_Argc();
+	if(n == 1)
+		Con_Printf("\"sv_protocol\" is \"%d\" (%s)\n", sv_protocol->id, sv_protocol->name);
+	else if(n == 2){
+		if((n = atoi(Cmd_Argv(1))) < PROTO_NQ || n >= PROTO_NUM)
+			Con_Printf("sv_protocol must be of value from %d to %d\n", PROTO_NQ, PROTO_NUM-1);
+		else{
+			sv_protocol = &protos[n];
+			if(sv.active)
+				Con_Printf("changes will take effect on the next game\n");
+		}
+	}else
+		Con_Printf("usage: sv_protocol <protocol>\n");
+}
 
 /*
 ===============
@@ -40,6 +78,8 @@ void SV_Init (void)
 	Cvar_RegisterVariable (&sv_idealpitchscale);
 	Cvar_RegisterVariable (&sv_aim);
 	Cvar_RegisterVariable (&sv_nostep);
+
+	Cmd_AddCommand("sv_protocol", SV_Protocol_f);
 
 	for (i=0 ; i<MAX_MODELS ; i++)
 		sprint (localmodels[i], "*%d", i);
@@ -1056,6 +1096,7 @@ void SV_SpawnServer (char *server)
 	memset(&sv, 0, sizeof sv);
 
 	strcpy(sv.name, server);
+	sv.protocol = sv_protocol;
 
 // load progs to get entity field count
 	PR_LoadProgs ();

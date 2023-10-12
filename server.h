@@ -11,9 +11,23 @@ typedef struct
 
 typedef enum {ss_loading, ss_active} server_state_t;
 
+enum {
+	PROTO_NQ,
+	PROTO_RMQ,
+	PROTO_NUM,
+};
+
+typedef struct {
+	int id;
+	char *name;
+	void (*MSG_WriteCoord)(sizebuf_t *sb, float f);
+	void (*MSG_WriteAngle)(sizebuf_t *sb, float f);
+}protocol_t;
+
 typedef struct
 {
 	qboolean	active;				// false if only a net client
+	protocol_t	*protocol;
 
 	qboolean	paused;
 	qboolean	loadgame;			// handle connections specially

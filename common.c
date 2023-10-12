@@ -163,9 +163,19 @@ void MSG_WriteCoord (sizebuf_t *sb, float f)
 	MSG_WriteShort (sb, (int)(f*8));
 }
 
+void MSG_WriteCoordInt32 (sizebuf_t *sb, float f)
+{
+	MSG_WriteLong (sb, Qrint(f*16));
+}
+
 void MSG_WriteAngle (sizebuf_t *sb, float f)
 {
 	MSG_WriteByte (sb, ((int)f*256/360) & 255);
+}
+
+void MSG_WriteAngleShort (sizebuf_t *sb, float f)
+{
+	MSG_WriteShort (sb, Qrint(f*65536.0/360.0));
 }
 
 //

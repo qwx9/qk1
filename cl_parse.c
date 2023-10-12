@@ -471,7 +471,7 @@ CL_ParseClientdata
 Server information pertaining to this client only
 ==================
 */
-void CL_ParseClientdata (int bits)
+void CL_ParseClientdata (unsigned int bits)
 {
 	int		i, j;
 	
@@ -579,6 +579,10 @@ void CL_ParseClientdata (int bits)
 			cl.stats[STAT_ACTIVEWEAPON] = (1<<i);
 			Sbar_Changed ();
 		}
+	}
+
+	if(cl.viewent.model != cl.model_precache[cl.stats[STAT_WEAPON]]){
+		// FIXME(sigrid) - reset lerp
 	}
 }
 
@@ -733,7 +737,7 @@ void CL_ParseServerMessage (void)
 			break;
 			
 		case svc_clientdata:
-			i = MSG_ReadShort ();
+			i = (ushort)MSG_ReadShort ();
 			CL_ParseClientdata (i);
 			break;
 		
