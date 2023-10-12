@@ -22,6 +22,8 @@ typedef struct {
 	char *name;
 	void (*MSG_WriteCoord)(sizebuf_t *sb, float f);
 	void (*MSG_WriteAngle)(sizebuf_t *sb, float f);
+	float (*MSG_ReadCoord)(void);
+	float (*MSG_ReadAngle)(void);
 }protocol_t;
 
 typedef struct

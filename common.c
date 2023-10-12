@@ -173,7 +173,7 @@ void MSG_WriteAngle (sizebuf_t *sb, float f)
 	MSG_WriteByte (sb, ((int)f*256/360) & 255);
 }
 
-void MSG_WriteAngleShort (sizebuf_t *sb, float f)
+void MSG_WriteAngleInt16 (sizebuf_t *sb, float f)
 {
 	MSG_WriteShort (sb, Qrint(f*65536.0/360.0));
 }
@@ -303,15 +303,23 @@ char *MSG_ReadString (void)
 
 float MSG_ReadCoord (void)
 {
-	return MSG_ReadShort() * (1.0/8);
+	return MSG_ReadShort() * 1.0 / 8.0;
+}
+
+float MSG_ReadCoordInt32 (void)
+{
+	return MSG_ReadLong() * 1.0 / 16.0;
 }
 
 float MSG_ReadAngle (void)
 {
-	return MSG_ReadChar() * (360.0/256);
+	return MSG_ReadChar() * 360.0 / 256.0;
 }
 
-
+float MSG_ReadAngleInt16 (void)
+{
+	return MSG_ReadShort() * 360.0 / 65536.0;
+}
 
 //===========================================================================
 

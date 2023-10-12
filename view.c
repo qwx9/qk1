@@ -292,7 +292,6 @@ void V_ParseDamage (void)
 {
 	int		armor, blood;
 	vec3_t	from;
-	int		i;
 	vec3_t	forward, right, up;
 	entity_t	*ent;
 	float	side;
@@ -300,8 +299,7 @@ void V_ParseDamage (void)
 	
 	armor = MSG_ReadByte ();
 	blood = MSG_ReadByte ();
-	for (i=0 ; i<3 ; i++)
-		from[i] = MSG_ReadCoord ();
+	MSG_ReadVec(from);
 
 	count = blood*0.5 + armor*0.5;
 	if (count < 10)

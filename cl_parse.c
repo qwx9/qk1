@@ -89,7 +89,6 @@ void CL_ParseStartSoundPacket(void)
     int 	volume;
     int 	field_mask;
     float 	attenuation;  
- 	int		i;
 	           
     field_mask = MSG_ReadByte(); 
 
@@ -111,10 +110,9 @@ void CL_ParseStartSoundPacket(void)
 
 	if (ent > MAX_EDICTS)
 		Host_Error ("CL_ParseStartSoundPacket: ent = %d", ent);
-	
-	for (i=0 ; i<3 ; i++)
-		pos[i] = MSG_ReadCoord ();
- 
+
+	MSG_ReadVec(pos);
+
     startsfx (ent, channel, cl.sound_precache[sound_num], pos, volume/255.0, attenuation);
 }       
 
@@ -404,29 +402,29 @@ if (bits&(1<<i))
 	VectorCopy (ent->msg_angles[0], ent->msg_angles[1]);
 
 	if (bits & U_ORIGIN1)
-		ent->msg_origins[0][0] = MSG_ReadCoord ();
+		ent->msg_origins[0][0] = sv.protocol->MSG_ReadCoord ();
 	else
 		ent->msg_origins[0][0] = ent->baseline.origin[0];
 	if (bits & U_ANGLE1)
-		ent->msg_angles[0][0] = MSG_ReadAngle();
+		ent->msg_angles[0][0] = sv.protocol->MSG_ReadAngle();
 	else
 		ent->msg_angles[0][0] = ent->baseline.angles[0];
 
 	if (bits & U_ORIGIN2)
-		ent->msg_origins[0][1] = MSG_ReadCoord ();
+		ent->msg_origins[0][1] = sv.protocol->MSG_ReadCoord ();
 	else
 		ent->msg_origins[0][1] = ent->baseline.origin[1];
 	if (bits & U_ANGLE2)
-		ent->msg_angles[0][1] = MSG_ReadAngle();
+		ent->msg_angles[0][1] = sv.protocol->MSG_ReadAngle();
 	else
 		ent->msg_angles[0][1] = ent->baseline.angles[1];
 
 	if (bits & U_ORIGIN3)
-		ent->msg_origins[0][2] = MSG_ReadCoord ();
+		ent->msg_origins[0][2] = sv.protocol->MSG_ReadCoord ();
 	else
 		ent->msg_origins[0][2] = ent->baseline.origin[2];
 	if (bits & U_ANGLE3)
-		ent->msg_angles[0][2] = MSG_ReadAngle();
+		ent->msg_angles[0][2] = sv.protocol->MSG_ReadAngle();
 	else
 		ent->msg_angles[0][2] = ent->baseline.angles[2];
 
@@ -458,8 +456,8 @@ void CL_ParseBaseline (entity_t *ent)
 	ent->baseline.skin = MSG_ReadByte();
 	for (i=0 ; i<3 ; i++)
 	{
-		ent->baseline.origin[i] = MSG_ReadCoord ();
-		ent->baseline.angles[i] = MSG_ReadAngle ();
+		ent->baseline.origin[i] = sv.protocol->MSG_ReadCoord ();
+		ent->baseline.angles[i] = sv.protocol->MSG_ReadAngle ();
 	}
 }
 
@@ -659,10 +657,8 @@ void CL_ParseStaticSound (void)
 {
 	vec3_t		org;
 	int			sound_num, vol, atten;
-	int			i;
-	
-	for (i=0 ; i<3 ; i++)
-		org[i] = MSG_ReadCoord ();
+
+	MSG_ReadVec(org);
 	sound_num = MSG_ReadByte ();
 	vol = MSG_ReadByte ();
 	atten = MSG_ReadByte ();
@@ -773,7 +769,7 @@ void CL_ParseServerMessage (void)
 			
 		case svc_setangle:
 			for (i=0 ; i<3 ; i++)
-				cl.viewangles[i] = MSG_ReadAngle ();
+				cl.viewangles[i] = sv.protocol->MSG_ReadAngle ();
 			break;
 			
 		case svc_setview:

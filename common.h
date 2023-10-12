@@ -70,7 +70,7 @@ void MSG_WriteString (sizebuf_t *sb, char *s);
 void MSG_WriteCoord (sizebuf_t *sb, float f);
 void MSG_WriteCoordInt32 (sizebuf_t *sb, float f);
 void MSG_WriteAngle (sizebuf_t *sb, float f);
-void MSG_WriteAngleShort (sizebuf_t *sb, float f);
+void MSG_WriteAngleInt16 (sizebuf_t *sb, float f);
 
 extern	int			msg_readcount;
 extern	qboolean	msg_badread;		// set if a read goes beyond end of message
@@ -84,7 +84,15 @@ float MSG_ReadFloat (void);
 char *MSG_ReadString (void);
 
 float MSG_ReadCoord (void);
+float MSG_ReadCoordInt32 (void);
 float MSG_ReadAngle (void);
+float MSG_ReadAngleInt16 (void);
+
+#define MSG_ReadVec(d) do{ \
+	(d)[0] = sv.protocol->MSG_ReadCoord(); \
+	(d)[1] = sv.protocol->MSG_ReadCoord(); \
+	(d)[2] = sv.protocol->MSG_ReadCoord(); \
+}while(0)
 
 //============================================================================
 
