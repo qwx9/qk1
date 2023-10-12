@@ -51,12 +51,6 @@ void CL_ClearState (void)
 	memset(&cl, 0, sizeof cl);
 
 	SZ_Clear (&cls.message);
-
-// clear other arrays	
-	Hunk_Memset0(cl_efrags);
-	Hunk_Memset0(cl_entities);
-	Hunk_Memset0(cl_temp_entities);
-
 	memset(cl_dlights, 0, sizeof cl_dlights);
 	memset(cl_lightstyle, 0, sizeof cl_lightstyle);
 	memset(cl_beams, 0, sizeof cl_beams);

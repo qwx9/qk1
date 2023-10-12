@@ -99,16 +99,6 @@ Hunk_Double(void *p)
 	return m+1;
 }
 
-void
-Hunk_Memset0(void *p)
-{
-	mem_t *m;
-
-	m = p;
-	m--;
-	memset(p, 0, m->size);
-}
-
 void *
 Hunk_Mark(void)
 {

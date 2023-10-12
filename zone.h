@@ -10,7 +10,6 @@ int Hunk_From(void *p);
 void Hunk_CacheFrom(mem_user_t *c, void *p);
 void *Hunk_Alloc(int size);
 void *Hunk_Double(void *p);
-void Hunk_Memset0(void *p);
 void *Hunk_Mark(void);
 void Hunk_FreeToMark(void *mark);
 void *Hunk_TempAlloc(int size);
