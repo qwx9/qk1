@@ -42,12 +42,63 @@ typedef struct {
 
 static gefv_cache	gefvCache[GEFV_CACHESIZE] = {{nil, ""}, {nil, ""}};
 
-/* amd64: kludge for assumed 32bit pointer arithmetic */
-char *PR_Str (int ofs)
+#define MAX_PRSTR 1024
+char **prstr;
+int num_prstr;
+int max_prstr;
+
+#define MAX_PRTEMPSTR 1024
+#define PRTEMPSTR_SIZE 1024
+char *prtempstr;
+int num_prtempstr;
+
+char *
+PR_StrTmp(void)
 {
-	if (((uintptr)pr_strings&0xffffffff)+ofs>>32)
-		return (char *)((uintptr)pr_strings+ofs&0xffffffff);
-	return pr_strings+ofs;
+	return &prtempstr[PRTEMPSTR_SIZE * (num_prtempstr++ & MAX_PRTEMPSTR)];
+}
+
+int
+PR_CopyStrTmp(char *s)
+{
+	char *t = PR_StrTmp();
+	snprint(t, PRTEMPSTR_SIZE, "%s", s);
+	return PR_SetStr(t);
+}
+
+int
+PR_StrSlot(void)
+{
+	if(num_prstr >= max_prstr){
+		max_prstr *= 2;
+		prstr = realloc(prstr, max_prstr*sizeof(*prstr));
+	}
+	return num_prstr++;
+}
+
+int
+PR_SetStr(char *s)
+{
+	int i;
+
+	for(i = 0; i < num_prstr; i++){
+		if(s == prstr[i])
+			return -1-i;
+	}
+	i = PR_StrSlot();
+	prstr[i] = s;
+	return -1-i;
+}
+
+char *
+PR_Str(int i)
+{
+	if(i >= 0)
+		return pr_strings+i;
+	if(i < 0 && i >= -num_prstr)
+		return prstr[-1-i];
+	Host_Error("PR_Str: invalid offset %d", i);
+	return "";
 }
 
 /*
@@ -600,14 +651,15 @@ void ED_ParseGlobals (char *data)
 ED_NewString
 =============
 */
-char *ED_NewString (char *string)
+string_t ED_NewString (char *string)
 {
 	char	*new, *new_p;
-	int		i,l;
+	int		i,l, slot;
 	
 	l = strlen(string) + 1;
 	new = Hunk_Alloc (l);
 	new_p = new;
+	slot = PR_StrSlot();
 
 	for (i=0 ; i< l ; i++)
 	{
@@ -622,8 +674,9 @@ char *ED_NewString (char *string)
 		else
 			*new_p++ = string[i];
 	}
+	prstr[slot] = new;
 	
-	return new;
+	return -1-slot;
 }
 
 
@@ -649,7 +702,7 @@ qboolean	ED_ParseEpair (void *base, ddef_t *key, char *s)
 	switch (key->type & ~DEF_SAVEGLOBAL)
 	{
 	case ev_string:
-		*(string_t *)d = ED_NewString (s) - pr_strings;
+		*(string_t *)d = ED_NewString (s);
 		break;
 		
 	case ev_float:
@@ -821,7 +874,6 @@ void ED_LoadFromFile (char *data)
 	ent = nil;
 	inhibit = 0;
 	pr_global_struct->time = sv.time;
-	
 // parse ents
 	while (1)
 	{
@@ -870,7 +922,6 @@ void ED_LoadFromFile (char *data)
 
 	// look for the spawn function
 		func = ED_FindFunction ( PR_Str(ent->v.classname) );
-
 		if (!func)
 		{
 			Con_Printf ("No spawn function for:\n");
@@ -899,6 +950,19 @@ void PR_LoadProgs (void)
 // flush the non-C variable lookup cache
 	for (i=0 ; i<GEFV_CACHESIZE ; i++)
 		gefvCache[i].field[0] = 0;
+
+	if(prstr == nil){
+		max_prstr = MAX_PRSTR;
+		prstr = malloc(max_prstr*sizeof(*prstr));
+	}
+	if(prtempstr == nil)
+		prtempstr = malloc(MAX_PRTEMPSTR*PRTEMPSTR_SIZE);
+
+	memset(prstr, 0, MAX_PRSTR*sizeof(*prstr));
+	memset(prtempstr, 0, MAX_PRTEMPSTR*PRTEMPSTR_SIZE);
+	num_prstr = 0;
+	num_prtempstr = 0;
+	PR_SetStr("");
 
 	initcrc();
 

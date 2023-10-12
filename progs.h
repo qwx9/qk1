@@ -48,7 +48,10 @@ void PR_Init (void);
 void PR_ExecuteProgram (func_t fnum);
 void PR_LoadProgs (void);
 
-char	*PR_Str (int ofs);
+char *PR_StrTmp(void);
+int PR_CopyStrTmp(char *s);
+int PR_SetStr(char *s);
+char *PR_Str (int ofs);
 char *PR_UglyValueString (etype_t, eval_t *);
 
 void PR_Profile_f (void);
@@ -56,7 +59,7 @@ void PR_Profile_f (void);
 edict_t *ED_Alloc (void);
 void ED_Free (edict_t *ed);
 
-char	*ED_NewString (char *string);
+string_t ED_NewString (char *string);
 // returns a copy of the string allocated from the server's string heap
 
 void ED_Print (edict_t *ed);

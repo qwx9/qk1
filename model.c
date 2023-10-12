@@ -46,9 +46,11 @@ void *Mod_Extradata (model_t *mod)
 		return r;
 
 	Mod_LoadModel (mod, true);
-	
-	if (!mod->cache.data)
+
+	if (!mod->cache.data){
+		assert(0);
 		fatal ("Mod_Extradata: caching failed: %s", mod->name);
+	}
 	return mod->cache.data;
 }
 
@@ -269,7 +271,6 @@ model_t *Mod_LoadModel (model_t *mod, qboolean crash)
 	if(buf == nil){
 		if(crash)
 			fatal("Mod_LoadModel: %r");
-		fprint(2, "loadstklmp failed: %s\n", mod->name);
 		return nil;
 	}
 

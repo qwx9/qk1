@@ -1016,6 +1016,7 @@ extern float		scr_centertime_off;
 void SV_SpawnServer (char *server)
 {
 	edict_t		*ent;
+	static char dummy[8] = {0};
 	int			i;
 
 	// let's not have any servers with no name
@@ -1105,9 +1106,8 @@ void SV_SpawnServer (char *server)
 //
 	SV_ClearWorld ();
 	
-	sv.sound_precache[0] = pr_strings;
-
-	sv.model_precache[0] = pr_strings;
+	sv.sound_precache[0] = dummy;
+	sv.model_precache[0] = dummy;
 	sv.model_precache[1] = sv.modelname;
 	for (i=1 ; i<sv.worldmodel->numsubmodels ; i++)
 	{
@@ -1121,7 +1121,7 @@ void SV_SpawnServer (char *server)
 	ent = EDICT_NUM(0);
 	memset(&ent->v, 0, progs->entityfields * 4);
 	ent->free = false;
-	ent->v.model = sv.worldmodel->name - pr_strings;
+	ent->v.model = PR_SetStr(sv.worldmodel->name);
 	ent->v.modelindex = 1;		// world model
 	ent->v.solid = SOLID_BSP;
 	ent->v.movetype = MOVETYPE_PUSH;
@@ -1131,7 +1131,7 @@ void SV_SpawnServer (char *server)
 	else
 		pr_global_struct->deathmatch = deathmatch.value;
 
-	pr_global_struct->mapname = sv.name - pr_strings;
+	pr_global_struct->mapname = PR_SetStr(sv.name);
 
 // serverflags are for cross level information (sigils)
 	pr_global_struct->serverflags = svs.serverflags;

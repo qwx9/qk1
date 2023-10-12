@@ -232,17 +232,15 @@ void PF_setmodel (void)
 			
 	if (!*check)
 		PR_RunError ("no precache: %s\n", m);
-		
-
-	e->v.model = m - pr_strings;
+	e->v.model = PR_SetStr(m);
 	e->v.modelindex = i; //SV_ModelIndex (m);
 
 	mod = sv.models[ (int)e->v.modelindex];  // Mod_ForName (m, true);
-	
-	if (mod)
-		SetMinMaxSize (e, mod->mins, mod->maxs, true);
-	else
+
+	if(!mod)
 		SetMinMaxSize (e, vec3_origin, vec3_origin, true);
+	else
+		SetMinMaxSize (e, mod->mins, mod->maxs, true);
 }
 
 /*
@@ -876,18 +874,18 @@ PF_dprint(void)
 	fprint(2, "%s", PF_VarString(0));
 }
 
-char	pr_string_temp[128];
-
 void PF_ftos (void)
 {
 	float	v;
+	char *s;
+
 	v = G_FLOAT(OFS_PARM0);
-	
+	s = PR_StrTmp();
 	if (v == (int)v)
-		sprint (pr_string_temp, "%d",(int)v);
+		sprint (s, "%d",(int)v);
 	else
-		sprint (pr_string_temp, "%5.1f",v);
-	G_INT(OFS_RETURN) = pr_string_temp - pr_strings;
+		sprint (s, "%5.1f",v);
+	G_INT(OFS_RETURN) = PR_SetStr(s);
 }
 
 void PF_fabs (void)
@@ -899,8 +897,10 @@ void PF_fabs (void)
 
 void PF_vtos (void)
 {
-	sprint (pr_string_temp, "'%5.1f %5.1f %5.1f'", G_VECTOR(OFS_PARM0)[0], G_VECTOR(OFS_PARM0)[1], G_VECTOR(OFS_PARM0)[2]);
-	G_INT(OFS_RETURN) = pr_string_temp - pr_strings;
+	char *s;
+	s = PR_StrTmp();
+	sprint (s, "'%5.1f %5.1f %5.1f'", G_VECTOR(OFS_PARM0)[0], G_VECTOR(OFS_PARM0)[1], G_VECTOR(OFS_PARM0)[2]);
+	G_INT(OFS_RETURN) = PR_SetStr(s);
 }
 
 void PF_Spawn (void)
