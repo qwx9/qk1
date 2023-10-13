@@ -5,12 +5,11 @@
 #include "quakedef.h"
 #include "fns.h"
 
-mainstacksize = 32*1024*1024;
+int mainstacksize = 1*1024*1024;
 char *netmtpt = "/net";
 char *game;
 int debug;
 
-/* FIXME: merge dprint/fatal? */
 void
 fatal(char *fmt, ...)
 {
