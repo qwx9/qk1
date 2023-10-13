@@ -502,16 +502,16 @@ void SV_WriteEntitiesToClient (edict_t	*clent, sizebuf_t *msg)
 			bits |= U_MODEL;
 		if (e >= 256)
 			bits |= U_LONGENTITY;
-		if((bits & U_FRAME) != 0){
+		if(bits & U_FRAME){
 			if(ent->v.frame >= sv.protocol->limit_frame)
 				bits ^= U_FRAME;
 			else if(ent->v.frame >= sv.protocol->large_frame)
 				bits |= sv.protocol->fl_large_frame;
 		}
-		if((bits & U_MODEL) != 0){
-			if(ent->v.model >= sv.protocol->limit_model)
+		if(bits & U_MODEL){
+			if(ent->v.modelindex >= sv.protocol->limit_model)
 				bits ^= U_MODEL;
-			else if(ent->v.model >= sv.protocol->large_model)
+			else if(ent->v.modelindex >= sv.protocol->large_model)
 				bits |= sv.protocol->fl_large_model;
 		}
 		if(bits >= (1<<8)){
