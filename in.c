@@ -81,7 +81,7 @@ Sys_SendKeyEvents(void)
 	while(r = nbrecv(inchan, &ev), r > 0)
 		Key_Event(ev.key, ev.down);
 	if(r < 0)
-		fprint(2, "Sys_SendKeyEvents: %r\n");
+		Con_DPrintf("Sys_SendKeyEvents: %r\n");
 }
 
 void
@@ -267,7 +267,7 @@ mproc(void *)
 		if(n = read(fd, buf, sizeof buf), n != 1+4*12){
 			if(n < 0 || ++nerr > 10)
 				break;
-			fprint(2, "mproc: bad count %d not 49: %r\n", n);
+			Con_DPrintf("mproc: bad count %d not 49: %r\n", n);
 			continue;
 		}
 		nerr = 0;
@@ -312,7 +312,7 @@ IN_Grabm(int on)
 	if(mouseon = on && m_windowed.value){
 		fd = open("/dev/cursor", ORDWR|OCEXEC);
 		if(fd < 0){
-			fprint(2, "IN_Grabm:open: %r\n");
+			Con_DPrintf("IN_Grabm:open: %r\n");
 			return;
 		}
 		write(fd, nocurs, sizeof nocurs);

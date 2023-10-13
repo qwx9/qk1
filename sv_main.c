@@ -262,7 +262,7 @@ void SV_ConnectClient (int clientnum)
 
 	client = svs.clients + clientnum;
 
-	dprint("client %s connected\n", client->netconnection->address);
+	Con_DPrintf("client %s connected\n", client->netconnection->address);
 
 	edictnum = clientnum+1;
 
@@ -1091,7 +1091,7 @@ void SV_SpawnServer (char *server)
 		setcvar ("hostname", "UNNAMED");
 	scr_centertime_off = 0;
 
-	dprint("SV_SpawnServer: %s\n", server);
+	Con_DPrintf("SV_SpawnServer: %s\n", server);
 	svs.changelevel_issued = false;		// now safe to issue another
 
 //
@@ -1227,6 +1227,6 @@ void SV_SpawnServer (char *server)
 			SV_SendServerinfo (host_client);
 
 	IN_Grabm(1);
-	dprint("server spawned\n");
+	Con_DPrintf("server spawned\n");
 }
 

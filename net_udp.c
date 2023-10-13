@@ -85,7 +85,7 @@ udpinfo(Addr *a)
 	NetConnInfo *nc;
 
 	if((nc = getnetconninfo(nil, a->fd)) == nil){
-		fprint(2, "getnetconninfo: %r\n");
+		Con_DPrintf("getnetconninfo: %r\n");
 		return;
 	}
 	strncpy(a->ip, nc->raddr, sizeof(a->ip)-1);
@@ -98,7 +98,7 @@ int
 UDP_Connect(Addr *a)
 {
 	if((a->fd = dial(netmkaddr(a->ip, "udp", a->srv), myip.srv, nil, nil)) < 0){
-		fprint(2, "dial: %r\n");
+		Con_DPrintf("dial: %r\n");
 		return -1;
 	}
 	return 0;
@@ -123,7 +123,7 @@ udpread(byte *buf, int len, Addr *a)
 	if(flen(a->fd) < 1)
 		return 0;
 	if((n = read(a->fd, buf, len)) <= 0){
-		fprint(2, "udpread: %r\n");
+		Con_DPrintf("udpread: %r\n");
 		return -1;
 	}
 	return n;
@@ -133,7 +133,7 @@ int
 udpwrite(uchar *buf, int len, Addr *a)
 {
 	if(write(a->fd, buf, len) != len){
-		fprint(2, "udpwrite: %r\n");
+		Con_DPrintf("udpwrite: %r\n");
 		return -1;
 	}
 	return len;
@@ -159,11 +159,11 @@ UDP_Broadcast(uchar *buf, int len)
 
 	snprint(ip, sizeof ip, "%I", IPv4bcast);
 	if((fd = dial(netmkaddr(ip, "udp", myip.srv), myip.srv, nil, nil)) < 0){
-		fprint(2, "UDP_Broadcast: %r\n");
+		Con_DPrintf("UDP_Broadcast: %r\n");
 		return -1;
 	}
 	if(write(fd, buf, len) != len)
-		fprint(2, "write: %r\n");
+		Con_DPrintf("write: %r\n");
 	close(fd);
 	return 0;
 }
@@ -185,12 +185,12 @@ getip(char *s, Addr *a)
 	snprint(buf, sizeof buf, "udp!%s!%s", s, p);
 	n = strlen(buf);
 	if(write(fd, buf, n) != n){
-		fprint(2, "translating %s: %r\n", s);
+		Con_DPrintf("translating %s: %r\n", s);
 		return -1;
 	}
 	seek(fd, 0, 0);
 	if((n = read(fd, buf, sizeof(buf)-1)) <= 0){
-		fprint(2, "reading cs tables: %r");
+		Con_DPrintf("reading cs tables: %r");
 		return -1;
 	}
 	buf[n] = 0;
@@ -204,7 +204,7 @@ getip(char *s, Addr *a)
 	snprint(a->sys, sizeof a->sys, "%s!%s", a->ip, a->srv);
 	return 0;
 err:
-	fprint(2, "bad cs entry %s", buf);
+	Con_DPrintf("bad cs entry %s", buf);
 	return -1;
 }
 

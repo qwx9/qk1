@@ -469,7 +469,7 @@ nextmsg:
 		ret = NET_GetMessage (host_client->netconnection);
 		if (ret == -1)
 		{
-			fprint(2, "SV_ReadClientMessage: NET_GetMessage failed\n");
+			Con_DPrintf("SV_ReadClientMessage: NET_GetMessage failed\n");
 			return false;
 		}
 		if (!ret)
@@ -484,7 +484,7 @@ nextmsg:
 
 			if (msg_badread)
 			{
-				fprint(2, "SV_ReadClientMessage: badread\n");
+				Con_DPrintf("SV_ReadClientMessage: badread\n");
 				return false;
 			}	
 	
@@ -496,7 +496,7 @@ nextmsg:
 				goto nextmsg;		// end of message
 				
 			default:
-				fprint(2, "SV_ReadClientMessage: unknown command char\n");
+				Con_DPrintf("SV_ReadClientMessage: unknown command char\n");
 				return false;
 							
 			case clc_nop:
@@ -548,7 +548,7 @@ nextmsg:
 				else if (ret == 1)
 					Cmd_ExecuteString (s, src_client);
 				else
-					fprint(2, "%s tried to %s\n", host_client->name, s);
+					Con_DPrintf("%s tried to %s\n", host_client->name, s);
 				break;
 				
 			case clc_disconnect:

@@ -145,7 +145,7 @@ setcvar(char *k, char *v)
 
 	cv = Cvar_FindVar(k);
 	if(cv == nil){
-		fprint(2, "setcvar: no such cvar %s\n", k);
+		Con_DPrintf("setcvar: no such cvar %s\n", k);
 		return;
 	}
 	n = strcmp(cv->string, k);

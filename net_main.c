@@ -324,7 +324,7 @@ int	NET_GetMessage (qsocket_t *sock)
 	{
 		if (net_time - sock->lastMessageTime > net_messagetimeout.value)
 		{
-			fprint(2, "NET_GetMessage: sock %#p timed out\n", sock);
+			Con_DPrintf("NET_GetMessage: sock %#p timed out\n", sock);
 			NET_Close(sock);
 			return -1;
 		}

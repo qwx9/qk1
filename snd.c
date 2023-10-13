@@ -302,12 +302,12 @@ loadsfx(Sfx *sfx)
 		return sc;
 	u = loadstklmp(va("sound/%s", sfx->s), buf, sizeof buf, &len);
 	if(u == nil){
-		fprint(2, "loadsfx: %r\n");
+		Con_DPrintf("loadsfx: %r\n");
 		return nil;
 	}
 	info = GetWavinfo(sfx->s, u, len);
 	if(info.channels != 1){
-		fprint(2, "loadsfx: non mono wave %s\n", sfx->s);
+		Con_DPrintf("loadsfx: non mono wave %s\n", sfx->s);
 		return nil;
 	}
 	stepscale = (float)info.rate / Srate;	
@@ -506,7 +506,7 @@ auproc(void *p)
 			sz = -sz;
 		}
 		if(write(afd, m, sz) != sz){
-			fprint(2, "sndwrite: %r\n");
+			Con_DPrintf("sndwrite: %r\n");
 			shutsnd();
 			break;
 		}
@@ -696,7 +696,7 @@ staticsfx(Sfx *sfx, vec3_t zp, float vol, float att)
 	if(sc = loadsfx(sfx), sc == nil)
 		return;
 	if(sc->loop < 0){
-		fprint(2, "staticsfx %s: nonlooped static sound\n", sfx->s);
+		Con_DPrintf("staticsfx %s: nonlooped static sound\n", sfx->s);
 		return;
 	}
 	c->sfx = sfx;

@@ -22,7 +22,7 @@ cproc(void *)
 	double vol;
 
 	if((afd = open("/dev/audio", OWRITE)) < 0){
-		fprint(2, "cd: open: %r\n");
+		Con_DPrintf("cd: open: %r\n");
 		return;
 	}
 	fd = -1;
@@ -32,7 +32,7 @@ cproc(void *)
 			trk = chtrk;
 			snprint(f, sizeof f, "%s%03ud", cdfile, trk);
 			if((fd = open(f, OREAD)) < 0)
-				fprint(2, "cd: open: %r\n");
+				Con_DPrintf("cd: open: %r\n");
 			chtrk = 0;
 		}
 		if(!cdread || fd < 0){
@@ -177,7 +177,7 @@ int
 initcd(void)
 {
 	if(cdinfo() < 0){
-		fprint(2, "cdinfo: %r\n");
+		Con_DPrintf("cdinfo: %r\n");
 		return -1;
 	}
 	if(proccreate(cproc, nil, 16384) < 0)

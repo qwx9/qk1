@@ -47,7 +47,6 @@ int	readdm(void);
 int	loaddm(char*);
 int	opendm(char*, int);
 void	initfs(void);
-void	dprint(char*, ...);
 void	fatal(char*, ...);
 void*	emalloc(ulong);
 vlong	flen(int);
@@ -57,5 +56,4 @@ void	fppdbl(void);
 void	shutdown(void);
 uvlong	nanosec(void);
 
-#pragma	varargck	argpos	dprint	1
 #pragma varargck	argpos	fatal	1

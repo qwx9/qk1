@@ -5,24 +5,10 @@
 #include "quakedef.h"
 #include "fns.h"
 
-mainstacksize = 1*1024*1024;
+mainstacksize = 32*1024*1024;
 char *netmtpt = "/net";
 char *game;
 int debug;
-
-void
-dprint(char *fmt, ...)
-{
-	char s[256];
-	va_list arg;
-
-	if(!debug)
-		return;
-	va_start(arg, fmt);
-	vseprint(s, s+sizeof s, fmt, arg);
-	va_end(arg);
-	fprint(2, "%s", s);
-}
 
 /* FIXME: merge dprint/fatal? */
 void

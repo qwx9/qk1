@@ -461,7 +461,7 @@ void Host_Say(qboolean teamonly)
 	}
 	host_client = save;
 
-	dprint("%s", &text[1]);
+	Con_DPrintf("%s", &text[1]);
 }
 
 
@@ -718,7 +718,7 @@ void Host_Spawn_f (void)
 		PR_ExecuteProgram (pr_global_struct->ClientConnect);
 
 		if ((dtime() - host_client->netconnection->connecttime) <= sv.time)
-			dprint("%s entered the game\n", host_client->name);
+			Con_DPrintf("%s entered the game\n", host_client->name);
 
 		PR_ExecuteProgram (pr_global_struct->PutClientInServer);	
 	}
@@ -887,7 +887,7 @@ loadgame(void)
 	/* Can't call SCR_BeginLoadingPlaque, because too much stack space has
 	 * been used.  The menu calls it before stuffing loadgame command */
 	//SCR_BeginLoadingPlaque();
-	dprint("loadgame: reading from %s", s);
+	Con_DPrintf("loadgame: reading from %s", s);
 	if(loadsav(s) < 0){
 		Con_Printf(va("loadgame: %r\n"));
 		return;

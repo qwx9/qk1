@@ -1520,7 +1520,7 @@ static void PF_checkextension (void)
 	int i;
 
 	G_FLOAT(OFS_RETURN) = false;
-	//fprint(2, "checking extension %s\n", ext);
+	Con_DPrintf("checking extension %s\n", ext);
 	for(i = 0; i < nelem(exts); i++){
 		if(strcmp(ext, exts[i]) == 0){
 			G_FLOAT(OFS_RETURN) = true;

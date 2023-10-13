@@ -78,7 +78,7 @@ readcl(void)
 		if(r != 1 && r != 2)
 			return r;
 		if(net_message.cursize == 1 && net_message.data[0] == svc_nop)
-			dprint("<-- server to client keepalive\n");
+			Con_DPrintf("<-- server to client keepalive\n");
 		else
 			break;
 	}
@@ -132,7 +132,7 @@ recdemo(void)
 	if(c > 2)
 		Cmd_ExecuteString(va("map %s", Cmd_Argv(2)), src_command);
 	s = va("%s/%s%s", fsdir, a, ext(a, ".dem"));
-	dprint("recdemo: writing to file %s\n", s);
+	Con_DPrintf("recdemo: writing to file %s\n", s);
 	if(opendm(s, trk) < 0){
 		Con_Printf(va("recdemo: %r\n"));
 		return;
@@ -158,7 +158,7 @@ playdemo(void)
 	CL_Disconnect();
 	a = Cmd_Argv(1);
 	s = va("%s%s", a, ext(a, ".dem"));
-	dprint("playdemo: reading file %s\n", s);
+	Con_DPrintf("playdemo: reading file %s\n", s);
 	if(loaddm(s) < 0){
 		Con_Printf(va("playdemo: %r\n"));
 		cls.demonum = -1;
