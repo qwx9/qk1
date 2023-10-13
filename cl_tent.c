@@ -4,8 +4,8 @@
 #include "quakedef.h"
 #include "fns.h"
 
-int			num_temp_entities;
-entity_t	cl_temp_entities[MAX_TEMP_ENTITIES];
+static int num_temp_entities;
+static entity_t cl_temp_entities[MAX_TEMP_ENTITIES];
 beam_t		cl_beams[MAX_BEAMS];
 
 Sfx			*cl_sfx_wizhit;
@@ -37,7 +37,7 @@ void CL_InitTEnts (void)
 CL_ParseBeam
 =================
 */
-void CL_ParseBeam (model_t *m)
+static void CL_ParseBeam (model_t *m)
 {
 	int		ent;
 	vec3_t	start, end;
@@ -214,7 +214,7 @@ void CL_ParseTEnt (void)
 CL_NewTempEntity
 =================
 */
-entity_t *CL_NewTempEntity (void)
+static entity_t *CL_NewTempEntity (void)
 {
 	entity_t	*ent;
 

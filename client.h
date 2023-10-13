@@ -245,7 +245,6 @@ extern	entity_t		*cl_entities;
 extern	entity_t		*cl_static_entities;
 extern	lightstyle_t	cl_lightstyle[Nlights];
 extern	dlight_t		cl_dlights[MAX_DLIGHTS];
-extern	entity_t		cl_temp_entities[MAX_TEMP_ENTITIES];
 extern	beam_t			cl_beams[MAX_BEAMS];
 
 //=============================================================================
@@ -307,7 +306,6 @@ char *Key_KeynumToString (int keynum);
 // cl_parse.c
 //
 void CL_ParseServerMessage (void);
-void CL_NewTranslation (int slot);
 
 //
 // view

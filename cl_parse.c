@@ -4,7 +4,7 @@
 #include "quakedef.h"
 #include "fns.h"
 
-char *svc_strings[] =
+static char *svc_strings[] =
 {
 	"svc_bad",
 	"svc_nop",
@@ -63,7 +63,7 @@ CL_EntityNum
 This error checks and tracks the total number of entities
 ===============
 */
-entity_t	*CL_EntityNum (int num)
+static entity_t	*CL_EntityNum(int num)
 {
 	if (num >= cl.num_entities)
 	{
@@ -85,7 +85,7 @@ entity_t	*CL_EntityNum (int num)
 CL_ParseStartSoundPacket
 ==================
 */
-void CL_ParseStartSoundPacket(void)
+static void CL_ParseStartSoundPacket(void)
 {
     vec3_t  pos;
     int 	channel, ent;
@@ -122,7 +122,7 @@ When the client is taking a long time to load stuff, send keepalive messages
 so the server doesn't disconnect.
 ==================
 */
-void CL_KeepaliveMessage (void)
+static void CL_KeepaliveMessage (void)
 {
 	float	time;
 	static float lastmsg;
@@ -180,7 +180,7 @@ void CL_KeepaliveMessage (void)
 CL_ParseServerInfo
 ==================
 */
-void CL_ParseServerInfo (void)
+static void CL_ParseServerInfo (void)
 {
 	char	*str;
 	void	*p;
@@ -313,7 +313,7 @@ relinked.  Other attributes can change without relinking.
 */
 static int	bitcounts[16];
 
-void CL_ParseUpdate (int bits)
+static void CL_ParseUpdate (int bits)
 {
 	int			i;
 	model_t		*model;
@@ -420,7 +420,7 @@ void CL_ParseUpdate (int bits)
 CL_ParseBaseline
 ==================
 */
-void CL_ParseBaseline (int withbits, entity_t *ent)
+static void CL_ParseBaseline (int withbits, entity_t *ent)
 {
 	int i, bits;
 
@@ -444,7 +444,7 @@ CL_ParseClientdata
 Server information pertaining to this client only
 ==================
 */
-void CL_ParseClientdata (unsigned int bits)
+static void CL_ParseClientdata (unsigned int bits)
 {
 	int		i, j, weaponmodel;
 
@@ -536,7 +536,7 @@ void CL_ParseClientdata (unsigned int bits)
 CL_NewTranslation
 =====================
 */
-void CL_NewTranslation (int slot)
+static void CL_NewTranslation (int slot)
 {
 	int		i, j;
 	int		top, bottom;
@@ -571,7 +571,7 @@ void CL_NewTranslation (int slot)
 CL_ParseStatic
 =====================
 */
-void CL_ParseStatic (int withbits)
+static void CL_ParseStatic (int withbits)
 {
 	entity_t *ent;
 	int		i;
@@ -600,7 +600,7 @@ void CL_ParseStatic (int withbits)
 CL_ParseStaticSound
 ===================
 */
-void CL_ParseStaticSound (int large_sound)
+static void CL_ParseStaticSound (int large_sound)
 {
 	vec3_t		org;
 	int			sound_num, vol, atten;

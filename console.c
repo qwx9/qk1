@@ -5,9 +5,9 @@
 #include "quakedef.h"
 #include "fns.h"
 
-int 		con_linewidth;
+static int con_linewidth;
 
-float		con_cursorspeed = 4;
+static float con_cursorspeed = 4;
 
 #define		CON_TEXTSIZE	16384
 #define		MAXPRINTMSG		4096
@@ -16,17 +16,17 @@ qboolean 	con_forcedup;		// because no entities to refresh
 
 int			con_totallines;		// total lines in console scrollback
 int			con_backscroll;		// lines up from bottom to display
-int			con_current;		// where next message will be printed
-int			con_x;				// offset in current line for next print
-char		*con_text=0;
+static int		con_current;		// where next message will be printed
+static int		con_x;				// offset in current line for next print
+static char		*con_text;
 
-cvar_t		con_notifytime = {"con_notifytime","3"};		//seconds
+static cvar_t con_notifytime = {"con_notifytime","3"};		//seconds
 
 #define	NUM_CON_TIMES 4
-float		con_times[NUM_CON_TIMES];	// realtime time the line was generated
+static float con_times[NUM_CON_TIMES];	// realtime time the line was generated
 								// for transparent notify lines
 
-int			con_vislines;
+static int con_vislines;
 
 #define		MAXCMDLINE	256
 extern	char	key_lines[32][MAXCMDLINE];
@@ -288,37 +288,17 @@ Con_Print(char *txt)
 	}
 }
 
-/* all this because of the color printing hack */
-static void
-print1(char *s, int n)
-{
-	char buf[MAXPRINTMSG], *p, *d;
-
-	if(!debug)
-		return;
-	p = s;
-	d = buf;
-	while(*p)
-		*d++ = *p++ & 0x7f;
-	write(1, buf, n);
-}
-
 /* Handles cursor positioning, line wrapping, etc */
 void
 Con_Printf(char *fmt, ...)
 {
-	int n;
 	va_list arg;
 	char msg[MAXPRINTMSG];
 	static qboolean	inupdate;
 
-	/* FIXME: Con_Print() above uses 1<<7 bit for color printing select
-	 * letters, notably in mods. this does not amuse print(2) (dofmt()?). */
 	va_start(arg, fmt);
-	n = vsnprintf(msg, sizeof msg, fmt, arg);
+	vsnprintf(msg, sizeof msg, fmt, arg);
 	va_end(arg);
-
-	print1(msg, n);
 
 	if(!con_initialized)
 		return;
