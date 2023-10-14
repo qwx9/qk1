@@ -4,6 +4,8 @@
 #include "quakedef.h"
 #include "fns.h"
 
+#define	ON_EPSILON		0.1			// point on plane side epsilon
+
 edict_t	*sv_player;
 
 extern	cvar_t	sv_friction;
