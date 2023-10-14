@@ -97,7 +97,7 @@ static void CL_ParseStartSoundPacket(void)
     field_mask = MSG_ReadByte(); 
     volume = (field_mask & SND_VOLUME) ? MSG_ReadByte() : Spktvol;
 	attenuation = (field_mask & SND_ATTENUATION) ? MSG_ReadByte()/64.0 : Spktatt;
-	if(field_mask & (sv.protocol->fl_large_entity | sv.protocol->fl_large_channel)){
+	if(field_mask & (cl.protocol->fl_large_entity | cl.protocol->fl_large_channel)){
 		ent = MSG_ReadShort();
 		channel = MSG_ReadByte();
 	}else{
@@ -105,7 +105,7 @@ static void CL_ParseStartSoundPacket(void)
 		ent = channel >> 3;
 		channel &= 7;
 	}
-	sound_num = (field_mask & sv.protocol->fl_large_sound) ? MSG_ReadShort() : MSG_ReadByte();
+	sound_num = (field_mask & cl.protocol->fl_large_sound) ? MSG_ReadShort() : MSG_ReadByte();
 
 	if(ent > MAX_EDICTS)
 		Host_Error("CL_ParseStartSoundPacket: ent = %d", ent);
