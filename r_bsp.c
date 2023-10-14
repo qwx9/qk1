@@ -459,9 +459,9 @@ void R_RecursiveWorldNode (mnode_t *node, int clipflags)
 
 			pindex = pfrustum_indexes[i];
 
-			rejectpt[0] = (float)node->minmaxs[pindex[0]];
-			rejectpt[1] = (float)node->minmaxs[pindex[1]];
-			rejectpt[2] = (float)node->minmaxs[pindex[2]];
+			rejectpt[0] = node->minmaxs[pindex[0]];
+			rejectpt[1] = node->minmaxs[pindex[1]];
+			rejectpt[2] = node->minmaxs[pindex[2]];
 			
 			d = DotProduct (rejectpt, view_clipplanes[i].normal);
 			d -= view_clipplanes[i].dist;
@@ -469,9 +469,9 @@ void R_RecursiveWorldNode (mnode_t *node, int clipflags)
 			if (d <= 0)
 				return;
 
-			acceptpt[0] = (float)node->minmaxs[pindex[3+0]];
-			acceptpt[1] = (float)node->minmaxs[pindex[3+1]];
-			acceptpt[2] = (float)node->minmaxs[pindex[3+2]];
+			acceptpt[0] = node->minmaxs[pindex[3+0]];
+			acceptpt[1] = node->minmaxs[pindex[3+1]];
+			acceptpt[2] = node->minmaxs[pindex[3+2]];
 
 			d = DotProduct (acceptpt, view_clipplanes[i].normal);
 			d -= view_clipplanes[i].dist;
