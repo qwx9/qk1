@@ -264,7 +264,7 @@ void SV_TouchLinks ( edict_t *ent, areanode_t *node )
 	int			old_self, old_other;
 
 // touch linked edicts
-	for (l = node->trigger_edicts.next ; l != &node->trigger_edicts ; l = next)
+	for (l = node->trigger_edicts.next ; l != nil && l != &node->trigger_edicts ; l = next)
 	{
 		next = l->next;
 		touch = EDICT_FROM_AREA(l);

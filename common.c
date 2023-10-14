@@ -497,3 +497,14 @@ va(char *fmt, ...)
 
 	return s;  
 }
+
+float
+f32le(u32int u)
+{
+	union {
+		float f;
+		u32int u;
+	}x;
+	x.u = u;
+	return x.f;
+}

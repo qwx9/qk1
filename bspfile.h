@@ -30,6 +30,7 @@
 //=============================================================================
 
 #define BSPVERSION	29
+#define BSP2VERSION ('B'|'S'<<8|'P'<<16|'2'<<24)
 #define	TOOLVERSION	2
 
 #pragma pack on
@@ -141,9 +142,24 @@ typedef struct
 typedef struct
 {
 	int			planenum;
+	int			children[2];	// negative numbers are -(leafs+1), not nodes
+	float		mins[3];		// for sphere culling
+	float		maxs[3];
+	unsigned int	firstface;
+	unsigned int	numfaces;	// counting both sides
+} bsp2_dnode_t;
+
+typedef struct
+{
+	int			planenum;
 	short		children[2];	// negative numbers are contents
 } dclipnode_t;
 
+typedef struct
+{
+	int		planenum;
+	int		children[2];	// negative numbers are contents
+} bsp2_dclipnode_t;
 
 typedef struct texinfo_s
 {
@@ -160,6 +176,11 @@ typedef struct
 	unsigned short	v[2];		// vertex numbers
 } dedge_t;
 
+typedef struct
+{
+	unsigned int v[2];
+} bsp2_dedge_t;
+
 #define	MAXLIGHTMAPS	4
 typedef struct
 {
@@ -174,6 +195,20 @@ typedef struct
 	byte		styles[MAXLIGHTMAPS];
 	int			lightofs;		// start of [numstyles*surfsize] samples
 } dface_t;
+
+typedef struct
+{
+	int		planenum;
+	int		side;
+
+	int			firstedge;		// we must support > 64k edges
+	int		numedges;	
+	int		texinfo;
+
+// lighting info
+	byte		styles[MAXLIGHTMAPS];
+	int			lightofs;		// start of [numstyles*surfsize] samples
+} bsp2_dface_t;
 
 // leaf 0 is the generic CONTENTS_SOLID leaf, used for all solid areas
 // all other leafs need visibility info
@@ -190,6 +225,20 @@ typedef struct
 
 	byte		ambient_level[Namb];
 } dleaf_t;
+
+typedef struct
+{
+	int			contents;
+	int			visofs;				// -1 = no visibility info
+
+	float		mins[3];			// for frustum culling
+	float		maxs[3];
+
+	unsigned int		firstmarksurface;
+	unsigned int		nummarksurfaces;
+
+	byte		ambient_level[Namb];
+} bsp2_dleaf_t;
 
 #pragma pack off
 

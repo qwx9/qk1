@@ -95,7 +95,7 @@ typedef struct msurface_s
 	struct surfcache_s	*cachespots[MIPLEVELS];
 
 	int		texturemins[2];
-	short		extents[2];
+	int		extents[2];
 
 	mtexinfo_t	*texinfo;
 	
@@ -110,7 +110,7 @@ typedef struct mnode_s
 	int			contents;		// 0, to differentiate from leafs
 	int			visframe;		// node needs to be traversed if current
 	
-	int		minmaxs[6];		// for bounding box culling
+	float		minmaxs[6];		// for bounding box culling
 
 	struct mnode_s	*parent;
 
@@ -130,7 +130,7 @@ typedef struct mleaf_s
 	int			contents;		// wil be a negative contents number
 	int			visframe;		// node needs to be traversed if current
 
-	int		minmaxs[6];		// for bounding box culling
+	float		minmaxs[6];		// for bounding box culling
 
 	struct mnode_s	*parent;
 
