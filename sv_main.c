@@ -436,7 +436,7 @@ SV_WriteEntitiesToClient
 void SV_WriteEntitiesToClient (edict_t	*clent, sizebuf_t *msg)
 {
 	u32int	bits;
-	int		e, i;
+	int		e, i, model;
 	byte	*pvs;
 	vec3_t	org;
 	float	miss;
@@ -451,12 +451,13 @@ void SV_WriteEntitiesToClient (edict_t	*clent, sizebuf_t *msg)
 	for (e=1 ; e<sv.num_edicts ; e++, ent = NEXT_EDICT(ent))
 	{
 // ignore if not touching a PV leaf
+		model = ent->v.modelindex;
 		if (ent != clent)	// clent is ALLWAYS sent
 		{
 // ignore ents without visible models
-			if (!ent->v.modelindex || !*PR_Str(ent->v.model))
+			if(!model || !*PR_Str(ent->v.model))
 				continue;
-			if(ent->v.modelindex >= sv.protocol->limit_model)
+			if(model >= sv.protocol->limit_model)
 				continue;
 
 			for (i=0 ; i < ent->num_leafs ; i++)
@@ -482,23 +483,23 @@ void SV_WriteEntitiesToClient (edict_t	*clent, sizebuf_t *msg)
 			if ( miss < -0.1 || miss > 0.1 )
 				bits |= U_ORIGIN1<<i;
 		}
-		if ( ent->v.angles[0] != ent->baseline.angles[0] )
+		if (ent->v.angles[0] != ent->baseline.angles[0])
 			bits |= U_ANGLE1;
-		if ( ent->v.angles[1] != ent->baseline.angles[1] )
+		if (ent->v.angles[1] != ent->baseline.angles[1])
 			bits |= U_ANGLE2;
-		if ( ent->v.angles[2] != ent->baseline.angles[2] )
+		if (ent->v.angles[2] != ent->baseline.angles[2])
 			bits |= U_ANGLE3;
 		if (ent->v.movetype == MOVETYPE_STEP)
 			bits |= U_NOLERP;	// don't mess up the step animation
-		if (ent->baseline.colormap != ent->v.colormap)
+		if (ent->v.colormap != ent->baseline.colormap)
 			bits |= U_COLORMAP;
-		if (ent->baseline.skin != ent->v.skin)
+		if (ent->v.skin != ent->baseline.skin)
 			bits |= U_SKIN;
-		if (ent->baseline.frame != ent->v.frame)
+		if (ent->v.frame != ent->baseline.frame)
 			bits |= U_FRAME;
-		if (ent->baseline.effects != ent->v.effects)
+		if (ent->v.effects != ent->baseline.effects)
 			bits |= U_EFFECTS;
-		if (ent->baseline.modelindex != ent->v.modelindex)
+		if (model != ent->baseline.modelindex)
 			bits |= U_MODEL;
 		if (e >= 256)
 			bits |= U_LONGENTITY;
@@ -509,9 +510,9 @@ void SV_WriteEntitiesToClient (edict_t	*clent, sizebuf_t *msg)
 				bits |= sv.protocol->fl_large_frame;
 		}
 		if(bits & U_MODEL){
-			if(ent->v.modelindex >= sv.protocol->limit_model)
+			if(model >= sv.protocol->limit_model)
 				bits ^= U_MODEL;
-			else if(ent->v.modelindex >= sv.protocol->large_model)
+			else if(model >= sv.protocol->large_model)
 				bits |= sv.protocol->fl_large_model;
 		}
 		if(bits >= (1<<8)){
@@ -527,29 +528,27 @@ void SV_WriteEntitiesToClient (edict_t	*clent, sizebuf_t *msg)
 	//
 		MSG_WriteByte (msg, bits | U_SIGNAL);
 
-		if (bits & U_MOREBITS)
-			MSG_WriteByte (msg, bits>>8);
-		if (bits & U_MOREBITS2)
-			MSG_WriteByte (msg, bits>>16);
-		if (bits & U_MOREBITS3)
-			MSG_WriteByte (msg, bits>>24);
-		if (bits & U_LONGENTITY)
-			MSG_WriteShort (msg,e);
-		else
-			MSG_WriteByte (msg,e);
-
+		if (bits & U_MOREBITS){
+			MSG_WriteByte(msg, bits>>8);
+			if (bits & U_MOREBITS2){
+				MSG_WriteByte(msg, bits>>16);
+				if(bits & U_MOREBITS3)
+					MSG_WriteByte(msg, bits>>24);
+			}
+		}
+		((bits & U_LONGENTITY) ? MSG_WriteShort : MSG_WriteByte)(msg, e);
 		if (bits & U_MODEL)
-			MSG_WriteByte (msg,	ent->v.modelindex);
+			MSG_WriteByte(msg, model);
 		if (bits & U_FRAME)
-			MSG_WriteByte (msg, ent->v.frame);
+			MSG_WriteByte(msg, ent->v.frame);
 		if (bits & U_COLORMAP)
-			MSG_WriteByte (msg, ent->v.colormap);
+			MSG_WriteByte(msg, ent->v.colormap);
 		if (bits & U_SKIN)
-			MSG_WriteByte (msg, ent->v.skin);
+			MSG_WriteByte(msg, ent->v.skin);
 		if (bits & U_EFFECTS)
-			MSG_WriteByte (msg, ent->v.effects);
+			MSG_WriteByte(msg, ent->v.effects);
 		if (bits & U_ORIGIN1)
-			sv.protocol->MSG_WriteCoord (msg, ent->v.origin[0]);		
+			sv.protocol->MSG_WriteCoord(msg, ent->v.origin[0]);		
 		if (bits & U_ANGLE1)
 			sv.protocol->MSG_WriteAngle(msg, ent->v.angles[0]);
 		if (bits & U_ORIGIN2)
@@ -557,13 +556,13 @@ void SV_WriteEntitiesToClient (edict_t	*clent, sizebuf_t *msg)
 		if (bits & U_ANGLE2)
 			sv.protocol->MSG_WriteAngle(msg, ent->v.angles[1]);
 		if (bits & U_ORIGIN3)
-			sv.protocol->MSG_WriteCoord (msg, ent->v.origin[2]);
+			sv.protocol->MSG_WriteCoord(msg, ent->v.origin[2]);
 		if (bits & U_ANGLE3)
 			sv.protocol->MSG_WriteAngle(msg, ent->v.angles[2]);
 		if (bits & sv.protocol->fl_large_frame)
 			MSG_WriteByte(msg, (int)ent->v.frame>>8);
 		if (bits & sv.protocol->fl_large_model)
-			MSG_WriteByte(msg, (int)ent->v.modelindex>>8);
+			MSG_WriteByte(msg, model>>8);
 	}
 }
 
@@ -981,8 +980,7 @@ void SV_CreateBaseline (void)
 		else
 		{
 			svent->baseline.colormap = 0;
-			svent->baseline.modelindex =
-				SV_ModelIndex(PR_Str(svent->v.model));
+			svent->baseline.modelindex = SV_ModelIndex(PR_Str(svent->v.model));
 		}
 
 		bits = 0;
