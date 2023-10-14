@@ -332,15 +332,18 @@ void Con_DPrintf (char *fmt, ...)
 {
 	va_list		argptr;
 	char		msg[MAXPRINTMSG];
+	int			n;
 
 	if (!developer.value)
 		return;			// don't confuse non-developers with techie stuff...
 
 	va_start (argptr,fmt);
-	vsprintf (msg,fmt,argptr);
+	n = vsprintf (msg,fmt,argptr);
 	va_end (argptr);
-	
+
 	Con_Printf ("%s", msg);
+	if(developer.value > 1)
+		write(2, msg, n);
 }
 
 /*
