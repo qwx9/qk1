@@ -504,8 +504,8 @@ void ED_Print (edict_t *ed)
 		v = (int *)((char *)&ed->v + d->ofs*4);
 
 	// if the value is still all 0, skip the field
-		type = d->type & ~DEF_SAVEGLOBAL;
-		
+		if((type = d->type & ~DEF_SAVEGLOBAL) >= nelem(type_size))
+			continue;
 		for (j=0 ; j<type_size[type] ; j++)
 			if (v[j])
 				break;
@@ -1064,8 +1064,6 @@ void PR_Init (void)
 	Cvar_RegisterVariable (&saved4);
 	Cvar_RegisterVariable (&pr_checkextension);
 }
-
-
 
 edict_t *EDICT_NUM(int n)
 {
