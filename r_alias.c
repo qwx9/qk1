@@ -119,7 +119,7 @@ qboolean R_AliasCheckBBox (void)
 	zclipped = false;
 	zfullyclipped = true;
 
-	minz = 9999;
+	minz = Q_MAXINT;
 	for (i=0; i<8 ; i++)
 	{
 		R_AliasTransformVector  (&basepts[i][0], &viewaux[i].fv[0]);

@@ -23,8 +23,10 @@ int				r_currentbkey;
 
 typedef enum {touchessolid, drawnode, nodrawnode} solidstate_t;
 
-#define MAX_BMODEL_VERTS	1000		// 6K
-#define MAX_BMODEL_EDGES	3000		// 12K
+#define MAX_BMODEL_VERTS	6000
+#define MAX_BMODEL_EDGES	12000
+static mvertex_t bverts[MAX_BMODEL_VERTS];
+static bedge_t bedges[MAX_BMODEL_EDGES];
 
 static mvertex_t	*pbverts;
 static bedge_t		*pbedges;
@@ -314,8 +316,7 @@ void R_DrawSolidClippedSubmodelPolygons (model_t *pmodel)
 	msurface_t	*psurf;
 	int			numsurfaces;
 	mplane_t	*pplane;
-	mvertex_t	bverts[MAX_BMODEL_VERTS];
-	bedge_t		bedges[MAX_BMODEL_EDGES], *pbedge;
+	bedge_t		*pbedge;
 	medge_t		*pedge, *pedges;
 
 // FIXME: use bounding-box-based frustum clipping info?

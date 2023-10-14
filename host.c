@@ -288,7 +288,7 @@ void SV_DropClient (qboolean crash)
 // free the client (the body stays around)
 	host_client->active = false;
 	host_client->name[0] = 0;
-	host_client->old_frags = -999999;
+	host_client->old_frags = Q_MININT;
 	net_activeconnections--;
 
 // send notification to all clients

@@ -108,15 +108,15 @@ surfcache_t     *D_SCAlloc (int width, uintptr size)
 	qboolean                wrapped_this_time;
 
 	if ((width < 0) || (width > 256))
-		fatal ("D_SCAlloc: bad cache width %d\n", width);
+		Host_Error("D_SCAlloc: bad cache width %d\n", width);
 
 	if ((size <= 0) || (size > 0x10000))
-		fatal ("D_SCAlloc: bad cache size %zud\n", size);
+		Host_Error("D_SCAlloc: bad cache size %zud\n", size);
 	
 	size = (uintptr)&((surfcache_t *)0)->data[size];
 	size = (size + 3) & ~3;
 	if (size > sc_size)
-		fatal ("D_SCAlloc: %zud > cache size",size);
+		Host_Error("D_SCAlloc: %zud > cache size",size);
 
 // if there is not size bytes after the rover, reset to the start
 	wrapped_this_time = false;

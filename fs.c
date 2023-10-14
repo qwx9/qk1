@@ -444,7 +444,7 @@ loadpoints(void)
 		free_particles = p->next;
 		p->next = active_particles;
 		active_particles = p;
-		p->die = 99999;
+		p->die = Q_MAXFLOAT;
 		p->color = -nv & 15;
 		p->type = pt_static;
 		VectorCopy(vec3_origin, p->vel);

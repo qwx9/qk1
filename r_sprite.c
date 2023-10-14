@@ -176,7 +176,7 @@ void R_SetupAndDrawSprite (void)
 
 // transform vertices into viewspace and project
 	pv = &clip_verts[clip_current][0][0];
-	r_spritedesc.nearzi = -999999;
+	r_spritedesc.nearzi = -Q_MAXFLOAT;
 
 	for (i=0 ; i<nump ; i++)
 	{

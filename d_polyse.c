@@ -631,7 +631,7 @@ void D_PolysetDrawSpans8 (spanpackage_t *pspanpackage)
 		}
 
 		pspanpackage++;
-	} while (pspanpackage->count != -999999);
+	} while (pspanpackage->count != Q_MININT);
 }
 
 
@@ -862,7 +862,7 @@ void D_RasterizeAliasPolySmooth (void)
 	d_aspancount = 0;
 	d_countextrastep = ubasestep + 1;
 	originalcount = a_spans[initialrightheight].count;
-	a_spans[initialrightheight].count = -999999; // mark end of the spanpackages
+	a_spans[initialrightheight].count = Q_MININT; // mark end of the spanpackages
 	D_PolysetDrawSpans8 (a_spans);
 
 // scan out the bottom part of the right edge, if it exists
@@ -885,7 +885,7 @@ void D_RasterizeAliasPolySmooth (void)
 							  prightbottom[0], prightbottom[1]);
 
 		d_countextrastep = ubasestep + 1;
-		a_spans[initialrightheight + height].count = -999999;
+		a_spans[initialrightheight + height].count = Q_MININT;
 											// mark end of the spanpackages
 		D_PolysetDrawSpans8 (pstart);
 	}

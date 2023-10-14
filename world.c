@@ -792,8 +792,8 @@ SV_MoveBounds
 void SV_MoveBounds (vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end, vec3_t boxmins, vec3_t boxmaxs)
 {
 	/* debug to test against everything
-	boxmins[0] = boxmins[1] = boxmins[2] = -9999;
-	boxmaxs[0] = boxmaxs[1] = boxmaxs[2] = 9999;
+	boxmins[0] = boxmins[1] = boxmins[2] = -Q_MAXFLOAT;
+	boxmaxs[0] = boxmaxs[1] = boxmaxs[2] = Q_MAXFLOAT;
 	*/
 
 	int		i;

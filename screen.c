@@ -114,7 +114,7 @@ void SCR_DrawCenterString (void)
 	if (cl.intermission)
 		remaining = scr_printspeed.value * (cl.time - scr_centertime_start);
 	else
-		remaining = 9999;
+		remaining = Q_MAXINT;
 
 	scr_erase_center = 0;
 	start = scr_centerstring;
