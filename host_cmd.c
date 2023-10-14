@@ -886,7 +886,7 @@ loadgame(void)
 	s = va("%s/%s%s", fsdir, a, ext(a, ".sav"));
 	/* Can't call SCR_BeginLoadingPlaque, because too much stack space has
 	 * been used.  The menu calls it before stuffing loadgame command */
-	//SCR_BeginLoadingPlaque();
+	SCR_BeginLoadingPlaque();
 	Con_DPrintf("loadgame: reading from %s", s);
 	if(loadsav(s) < 0){
 		Con_Printf(va("loadgame: %r\n"));
