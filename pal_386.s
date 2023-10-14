@@ -1,0 +1,37 @@
+TEXT pal2xrgb(SB), $-4
+	MOVL n+0(FP), AX
+	MOVL p+4(FP), BX
+	MOVL s+8(FP), SI
+	MOVL d+12(FP), DI
+
+	ADDL SI, AX
+
+_l2:
+	MOVWLZX 0(SI), CX
+	MOVL CX, DX
+	ANDL $0x00ff, CX
+	SHRL $8, DX
+
+	MOVL (BX)(CX*4), CX
+	MOVL (BX)(DX*4), DX
+	MOVL CX, 0(DI)
+	MOVL DX, 4(DI)
+
+	ADDL $2, SI
+	ADDL $8, DI
+	CMPL SI, AX
+	JLE _l2
+	JEQ _end
+
+_l1:
+	MOVBLZX 0(SI), CX
+	MOVL (BX)(CX*4), CX
+	MOVL CX, 0(DI)
+
+	ADDL $1, SI
+	ADDL $4, DI
+	CMPL SI, AX
+	JLE _l1
+
+_end:
+	RET
