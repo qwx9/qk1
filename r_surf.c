@@ -6,9 +6,9 @@
 
 drawsurf_t	r_drawsurf;
 
-int				lightleft, sourcesstep, blocksize, sourcetstep;
+int				sourcesstep, blocksize, sourcetstep;
 int				lightdelta, lightdeltastep;
-int				lightright, lightleftstep, lightrightstep, blockdivshift;
+int				lightleftstep, lightrightstep, blockdivshift;
 unsigned		blockdivmask;
 void			*prowdestbase;
 unsigned char	*pbasesource;
@@ -30,8 +30,6 @@ static void	(*surfmiptable[4])(void) = {
 	R_DrawSurfaceBlock8_mip2,
 	R_DrawSurfaceBlock8_mip3
 };
-
-
 
 unsigned		blocklights[18*18];
 
@@ -295,7 +293,7 @@ R_DrawSurfaceBlock8_mip0
 */
 void R_DrawSurfaceBlock8_mip0 (void)
 {
-	int				v, i, lightstep, lighttemp, light;
+	int				v, i, lightstep, lighttemp, light, lightleft, lightright;
 	unsigned char	*psource, *prowdest;
 
 	psource = pbasesource;
@@ -303,7 +301,6 @@ void R_DrawSurfaceBlock8_mip0 (void)
 
 	for (v=0 ; v<r_numvblocks ; v++)
 	{
-	// FIXME: make these locals?
 	// FIXME: use delta rather than both right and left, like ASM?
 		lightleft = r_lightptr[0];
 		lightright = r_lightptr[1];
@@ -354,7 +351,7 @@ R_DrawSurfaceBlock8_mip1
 */
 void R_DrawSurfaceBlock8_mip1 (void)
 {
-	int				v, i, b, lightstep, lighttemp, light;
+	int				v, i, b, lightstep, lighttemp, light, lightleft, lightright;
 	unsigned char	pix, *psource, *prowdest;
 
 	psource = pbasesource;
@@ -362,7 +359,6 @@ void R_DrawSurfaceBlock8_mip1 (void)
 
 	for (v=0 ; v<r_numvblocks ; v++)
 	{
-	// FIXME: make these locals?
 	// FIXME: use delta rather than both right and left, like ASM?
 		lightleft = r_lightptr[0];
 		lightright = r_lightptr[1];
@@ -404,7 +400,7 @@ R_DrawSurfaceBlock8_mip2
 */
 void R_DrawSurfaceBlock8_mip2 (void)
 {
-	int				v, i, b, lightstep, lighttemp, light;
+	int				v, i, b, lightstep, lighttemp, light, lightleft, lightright;
 	unsigned char	pix, *psource, *prowdest;
 
 	psource = pbasesource;
@@ -412,7 +408,6 @@ void R_DrawSurfaceBlock8_mip2 (void)
 
 	for (v=0 ; v<r_numvblocks ; v++)
 	{
-	// FIXME: make these locals?
 	// FIXME: use delta rather than both right and left, like ASM?
 		lightleft = r_lightptr[0];
 		lightright = r_lightptr[1];
@@ -454,7 +449,7 @@ R_DrawSurfaceBlock8_mip3
 */
 void R_DrawSurfaceBlock8_mip3 (void)
 {
-	int				v, i, b, lightstep, lighttemp, light;
+	int				v, i, b, lightstep, lighttemp, light, lightleft, lightright;
 	unsigned char	pix, *psource, *prowdest;
 
 	psource = pbasesource;
@@ -462,7 +457,6 @@ void R_DrawSurfaceBlock8_mip3 (void)
 
 	for (v=0 ; v<r_numvblocks ; v++)
 	{
-	// FIXME: make these locals?
 	// FIXME: use delta rather than both right and left, like ASM?
 		lightleft = r_lightptr[0];
 		lightright = r_lightptr[1];
