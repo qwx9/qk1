@@ -124,13 +124,7 @@ void RotatePointAroundVector( vec3_t dst, const vec3_t dir, const vec3_t point, 
 
 float	anglemod(float a)
 {
-	/*
-	if (a >= 0)
-		a -= 360*(int)(a/360);
-	else
-		a += 360*( 1 + (int)(-a/360) );
-	*/
-	a = (360.0/65536) * ((int)(a*(65536/360.0)) & 65535);
+	a = (360.0/65536.0) * ((int)(a*(65536.0/360.0)) & 65535);
 	return a;
 }
 
@@ -257,16 +251,16 @@ if (sides == 0)
 
 void AngleVectors (vec3_t angles, vec3_t forward, vec3_t right, vec3_t up)
 {
-	float		angle;
-	float		sr, sp, sy, cr, cp, cy;
-	
-	angle = angles[YAW] * (M_PI*2 / 360);
+	double		angle;
+	double		sr, sp, sy, cr, cp, cy;
+
+	angle = angles[YAW] * (M_PI*2 / 360.0);
 	sy = sin(angle);
 	cy = cos(angle);
-	angle = angles[PITCH] * (M_PI*2 / 360);
+	angle = angles[PITCH] * (M_PI*2 / 360.0);
 	sp = sin(angle);
 	cp = cos(angle);
-	angle = angles[ROLL] * (M_PI*2 / 360);
+	angle = angles[ROLL] * (M_PI*2 / 360.0);
 	sr = sin(angle);
 	cr = cos(angle);
 
@@ -332,8 +326,6 @@ void CrossProduct (vec3_t v1, vec3_t v2, vec3_t cross)
 	cross[1] = v1[2]*v2[0] - v1[0]*v2[2];
 	cross[2] = v1[0]*v2[1] - v1[1]*v2[0];
 }
-
-double sqrt(double x);
 
 vec_t Length(vec3_t v)
 {

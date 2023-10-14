@@ -390,7 +390,7 @@ void PF_vectoyaw (void)
 		yaw = 0;
 	else
 	{
-		yaw = (int) (atan2(value1[1], value1[0]) * 180 / M_PI);
+		yaw = atan2(value1[1], value1[0]) * 180.0 / M_PI;
 		if (yaw < 0)
 			yaw += 360;
 	}
@@ -409,8 +409,8 @@ vector vectoangles(vector)
 void PF_vectoangles (void)
 {
 	float	*value1;
-	float	forward;
-	float	yaw, pitch;
+	double	forward;
+	double	yaw, pitch;
 	
 	value1 = G_VECTOR(OFS_PARM0);
 
@@ -424,12 +424,12 @@ void PF_vectoangles (void)
 	}
 	else
 	{
-		yaw = (int) (atan2(value1[1], value1[0]) * 180 / M_PI);
+		yaw = atan2(value1[1], value1[0]) * 180.0 / M_PI;
 		if (yaw < 0)
 			yaw += 360;
 
 		forward = sqrt (value1[0]*value1[0] + value1[1]*value1[1]);
-		pitch = (int) (atan2(value1[2], forward) * 180 / M_PI);
+		pitch = atan2(value1[2], forward) * 180 / M_PI;
 		if (pitch < 0)
 			pitch += 360;
 	}
@@ -1151,10 +1151,7 @@ void PF_rint (void)
 {
 	float	f;
 	f = G_FLOAT(OFS_PARM0);
-	if (f > 0)
-		G_FLOAT(OFS_RETURN) = (int)(f + 0.5);
-	else
-		G_FLOAT(OFS_RETURN) = (int)(f - 0.5);
+	G_FLOAT(OFS_RETURN) = Qrint(f);
 }
 void PF_floor (void)
 {
