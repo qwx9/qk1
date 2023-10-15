@@ -872,12 +872,9 @@ void R_ZDrawSubmodelPolys (model_t *pmodel)
 		dot = DotProduct (modelorg, pplane->normal) - pplane->dist;
 
 	// draw the polygon
-		if (((psurf->flags & SURF_PLANEBACK) && (dot < -BACKFACE_EPSILON)) ||
-			(!(psurf->flags & SURF_PLANEBACK) && (dot > BACKFACE_EPSILON)))
-		{
-		// FIXME: use bounding-box-based frustum clipping info?
+	// FIXME: use bounding-box-based frustum clipping info?
+		if ((dot > 0) ^ !!(psurf->flags & SURF_PLANEBACK))
 			R_RenderPoly (psurf, 15);
-		}
 	}
 }
 
