@@ -367,11 +367,11 @@ SZ_GetSpace(sizebuf_t *buf, int length)
 	
 	if(buf->cursize + length > buf->maxsize){
 		if(!buf->allowoverflow)
-			Host_Error("SZ_GetSpace: overflow without allowoverflow set");
+			Host_Error("SZ_GetSpace: %s: overflow without allowoverflow set", buf->name);
 		if(length > buf->maxsize)
-			Host_Error("SZ_GetSpace: %d is > full buffer size", length);
+			Host_Error("SZ_GetSpace: %s: %d is > full buffer size", buf->name, length);
 		buf->overflowed = true;
-		Con_Printf("SZ_GetSpace: overflow");
+		Con_Printf("SZ_GetSpace: %s: overflow", buf->name);
 		SZ_Clear(buf); 
 	}
 	data = buf->data + buf->cursize;

@@ -1134,15 +1134,18 @@ void SV_SpawnServer (char *server)
 	sv.datagram.maxsize = sizeof sv.datagram_buf;
 	sv.datagram.cursize = 0;
 	sv.datagram.data = sv.datagram_buf;
+	sv.datagram.name = "sv.datagram";
 	
 	sv.reliable_datagram.maxsize = sizeof sv.reliable_datagram_buf;
 	sv.reliable_datagram.cursize = 0;
 	sv.reliable_datagram.data = sv.reliable_datagram_buf;
-	
+	sv.reliable_datagram.name = "sv.reliable_datagram";
+
 	sv.signon.maxsize = sizeof sv.signon_buf;
 	sv.signon.cursize = 0;
 	sv.signon.data = sv.signon_buf;
-	
+	sv.signon.name = "sv.signon";
+
 // leave slots at start for clients only
 	sv.num_edicts = svs.maxclients+1;
 	for (i=0 ; i<svs.maxclients ; i++)
