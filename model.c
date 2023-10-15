@@ -360,7 +360,7 @@ void Mod_LoadTextures (lump_t *l)
 			mt->offsets[j] = LittleLong (mt->offsets[j]);
 		
 		if ( (mt->width & 15) || (mt->height & 15) )
-			Host_Error("Texture %s is not 16 aligned", mt->name);
+			Con_DPrintf("Texture %s is not 16 aligned", mt->name);
 		pixels = mt->width*mt->height/64*85;
 		tx = Hunk_Alloc(pixels + sizeof *tx);
 		loadmodel->textures[i] = tx;
