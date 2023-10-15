@@ -13,16 +13,6 @@ uzint	*zspantable[MAXHEIGHT];
 
 /*
 ================
-D_Patch
-================
-*/
-void D_Patch (void)
-{
-}
-
-
-/*
-================
 D_ViewChanged
 ================
 */
@@ -46,7 +36,7 @@ void D_ViewChanged (void)
 	if (d_pix_min < 1)
 		d_pix_min = 1;
 
-	d_pix_max = (int)((float)r_refdef.vrect.width / (320.0 / 4.0) + 0.5) * 90.0/r_refdef.fov_x;
+	d_pix_max = (int)(((float)r_refdef.vrect.width / (320.0 / 4.0) + 0.5) * r_part_scale.value * 90.0/r_refdef.fov_x);
 	d_pix_shift = 8 - (int)((float)r_refdef.vrect.width / 320.0 + 0.5);
 	if (d_pix_max < 1)
 		d_pix_max = 1;
@@ -71,7 +61,5 @@ void D_ViewChanged (void)
 			zspantable[i] = d_pzbuffer + i*d_zwidth;
 		}
 	}
-
-	D_Patch ();
 }
 

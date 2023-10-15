@@ -46,11 +46,10 @@ extern cvar_t	r_dspeeds;
 extern cvar_t	r_drawflat;
 extern cvar_t	r_ambient;
 extern cvar_t	r_reportsurfout;
-extern cvar_t	r_maxsurfs;
 extern cvar_t	r_numsurfs;
 extern cvar_t	r_reportedgeout;
-extern cvar_t	r_maxedges;
 extern cvar_t	r_numedges;
+extern cvar_t	r_part_scale;
 
 #define XCENTERING	(1.0 / 2.0)
 #define YCENTERING	(1.0 / 2.0)
