@@ -32,7 +32,7 @@ void R_InitSky (texture_t *mt)
 		n = skyw*skyh;
 		r_skysource[0] = Hunk_Alloc(n);
 		r_skysource[1] = r_skysource[0];
-		memmove(r_skysource[0], src+n, n);
+		memmove(r_skysource[0], src, n);
 		return;
 	}
 	skyw = w/2;
