@@ -360,7 +360,7 @@ void D_DrawZSpans (espan_t *pspan)
 {
 	int				count, doublecount, izistep;
 	int				izi;
-	short			*pdest;
+	uzint			*pdest;
 	unsigned		ltemp;
 	double			zi;
 	float			du, dv;

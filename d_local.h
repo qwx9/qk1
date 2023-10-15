@@ -33,6 +33,8 @@ typedef struct sspan_s
 	int				u, v, count;
 } sspan_t;
 
+typedef u16int uzint;
+
 extern cvar_t	d_subdiv16;
 
 extern float	scale_for_mip;
@@ -64,7 +66,7 @@ surfcache_t	*D_CacheSurface (msurface_t *surface, int miplevel);
 
 extern int D_MipLevelForScale (float scale);
 
-extern short *d_pzbuffer;
+extern uzint *d_pzbuffer;
 extern unsigned int d_zrowbytes, d_zwidth;
 
 extern int	*d_pscantable;
@@ -76,7 +78,7 @@ extern int	d_y_aspect_shift, d_pix_min, d_pix_max, d_pix_shift;
 
 extern pixel_t	*d_viewbuffer;
 
-extern short	*zspantable[MAXHEIGHT];
+extern uzint	*zspantable[MAXHEIGHT];
 
 extern int		d_minmip;
 extern float	d_scalemip[3];
