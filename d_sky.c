@@ -7,6 +7,7 @@
 #define SKY_SPAN_SHIFT	5
 #define SKY_SPAN_MAX	(1 << SKY_SPAN_SHIFT)
 
+extern int skyw, skyh;
 
 /*
 =================
@@ -15,26 +16,28 @@ D_Sky_uv_To_st
 */
 void D_Sky_uv_To_st (int u, int v, fixed16_t *s, fixed16_t *t)
 {
-	float	wu, wv, temp;
+	double	wu, wv, temp;
 	vec3_t	end;
 
 	if (r_refdef.vrect.width >= r_refdef.vrect.height)
-		temp = (float)r_refdef.vrect.width;
+		temp = r_refdef.vrect.width;
 	else
-		temp = (float)r_refdef.vrect.height;
+		temp = r_refdef.vrect.height;
 
-	wu = 8192.0 * (float)(u-((int)vid.width>>1)) / temp;
-	wv = 8192.0 * (float)(((int)vid.height>>1)-v) / temp;
+	wu = 8192.0 * (double)(u-((int)vid.width>>1)) / temp;
+	wv = 8192.0 * (double)(((int)vid.height>>1)-v) / temp;
 
-	end[0] = 4096*vpn[0] + wu*vright[0] + wv*vup[0];
-	end[1] = 4096*vpn[1] + wu*vright[1] + wv*vup[1];
-	end[2] = 4096*vpn[2] + wu*vright[2] + wv*vup[2];
+	end[0] = 4096.0*vpn[0] + wu*vright[0] + wv*vup[0];
+	end[1] = 4096.0*vpn[1] + wu*vright[1] + wv*vup[1];
+	end[2] = 4096.0*vpn[2] + wu*vright[2] + wv*vup[2];
 	end[2] *= 3;
-	VectorNormalize (end);
+	VectorNormalize(end);
 
 	temp = skytime*skyspeed;	// TODO: add D_SetupFrame & set this there
-	*s = (int)((temp + 6*(SKYSIZE/2-1)*end[0]) * 0x10000);
-	*t = (int)((temp + 6*(SKYSIZE/2-1)*end[1]) * 0x10000);
+	s[0] = (int)((temp + 4*(skyw-1)*end[0]) * 0x10000);
+	t[0] = (int)((temp + 4*(skyh-1)*end[1]) * 0x10000);
+	s[1] = (int)((temp*2.0 + 4*(skyw-1)*end[0]) * 0x10000);
+	t[1] = (int)((temp*2.0 + 4*(skyh-1)*end[1]) * 0x10000);
 }
 
 
@@ -46,12 +49,12 @@ D_DrawSkyScans8
 void D_DrawSkyScans8 (espan_t *pspan)
 {
 	int				count, spancount, u, v;
-	unsigned char	*pdest;
-	fixed16_t		s, t, snext, tnext, sstep, tstep;
+	unsigned char	*pdest, m;
+	fixed16_t		s[2], t[2], snext[2], tnext[2], sstep[2], tstep[2];
 	int				spancountminus1;
 
-	sstep = 0;	// keep compiler happy
-	tstep = 0;	// ditto
+	sstep[0] = sstep[1] = 0;	// keep compiler happy
+	tstep[0] = tstep[1] = 0;	// ditto
 
 	do
 	{
@@ -63,7 +66,7 @@ void D_DrawSkyScans8 (espan_t *pspan)
 	// calculate the initial s & t
 		u = pspan->u;
 		v = pspan->v;
-		D_Sky_uv_To_st (u, v, &s, &t);
+		D_Sky_uv_To_st (u, v, s, t);
 
 		do
 		{
@@ -80,10 +83,12 @@ void D_DrawSkyScans8 (espan_t *pspan)
 
 			// calculate s and t at far end of span,
 			// calculate s and t steps across span by shifting
-				D_Sky_uv_To_st (u, v, &snext, &tnext);
+				D_Sky_uv_To_st (u, v, snext, tnext);
 
-				sstep = (snext - s) >> SKY_SPAN_SHIFT;
-				tstep = (tnext - t) >> SKY_SPAN_SHIFT;
+				sstep[0] = (snext[0] - s[0]) >> SKY_SPAN_SHIFT;
+				tstep[0] = (tnext[0] - t[0]) >> SKY_SPAN_SHIFT;
+				sstep[1] = (snext[1] - s[1]) >> SKY_SPAN_SHIFT;
+				tstep[1] = (tnext[1] - t[1]) >> SKY_SPAN_SHIFT;
 			}
 			else
 			{
@@ -94,24 +99,35 @@ void D_DrawSkyScans8 (espan_t *pspan)
 				if (spancountminus1 > 0)
 				{
 					u += spancountminus1;
-					D_Sky_uv_To_st (u, v, &snext, &tnext);
+					D_Sky_uv_To_st (u, v, snext, tnext);
 
-					sstep = (snext - s) / spancountminus1;
-					tstep = (tnext - t) / spancountminus1;
+					sstep[0] = (snext[0] - s[0]) / spancountminus1;
+					tstep[0] = (tnext[0] - t[0]) / spancountminus1;
+					sstep[1] = (snext[1] - s[1]) / spancountminus1;
+					tstep[1] = (tnext[1] - t[1]) / spancountminus1;
 				}
 			}
 
 			do
 			{
-				*pdest++ = r_skysource[((t & R_SKY_TMASK) >> 8) +
-						((s & R_SKY_SMASK) >> 16)];
-				s += sstep;
-				t += tstep;
+				m = r_skysource[1][((t[1] & R_SKY_TMASK) >> 9) +
+						((s[1] & R_SKY_SMASK) >> 16)];
+				if(m == 0)
+					*pdest = r_skysource[0][((t[0] & R_SKY_TMASK) >> 9) +
+							((s[0] & R_SKY_SMASK) >> 16)];
+				else
+					*pdest = m;
+				pdest++;
+				s[0] += sstep[0];
+				t[0] += tstep[0];
+				s[1] += sstep[1];
+				t[1] += tstep[1];
 			} while (--spancount > 0);
 
-			s = snext;
-			t = tnext;
-
+			s[0] = snext[0];
+			t[0] = tnext[0];
+			s[1] = snext[1];
+			t[1] = tnext[1];
 		} while (count > 0);
 
 	} while ((pspan = pspan->pnext) != nil);

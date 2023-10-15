@@ -30,8 +30,6 @@ D_Init
 void D_Init (void)
 {
 
-	r_skydirect = 1;
-
 	Cvar_RegisterVariable (&d_subdiv16);
 	Cvar_RegisterVariable (&d_mipcap);
 	Cvar_RegisterVariable (&d_mipscale);

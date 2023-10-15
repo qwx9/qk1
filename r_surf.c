@@ -522,8 +522,6 @@ R_GenTile(msurface_t *psurf, void *pdest)
 		R_GenTurbTile((pixel_t *)
 			((byte *)psurf->texinfo->texture
 			+ psurf->texinfo->texture->offsets[0]), pdest);
-	}else if(psurf->flags & SURF_DRAWSKY)
-		R_GenSkyTile(pdest);
-	else
+	}else if((psurf->flags & SURF_DRAWSKY) == 0)
 		fatal("Unknown tile type");
 }
