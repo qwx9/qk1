@@ -45,7 +45,7 @@ typedef struct
 	byte		reliable_datagram_buf[MAX_DATAGRAM];
 
 	sizebuf_t	signon;
-	byte		signon_buf[32768];
+	byte		signon_buf[NET_MAXMESSAGE];
 } server_t;
 
 
