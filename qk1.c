@@ -50,11 +50,7 @@ flen(int fd)
 double
 dtime(void)
 {
-	static double t0;
-
-	if(t0 == 0.0)
-		t0 = time(nil);
-	return nanosec() / 1000000000.0 - t0;
+	return nanosec() / 1000000000.0;
 }
 
 void
