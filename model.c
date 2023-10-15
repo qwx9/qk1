@@ -727,7 +727,7 @@ void CalcSurfaceExtents (msurface_t *s)
 
 		s->texturemins[i] = bmins[i] * 16;
 		s->extents[i] = (bmaxs[i] - bmins[i]) * 16;
-		if ( !(tex->flags & TEX_SPECIAL) && s->extents[i] > 256)
+		if ( !(tex->flags & TEX_SPECIAL) && s->extents[i] > 2000)
 			Host_Error("Bad surface: texture=%s flags=%ux extents[%d]=%d",
 				tex->texture->name,
 				tex->flags,
