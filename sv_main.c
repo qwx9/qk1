@@ -454,6 +454,8 @@ void SV_WriteEntitiesToClient (edict_t	*clent, sizebuf_t *msg)
 		model = ent->v.modelindex;
 		if (ent != clent)	// clent is ALLWAYS sent
 		{
+			if(ent->v.effects == EF_NODRAW)
+				continue;
 // ignore ents without visible models
 			if(!model || !*PR_Str(ent->v.model))
 				continue;

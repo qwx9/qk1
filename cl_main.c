@@ -560,7 +560,7 @@ void CL_RelinkEntities (void)
 
 		ent->forcelink = false;
 
-		if (i == cl.viewentity && !chase_active.value)
+		if ((ent->effects & EF_NODRAW) != 0 || (i == cl.viewentity && !chase_active.value))
 			continue;
 
 		if (cl_numvisedicts < MAX_VISEDICTS)
