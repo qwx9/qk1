@@ -148,6 +148,7 @@ void R_RecursiveClipBPoly (bedge_t *pedges, mnode_t *pnode, msurface_t *psurf)
 	mvertex_t	*pvert, *plastvert, *ptvert;
 	mnode_t		*pn;
 
+next:
 	psideedges[0] = psideedges[1] = nil;
 
 	makeclippededge = false;
@@ -155,8 +156,7 @@ void R_RecursiveClipBPoly (bedge_t *pedges, mnode_t *pnode, msurface_t *psurf)
 // transform the BSP plane into model space
 // FIXME: cache these?
 	splitplane = pnode->plane;
-	tplane.dist = splitplane->dist -
-			DotProduct(r_entorigin, splitplane->normal);
+	tplane.dist = splitplane->dist - DotProduct(r_entorigin, splitplane->normal);
 	tplane.normal[0] = DotProduct (entity_rotation[0], splitplane->normal);
 	tplane.normal[1] = DotProduct (entity_rotation[1], splitplane->normal);
 	tplane.normal[2] = DotProduct (entity_rotation[2], splitplane->normal);
@@ -172,19 +172,11 @@ void R_RecursiveClipBPoly (bedge_t *pedges, mnode_t *pnode, msurface_t *psurf)
 		lastdist = DotProduct (plastvert->position, tplane.normal) -
 				   tplane.dist;
 
-		if (lastdist > 0)
-			lastside = 0;
-		else
-			lastside = 1;
-
+		lastside = lastdist <= 0;
 		pvert = pedges->v[1];
-
 		dist = DotProduct (pvert->position, tplane.normal) - tplane.dist;
-
-		if (dist > 0)
-			side = 0;
-		else
-			side = 1;
+		side = dist <= 0;
+		
 
 		if (side != lastside)
 		{
@@ -293,10 +285,12 @@ void R_RecursiveClipBPoly (bedge_t *pedges, mnode_t *pnode, msurface_t *psurf)
 						R_RenderBmodelFace (psideedges[i], psurf);
 					}
 				}
-				else
-				{
-					R_RecursiveClipBPoly (psideedges[i], pnode->children[i],
-									  psurf);
+				else if(i == 1){ // last, can skip the call
+					pedges = psideedges[i];
+					pnode = pnode->children[i];
+					goto next;
+				}else{
+					R_RecursiveClipBPoly (psideedges[i], pnode->children[i], psurf);
 				}
 			}
 		}
@@ -311,7 +305,7 @@ R_DrawSolidClippedSubmodelPolygons
 */
 void R_DrawSolidClippedSubmodelPolygons (model_t *pmodel)
 {
-	int			i, j, lindex;
+	int			i, j, lindex, o;
 	vec_t		dot;
 	msurface_t	*psurf;
 	int			numsurfaces;
@@ -356,20 +350,11 @@ void R_DrawSolidClippedSubmodelPolygons (model_t *pmodel)
 				{
 				   lindex = pmodel->surfedges[psurf->firstedge+j];
 
-					if (lindex > 0)
-					{
-						pedge = &pedges[lindex];
-						pbedge[j].v[0] = &r_pcurrentvertbase[pedge->v[0]];
-						pbedge[j].v[1] = &r_pcurrentvertbase[pedge->v[1]];
-					}
-					else
-					{
+					if (o = (lindex < 0))
 						lindex = -lindex;
-						pedge = &pedges[lindex];
-						pbedge[j].v[0] = &r_pcurrentvertbase[pedge->v[1]];
-						pbedge[j].v[1] = &r_pcurrentvertbase[pedge->v[0]];
-					}
-
+					pedge = &pedges[lindex];
+					pbedge[j].v[0] = &r_pcurrentvertbase[pedge->v[o]];
+					pbedge[j].v[1] = &r_pcurrentvertbase[pedge->v[!o]];
 					pbedge[j].pnext = &pbedge[j+1];
 				}
 
