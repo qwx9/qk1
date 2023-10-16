@@ -6,7 +6,6 @@
 
 #define NUM_MIPS	4
 
-cvar_t	d_subdiv16 = {"d_subdiv16", "1"};
 cvar_t	d_mipcap = {"d_mipcap", "0"};
 cvar_t	d_mipscale = {"d_mipscale", "1"};
 
@@ -29,8 +28,6 @@ D_Init
 */
 void D_Init (void)
 {
-
-	Cvar_RegisterVariable (&d_subdiv16);
 	Cvar_RegisterVariable (&d_mipcap);
 	Cvar_RegisterVariable (&d_mipscale);
 
