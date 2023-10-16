@@ -98,9 +98,9 @@ PR_SetStr(char *s)
 char *
 PR_Str(int i)
 {
-	if(i >= 0)
+	if(i >= 0 && i < pr_strings_size)
 		return pr_strings+i;
-	if(i < 0 && i >= -num_prstr)
+	if(i < 0 && i >= -num_prstr && prstr[-1-i] != nil)
 		return prstr[-1-i];
 	Host_Error("PR_Str: invalid offset %d", i);
 	return "";
