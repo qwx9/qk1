@@ -228,7 +228,7 @@ void Turbulent8 (espan_t *pspan)
 	izi += izistep; \
 	s += sstep; \
 	t += tstep; \
-}
+}while(0)
 
 void D_DrawSpans16_Fence (espan_t *pspan)
 {
@@ -246,6 +246,7 @@ void D_DrawSpans16_Fence (espan_t *pspan)
 
 	// we count on FP exceptions being turned off to avoid range problems
 	izistep = (int)(d_zistepu * 0x8000 * 0x10000);
+	sstep = tstep = 0;
 
 	do
 	{
@@ -319,6 +320,7 @@ void D_DrawSpans16_Fence (espan_t *pspan)
 			WRITEFENCE(-3);
 			WRITEFENCE(-2);
 			WRITEFENCE(-1);
+			USED(s, t);
 
 			s = snext;
 			t = tnext;
@@ -368,6 +370,7 @@ void D_DrawSpans16_Fence (espan_t *pspan)
 			case  3: WRITEFENCE(-3);
 			case  2: WRITEFENCE(-2);
 			case  1: WRITEFENCE(-1);
+			USED(izi, s, t);
 			}
 		}
 	}
