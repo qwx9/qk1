@@ -6,10 +6,6 @@
 #define	VID_LockBuffer()
 #define	VID_UnlockBuffer()
 
-#ifdef __id386__
-#define UNALIGNED_OK	// unset if unaligned accesses are not supported
-#endif
-
 enum {
 	// !!! if this is changed, it must be changed in d_ifacea.h too !!!
 	CACHE_SIZE = 32, // used to align key data structures
@@ -143,6 +139,7 @@ typedef struct
 
 struct Sfx{
 	char s[Npath];
+	int map;
 	mem_user_t cu;
 };
 

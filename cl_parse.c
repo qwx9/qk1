@@ -257,6 +257,7 @@ static void CL_ParseServerInfo (void)
 
 // precache sounds
 	memset(cl.sound_precache, 0, sizeof cl.sound_precache);
+	sfxbegin();
 	for (numsounds=1 ; ; numsounds++)
 	{
 		str = MSG_ReadString ();

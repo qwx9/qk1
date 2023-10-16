@@ -15,6 +15,7 @@ void	stopsfx(int, int);
 void	startsfx(int, int, Sfx *, vec3_t, float, float);
 void	localsfx(char *);
 void	staticsfx(Sfx *, vec3_t, float, float);
+void	sfxbegin(void);
 void	touchsfx(char *);
 Sfx*	precachesfx(char *);
 void	shutcd(void);

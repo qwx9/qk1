@@ -54,7 +54,7 @@ typedef struct
 	int 	speed;
 	int 	width;
 	int 	stereo;
-	int loop;
+	int		loop;
 	byte	data[1];		// variable sized
 } sfxcache_t;
 
@@ -72,9 +72,9 @@ static vec3_t		listener_origin;
 static vec3_t		listener_forward;
 static vec3_t		listener_right;
 static vec3_t		listener_up;
-#define	MAX_SFX		512
-static Sfx		*known_sfx;		// hunk allocated [MAX_SFX]
+static Sfx			*known_sfx;		// hunk allocated
 static int			num_sfx;
+static int			map;
 
 static cvar_t precache = {"precache", "1"};
 static cvar_t loadas8bit = {"loadas8bit", "0"};
@@ -712,10 +712,8 @@ findsfx(char *s)
 {
 	Sfx *sfx, *e;
 
-	if(s == nil)
-		fatal("findsfx: nil pointer\n");
 	if(strlen(s) >= Npath)
-		fatal("findsfx: path too long %s", s);
+		Host_Error("findsfx: path too long %s", s);
 	sfx = known_sfx;
 	e = known_sfx + num_sfx;
 	while(sfx < e){
@@ -723,10 +721,20 @@ findsfx(char *s)
 			return sfx;
 		sfx++;
 	}
-	if(num_sfx == MAX_SFX)
-		fatal("findsfx: sfx list overflow");
+	if(num_sfx == MAX_SOUNDS){
+		sfx = known_sfx;
+		while(sfx < e){
+			if(sfx->map && sfx->map < map)
+				break;
+			sfx++;
+		}
+		if(sfx == e)
+			Host_Error("findsfx: sfx list overflow: %s", s);
+		if(Cache_Check(&sfx->cu))
+			Cache_Free(&sfx->cu);
+	}else
+		num_sfx++;
 	strcpy(sfx->s, s);
-	num_sfx++;
 	return sfx;
 }
 
@@ -749,6 +757,7 @@ precachesfx(char *s)
 	if(afd < 0)
 		return nil;
 	sfx = findsfx(s);
+	sfx->map = map;
 	if(precache.value)
 		loadsfx(sfx);
 	return sfx;
@@ -825,6 +834,12 @@ sfxlist(void)
 }
 
 void
+sfxbegin(void)
+{
+	map++;
+}
+
+void
 shutsnd(void)
 {
 	if(afd < 0)
@@ -855,8 +870,9 @@ initsnd(void)
 
 	nchan = Nchan;
 	chans = calloc(nchan, sizeof(*chans));
-	known_sfx = Hunk_Alloc(MAX_SFX * sizeof *known_sfx);
+	known_sfx = Hunk_Alloc(MAX_SOUNDS * sizeof *known_sfx);
 	num_sfx = 0;
+	
 	ambsfx[Ambwater] = precachesfx("ambience/water1.wav");
 	ambsfx[Ambsky] = precachesfx("ambience/wind2.wav");
 	stopallsfx();
