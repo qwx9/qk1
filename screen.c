@@ -24,7 +24,6 @@ cvar_t		scr_showfps = {"showfps","0", true};
 
 qboolean	scr_initialized;		// ready to draw
 
-qpic_t		*scr_ram;
 qpic_t		*scr_net;
 qpic_t		*scr_turtle;
 
@@ -298,29 +297,10 @@ void SCR_Init (void)
 	Cmd_AddCommand ("sizeup",SCR_SizeUp_f);
 	Cmd_AddCommand ("sizedown",SCR_SizeDown_f);
 
-	scr_ram = Draw_PicFromWad ("ram");
 	scr_net = Draw_PicFromWad ("net");
 	scr_turtle = Draw_PicFromWad ("turtle");
 
 	scr_initialized = true;
-}
-
-
-
-/*
-==============
-SCR_DrawRam
-==============
-*/
-void SCR_DrawRam (void)
-{
-	if (!scr_showram.value)
-		return;
-
-	if (!r_cache_thrash)
-		return;
-
-	Draw_Pic (scr_vrect.x+32, scr_vrect.y, scr_ram);
 }
 
 /*
@@ -745,7 +725,6 @@ void SCR_UpdateScreen (void)
 	}
 	else
 	{
-		SCR_DrawRam ();
 		SCR_DrawNet ();
 		SCR_DrawTurtle ();
 		SCR_DrawPause ();
