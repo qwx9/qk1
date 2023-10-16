@@ -234,7 +234,7 @@ void D_DrawSurfaces (void)
 				}
 
 				D_CalcGradients (pface);
-				Turbulent8 (s->spans);
+				Turbulent8 (s->spans, r_wateralpha.value);
 				D_DrawZSpans (s->spans);
 
 				if (s->insubmodel)
@@ -286,8 +286,10 @@ void D_DrawSurfaces (void)
 
 				if(s->flags & SURF_FENCE)
 					D_DrawSpans16_Fence(s->spans);
+				else if(s->flags & SURF_TRANS)
+					(*d_drawspans) (s->spans, r_wateralpha.value);
 				else
-					(*d_drawspans) (s->spans);
+					(*d_drawspans) (s->spans, 1.0);
 
 				D_DrawZSpans (s->spans);
 

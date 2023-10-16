@@ -780,7 +780,7 @@ void Mod_LoadFaces (lump_t *l, int ver)
 		if(strncmp(out->texinfo->texture->name, "sky", 3) == 0)
 			out->flags |= SURF_DRAWSKY | SURF_DRAWTILED;
 		else if(out->texinfo->texture->name[0] == '*'){	// turbulent
-			out->flags |= SURF_DRAWTURB | SURF_DRAWTILED;
+			out->flags |= SURF_DRAWTURB | SURF_DRAWTILED | SURF_TRANS;
 			for (i=0 ; i<2 ; i++){
 				out->extents[i] = 16384;
 				out->texturemins[i] = -8192;

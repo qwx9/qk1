@@ -11,7 +11,7 @@ int resized;
 Point center;		/* of window */
 Rectangle grabr;
 
-static s32int fbpal[256];
+s32int fbpal[256];
 static uchar *fbs;
 static Image *fbi;
 static Rectangle fbr;

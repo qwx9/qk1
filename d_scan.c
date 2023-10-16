@@ -8,9 +8,7 @@ unsigned char	*r_turb_pbase, *r_turb_pdest;
 fixed16_t		r_turb_s, r_turb_t, r_turb_sstep, r_turb_tstep;
 int				*r_turb_turb;
 int				r_turb_spancount;
-
-void D_DrawTurbulent8Span (void);
-
+static uzint	*r_turb_z;
 
 /*
 =============
@@ -28,8 +26,8 @@ void D_WarpScreen (void)
 	int		*turb;
 	int		*col;
 	byte	**row;
-	byte	*rowptr[MAXHEIGHT+(AMP2*2)];
-	int		column[MAXWIDTH+(AMP2*2)];
+	static byte	*rowptr[MAXHEIGHT+(AMP2*2)];
+	static int		column[MAXWIDTH+(AMP2*2)];
 	float	wratio, hratio;
 
 	w = r_refdef.vrect.width;
@@ -68,13 +66,54 @@ void D_WarpScreen (void)
 	}
 }
 
+static byte *alphamap;
+static byte mapalpha;
+
+static void
+buildalpha(int alpha)
+{
+	extern s32int fbpal[256];
+	int a, b;
+	byte *ca, *cb, *p;
+	int r0, g0, b0;
+	int r1, g1, b1;
+	int rr, gg, bb;
+	int i, dst, x, best;
+
+	if(alphamap == nil)
+		alphamap = malloc(256*256);
+	for(a = 0; a < 256; a++){
+		ca = (byte*)&fbpal[a];
+		r0 = ca[0]; g0 = ca[1]; b0 = ca[2];
+		for(b = 0; b < 256; b++){
+				cb = (byte*)&fbpal[b];
+				r1 = cb[0]; g1 = cb[1]; b1 = cb[2];
+				rr = (alpha*r0 + (255 - alpha)*r1)/255;
+				gg = (alpha*g0 + (255 - alpha)*g1)/255;
+				bb = (alpha*b0 + (255 - alpha)*b1)/255;
+				dst = 9999999;
+				best = 255;
+				p = (byte*)fbpal;
+				for(i = 0; i < 768; i += 4){
+					if((x = (rr-p[i])*(rr-p[i])+(gg-p[i+1])*(gg-p[i+1])+(bb-p[i+2])*(bb-p[i+2])) < dst){
+					dst = x;
+					best = i;
+				}
+				alphamap[a<<8 | b] = best/4;
+			}
+		}
+	}
+}
+
+#define blendalpha(a, b, alpha) \
+	alphamap[(u16int)((a)<<8 | (b))]
 
 /*
 =============
 D_DrawTurbulent8Span
 =============
 */
-void D_DrawTurbulent8Span (void)
+void D_DrawTurbulent8Span (int izi, byte alpha)
 {
 	int		sturb, tturb;
 
@@ -82,9 +121,17 @@ void D_DrawTurbulent8Span (void)
 	{
 		sturb = ((r_turb_s + r_turb_turb[(r_turb_t>>16)&(CYCLE-1)])>>16)&63;
 		tturb = ((r_turb_t + r_turb_turb[(r_turb_s>>16)&(CYCLE-1)])>>16)&63;
-		*r_turb_pdest++ = *(r_turb_pbase + (tturb<<6) + sturb);
+		if (*r_turb_z <= (izi >> 16)){
+			if(alpha == 255 || alpha == 0)
+				*r_turb_pdest = *(r_turb_pbase + (tturb<<6) + sturb);
+			else
+				*r_turb_pdest = blendalpha(*(r_turb_pbase + (tturb<<6) + sturb), *r_turb_pdest, alpha);
+			*r_turb_z = (izi >> 16);
+		}
 		r_turb_s += r_turb_sstep;
 		r_turb_t += r_turb_tstep;
+		r_turb_pdest++;
+		r_turb_z++;
 	} while (--r_turb_spancount > 0);
 }
 
@@ -94,12 +141,13 @@ void D_DrawTurbulent8Span (void)
 Turbulent8
 =============
 */
-void Turbulent8 (espan_t *pspan)
+void Turbulent8 (espan_t *pspan, float alpha)
 {
 	int				count;
 	fixed16_t		snext, tnext;
 	float			sdivz, tdivz, zi, z, du, dv, spancountminus1;
 	float			sdivz16stepu, tdivz16stepu, zi16stepu;
+	byte			balpha;
 	
 	r_turb_turb = sintable + ((int)(cl.time*SPEED)&(CYCLE-1));
 
@@ -111,11 +159,19 @@ void Turbulent8 (espan_t *pspan)
 	sdivz16stepu = d_sdivzstepu * 16;
 	tdivz16stepu = d_tdivzstepu * 16;
 	zi16stepu = d_zistepu * 16;
+	alpha = clamp(alpha, 0.0, 1.0);
+	balpha = alpha * 255;
+
+	if(balpha != 255 && (alphamap == nil || balpha != mapalpha)){
+		mapalpha = balpha;
+		buildalpha(balpha);
+	}
 
 	do
 	{
 		r_turb_pdest = (unsigned char *)((byte *)d_viewbuffer +
 				(screenwidth * pspan->v) + pspan->u);
+		r_turb_z = d_pzbuffer + (d_zwidth * pspan->v) + pspan->u;
 
 		count = pspan->count;
 
@@ -211,7 +267,7 @@ void Turbulent8 (espan_t *pspan)
 			r_turb_s = r_turb_s & ((CYCLE<<16)-1);
 			r_turb_t = r_turb_t & ((CYCLE<<16)-1);
 
-			D_DrawTurbulent8Span ();
+			D_DrawTurbulent8Span ((int)(zi * 0x8000 * 0x10000), balpha);
 
 			r_turb_s = snext;
 			r_turb_t = tnext;
@@ -382,7 +438,7 @@ void D_DrawSpans16_Fence (espan_t *pspan)
 D_DrawSpans16
 =============
 */
-void D_DrawSpans16 (espan_t *pspan) //qbism- up it from 8 to 16
+void D_DrawSpans16 (espan_t *pspan, float alpha) //qbism- up it from 8 to 16
 {
 	int				count, spancount;
 	unsigned char	*pbase, *pdest;
@@ -495,9 +551,10 @@ void D_DrawSpans16 (espan_t *pspan) //qbism- up it from 8 to 16
 				}
 			}
 
-			void dospan(uchar *, uchar *, int, int, int, int, int, int);
-			if(spancount > 0)
+			if(spancount > 0){
+				void dospan(uchar *, uchar *, int, int, int, int, int, int);
 				dospan(pdest, pbase, s, t, sstep, tstep, spancount, cachewidth);
+			}
 			pdest += spancount;
 			s = snext;
 			t = tnext;

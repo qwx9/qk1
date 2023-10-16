@@ -117,6 +117,7 @@ cvar_t	r_numedges = {"r_numedges", "0"};
 cvar_t	r_aliastransbase = {"r_aliastransbase", "200"};
 cvar_t	r_aliastransadj = {"r_aliastransadj", "100"};
 cvar_t	r_part_scale = {"r_part_scale", "0.75", true};
+cvar_t	r_wateralpha = {"r_wateralpha", "1", true};
 
 extern cvar_t	scr_fov;
 
@@ -199,6 +200,7 @@ void R_Init (void)
 	Cvar_RegisterVariable (&r_aliastransbase);
 	Cvar_RegisterVariable (&r_aliastransadj);
 	Cvar_RegisterVariable (&r_part_scale);
+	Cvar_RegisterVariable (&r_wateralpha);
 
 	view_clipplanes[0].leftedge = true;
 	view_clipplanes[1].rightedge = true;
