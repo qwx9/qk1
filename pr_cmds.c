@@ -1436,15 +1436,29 @@ int SV_ModelIndex (char *name);
 void PF_makestatic (void)
 {
 	edict_t	*ent;
-	int		i;
+	int		i, model, frame, bits;
 	
 	ent = G_EDICT(OFS_PARM0);
+	model = SV_ModelIndex(PR_Str(ent->v.model));
+	frame = ent->v.frame;
+	bits = 0;
+	if(model >= sv.protocol->limit_model)
+		return; // yikes.
+	else if(model >= sv.protocol->large_model)
+		bits |= sv.protocol->fl_large_baseline_model;
+	if(frame >= sv.protocol->limit_frame)
+		frame = 0; // yikes.
+	else if(frame >= sv.protocol->large_frame)
+		bits |= sv.protocol->fl_large_baseline_frame;
 
-	MSG_WriteByte (&sv.signon,svc_spawnstatic);
+	MSG_WriteByte (&sv.signon, bits ? svc_spawnstatic2 : svc_spawnstatic);
+	if(bits)
+		MSG_WriteByte(&sv.signon, bits);
 
-	MSG_WriteByte (&sv.signon, SV_ModelIndex(PR_Str(ent->v.model)));
-
-	MSG_WriteByte (&sv.signon, ent->v.frame);
+	((bits & sv.protocol->fl_large_baseline_model) ? MSG_WriteShort : MSG_WriteByte)
+		(&sv.signon, model);
+	((bits & sv.protocol->fl_large_baseline_frame) ? MSG_WriteShort : MSG_WriteByte)
+		(&sv.signon, frame);
 	MSG_WriteByte (&sv.signon, ent->v.colormap);
 	MSG_WriteByte (&sv.signon, ent->v.skin);
 	for (i=0 ; i<3 ; i++)
