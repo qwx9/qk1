@@ -5,7 +5,7 @@
 #include "quakedef.h"
 #include "fns.h"
 
-int mainstacksize = 4*1024*1024;
+int mainstacksize = 1*1024*1024;
 char *netmtpt = "/net";
 char *game;
 int debug;

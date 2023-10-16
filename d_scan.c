@@ -66,8 +66,7 @@ void D_WarpScreen (void)
 	}
 }
 
-static byte *alphamap;
-static byte mapalpha;
+static byte *alphamap[256];
 
 static void
 buildalpha(int alpha)
@@ -75,38 +74,38 @@ buildalpha(int alpha)
 	extern s32int fbpal[256];
 	int a, b;
 	byte *ca, *cb, *p;
-	int r0, g0, b0;
-	int r1, g1, b1;
 	int rr, gg, bb;
 	int i, dst, x, best;
 
-	if(alphamap == nil)
-		alphamap = malloc(256*256);
-	for(a = 0; a < 256; a++){
-		ca = (byte*)&fbpal[a];
-		r0 = ca[0]; g0 = ca[1]; b0 = ca[2];
-		for(b = 0; b < 256; b++){
-				cb = (byte*)&fbpal[b];
-				r1 = cb[0]; g1 = cb[1]; b1 = cb[2];
-				rr = (alpha*r0 + (255 - alpha)*r1)/255;
-				gg = (alpha*g0 + (255 - alpha)*g1)/255;
-				bb = (alpha*b0 + (255 - alpha)*b1)/255;
-				dst = 9999999;
-				best = 255;
-				p = (byte*)fbpal;
-				for(i = 0; i < 768; i += 4){
-					if((x = (rr-p[i])*(rr-p[i])+(gg-p[i+1])*(gg-p[i+1])+(bb-p[i+2])*(bb-p[i+2])) < dst){
+	if(alphamap[alpha] != nil)
+		return;
+	alphamap[alpha] = malloc(256*256);
+	p = (byte*)fbpal;
+	ca = p;
+	for(a = 0; a < 256; a++, ca += 4){
+		cb = p;
+		for(b = 0; b < 256; b++, cb++){
+			rr = (alpha*ca[0] + (255 - alpha)*(*cb++))>>8;
+			gg = (alpha*ca[1] + (255 - alpha)*(*cb++))>>8;
+			bb = (alpha*ca[2] + (255 - alpha)*(*cb++))>>8;
+			dst = 9999999;
+			best = 255;
+			for(i = 0; i < 768; i += 4){
+				x = (rr-p[i+0])*(rr-p[i+0]) +
+					(gg-p[i+1])*(gg-p[i+1]) +
+					(bb-p[i+2])*(bb-p[i+2]);
+				if(x < dst){
 					dst = x;
 					best = i;
 				}
-				alphamap[a<<8 | b] = best/4;
 			}
+			alphamap[alpha][a<<8 | b] = best/4;
 		}
 	}
 }
 
 #define blendalpha(a, b, alpha) \
-	alphamap[(u16int)((a)<<8 | (b))]
+	alphamap[alpha][(u16int)((a)<<8 | (b))]
 
 /*
 =============
@@ -161,11 +160,7 @@ void Turbulent8 (espan_t *pspan, float alpha)
 	zi16stepu = d_zistepu * 16;
 	alpha = clamp(alpha, 0.0, 1.0);
 	balpha = alpha * 255;
-
-	if(balpha != 255 && (alphamap == nil || balpha != mapalpha)){
-		mapalpha = balpha;
-		buildalpha(balpha);
-	}
+	buildalpha(balpha);
 
 	do
 	{
@@ -446,6 +441,7 @@ void D_DrawSpans16 (espan_t *pspan, float alpha) //qbism- up it from 8 to 16
 	float			sdivz, tdivz, zi, z, du, dv, spancountminus1;
 	float			sdivzstepu, tdivzstepu, zistepu;
 
+	USED(alpha);
 	sstep = 0;	// keep compiler happy
 	tstep = 0;	// ditto
 
