@@ -34,7 +34,6 @@ MSG_ReadProtocolInfoRMQ(protocol_t *proto)
 
 protocol_t protos[PROTO_NUM] = {
 	[PROTO_NQ] = {
-		.id = PROTO_NQ,
 		.name = "Quake",
 		.version = 15,
 		.limit_entity = 8192,
@@ -50,7 +49,6 @@ protocol_t protos[PROTO_NUM] = {
 		.MSG_ReadProtocolInfo = MSG_ReadProtocolInfoNQ,
 	},
 	[PROTO_RMQ] = {
-		.id = PROTO_RMQ,
 		.name = "RMQ",
 		.version = 999,
 		.fl_large_entity = 1<<3, .large_entity = 8192, .limit_entity = 65536,

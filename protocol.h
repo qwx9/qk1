@@ -15,7 +15,6 @@ enum {
 typedef struct protocol_t protocol_t;
 
 struct protocol_t {
-	int id;
 	int version;
 	int flags;
 	char *name;

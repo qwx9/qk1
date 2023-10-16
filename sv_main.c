@@ -19,16 +19,21 @@ static char	localmodels[MAX_MODELS][8];			// inline model names for precache
 static void
 SV_Protocol_f(void)
 {
-	int n;
+	int i, n;
 
-	n = Cmd_Argc();
-	if(n == 1)
-		Con_Printf("\"sv_protocol\" is \"%d\" (%s)\n", sv_protocol->id, sv_protocol->name);
-	else if(n == 2){
-		if((n = atoi(Cmd_Argv(1))) < PROTO_NQ || n >= PROTO_NUM)
-			Con_Printf("sv_protocol must be of value from %d to %d\n", PROTO_NQ, PROTO_NUM-1);
-		else{
-			sv_protocol = &protos[n];
+	i = Cmd_Argc();
+	if(i == 1)
+		Con_Printf("\"sv_protocol\" is \"%d\" (%s)\n", sv_protocol->version, sv_protocol->name);
+	else if(i == 2){
+		n = atoi(Cmd_Argv(1));
+		for(i = 0; i < PROTO_NUM && n != protos[i].version; i++);
+		if(i >= PROTO_NUM){
+			Con_Printf("sv_protocol must be of values:");
+			for(i = 0; i < PROTO_NUM; i++)
+				Con_Printf(" %d", protos[i].version);
+			Con_Printf("\n");
+		}else{
+			sv_protocol = &protos[i];
 			if(sv.active)
 				Con_Printf("changes will take effect on the next game\n");
 		}
