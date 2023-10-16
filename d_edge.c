@@ -185,6 +185,9 @@ void D_DrawSurfaces (void)
 			if (!s->spans)
 				continue;
 
+			if (s->flags & SURF_TRANS)
+				continue;
+
 			r_drawnpolycount++;
 
 			d_zistepu = s->d_zistepu;

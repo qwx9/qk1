@@ -382,6 +382,9 @@ void R_RenderFace (msurface_t *fa, int clipflags)
 		return;
 	}
 
+	if(fa->flags & SURF_TRANS)
+		return;
+
 	c_faceclip++;
 
 // set up clip planes

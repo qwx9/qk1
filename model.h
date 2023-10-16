@@ -55,13 +55,16 @@ typedef struct texture_s
 	unsigned	offsets[MIPLEVELS];		// four mip maps stored
 } texture_t;
 
-
-#define	SURF_PLANEBACK		2
-#define	SURF_DRAWSKY		4
-#define SURF_DRAWSPRITE		8
-#define SURF_DRAWTURB		0x10
-#define SURF_DRAWTILED		0x20
-#define SURF_DRAWBACKGROUND	0x40
+enum {
+	SURF_PLANEBACK = 1<<1,
+	SURF_DRAWSKY = 1<<2,
+	SURF_DRAWSPRITE = 1<<3,
+	SURF_DRAWTURB = 1<<4,
+	SURF_DRAWTILED = 1<<5,
+	SURF_DRAWBACKGROUND = 1<<6,
+	SURF_TRANS = 1<<8,
+	SURF_FENCE = 1<<9,
+};
 
 // !!! if this is changed, it must be changed in asm_draw.h too !!!
 typedef struct

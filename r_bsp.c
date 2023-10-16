@@ -327,6 +327,8 @@ void R_DrawSolidClippedSubmodelPolygons (model_t *pmodel)
 
 	for (i=0 ; i<numsurfaces ; i++, psurf++)
 	{
+		if(psurf->flags & SURF_TRANS)
+			continue;
 	// find which side of the node we are on
 		pplane = psurf->plane;
 
@@ -404,6 +406,9 @@ void R_DrawSubmodelPolygons (model_t *pmodel, int clipflags)
 
 	for (i=0 ; i<numsurfaces ; i++, psurf++)
 	{
+		if(psurf->flags & SURF_TRANS)
+			continue;
+
 	// find which side of the node we are on
 		pplane = psurf->plane;
 

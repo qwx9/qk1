@@ -776,16 +776,17 @@ void Mod_LoadFaces (lump_t *l, int ver)
 		out->samples = (i = le32(in)) < 0 ? nil : loadmodel->lightdata + i;
 
 	// set the drawing flags flag
-		
+
 		if(strncmp(out->texinfo->texture->name, "sky", 3) == 0)
 			out->flags |= SURF_DRAWSKY | SURF_DRAWTILED;
-		else if(strncmp(out->texinfo->texture->name, "*", 1) == 0){	// turbulent
+		else if(out->texinfo->texture->name[0] == '*'){	// turbulent
 			out->flags |= SURF_DRAWTURB | SURF_DRAWTILED;
 			for (i=0 ; i<2 ; i++){
 				out->extents[i] = 16384;
 				out->texturemins[i] = -8192;
 			}
-		}
+		}else if(out->texinfo->texture->name[0] == '{')
+			out->flags |= SURF_TRANS | SURF_FENCE;
 	}
 }
 
