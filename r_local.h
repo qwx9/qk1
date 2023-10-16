@@ -51,6 +51,8 @@ extern cvar_t	r_reportedgeout;
 extern cvar_t	r_numedges;
 extern cvar_t	r_part_scale;
 extern cvar_t	r_wateralpha;
+extern cvar_t	r_lavaalpha;
+extern cvar_t	r_slimealpha;
 
 #define XCENTERING	(1.0 / 2.0)
 #define YCENTERING	(1.0 / 2.0)

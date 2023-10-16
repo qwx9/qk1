@@ -144,6 +144,17 @@ void D_CalcGradients (msurface_t *pface)
 	bbextentt = ((pface->extents[1] << 16) >> miplevel) - 1;
 }
 
+static float
+alphafor(surf_t *s)
+{
+	if((s->flags & (SURF_LAVA|SURF_SLIME|SURF_TELE)) == 0)
+		return r_wateralpha.value;
+	if(s->flags & SURF_LAVA)
+		return r_lavaalpha.value;
+	if(s->flags & SURF_SLIME)
+		return r_slimealpha.value;
+	return 1.0;
+}
 
 /*
 ==============
@@ -234,7 +245,7 @@ void D_DrawSurfaces (void)
 				}
 
 				D_CalcGradients (pface);
-				Turbulent8 (s->spans, r_wateralpha.value);
+				Turbulent8 (s->spans, alphafor(s));
 				D_DrawZSpans (s->spans);
 
 				if (s->insubmodel)
@@ -286,8 +297,6 @@ void D_DrawSurfaces (void)
 
 				if(s->flags & SURF_FENCE)
 					D_DrawSpans16_Fence(s->spans);
-				else if(s->flags & SURF_TRANS)
-					(*d_drawspans) (s->spans, r_wateralpha.value);
 				else
 					(*d_drawspans) (s->spans, 1.0);
 

@@ -64,6 +64,9 @@ enum {
 	SURF_DRAWBACKGROUND = 1<<6,
 	SURF_TRANS = 1<<8,
 	SURF_FENCE = 1<<9,
+	SURF_LAVA = 1<<10,
+	SURF_SLIME = 1<<11,
+	SURF_TELE = 1<<12,
 };
 
 // !!! if this is changed, it must be changed in asm_draw.h too !!!

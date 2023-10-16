@@ -785,6 +785,12 @@ void Mod_LoadFaces (lump_t *l, int ver)
 				out->extents[i] = 16384;
 				out->texturemins[i] = -8192;
 			}
+			if(strstr(out->texinfo->texture->name, "lava") != nil)
+				out->flags |= SURF_LAVA;
+			if(strstr(out->texinfo->texture->name, "slime") != nil)
+				out->flags |= SURF_SLIME;
+			if(strstr(out->texinfo->texture->name, "tele") != nil)
+				out->flags |= SURF_TELE;
 		}else if(out->texinfo->texture->name[0] == '{')
 			out->flags |= SURF_TRANS | SURF_FENCE;
 	}
