@@ -1516,11 +1516,11 @@ void PF_changelevel (void)
 
 void PF_Fixme (void)
 {
-	PR_RunError ("unimplemented bulitin");
+	PR_RunError ("unimplemented builtin");
 }
 
 static const char *exts[] = {
-	"NEIN_QC", // yes, this is just a dummy
+	"DP_EF_NODRAW",
 };
 
 static void PF_checkextension (void)
