@@ -855,9 +855,9 @@ void R_RenderView (void)
 
 	if (!cl_entities[0].model || !cl.worldmodel)
 		fatal ("R_RenderView: NULL worldmodel");
-	
+	r_drawflags = 0;
 	R_EdgeDrawing ();
-	
+
 	if (r_dspeeds.value)
 	{
 		se_time2 = dtime ();
@@ -881,6 +881,10 @@ void R_RenderView (void)
 	}
 
 	R_DrawParticles ();
+
+	r_drawflags = SURF_TRANS;
+	R_EdgeDrawing ();
+	r_drawflags = 0;
 
 	if (r_dspeeds.value)
 		dp_time2 = dtime ();

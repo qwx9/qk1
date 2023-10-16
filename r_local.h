@@ -96,6 +96,7 @@ extern	int		r_visframecount;
 //=============================================================================
 
 extern int	vstartscan;
+extern int r_drawflags;
 
 
 void R_ClearPolyList (void);

@@ -18,7 +18,7 @@ zpointdesc_t	r_zpointdesc;
 
 polydesc_t		r_polydesc;
 
-
+int r_drawflags;
 
 clipplane_t	*entity_clipplanes;
 clipplane_t	view_clipplanes[4];
@@ -382,7 +382,7 @@ void R_RenderFace (msurface_t *fa, int clipflags)
 		return;
 	}
 
-	if(fa->flags & SURF_TRANS)
+	if((fa->flags & SURF_TRANS) ^ r_drawflags)
 		return;
 
 	c_faceclip++;

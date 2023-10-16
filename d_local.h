@@ -56,6 +56,7 @@ void D_DrawSpans16 (espan_t *pspans);
 void D_DrawZSpans (espan_t *pspans);
 void Turbulent8 (espan_t *pspan);
 void D_SpriteDrawSpans (sspan_t *pspan);
+void D_DrawSpans16_Fence (espan_t *pspan);
 
 void D_DrawSkyScans8 (espan_t *pspan);
 void D_DrawSkyScans16 (espan_t *pspan);

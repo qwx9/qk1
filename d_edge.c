@@ -185,7 +185,7 @@ void D_DrawSurfaces (void)
 			if (!s->spans)
 				continue;
 
-			if (s->flags & SURF_TRANS)
+			if((s->flags & SURF_TRANS) ^ r_drawflags)
 				continue;
 
 			r_drawnpolycount++;
@@ -270,8 +270,11 @@ void D_DrawSurfaces (void)
 				}
 
 				pface = s->data;
-				miplevel = D_MipLevelForScale (s->nearzi * scale_for_mip
-				* pface->texinfo->mipadjust);
+				if(s->flags & SURF_FENCE)
+					miplevel = 0;
+				else
+					miplevel = D_MipLevelForScale (s->nearzi * scale_for_mip
+					* pface->texinfo->mipadjust);
 
 			// FIXME: make this passed in to D_CacheSurface
 				pcurrentcache = D_CacheSurface (pface, miplevel);
@@ -281,7 +284,10 @@ void D_DrawSurfaces (void)
 
 				D_CalcGradients (pface);
 
-				(*d_drawspans) (s->spans);
+				if(s->flags & SURF_FENCE)
+					D_DrawSpans16_Fence(s->spans);
+				else
+					(*d_drawspans) (s->spans);
 
 				D_DrawZSpans (s->spans);
 

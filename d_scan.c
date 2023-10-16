@@ -221,6 +221,159 @@ void Turbulent8 (espan_t *pspan)
 	} while ((pspan = pspan->pnext) != nil);
 }
 
+#define WRITEFENCE(i) do{ \
+	fencepix = *(pbase + (s >> 16) + (t >> 16) * cachewidth); \
+	if (pz[i] <= (izi >> 16) && fencepix != 255) \
+		pdest[i] = fencepix; pz[i] = (izi >> 16); \
+	izi += izistep; \
+	s += sstep; \
+	t += tstep; \
+}
+
+void D_DrawSpans16_Fence (espan_t *pspan)
+{
+	byte fencepix;
+	byte *pbase = (byte *)cacheblock, *pdest;
+	int count, spancount, izi, izistep;
+	fixed16_t s, t, snext, tnext, sstep, tstep;
+	float sdivz, tdivz, zi, z, du, dv, spancountminus1;
+	float sdivzstepu, tdivzstepu, zistepu;
+	uzint *pz;
+
+	sdivzstepu = d_sdivzstepu * 16;
+	tdivzstepu = d_tdivzstepu * 16;
+	zistepu = d_zistepu * 16;
+
+	// we count on FP exceptions being turned off to avoid range problems
+	izistep = (int)(d_zistepu * 0x8000 * 0x10000);
+
+	do
+	{
+		pdest = (byte *)((byte *)d_viewbuffer + (screenwidth * pspan->v) + pspan->u);
+		pz = d_pzbuffer + (d_zwidth * pspan->v) + pspan->u;
+
+		count = pspan->count >> 4;
+		spancount = pspan->count % 16;
+
+		// calculate the initial s/z, t/z, 1/z, s, and t and clamp
+		du = (float)pspan->u;
+		dv = (float)pspan->v;
+
+		sdivz = d_sdivzorigin + dv*d_sdivzstepv + du*d_sdivzstepu;
+		tdivz = d_tdivzorigin + dv*d_tdivzstepv + du*d_tdivzstepu;
+		zi = d_ziorigin + dv*d_zistepv + du*d_zistepu;
+		z = (float)0x10000 / zi;		// prescale to 16.16 fixed-point
+		// we count on FP exceptions being turned off to avoid range problems
+		izi = (int)(zi * 0x8000 * 0x10000);
+
+		s = (int)(sdivz * z) + sadjust;
+		if (s > bbextents)
+			s = bbextents;
+		else if (s < 0)
+			s = 0;
+
+		t = (int)(tdivz * z) + tadjust;
+		if (t > bbextentt)
+			t = bbextentt;
+		else if (t < 0)
+			t = 0;
+
+		while (count--){
+			// calculate s/z, t/z, zi->fixed s and t at far end of span,
+			// calculate s and t steps across span by shifting
+			sdivz += sdivzstepu;
+			tdivz += tdivzstepu;
+			zi += zistepu;
+			z = (float)0x10000 / zi;   // prescale to 16.16 fixed-point
+
+			snext = (int) (sdivz * z) + sadjust;
+			if (snext > bbextents)
+				snext = bbextents;
+			else if (snext <= 16)
+				snext = 16;   // prevent round-off error on <0 steps causing overstepping & running off the edge of the texture
+
+			tnext = (int) (tdivz * z) + tadjust;
+			if (tnext > bbextentt)
+				tnext = bbextentt;
+			else if (tnext < 16)
+				tnext = 16;   // guard against round-off error on <0 steps
+
+			sstep = (snext - s) >> 4;
+			tstep = (tnext - t) >> 4;
+
+			pdest += 16;
+			pz += 16;
+			WRITEFENCE(-16);
+			WRITEFENCE(-15);
+			WRITEFENCE(-14);
+			WRITEFENCE(-13);
+			WRITEFENCE(-12);
+			WRITEFENCE(-11);
+			WRITEFENCE(-10);
+			WRITEFENCE(-9);
+			WRITEFENCE(-8);
+			WRITEFENCE(-7);
+			WRITEFENCE(-6);
+			WRITEFENCE(-5);
+			WRITEFENCE(-4);
+			WRITEFENCE(-3);
+			WRITEFENCE(-2);
+			WRITEFENCE(-1);
+
+			s = snext;
+			t = tnext;
+		}
+		if (spancount > 0)
+		{
+			// calculate s/z, t/z, zi->fixed s and t at last pixel in span (so can't step off polygon),
+			// clamp, calculate s and t steps across span by division, biasing steps low so we don't run off the texture
+			spancountminus1 = (float)(spancount - 1);
+			sdivz += d_sdivzstepu * spancountminus1;
+			tdivz += d_tdivzstepu * spancountminus1;
+			zi += d_zistepu * spancountminus1;
+			z = (float)0x10000 / zi;   // prescale to 16.16 fixed-point
+			snext = (int)(sdivz * z) + sadjust;
+			if (snext > bbextents)
+				snext = bbextents;
+			else if (snext < 16)
+				snext = 16;   // prevent round-off error on <0 steps from causing overstepping & running off the edge of the texture
+
+			tnext = (int)(tdivz * z) + tadjust;
+			if (tnext > bbextentt)
+				tnext = bbextentt;
+			else if (tnext < 16)
+				tnext = 16;   // guard against round-off error on <0 steps
+
+			if (spancount > 1){
+				sstep = (snext - s) / (spancount - 1);
+				tstep = (tnext - t) / (spancount - 1);
+			}
+
+			pdest += spancount;
+			pz += spancount;
+			switch (spancount){
+			case 16: WRITEFENCE(-16);
+			case 15: WRITEFENCE(-15);
+			case 14: WRITEFENCE(-14);
+			case 13: WRITEFENCE(-13);
+			case 12: WRITEFENCE(-12);
+			case 11: WRITEFENCE(-11);
+			case 10: WRITEFENCE(-10);
+			case  9: WRITEFENCE(-9);
+			case  8: WRITEFENCE(-8);
+			case  7: WRITEFENCE(-7);
+			case  6: WRITEFENCE(-6);
+			case  5: WRITEFENCE(-5);
+			case  4: WRITEFENCE(-4);
+			case  3: WRITEFENCE(-3);
+			case  2: WRITEFENCE(-2);
+			case  1: WRITEFENCE(-1);
+			}
+		}
+	}
+	while ((pspan = pspan->pnext) != nil);
+}
+
 /*
 =============
 D_DrawSpans16
