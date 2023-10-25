@@ -379,6 +379,8 @@ static void CL_ParseUpdate (int bits)
 	ent->msg_origins[0][2] = (bits & U_ORIGIN3) ? cl.protocol->MSG_ReadCoord() : ent->baseline.origin[2];
 	ent->msg_angles[0][2] = (bits & U_ANGLE3) ? cl.protocol->MSG_ReadAngle() : ent->baseline.angles[2];
 
+	ent->alpha = (bits & cl.protocol->fl_alpha) ? MSG_ReadByte() : ent->baseline.alpha;
+
 	if(bits & U_NOLERP)
 		ent->forcelink = true;
 
@@ -435,6 +437,7 @@ static void CL_ParseBaseline (int withbits, entity_t *ent)
 		ent->baseline.origin[i] = cl.protocol->MSG_ReadCoord ();
 		ent->baseline.angles[i] = cl.protocol->MSG_ReadAngle ();
 	}
+	ent->baseline.alpha = (bits & cl.protocol->fl_baseline_alpha) ? MSG_ReadByte() : DEFAULT_ALPHA;
 }
 
 
@@ -526,6 +529,7 @@ static void CL_ParseClientdata (unsigned int bits)
 
 	if(bits & cl.protocol->fl_large_weaponframe)
 		cl.stats[STAT_WEAPONFRAME] |= MSG_ReadByte() << 8;
+	cl.viewent.alpha = (bits & cl.protocol->fl_weapon_alpha) ? MSG_ReadByte() : DEFAULT_ALPHA;
 
 	if(cl.viewent.model != cl.model_precache[cl.stats[STAT_WEAPON]]){
 		// FIXME(sigrid) - reset lerp

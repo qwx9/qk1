@@ -1450,6 +1450,12 @@ void PF_makestatic (void)
 		frame = 0; // yikes.
 	else if(frame >= sv.protocol->large_frame)
 		bits |= sv.protocol->fl_large_baseline_frame;
+	if(zeroalpha(ent->alpha)){
+		ED_Free(ent);
+		return;
+	}
+	if(!defalpha(ent->alpha))
+		bits |= sv.protocol->fl_baseline_alpha;
 
 	MSG_WriteByte (&sv.signon, bits ? svc_spawnstatic2 : svc_spawnstatic);
 	if(bits)
@@ -1466,6 +1472,8 @@ void PF_makestatic (void)
 		sv.protocol->MSG_WriteCoord(&sv.signon, ent->v.origin[i]);
 		sv.protocol->MSG_WriteAngle(&sv.signon, ent->v.angles[i]);
 	}
+	if(bits & sv.protocol->fl_baseline_alpha)
+		MSG_WriteByte(&sv.signon, ent->alpha);
 
 // throw the entity away now
 	ED_Free (ent);

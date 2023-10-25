@@ -441,7 +441,8 @@ SV_WriteEntitiesToClient
 void SV_WriteEntitiesToClient (edict_t	*clent, sizebuf_t *msg)
 {
 	u32int	bits;
-	int		e, i, model;
+	int		e, i, model, alpha;
+	eval_t	*v;
 	byte	*pvs;
 	vec3_t	org;
 	float	miss;
@@ -457,22 +458,27 @@ void SV_WriteEntitiesToClient (edict_t	*clent, sizebuf_t *msg)
 	{
 // ignore if not touching a PV leaf
 		model = ent->v.modelindex;
+
+		v = GetEdictFieldValue(ent, "alpha");
+		alpha = v ? f2alpha(v->_float) : DEFAULT_ALPHA;
+
 		if (ent != clent)	// clent is ALLWAYS sent
 		{
-			if(ent->v.effects == EF_NODRAW)
-				continue;
 // ignore ents without visible models
 			if(!model || !*PR_Str(ent->v.model))
 				continue;
 			if(model >= sv.protocol->limit_model)
 				continue;
-
-			for (i=0 ; i < ent->num_leafs ; i++)
-				if (pvs[ent->leafnums[i] >> 3] & (1 << (ent->leafnums[i]&7) ))
+			for(i=0 ; i < ent->num_leafs ; i++)
+				if(pvs[ent->leafnums[i] >> 3] & (1 << (ent->leafnums[i]&7) ))
 					break;
-
-			if (i == ent->num_leafs && ent->num_leafs < MAX_ENT_LEAFS)
+			if(i == ent->num_leafs && ent->num_leafs < MAX_ENT_LEAFS)
 				continue;		// not visible
+
+			if((int)ent->v.effects == EF_NODRAW)
+				continue;
+			if((int)ent->v.effects == 0 && zeroalpha(alpha))
+				continue;
 		}
 
 		if (msg->cursize + 18 > msg->maxsize)
@@ -508,6 +514,8 @@ void SV_WriteEntitiesToClient (edict_t	*clent, sizebuf_t *msg)
 			bits |= U_EFFECTS;
 		if (model != ent->baseline.modelindex)
 			bits |= U_MODEL;
+		if (alpha != ent->baseline.alpha)
+			bits |= sv.protocol->fl_alpha;
 		if (e >= 256)
 			bits |= U_LONGENTITY;
 		if(bits & U_FRAME){
@@ -566,6 +574,8 @@ void SV_WriteEntitiesToClient (edict_t	*clent, sizebuf_t *msg)
 			sv.protocol->MSG_WriteCoord(msg, ent->v.origin[2]);
 		if (bits & U_ANGLE3)
 			sv.protocol->MSG_WriteAngle(msg, ent->v.angles[2]);
+		if (bits & sv.protocol->fl_alpha)
+			MSG_WriteByte(msg, alpha);
 		if (bits & sv.protocol->fl_large_frame)
 			MSG_WriteByte(msg, (int)ent->v.frame>>8);
 		if (bits & sv.protocol->fl_large_model)
@@ -666,6 +676,8 @@ void SV_WriteClientdataToMessage (edict_t *ent, sizebuf_t *msg)
 			bits ^= SU_WEAPON; // yikes.
 		else if(weaponmodel >= sv.protocol->large_model)
 			bits |= sv.protocol->fl_large_weaponmodel;
+		if(!defalpha(ent->alpha))
+			bits |= sv.protocol->fl_weapon_alpha;
 	}
 	if (ent->v.weaponframe){
 		bits |= SU_WEAPONFRAME;
@@ -743,6 +755,8 @@ void SV_WriteClientdataToMessage (edict_t *ent, sizebuf_t *msg)
 		MSG_WriteByte(msg, weaponmodel>>8);
 	if(bits & sv.protocol->fl_large_weaponframe)
 		MSG_WriteByte(msg, (int)ent->v.weaponframe>>8);
+	if(bits & sv.protocol->fl_weapon_alpha)
+		MSG_WriteByte(msg, ent->alpha);
 }
 
 /*
@@ -983,11 +997,13 @@ void SV_CreateBaseline (void)
 		{
 			svent->baseline.colormap = entnum;
 			svent->baseline.modelindex = SV_ModelIndex("progs/player.mdl");
+			svent->baseline.alpha = DEFAULT_ALPHA;
 		}
 		else
 		{
 			svent->baseline.colormap = 0;
 			svent->baseline.modelindex = SV_ModelIndex(PR_Str(svent->v.model));
+			svent->baseline.alpha = svent->alpha;
 		}
 
 		bits = 0;
@@ -999,6 +1015,8 @@ void SV_CreateBaseline (void)
 			svent->baseline.frame = 0; // yikes.
 		else if(svent->baseline.frame >= sv.protocol->large_frame)
 			bits |= sv.protocol->fl_large_baseline_frame;
+		if(!defalpha(svent->baseline.alpha))
+			bits |= sv.protocol->fl_baseline_alpha;
 
 	//
 	// add to the message
@@ -1019,6 +1037,8 @@ void SV_CreateBaseline (void)
 			sv.protocol->MSG_WriteCoord(&sv.signon, svent->baseline.origin[i]);
 			sv.protocol->MSG_WriteAngle(&sv.signon, svent->baseline.angles[i]);
 		}
+		if(bits & sv.protocol->fl_baseline_alpha)
+			MSG_WriteByte(&sv.signon, svent->baseline.alpha);
 	}
 }
 

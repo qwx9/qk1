@@ -15,7 +15,16 @@ globalvars_t	*pr_global_struct;
 float			*pr_globals;			// same as pr_global_struct
 int				pr_edict_size;	// in bytes
 
-int		type_size[8] = {1,sizeof(string_t)/4,1,3,1,1,sizeof(func_t)/4,sizeof(void *)/4};
+int type_size[8] = {
+	[ev_void] = 1,
+	[ev_string] = sizeof(string_t)/4,
+	[ev_float] = 1,
+	[ev_vector] = 3,
+	[ev_entity] = 1,
+	[ev_field] = 1,
+	[ev_function] = sizeof(func_t)/4,
+	[ev_pointer] = sizeof(void *)/4,
+};
 
 ddef_t *ED_FieldAtOfs (int ofs);
 qboolean	ED_ParseEpair (void *base, ddef_t *key, char *s);
@@ -180,7 +189,7 @@ void ED_Free (edict_t *ed)
 	VectorCopy (vec3_origin, ed->v.angles);
 	ed->v.nextthink = -1;
 	ed->v.solid = 0;
-	
+	ed->alpha = DEFAULT_ALPHA;
 	ed->freetime = sv.time;
 }
 
@@ -624,22 +633,22 @@ void ED_ParseGlobals (char *data)
 		if (com_token[0] == '}')
 			break;
 		if (!data)
-			fatal ("ED_ParseEntity: EOF without closing brace");
+			fatal ("ED_ParseGlobals: EOF without closing brace");
 
 		strcpy (keyname, com_token);
 
 	// parse value	
 		data = COM_Parse (data);
 		if (!data)
-			fatal ("ED_ParseEntity: EOF without closing brace");
+			fatal ("ED_ParseGlobals: EOF without closing brace");
 
 		if (com_token[0] == '}')
-			fatal ("ED_ParseEntity: closing brace without data");
+			fatal ("ED_ParseGlobals: closing brace without data");
 
 		key = ED_FindGlobal (keyname);
 		if (!key)
 		{
-			Con_Printf ("'%s' is not a global\n", keyname);
+			Con_Printf ("ED_ParseGlobals: '%s' is not a global\n", keyname);
 			continue;
 		}
 
@@ -789,21 +798,21 @@ char *ED_ParseEdict (char *data, edict_t *ent)
 		if (com_token[0] == '}')
 			break;
 		if (!data)
-			fatal ("ED_ParseEntity: EOF without closing brace");
+			fatal ("ED_ParseEdict: EOF without closing brace");
 		
-// anglehack is to allow QuakeEd to write single scalar angles
-// and allow them to be turned into vectors. (FIXME...)
-if (!strcmp(com_token, "angle"))
-{
-	strcpy (com_token, "angles");
-	anglehack = true;
-}
-else
-	anglehack = false;
+		// anglehack is to allow QuakeEd to write single scalar angles
+		// and allow them to be turned into vectors. (FIXME...)
+		if (!strcmp(com_token, "angle"))
+		{
+			strcpy (com_token, "angles");
+			anglehack = true;
+		}
+		else
+			anglehack = false;
 
-// FIXME: change light to _light to get rid of this hack
-if (!strcmp(com_token, "light"))
-	strcpy (com_token, "light_lev");	// hack for single light def
+		// FIXME: change light to _light to get rid of this hack
+		if (!strcmp(com_token, "light"))
+			strcpy (com_token, "light_lev");	// hack for single light def
 
 		strcpy (keyname, com_token);
 
@@ -818,31 +827,33 @@ if (!strcmp(com_token, "light"))
 	// parse value	
 		data = COM_Parse (data);
 		if (!data)
-			fatal ("ED_ParseEntity: EOF without closing brace");
+			fatal ("ED_ParseEdict: EOF without closing brace");
 
 		if (com_token[0] == '}')
-			fatal ("ED_ParseEntity: closing brace without data");
+			fatal ("ED_ParseEdict: closing brace without data");
 
 		init = true;	
 
-// keynames with a leading underscore are used for utility comments,
-// and are immediately discarded by quake
+	// keynames with a leading underscore are used for utility comments,
+	// and are immediately discarded by quake
 		if (keyname[0] == '_')
 			continue;
 		
 		key = ED_FindField (keyname);
 		if (!key)
 		{
-			Con_Printf ("'%s' is not a field\n", keyname);
+			if(strcmp(keyname, "alpha") == 0)
+				ent->alpha = f2alpha(atof(com_token));
+			else
+				Con_Printf ("ED_ParseEdict: '%s' is not a field\n", keyname);
 			continue;
 		}
 
-if (anglehack)
-{
-char	temp[32];
-strcpy (temp, com_token);
-sprint (com_token, "0 %s 0", temp);
-}
+		if (anglehack){
+			char	temp[32];
+			strcpy (temp, com_token);
+			sprint (com_token, "0 %s 0", temp);
+		}
 
 		if (!ED_ParseEpair ((void *)&ent->v, key, com_token))
 			Host_Error ("ED_ParseEdict: parse error");
@@ -942,6 +953,62 @@ void ED_LoadFromFile (char *data)
 	Con_DPrintf("%d entities inhibited\n", inhibit);
 }
 
+typedef struct extra_field_t extra_field_t;
+
+struct extra_field_t {
+	int type;
+	char *name;
+};
+
+static extra_field_t extra_fields[] = {
+	{ev_float, "alpha"},
+};
+
+static void
+PR_FieldDefs(ddef_t *in)
+{
+	extra_field_t *e;
+	ddef_t *d;
+	int i, n;
+
+	// allocate to fit *all* extra fields, if needed, and copy over
+	n = progs->numfielddefs;
+	for(i = 0; i < nelem(extra_fields); i++)
+		n += extra_fields[i].type == ev_vector ? 4 : 1;
+	d = malloc(n * sizeof(*in));
+	memmove(d, in, progs->numfielddefs * sizeof(*in));
+	free(pr_fielddefs);
+	pr_fielddefs = d;
+
+	// convert endianess of fields that loaded from disk
+	for(i = 0 ; i < progs->numfielddefs; i++, d++){
+		d->type = LittleShort(d->type);
+		if(d->type & DEF_SAVEGLOBAL)
+			fatal("PR_FieldDefs: d->type & DEF_SAVEGLOBAL");
+		d->ofs = LittleShort(d->ofs);
+		d->s_name = LittleLong(d->s_name);
+	}
+
+	// add missing extra fields
+	d = &pr_fielddefs[progs->numfielddefs];
+	for(i = 0, e = extra_fields; i < nelem(extra_fields); i++, e++){
+		if(ED_FindField(e->name) != nil)
+			continue;
+		d->type = e->type;
+		d->s_name = ED_NewString(e->name);
+		d->ofs = progs->numfielddefs++;
+		d++;
+		if(e->type == ev_vector){
+			for(n = 0; n < 3; n++){
+				d->type = ev_float;
+				d->s_name = ED_NewString(va("%s_%c", e->name, 'x'+n));
+				d->ofs = progs->numfielddefs++;
+				d++;
+			}
+		}
+		progs->entityfields += type_size[e->type];
+	}
+}
 
 /*
 ===============
@@ -992,14 +1059,10 @@ void PR_LoadProgs (void)
 	pr_strings = (char *)progs + progs->ofs_strings;
 	pr_strings_size = progs->numstrings;
 	pr_globaldefs = (ddef_t *)((byte *)progs + progs->ofs_globaldefs);
-	pr_fielddefs = (ddef_t *)((byte *)progs + progs->ofs_fielddefs);
 	pr_statements = (dstatement_t *)((byte *)progs + progs->ofs_statements);
-
 	pr_global_struct = (globalvars_t *)((byte *)progs + progs->ofs_globals);
 	pr_globals = (float *)pr_global_struct;
-	
-	pr_edict_size = progs->entityfields * 4 + sizeof(edict_t) - sizeof(entvars_t);
-	
+		
 // byte swap the lumps
 	for (i=0 ; i<progs->numstatements ; i++)
 	{
@@ -1026,17 +1089,11 @@ void PR_LoadProgs (void)
 		pr_globaldefs[i].s_name = LittleLong (pr_globaldefs[i].s_name);
 	}
 
-	for (i=0 ; i<progs->numfielddefs ; i++)
-	{
-		pr_fielddefs[i].type = LittleShort (pr_fielddefs[i].type);
-		if (pr_fielddefs[i].type & DEF_SAVEGLOBAL)
-			fatal ("PR_LoadProgs: pr_fielddefs[i].type & DEF_SAVEGLOBAL");
-		pr_fielddefs[i].ofs = LittleShort (pr_fielddefs[i].ofs);
-		pr_fielddefs[i].s_name = LittleLong (pr_fielddefs[i].s_name);
-	}
-
 	for (i=0 ; i<progs->numglobals ; i++)
 		((int *)pr_globals)[i] = LittleLong (((int *)pr_globals)[i]);
+
+	PR_FieldDefs((ddef_t *)((byte *)progs + progs->ofs_fielddefs));
+	pr_edict_size = progs->entityfields * 4 + sizeof(edict_t) - sizeof(entvars_t);
 }
 
 

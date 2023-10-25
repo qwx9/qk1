@@ -12,6 +12,16 @@ enum {
 	PF_RMQ_COORD_INT32 = 1<<7,
 };
 
+enum {
+	DEFAULT_ALPHA,
+	ZERO_ALPHA,
+};
+
+#define defalpha(a) ((a) == DEFAULT_ALPHA)
+#define zeroalpha(a) (!defalpha(a) && (a) <= ZERO_ALPHA)
+#define f2alpha(f) ((f) == 0.0 ? DEFAULT_ALPHA : clamp((f)*254+1, 1, 255))
+#define alpha2f(a) (zeroalpha(a) ? 0.0 : (float)(a)/255.0)
+
 typedef struct protocol_t protocol_t;
 
 struct protocol_t {
@@ -34,6 +44,10 @@ struct protocol_t {
 	u32int fl_large_weaponmodel;
 	u32int fl_large_baseline_model;
 	u32int fl_large_baseline_frame;
+
+	u32int fl_alpha;
+	u32int fl_baseline_alpha;
+	u32int fl_weapon_alpha;
 
 	// absolute limits for the protocol
 	int limit_entity;

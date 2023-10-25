@@ -127,6 +127,7 @@ typedef struct
 	int		colormap;
 	int		skin;
 	int		effects;
+	byte	alpha;
 } entity_state_t;
 
 #include "wad.h"

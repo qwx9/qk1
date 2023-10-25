@@ -16,6 +16,7 @@ typedef struct edict_s
 {
 	qboolean	free;
 	link_t		area;				// linked to a division node or leaf
+	byte		alpha;
 	
 	int			num_leafs;
 	int			leafnums[MAX_ENT_LEAFS];
