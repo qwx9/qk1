@@ -2,6 +2,15 @@
 
 #include "r_shared.h"
 
+enum {
+	DRAW_BLEND = 1<<0,
+};
+
+#define surfdrawflags(s) (((s)->flags & SURF_TRANS) ? DRAW_BLEND : 0)
+#define enthasalpha(e) ((e) && !defalpha((e)->alpha))
+#define entdrawflags(e) (((e) && (!defalpha((e)->alpha) || ((e)->model && (e)->model != cl.worldmodel && (e)->model->blend))) ? DRAW_BLEND : 0)
+
+
 #define ALIAS_BASE_SIZE_RATIO		(1.0 / 11.0)
 					// normalizing factor so player model works out to about
 					//  1 pixel per triangle

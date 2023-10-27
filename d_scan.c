@@ -66,47 +66,6 @@ void D_WarpScreen (void)
 	}
 }
 
-static byte *alphamap[256];
-
-static void
-buildalpha(int alpha)
-{
-	extern s32int fbpal[256];
-	int a, b;
-	byte *ca, *cb, *p;
-	int rr, gg, bb;
-	int i, dst, x, best;
-
-	if(alphamap[alpha] != nil)
-		return;
-	alphamap[alpha] = malloc(256*256);
-	p = (byte*)fbpal;
-	ca = p;
-	for(a = 0; a < 256; a++, ca += 4){
-		cb = p;
-		for(b = 0; b < 256; b++, cb++){
-			rr = (alpha*ca[0] + (255 - alpha)*(*cb++))>>8;
-			gg = (alpha*ca[1] + (255 - alpha)*(*cb++))>>8;
-			bb = (alpha*ca[2] + (255 - alpha)*(*cb++))>>8;
-			dst = 9999999;
-			best = 255;
-			for(i = 0; i < 768; i += 4){
-				x = (rr-p[i+0])*(rr-p[i+0]) +
-					(gg-p[i+1])*(gg-p[i+1]) +
-					(bb-p[i+2])*(bb-p[i+2]);
-				if(x < dst){
-					dst = x;
-					best = i;
-				}
-			}
-			alphamap[alpha][a<<8 | b] = best/4;
-		}
-	}
-}
-
-#define blendalpha(a, b, alpha) \
-	alphamap[alpha][(u16int)((a)<<8 | (b))]
-
 /*
 =============
 D_DrawTurbulent8Span
@@ -120,13 +79,8 @@ void D_DrawTurbulent8Span (int izi, byte alpha)
 	{
 		sturb = ((r_turb_s + r_turb_turb[(r_turb_t>>16)&(CYCLE-1)])>>16)&63;
 		tturb = ((r_turb_t + r_turb_turb[(r_turb_s>>16)&(CYCLE-1)])>>16)&63;
-		if (*r_turb_z <= (izi >> 16)){
-			if(alpha == 255 || alpha == 0)
-				*r_turb_pdest = *(r_turb_pbase + (tturb<<6) + sturb);
-			else
-				*r_turb_pdest = blendalpha(*(r_turb_pbase + (tturb<<6) + sturb), *r_turb_pdest, alpha);
-			*r_turb_z = (izi >> 16);
-		}
+		if (*r_turb_z <= (izi >> 16))
+			*r_turb_pdest = blendalpha(*(r_turb_pbase + (tturb<<6) + sturb), *r_turb_pdest, alpha);
 		r_turb_s += r_turb_sstep;
 		r_turb_t += r_turb_tstep;
 		r_turb_pdest++;
@@ -140,13 +94,12 @@ void D_DrawTurbulent8Span (int izi, byte alpha)
 Turbulent8
 =============
 */
-void Turbulent8 (espan_t *pspan, float alpha)
+void Turbulent8 (espan_t *pspan, byte alpha)
 {
 	int				count;
 	fixed16_t		snext, tnext;
 	float			sdivz, tdivz, zi, z, du, dv, spancountminus1;
 	float			sdivz16stepu, tdivz16stepu, zi16stepu;
-	byte			balpha;
 	
 	r_turb_turb = sintable + ((int)(cl.time*SPEED)&(CYCLE-1));
 
@@ -158,9 +111,6 @@ void Turbulent8 (espan_t *pspan, float alpha)
 	sdivz16stepu = d_sdivzstepu * 16;
 	tdivz16stepu = d_tdivzstepu * 16;
 	zi16stepu = d_zistepu * 16;
-	alpha = clamp(alpha, 0.0, 1.0);
-	balpha = alpha * 255;
-	buildalpha(balpha);
 
 	do
 	{
@@ -262,7 +212,7 @@ void Turbulent8 (espan_t *pspan, float alpha)
 			r_turb_s = r_turb_s & ((CYCLE<<16)-1);
 			r_turb_t = r_turb_t & ((CYCLE<<16)-1);
 
-			D_DrawTurbulent8Span ((int)(zi * 0x8000 * 0x10000), balpha);
+			D_DrawTurbulent8Span ((int)(zi * 0x8000 * 0x10000), alpha);
 
 			r_turb_s = snext;
 			r_turb_t = tnext;
@@ -274,14 +224,16 @@ void Turbulent8 (espan_t *pspan, float alpha)
 
 #define WRITEFENCE(i) do{ \
 	fencepix = *(pbase + (s >> 16) + (t >> 16) * cachewidth); \
-	if (pz[i] <= (izi >> 16) && fencepix != 255) \
-		pdest[i] = fencepix; pz[i] = (izi >> 16); \
+	if (pz[i] <= (izi >> 16) && fencepix != 255){ \
+		pdest[i] = blendalpha(fencepix, pdest[i], alpha); \
+		pz[i] = (izi >> 16); \
+	} \
 	izi += izistep; \
 	s += sstep; \
 	t += tstep; \
 }while(0)
 
-void D_DrawSpans16_Fence (espan_t *pspan)
+void D_DrawSpans16_Fence (espan_t *pspan, byte alpha)
 {
 	byte fencepix;
 	byte *pbase = (byte *)cacheblock, *pdest;
@@ -433,15 +385,15 @@ void D_DrawSpans16_Fence (espan_t *pspan)
 D_DrawSpans16
 =============
 */
-void D_DrawSpans16 (espan_t *pspan, float alpha) //qbism- up it from 8 to 16
+void D_DrawSpans16 (espan_t *pspan, byte alpha) //qbism- up it from 8 to 16
 {
 	int				count, spancount;
 	unsigned char	*pbase, *pdest;
+	uzint			*pz;
 	fixed16_t		s, t, snext, tnext, sstep, tstep;
 	float			sdivz, tdivz, zi, z, du, dv, spancountminus1;
 	float			sdivzstepu, tdivzstepu, zistepu;
 
-	USED(alpha);
 	sstep = 0;	// keep compiler happy
 	tstep = 0;	// ditto
 
@@ -455,6 +407,7 @@ void D_DrawSpans16 (espan_t *pspan, float alpha) //qbism- up it from 8 to 16
 	{
 		pdest = (unsigned char *)((byte *)d_viewbuffer +
 				(screenwidth * pspan->v) + pspan->u);
+		pz = d_pzbuffer + (d_zwidth * pspan->v) + pspan->u;
 
 		count = pspan->count;
 
@@ -549,9 +502,14 @@ void D_DrawSpans16 (espan_t *pspan, float alpha) //qbism- up it from 8 to 16
 
 			if(spancount > 0){
 				void dospan(uchar *, uchar *, int, int, int, int, int, int);
-				dospan(pdest, pbase, s, t, sstep, tstep, spancount, cachewidth);
+				void dospan_alpha(uchar *, uchar *, int, int, int, int, int, int, byte, uzint *, int);
+				if(r_drawflags & DRAW_BLEND)
+					dospan_alpha(pdest, pbase, s, t, sstep, tstep, spancount, cachewidth, alpha, pz, (int)(zi * 0x8000 * 0x10000));
+				else
+					dospan(pdest, pbase, s, t, sstep, tstep, spancount, cachewidth);
 			}
 			pdest += spancount;
+			pz += spancount;
 			s = snext;
 			t = tnext;
 
@@ -573,6 +531,9 @@ void D_DrawZSpans (espan_t *pspan)
 	unsigned		ltemp;
 	double			zi;
 	float			du, dv;
+
+	if((r_drawflags & DRAW_BLEND) != 0)
+		return;
 
 // FIXME: check for clamping/range problems
 // we count on FP exceptions being turned off to avoid range problems

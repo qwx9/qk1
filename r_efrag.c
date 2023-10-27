@@ -221,37 +221,21 @@ R_StoreEfrags
 void R_StoreEfrags (efrag_t **ppefrag)
 {
 	entity_t	*pent;
-	model_t		*clmodel;
 	efrag_t		*pefrag;
 
 
 	while ((pefrag = *ppefrag) != nil)
 	{
 		pent = pefrag->entity;
-		clmodel = pent->model;
 
-		switch (clmodel->type)
+		if ((pent->visframe != r_framecount) &&
+			(cl_numvisedicts < MAX_VISEDICTS))
 		{
-		case mod_alias:
-		case mod_brush:
-		case mod_sprite:
-			pent = pefrag->entity;
-
-			if ((pent->visframe != r_framecount) &&
-				(cl_numvisedicts < MAX_VISEDICTS))
-			{
-				cl_visedicts[cl_numvisedicts++] = pent;
-
-			// mark that we've recorded this entity for this frame
-				pent->visframe = r_framecount;
-			}
-
-			ppefrag = &pefrag->leafnext;
-			break;
-
-		default:	
-			fatal ("R_StoreEfrags: Bad entity type %d\n", clmodel->type);
+			cl_visedicts[cl_numvisedicts++] = pent;
+			pent->visframe = r_framecount;
 		}
+
+		ppefrag = &pefrag->leafnext;
 	}
 }
 

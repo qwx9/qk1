@@ -313,6 +313,9 @@ void R_DrawSolidClippedSubmodelPolygons (model_t *pmodel)
 	bedge_t		*pbedge;
 	medge_t		*pedge, *pedges;
 
+	if(entdrawflags(currententity) ^ r_drawflags)
+		return;
+
 // FIXME: use bounding-box-based frustum clipping info?
 
 	psurf = &pmodel->surfaces[pmodel->firstmodelsurface];
@@ -321,8 +324,6 @@ void R_DrawSolidClippedSubmodelPolygons (model_t *pmodel)
 
 	for (i=0 ; i<numsurfaces ; i++, psurf++)
 	{
-		if((psurf->flags & SURF_TRANS) ^ r_drawflags)
-			continue;
 	// find which side of the node we are on
 		pplane = psurf->plane;
 
@@ -386,14 +387,14 @@ void R_DrawSubmodelPolygons (model_t *pmodel, int clipflags)
 
 // FIXME: use bounding-box-based frustum clipping info?
 
+	if(entdrawflags(currententity) ^ r_drawflags)
+		return;
+
 	psurf = &pmodel->surfaces[pmodel->firstmodelsurface];
 	numsurfaces = pmodel->nummodelsurfaces;
 
 	for (i=0 ; i<numsurfaces ; i++, psurf++)
 	{
-		if((psurf->flags & SURF_TRANS) ^ r_drawflags)
-			continue;
-
 	// find which side of the node we are on
 		pplane = psurf->plane;
 

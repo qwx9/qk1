@@ -1172,7 +1172,14 @@ void Mod_LoadBrushModel (model_t *mod, void *buffer)
 		
 		mod->firstmodelsurface = bm->firstface;
 		mod->nummodelsurfaces = bm->numfaces;
-		
+		mod->blend = false;
+		for(j = bm->firstface; j < bm->firstface+bm->numfaces; j++){
+			if(surfdrawflags(&loadmodel->surfaces[j]) & DRAW_BLEND){
+				mod->blend = true;
+				break;
+			}
+		}
+
 		VectorCopy (bm->maxs, mod->maxs);
 		VectorCopy (bm->mins, mod->mins);
 		mod->radius = RadiusFromBounds (mod->mins, mod->maxs);

@@ -5,13 +5,16 @@
 
 #define P \
 	do{ \
-		*pdest++ = pbase[(s >> 16) + (t >> 16) * cachewidth]; \
+		if(*z <= (izi >> 16)) \
+			*pdest = blendalpha(pbase[(s >> 16) + (t >> 16) * cachewidth], *pdest, alpha); \
+		pdest++; \
+		z++; \
 		s += sstep; \
 		t += tstep; \
 	}while(0)
 
 void
-dospan(uchar *pdest, uchar *pbase, int s, int t, int sstep, int tstep, int spancount, int cachewidth, u8int alpha, uzint *z, int izi)
+dospan_alpha(uchar *pdest, uchar *pbase, int s, int t, int sstep, int tstep, int spancount, int cachewidth, u8int alpha, uzint *z, int izi)
 {
 	switch(spancount)
 	{

@@ -292,6 +292,7 @@ typedef struct model_s
 {
 	char		name[Npath];
 	qboolean	needload;		// bmodels and sprites don't cache normally
+	qboolean	blend;
 
 	modtype_t	type;
 	int			numframes;

@@ -7,6 +7,7 @@ CFLAGS=$CFLAGS -D__${objtype}__
 OFILES=\
 	pal`{test -f pal_$objtype.s && echo -n _$objtype}.$O\
 	span`{test -f span_$objtype.s && echo -n _$objtype}.$O\
+	span_alpha.$O\
 	cd.$O\
 	cl_demo.$O\
 	cl_input.$O\
@@ -19,6 +20,7 @@ OFILES=\
 	console.$O\
 	cvar.$O\
 	draw.$O\
+	d_alpha.$O\
 	d_edge.$O\
 	d_fill.$O\
 	d_init.$O\

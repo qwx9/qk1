@@ -353,6 +353,8 @@ void R_EmitCachedEdge (void)
 	r_emitted = 1;
 }
 
+float alphafor(int flags);
+
 /*
 ================
 R_RenderFace
@@ -368,6 +370,9 @@ void R_RenderFace (msurface_t *fa, int clipflags)
 	medge_t		*pedges, tedge;
 	clipplane_t	*pclip;
 
+	if(surfdrawflags(fa) ^ r_drawflags)
+		return;
+
 // skip out if no more surfs
 	if ((surface_p) >= surf_max)
 	{
@@ -381,9 +386,6 @@ void R_RenderFace (msurface_t *fa, int clipflags)
 		r_outofedges += fa->numedges;
 		return;
 	}
-
-	if((fa->flags & SURF_TRANS) ^ r_drawflags)
-		return;
 
 	c_faceclip++;
 

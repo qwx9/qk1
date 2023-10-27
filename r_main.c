@@ -470,6 +470,12 @@ void R_DrawEntitiesOnList (void)
 
 		if (currententity == &cl_entities[cl.viewentity])
 			continue;	// don't draw the player
+		if(r_drawflags & DRAW_BLEND)
+			buildalpha(currententity->alpha);
+
+		// FIXME(sigrid): no trans-specific surfaces, hopefully?
+		if(entdrawflags(currententity) ^ r_drawflags)
+			continue;
 
 		switch (currententity->model->type)
 		{
@@ -507,7 +513,7 @@ void R_DrawEntitiesOnList (void)
 							lighting.ambientlight += add;
 					}
 				}
-	
+
 			// clamp lighting so it doesn't overbright as much
 				if (lighting.ambientlight > 128)
 					lighting.ambientlight = 128;
@@ -682,6 +688,9 @@ void R_DrawBEntitiesOnList (void)
 	{
 		currententity = cl_visedicts[i];
 
+		if(entdrawflags(currententity) ^ r_drawflags)
+			continue;
+
 		switch (currententity->model->type)
 		{
 		case mod_brush:
@@ -750,6 +759,8 @@ void R_DrawBEntitiesOnList (void)
 
 					if (r_pefragtopnode)
 					{
+						if(r_drawflags & DRAW_BLEND)
+							R_BeginEdgeFrame();
 						currententity->topnode = r_pefragtopnode;
 	
 						if (r_pefragtopnode->contents >= 0)
@@ -767,6 +778,8 @@ void R_DrawBEntitiesOnList (void)
 						}
 	
 						currententity->topnode = nil;
+						if(r_drawflags & DRAW_BLEND)
+							R_ScanEdges();
 					}
 				}
 
@@ -816,7 +829,8 @@ void R_EdgeDrawing (void)
 		db_time1 = rw_time2;
 	}
 
-	R_DrawBEntitiesOnList ();
+	if((r_drawflags & DRAW_BLEND) == 0)
+		R_DrawBEntitiesOnList ();
 
 	if (r_dspeeds.value)
 	{
@@ -861,7 +875,6 @@ void R_RenderView (void)
 
 	if (!cl_entities[0].model || !cl.worldmodel)
 		fatal ("R_RenderView: NULL worldmodel");
-	r_drawflags = 0;
 	R_EdgeDrawing ();
 
 	if (r_dspeeds.value)
@@ -888,8 +901,11 @@ void R_RenderView (void)
 
 	R_DrawParticles ();
 
-	r_drawflags = SURF_TRANS;
+	r_drawflags = DRAW_BLEND;
+	r_worldpolysbacktofront = true;
 	R_EdgeDrawing ();
+	R_DrawBEntitiesOnList();
+	R_DrawEntitiesOnList ();
 	r_drawflags = 0;
 
 	if (r_dspeeds.value)

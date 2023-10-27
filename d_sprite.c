@@ -13,7 +13,7 @@ static sspan_t	*sprite_spans;
 D_SpriteDrawSpans
 =====================
 */
-void D_SpriteDrawSpans (sspan_t *pspan)
+void D_SpriteDrawSpans (sspan_t *pspan, byte alpha)
 {
 	int			count, spancount, izistep;
 	int			izi;
@@ -142,10 +142,13 @@ void D_SpriteDrawSpans (sspan_t *pspan)
 				btemp = *(pbase + (s >> 16) + (t >> 16) * cachewidth);
 				if (btemp != 255)
 				{
-					if (*pz <= (izi >> 16))	/* FIXME: segfault: assumed 32bit ptr? */
-					{
-						*pz = izi >> 16;
-						*pdest = btemp;
+					if (*pz <= (izi >> 16)){	/* FIXME: segfault: assumed 32bit ptr? */
+						if(r_drawflags & DRAW_BLEND){
+							*pdest = blendalpha(btemp, *pdest, alpha);
+						}else{
+							*pz = izi >> 16;
+							*pdest = btemp;
+						}
 					}
 				}
 
@@ -414,6 +417,6 @@ void D_DrawSprite (void)
 	D_SpriteCalculateGradients ();
 	D_SpriteScanLeftEdge ();
 	D_SpriteScanRightEdge ();
-	D_SpriteDrawSpans (sprite_spans);
+	D_SpriteDrawSpans (sprite_spans, currententity->alpha);
 }
 

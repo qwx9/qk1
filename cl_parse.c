@@ -590,6 +590,7 @@ static void CL_ParseStatic (int withbits)
 
 // copy it to the current state
 	ent->model = cl.model_precache[ent->baseline.modelindex];
+	ent->alpha = ent->baseline.alpha;
 	ent->frame = ent->baseline.frame;
 	ent->colormap = vid.colormap;
 	ent->skinnum = ent->baseline.skin;

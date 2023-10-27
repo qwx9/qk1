@@ -144,18 +144,6 @@ void D_CalcGradients (msurface_t *pface)
 	bbextentt = ((pface->extents[1] << 16) >> miplevel) - 1;
 }
 
-static float
-alphafor(surf_t *s)
-{
-	if((s->flags & (SURF_LAVA|SURF_SLIME|SURF_TELE)) == 0)
-		return r_wateralpha.value;
-	if(s->flags & SURF_LAVA)
-		return r_lavaalpha.value;
-	if(s->flags & SURF_SLIME)
-		return r_slimealpha.value;
-	return 1.0;
-}
-
 /*
 ==============
 D_DrawSurfaces
@@ -168,6 +156,7 @@ void D_DrawSurfaces (void)
 	surfcache_t		*pcurrentcache;
 	vec3_t			world_transformed_modelorg;
 	vec3_t			local_modelorg;
+	byte			alpha;
 
 	currententity = &cl_entities[0];
 	TransformVector (modelorg, transformed_modelorg);
@@ -196,8 +185,16 @@ void D_DrawSurfaces (void)
 			if (!s->spans)
 				continue;
 
-			if((s->flags & SURF_TRANS) ^ r_drawflags)
+			if((surfdrawflags(s) | entdrawflags(s->entity)) ^ r_drawflags)
 				continue;
+			alpha = 255;
+			if(enthasalpha(s->entity) && s->entity->alpha != 255)
+				alpha = s->entity->alpha;
+			else if(s->flags & SURF_TRANS)
+				alpha *= alphafor(s->flags);
+			if(alpha < 1)
+				alpha = 255;
+			buildalpha(alpha);
 
 			r_drawnpolycount++;
 
@@ -245,7 +242,7 @@ void D_DrawSurfaces (void)
 				}
 
 				D_CalcGradients (pface);
-				Turbulent8 (s->spans, alphafor(s));
+				Turbulent8 (s->spans, alpha);
 				D_DrawZSpans (s->spans);
 
 				if (s->insubmodel)
@@ -296,11 +293,11 @@ void D_DrawSurfaces (void)
 				D_CalcGradients (pface);
 
 				if(s->flags & SURF_FENCE)
-					D_DrawSpans16_Fence(s->spans);
-				else
-					(*d_drawspans) (s->spans, 1.0);
-
-				D_DrawZSpans (s->spans);
+					D_DrawSpans16_Fence(s->spans, alpha);
+				else{
+					(*d_drawspans) (s->spans, alpha);
+					D_DrawZSpans (s->spans);
+				}
 
 				if (s->insubmodel)
 				{
