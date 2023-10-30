@@ -84,10 +84,15 @@ extern float	d_scalemip[3];
 
 extern void (*d_drawspans) (espan_t *pspan, byte alpha);
 
-extern byte *alphamap[256];
+enum {
+	// perhaps a bit too much, but looks ok
+	AlphaStep = 2,
+};
+
+extern byte *alphamap[256>>AlphaStep];
 
 #define blendalpha(a, b, alpha) \
-	alphamap[alpha][(u16int)((a)<<8 | (b))]
+	alphamap[alpha>>AlphaStep][(u16int)((a)<<8 | (b))]
 
-void buildalpha(int alpha);
+void initalpha(void);
 float alphafor(int flags);

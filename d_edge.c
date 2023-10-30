@@ -194,7 +194,6 @@ void D_DrawSurfaces (void)
 				alpha *= alphafor(s->flags);
 			if(alpha < 1)
 				alpha = 255;
-			buildalpha(alpha);
 
 			r_drawnpolycount++;
 

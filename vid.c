@@ -139,6 +139,8 @@ setpal(uchar *p)
 	for(fp=fbpal; fp<fbpal+nelem(fbpal); p+=3, fp++)
 		*fp = p[0] << 16 | p[1] << 8 | p[2];
 
+	initalpha();
+
 	scr_fullupdate = 0;
 }
 

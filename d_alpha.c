@@ -4,50 +4,119 @@
 #include "quakedef.h"
 #include "fns.h"
 
-/* FIXME(sigrid): this is super dumb.
- *
- * how it SHOULD be done:
- * 1) no point in 256 alphamaps, a'=255-a → (x->a->y) ≡ (y->a'->x)
- * 1.1) these are 8-bit colors, no way there are *different* variations for each alpha
- *      eg: x=3, y=9 → a≠a' → there is a very high chance (x->a->y) = (x->a'->y) if a is close to a'
- * 2) use k-d (3-d in this case) tree to look up colors faster
- * 3) if it's fast enough, can build all alpha maps just once on startup
- * 4) try different color models, this alpha blending looks like crap with liquids
- */
-byte *alphamap[256];
+typedef struct Col Col;
+
+struct Col {
+	Col *s[2];
+	u8int c[3];
+	u8int x;
+};
+
+static Col *lookup;
+
+static void
+ins(u8int c[3], u8int x)
+{
+	Col **p, *e, *l;
+	int i;
+
+	for(l = lookup, p = &lookup, e = lookup, i = 0; e != nil; i = (i+1)%3){
+		l = *p;
+		p = &e->s[c[i] >= e->c[i]];
+		e = *p;
+	}
+	if(l != nil && memcmp(l->c, c, 3) == 0)
+		return;
+	e = calloc(1, sizeof(*e));
+	memmove(e->c, c, 3);
+	e->x = x;
+	*p = e;
+}
+
+static void
+closest_(u8int c[3], Col *t, int i, Col **best, int *min)
+{
+	int d, d2, nd;
+
+	if(t == nil)
+		return;
+
+	i %= 3;
+	nd = (int)t->c[i] - (int)c[i];
+	i = (i+1)%3;
+	d = (int)t->c[i] - (int)c[i];
+	i = (i+1)%3;
+	d2 = (int)t->c[i] - (int)c[i];
+	d = nd*nd + d*d + d2*d2;
+
+	if(*min > d){
+		*min = d;
+		*best = t;
+	}
+
+	i += 2;
+	closest_(c, t->s[nd <= 0], i, best, min);
+	if(nd*nd < *min)
+		closest_(c, t->s[nd > 0], i, best, min);
+}
+
+static Col *
+closest(u8int c[3])
+{
+	Col *best;
+	int min;
+
+	best = nil;
+	min = 99999;
+	closest_(c, lookup, 0, &best, &min);
+	return best;
+}
+
+byte *alphamap[256>>AlphaStep];
 
 void
-buildalpha(int alpha)
+initalpha(void)
 {
 	extern s32int fbpal[256];
-	int a, b;
+	int a, b, ai, alpha, i;
 	byte *ca, *cb, *p;
-	int rr, gg, bb;
-	int i, dst, x, best;
+	u8int c[3];
+	Col *best;
 
-	if(alphamap[alpha] != nil)
+	if(lookup != nil)
 		return;
-	alphamap[alpha] = malloc(256*256);
+
 	p = (byte*)fbpal;
-	ca = p;
-	for(a = 0; a < 256; a++, ca += 4){
-		cb = p;
-		for(b = 0; b < 256; b++, cb++){
-			rr = (alpha*ca[0] + (255 - alpha)*(*cb++))>>8;
-			gg = (alpha*ca[1] + (255 - alpha)*(*cb++))>>8;
-			bb = (alpha*ca[2] + (255 - alpha)*(*cb++))>>8;
-			dst = 9999999;
-			best = 255;
-			for(i = 0; i < 768; i += 4){
-				x = (rr-p[i+0])*(rr-p[i+0]) +
-					(gg-p[i+1])*(gg-p[i+1]) +
-					(bb-p[i+2])*(bb-p[i+2]);
-				if(x < dst){
-					dst = x;
-					best = i;
-				}
+	for(i = 0; i < 64; i++){
+		ins(p+(64+i)*4, 64+i);
+		ins(p+(63-i)*4, 63-i);
+		ins(p+(128+i)*4, 128+i);
+		ins(p+(255-i)*4, 255-i);
+	}
+
+	for(alpha = 1; alpha <= 128; alpha += 1<<AlphaStep){
+		ai = alpha >> AlphaStep;
+		alphamap[ai] = malloc(256*256);
+
+		ca = p;
+		for(a = 0; a < 256; a++, ca += 4){
+			cb = p;
+			for(b = 0; b < 256; b++, cb++){
+				c[0] = (alpha*ca[0] + (255 - alpha)*(*cb++))>>8;
+				c[1] = (alpha*ca[1] + (255 - alpha)*(*cb++))>>8;
+				c[2] = (alpha*ca[2] + (255 - alpha)*(*cb++))>>8;
+				best = closest(c);
+				alphamap[ai][a<<8 | b] = best->x;
 			}
-			alphamap[alpha][a<<8 | b] = best/4;
+		}
+	}
+	for(alpha = 128+AlphaStep; alpha < 256; alpha += 1<<AlphaStep){
+		ai = alpha >> AlphaStep;
+		alphamap[ai] = malloc(256*256);
+		i = (256-alpha)>>AlphaStep;
+		for(a = 0; a < 256; a++){
+			for(b = 0; b < 256; b++)
+				alphamap[ai][b<<8 | a] = alphamap[i][a<<8 | b];
 		}
 	}
 }

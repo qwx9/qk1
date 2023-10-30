@@ -470,8 +470,6 @@ void R_DrawEntitiesOnList (void)
 
 		if (currententity == &cl_entities[cl.viewentity])
 			continue;	// don't draw the player
-		if(r_drawflags & DRAW_BLEND)
-			buildalpha(currententity->alpha);
 
 		// FIXME(sigrid): no trans-specific surfaces, hopefully?
 		if(entdrawflags(currententity) ^ r_drawflags)
