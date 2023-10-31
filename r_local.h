@@ -6,7 +6,7 @@ enum {
 	DRAW_BLEND = 1<<0,
 };
 
-#define surfdrawflags(s) (((s)->flags & SURF_TRANS) ? DRAW_BLEND : 0)
+int surfdrawflags(int flags);
 #define enthasalpha(e) ((e) && !defalpha((e)->alpha))
 #define entdrawflags(e) (((e) && (!defalpha((e)->alpha) || ((e)->model && (e)->model != cl.worldmodel && (e)->model->blend))) ? DRAW_BLEND : 0)
 

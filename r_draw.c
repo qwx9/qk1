@@ -50,6 +50,18 @@ int				r_ceilv1;
 qboolean	r_lastvertvalid;
 
 
+int
+surfdrawflags(int flags)
+{
+	if(flags & SURF_TRANS){
+		if((flags & SURF_TELE) != 0 || alphafor(flags) >= 1.0f)
+			if((flags & SURF_FENCE) == 0)
+				return 0;
+		return DRAW_BLEND;
+	}
+	return 0;
+}
+
 /*
 ================
 R_EmitEdge
@@ -370,7 +382,7 @@ void R_RenderFace (msurface_t *fa, int clipflags)
 	medge_t		*pedges, tedge;
 	clipplane_t	*pclip;
 
-	if(surfdrawflags(fa) ^ r_drawflags)
+	if(surfdrawflags(fa->flags) ^ r_drawflags)
 		return;
 
 // skip out if no more surfs

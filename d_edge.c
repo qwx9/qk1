@@ -185,7 +185,7 @@ void D_DrawSurfaces (void)
 			if (!s->spans)
 				continue;
 
-			if((surfdrawflags(s) | entdrawflags(s->entity)) ^ r_drawflags)
+			if((surfdrawflags(s->flags) | entdrawflags(s->entity)) ^ r_drawflags)
 				continue;
 			alpha = 255;
 			if(enthasalpha(s->entity) && s->entity->alpha != 255)

@@ -1174,7 +1174,7 @@ void Mod_LoadBrushModel (model_t *mod, void *buffer)
 		mod->nummodelsurfaces = bm->numfaces;
 		mod->blend = false;
 		for(j = bm->firstface; j < bm->firstface+bm->numfaces; j++){
-			if(surfdrawflags(&loadmodel->surfaces[j]) & DRAW_BLEND){
+			if(loadmodel->surfaces[j].flags & SURF_TRANS){
 				mod->blend = true;
 				break;
 			}
