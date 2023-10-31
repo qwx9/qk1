@@ -54,9 +54,8 @@ int
 surfdrawflags(int flags)
 {
 	if(flags & SURF_TRANS){
-		if((flags & SURF_TELE) != 0 || alphafor(flags) >= 1.0f)
-			if((flags & SURF_FENCE) == 0)
-				return 0;
+		if((flags & SURF_FENCE) == 0 && alphafor(flags) >= 1.0f)
+			return 0;
 		return DRAW_BLEND;
 	}
 	return 0;
