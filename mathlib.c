@@ -9,7 +9,7 @@ int nanmask = 255<<23;
 
 /*-----------------------------------------------------------------*/
 
-#define DEG2RAD( a ) ( a * M_PI ) / 180.0F
+#define DEG2RAD( a ) (a*M_PI/180.0)
 
 void ProjectPointOnPlane( vec3_t dst, const vec3_t p, const vec3_t normal )
 {
@@ -130,19 +130,6 @@ float	anglemod(float a)
 
 /*
 ==================
-BOPS_Error
-
-Split out like this for ASM to call.
-==================
-*/
-void BOPS_Error (void)
-{
-	fatal ("BoxOnPlaneSide:  Bad signbits");
-}
-
-
-/*
-==================
 BoxOnPlaneSide
 
 Returns 1, 2, or 1 + 2
@@ -152,19 +139,6 @@ int BoxOnPlaneSide (vec3_t emins, vec3_t emaxs, mplane_t *p)
 {
 	float	dist1, dist2;
 	int		sides;
-
-/*
-	// this is done by the BOX_ON_PLANE_SIDE macro before calling this function
-// fast axial cases
-	if (p->type < 3)
-	{
-		if (p->dist <= emins[p->type])
-			return 1;
-		if (p->dist >= emaxs[p->type])
-			return 2;
-		return 3;
-	}
-*/
 	
 // general case
 	switch (p->signbits)
@@ -203,36 +177,9 @@ dist2 = p->normal[0]*emaxs[0] + p->normal[1]*emaxs[1] + p->normal[2]*emaxs[2];
 		break;
 	default:
 		dist1 = dist2 = 0;		// shut up compiler
-		BOPS_Error ();
+		fatal ("BoxOnPlaneSide:  Bad signbits");
 		break;
 	}
-
-/*
-	int		i;
-	vec3_t	corners[2];
-
-	for (i=0 ; i<3 ; i++)
-	{
-		if (plane->normal[i] < 0)
-		{
-			corners[0][i] = emins[i];
-			corners[1][i] = emaxs[i];
-		}
-		else
-		{
-			corners[1][i] = emins[i];
-			corners[0][i] = emaxs[i];
-		}
-	}
-	dist = DotProduct (plane->normal, corners[0]) - plane->dist;
-	dist2 = DotProduct (plane->normal, corners[1]) - plane->dist;
-	sides = 0;
-	if (dist1 >= 0)
-		sides = 1;
-	if (dist2 < 0)
-		sides |= 2;
-
-*/
 
 	sides = 0;
 	if (dist1 >= p->dist)
