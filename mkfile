@@ -8,6 +8,7 @@ OFILES=\
 	pal`{test -f pal_$objtype.s && echo -n _$objtype}.$O\
 	span`{test -f span_$objtype.s && echo -n _$objtype}.$O\
 	span_alpha.$O\
+	dotproduct`{test -f span_$objtype.s && echo -n _$objtype}.$O\
 	cd.$O\
 	cl_demo.$O\
 	cl_input.$O\
