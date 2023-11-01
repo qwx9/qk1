@@ -426,6 +426,7 @@ void R_RecursiveWorldNode (mnode_t *node, int clipflags)
 	mleaf_t		*pleaf;
 	double		d, dot;
 
+again:
 	if (node->contents == CONTENTS_SOLID)
 		return;		// solid
 
@@ -502,23 +503,8 @@ void R_RecursiveWorldNode (mnode_t *node, int clipflags)
 
 	// find which side of the node we are on
 		plane = node->plane;
-
-		switch (plane->type)
-		{
-		case PLANE_X:
-			dot = modelorg[0] - plane->dist;
-			break;
-		case PLANE_Y:
-			dot = modelorg[1] - plane->dist;
-			break;
-		case PLANE_Z:
-			dot = modelorg[2] - plane->dist;
-			break;
-		default:
-			dot = DotProduct (modelorg, plane->normal) - plane->dist;
-			break;
-		}
-	
+		dot = plane->type <= PLANE_Z ? modelorg[plane->type] : DotProduct(modelorg, plane->normal);
+		dot -= plane->dist;
 		side = dot < 0;
 
 	// recurse down the children, front side first
@@ -549,7 +535,8 @@ void R_RecursiveWorldNode (mnode_t *node, int clipflags)
 		}
 
 	// recurse down the back side
-		R_RecursiveWorldNode (node->children[!side], clipflags);
+		node = node->children[!side];
+		goto again;
 	}
 }
 

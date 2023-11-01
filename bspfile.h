@@ -92,15 +92,16 @@ typedef struct
 	float	point[3];
 } dvertex_t;
 
-// 0-2 are axial planes
-#define	PLANE_X			0
-#define	PLANE_Y			1
-#define	PLANE_Z			2
-
-// 3-5 are non-axial planes snapped to the nearest
-#define	PLANE_ANYX		3
-#define	PLANE_ANYY		4
-#define	PLANE_ANYZ		5
+enum {
+	// 0-2 are axial planes
+	PLANE_X,
+	PLANE_Y,
+	PLANE_Z,
+	// 3-5 are non-axial planes snapped to the nearest
+	PLANE_ANYX,
+	PLANE_ANYY,
+	PLANE_ANYZ,
+};
 
 typedef struct
 {
@@ -108,8 +109,6 @@ typedef struct
 	float	dist;
 	int		type;		// PLANE_X - PLANE_ANYZ ?remove? trivial to regenerate
 } dplane_t;
-
-
 
 #define	CONTENTS_EMPTY		-1
 #define	CONTENTS_SOLID		-2
