@@ -13,9 +13,6 @@ float		r_time1;
 int			r_numallocatededges;
 int			r_numallocatedbasespans;
 byte		*r_basespans;
-qboolean	r_drawpolys;
-qboolean	r_drawculledpolys;
-qboolean	r_worldpolysbacktofront;
 qboolean	r_recursiveaffinetriangles = true;
 float		r_aliasuvscale = 1.0;
 int			r_outofsurfaces;
@@ -24,8 +21,6 @@ int			r_outofspans;
 
 qboolean	r_dowarp, r_dowarpold, r_viewchanged;
 
-int			numbtofpolys;
-btofpoly_t	*pbtofpolys;
 mvertex_t	*r_pcurrentvertbase;
 
 int			c_surf;
@@ -580,41 +575,34 @@ R_DrawEntity(entity_t *e)
 			}
 		}
 
-		// if the driver wants polygons, deliver those. Z-buffering is on
-		// at this point, so no clipping to the world tree is needed, just
-		// frustum clipping
-		if(r_drawpolys || r_drawculledpolys){
-			R_ZDrawSubmodelPolys(clmodel);
-		}else{
-			r_pefragtopnode = nil;
+		r_pefragtopnode = nil;
 
-			for(j = 0; j < 3; j++){
-				r_emins[j] = minmaxs[j];
-				r_emaxs[j] = minmaxs[3+j];
+		for(j = 0; j < 3; j++){
+			r_emins[j] = minmaxs[j];
+			r_emaxs[j] = minmaxs[3+j];
+		}
+
+		R_SplitEntityOnNode2(cl.worldmodel->nodes);
+
+		if(r_pefragtopnode){
+			e->topnode = r_pefragtopnode;
+
+			if(r_drawflags & DRAW_BLEND)
+				R_BeginEdgeFrame();
+			if(r_pefragtopnode->contents >= 0){
+				// not a leaf; has to be clipped to the world BSP
+				r_clipflags = clipflags;
+				R_DrawSolidClippedSubmodelPolygons(clmodel);
+			}else{
+				// falls entirely in one leaf, so we just put all the
+				// edges in the edge list and let 1/z sorting handle
+				// drawing order
+				R_DrawSubmodelPolygons(clmodel, clipflags);
 			}
+			if(r_drawflags & DRAW_BLEND)
+				R_ScanEdges();
 
-			R_SplitEntityOnNode2(cl.worldmodel->nodes);
-
-			if(r_pefragtopnode){
-				e->topnode = r_pefragtopnode;
-
-				if(r_drawflags & DRAW_BLEND)
-					R_BeginEdgeFrame();
-				if(r_pefragtopnode->contents >= 0){
-					// not a leaf; has to be clipped to the world BSP
-					r_clipflags = clipflags;
-					R_DrawSolidClippedSubmodelPolygons(clmodel);
-				}else{
-					// falls entirely in one leaf, so we just put all the
-					// edges in the edge list and let 1/z sorting handle
-					// drawing order
-					R_DrawSubmodelPolygons(clmodel, clipflags);
-				}
-				if(r_drawflags & DRAW_BLEND)
-					R_ScanEdges();
-
-				e->topnode = nil;
-			}
+			e->topnode = nil;
 		}
 
 		// put back world rotation and frustum clipping		
@@ -753,7 +741,6 @@ void R_RenderView (void)
 	R_DrawParticles ();
 
 	r_drawflags = DRAW_BLEND;
-	r_worldpolysbacktofront = true;
 	R_EdgeDrawing();
 	for(i = 0; i < cl_numvisedicts; i++)
 		R_DrawEntity(cl_visedicts[i]);

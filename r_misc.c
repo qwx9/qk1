@@ -182,8 +182,6 @@ void R_SetupFrame (void)
 
 	r_framecount++;
 
-	numbtofpolys = 0;
-
 /* debugging
 r_refdef.vieworg[0]=  80;
 r_refdef.vieworg[1]=      64;

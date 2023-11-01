@@ -175,16 +175,6 @@ extern int		reinit_surfcache;
 extern int		r_currentkey;
 extern int		r_currentbkey;
 
-typedef struct btofpoly_s {
-	int			clipflags;
-	msurface_t	*psurf;
-} btofpoly_t;
-
-#define MAX_BTOFPOLYS	5000	// FIXME: tune this
-
-extern int			numbtofpolys;
-extern btofpoly_t	*pbtofpolys;
-
 void	R_InitTurb (void);
 void	R_ZDrawSubmodelPolys (model_t *clmodel);
 

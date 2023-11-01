@@ -53,48 +53,6 @@ void R_TrailingEdge (surf_t *surf, edge_t *edge);
 
 /*
 ==============
-R_DrawCulledPolys
-==============
-*/
-void R_DrawCulledPolys (void)
-{
-	surf_t			*s;
-	msurface_t		*pface;
-
-	currententity = &cl_entities[0];
-
-	if (r_worldpolysbacktofront)
-	{
-		for (s=surface_p-1 ; s>&surfaces[1] ; s--)
-		{
-			if (!s->spans)
-				continue;
-
-			if (!(s->flags & SURF_DRAWBACKGROUND))
-			{
-				pface = (msurface_t *)s->data;
-				R_RenderPoly (pface, 15);
-			}
-		}
-	}
-	else
-	{
-		for (s = &surfaces[1] ; s<surface_p ; s++)
-		{
-			if (!s->spans)
-				continue;
-
-			if (!(s->flags & SURF_DRAWBACKGROUND))
-			{
-				pface = (msurface_t *)s->data;
-				R_RenderPoly (pface, 15);
-			}
-		}
-	}
-}
-
-/*
-==============
 R_BeginEdgeFrame
 ==============
 */
@@ -649,14 +607,7 @@ void R_ScanEdges (void)
 		if (span_p >= max_span_p)
 		{
 			r_outofspans++;
-			if (r_drawculledpolys)
-			{
-				R_DrawCulledPolys ();
-			}
-			else
-			{
-				D_DrawSurfaces ();
-			}
+			D_DrawSurfaces ();
 
 		// clear the surface span pointers
 			for (s = &surfaces[1] ; s<surface_p ; s++)
@@ -686,10 +637,7 @@ void R_ScanEdges (void)
 	(*pdrawfunc) ();
 
 // draw whatever's left in the span list
-	if (r_drawculledpolys)
-		R_DrawCulledPolys ();
-	else
-		D_DrawSurfaces ();
+	D_DrawSurfaces ();
 }
 
 

@@ -519,10 +519,7 @@ void R_RecursiveWorldNode (mnode_t *node, int clipflags)
 			break;
 		}
 	
-		if (dot >= 0)
-			side = 0;
-		else
-			side = 1;
+		side = dot < 0;
 
 	// recurse down the children, front side first
 		R_RecursiveWorldNode (node->children[side], clipflags);
@@ -530,75 +527,21 @@ void R_RecursiveWorldNode (mnode_t *node, int clipflags)
 	// draw stuff
 		c = node->numsurfaces;
 
-		if (c)
-		{
+		if(c){
 			surf = cl.worldmodel->surfaces + node->firstsurface;
 
-			if (dot < -BACKFACE_EPSILON)
-			{
-				do
-				{
-					if ((surf->flags & SURF_PLANEBACK) &&
-						(surf->visframe == r_framecount))
-					{
-						if (r_drawpolys)
-						{
-							if (r_worldpolysbacktofront)
-							{
-								if (numbtofpolys < MAX_BTOFPOLYS)
-								{
-									pbtofpolys[numbtofpolys].clipflags =
-											clipflags;
-									pbtofpolys[numbtofpolys].psurf = surf;
-									numbtofpolys++;
-								}
-							}
-							else
-							{
-								R_RenderPoly (surf, clipflags);
-							}
-						}
-						else
-						{
-							R_RenderFace (surf, clipflags);
-						}
-					}
-
+			if(dot < -BACKFACE_EPSILON){
+				do{
+					if((surf->flags & SURF_PLANEBACK) && surf->visframe == r_framecount)
+						R_RenderFace (surf, clipflags);
 					surf++;
-				} while (--c);
-			}
-			else if (dot > BACKFACE_EPSILON)
-			{
-				do
-				{
-					if (!(surf->flags & SURF_PLANEBACK) &&
-						(surf->visframe == r_framecount))
-					{
-						if (r_drawpolys)
-						{
-							if (r_worldpolysbacktofront)
-							{
-								if (numbtofpolys < MAX_BTOFPOLYS)
-								{
-									pbtofpolys[numbtofpolys].clipflags =
-											clipflags;
-									pbtofpolys[numbtofpolys].psurf = surf;
-									numbtofpolys++;
-								}
-							}
-							else
-							{
-								R_RenderPoly (surf, clipflags);
-							}
-						}
-						else
-						{
-							R_RenderFace (surf, clipflags);
-						}
-					}
-
+				}while(--c);
+			}else if(dot > BACKFACE_EPSILON){
+				do{
+					if(!(surf->flags & SURF_PLANEBACK) && surf->visframe == r_framecount)
+						R_RenderFace(surf, clipflags);
 					surf++;
-				} while (--c);
+				}while(--c);
 			}
 
 		// all surfaces on the same node share the same sequence number
@@ -619,11 +562,7 @@ R_RenderWorld
 */
 void R_RenderWorld (void)
 {
-	int			i;
 	model_t		*clmodel;
-	btofpoly_t	btofpolys[MAX_BTOFPOLYS];
-
-	pbtofpolys = btofpolys;
 
 	currententity = &cl_entities[0];
 	VectorCopy (r_origin, modelorg);
@@ -631,16 +570,6 @@ void R_RenderWorld (void)
 	r_pcurrentvertbase = clmodel->vertexes;
 
 	R_RecursiveWorldNode (clmodel->nodes, 15);
-
-// if the driver wants the polygons back to front, play the visible ones back
-// in that order
-	if (r_worldpolysbacktofront)
-	{
-		for (i=numbtofpolys-1 ; i>=0 ; i--)
-		{
-			R_RenderPoly (btofpolys[i].psurf, btofpolys[i].clipflags);
-		}
-	}
 }
 
 
