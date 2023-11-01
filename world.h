@@ -20,6 +20,7 @@ typedef struct
 #define	MOVE_NOMONSTERS	1
 #define	MOVE_MISSILE	2
 
+int SV_FindTouchedLeafs (edict_t *ent, mnode_t *node, byte *pvs);
 
 void SV_ClearWorld (void);
 // called after the world model has been loaded, before linking any entities

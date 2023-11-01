@@ -374,7 +374,7 @@ static int fatbytes;
 static byte	*fatpvs;
 static int fatpvs_size;
 
-void SV_AddToFatPVS (vec3_t org, mnode_t *node)
+void SV_AddToFatPVS (vec3_t org, mnode_t *node, model_t *m)
 {
 	int		i;
 	byte	*pvs;
@@ -388,7 +388,7 @@ void SV_AddToFatPVS (vec3_t org, mnode_t *node)
 		{
 			if (node->contents != CONTENTS_SOLID)
 			{
-				pvs = Mod_LeafPVS ( (mleaf_t *)node, sv.worldmodel);
+				pvs = Mod_LeafPVS ( (mleaf_t *)node, m);
 				for (i=0 ; i<fatbytes ; i++)
 					fatpvs[i] |= pvs[i];
 			}
@@ -403,7 +403,7 @@ void SV_AddToFatPVS (vec3_t org, mnode_t *node)
 			node = node->children[1];
 		else
 		{	// go down both
-			SV_AddToFatPVS (org, node->children[0]);
+			SV_AddToFatPVS (org, node->children[0], m);
 			node = node->children[1];
 		}
 	}
@@ -417,15 +417,15 @@ Calculates a PVS that is the inclusive or of all leafs within 8 pixels of the
 given point.
 =============
 */
-byte *SV_FatPVS (vec3_t org)
+byte *SV_FatPVS (vec3_t org, model_t *m)
 {
-	fatbytes = (sv.worldmodel->numleafs+31)>>3;
+	fatbytes = (m->numleafs+31)>>3;
 	if(fatpvs == nil || fatbytes > fatpvs_size){
 		fatpvs = realloc(fatpvs, fatbytes);
 		fatpvs_size = fatbytes;
 	}
 	memset(fatpvs, 0, fatbytes);
-	SV_AddToFatPVS (org, sv.worldmodel->nodes);
+	SV_AddToFatPVS(org, m->nodes, m);
 	return fatpvs;
 }
 
@@ -450,7 +450,7 @@ void SV_WriteEntitiesToClient (edict_t	*clent, sizebuf_t *msg)
 
 // find the client's PVS
 	VectorAdd (clent->v.origin, clent->v.view_ofs, org);
-	pvs = SV_FatPVS (org);
+	pvs = SV_FatPVS (org, sv.worldmodel);
 
 // send over all entities (excpet the client) that touch the pvs
 	ent = NEXT_EDICT(sv.edicts);
@@ -464,18 +464,14 @@ void SV_WriteEntitiesToClient (edict_t	*clent, sizebuf_t *msg)
 
 		if (ent != clent)	// clent is ALLWAYS sent
 		{
+			if((int)ent->v.effects == EF_NODRAW)
+				continue;
 // ignore ents without visible models
 			if(!model || !*PR_Str(ent->v.model))
 				continue;
 			if(model >= sv.protocol->limit_model)
 				continue;
-			for(i=0 ; i < ent->num_leafs ; i++)
-				if(pvs[ent->leafnums[i] >> 3] & (1 << (ent->leafnums[i]&7) ))
-					break;
-			if(i == ent->num_leafs && ent->num_leafs < MAX_ENT_LEAFS)
-				continue;		// not visible
-
-			if((int)ent->v.effects == EF_NODRAW)
+			if(!SV_FindTouchedLeafs(ent, sv.worldmodel->nodes, pvs))
 				continue;
 			if((int)ent->v.effects == 0 && zeroalpha(alpha))
 				continue;
