@@ -14,30 +14,24 @@ extern int skyw, skyh;
 D_Sky_uv_To_st
 =================
 */
-void D_Sky_uv_To_st (int u, int v, fixed16_t *s, fixed16_t *t)
+void D_Sky_uv_To_st (int u, int v, fixed16_t *s, fixed16_t *t, float skydist)
 {
-	double	wu, wv, temp;
+	double	wu, wv;
 	vec3_t	end;
 
-	if (r_refdef.vrect.width >= r_refdef.vrect.height)
-		temp = r_refdef.vrect.width;
-	else
-		temp = r_refdef.vrect.height;
+	wu = (u - xcenter)/xscale;
+	wv = (ycenter - v)/yscale;
 
-	wu = 8192.0 * (double)(u-((int)vid.width>>1)) / temp;
-	wv = 8192.0 * (double)(((int)vid.height>>1)-v) / temp;
-
-	end[0] = 4096.0*vpn[0] + wu*vright[0] + wv*vup[0];
-	end[1] = 4096.0*vpn[1] + wu*vright[1] + wv*vup[1];
-	end[2] = 4096.0*vpn[2] + wu*vright[2] + wv*vup[2];
+	end[0] = vpn[0] + wu*vright[0] + wv*vup[0];
+	end[1] = vpn[1] + wu*vright[1] + wv*vup[1];
+	end[2] = vpn[2] + wu*vright[2] + wv*vup[2];
 	end[2] *= 3;
 	VectorNormalize(end);
 
-	temp = skytime*skyspeed;	// TODO: add D_SetupFrame & set this there
-	s[0] = (int)((temp + 4*(skyw-1)*end[0]) * 0x10000);
-	t[0] = (int)((temp + 4*(skyh-1)*end[1]) * 0x10000);
-	s[1] = (int)((temp*2.0 + 4*(skyw-1)*end[0]) * 0x10000);
-	t[1] = (int)((temp*2.0 + 4*(skyh-1)*end[1]) * 0x10000);
+	s[0] = (int)((skydist + 4*(skyw-1)*end[0]) * 0x10000);
+	t[0] = (int)((skydist + 4*(skyh-1)*end[1]) * 0x10000);
+	s[1] = (int)((skydist*2.0 + 4*(skyw-1)*end[0]) * 0x10000);
+	t[1] = (int)((skydist*2.0 + 4*(skyh-1)*end[1]) * 0x10000);
 }
 
 
@@ -52,9 +46,11 @@ void D_DrawSkyScans8 (espan_t *pspan)
 	unsigned char	*pdest, m;
 	fixed16_t		s[2], t[2], snext[2], tnext[2], sstep[2], tstep[2];
 	int				spancountminus1;
+	float			skydist;
 
 	sstep[0] = sstep[1] = 0;	// keep compiler happy
 	tstep[0] = tstep[1] = 0;	// ditto
+	skydist = skytime*skyspeed;	// TODO: add D_SetupFrame & set this there
 
 	do
 	{
@@ -66,7 +62,7 @@ void D_DrawSkyScans8 (espan_t *pspan)
 	// calculate the initial s & t
 		u = pspan->u;
 		v = pspan->v;
-		D_Sky_uv_To_st (u, v, s, t);
+		D_Sky_uv_To_st (u, v, s, t, skydist);
 
 		do
 		{
@@ -83,7 +79,7 @@ void D_DrawSkyScans8 (espan_t *pspan)
 
 			// calculate s and t at far end of span,
 			// calculate s and t steps across span by shifting
-				D_Sky_uv_To_st (u, v, snext, tnext);
+				D_Sky_uv_To_st (u, v, snext, tnext, skydist);
 
 				sstep[0] = (snext[0] - s[0]) >> SKY_SPAN_SHIFT;
 				tstep[0] = (tnext[0] - t[0]) >> SKY_SPAN_SHIFT;
@@ -99,7 +95,7 @@ void D_DrawSkyScans8 (espan_t *pspan)
 				if (spancountminus1 > 0)
 				{
 					u += spancountminus1;
-					D_Sky_uv_To_st (u, v, snext, tnext);
+					D_Sky_uv_To_st (u, v, snext, tnext, skydist);
 
 					sstep[0] = (snext[0] - s[0]) / spancountminus1;
 					tstep[0] = (tnext[0] - t[0]) / spancountminus1;
