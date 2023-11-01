@@ -54,16 +54,6 @@ dtime(void)
 }
 
 void
-fppdbl(void)
-{
-}
-
-void
-fppsgl(void)
-{
-}
-
-void
 shutdown(void)
 {
 	stopfb();

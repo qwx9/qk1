@@ -42,17 +42,10 @@ typedef struct {
 
 //===========================================================================
 
-extern cvar_t	r_draworder;
-extern cvar_t	r_speeds;
-extern cvar_t	r_timegraph;
-extern cvar_t	r_graphheight;
 extern cvar_t	r_clearcolor;
 extern cvar_t	r_waterwarp;
 extern cvar_t	r_fullbright;
 extern cvar_t	r_drawentities;
-extern cvar_t	r_aliasstats;
-extern cvar_t	r_dspeeds;
-extern cvar_t	r_drawflat;
 extern cvar_t	r_ambient;
 extern cvar_t	r_reportsurfout;
 extern cvar_t	r_numsurfs;
@@ -257,9 +250,6 @@ extern int			r_maxvalidedgeoffset;
 
 void R_AliasClipTriangle (mtriangle_t *ptri);
 
-extern float	r_time1;
-extern float	dp_time1, dp_time2, db_time1, db_time2, rw_time1, rw_time2;
-extern float	se_time1, se_time2, de_time1, de_time2, dv_time1, dv_time2;
 extern int		r_frustum_indexes[4*6];
 extern int		r_maxsurfsseen, r_maxedgesseen, r_cnumsurfs;
 extern qboolean	r_surfsonstack;
@@ -274,10 +264,6 @@ extern int		r_clipflags;
 extern int		r_dlightframecount;
 
 void R_StoreEfrags (efrag_t **ppefrag);
-void R_TimeGraph (void);
-void R_PrintAliasStats (void);
-void R_PrintTimes (void);
-void R_PrintDSpeeds (void);
 void R_AnimateLight (void);
 int R_LightPoint (vec3_t p);
 void R_SetupFrame (void);

@@ -45,10 +45,8 @@ edge_t	edge_sentinel;
 float	fv;
 
 void R_GenerateSpans (void);
-void R_GenerateSpansBackward (void);
 
 void R_LeadingEdge (edge_t *edge);
-void R_LeadingEdgeBackwards (edge_t *edge);
 void R_TrailingEdge (surf_t *surf, edge_t *edge);
 
 //=============================================================================
@@ -118,19 +116,10 @@ void R_BeginEdgeFrame (void)
 	surfaces[1].spans = nil;	// no background spans yet
 	surfaces[1].flags = SURF_DRAWBACKGROUND;
 
-// put the background behind everything in the world
-	if (r_draworder.value)
-	{
-		pdrawfunc = R_GenerateSpansBackward;
-		surfaces[1].key = 0;
-		r_currentkey = 1;
-	}
-	else
-	{
-		pdrawfunc = R_GenerateSpans;
-		surfaces[1].key = 0x7FFFFFFF;
-		r_currentkey = 0;
-	}
+	// put the background behind everything in the world
+	pdrawfunc = R_GenerateSpans;
+	surfaces[1].key = 0x7FFFFFFF;
+	r_currentkey = 0;
 
 	v = r_refdef.vrect.y;
 	n = r_refdef.vrectbottom - v;
@@ -578,35 +567,6 @@ void R_GenerateSpans (void)
 		}
 
 		R_LeadingEdge (edge);
-	}
-
-	R_CleanupSpan ();
-}
-
-
-/*
-==============
-R_GenerateSpansBackward
-==============
-*/
-void R_GenerateSpansBackward (void)
-{
-	edge_t			*edge;
-
-	r_bmodelactive = 0;
-
-// clear active surfaces to just the background surface
-	surfaces[1].next = surfaces[1].prev = &surfaces[1];
-	surfaces[1].last_u = edge_head_u_shift20;
-
-// generate spans
-	for (edge=edge_head.next ; edge != &edge_tail; edge=edge->next)
-	{			
-		if (edge->surfs[0])
-			R_TrailingEdge (&surfaces[edge->surfs[0]], edge);
-
-		if (edge->surfs[1])
-			R_LeadingEdgeBackwards (edge);
 	}
 
 	R_CleanupSpan ();

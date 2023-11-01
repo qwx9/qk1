@@ -20,147 +20,6 @@ void R_CheckVariables (void)
 	}
 }
 
-/*
-================
-R_LineGraph
-
-Only called by R_DisplayTime
-================
-*/
-void R_LineGraph (int x, int y, int h)
-{
-	int		i;
-	byte	*dest;
-	int		s;
-
-// FIXME: should be disabled on no-buffer adapters, or should be in the driver
-	
-	x += r_refdef.vrect.x;
-	y += r_refdef.vrect.y;
-	
-	dest = vid.buffer + vid.rowbytes*y + x;
-	
-	s = r_graphheight.value;
-	
-	if (h>s)
-		h = s;
-		
-	for (i=0 ; i<h ; i++, dest -= vid.rowbytes*2)
-	{
-		dest[0] = 0xff;
-		*(dest-vid.rowbytes) = 0x30;
-	}
-	for ( ; i<s ; i++, dest -= vid.rowbytes*2)
-	{
-		dest[0] = 0x30;
-		*(dest-vid.rowbytes) = 0x30;
-	}
-}
-
-/*
-==============
-R_TimeGraph
-
-Performance monitoring tool
-==============
-*/
-#define	MAX_TIMINGS		100
-extern float mouse_x, mouse_y;
-void R_TimeGraph (void)
-{
-	static	int		timex;
-	int		a;
-	float	r_time2;
-	static byte	r_timings[MAX_TIMINGS];
-	int		x;
-	
-	r_time2 = dtime ();
-
-	a = (r_time2-r_time1)/0.01;
-//a = fabs(mouse_y * 0.05);
-//a = (int)((r_refdef.vieworg[2] + 1024)/1)%(int)r_graphheight.value;
-//a = fabs(velocity[0])/20;
-//a = ((int)fabs(origin[0])/8)%20;
-//a = (cl.idealpitch + 30)/5;
-	r_timings[timex] = a;
-	a = timex;
-
-	if (r_refdef.vrect.width <= MAX_TIMINGS)
-		x = r_refdef.vrect.width-1;
-	else
-		x = r_refdef.vrect.width -
-				(r_refdef.vrect.width - MAX_TIMINGS)/2;
-	do
-	{
-		R_LineGraph (x, r_refdef.vrect.height-2, r_timings[a]);
-		if (x==0)
-			break;		// screen too small to hold entire thing
-		x--;
-		a--;
-		if (a == -1)
-			a = MAX_TIMINGS-1;
-	} while (a != timex);
-
-	timex = (timex+1)%MAX_TIMINGS;
-}
-
-
-/*
-=============
-R_PrintTimes
-=============
-*/
-void R_PrintTimes (void)
-{
-	float	r_time2;
-	float		ms;
-
-	r_time2 = dtime ();
-
-	ms = 1000* (r_time2 - r_time1);
-	
-	Con_Printf ("%5.1f ms %3d/%3d/%3d poly %3d surf\n",
-				ms, c_faceclip, r_polycount, r_drawnpolycount, c_surf);
-	c_surf = 0;
-}
-
-
-/*
-=============
-R_PrintDSpeeds
-=============
-*/
-void R_PrintDSpeeds (void)
-{
-	float	ms, dp_time, r_time2, rw_time, db_time, se_time, de_time, dv_time;
-
-	r_time2 = dtime ();
-
-	dp_time = (dp_time2 - dp_time1) * 1000;
-	rw_time = (rw_time2 - rw_time1) * 1000;
-	db_time = (db_time2 - db_time1) * 1000;
-	se_time = (se_time2 - se_time1) * 1000;
-	de_time = (de_time2 - de_time1) * 1000;
-	dv_time = (dv_time2 - dv_time1) * 1000;
-	ms = (r_time2 - r_time1) * 1000;
-
-	Con_Printf ("%3d %4.1fp %3dw %4.1fb %3ds %4.1fe %4.1fv\n",
-				(int)ms, dp_time, (int)rw_time, db_time, (int)se_time, de_time,
-				dv_time);
-}
-
-
-/*
-=============
-R_PrintAliasStats
-=============
-*/
-void R_PrintAliasStats (void)
-{
-	Con_Printf ("%3d polygon model drawn\n", r_amodels_drawn);
-}
-
-
 void WarpPalette (void)
 {
 	int		i,j;
@@ -288,10 +147,8 @@ void R_SetupFrame (void)
 // don't allow cheats in multiplayer
 	if (cl.maxclients > 1)
 	{
-		setcvar ("r_draworder", "0");
 		setcvar ("r_fullbright", "0");
 		setcvar ("r_ambient", "0");
-		setcvar ("r_drawflat", "0");
 	}
 
 	if (r_numsurfs.value)
@@ -319,9 +176,6 @@ void R_SetupFrame (void)
 	if (r_refdef.ambientlight < 0)
 		r_refdef.ambientlight = 0;
 
-	if (!sv.active)
-		r_draworder.value = 0;	// don't let cheaters look behind walls
-		
 	R_CheckVariables ();
 	
 	R_AnimateLight ();

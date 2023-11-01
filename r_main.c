@@ -97,18 +97,11 @@ float	se_time1, se_time2, de_time1, de_time2, dv_time1, dv_time2;
 
 void R_MarkLeaves (void);
 
-cvar_t	r_draworder = {"r_draworder","0"};
-cvar_t	r_speeds = {"r_speeds","0"};
-cvar_t	r_timegraph = {"r_timegraph","0"};
-cvar_t	r_graphheight = {"r_graphheight","10"};
 cvar_t	r_clearcolor = {"r_clearcolor","2"};
 cvar_t	r_waterwarp = {"r_waterwarp","1"};
 cvar_t	r_fullbright = {"r_fullbright","0"};
 cvar_t	r_drawentities = {"r_drawentities","1"};
 cvar_t	r_drawviewmodel = {"r_drawviewmodel","1"};
-cvar_t	r_aliasstats = {"r_polymodelstats","0"};
-cvar_t	r_dspeeds = {"r_dspeeds","0"};
-cvar_t	r_drawflat = {"r_drawflat", "0"};
 cvar_t	r_ambient = {"r_ambient", "0"};
 cvar_t	r_reportsurfout = {"r_reportsurfout", "0"};
 cvar_t	r_numsurfs = {"r_numsurfs", "0"};
@@ -182,19 +175,12 @@ void R_Init (void)
 	Cmd_AddCommand("pointfile", loadpoints);
 	Cmd_AddCommand("fog", fog);
 
-	Cvar_RegisterVariable (&r_draworder);
-	Cvar_RegisterVariable (&r_speeds);
-	Cvar_RegisterVariable (&r_timegraph);
-	Cvar_RegisterVariable (&r_graphheight);
-	Cvar_RegisterVariable (&r_drawflat);
 	Cvar_RegisterVariable (&r_ambient);
 	Cvar_RegisterVariable (&r_clearcolor);
 	Cvar_RegisterVariable (&r_waterwarp);
 	Cvar_RegisterVariable (&r_fullbright);
 	Cvar_RegisterVariable (&r_drawentities);
 	Cvar_RegisterVariable (&r_drawviewmodel);
-	Cvar_RegisterVariable (&r_aliasstats);
-	Cvar_RegisterVariable (&r_dspeeds);
 	Cvar_RegisterVariable (&r_reportsurfout);
 	Cvar_RegisterVariable (&r_numsurfs);
 	Cvar_RegisterVariable (&r_reportedgeout);
@@ -445,166 +431,8 @@ void R_MarkLeaves (void)
 	}
 }
 
-
-/*
-=============
-R_DrawEntitiesOnList
-=============
-*/
-void R_DrawEntitiesOnList (void)
-{
-	int			i, j;
-	int			lnum;
-	alight_t	lighting;
-// FIXME: remove and do real lighting
-	float		lightvec[3] = {-1, 0, 0};
-	vec3_t		dist;
-	float		add;
-
-	if (!r_drawentities.value)
-		return;
-
-	for (i=0 ; i<cl_numvisedicts ; i++)
-	{
-		currententity = cl_visedicts[i];
-
-		if (currententity == &cl_entities[cl.viewentity])
-			continue;	// don't draw the player
-
-		// FIXME(sigrid): no trans-specific surfaces, hopefully?
-		if(entdrawflags(currententity) ^ r_drawflags)
-			continue;
-
-		switch (currententity->model->type)
-		{
-		case mod_sprite:
-			VectorCopy (currententity->origin, r_entorigin);
-			VectorSubtract (r_origin, r_entorigin, modelorg);
-			R_DrawSprite ();
-			break;
-
-		case mod_alias:
-			VectorCopy (currententity->origin, r_entorigin);
-			VectorSubtract (r_origin, r_entorigin, modelorg);
-
-		// see if the bounding box lets us trivially reject, also sets
-		// trivial accept status
-			if (R_AliasCheckBBox ())
-			{
-				j = R_LightPoint (currententity->origin);
-	
-				lighting.ambientlight = j;
-				lighting.shadelight = j;
-
-				lighting.plightvec = lightvec;
-
-				for (lnum=0 ; lnum<MAX_DLIGHTS ; lnum++)
-				{
-					if (cl_dlights[lnum].die >= cl.time)
-					{
-						VectorSubtract (currententity->origin,
-										cl_dlights[lnum].origin,
-										dist);
-						add = cl_dlights[lnum].radius - Length(dist);
-	
-						if (add > 0)
-							lighting.ambientlight += add;
-					}
-				}
-
-			// clamp lighting so it doesn't overbright as much
-				if (lighting.ambientlight > 128)
-					lighting.ambientlight = 128;
-				if (lighting.ambientlight + lighting.shadelight > 192)
-					lighting.shadelight = 192 - lighting.ambientlight;
-
-				R_AliasDrawModel (&lighting);
-			}
-
-			break;
-
-		default:
-			break;
-		}
-	}
-}
-
-/*
-=============
-R_DrawViewModel
-=============
-*/
-void R_DrawViewModel (void)
-{
-// FIXME: remove and do real lighting
-	float		lightvec[3] = {-1, 0, 0};
-	int			j;
-	int			lnum;
-	vec3_t		dist;
-	float		add;
-	dlight_t	*dl;
-	
-	if (!r_drawviewmodel.value)
-		return;
-
-	if (cl.items & IT_INVISIBILITY)
-		return;
-
-	if (cl.stats[STAT_HEALTH] <= 0)
-		return;
-
-	currententity = &cl.viewent;
-	if (!currententity->model)
-		return;
-
-	VectorCopy (currententity->origin, r_entorigin);
-	VectorSubtract (r_origin, r_entorigin, modelorg);
-
-	VectorCopy (vup, viewlightvec);
-	VectorInverse (viewlightvec);
-
-	j = R_LightPoint (currententity->origin);
-
-	if (j < 24)
-		j = 24;		// allways give some light on gun
-	r_viewlighting.ambientlight = j;
-	r_viewlighting.shadelight = j;
-
-// add dynamic lights		
-	for (lnum=0 ; lnum<MAX_DLIGHTS ; lnum++)
-	{
-		dl = &cl_dlights[lnum];
-		if (!dl->radius)
-			continue;
-		if (!dl->radius)
-			continue;
-		if (dl->die < cl.time)
-			continue;
-
-		VectorSubtract (currententity->origin, dl->origin, dist);
-		add = dl->radius - Length(dist);
-		if (add > 0)
-			r_viewlighting.ambientlight += add;
-	}
-
-// clamp lighting so it doesn't overbright as much
-	if (r_viewlighting.ambientlight > 128)
-		r_viewlighting.ambientlight = 128;
-	if (r_viewlighting.ambientlight + r_viewlighting.shadelight > 192)
-		r_viewlighting.shadelight = 192 - r_viewlighting.ambientlight;
-
-	r_viewlighting.plightvec = lightvec;
-
-	R_AliasDrawModel (&r_viewlighting);
-}
-
-
-/*
-=============
-R_BmodelCheckBBox
-=============
-*/
-int R_BmodelCheckBBox (model_t *clmodel, float *minmaxs)
+static int
+R_BmodelCheckBBox(model_t *clmodel, float *minmaxs)
 {
 	int			i, *pindex, clipflags;
 	vec3_t		acceptpt, rejectpt;
@@ -662,145 +490,211 @@ int R_BmodelCheckBBox (model_t *clmodel, float *minmaxs)
 	return clipflags;
 }
 
-
-/*
-=============
-R_DrawBEntitiesOnList
-=============
-*/
-void R_DrawBEntitiesOnList (void)
+static int
+R_DrawEntity(entity_t *e)
 {
-	int			i, j, k, clipflags;
-	vec3_t		oldorigin;
-	model_t		*clmodel;
+	int			j, k, clipflags;
+	alight_t	lighting;
+	float		lightvec[3] = {-1, 0, 0}; // FIXME: remove and do real lighting
 	float		minmaxs[6];
+	vec3_t		dist, oldorigin;
+	float		add;
+	model_t		*clmodel;
 
-	if (!r_drawentities.value)
-		return;
+	if(!r_drawentities.value || e == &cl_entities[cl.viewentity])
+		return 1;
+	if((entdrawflags(e) ^ r_drawflags) != 0)
+		return 0;
 
-	VectorCopy (modelorg, oldorigin);
-	insubmodel = true;
-	r_dlightframecount = r_framecount;
+	currententity = e;
 
-	for (i=0 ; i<cl_numvisedicts ; i++)
-	{
-		currententity = cl_visedicts[i];
+	switch(e->model->type){
+	case mod_sprite:
+		VectorCopy(e->origin, r_entorigin);
+		VectorSubtract(r_origin, r_entorigin, modelorg);
+		R_DrawSprite();
+		break;
 
-		if(entdrawflags(currententity) ^ r_drawflags)
-			continue;
-
-		switch (currententity->model->type)
-		{
-		case mod_brush:
-
-			clmodel = currententity->model;
+	case mod_alias:
+		VectorCopy(e->origin, r_entorigin);
+		VectorSubtract(r_origin, r_entorigin, modelorg);
 
 		// see if the bounding box lets us trivially reject, also sets
 		// trivial accept status
-			for (j=0 ; j<3 ; j++)
-			{
-				minmaxs[j] = currententity->origin[j] +
-						clmodel->mins[j];
-				minmaxs[3+j] = currententity->origin[j] +
-						clmodel->maxs[j];
-			}
-
-			clipflags = R_BmodelCheckBBox (clmodel, minmaxs);
-
-			if (clipflags != BMODEL_FULLY_CLIPPED)
-			{
-				VectorCopy (currententity->origin, r_entorigin);
-				VectorSubtract (r_origin, r_entorigin, modelorg);
-			// FIXME: is this needed?
-				VectorCopy (modelorg, r_worldmodelorg);
-		
-				r_pcurrentvertbase = clmodel->vertexes;
-		
-			// FIXME: stop transforming twice
-				R_RotateBmodel ();
-
-			// calculate dynamic lighting for bmodel if it's not an
-			// instanced model
-				if (clmodel->firstmodelsurface != 0)
-				{
-					for (k=0 ; k<MAX_DLIGHTS ; k++)
-					{
-						if ((cl_dlights[k].die < cl.time) ||
-							(!cl_dlights[k].radius))
-						{
-							continue;
-						}
-
-						R_MarkLights (&cl_dlights[k], 1<<k,
-							clmodel->nodes + clmodel->hulls[0].firstclipnode);
-					}
-				}
-
-			// if the driver wants polygons, deliver those. Z-buffering is on
-			// at this point, so no clipping to the world tree is needed, just
-			// frustum clipping
-				if (r_drawpolys | r_drawculledpolys)
-				{
-					R_ZDrawSubmodelPolys (clmodel);
-				}
-				else
-				{
-					r_pefragtopnode = nil;
-
-					for (j=0 ; j<3 ; j++)
-					{
-						r_emins[j] = minmaxs[j];
-						r_emaxs[j] = minmaxs[3+j];
-					}
-
-					R_SplitEntityOnNode2 (cl.worldmodel->nodes);
-
-					if (r_pefragtopnode)
-					{
-						if(r_drawflags & DRAW_BLEND)
-							R_BeginEdgeFrame();
-						currententity->topnode = r_pefragtopnode;
-	
-						if (r_pefragtopnode->contents >= 0)
-						{
-						// not a leaf; has to be clipped to the world BSP
-							r_clipflags = clipflags;
-							R_DrawSolidClippedSubmodelPolygons (clmodel);
-						}
-						else
-						{
-						// falls entirely in one leaf, so we just put all the
-						// edges in the edge list and let 1/z sorting handle
-						// drawing order
-							R_DrawSubmodelPolygons (clmodel, clipflags);
-						}
-	
-						currententity->topnode = nil;
-						if(r_drawflags & DRAW_BLEND)
-							R_ScanEdges();
-					}
-				}
-
-			// put back world rotation and frustum clipping		
-			// FIXME: R_RotateBmodel should just work off base_vxx
-				VectorCopy (base_vpn, vpn);
-				VectorCopy (base_vup, vup);
-				VectorCopy (base_vright, vright);
-				VectorCopy (base_modelorg, modelorg);
-				VectorCopy (oldorigin, modelorg);
-				R_TransformFrustum ();
-			}
-
+		if(!R_AliasCheckBBox())
 			break;
 
-		default:
-			break;
+		j = R_LightPoint(currententity->origin);
+		lighting.ambientlight = j;
+		lighting.shadelight = j;
+		lighting.plightvec = lightvec;
+
+		add = 0;
+		for(k = 0; k < MAX_DLIGHTS; k++){
+			if(cl_dlights[k].die < cl.time || cl_dlights[k].radius == 0)
+				continue;
+			VectorSubtract(e->origin, cl_dlights[k].origin, dist);
+			add += cl_dlights[k].radius - Length(dist);
+			if(add > 0)
+				lighting.ambientlight += add;
 		}
+
+		// clamp lighting so it doesn't overbright as much
+		if(lighting.ambientlight > 128)
+			lighting.ambientlight = 128;
+		if(lighting.ambientlight + lighting.shadelight > 192)
+			lighting.shadelight = 192 - lighting.ambientlight;
+
+		R_AliasDrawModel(&lighting);
+		break;
+
+	case mod_brush:
+		VectorCopy(modelorg, oldorigin);
+		insubmodel = true;
+		r_dlightframecount = r_framecount;
+		clmodel = e->model;
+
+		// see if the bounding box lets us trivially reject, also sets
+		// trivial accept status
+		for(j = 0; j < 3; j++){
+			minmaxs[j] = currententity->origin[j] + clmodel->mins[j];
+			minmaxs[3+j] = currententity->origin[j] + clmodel->maxs[j];
+		}
+
+		clipflags = R_BmodelCheckBBox(clmodel, minmaxs);
+		if(clipflags == BMODEL_FULLY_CLIPPED)
+			break;
+
+		VectorCopy(e->origin, r_entorigin);
+		VectorSubtract(r_origin, r_entorigin, modelorg);
+		r_pcurrentvertbase = clmodel->vertexes;
+		R_RotateBmodel(); // FIXME: stop transforming twice
+
+		// calculate dynamic lighting for bmodel if it's not an
+		// instanced model
+		if(clmodel->firstmodelsurface != 0){
+			for(k = 0; k < MAX_DLIGHTS; k++){
+				if(cl_dlights[k].die < cl.time || cl_dlights[k].radius == 0)
+					continue;
+				R_MarkLights(&cl_dlights[k], 1<<k, clmodel->nodes + clmodel->hulls[0].firstclipnode);
+			}
+		}
+
+		// if the driver wants polygons, deliver those. Z-buffering is on
+		// at this point, so no clipping to the world tree is needed, just
+		// frustum clipping
+		if(r_drawpolys || r_drawculledpolys){
+			R_ZDrawSubmodelPolys(clmodel);
+		}else{
+			r_pefragtopnode = nil;
+
+			for(j = 0; j < 3; j++){
+				r_emins[j] = minmaxs[j];
+				r_emaxs[j] = minmaxs[3+j];
+			}
+
+			R_SplitEntityOnNode2(cl.worldmodel->nodes);
+
+			if(r_pefragtopnode){
+				e->topnode = r_pefragtopnode;
+
+				if(r_drawflags & DRAW_BLEND)
+					R_BeginEdgeFrame();
+				if(r_pefragtopnode->contents >= 0){
+					// not a leaf; has to be clipped to the world BSP
+					r_clipflags = clipflags;
+					R_DrawSolidClippedSubmodelPolygons(clmodel);
+				}else{
+					// falls entirely in one leaf, so we just put all the
+					// edges in the edge list and let 1/z sorting handle
+					// drawing order
+					R_DrawSubmodelPolygons(clmodel, clipflags);
+				}
+				if(r_drawflags & DRAW_BLEND)
+					R_ScanEdges();
+
+				e->topnode = nil;
+			}
+		}
+
+		// put back world rotation and frustum clipping		
+		// FIXME: R_RotateBmodel should just work off base_vxx
+		VectorCopy(base_vpn, vpn);
+		VectorCopy(base_vup, vup);
+		VectorCopy(base_vright, vright);
+		VectorCopy(base_modelorg, modelorg);
+		VectorCopy(oldorigin, modelorg);
+		R_TransformFrustum();
+		break;
 	}
 
-	insubmodel = false;
+	return 1;
 }
 
+/*
+=============
+R_DrawViewModel
+=============
+*/
+void R_DrawViewModel (void)
+{
+// FIXME: remove and do real lighting
+	float		lightvec[3] = {-1, 0, 0};
+	int			j;
+	int			lnum;
+	vec3_t		dist;
+	float		add;
+	dlight_t	*dl;
+	
+	if (!r_drawviewmodel.value)
+		return;
+
+	if (cl.items & IT_INVISIBILITY)
+		return;
+
+	if (cl.stats[STAT_HEALTH] <= 0)
+		return;
+
+	currententity = &cl.viewent;
+	if (!currententity->model)
+		return;
+
+	VectorCopy (currententity->origin, r_entorigin);
+	VectorSubtract (r_origin, r_entorigin, modelorg);
+
+	VectorCopy (vup, viewlightvec);
+	VectorInverse (viewlightvec);
+
+	j = R_LightPoint (currententity->origin);
+
+	if (j < 24)
+		j = 24;		// allways give some light on gun
+	r_viewlighting.ambientlight = j;
+	r_viewlighting.shadelight = j;
+
+// add dynamic lights		
+	for (lnum=0 ; lnum<MAX_DLIGHTS ; lnum++)
+	{
+		dl = &cl_dlights[lnum];
+		if(dl->die < cl.time || !dl->radius)
+			continue;
+
+		VectorSubtract (currententity->origin, dl->origin, dist);
+		add = dl->radius - Length(dist);
+		if (add > 0)
+			r_viewlighting.ambientlight += add;
+	}
+
+// clamp lighting so it doesn't overbright as much
+	if (r_viewlighting.ambientlight > 128)
+		r_viewlighting.ambientlight = 128;
+	if (r_viewlighting.ambientlight + r_viewlighting.shadelight > 192)
+		r_viewlighting.shadelight = 192 - r_viewlighting.ambientlight;
+
+	r_viewlighting.plightvec = lightvec;
+
+	R_AliasDrawModel (&r_viewlighting);
+}
 
 /*
 ================
@@ -809,35 +703,17 @@ R_EdgeDrawing
 */
 void R_EdgeDrawing (void)
 {
-	R_BeginEdgeFrame ();
+	int i;
 
-	if (r_dspeeds.value)
-	{
-		rw_time1 = dtime ();
+	R_BeginEdgeFrame();
+	R_RenderWorld();
+	if((r_drawflags & DRAW_BLEND) == 0){
+		for(i = 0; i < cl_numvisedicts; i++){
+			if(cl_visedicts[i]->model->type == mod_brush)
+				R_DrawEntity(cl_visedicts[i]);
+		}
 	}
-
-	R_RenderWorld ();
-
-	if (r_drawculledpolys)
-		R_ScanEdges ();
-
-	if (r_dspeeds.value)
-	{
-		rw_time2 = dtime ();
-		db_time1 = rw_time2;
-	}
-
-	if((r_drawflags & DRAW_BLEND) == 0)
-		R_DrawBEntitiesOnList ();
-
-	if (r_dspeeds.value)
-	{
-		db_time2 = dtime ();
-		se_time1 = db_time2;
-	}
-	
-	if (!(r_drawpolys | r_drawculledpolys))
-		R_ScanEdges ();
+	R_ScanEdges();
 }
 
 /*
@@ -849,12 +725,10 @@ r_refdef must be set before the first call
 */
 void R_RenderView (void)
 {
+	int i;
 	static byte	warpbuffer[WARP_WIDTH * WARP_HEIGHT];
 
 	r_warpbuffer = warpbuffer;
-
-	if (r_timegraph.value || r_speeds.value || r_dspeeds.value)
-		r_time1 = dtime ();
 
 	R_SetupFrame ();
 
@@ -865,75 +739,36 @@ void R_RenderView (void)
 	R_MarkLeaves ();	// done here so we know if we're in water
 #endif
 
-// make FDIV fast. This reduces timing precision after we've been running for a
-// while, so we don't do it globally.  This also sets chop mode, and we do it
-// here so that setup stuff like the refresh area calculations match what's
-// done in screen.c
-	fppsgl ();
-
 	if (!cl_entities[0].model || !cl.worldmodel)
 		fatal ("R_RenderView: NULL worldmodel");
 	R_EdgeDrawing ();
 
-	if (r_dspeeds.value)
-	{
-		se_time2 = dtime ();
-		de_time1 = se_time2;
-	}
-
-	R_DrawEntitiesOnList ();
-
-	if (r_dspeeds.value)
-	{
-		de_time2 = dtime ();
-		dv_time1 = de_time2;
+	for(i = 0; i < cl_numvisedicts; i++){
+		if(cl_visedicts[i]->model->type != mod_brush)
+			R_DrawEntity(cl_visedicts[i]);
 	}
 
 	R_DrawViewModel ();
-
-	if (r_dspeeds.value)
-	{
-		dv_time2 = dtime ();
-		dp_time1 = dtime ();
-	}
 
 	R_DrawParticles ();
 
 	r_drawflags = DRAW_BLEND;
 	r_worldpolysbacktofront = true;
-	R_EdgeDrawing ();
-	R_DrawBEntitiesOnList();
-	R_DrawEntitiesOnList ();
+	R_EdgeDrawing();
+	for(i = 0; i < cl_numvisedicts; i++)
+		R_DrawEntity(cl_visedicts[i]);
 	r_drawflags = 0;
-
-	if (r_dspeeds.value)
-		dp_time2 = dtime ();
 
 	if (r_dowarp)
 		D_WarpScreen ();
 
 	V_SetContentsColor (r_viewleaf->contents);
 
-	if (r_timegraph.value)
-		R_TimeGraph ();
-
-	if (r_aliasstats.value)
-		R_PrintAliasStats ();
-		
-	if (r_speeds.value)
-		R_PrintTimes ();
-
-	if (r_dspeeds.value)
-		R_PrintDSpeeds ();
-
 	if (r_reportsurfout.value && r_outofsurfaces)
 		Con_Printf ("Short %d surfaces\n", r_outofsurfaces);
 
 	if (r_reportedgeout.value && r_outofedges)
 		Con_Printf ("Short roughly %d edges\n", r_outofedges * 2 / 3);
-
-// back to high floating-point precision
-	fppdbl ();
 }
 
 /*

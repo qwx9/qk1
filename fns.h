@@ -52,8 +52,6 @@ void	fatal(char*, ...);
 void*	emalloc(ulong);
 vlong	flen(int);
 double	dtime(void);
-void	fppsgl(void);
-void	fppdbl(void);
 void	shutdown(void);
 uvlong	nanosec(void);
 
