@@ -49,7 +49,6 @@ int				r_ceilv1;
 
 qboolean	r_lastvertvalid;
 
-
 int
 surfdrawflags(int flags)
 {
@@ -57,6 +56,20 @@ surfdrawflags(int flags)
 		if((flags & SURF_FENCE) == 0 && alphafor(flags) >= 1.0f)
 			return 0;
 		return DRAW_BLEND;
+	}
+	return 0;
+}
+
+int
+entdrawflags(entity_t *e)
+{
+	if(e != nil){
+		if(e->effects & EF_NODRAW)
+			return DRAW_NO;
+		if(!defalpha(e->alpha))
+			return DRAW_BLEND;
+		if(e->model != nil && e->model != cl.worldmodel && e->model->blend)
+			return DRAW_BLEND;
 	}
 	return 0;
 }
@@ -381,7 +394,7 @@ void R_RenderFace (msurface_t *fa, int clipflags)
 	medge_t		*pedges, tedge;
 	clipplane_t	*pclip;
 
-	if(surfdrawflags(fa->flags) ^ r_drawflags)
+	if((surfdrawflags(fa->flags) | entdrawflags(currententity)) ^ r_drawflags)
 		return;
 
 // skip out if no more surfs

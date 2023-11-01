@@ -4,12 +4,12 @@
 
 enum {
 	DRAW_BLEND = 1<<0,
+	DRAW_NO = 1<<1,
 };
 
 int surfdrawflags(int flags);
+int entdrawflags(entity_t *e);
 #define enthasalpha(e) ((e) && !defalpha((e)->alpha))
-#define entdrawflags(e) (((e) && (!defalpha((e)->alpha) || ((e)->model && (e)->model != cl.worldmodel && (e)->model->blend))) ? DRAW_BLEND : 0)
-
 
 #define ALIAS_BASE_SIZE_RATIO		(1.0 / 11.0)
 					// normalizing factor so player model works out to about
