@@ -86,7 +86,7 @@ byte	*skintable[MAX_LBM_HEIGHT];
 int		skinwidth;
 byte	*skinstart;
 
-void D_PolysetDrawSpans8 (spanpackage_t *pspanpackage);
+void D_PolysetDrawSpans8 (spanpackage_t *pspanpackage, byte alpha);
 void D_PolysetCalcGradients (int skinwidth);
 void D_DrawSubdiv (void);
 void D_DrawNonSubdiv (void);
@@ -561,7 +561,7 @@ void D_PolysetCalcGradients (int skinwidth)
 D_PolysetDrawSpans8
 ================
 */
-void D_PolysetDrawSpans8 (spanpackage_t *pspanpackage)
+void D_PolysetDrawSpans8 (spanpackage_t *pspanpackage, byte alpha)
 {
 	int		lcount;
 	byte	*lpdest;
@@ -598,11 +598,18 @@ void D_PolysetDrawSpans8 (spanpackage_t *pspanpackage)
 
 			do
 			{
-				if ((lzi >> 16) >= *lpz)
-				{
-					*lpdest = ((byte *)acolormap)[*lptex + (llight & 0xFF00)];
-// gel mapping					*lpdest = gelmap[*lpdest];
-					*lpz = lzi >> 16;
+				if ((lzi >> 16) >= *lpz){
+					if(r_drawflags & DRAW_BLEND){
+						*lpdest = blendalpha(
+							((byte *)acolormap)[*lptex + (llight & 0xFF00)],
+							*lpdest,
+							alpha
+						);
+					}else{
+						*lpdest = ((byte *)acolormap)[*lptex + (llight & 0xFF00)];
+	// gel mapping					*lpdest = gelmap[*lpdest];
+						*lpz = lzi >> 16;
+					}
 				}
 				lpdest++;
 				lzi += r_zistepx;
@@ -854,7 +861,7 @@ void D_RasterizeAliasPolySmooth (void)
 	d_countextrastep = ubasestep + 1;
 	originalcount = a_spans[initialrightheight].count;
 	a_spans[initialrightheight].count = Q_MININT; // mark end of the spanpackages
-	D_PolysetDrawSpans8 (a_spans);
+	D_PolysetDrawSpans8 (a_spans, currententity->alpha);
 
 // scan out the bottom part of the right edge, if it exists
 	if (pedgetable->numrightedges == 2)
@@ -878,7 +885,7 @@ void D_RasterizeAliasPolySmooth (void)
 		d_countextrastep = ubasestep + 1;
 		a_spans[initialrightheight + height].count = Q_MININT;
 											// mark end of the spanpackages
-		D_PolysetDrawSpans8 (pstart);
+		D_PolysetDrawSpans8 (pstart, currententity->alpha);
 	}
 }
 
