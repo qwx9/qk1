@@ -112,7 +112,7 @@ threadmain(int argc, char **argv)
 	/* ignore fp exceptions: rendering shit assumes they are */
 	setfcr(getfcr() & ~(FPOVFL|FPUNFL|FPINVAL|FPZDIV));
 	notify(croak);
-	Host_Init();
+	Host_Init(argc, argv);
 	t = dtime() - 1.0 / Fpsmax;
 	for(;;){
 		t´ = dtime();

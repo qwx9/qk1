@@ -578,8 +578,10 @@ void Host_Frame (float time)
 Host_Init
 ====================
 */
-void Host_Init (void)
+void Host_Init (int argc, char **argv)
 {
+	int i;
+
 	Memory_Init();
 	Cbuf_Init ();
 	Cmd_Init ();	
@@ -625,7 +627,18 @@ void Host_Init (void)
 
 	host_hunklevel = Hunk_Mark ();
 
-	host_initialized = true;	
+	host_initialized = true;
+
+	if(argc < 1 || **argv != '+')
+		return;
+	for(i = 0; i < argc;){
+		Cbuf_AddText(argv[i++]+1);
+		while(i < argc && argv[i][0] != '+'){
+			Cbuf_AddText(" ");
+			Cbuf_AddText(argv[i++]);
+		}
+		Cbuf_AddText("\n");
+	}	
 }
 
 
