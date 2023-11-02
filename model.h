@@ -86,28 +86,24 @@ typedef struct
 
 typedef struct msurface_s
 {
-	int			visframe;		// should be drawn when node is crossed
-
-	int			dlightframe;
-	int			dlightbits;
-
 	mplane_t	*plane;
-	int			flags;
+	mtexinfo_t	*texinfo;
+	byte		*samples;		// [numstyles*surfsize]
 
-	int			firstedge;	// look up in model->surfedges[], negative numbers
-	int			numedges;	// are backwards edges
-	
 // surface generation data
 	struct surfcache_s	*cachespots[MIPLEVELS];
 
+	int		visframe;		// should be drawn when node is crossed
+	int		dlightframe;
+	int		dlightbits;
+	int		flags;
+	int		firstedge;	// look up in model->surfedges[], negative numbers
+	int		numedges;	// are backwards edges
 	int		texturemins[2];
 	int		extents[2];
 
-	mtexinfo_t	*texinfo;
-	
 // lighting info
 	byte		styles[MAXLIGHTMAPS];
-	byte		*samples;		// [numstyles*surfsize]
 } msurface_t;
 
 typedef struct mnode_s
