@@ -50,9 +50,15 @@ void CL_ClearState (void)
 // wipe the entire cl structure
 	memset(&cl, 0, sizeof cl);
 
+	//if(cls.state == ca_connected)
+		stopallsfx();
+
 	SZ_Clear (&cls.message);
-	memset(cl_dlights, 0, sizeof cl_dlights);
+	CL_ResetTEnts();
+	memset(cl_static_entities, 0, MAX_STATIC_ENTITIES * sizeof(*cl_static_entities));
+	memset(cl_entities, 0, MAX_EDICTS*sizeof(*cl_entities));
 	memset(cl_lightstyle, 0, sizeof cl_lightstyle);
+	memset(cl_dlights, 0, sizeof cl_dlights);
 	memset(cl_beams, 0, sizeof cl_beams);
 
 //

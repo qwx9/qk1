@@ -232,6 +232,12 @@ static entity_t *CL_NewTempEntity (void)
 	return ent;
 }
 
+void
+CL_ResetTEnts(void)
+{
+	memset(cl_temp_entities, 0, sizeof(cl_temp_entities));
+	num_temp_entities = 0;
+}
 
 /*
 =================
