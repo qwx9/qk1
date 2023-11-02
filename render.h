@@ -48,6 +48,8 @@ typedef struct entity_s
 											//  that splits bmodel, or NULL if
 											//  not split
 
+	struct entity_s			*last_reject;
+
 	byte alpha;
 } entity_t;
 

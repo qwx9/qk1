@@ -114,6 +114,8 @@ extern cvar_t	scr_fov;
 void CreatePassages (void);
 void SetVisibilityByPassages (void);
 
+static entity_t *ent_reject;
+
 /*
 ==================
 R_InitTextures
@@ -502,6 +504,7 @@ R_DrawEntity(entity_t *e)
 		return 0;
 
 	currententity = e;
+	VectorCopy(modelorg, oldorigin);
 
 	switch(e->model->type){
 	case mod_sprite:
@@ -544,7 +547,6 @@ R_DrawEntity(entity_t *e)
 		break;
 
 	case mod_brush:
-		VectorCopy(modelorg, oldorigin);
 		insubmodel = true;
 		r_dlightframecount = r_framecount;
 		clmodel = e->model;
@@ -604,17 +606,17 @@ R_DrawEntity(entity_t *e)
 
 			e->topnode = nil;
 		}
-
-		// put back world rotation and frustum clipping		
-		// FIXME: R_RotateBmodel should just work off base_vxx
-		VectorCopy(base_vpn, vpn);
-		VectorCopy(base_vup, vup);
-		VectorCopy(base_vright, vright);
-		VectorCopy(base_modelorg, modelorg);
-		VectorCopy(oldorigin, modelorg);
-		R_TransformFrustum();
 		break;
 	}
+
+	// put back world rotation and frustum clipping		
+	// FIXME: R_RotateBmodel should just work off base_vxx
+	VectorCopy(base_vpn, vpn);
+	VectorCopy(base_vup, vup);
+	VectorCopy(base_vright, vright);
+	VectorCopy(base_modelorg, modelorg);
+	VectorCopy(oldorigin, modelorg);
+	R_TransformFrustum();
 
 	return 1;
 }
@@ -656,7 +658,7 @@ void R_DrawViewModel (void)
 	j = R_LightPoint (currententity->origin);
 
 	if (j < 24)
-		j = 24;		// allways give some light on gun
+		j = 24;		// always give some light on gun
 	r_viewlighting.ambientlight = j;
 	r_viewlighting.shadelight = j;
 
@@ -691,6 +693,7 @@ R_EdgeDrawing
 */
 void R_EdgeDrawing (void)
 {
+	entity_t *e;
 	int i;
 
 	R_BeginEdgeFrame();
@@ -699,11 +702,28 @@ void R_EdgeDrawing (void)
 	else{
 		R_RenderWorld();
 		for(i = 0; i < cl_numvisedicts; i++){
-			if(cl_visedicts[i]->model->type == mod_brush)
-				R_DrawEntity(cl_visedicts[i]);
+			e = cl_visedicts[i];
+			if(e->model->type == mod_brush && !R_DrawEntity(e)){
+				e->last_reject = ent_reject;
+				ent_reject = e;
+			}
 		}
 	}
 	R_ScanEdges();
+}
+
+static int
+R_SortEntities(void *a_, void *b_)
+{
+	entity_t *a, *b;
+	vec3_t v[2];
+
+	a = *(entity_t**)a_;
+	b = *(entity_t**)b_;
+	// FIXME(sigrid): this is the most dumb way, also incorrect
+	VectorSubtract(r_refdef.vieworg, a->origin, v[0]);
+	VectorSubtract(r_refdef.vieworg, b->origin, v[1]);
+	return Length(v[1]) - Length(v[0]);
 }
 
 /*
@@ -715,8 +735,9 @@ r_refdef must be set before the first call
 */
 void R_RenderView (void)
 {
-	int i;
 	static byte	warpbuffer[WARP_WIDTH * WARP_HEIGHT];
+	entity_t *e;
+	int i;
 
 	r_warpbuffer = warpbuffer;
 
@@ -731,19 +752,26 @@ void R_RenderView (void)
 
 	if (!cl_entities[0].model || !cl.worldmodel)
 		fatal ("R_RenderView: NULL worldmodel");
+	ent_reject = nil;
 	R_EdgeDrawing ();
 
 	for(i = 0; i < cl_numvisedicts; i++){
-		if(cl_visedicts[i]->model->type != mod_brush)
-			R_DrawEntity(cl_visedicts[i]);
+		e = cl_visedicts[i];
+		if(e->model->type != mod_brush && !R_DrawEntity(e)){
+			e->last_reject = ent_reject;
+			ent_reject = e;
+		}
 	}
 
 	R_DrawViewModel ();
-
 	R_DrawParticles ();
 
 	r_drawflags = DRAW_BLEND;
 	R_EdgeDrawing();
+	for(i = 0, e = ent_reject; e != nil; e = e->last_reject, i++)
+		cl_visedicts[i] = e;
+	cl_numvisedicts = i;
+	qsort(cl_visedicts, cl_numvisedicts, sizeof(*cl_visedicts), R_SortEntities);
 	for(i = 0; i < cl_numvisedicts; i++)
 		R_DrawEntity(cl_visedicts[i]);
 	r_drawflags = 0;
