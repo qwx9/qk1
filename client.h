@@ -119,7 +119,7 @@ extern client_static_t	cls;
 //
 typedef struct
 {
-	protocol_t *protocol;
+	protocol_t  protocol;
 	int			movemessages;	// since connecting to this server
 								// throw out the first couple, so the player
 								// doesn't accidentally do something the 
@@ -290,6 +290,7 @@ void CL_SendMove (usercmd_t *cmd);
 
 void CL_ParseTEnt (void);
 void CL_UpdateTEnts (void);
+void CL_ResetTEnts (void);
 
 void CL_ClearState (void);
 

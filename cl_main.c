@@ -50,7 +50,7 @@ void CL_ClearState (void)
 // wipe the entire cl structure
 	memset(&cl, 0, sizeof cl);
 
-	//if(cls.state == ca_connected)
+	if(cls.state == ca_connected)
 		stopallsfx();
 
 	SZ_Clear (&cls.message);

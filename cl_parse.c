@@ -97,7 +97,7 @@ static void CL_ParseStartSoundPacket(void)
     field_mask = MSG_ReadByte(); 
     volume = (field_mask & SND_VOLUME) ? MSG_ReadByte() : Spktvol;
 	attenuation = (field_mask & SND_ATTENUATION) ? MSG_ReadByte()/64.0 : Spktatt;
-	if(field_mask & (cl.protocol->fl_large_entity | cl.protocol->fl_large_channel)){
+	if(field_mask & (cl.protocol.fl_large_entity | cl.protocol.fl_large_channel)){
 		ent = MSG_ReadShort();
 		channel = MSG_ReadByte();
 	}else{
@@ -105,7 +105,7 @@ static void CL_ParseStartSoundPacket(void)
 		ent = channel >> 3;
 		channel &= 7;
 	}
-	sound_num = (field_mask & cl.protocol->fl_large_sound) ? MSG_ReadShort() : MSG_ReadByte();
+	sound_num = (field_mask & cl.protocol.fl_large_sound) ? MSG_ReadShort() : MSG_ReadByte();
 
 	if(ent > MAX_EDICTS)
 		Host_Error("CL_ParseStartSoundPacket: ent = %d", ent);
@@ -197,7 +197,6 @@ static void CL_ParseServerInfo (void)
 
 // parse protocol version number
 	i = MSG_ReadLong ();
-	free(cl.protocol);
 	p = nil;
 	for(n = 0; n < nelem(protos); n++){
 		if(protos[n].version == i){
@@ -209,9 +208,8 @@ static void CL_ParseServerInfo (void)
 		Con_Printf ("Server returned unknown protocol version %d", i);
 		return;
 	}
-	cl.protocol = malloc(sizeof(*cl.protocol));
-	memmove(cl.protocol, p, sizeof(*cl.protocol));
-	cl.protocol->MSG_ReadProtocolInfo(cl.protocol);
+	memmove(&cl.protocol, p, sizeof(cl.protocol));
+	cl.protocol.MSG_ReadProtocolInfo(&cl.protocol);
 
 // parse maxclients
 	cl.maxclients = MSG_ReadByte ();
@@ -372,21 +370,21 @@ static void CL_ParseUpdate (int bits)
 		ent->skinnum = skin;
 	}
 
-	ent->msg_origins[0][0] = (bits & U_ORIGIN1) ? cl.protocol->MSG_ReadCoord() : ent->baseline.origin[0];
-	ent->msg_angles[0][0] = (bits & U_ANGLE1) ? cl.protocol->MSG_ReadAngle() : ent->baseline.angles[0];
-	ent->msg_origins[0][1] = (bits & U_ORIGIN2) ? cl.protocol->MSG_ReadCoord() : ent->baseline.origin[1];
-	ent->msg_angles[0][1] = (bits & U_ANGLE2) ? cl.protocol->MSG_ReadAngle() : ent->baseline.angles[1];
-	ent->msg_origins[0][2] = (bits & U_ORIGIN3) ? cl.protocol->MSG_ReadCoord() : ent->baseline.origin[2];
-	ent->msg_angles[0][2] = (bits & U_ANGLE3) ? cl.protocol->MSG_ReadAngle() : ent->baseline.angles[2];
+	ent->msg_origins[0][0] = (bits & U_ORIGIN1) ? cl.protocol.MSG_ReadCoord() : ent->baseline.origin[0];
+	ent->msg_angles[0][0] = (bits & U_ANGLE1) ? cl.protocol.MSG_ReadAngle() : ent->baseline.angles[0];
+	ent->msg_origins[0][1] = (bits & U_ORIGIN2) ? cl.protocol.MSG_ReadCoord() : ent->baseline.origin[1];
+	ent->msg_angles[0][1] = (bits & U_ANGLE2) ? cl.protocol.MSG_ReadAngle() : ent->baseline.angles[1];
+	ent->msg_origins[0][2] = (bits & U_ORIGIN3) ? cl.protocol.MSG_ReadCoord() : ent->baseline.origin[2];
+	ent->msg_angles[0][2] = (bits & U_ANGLE3) ? cl.protocol.MSG_ReadAngle() : ent->baseline.angles[2];
 
-	ent->alpha = (bits & cl.protocol->fl_alpha) ? MSG_ReadByte() : ent->baseline.alpha;
+	ent->alpha = (bits & cl.protocol.fl_alpha) ? MSG_ReadByte() : ent->baseline.alpha;
 
 	if(bits & U_NOLERP)
 		ent->forcelink = true;
 
-	if(bits & cl.protocol->fl_large_frame)
+	if(bits & cl.protocol.fl_large_frame)
 		ent->frame |= MSG_ReadByte()<<8;
-	if(bits & cl.protocol->fl_large_model)
+	if(bits & cl.protocol.fl_large_model)
 		modnum |= MSG_ReadByte()<<8;
 
 	if(modnum < 0 || modnum >= MAX_MODELS)
@@ -428,16 +426,16 @@ static void CL_ParseBaseline (int withbits, entity_t *ent)
 	int i, bits;
 
 	bits = withbits ? MSG_ReadByte() : 0;
-	ent->baseline.modelindex = (bits & cl.protocol->fl_large_baseline_model) ? MSG_ReadShort() : MSG_ReadByte();
-	ent->baseline.frame = (bits & cl.protocol->fl_large_baseline_frame) ? MSG_ReadShort() : MSG_ReadByte();
+	ent->baseline.modelindex = (bits & cl.protocol.fl_large_baseline_model) ? MSG_ReadShort() : MSG_ReadByte();
+	ent->baseline.frame = (bits & cl.protocol.fl_large_baseline_frame) ? MSG_ReadShort() : MSG_ReadByte();
 	ent->baseline.colormap = MSG_ReadByte();
 	ent->baseline.skin = MSG_ReadByte();
 	for (i=0 ; i<3 ; i++)
 	{
-		ent->baseline.origin[i] = cl.protocol->MSG_ReadCoord ();
-		ent->baseline.angles[i] = cl.protocol->MSG_ReadAngle ();
+		ent->baseline.origin[i] = cl.protocol.MSG_ReadCoord ();
+		ent->baseline.angles[i] = cl.protocol.MSG_ReadAngle ();
 	}
-	ent->baseline.alpha = (bits & cl.protocol->fl_baseline_alpha) ? MSG_ReadByte() : DEFAULT_ALPHA;
+	ent->baseline.alpha = (bits & cl.protocol.fl_baseline_alpha) ? MSG_ReadByte() : DEFAULT_ALPHA;
 }
 
 
@@ -520,16 +518,16 @@ static void CL_ParseClientdata (unsigned int bits)
 		Sbar_Changed();
 	}
 
-	if(bits & cl.protocol->fl_large_weaponmodel)
+	if(bits & cl.protocol.fl_large_weaponmodel)
 		weaponmodel |= MSG_ReadByte() << 8;
 	if(cl.stats[STAT_WEAPON] != weaponmodel){
 		cl.stats[STAT_WEAPON] = weaponmodel;
 		Sbar_Changed();
 	}
 
-	if(bits & cl.protocol->fl_large_weaponframe)
+	if(bits & cl.protocol.fl_large_weaponframe)
 		cl.stats[STAT_WEAPONFRAME] |= MSG_ReadByte() << 8;
-	cl.viewent.alpha = (bits & cl.protocol->fl_weapon_alpha) ? MSG_ReadByte() : DEFAULT_ALPHA;
+	cl.viewent.alpha = (bits & cl.protocol.fl_weapon_alpha) ? MSG_ReadByte() : DEFAULT_ALPHA;
 
 	if(cl.viewent.model != cl.model_precache[cl.stats[STAT_WEAPON]]){
 		// FIXME(sigrid) - reset lerp
@@ -699,7 +697,7 @@ void CL_ParseServerMessage (void)
 			}
 			if(p == nil)
 				Host_Error("CL_ParseServerMessage: server uses unknown protocol %d\n", i);
-			if(p->version != cl.protocol->version)
+			if(p->version != cl.protocol.version)
 				Host_Error("CL_ParseServerMessage: server decided to switch protocol to %d mid-game?\n", i);
 			break;
 			
@@ -729,7 +727,7 @@ void CL_ParseServerMessage (void)
 			
 		case svc_setangle:
 			for (i=0 ; i<3 ; i++)
-				cl.viewangles[i] = cl.protocol->MSG_ReadAngle ();
+				cl.viewangles[i] = cl.protocol.MSG_ReadAngle ();
 			break;
 			
 		case svc_setview:

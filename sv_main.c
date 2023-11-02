@@ -99,8 +99,8 @@ void SV_StartParticle (vec3_t org, vec3_t dir, int color, int count)
 
 	if (sv.datagram.cursize > MAX_DATAGRAM-16)
 		return;	
-	MSG_WriteByte (&sv.datagram, svc_particle);
-	MSG_WriteVec(sv.protocol, &sv.datagram, org);
+	MSG_WriteByte(&sv.datagram, svc_particle);
+	MSG_WriteVec(*sv.protocol, &sv.datagram, org);
 	for (i=0 ; i<3 ; i++)
 	{
 		v = dir[i]*16;

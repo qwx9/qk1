@@ -30,11 +30,6 @@ void RemoveLink (link_t *l);
 void InsertLinkBefore (link_t *l, link_t *before);
 void InsertLinkAfter (link_t *l, link_t *after);
 
-// (type *)STRUCT_FROM_LINK(link_t *link, type, member)
-// ent = STRUCT_FROM_LINK(link,entity_t,order)
-// FIXME: remove this mess!
-#define	STRUCT_FROM_LINK(l,t,m) ((t *)((byte *)l - (uintptr)&(((t *)0)->m)))
-
 //============================================================================
 
 #define max(a,b) ((a)>(b)?(a):(b))
@@ -100,15 +95,15 @@ float MSG_ReadAngle (void);
 float MSG_ReadAngleInt16 (void);
 
 #define MSG_ReadVec(proto, d) do{ \
-	(d)[0] = (proto)->MSG_ReadCoord(); \
-	(d)[1] = (proto)->MSG_ReadCoord(); \
-	(d)[2] = (proto)->MSG_ReadCoord(); \
+	(d)[0] = (proto).MSG_ReadCoord(); \
+	(d)[1] = (proto).MSG_ReadCoord(); \
+	(d)[2] = (proto).MSG_ReadCoord(); \
 }while(0)
 
 #define MSG_WriteVec(proto, sb, s) do{ \
-	(proto)->MSG_WriteCoord(sb, (s)[0]); \
-	(proto)->MSG_WriteCoord(sb, (s)[1]); \
-	(proto)->MSG_WriteCoord(sb, (s)[2]); \
+	(proto).MSG_WriteCoord(sb, (s)[0]); \
+	(proto).MSG_WriteCoord(sb, (s)[1]); \
+	(proto).MSG_WriteCoord(sb, (s)[2]); \
 }while(0)
 
 //============================================================================
