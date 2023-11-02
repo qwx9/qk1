@@ -17,7 +17,7 @@ enum{
 	Ssamp = Srate / Fpsmin,
 	Snbuf = Ssamp * Sblk,
 
-	Nchan = 128,
+	Nchan = 256,
 	Ndyn = 8,
 	Sstat = Ndyn + Namb
 };
@@ -36,7 +36,6 @@ struct Chan{
 	int n;
 };
 
-static int nchan;
 static Chan *chans, *che;
 
 static int afd = -1, mixbufi;
@@ -583,7 +582,7 @@ stopallsfx(void)
 {
 	if(afd < 0)
 		return;
-	memset(chans, 0, sizeof(*chans)*nchan);
+	memset(chans, 0, sizeof(*chans)*Nchan);
 	che = chans + Sstat;
 }
 
@@ -686,12 +685,8 @@ staticsfx(Sfx *sfx, vec3_t zp, float vol, float att)
 	Chan *c;
 	sfxcache_t *sc;
 
-	if(sfx == nil)
+	if(sfx == nil || che >= chans+Nchan)
 		return;
-	if(che >= chans + nchan){
-		nchan *= 2;
-		chans = realloc(chans, nchan*sizeof(*chans));
-	}
 	c = che++;
 	if(sc = loadsfx(sfx), sc == nil)
 		return;
@@ -868,8 +863,7 @@ initsnd(void)
 	Cvar_RegisterVariable(&ambient_level);
 	Cvar_RegisterVariable(&ambient_fade);
 
-	nchan = Nchan;
-	chans = calloc(nchan, sizeof(*chans));
+	chans = calloc(Nchan, sizeof(*chans));
 	known_sfx = Hunk_Alloc(MAX_SOUNDS * sizeof *known_sfx);
 	num_sfx = 0;
 	
