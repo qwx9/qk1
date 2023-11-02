@@ -384,7 +384,7 @@ float alphafor(int flags);
 R_RenderFace
 ================
 */
-void R_RenderFace (msurface_t *fa, int clipflags)
+int R_RenderFace (msurface_t *fa, int clipflags)
 {
 	int			i, lindex;
 	unsigned	mask;
@@ -395,20 +395,18 @@ void R_RenderFace (msurface_t *fa, int clipflags)
 	clipplane_t	*pclip;
 
 	if((surfdrawflags(fa->flags) | entdrawflags(currententity)) ^ r_drawflags)
-		return;
+		return 0;
 
 // skip out if no more surfs
-	if ((surface_p) >= surf_max)
-	{
+	if (surface_p >= surf_max){
 		r_outofsurfaces++;
-		return;
+		return 1;
 	}
 
 // ditto if not enough edges left, or switch to auxedges if possible
-	if ((edge_p + fa->numedges + 4) >= edge_max)
-	{
+	if (edge_p + fa->numedges + 4 >= edge_max){
 		r_outofedges += fa->numedges;
-		return;
+		return 1;
 	}
 
 	c_faceclip++;
@@ -550,7 +548,7 @@ void R_RenderFace (msurface_t *fa, int clipflags)
 
 // if no edges made it out, return without posting the surface
 	if (!r_emitted)
-		return;
+		return 1;
 
 	r_polycount++;
 
@@ -577,6 +575,8 @@ void R_RenderFace (msurface_t *fa, int clipflags)
 
 //JDC	VectorCopy (r_worldmodelorg, surface_p->modelorg);
 	surface_p++;
+
+	return 1;
 }
 
 

@@ -694,8 +694,10 @@ void R_EdgeDrawing (void)
 	int i;
 
 	R_BeginEdgeFrame();
-	R_RenderWorld();
-	if((r_drawflags & DRAW_BLEND) == 0){
+	if(r_drawflags & DRAW_BLEND)
+		R_RenderWorldRejects();
+	else{
+		R_RenderWorld();
 		for(i = 0; i < cl_numvisedicts; i++){
 			if(cl_visedicts[i]->model->type == mod_brush)
 				R_DrawEntity(cl_visedicts[i]);

@@ -21,6 +21,16 @@ vec3_t			r_worldmodelorg;
 
 int				r_currentbkey;
 
+typedef struct nodereject_t nodereject_t;
+
+struct nodereject_t {
+	mnode_t *node;
+	int clipflags;
+};
+
+static nodereject_t *node_rejects;
+static int num_node_rejects, max_node_rejects = 128;
+
 typedef enum {touchessolid, drawnode, nodrawnode} solidstate_t;
 
 #define MAX_BMODEL_VERTS	6000
@@ -419,7 +429,7 @@ R_RecursiveWorldNode
 */
 void R_RecursiveWorldNode (mnode_t *node, int clipflags)
 {
-	int			i, c, side, *pindex;
+	int			i, c, side, *pindex, rejected;
 	vec3_t		acceptpt, rejectpt;
 	mplane_t	*plane;
 	msurface_t	*surf, **mark;
@@ -515,19 +525,29 @@ again:
 
 		if(c){
 			surf = cl.worldmodel->surfaces + node->firstsurface;
+			rejected = 0;
 
 			if(dot < -BACKFACE_EPSILON){
 				do{
 					if((surf->flags & SURF_PLANEBACK) && surf->visframe == r_framecount)
-						R_RenderFace (surf, clipflags);
+						rejected |= !R_RenderFace(surf, clipflags);
 					surf++;
 				}while(--c);
 			}else if(dot > BACKFACE_EPSILON){
 				do{
 					if(!(surf->flags & SURF_PLANEBACK) && surf->visframe == r_framecount)
-						R_RenderFace(surf, clipflags);
+						rejected |= !R_RenderFace(surf, clipflags);
 					surf++;
 				}while(--c);
+			}
+
+			if(rejected){
+				if(node_rejects == nil || num_node_rejects >= max_node_rejects){
+					max_node_rejects *= 2;
+					node_rejects = realloc(node_rejects, sizeof(*node_rejects)*max_node_rejects);
+				}
+				node_rejects[num_node_rejects].node = node;
+				node_rejects[num_node_rejects++].clipflags = clipflags;
 			}
 
 		// all surfaces on the same node share the same sequence number
@@ -556,7 +576,26 @@ void R_RenderWorld (void)
 	clmodel = currententity->model;
 	r_pcurrentvertbase = clmodel->vertexes;
 
+	num_node_rejects = 0;
 	R_RecursiveWorldNode (clmodel->nodes, 15);
 }
 
+void
+R_RenderWorldRejects(void)
+{
+	model_t *clmodel;
+	nodereject_t *rej;
+	msurface_t *surf;
+	int i;
 
+	currententity = &cl_entities[0];
+	VectorCopy (r_origin, modelorg);
+	clmodel = currententity->model;
+	r_pcurrentvertbase = clmodel->vertexes;
+
+	for(rej = node_rejects; rej < node_rejects+num_node_rejects; rej++){
+		surf = cl.worldmodel->surfaces + rej->node->firstsurface;
+		for(i = 0; i < rej->node->numsurfaces; i++, surf++)
+			R_RenderFace(surf, rej->clipflags);
+	}
+}

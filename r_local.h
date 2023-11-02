@@ -83,6 +83,7 @@ extern	clipplane_t	view_clipplanes[4];
 //=============================================================================
 
 void R_RenderWorld (void);
+void R_RenderWorldRejects(void);
 
 //=============================================================================
 
@@ -115,7 +116,7 @@ extern	vec3_t			r_worldmodelorg;
 
 
 void R_DrawSprite (void);
-void R_RenderFace (msurface_t *fa, int clipflags);
+int R_RenderFace (msurface_t *fa, int clipflags);
 void R_RenderPoly (msurface_t *fa, int clipflags);
 void R_RenderBmodelFace (bedge_t *pedges, msurface_t *psurf);
 void R_TransformPlane (mplane_t *p, float *normal, float *dist);
