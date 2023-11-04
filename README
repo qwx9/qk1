@@ -1,7 +1,7 @@
 qk1 - (9) quake
 ===============
 Port of linux/x11 quake and quakeworld to plan9front.  Tested and known to
-work on amd64, 386 and arm, but currently broken on zynq.
+work on arm64, amd64, 386 and arm.
 
 For details, see: http://nopenopenope.net/posts/quake
 
@@ -75,18 +75,16 @@ To install a mod
 
 
 
-Memory limit
-------------
-By default, qk1 allocates 64 MB of memory for its internal heap.  This amount
-can be controlled via a command line parameter, which is sadly different
-between games (i'm to blame):
+Memory limit (applies to QW only)
+---------------------------------
+By default, qw allocates 64 MB of memory for its internal heap.  This
+amount can be controlled via a command line parameter, which is sadly
+different between games (i'm to blame):
 
-	; games/quake -m 192
-	# quakeworld:
 	; games/qwcl -mem 192
 	; games/qwsv -mem 192
 
-It is necessary to increase it when playing on larger resolutions, else qk1
+It is necessary to increase it when playing on larger resolutions, else qw
 might crash with errors such as 'Hunk_Alloc: failed on 548512 bytes'.  Mods
 may require more memory as well.  The old default was 12 MB, so it can also
 be lowered in the unlikely case that it's necessary.  Typically, this
@@ -107,18 +105,13 @@ Mouse look on the other hand is enabled with a command:
 To disable mouse look, use `-mlook'.
 
 
-Screen resolution
------------------
-The rio(1) window running qk1 can be resized at will and at runtime, but must
+Screen resolution (applies to QW only)
+--------------------------------------
+The rio(1) window running qw can be resized at will and at runtime, but must
 the drawing area's size must be between 320x160 and 2047x2048.  To help with
 drawing speed, scaling up from a fixed resolution has been implemented.  When
-enabled, qk1 will behave like doom(1), where window size determines at
-runtime a scaling factor.  Currently, the way to enable this is again
-different between quake and quakeworld.
-
-quake:
-	
-	; games/quake -s 320 200
+enabled, qw will behave like doom(1), where window size determines at
+runtime a scaling factor.
 
 quakeworld:
 
@@ -161,7 +154,6 @@ mixfs(1).
 
 Known bugs
 ----------
-- rendering broken on zynq
 - regression: cd audio with actual cd's broken
 - a rare crash at d_sprite.c:/D_SpriteDrawSpansd can occur when running for
 a long time
@@ -175,7 +167,7 @@ disproportionate
 - #define PARANOID reveals several points of failure that are otherwise ignored
 - both stdio(2) and print(2) are used due to the way colored strings are, how
 to handle this gracefully is unknown
-- questionable pr_edict.c:/PR_Str hack may cause problems
+- questionable pr_edict.c:/PR_Str hack may cause problems (QW only)
 - refactoring: manpages, command line args, merge quakeworld, FIXME's in code
 
 
