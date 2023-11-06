@@ -1,13 +1,9 @@
-#include <u.h>
-#include <libc.h>
+#include "quakedef.h"
 #include <bio.h>
 #include <draw.h>
 #include <thread.h>
 #include <mouse.h>
 #include <keyboard.h>
-#include "dat.h"
-#include "quakedef.h"
-#include "fns.h"
 
 /* vid.c */
 extern int resized;

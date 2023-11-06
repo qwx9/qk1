@@ -48,13 +48,10 @@ int	readdm(void);
 int	loaddm(char*);
 int	opendm(char*, int);
 void	initfs(void);
+#pragma varargck	argpos	fatal	1
 void	fatal(char*, ...);
 void*	emalloc(ulong);
 vlong	flen(int);
 double	dtime(void);
 void	game_shutdown(void);
 uvlong	nanosec(void);
-
-#ifdef __plan9__
-#pragma varargck	argpos	fatal	1
-#endif

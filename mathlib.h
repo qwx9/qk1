@@ -12,6 +12,8 @@ typedef	int	fixed16_t;
 #define M_PI		3.14159265358979323846264338327950288
 #endif
 
+int isnanf(float f);
+
 struct mplane_s;
 
 extern vec3_t vec3_origin;

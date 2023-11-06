@@ -1,9 +1,5 @@
-#include <u.h>
-#include <libc.h>
-#include <thread.h>
-#include "dat.h"
 #include "quakedef.h"
-#include "fns.h"
+#include <thread.h>
 
 int mainstacksize = 1*1024*1024;
 char *netmtpt = "/net";

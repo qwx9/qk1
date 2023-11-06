@@ -1,8 +1,4 @@
-#include <u.h>
-#include <libc.h>
-#include "dat.h"
 #include "quakedef.h"
-#include "fns.h"
 
 dprograms_t		*progs;
 dfunction_t		*pr_functions;
@@ -704,37 +700,36 @@ returns false if error
 */
 qboolean	ED_ParseEpair (void *base, ddef_t *key, char *s)
 {
-	int		i;
-	char	string[128];
 	ddef_t	*def;
 	char	*v, *w;
 	void	*d;
 	dfunction_t	*func;
+	int		i;
 	
 	d = (void *)((int *)base + key->ofs);
 	
 	switch (key->type & ~DEF_SAVEGLOBAL)
 	{
 	case ev_string:
-		*(string_t *)d = ED_NewString (s);
+		*(string_t *)d = ED_NewString(s);
 		break;
 		
 	case ev_float:
-		*(float *)d = atof (s);
+		*(float *)d = atof(s);
 		break;
 		
 	case ev_vector:
-		strcpy (string, s);
-		v = string;
-		w = string;
-		for (i=0 ; i<3 ; i++)
-		{
-			while (*v && *v != ' ')
+		memset(d, 0, sizeof(float)*3);
+		w = s;
+		for(i = 0; i < 3; i++, w = v){
+			((float*)d)[i] = strtod(w, &v);
+			if(w == v)
+				break;
+			while(*v == ',' || *v == ' ')
 				v++;
-			*v = 0;
-			((float *)d)[i] = atof (w);
-			w = v = v+1;
 		}
+		for(; i < 3; i++)
+			((float*)d)[i] = 0;
 		break;
 		
 	case ev_entity:

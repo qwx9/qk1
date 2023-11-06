@@ -1,8 +1,4 @@
-#include <u.h>
-#include <libc.h>
-#include "dat.h"
 #include "quakedef.h"
-#include "fns.h"
 
 static finalvert_t		fv[2][8];
 static auxvert_t		av[8];
@@ -215,6 +211,8 @@ void R_AliasClipTriangle (mtriangle_t *ptri)
 	int				i, k, pingpong;
 	mtriangle_t		mtri;
 	unsigned		clipflags;
+
+	memset(fv, 0, sizeof(fv));
 
 // copy vertexes and fix seam texture coordinates
 	if (ptri->facesfront)

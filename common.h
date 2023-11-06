@@ -115,6 +115,7 @@ char *COM_Parse (char *data);
 extern	int		com_argc;
 extern	char	**com_argv;
 
+#pragma varargck	argpos	va	1
 char	*va(char *format, ...);
 // does a varargs printf into a temp buffer
 
@@ -125,7 +126,3 @@ struct cache_user_s;
 extern cvar_t registered;
 
 extern qboolean		standard_quake, rogue, hipnotic;
-
-#ifdef __plan9__
-#pragma varargck	argpos	va	1
-#endif

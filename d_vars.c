@@ -1,8 +1,4 @@
-#include <u.h>
-#include <libc.h>
-#include "dat.h"
 #include "quakedef.h"
-#include "fns.h"
 
 // all global and static refresh variables are collected in a contiguous block
 // to avoid cache conflicts.

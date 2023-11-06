@@ -1,8 +1,4 @@
-#include <u.h>
-#include <libc.h>
-#include "dat.h"
 #include "quakedef.h"
-#include "fns.h"
 
 static int num_temp_entities;
 static entity_t cl_temp_entities[MAX_TEMP_ENTITIES];

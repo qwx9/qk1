@@ -1,8 +1,6 @@
-#include <u.h>
-#include <time.h>
-#include "dat.h"
 #include "quakedef.h"
-#include "fns.h"
+#include "parg.h"
+#include <time.h>
 
 char *game;
 int debug;
@@ -62,27 +60,42 @@ int
 main(int argc, char **argv)
 {
 	double t, t2, dt;
-/*
-	ARGBEGIN{
-	case 'D':
-		debug = 1;
-		break;
-	case 'd':
-		dedicated = 1;
-		break;
-	case 'g':
-		game = EARGF(usage());
-		break;
-	case 'x':
-		netmtpt = EARGF(usage());
-		break;
-	default: usage();
-	}ARGEND
-*/
+	struct parg_state ps;
+	int c, nargs;
 
-	game = "ad";
+	parg_init(&ps);
+	nargs = 0;
+	while((c = parg_getopt(&ps, argc, argv, "Ddg:")) >= 0){
+		switch(c){
+		case 1:
+			argv[nargs++] = (char*)ps.optarg;
+			break;
+		case 'D':
+			debug = 1;
+			break;
+		case 'd':
+			dedicated = 1;
+			break;
+		case 'g':
+			game = (char*)ps.optarg;
+			break;
+		case 'h':
+			fprintf(stderr, "usage: qk1 [-g game]\n");
+			return 0;
+			break;
+		case '?':
+			fprintf(stderr, "unknown option -%c\n", ps.optopt);
+			return 1;
+			break;
+		default:
+			fprintf(stderr, "unhandled option -%c\n", c);
+			return 1;
+			break;
+		}
+	}
+
 	srand(getpid());
-	Host_Init(argc, argv);
+	Host_Init(nargs, argv);
 	t = dtime() - 1.0 / Fpsmax;
 	for(;;){
 		t2 = dtime();

@@ -13,14 +13,11 @@ void Con_DrawCharacter (int cx, int line, int num);
 void Con_CheckResize (void);
 void Con_Init (void);
 void Con_DrawConsole (int lines, qboolean drawinput);
+#pragma varargck	argpos	Con_Printf	1
 void Con_Printf (char *fmt, ...);
+#pragma varargck	argpos	Con_DPrintf	1
 void Con_DPrintf (char *fmt, ...);
 void Con_Clear_f (void);
 void Con_DrawNotify (void);
 void Con_ClearNotify (void);
 void Con_ToggleConsole_f (void);
-
-#ifdef __plan9__
-#pragma varargck	argpos	Con_Printf	1
-#pragma varargck	argpos	Con_DPrintf	1
-#endif

@@ -1,8 +1,4 @@
-#include <u.h>
-#include <libc.h>
-#include "dat.h"
 #include "quakedef.h"
-#include "fns.h"
 
 //define	PASSAGES
 
@@ -402,7 +398,7 @@ void R_MarkLeaves (void)
 {
 	byte	*vis;
 	mnode_t	*node;
-	int		i;
+	int		i, sz;
 
 	if (r_oldviewleaf == r_viewleaf)
 		return;
@@ -410,8 +406,8 @@ void R_MarkLeaves (void)
 	r_visframecount++;
 	r_oldviewleaf = r_viewleaf;
 
-	vis = Mod_LeafPVS (r_viewleaf, cl.worldmodel);
-		
+	vis = Mod_LeafPVS (r_viewleaf, cl.worldmodel, &sz);
+
 	for (i=0 ; i<cl.worldmodel->numleafs ; i++)
 	{
 		if (vis[i>>3] & (1<<(i&7)))

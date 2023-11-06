@@ -1,8 +1,4 @@
-#include <u.h>
-#include <libc.h>
-#include "dat.h"
 #include "quakedef.h"
-#include "fns.h"
 
 #define SKY_SPAN_SHIFT	5
 #define SKY_SPAN_MAX	(1 << SKY_SPAN_SHIFT)

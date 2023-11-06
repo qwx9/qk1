@@ -1,4 +1,4 @@
-#include <u.h>
+#include "quakedef.h"
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -7,9 +7,6 @@
 #include <sys/param.h>
 #include <sys/ioctl.h>
 #include <errno.h>
-#include "dat.h"
-#include "quakedef.h"
-#include "fns.h"
 
 extern cvar_t hostname;
 

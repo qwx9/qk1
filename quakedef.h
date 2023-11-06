@@ -1,10 +1,13 @@
+#pragma once
+
+#include <u.h>
+#include <libc.h>
+#include <stdio.h>
+
 #define	QUAKE_GAME			// as opposed to utilities
 #define	VERSION				1.09
 //#define	PARANOID			// speed sapping error checking
 #define	GAMENAME	"id1"		// directory to look in by default
-
-#define	VID_LockBuffer()
-#define	VID_UnlockBuffer()
 
 enum {
 	// !!! if this is changed, it must be changed in d_ifacea.h too !!!
@@ -113,10 +116,12 @@ typedef enum {false, true} qboolean;
 
 #include "cvar.h"
 #include "common.h"
+#include "zone.h"
+#include "dat.h"
+#include "mathlib.h"
+#include "fns.h"
 #include "bspfile.h"
 #include "vid.h"
-#include "zone.h"
-#include "mathlib.h"
 
 typedef struct
 {
@@ -137,12 +142,6 @@ typedef struct
 #include "protocol.h"
 #include "cmd.h"
 #include "sbar.h"
-
-struct Sfx{
-	char s[Npath];
-	int map;
-	mem_user_t cu;
-};
 
 extern cvar_t bgmvolume;
 extern cvar_t volume;
@@ -207,8 +206,6 @@ void Chase_Init (void);
 void Chase_Reset (void);
 void Chase_Update (void);
 
-#ifdef __plan9__
 #pragma varargck	argpos	Host_Error	1
 #pragma varargck	argpos	Host_EndGame	1
 #pragma varargck	argpos	Host_ClientCommands	1
-#endif

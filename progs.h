@@ -108,6 +108,7 @@ extern	qboolean	pr_trace;
 extern	dfunction_t	*pr_xfunction;
 extern	int			pr_xstatement;
 
+#pragma varargck	argpos	PR_RunError	1
 void PR_RunError (char *error, ...);
 
 void ED_PrintEdicts (void);
@@ -119,7 +120,3 @@ void M_Init (void);
 void M_Keydown (int key);
 void M_ToggleMenu_f (void);
 void M_Draw (void);
-
-#ifdef __plan9__
-#pragma varargck	argpos	PR_RunError	1
-#endif

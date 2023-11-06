@@ -1,9 +1,5 @@
-#include <u.h>
-#include <libc.h>
-#include <bio.h>
-#include "dat.h"
 #include "quakedef.h"
-#include "fns.h"
+#include <bio.h>
 
 u16int crcn;
 char fsdir[Nfspath];

@@ -186,7 +186,9 @@ void SV_AddUpdates (void);
 void SV_ClientThink (void);
 void SV_AddClientToServer (struct qsocket_s	*ret);
 
+#pragma varargck	argpos	SV_ClientPrintf	1
 void SV_ClientPrintf (char *fmt, ...);
+#pragma varargck	argpos	SV_BroadcastPrintf	1
 void SV_BroadcastPrintf (char *fmt, ...);
 
 void SV_Physics (void);
@@ -202,8 +204,3 @@ void SV_CheckForNewClients (void);
 void SV_RunClients (void);
 void SV_SaveSpawnparms (void);
 void SV_SpawnServer (char *server);
-
-#ifdef __plan9__
-#pragma varargck	argpos	SV_ClientPrintf	1
-#pragma varargck	argpos	SV_BroadcastPrintf	1
-#endif

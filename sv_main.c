@@ -1,8 +1,4 @@
-#include <u.h>
-#include <libc.h>
-#include "dat.h"
 #include "quakedef.h"
-#include "fns.h"
 
 server_t		sv;
 server_static_t	svs;
@@ -376,7 +372,7 @@ static int fatpvs_size;
 
 void SV_AddToFatPVS (vec3_t org, mnode_t *node, model_t *m)
 {
-	int		i;
+	int		i, sz;
 	byte	*pvs;
 	mplane_t	*plane;
 	float	d;
@@ -388,8 +384,8 @@ void SV_AddToFatPVS (vec3_t org, mnode_t *node, model_t *m)
 		{
 			if (node->contents != CONTENTS_SOLID)
 			{
-				pvs = Mod_LeafPVS ( (mleaf_t *)node, m);
-				for (i=0 ; i<fatbytes ; i++)
+				pvs = Mod_LeafPVS ( (mleaf_t *)node, m, &sz);
+				for (i=0 ; i<fatbytes && i<sz ; i++)
 					fatpvs[i] |= pvs[i];
 			}
 			return;

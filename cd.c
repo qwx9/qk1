@@ -1,10 +1,6 @@
-#include <u.h>
-#include <libc.h>
+#include "quakedef.h"
 #include <thread.h>
 #include <regexp.h>
-#include "dat.h"
-#include "quakedef.h"
-#include "fns.h"
 
 cvar_t bgmvolume = {"bgmvolume", "1", 1};
 

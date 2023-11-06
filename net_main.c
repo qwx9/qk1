@@ -1,8 +1,4 @@
-#include <u.h>
-#include <libc.h>
-#include "dat.h"
 #include "quakedef.h"
-#include "fns.h"
 
 qsocket_t	*net_activeSockets = nil;
 qsocket_t	*net_freeSockets = nil;

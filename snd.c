@@ -1,9 +1,5 @@
-#include <u.h>
-#include <libc.h>
-#include <thread.h>
-#include "dat.h"
 #include "quakedef.h"
-#include "fns.h"
+#include <thread.h>
 
 cvar_t volume = {"volume", "0.7", 1};
 

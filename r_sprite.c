@@ -1,8 +1,4 @@
-#include <u.h>
-#include <libc.h>
-#include "dat.h"
 #include "quakedef.h"
-#include "fns.h"
 
 static int				clip_current;
 static vec5_t			clip_verts[2][MAXWORKINGVERTS];

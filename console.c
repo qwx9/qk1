@@ -1,9 +1,4 @@
-#include <u.h>
-#include <libc.h>
-#include <stdio.h>
-#include "dat.h"
 #include "quakedef.h"
-#include "fns.h"
 
 static int con_linewidth;
 

@@ -5,12 +5,13 @@ BIN=${DESTDIR}${PREFIX}/bin
 MAN=${DESTDIR}${PREFIX}/share/man/man1
 SDL2_CFLAGS=$$(pkg-config --cflags sdl2)
 SDL2_LDFLAGS=$$(pkg-config --libs sdl2)
-CFLAGS?=-O2 -pipe -g -Wall
-CFLAGS+=-fms-extensions -Iunix -I. ${SDL2_CFLAGS}
+CFLAGS?=-O2 -g -Wall -Wextra -Wno-unknown-pragmas -Wno-missing-field-initializers -Wno-implicit-fallthrough
+CFLAGS+=-fms-extensions -I3rd/parg -Iunix -I. ${SDL2_CFLAGS}
 LDFLAGS?=
 LDFLAGS+=-lm ${SDL2_LDFLAGS}
 
 OBJS=\
+	3rd/parg/parg.o\
 	chase.o\
 	cl_demo.o\
 	cl_input.o\
@@ -62,7 +63,6 @@ OBJS=\
 	r_sky.o\
 	r_sprite.o\
 	r_surf.o\
-	r_vars.o\
 	sbar.o\
 	screen.o\
 	span.o\

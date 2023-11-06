@@ -1,8 +1,4 @@
-#include <u.h>
-#include <libc.h>
-#include "dat.h"
 #include "quakedef.h"
-#include "fns.h"
 
 #define	RETURN_EDICT(e) (((int *)pr_globals)[OFS_RETURN] = EDICT_TO_PROG(e))
 
@@ -684,8 +680,7 @@ int PF_newcheckclient (int check)
 // get the PVS for the entity
 	VectorAdd (ent->v.origin, ent->v.view_ofs, org);
 	leaf = Mod_PointInLeaf (org, sv.worldmodel);
-	pvs = Mod_LeafPVS (leaf, sv.worldmodel);
-	size = (sv.worldmodel->numleafs+7)>>3;
+	pvs = Mod_LeafPVS (leaf, sv.worldmodel, &size);
 	if(checkpvs == nil || size > checkpvs_size){
 		checkpvs = realloc(checkpvs, size);
 		checkpvs_size = size;

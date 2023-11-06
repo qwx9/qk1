@@ -1,8 +1,4 @@
-#include <u.h>
-#include <libc.h>
-#include "dat.h"
 #include "quakedef.h"
-#include "fns.h"
 
 static void
 MSG_WriteProtocolInfoNQ(sizebuf_t *sb, protocol_t *proto)

@@ -38,6 +38,7 @@ OFILES=\
 	host.$O\
 	host_cmd.$O\
 	in.$O\
+	isnanf.$O\
 	keys.$O\
 	mathlib.$O\
 	menu.$O\
@@ -65,7 +66,6 @@ OFILES=\
 	r_sky.$O\
 	r_sprite.$O\
 	r_surf.$O\
-	r_vars.$O\
 	screen.$O\
 	sbar.$O\
 	snd.$O\

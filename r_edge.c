@@ -1,8 +1,4 @@
-#include <u.h>
-#include <libc.h>
-#include "dat.h"
 #include "quakedef.h"
-#include "fns.h"
 
 /* FIXME
 the complex cases add new polys on most lines, so dont optimize for keeping them the same
@@ -339,9 +335,6 @@ void R_TrailingEdge (surf_t *surf, edge_t *edge)
 // start edge yet)
 	if (--surf->spanstate == 0)
 	{
-		if (surf->insubmodel)
-			r_bmodelactive--;
-
 		if (surf == surfaces[1].next)
 		{
 		// emit a span (current top going away)
@@ -388,9 +381,6 @@ void R_LeadingEdge (edge_t *edge)
 	// end edge)
 		if (++surf->spanstate == 1)
 		{
-			if (surf->insubmodel)
-				r_bmodelactive++;
-
 			surf2 = surfaces[1].next;
 
 			if (surf->key < surf2->key)
@@ -503,8 +493,6 @@ void R_GenerateSpans (void)
 {
 	edge_t			*edge;
 	surf_t			*surf;
-
-	r_bmodelactive = 0;
 
 // clear active surfaces to just the background surface
 	surfaces[1].next = surfaces[1].prev = &surfaces[1];

@@ -1,8 +1,4 @@
-#include <u.h>
-#include <libc.h>
-#include "dat.h"
 #include "quakedef.h"
-#include "fns.h"
 
 model_t	*loadmodel;
 char	loadname[32];	// for hunk tags
@@ -83,7 +79,7 @@ mleaf_t *Mod_PointInLeaf (vec3_t p, model_t *model)
 Mod_DecompressVis
 ===================
 */
-byte *Mod_DecompressVis (byte *in, model_t *model)
+static byte *Mod_DecompressVis (byte *in, model_t *model, int *outsz)
 {
 	static byte	*decompressed;
 	static int decompressed_size;
@@ -91,12 +87,13 @@ byte *Mod_DecompressVis (byte *in, model_t *model)
 	byte	*out;
 	int		row;
 
-	row = (model->numleafs+7)/8;	
+	row = (model->numleafs+7)/8;
 	if(decompressed == nil || row > decompressed_size){
 		decompressed_size = row;
 		decompressed = realloc(decompressed, decompressed_size);
 	}
 	out = decompressed;
+	*outsz = row;
 
 	if(!in){ // no vis info, so make all visible
 		memset(out, 0xff, row);
@@ -120,13 +117,14 @@ byte *Mod_DecompressVis (byte *in, model_t *model)
 	return decompressed;
 }
 
-byte *Mod_LeafPVS (mleaf_t *leaf, model_t *model)
+byte *Mod_LeafPVS (mleaf_t *leaf, model_t *model, int *outsz)
 {
 	static byte *mod_novis;
 	static int mod_novis_size;
 	int sz;
 
-	sz = (model->numleafs+7)/8;
+	sz = ((model->numleafs+7)/8 + 3) & ~3;
+	*outsz = sz;
 	if (leaf == model->leafs) {
 		if(mod_novis == nil || mod_novis_size < sz){
 			mod_novis = realloc(mod_novis, sz);
@@ -135,7 +133,7 @@ byte *Mod_LeafPVS (mleaf_t *leaf, model_t *model)
 		memset(mod_novis, 0xff, mod_novis_size);
 		return mod_novis;
 	}
-	return Mod_DecompressVis (leaf->compressed_vis, model);
+	return Mod_DecompressVis (leaf->compressed_vis, model, outsz);
 }
 
 /*

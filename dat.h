@@ -1,7 +1,3 @@
-typedef struct Sfx Sfx;
-
-extern char *game;
-
 enum{
 	Npath = 128,
 	Nfspath = 128,
@@ -14,6 +10,16 @@ enum{
 
 	Udpport = 26000,
 };
+
+typedef struct Sfx Sfx;
+
+struct Sfx {
+	char s[Npath];
+	int map;
+	mem_user_t cu;
+};
+
+extern char *game;
 
 extern char fsdir[];
 extern u16int crcn;

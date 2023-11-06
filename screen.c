@@ -1,8 +1,4 @@
-#include <u.h>
-#include <libc.h>
-#include "dat.h"
 #include "quakedef.h"
-#include "fns.h"
 
 // only the refresh window will be updated unless these variables are flagged 
 int			scr_copytop;

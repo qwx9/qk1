@@ -1,8 +1,4 @@
-#include <u.h>
-#include <libc.h>
-#include "dat.h"
 #include "quakedef.h"
-#include "fns.h"
 
 #define LIGHT_MIN	5		// lowest light value we'll allow, to avoid the
 							//  need for inner-loop light clamping

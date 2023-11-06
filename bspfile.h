@@ -306,7 +306,6 @@ extern	int			numsurfedges;
 extern	int			dsurfedges[MAX_MAP_SURFEDGES];
 
 
-void DecompressVis (byte *in, byte *decompressed);
 int CompressVis (byte *vis, byte *dest);
 
 void	LoadBSPFile (char *filename);

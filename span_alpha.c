@@ -1,6 +1,3 @@
-#include <u.h>
-#include <libc.h>
-#include "dat.h"
 #include "quakedef.h"
 
 #define P \

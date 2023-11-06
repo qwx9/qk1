@@ -1,10 +1,6 @@
-#include <u.h>
-#include <libc.h>
+#include "quakedef.h"
 #include <ip.h>
 #include <thread.h>
-#include "dat.h"
-#include "quakedef.h"
-#include "fns.h"
 
 Addr myip;
 

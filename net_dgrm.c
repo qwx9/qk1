@@ -1,9 +1,5 @@
-#include <u.h>
-#include <libc.h>
-#include <ip.h>
-#include "dat.h"
 #include "quakedef.h"
-#include "fns.h"
+#include <ip.h>
 
 //#define DEBUG
 

@@ -1,8 +1,4 @@
-#include <u.h>
-#include <libc.h>
-#include "dat.h"
 #include "quakedef.h"
-#include "fns.h"
 
 int	current_skill;
 
@@ -357,7 +353,7 @@ Host_Name_f
 */
 void Host_Name_f (void)
 {
-	char	*newName;
+	char	newName[16];
 
 	if (Cmd_Argc () == 1)
 	{
@@ -365,10 +361,10 @@ void Host_Name_f (void)
 		return;
 	}
 	if (Cmd_Argc () == 2)
-		newName = Cmd_Argv(1);	
+		strncpy(newName, Cmd_Argv(1), sizeof(newName));
 	else
-		newName = Cmd_Args();
-	newName[15] = 0;
+		strncpy(newName, Cmd_Args(), sizeof(newName));
+	newName[sizeof(newName)-1] = 0;
 
 	if (cmd_source == src_command)
 	{

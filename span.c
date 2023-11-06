@@ -1,6 +1,3 @@
-#include <u.h>
-#include <libc.h>
-#include "dat.h"
 #include "quakedef.h"
 
 #define P \
@@ -8,7 +5,7 @@
 		*pdest++ = pbase[(s >> 16) + (t >> 16) * cachewidth]; \
 		s += sstep; \
 		t += tstep; \
-	}while(0)
+	}while(0);
 
 void
 dospan(uchar *pdest, uchar *pbase, int s, int t, int sstep, int tstep, int spancount, int cachewidth)

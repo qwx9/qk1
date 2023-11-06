@@ -1,8 +1,4 @@
-#include <u.h>
-#include <libc.h>
-#include "dat.h"
 #include "quakedef.h"
-#include "fns.h"
 
 float           surfscale;
 qboolean        r_cache_thrash;         // set if surface cache is thrashing
