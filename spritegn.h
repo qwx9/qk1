@@ -2,7 +2,11 @@
 
 #define SPRITE_VERSION	1
 
+#ifdef __plan9__
 #pragma pack on
+#else
+#pragma pack(1)
+#endif
 
 // TODO: shorten these?
 typedef struct {
@@ -46,4 +50,8 @@ typedef struct {
 #define IDSPRITEHEADER	(('P'<<24)+('S'<<16)+('D'<<8)+'I')
 														// little-endian "IDSP"
 
+#ifdef __plan9__
 #pragma pack off
+#else
+#pragma pack(0)
+#endif

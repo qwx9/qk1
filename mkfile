@@ -2,7 +2,7 @@
 
 BIN=/$objtype/bin/games
 TARG=quake
-CFLAGS=$CFLAGS -D__${objtype}__
+CFLAGS=$CFLAGS -D__plan9__
 
 OFILES=\
 	pal`{test -f pal_$objtype.s && echo -n _$objtype}.$O\

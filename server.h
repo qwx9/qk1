@@ -203,5 +203,7 @@ void SV_RunClients (void);
 void SV_SaveSpawnparms (void);
 void SV_SpawnServer (char *server);
 
+#ifdef __plan9__
 #pragma varargck	argpos	SV_ClientPrintf	1
 #pragma varargck	argpos	SV_BroadcastPrintf	1
+#endif

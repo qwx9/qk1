@@ -97,7 +97,11 @@ enum {
 	OP_BITOR
 };
 
+#ifdef __plan9__
 #pragma pack on
+#else
+#pragma pack(1)
+#endif
 
 typedef struct statement_s
 {
@@ -159,4 +163,8 @@ typedef struct
 	int		entityfields;
 } dprograms_t;
 
+#ifdef __plan9__
 #pragma pack off
+#else
+#pragma pack(0)
+#endif

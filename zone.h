@@ -4,7 +4,7 @@ typedef struct
 }mem_user_t;
 
 #define Z_Free(p) free(p)
-#define Z_Malloc(sz) mallocz((sz), 1)
+#define Z_Malloc(sz) calloc(1, (sz))
 
 int Hunk_From(void *p);
 void Hunk_CacheFrom(mem_user_t *c, void *p);

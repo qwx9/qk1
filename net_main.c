@@ -34,6 +34,7 @@ Netdrv netdrv[MAX_NET_DRIVERS] = {
 	Loop_Close,
 	Loop_Shutdown
 	}
+#ifdef __plan9__
 	,
 	{
 	"Datagram",
@@ -49,10 +50,12 @@ Netdrv netdrv[MAX_NET_DRIVERS] = {
 	Datagram_Close,
 	Datagram_Shutdown
 	}
+#endif
 };
-int net_numdrivers = 2;
+int net_numdrivers = 0;
 
 Landrv landrv[MAX_NET_DRIVERS] = {
+#ifdef __plan9__
 	{
 	"UDP",
 	false,
@@ -67,8 +70,9 @@ Landrv landrv[MAX_NET_DRIVERS] = {
 	UDP_GetSocketPort,
 	UDP_SetSocketPort
 	}
+#endif
 };
-int net_numlandrivers = 1;
+int net_numlandrivers = 0;
 
 // these two macros are to make the code more readable
 #define sfunc	netdrv[sock->driver]
@@ -540,10 +544,10 @@ void NET_Init (void)
 	Cmd_AddCommand ("port", NET_Port_f);
 
 	// initialize all the drivers
-	for(net_driverlevel=0; net_driverlevel<net_numdrivers; net_driverlevel++){
-		if(netdrv[net_driverlevel].Init() < 0)
+	for(net_numdrivers=0; netdrv[net_numdrivers].Init; net_numdrivers++){
+		if(netdrv[net_numdrivers].Init() < 0)
 			continue;
-		netdrv[net_driverlevel].initialized = true;
+		netdrv[net_numdrivers].initialized = true;
 	}
 }
 

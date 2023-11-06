@@ -112,8 +112,6 @@ flipfb(void)
 	if(resized){		/* skip this frame if window resize */
 		stopfb();
 		resized = 0;
-		if(getwindow(display, Refnone) < 0)
-			sysfatal("getwindow: %r");
 		resetfb();
 		vid.recalc_refdef = 1;	/* force a surface cache flush */
 		Con_CheckResize();

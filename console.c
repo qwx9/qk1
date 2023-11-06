@@ -342,8 +342,8 @@ void Con_DPrintf (char *fmt, ...)
 	va_end (argptr);
 
 	Con_Printf ("%s", msg);
-	if(developer.value > 1)
-		write(2, msg, n);
+	if(developer.value > 1 && write(2, msg, n) < 0)
+		setcvar("developer", "0");
 }
 
 /*

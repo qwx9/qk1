@@ -54,7 +54,7 @@ dtime(void)
 }
 
 void
-shutdown(void)
+game_shutdown(void)
 {
 	stopfb();
 	Host_Shutdown();

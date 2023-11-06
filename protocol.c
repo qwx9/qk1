@@ -7,7 +7,7 @@
 static void
 MSG_WriteProtocolInfoNQ(sizebuf_t *sb, protocol_t *proto)
 {
-	USED(sb, proto);
+	USED(sb); USED(proto);
 }
 
 static void

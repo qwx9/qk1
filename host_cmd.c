@@ -24,7 +24,7 @@ void Host_Quit_f (void)
 	CL_Disconnect ();
 	Host_ShutdownServer(false);		
 
-	shutdown ();
+	game_shutdown ();
 }
 
 

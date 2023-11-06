@@ -20,4 +20,7 @@ void Con_DrawNotify (void);
 void Con_ClearNotify (void);
 void Con_ToggleConsole_f (void);
 
+#ifdef __plan9__
 #pragma varargck	argpos	Con_Printf	1
+#pragma varargck	argpos	Con_DPrintf	1
+#endif

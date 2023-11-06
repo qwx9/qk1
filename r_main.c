@@ -713,7 +713,7 @@ void R_EdgeDrawing (void)
 }
 
 static int
-R_SortEntities(void *a_, void *b_)
+R_SortEntities(const void *a_, const void *b_)
 {
 	entity_t *a, *b;
 	vec3_t v[2];

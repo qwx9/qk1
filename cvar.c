@@ -162,6 +162,6 @@ setcvarv(char *k, float v)
 {
 	char u[32];
 
-	sprint(u, "%f", v);
+	snprint(u, sizeof(u), "%f", v);
 	setcvar(k, u);
 }

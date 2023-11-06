@@ -53,11 +53,13 @@ void R_EntityParticles (entity_t *ent)
 	
 	dist = 64;
 
-if (!avelocities[0][0])
-{
-for (i=0 ; i<NUMVERTEXNORMALS*3 ; i++)
-avelocities[0][i] = (rand()&255) * 0.01;
-}
+	if(!avelocities[0][0]){
+		for (i=0 ; i<NUMVERTEXNORMALS ; i++){
+			avelocities[i][0] = (rand()&255) * 0.01;
+			avelocities[i][1] = (rand()&255) * 0.01;
+			avelocities[i][2] = (rand()&255) * 0.01;
+		}
+	}
 
 
 	for (i=0 ; i<NUMVERTEXNORMALS ; i++)
@@ -125,11 +127,7 @@ void R_ParseParticleEffect (void)
 		dir[i] = MSG_ReadChar () * (1.0/16);
 	msgcount = MSG_ReadByte ();
 	color = MSG_ReadByte ();
-
-if (msgcount == 255)
-	count = 1024;
-else
-	count = msgcount;
+	count = msgcount < 255 ? msgcount : 1024;
 	
 	R_RunParticleEffect (org, dir, color, count);
 }

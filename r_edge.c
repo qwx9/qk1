@@ -60,12 +60,12 @@ void R_BeginEdgeFrame (void)
 {
 	int		v, n;
 
-	Arr_AllocExtra(&r_edges, &r_numallocatededges, r_outofedges);
+	r_edges = Arr_AllocExtra(r_edges, &r_numallocatededges, r_outofedges);
 	edge_p = r_edges;
 	edge_max = &r_edges[r_numallocatededges];
 	r_outofedges = 0;
 
-	Arr_AllocExtra(&surfaces, &r_cnumsurfs, r_outofsurfaces);
+	surfaces = Arr_AllocExtra(surfaces, &r_cnumsurfs, r_outofsurfaces);
 	surf_max = &surfaces[r_cnumsurfs];
 	r_outofsurfaces = 0;
 
@@ -548,7 +548,7 @@ void R_ScanEdges (void)
 	espan_t	*basespan_p;
 	surf_t	*s;
 
-	Arr_AllocExtra(&r_basespans, &r_numallocatedbasespans, r_outofspans);
+	r_basespans = Arr_AllocExtra(r_basespans, &r_numallocatedbasespans, r_outofspans);
 	basespan_p = (espan_t *)
 			((uintptr)(r_basespans + CACHE_SIZE - 1) & ~(CACHE_SIZE - 1));
 	max_span_p = &basespan_p[r_numallocatedbasespans - r_refdef.vrect.width];

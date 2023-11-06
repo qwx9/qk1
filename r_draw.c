@@ -731,6 +731,8 @@ void R_RenderPoly (msurface_t *fa, int clipflags)
 		}
 	}
 
+	memset(verts, 0, sizeof(verts));
+
 // reconstruct the polygon
 // FIXME: these should be precalculated and loaded off disk
 	pedges = currententity->model->edges;

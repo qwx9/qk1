@@ -1,6 +1,5 @@
 #include <u.h>
 #include <libc.h>
-#include <bio.h>
 #include "dat.h"
 #include "quakedef.h"
 #include "fns.h"
@@ -23,18 +22,18 @@ enum{
 	Fstack
 };
 struct Lump{
-	char f[Npath];
+	char fname[Npath];
 	int ofs;
 	int len;
 };
 struct Pak{
-	char f[Nfspath];
-	Biobuf *bf;
+	char fname[Nfspath];
+	FILE *f;
 	Lump *l;
 	Lump *e;
 };
 struct Paklist{
-	char f[Nfspath];
+	char fname[Nfspath];
 	Pak *p;
 	Paklist *pl;
 };
@@ -105,7 +104,7 @@ static int notid1;
 static int loadsize;
 static uchar *loadbuf;
 static mem_user_t *loadcache;
-static Biobuf *demobf;
+static FILE *demof;
 static vlong demoofs;
 
 #define	GBIT32(p)	((p)[0]|((p)[1]<<8)|((p)[2]<<16)|((p)[3]<<24))
@@ -156,96 +155,83 @@ path(void)
 		if(pl->p)
 			Con_Printf(va("%s (%zd files)\n", pl->p->f, pl->p->e - pl->p->l));
 		else
-			Con_Printf("%s\n", pl->f);
-}
-
-static Biobuf *
-bopen(char *f, int m, int arm)
-{
-	Biobuf *bf;
-
-	bf = Bopen(f, m);
-	if(bf == nil)
-		return nil;
-	if(arm)
-		Blethal(bf, nil);
-	return bf;
+			Con_Printf("%s\n", pl->fname);
 }
 
 static long
-eread(Biobuf *bf, void *u, long n)
+eread(FILE *f, void *u, long n)
 {
-	if(Bread(bf, u, n) != n)
-		fatal("eread: short read: %r");
+	if(fread(u, 1, n, f) != n)
+		fatal("eread: short read");
 	return n;
 }
 
 static u8int
-get8(Biobuf *bf)
+get8(FILE *f)
 {
 	u8int v;
 
-	eread(bf, &v, 1);
+	eread(f, &v, 1);
 	return v;
 }
 
 static u16int
-get16(Biobuf *bf)
+get16(FILE *f)
 {
 	u16int v;
 
-	v = get8(bf);
-	return v | get8(bf) << 8;
+	v = get8(f);
+	return v | get8(f) << 8;
 }
 
 static u32int
-get32(Biobuf *bf)
+get32(FILE *f)
 {
 	u32int v;
 
-	v = get16(bf);
-	return v | get16(bf) << 16;
+	v = get16(f);
+	return v | get16(f) << 16;
 }
 
 static float
-getfl(Biobuf *bf)
+getfl(FILE *f)
 {
 	union{
 		float v;
 		u32int u;
 	} u;
 
-	u.u = get32(bf);
+	u.u = get32(f);
 	return u.v;
 }
 
 static u16int
-get16b(Biobuf *bf)
+get16b(FILE *f)
 {
 	u16int v;
 
-	v = get8(bf);
-	return v << 8 | get8(bf);
+	v = get8(f);
+	return v << 8 | get8(f);
 }
 
 static void
-ewrite(Biobuf *bf, void *u, long n)
+ewrite(FILE *f, void *u, long n)
 {
-	if(Bwrite(bf, u, n) != n)
-		fatal("eread: short write: %r");
+	if(fwrite(u, 1, n, f) != n)
+		fatal("eread: short write");
 }
 
 static void
-put32(Biobuf *bf, u32int v)
+put32(FILE *f, u32int v)
 {
 	uchar u[4];
 
 	PBIT32(u, v);
-	ewrite(bf, u, 4);
+	ewrite(f, u, 4);
 }
 
 static void
-putfl(Biobuf *bf, float v)
+putfl(FILE *f, float v)
 {
 	union{
 		float v;
@@ -253,53 +239,18 @@ putfl(Biobuf *bf, float v)
 	} w;
 
 	w.v = v;
-	put32(bf, w.u);
+	put32(f, w.u);
 }
 
-#ifdef __plan9__
 static vlong
-bsize(Biobuf *bf)
-{
-	vlong n;
-	Dir *d;
-
-	d = dirfstat(Bfildes(bf));
-	if(d == nil)
-		fatal("bstat: %r");
-	n = d->length;
-	free(d);
-	return n;
-}
-#else
-static vlong
-bsize(Biobuf *bf)
+bsize(FILE *f)
 {
 	struct stat st;
 
-	if(fstat(Bfildes(bf), &st) != 0)
-		fatal("bstat");
+	if(fstat(fileno(f), &st) != 0)
+		fatal("fstat");
 	return st.st_size;
 }
-#endif
-
-#ifdef __plan9__
-static int
-mkdir(char *path)
-{
-	int d;
-
-	if(access(path, AEXIST) == 0)
-		return 0;
-	if((d = create(path, OREAD, DMDIR|0777)) < 0){
-		Con_DPrintf("Sys_mkdir:create: %r\n");
-		return -1;
-	}
-	close(d);
-	return 0;
-}
-#else
-#define mkdir(p) mkdir(p, 0770)
-#endif
 
 static int
 mkpath(char *path)
@@ -314,31 +265,31 @@ mkpath(char *path)
 	while(*d != 0){
 		if(*d == '/'){
 			*d = 0;
-			if(mkdir(path) < 0)
+			if(mkdir(path, 0770) < 0)
 				return -1;
 			*d = '/';
 		}
 		d++;
 	}
-	return mkdir(path);
+	return mkdir(path, 0770);
 }
 
 static void
-closelmp(Biobuf *bf)
+closelmp(FILE *f)
 {
 	Paklist *pl;
 
 	for(pl=pkl; pl!=nil; pl=pl->pl)
-		if(pl->p && pl->p->bf == bf)
+		if(pl->p && pl->p->f == f)
 			return;
-	Bterm(bf);
+	fclose(f);
 }
 
-static Biobuf *
-openlmp(char *f, int *len)
+static FILE *
+openlmp(char *fname, int *len)
 {
 	char d[Nfspath+1];
-	Biobuf *bf;
+	FILE *f;
 	Paklist *pl;
 	Pak *p;
 	Lump *l;
@@ -348,39 +299,39 @@ openlmp(char *f, int *len)
 			p = pl->p;
 			l = p->l;
 			while(l < p->e){
-				if(strcmp(l->f, f) == 0){
-					Bseek(p->bf, l->ofs, 0);
+				if(strcmp(l->fname, fname) == 0){
+					fseek(p->f, l->ofs, SEEK_SET);
 					if(len != nil)
 						*len = l->len;
-					return p->bf;
+					return p->f;
 				}
 				l++;
 			}
 			continue;
 		}
-		snprint(d, sizeof d, "%s/%s", pl->f, f);
-		if(bf = bopen(d, OREAD, 1), bf == nil)
+		snprint(d, sizeof d, "%s/%s", pl->fname, fname);
+		if(f = fopen(d, "rb"), f == nil)
 			continue;
 		if(len != nil)
-			*len = bsize(bf);
-		return bf;
+			*len = bsize(f);
+		return f;
 	}
-	werrstr("openlmp %s: not found", f);
+	//fprintf(stderr, "openlmp %s: not found\n", fname);
 	return nil;
 }
 
 static uchar *
-loadlmp(char *f, int mth, int *n)
+loadlmp(char *fname, int mth, int *n)
 {
 	int m;
 	char r[32];
 	uchar *buf;
-	Biobuf *bf;
+	FILE *f;
 
-	bf = openlmp(f, &m);
-	if(bf == nil)
+	f = openlmp(fname, &m);
+	if(f == nil)
 		return nil;
-	radix(f, r);
+	radix(fname, r);
 	buf = nil;
 	switch(mth){
 	case Fhunk: buf = Hunk_Alloc(m + 1); break;
@@ -388,10 +339,10 @@ loadlmp(char *f, int mth, int *n)
 	case Fstack: buf = m + 1 <= loadsize ? loadbuf : Hunk_TempAlloc(m + 1); break;
 	}
 	if(buf == nil)
-		fatal("loadlmp %s %d: memory allocation failed: %r", f, m + 1);
+		fatal("loadlmp %s %d: memory allocation failed", fname, m + 1);
 	buf[m] = 0;
-	eread(bf, buf, m);
-	closelmp(bf);
+	eread(f, buf, m);
+	closelmp(f);
 	if(n != nil)
 		*n = m;
 	return buf;
@@ -423,14 +374,14 @@ void
 loadpoints(void)
 {
 	int i, n, nv;
-	Biobuf *bf;
+	FILE *f;
 	vec3_t v3;
 	vec_t *v;
 	particle_t *p;
 
-	bf = openlmp(va("maps/%s.pts", sv.name), &n);
-	if(bf == nil){
-		Con_Printf(va("loadpoints: %r\n"));
+	f = openlmp(va("maps/%s.pts", sv.name), &n);
+	if(f == nil){
+		Con_Printf(va("loadpoints failed\n"));
 		return;
 	}
 	nv = 0;
@@ -438,8 +389,8 @@ loadpoints(void)
 		if(n < 3*4+3)
 			break;
 		for(i=0, v=v3; i<3; i++){
-			*v++ = getfl(bf);
-			Bseek(bf, 1, 1);
+			*v++ = getfl(f);
+			fseek(f, 1, SEEK_CUR);
 		}
 		n -= 3*4+3;
 		nv++;
@@ -457,47 +408,47 @@ loadpoints(void)
 		VectorCopy(vec3_origin, p->vel);
 		VectorCopy(v3, p->org);
 	}
-	closelmp(bf);
+	closelmp(f);
 	Con_Printf("loadpoints: %d points read\n", nv);
 }
 
 static void
-dumpcvars(Biobuf *bf)
+dumpcvars(FILE *f)
 {
 	cvar_t *c;
 
 	for(c=cvar_vars; c!=nil; c=c->next)
 		if(c->archive)
-			if(Bprint(bf, "%s \"%s\"\n", c->name, c->string) == Beof)
-				fatal("dumpcvars: %r");
+			if(fprintf(f, "%s \"%s\"\n", c->name, c->string) < 0)
+				fatal("dumpcvars");
 }
 
 static void
-dumpkeys(Biobuf *bf)
+dumpkeys(FILE *f)
 {
 	char **k;
 
 	for(k=keybindings; k<keybindings+256; k++)
 		if(*k != nil && **k != 0)
-			Bprint(bf, "bind \"%s\" \"%s\"\n",
+			fprintf(f, "bind \"%s\" \"%s\"\n",
 				Key_KeynumToString(k-keybindings), *k);
 }
 
 void
 dumpcfg(void)
 {
-	Biobuf *bf;
+	FILE *f;
 
 	if(!host_initialized)
 		return;
-	bf = bopen(va("%s/config.cfg", fsdir), OWRITE, 1);
-	if(bf == nil){
-		Con_DPrintf("dumpcfg: %r\n");
+	f = fopen(va("%s/config.cfg", fsdir), "wb");
+	if(f == nil){
+		Con_DPrintf("dumpcfg failed\n");
 		return;
 	}
-	dumpkeys(bf);
-	dumpcvars(bf);
-	Bterm(bf);
+	dumpkeys(f);
+	dumpcvars(f);
+	fclose(f);
 }
 
 void
@@ -505,7 +456,8 @@ savnames(void)
 {
 	int n, *canld;
 	char (*e)[Nsavcm], (*s)[Nsavcm], *p;
-	Biobuf *bf;
+	char tmp[8192];
+	FILE *f;
 
 	s = savs;
 	canld = savcanld;
@@ -513,14 +465,14 @@ savnames(void)
 		*canld = 0;
 		memset(*s, 0, sizeof *s);
 		strcpy(*s, "--- UNUSED SLOT ---");
-		bf = bopen(va("%s/s%d.sav", fsdir, n), OREAD, 1);
-		if(bf == nil){
-			Con_DPrintf("savnames: %r\n");
+		f = fopen(va("%s/s%d.sav", fsdir, n), "rb");
+		if(f == nil){
+			Con_DPrintf("savnames failed\n");
 			continue;
 		}
-		if((p = Brdline(bf, '\n'), p == nil)	/* discard version */
-		|| (p = Brdline(bf, '\n'), p == nil)){
-			Con_DPrintf("savnames: short read: %r\n");
+		if((p = fgets(tmp, sizeof(tmp), f), p == nil)	/* discard version */
+		|| (p = fgets(tmp, sizeof(tmp), f), p == nil)){
+			Con_DPrintf("savnames: short read\n");
 			continue;
 		}
 		strncpy(*s, p, sizeof(*s)-1);
@@ -528,12 +480,12 @@ savnames(void)
 			if(*p == '_')
 				*p = ' ';
 		*canld = 1;
-		Bterm(bf);
+		fclose(f);
 	}
 }
 
 static void
-dumpedicts(Biobuf *bf, edict_t *ed)
+dumpedicts(FILE *f, edict_t *ed)
 {
 	int *vp, *ve;
 	char *s;
@@ -541,7 +493,7 @@ dumpedicts(Biobuf *bf, edict_t *ed)
 	ddef_t *d, *de;
 	eval_t *v;
 
-	Bprint(bf, "{\n");
+	fprintf(f, "{\n");
 	if(ed->free)
 		goto end;
 	ev = (uchar *)&ed->v;
@@ -559,20 +511,20 @@ dumpedicts(Biobuf *bf, edict_t *ed)
 				break;
 		if(vp == ve)
 			continue;
-		Bprint(bf, "\"%s\" ", s);
-		Bprint(bf, "\"%s\"\n", PR_UglyValueString(d->type, v));
+		fprintf(f, "\"%s\" ", s);
+		fprintf(f, "\"%s\"\n", PR_UglyValueString(d->type, v));
 	}
 end:
-	Bprint(bf, "}\n");
+	fprintf(f, "}\n");
 }
 
 static void
-dumpdefs(Biobuf *bf)
+dumpdefs(FILE *f)
 {
 	ushort t;
 	ddef_t *d, *de;
 
-	Bprint(bf, "{\n");
+	fprintf(f, "{\n");
 	de = pr_globaldefs + progs->numglobaldefs;
 	for(d=pr_globaldefs; d<de; d++){
 		t = d->type;
@@ -581,44 +533,44 @@ dumpdefs(Biobuf *bf)
 		t &= ~DEF_SAVEGLOBAL;
 		if(t != ev_string && t != ev_float && t != ev_entity)
 			continue;
-		Bprint(bf, "\"%s\" \"%s\"\n", PR_Str(d->s_name),
+		fprintf(f, "\"%s\" \"%s\"\n", PR_Str(d->s_name),
 			PR_UglyValueString(t, (eval_t *)&pr_globals[d->ofs]));
 	}
-	Bprint(bf, "}\n");
+	fprintf(f, "}\n");
 }
 
 int
-dumpsav(char *f, char *cm)
+dumpsav(char *fname, char *cm)
 {
 	int i;
 	char **s, **e;
 	float *fs, *fe;
-	Biobuf *bf;
+	FILE *f;
 
-	bf = bopen(f, OWRITE, 1);
-	if(bf == nil)
+	f = fopen(fname, "wb");
+	if(f == nil)
 		return -1;
-	Bprint(bf, "%d\n%s\n", Nsavver, cm);
+	fprintf(f, "%d\n%s\n", Nsavver, cm);
 	fs = svs.clients->spawn_parms;
 	fe = fs + nelem(svs.clients->spawn_parms);
 	while(fs < fe)
-		Bprint(bf, "%f\n", *fs++);
-	Bprint(bf, "%d\n%s\n%f\n", current_skill, sv.name, sv.time);
+		fprintf(f, "%f\n", *fs++);
+	fprintf(f, "%d\n%s\n%f\n", current_skill, sv.name, sv.time);
 	s = sv.lightstyles;
 	e = s + nelem(sv.lightstyles);
 	while(s < e){
-		Bprint(bf, "%s\n", *s != nil ? *s : "m");
+		fprintf(f, "%s\n", *s != nil ? *s : "m");
 		s++;
 	}
-	dumpdefs(bf);
+	dumpdefs(f);
 	for(i=0; i<sv.num_edicts; i++)
-		dumpedicts(bf, EDICT_NUM(i));
-	Bterm(bf);
+		dumpedicts(f, EDICT_NUM(i));
+	fclose(f);
 	return 0;
 }
 
 static void
-loadedicts(Biobuf *bf)
+loadedicts(FILE *f)
 {
 	int ent, c;
 	char sb[32768], *s;
@@ -628,8 +580,8 @@ loadedicts(Biobuf *bf)
 	c = 0;
 	do{
 		for(s=sb; s<sb+sizeof(sb)-1; s++){
-			c = Bgetc(bf);
-			if(c == Beof || c == 0)
+			c = fgetc(f);
+			if(c == EOF || c == 0)
 				break;
 			*s = c;
 			if(c == '}'){
@@ -657,89 +609,87 @@ loadedicts(Biobuf *bf)
 				SV_LinkEdict(ed, 0);
 		}
 		ent++;
-	}while(c != Beof);
+	}while(c != EOF);
 	sv.num_edicts = ent;
 }
 
 static int
-loadparms(Biobuf *bf, char *f)
+loadparms(FILE *f, char *fname)
 {
 	int r;
 	float sp[Nparms], *p;
 	char *s, **lp;
+	char tmp[8192];
 
 	r = -1;
 	p = sp;
 	while(p < sp + nelem(sp)){
-		if(s = Brdline(bf, '\n'), s == nil)
+		if(s = fgets(tmp, sizeof(tmp), f), s == nil)
 			goto exit;
 		*p++ = (float)strtod(s, nil);
 	}
-	if(s = Brdline(bf, '\n'), s == nil)
+	if(s = fgets(tmp, sizeof(tmp), f), s == nil)
 		goto exit;
 	current_skill = (int)(strtod(s, nil) + 0.1);
 	setcvarv("skill", (float)current_skill);
-	if(s = Brdstr(bf, '\n', 1), s == nil)
+	if(s = fgets(tmp, sizeof(tmp), f), s == nil)
 		goto exit;
 	CL_Disconnect_f();
 	SV_SpawnServer(s);
-	free(s);
-	if(!sv.active){
-		werrstr("failed to load map %s", f);
+	if(!sv.active)
 		goto exit;
-	}
 	sv.paused = 1;
 	sv.loadgame = 1;
-	if(s = Brdline(bf, '\n'), s == nil)
+	if(s = fgets(tmp, sizeof(tmp), f), s == nil)
 		goto exit;
 	sv.time = strtod(s, nil);
 	lp = sv.lightstyles;
 	while(lp < sv.lightstyles + nelem(sv.lightstyles)){
-		if(s = Brdstr(bf, '\n', 1), s == nil)
+		if(s = fgets(tmp, sizeof(tmp), f), s == nil)
 			goto exit;
 		*lp = Hunk_Alloc(strlen(s)+1);
 		strcpy(*lp++, s);
-		free(s);
 	}
 	r = 0;
-	loadedicts(bf);
+	loadedicts(f);
 	memcpy(svs.clients->spawn_parms, sp, sizeof sp);
 exit:
 	return r;
 }
 
 int
-loadsav(char *f)
+loadsav(char *fname)
 {
 	int n, r;
 	char *s;
-	Biobuf *bf;
+	FILE *f;
+	char tmp[8192];
 
-	bf = bopen(f, OREAD, 0);
-	if(bf == nil)
+	f = fopen(fname, "rb");
+	if(f == nil)
 		return -1;
 	r = -1;
-	if(s = Brdline(bf, '\n'), s == nil)
+	if(s = fgets(tmp, sizeof(tmp), f), s == nil)
 		goto exit;
 	n = strtol(s, nil, 10);
 	if(n != Nsavver){
 		werrstr("invalid version %d", n);
 		goto exit;
 	}
-	Brdline(bf, '\n');
-	r = loadparms(bf, f);
+	s = fgets(tmp, sizeof(tmp), f);
+	r = loadparms(f, fname);
 exit:
-	Bterm(bf);
+	fclose(f);
 	return r;
 }
 
 void
 closedm(void)
 {
-	if(demobf == nil)
+	if(demof == nil)
 		return;
-	closelmp(demobf);
-	demobf = nil;
+	closelmp(demof);
+	demof = nil;
 }
 
 void
@@ -747,10 +697,10 @@ writedm(void)
 {
 	int i;
 
-	put32(demobf, net_message.cursize);
+	put32(demof, net_message.cursize);
 	for(i=0; i<3; i++)
-		putfl(demobf, cl.viewangles[i]);
-	ewrite(demobf, net_message.data, net_message.cursize);
+		putfl(demof, cl.viewangles[i]);
+	ewrite(demof, net_message.data, net_message.cursize);
 }
 
 int
@@ -759,41 +709,41 @@ readdm(void)
 	int n;
 	vec_t *f;
 
-	Bseek(demobf, demoofs, 0);
-	net_message.cursize = get32(demobf);
+	fseek(demof, demoofs, SEEK_SET);
+	net_message.cursize = get32(demof);
 	VectorCopy(cl.mviewangles[0], cl.mviewangles[1]);
 	for(n=0, f=cl.mviewangles[0]; n<3; n++)
-		*f++ = getfl(demobf);
+		*f++ = getfl(demof);
 	if(net_message.cursize > NET_MAXMESSAGE)
 		fatal("readdm: invalid message size %d\n", net_message.cursize);
-	n = Bread(demobf, net_message.data, net_message.cursize);
-	demoofs = Bseek(demobf, 0, 1);
+	n = fread(net_message.data, 1, net_message.cursize, demof);
+	demoofs = ftell(demof);
 	if(n < 0)
-		Con_DPrintf("readdm: bad read: %r\n");
+		Con_DPrintf("readdm: bad read\n");
 	if(n != net_message.cursize){
-		Con_DPrintf("readdm: short read: %r\n");
+		Con_DPrintf("readdm: short read\n");
 		n = -1;
 	}
 	return n;
 }
 
 int
-loaddm(char *f)
+loaddm(char *fname)
 {
 	int n;
-	char *s;
+	char *s, tmp[8192];
 
-	demobf = openlmp(f, &n);
-	if(demobf == nil)
+	demof = openlmp(fname, &n);
+	if(demof == nil)
 		return -1;
-	s = Brdline(demobf, '\n');
-	n = Blinelen(demobf) - 1;
+	s = fgets(tmp, sizeof(tmp), demof);
+	n = strlen(s) - 1;
 	if(s == nil || n < 0 || n > 11){
 		Con_DPrintf("loaddm: invalid trk field\n");
-		closelmp(demobf);
+		closelmp(demof);
 		return -1;
 	}
-	demoofs = Bseek(demobf, 0, 1);
+	demoofs = ftell(demof);
 	s[n] = 0;
 	cls.forcetrack =  strtol(s, nil, 10);
 	return 0;
@@ -804,50 +754,50 @@ opendm(char *f, int trk)
 {
 	char s[16];
 
-	demobf = bopen(f, OWRITE, 0);
-	if(demobf == nil)
+	demof = fopen(f, "wb");
+	if(demof == nil)
 		return -1;
 	sprint(s, "%d\n", trk);
-	ewrite(demobf, s, strlen(s));
+	ewrite(demof, s, strlen(s));
 	return 0;
 }
 
 static Pak *
-pak(char *f)
+pak(char *fname)
 {
 	int n, ofs, len, nlmp;
 	uchar u[8];
-	Biobuf *bf;
+	FILE *f;
 	Lump *l;
 	Pak *p;
 
-	bf = bopen(f, OREAD, 1);
-	if(bf == nil)
+	f = fopen(fname, "rb");
+	if(f == nil)
 		return nil;
 	memset(u, 0, sizeof u);
-	eread(bf, u, 4);
+	eread(f, u, 4);
 	if(memcmp(u, "PACK", 4) != 0)
-		fatal("pak %s: invalid pak file", f);
-	ofs = get32(bf);
-	len = get32(bf);
+		fatal("pak %s: invalid pak file", fname);
+	ofs = get32(f);
+	len = get32(f);
 	nlmp = len / Npaksz;
 	if(nlmp > Npaklmp)
-		fatal("pak %s: invalid lump number %d", f, nlmp);
+		fatal("pak %s: invalid lump number %d", fname, nlmp);
 	if(nlmp != Npak0lmp)
 		notid1 = 1;
 	l = Hunk_Alloc(nlmp * sizeof *l);
 	p = Hunk_Alloc(sizeof *p);
-	snprint(p->f, sizeof(p->f), "%s", f);
-	p->bf = bf;
+	snprint(p->fname, sizeof(p->fname), "%s", fname);
+	p->f = f;
 	p->l = l;
 	p->e = l + nlmp;
-	Bseek(bf, ofs, 0);
+	fseek(f, ofs, SEEK_SET);
 	initcrc();
 	while(l < p->e){
-		eread(bf, l->f, 56);
+		eread(f, l->fname, 56);
 		for(n=0; n<56; n++)
-			crc(l->f[n]);
-		eread(bf, u, 8);
+			crc(l->fname[n]);
+		eread(f, u, 8);
 		for(n=0; n<8; n++)
 			crc(u[n]);
 		l->ofs = GBIT32(u);
@@ -869,7 +819,7 @@ pakdir(char *d)
 
 	strncpy(fsdir, d, sizeof(fsdir)-1);
 	pl = Hunk_Alloc(sizeof *pl);
-	strncpy(pl->f, d, sizeof(pl->f)-1);
+	strncpy(pl->fname, d, sizeof(pl->fname)-1);
 	pl->pl = pkl;
 	pkl = pl;
 	for(n=0; ; n++){
@@ -891,7 +841,7 @@ initns(void)
 {
 	char *home;
 
-	pakdir("/sys/games/lib/quake/id1");
+	pakdir("/usr/games/quake/id1");
 	if(game != nil){
 		if(strcmp(game, "rogue") == 0){
 			rogue = 1;
@@ -901,14 +851,13 @@ initns(void)
 			standard_quake = 0;
 		}else
 			notid1 = 1;
-		pakdir(va("/sys/games/lib/quake/%s", game));
+		pakdir(va("/usr/games/quake/%s", game));
 	}
-	if((home = getenv("home")) != nil){
-		pakdir(va("%s/lib/quake/id1", home));
+	if((home = getenv("HOME")) != nil){
+		pakdir(va("%s/.quake/id1", home));
 		if(game != nil)
-			pakdir(va("%s/lib/quake/%s", home, game));
+			pakdir(va("%s/.quake/%s", home, game));
 		mkpath(fsdir);
-		free(home);
 	}
 }
 
@@ -916,21 +865,21 @@ static void
 chkreg(void)
 {
 	u16int *p;
-	Biobuf *bf;
+	FILE *f;
 
 	Cvar_RegisterVariable(&registered);
-	bf = openlmp("gfx/pop.lmp", nil);
-	if(bf == nil){
+	f = openlmp("gfx/pop.lmp", nil);
+	if(f == nil){
 		Con_DPrintf("chkreg: shareware version\n");
 		if(notid1)
-			fatal("chkreg: phase error -- %r");
+			fatal("chkreg: phase error");
 		return;
 	}
 	p = pop;
 	while(p < pop + nelem(pop))
-		if(*p++ != get16b(bf))
+		if(*p++ != get16b(f))
 			fatal("chkreg: corrupted pop lump");
-	closelmp(bf);
+	closelmp(f);
 	setcvar("registered", "1");
 	Con_DPrintf("chkreg: registered version\n");
 }

@@ -7,7 +7,6 @@
 static int	miplevel;
 
 float		scale_for_mip;
-int			screenwidth;
 int			ubasestep, errorterm, erroradjustup, erroradjustdown;
 int			vstartscan;
 

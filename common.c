@@ -323,14 +323,15 @@ float MSG_ReadAngleInt16 (void)
 
 //===========================================================================
 
-void
-Arr_AllocExtra(void **arr, int *nel, int needextra)
+void *
+Arr_AllocExtra(void *arr, int *nel, int needextra)
 {
 	while(needextra > 0){
-		*arr = Hunk_Double(*arr);
+		arr = Hunk_Double(arr);
 		needextra -= *nel;
 		*nel *= 2;
 	}
+	return arr;
 }
 
 void

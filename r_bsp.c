@@ -361,7 +361,7 @@ void R_DrawSolidClippedSubmodelPolygons (model_t *pmodel)
 				{
 				   lindex = pmodel->surfedges[psurf->firstedge+j];
 
-					if (o = (lindex < 0))
+					if ((o = (lindex < 0)))
 						lindex = -lindex;
 					pedge = &pedges[lindex];
 					pbedge[j].v[0] = &r_pcurrentvertbase[pedge->v[o]];

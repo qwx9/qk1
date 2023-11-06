@@ -15,11 +15,8 @@ typedef	int	fixed16_t;
 struct mplane_s;
 
 extern vec3_t vec3_origin;
-extern	int nanmask;
 
 #define Qrint(f) (int)((f) + ((f) >= 0 ? 0.5 : -0.5))
-
-#define	IS_NAN(x) (((*(int *)&x)&nanmask)==nanmask)
 
 #define DotProduct_(x,y) (x[0]*y[0]+x[1]*y[1]+x[2]*y[2])
 #define DotProductDouble(x,y) ((double)x[0]*y[0]+(double)x[1]*y[1]+(double)x[2]*y[2])
@@ -29,7 +26,7 @@ extern	int nanmask;
 
 void VectorMA (vec3_t veca, float scale, vec3_t vecb, vec3_t vecc);
 
-vec_t DotProduct (vec3_t v1, vec3_t v2);
+vec_t DotProduct (const vec3_t v1, const vec3_t v2);
 void _VectorSubtract (vec3_t veca, vec3_t vecb, vec3_t out);
 void _VectorAdd (vec3_t veca, vec3_t vecb, vec3_t out);
 void _VectorCopy (vec3_t in, vec3_t out);

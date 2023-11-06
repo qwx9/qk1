@@ -52,7 +52,9 @@ void	fatal(char*, ...);
 void*	emalloc(ulong);
 vlong	flen(int);
 double	dtime(void);
-void	shutdown(void);
+void	game_shutdown(void);
 uvlong	nanosec(void);
 
+#ifdef __plan9__
 #pragma varargck	argpos	fatal	1
+#endif

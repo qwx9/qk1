@@ -207,6 +207,8 @@ void Chase_Init (void);
 void Chase_Reset (void);
 void Chase_Update (void);
 
+#ifdef __plan9__
 #pragma varargck	argpos	Host_Error	1
 #pragma varargck	argpos	Host_EndGame	1
 #pragma varargck	argpos	Host_ClientCommands	1
+#endif

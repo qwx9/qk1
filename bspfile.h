@@ -33,7 +33,11 @@
 #define BSP2VERSION ('B'|'S'<<8|'P'<<16|'2'<<24)
 #define	TOOLVERSION	2
 
+#ifdef __plan9__
 #pragma pack on
+#else
+#pragma pack(1)
+#endif
 
 typedef struct
 {
@@ -239,7 +243,11 @@ typedef struct
 	byte		ambient_level[Namb];
 } bsp2_dleaf_t;
 
+#ifdef __plan9__
 #pragma pack off
+#else
+#pragma pack(0)
+#endif
 
 
 //============================================================================

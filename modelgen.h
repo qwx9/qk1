@@ -6,7 +6,11 @@ typedef enum { ALIAS_SINGLE=0, ALIAS_GROUP } aliasframetype_t;
 
 typedef enum { ALIAS_SKIN_SINGLE=0, ALIAS_SKIN_GROUP } aliasskintype_t;
 
+#ifdef __plan9__
 #pragma pack on
+#else
+#pragma pack(1)
+#endif
 
 typedef struct {
 	int			ident;
@@ -84,4 +88,8 @@ typedef struct {
 #define IDPOLYHEADER	(('O'<<24)+('P'<<16)+('D'<<8)+'I')
 														// little-endian "IDPO"
 
+#ifdef __plan9__
 #pragma pack off
+#else
+#pragma pack(0)
+#endif

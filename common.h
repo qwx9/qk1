@@ -1,4 +1,4 @@
-void Arr_AllocExtra(void **arr, int *nel, int needextra);
+void *Arr_AllocExtra(void *arr, int *nel, int needextra);
 
 typedef struct sizebuf_s
 {
@@ -126,4 +126,6 @@ extern cvar_t registered;
 
 extern qboolean		standard_quake, rogue, hipnotic;
 
+#ifdef __plan9__
 #pragma varargck	argpos	va	1
+#endif

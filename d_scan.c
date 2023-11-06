@@ -323,7 +323,7 @@ void D_DrawSpans16_Fence (espan_t *pspan, byte alpha)
 			WRITEFENCE(-3);
 			WRITEFENCE(-2);
 			WRITEFENCE(-1);
-			USED(s, t);
+			USED(s); USED(t);
 
 			s = snext;
 			t = tnext;
@@ -373,7 +373,7 @@ void D_DrawSpans16_Fence (espan_t *pspan, byte alpha)
 			case  3: WRITEFENCE(-3);
 			case  2: WRITEFENCE(-2);
 			case  1: WRITEFENCE(-1);
-			USED(izi, s, t);
+			USED(izi); USED(s); USED(t);
 			}
 		}
 	}

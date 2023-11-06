@@ -638,8 +638,10 @@ void Mod_LoadTexinfo (lump_t *l)
 
 	for ( i=0 ; i<count ; i++, in++, out++)
 	{
-		for (j=0 ; j<8 ; j++)
+		for (j=0 ; j<4 ; j++)
 			out->vecs[0][j] = LittleFloat (in->vecs[0][j]);
+		for (j=0 ; j<4 ; j++)
+			out->vecs[1][j] = LittleFloat (in->vecs[1][j]);
 		len1 = Length (out->vecs[0]);
 		len2 = Length (out->vecs[1]);
 		len1 = (len1 + len2)/2;
@@ -1190,9 +1192,9 @@ void Mod_LoadBrushModel (model_t *mod, void *buffer)
 
 		if (i < mod->numsubmodels-1)
 		{	// duplicate the basic information
-			char	name[12];
+			char	name[16];
 
-			sprint (name, "*%d", i+1);
+			snprint(name, sizeof(name), "*%d", i+1);
 			loadmodel = Mod_FindName (name);
 			*loadmodel = *mod;
 			strcpy (loadmodel->name, name);

@@ -120,4 +120,6 @@ void M_Keydown (int key);
 void M_ToggleMenu_f (void);
 void M_Draw (void);
 
+#ifdef __plan9__
 #pragma varargck	argpos	PR_RunError	1
+#endif

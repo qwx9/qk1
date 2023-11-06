@@ -1473,7 +1473,7 @@ int		lanConfig_cursor = -1;
 int		lanConfig_cursor_table [] = {72, 92};
 #define NUM_LANCONFIG_CMDS	2
 
-char	lanConfig_portname[6];
+char	lanConfig_portname[8];
 char	lanConfig_joinname[22];
 
 void M_Menu_LanConfig_f (void)
@@ -1483,7 +1483,7 @@ void M_Menu_LanConfig_f (void)
 	m_entersound = true;
 	if(lanConfig_cursor == -1)
 		lanConfig_cursor = 1;
-	strncpy(lanConfig_portname, myip.srv, sizeof(lanConfig_portname)-1);
+	snprint(lanConfig_portname, sizeof(lanConfig_portname), "%s", myip.srv);
 	m_return_onerror = false;
 	m_return_reason[0] = 0;
 }
