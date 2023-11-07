@@ -33,8 +33,7 @@ struct Chan{
 static Chan *chans, *che;
 
 static int ainit, mixbufi;
-static uchar *mixbufs[2], *mixbuf;
-static int mixbufsz[2];
+static uchar mixbufs[2][Ssamp*Sblk], *mixbuf;
 static vlong sndt, sampt;
 static int nsamp;
 static int sampbuf[Ssamp*2];
@@ -531,17 +530,12 @@ stepsnd(vec3_t origin, vec3_t forward, vec3_t right, vec3_t up)
 	if(nsamp > Ssamp)
 		nsamp = Ssamp;
 	ns = nsamp * Sblk;
-	if(ns > mixbufsz[mixbufi]){
-		mixbufsz[mixbufi] = ns;
-		mixbufs[mixbufi] = realloc(mixbufs[mixbufi], mixbufsz[mixbufi]);
-	}
 	mixbuf = mixbufs[mixbufi];
 	samplesfx();
 	sampt += nsamp;
 	if(ns != 0){
 		sndwrite(mixbuf, ns);
 		mixbufi = (mixbufi + 1) % nelem(mixbufs);
-		mixbuf = mixbufs[mixbufi];
 	}
 	sndt = nanosec();
 }
@@ -553,6 +547,7 @@ stopallsfx(void)
 		return;
 	memset(chans, 0, sizeof(*chans)*Nchan);
 	che = chans + Sstat;
+	sndstop();
 }
 
 void

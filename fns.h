@@ -59,6 +59,7 @@ uvlong	nanosec(void);
 char *lerr(void);
 int	sys_mkdir(char *path);
 
+void sndstop(void);
 void sndwrite(uchar *buf, long sz);
 void sndclose(void);
 int sndopen(void);

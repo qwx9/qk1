@@ -4,9 +4,22 @@
 static SDL_AudioDeviceID adev;
 
 void
+sndstop(void)
+{
+	if(adev == 0)
+		return;
+	SDL_ClearQueuedAudio(adev);
+	SDL_PauseAudioDevice(adev, 1);
+}
+
+void
 sndwrite(uchar *buf, long sz)
 {
-	if(adev != 0 && SDL_QueueAudio(adev, buf, sz) != 0){
+	if(adev == 0)
+		return;
+	if(SDL_QueueAudio(adev, buf, sz) == 0)
+		SDL_PauseAudioDevice(adev, 0);
+	else{
 		Con_Printf("sndwrite: %s\n", SDL_GetError());
 		sndclose();
 	}
@@ -15,11 +28,11 @@ sndwrite(uchar *buf, long sz)
 void
 sndclose(void)
 {
-	if(adev != 0){
-		SDL_CloseAudioDevice(adev);
-		SDL_QuitSubSystem(SDL_INIT_AUDIO);
-		adev = 0;
-	}
+	if(adev == 0)
+		return;
+	SDL_CloseAudioDevice(adev);
+	SDL_QuitSubSystem(SDL_INIT_AUDIO);
+	adev = 0;
 }
 
 int
@@ -42,6 +55,5 @@ err:
 		SDL_QuitSubSystem(SDL_INIT_AUDIO);
 		goto err;
 	}
-	SDL_PauseAudioDevice(adev, 0);
 	return 0;
 }

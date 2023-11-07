@@ -26,11 +26,18 @@ auproc(void *p)
 }
 
 void
+sndstop(void)
+{
+	close(afd);
+	afd = -1;
+}
+
+void
 sndwrite(uchar *buf, long sz)
 {
 	static Channel *ach;
 
-	if(afd < 0)
+	if(afd < 0 && sndopen() < 0)
 		return;
 	if(ach == nil){
 		ach = chancreate(sizeof(ulong), 0);
