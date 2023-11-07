@@ -220,9 +220,10 @@ void Turbulent8 (espan_t *pspan, byte alpha)
 
 #define WRITEFENCE(i) do{ \
 	fencepix = *(pbase + (s >> 16) + (t >> 16) * cachewidth); \
-	if (pz[i] <= (izi >> 16) && fencepix != 255){ \
+	if (fencepix != 255 && pz[i] <= (izi >> 16)){ \
 		pdest[i] = blendalpha(fencepix, pdest[i], alpha); \
-		pz[i] = (izi >> 16); \
+		if(alpha == 255) \
+			pz[i] = (izi >> 16); \
 	} \
 	izi += izistep; \
 	s += sstep; \
