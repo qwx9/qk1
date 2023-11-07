@@ -22,7 +22,6 @@ auproc(void *p)
 			break;
 		}
 	}
-	chanclose(p);
 	threadexits(nil);
 }
 
@@ -34,12 +33,8 @@ sndstop(void)
 void
 sndwrite(uchar *buf, long sz)
 {
-	if(afd < 0)
+	if(ach == nil)
 		return;
-	if(ach == nil){
-		ach = chancreate(sizeof(ulong), 0);
-		proccreate(auproc, ach, 4096);
-	}
 	qlock(&alock);
 	sendul(ach, sz);
 	mixbuf = buf;
@@ -49,8 +44,11 @@ sndwrite(uchar *buf, long sz)
 void
 sndclose(void)
 {
-	close(afd);
-	afd = -1;
+	if(ach != nil){
+		chanclose(ach);
+		close(afd);
+		afd = -1;
+	}
 }
 
 int
@@ -58,5 +56,7 @@ sndopen(void)
 {
 	if((afd = open("/dev/audio", OWRITE)) < 0)
 		return -1;
+	ach = chancreate(sizeof(ulong), 0);
+	proccreate(auproc, ach, 4096);
 	return 0;
 }
