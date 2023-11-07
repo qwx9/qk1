@@ -4,6 +4,7 @@
 static int afd;
 static QLock alock;
 static uchar *mixbuf;
+static Channel *ach;
 
 static void
 auproc(void *p)
@@ -28,6 +29,13 @@ auproc(void *p)
 void
 sndstop(void)
 {
+	if(ach != nil){
+		qlock(&alock);
+		mixbuf = nil;
+		sendul(ach, 0);
+		qunlock(&alock);
+		ach = nil;
+	}
 	close(afd);
 	afd = -1;
 }
@@ -35,8 +43,6 @@ sndstop(void)
 void
 sndwrite(uchar *buf, long sz)
 {
-	static Channel *ach;
-
 	if(afd < 0 && sndopen() < 0)
 		return;
 	if(ach == nil){
