@@ -6,10 +6,12 @@ work on arm64, amd64, 386 and arm.
 
 For details, see: http://nopenopenope.net/posts/quake
 
-This fork in particular was extended to support Arcane Dimensions mod.
+This fork in particular was extended to support Arcane Dimensions[1] mod.
 
 Hereafter `qk1' refers to the project as a whole, and `quake' and `quakeworld'
 refer to the actual games.
+
+[1] https://www.moddb.com/mods/arcane-dimensions
 
 Installation and start up
 -------------------------
