@@ -30,7 +30,7 @@ extern int savcanld[];
 extern int dedicated;
 
 enum{
-	Fpsmin = 10,
+	Fpsmin = 5,
 	Fpsmax = 72
 };
 

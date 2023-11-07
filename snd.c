@@ -10,7 +10,6 @@ enum{
 	Sch = 2,
 	Sblk = Ssize * Sch,
 	Ssamp = Srate / Fpsmin,
-	Snbuf = Ssamp * Sblk,
 
 	Nchan = 256,
 	Ndyn = 8,
@@ -34,10 +33,11 @@ struct Chan{
 static Chan *chans, *che;
 
 static int ainit, mixbufi;
-static uchar mixbufs[2][Snbuf], *mixbuf = mixbufs[0];
+static uchar *mixbufs[2], *mixbuf;
+static int mixbufsz[2];
 static vlong sndt, sampt;
 static int nsamp;
-static int sampbuf[Ssamp*Sch*sizeof(int)];
+static int sampbuf[Ssamp*2];
 static int scalt[32][256];
 
 static Sfx *ambsfx[Namb];
@@ -531,6 +531,11 @@ stepsnd(vec3_t origin, vec3_t forward, vec3_t right, vec3_t up)
 	if(nsamp > Ssamp)
 		nsamp = Ssamp;
 	ns = nsamp * Sblk;
+	if(ns > mixbufsz[mixbufi]){
+		mixbufsz[mixbufi] = ns;
+		mixbufs[mixbufi] = realloc(mixbufs[mixbufi], mixbufsz[mixbufi]);
+	}
+	mixbuf = mixbufs[mixbufi];
 	samplesfx();
 	sampt += nsamp;
 	if(ns != 0){
