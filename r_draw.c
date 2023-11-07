@@ -83,8 +83,7 @@ void R_EmitEdge (mvertex_t *pv0, mvertex_t *pv1)
 	vec3_t	local, transformed;
 	float	*world;
 	int		v, v2, ceilv0;
-	float	scale, lzi0, u0, v0;
-	int		side;
+	float	lzi0, u0, v0;
 
 	if (r_lastvertvalid)
 	{
@@ -107,21 +106,11 @@ void R_EmitEdge (mvertex_t *pv0, mvertex_t *pv1)
 		lzi0 = 1.0 / transformed[2];
 	
 	// FIXME: build x/yscale into transform?
-		scale = xscale * lzi0;
-		u0 = (xcenter + scale*transformed[0]);
-		if (u0 < r_refdef.fvrectx_adj)
-			u0 = r_refdef.fvrectx_adj;
-		if (u0 > r_refdef.fvrectright_adj)
-			u0 = r_refdef.fvrectright_adj;
-	
-		scale = yscale * lzi0;
-		v0 = (ycenter - scale*transformed[1]);
-		if (v0 < r_refdef.fvrecty_adj)
-			v0 = r_refdef.fvrecty_adj;
-		if (v0 > r_refdef.fvrectbottom_adj)
-			v0 = r_refdef.fvrectbottom_adj;
-	
-		ceilv0 = (int) ceil(v0);
+		u0 = xcenter + xscale*lzi0*transformed[0];
+		//u0 = clamp(u0, r_refdef.fvrectx_adj, r_refdef.fvrectright_adj);
+		v0 = ycenter - yscale*lzi0*transformed[1];
+		//v0 = clamp(v0, r_refdef.fvrecty_adj, r_refdef.fvrectbottom_adj);
+		ceilv0 = (int)ceil(v0);
 	}
 
 	world = &pv1->position[0];
@@ -135,23 +124,12 @@ void R_EmitEdge (mvertex_t *pv0, mvertex_t *pv1)
 
 	r_lzi1 = 1.0 / transformed[2];
 
-	scale = xscale * r_lzi1;
-	r_u1 = (xcenter + scale*transformed[0]);
-	if (r_u1 < r_refdef.fvrectx_adj)
-		r_u1 = r_refdef.fvrectx_adj;
-	if (r_u1 > r_refdef.fvrectright_adj)
-		r_u1 = r_refdef.fvrectright_adj;
-
-	scale = yscale * r_lzi1;
-	r_v1 = (ycenter - scale*transformed[1]);
-	if (r_v1 < r_refdef.fvrecty_adj)
-		r_v1 = r_refdef.fvrecty_adj;
-	if (r_v1 > r_refdef.fvrectbottom_adj)
-		r_v1 = r_refdef.fvrectbottom_adj;
-
+	r_u1 = xcenter + xscale*r_lzi1*transformed[0];
+	//r_u1 = clamp(r_u1, r_refdef.fvrectx_adj, r_refdef.fvrectright_adj);
+	r_v1 = ycenter - yscale*r_lzi1*transformed[1];
+	//r_v1 = clamp(r_v1, r_refdef.fvrecty_adj, r_refdef.fvrectbottom_adj);
 	if (r_lzi1 > lzi0)
 		lzi0 = r_lzi1;
-
 	if (lzi0 > r_nearzi)	// for mipmap finding
 		r_nearzi = lzi0;
 
@@ -160,8 +138,7 @@ void R_EmitEdge (mvertex_t *pv0, mvertex_t *pv1)
 		return;
 
 	r_emitted = 1;
-
-	r_ceilv1 = (int) ceil(r_v1);
+	r_ceilv1 = (int)ceil(r_v1);
 
 
 // create the edge
@@ -177,15 +154,11 @@ void R_EmitEdge (mvertex_t *pv0, mvertex_t *pv1)
 		return;		// horizontal edge
 	}
 
-	side = ceilv0 > r_ceilv1;
-
 	edge = edge_p++;
-
 	edge->owner = r_pedge;
-
 	edge->nearzi = lzi0;
 
-	if (side == 0)
+	if (ceilv0 <= r_ceilv1)
 	{
 	// trailing edge (go from p1 to p2)
 		v = ceilv0;
@@ -206,7 +179,7 @@ void R_EmitEdge (mvertex_t *pv0, mvertex_t *pv1)
 		edge->surfs[0] = 0;
 		edge->surfs[1] = surface_p - surfaces;
 
-		u_step = ((u0 - r_u1) / (v0 - r_v1));
+		u_step = (u0 - r_u1) / (v0 - r_v1);
 		u = r_u1 + ((float)v - r_v1) * u_step;
 	}
 
@@ -218,10 +191,8 @@ void R_EmitEdge (mvertex_t *pv0, mvertex_t *pv1)
 // it to incorrectly extend to the scan, and the extension of the line goes off
 // the edge of the screen
 // FIXME: is this actually needed?
-	if (edge->u < r_refdef.vrect_x_adj_shift20)
-		edge->u = r_refdef.vrect_x_adj_shift20;
-	if (edge->u > r_refdef.vrectright_adj_shift20)
-		edge->u = r_refdef.vrectright_adj_shift20;
+// FIXME(sigrid): looks like it isn't.
+	//edge->u = clamp(edge->u, r_refdef.vrect_x_adj_shift20, r_refdef.vrectright_adj_shift20);
 
 //
 // sort the edge in normally
@@ -259,91 +230,87 @@ void R_ClipEdge (mvertex_t *pv0, mvertex_t *pv1, clipplane_t *clip)
 	float		d0, d1, f;
 	mvertex_t	clipvert;
 
-	if (clip)
-	{
-		do
+	for(; clip != nil; clip = clip->next){
+		d0 = DotProduct (pv0->position, clip->normal) - clip->dist;
+		d1 = DotProduct (pv1->position, clip->normal) - clip->dist;
+
+		if (d0 >= 0)
 		{
-			d0 = DotProduct (pv0->position, clip->normal) - clip->dist;
-			d1 = DotProduct (pv1->position, clip->normal) - clip->dist;
-
-			if (d0 >= 0)
+		// point 0 is unclipped
+			if (d1 >= 0)
 			{
-			// point 0 is unclipped
-				if (d1 >= 0)
-				{
-				// both points are unclipped
-					continue;
-				}
+			// both points are unclipped
+				continue;
+			}
 
-			// only point 1 is clipped
+		// only point 1 is clipped
 
-			// we don't cache clipped edges
-				cacheoffset = 0x7FFFFFFF;
+		// we don't cache clipped edges
+			cacheoffset = 0x7FFFFFFF;
 
-				f = d0 / (d0 - d1);
-				clipvert.position[0] = pv0->position[0] +
-						f * (pv1->position[0] - pv0->position[0]);
-				clipvert.position[1] = pv0->position[1] +
-						f * (pv1->position[1] - pv0->position[1]);
-				clipvert.position[2] = pv0->position[2] +
-						f * (pv1->position[2] - pv0->position[2]);
+			f = d0 / (d0 - d1);
+			clipvert.position[0] = pv0->position[0] +
+					f * (pv1->position[0] - pv0->position[0]);
+			clipvert.position[1] = pv0->position[1] +
+					f * (pv1->position[1] - pv0->position[1]);
+			clipvert.position[2] = pv0->position[2] +
+					f * (pv1->position[2] - pv0->position[2]);
 
-				if (clip->leftedge)
-				{
-					r_leftclipped = true;
-					r_leftexit = clipvert;
-				}
-				else if (clip->rightedge)
-				{
-					r_rightclipped = true;
-					r_rightexit = clipvert;
-				}
+			if (clip->leftedge)
+			{
+				r_leftclipped = true;
+				r_leftexit = clipvert;
+			}
+			else if (clip->rightedge)
+			{
+				r_rightclipped = true;
+				r_rightexit = clipvert;
+			}
 
-				R_ClipEdge (pv0, &clipvert, clip->next);
+			R_ClipEdge (pv0, &clipvert, clip->next);
+			return;
+		}
+		else
+		{
+		// point 0 is clipped
+			if (d1 < 0)
+			{
+			// both points are clipped
+			// we do cache fully clipped edges
+				if (!r_leftclipped)
+					cacheoffset = FULLY_CLIPPED_CACHED |
+							(r_framecount & FRAMECOUNT_MASK);
 				return;
 			}
-			else
+
+		// only point 0 is clipped
+			r_lastvertvalid = false;
+
+		// we don't cache partially clipped edges
+			cacheoffset = 0x7FFFFFFF;
+
+			f = d0 / (d0 - d1);
+			clipvert.position[0] = pv0->position[0] +
+					f * (pv1->position[0] - pv0->position[0]);
+			clipvert.position[1] = pv0->position[1] +
+					f * (pv1->position[1] - pv0->position[1]);
+			clipvert.position[2] = pv0->position[2] +
+					f * (pv1->position[2] - pv0->position[2]);
+
+			if (clip->leftedge)
 			{
-			// point 0 is clipped
-				if (d1 < 0)
-				{
-				// both points are clipped
-				// we do cache fully clipped edges
-					if (!r_leftclipped)
-						cacheoffset = FULLY_CLIPPED_CACHED |
-								(r_framecount & FRAMECOUNT_MASK);
-					return;
-				}
-
-			// only point 0 is clipped
-				r_lastvertvalid = false;
-
-			// we don't cache partially clipped edges
-				cacheoffset = 0x7FFFFFFF;
-
-				f = d0 / (d0 - d1);
-				clipvert.position[0] = pv0->position[0] +
-						f * (pv1->position[0] - pv0->position[0]);
-				clipvert.position[1] = pv0->position[1] +
-						f * (pv1->position[1] - pv0->position[1]);
-				clipvert.position[2] = pv0->position[2] +
-						f * (pv1->position[2] - pv0->position[2]);
-
-				if (clip->leftedge)
-				{
-					r_leftclipped = true;
-					r_leftenter = clipvert;
-				}
-				else if (clip->rightedge)
-				{
-					r_rightclipped = true;
-					r_rightenter = clipvert;
-				}
-
-				R_ClipEdge (&clipvert, pv1, clip->next);
-				return;
+				r_leftclipped = true;
+				r_leftenter = clipvert;
 			}
-		} while ((clip = clip->next) != nil);
+			else if (clip->rightedge)
+			{
+				r_rightclipped = true;
+				r_rightenter = clipvert;
+			}
+
+			R_ClipEdge (&clipvert, pv1, clip->next);
+			return;
+		}
 	}
 
 // add the edge
