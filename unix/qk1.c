@@ -1,9 +1,25 @@
 #include "quakedef.h"
 #include "parg.h"
 #include <time.h>
+#include <errno.h>
 
 char *game;
 int debug;
+char lasterr[256] = {0};
+
+char *
+lerr(void)
+{
+	if(*lasterr == 0 && errno != 0)
+		return strerror(errno);
+	return lasterr;
+}
+
+int
+sys_mkdir(char *path)
+{
+	return mkdir(path, 0770);
+}
 
 void
 fatal(char *fmt, ...)
@@ -62,6 +78,11 @@ main(int argc, char **argv)
 	double t, t2, dt;
 	struct parg_state ps;
 	int c, nargs;
+	static char *paths[] = {
+		"/usr/games/quake",
+		nil,
+		nil,
+	};
 
 	parg_init(&ps);
 	nargs = 0;
@@ -71,7 +92,7 @@ main(int argc, char **argv)
 			argv[nargs++] = (char*)ps.optarg;
 			break;
 		case 'D':
-			debug = 1;
+			debug++;
 			break;
 		case 'd':
 			dedicated = 1;
@@ -95,7 +116,10 @@ main(int argc, char **argv)
 	}
 
 	srand(getpid());
-	Host_Init(nargs, argv);
+
+	paths[1] = strdup(va("%s/.quake", getenv("HOME")));
+	Host_Init(nargs, argv, paths);
+
 	t = dtime() - 1.0 / Fpsmax;
 	for(;;){
 		t2 = dtime();

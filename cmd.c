@@ -271,7 +271,7 @@ void Cmd_Exec_f (void)
 	mark = Hunk_Mark ();
 	f = loadhunklmp(Cmd_Argv(1), nil);
 	if(f == nil){
-		Con_Printf(va("exec: %r\n"));
+		Con_Printf(va("exec: %s\n", lerr()));
 		return;
 	}
 	Con_Printf ("execing %s\n",Cmd_Argv(1));

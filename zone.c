@@ -60,7 +60,7 @@ Hunk_Alloc(int size)
 
 	m = calloc(1, sizeof(*m) + size);
 	if(m == nil)
-		fatal("Hunk_Alloc: %r");
+		fatal("Hunk_Alloc: %s", lerr());
 	m->size = size;
 	m->next = hunk_head;
 	if(hunk_head != nil)
@@ -81,7 +81,7 @@ Hunk_Double(void *p)
 	t = getmalloctag(m);
 	n = realloc(m, sizeof(*m) + m->size*2);
 	if(m == nil)
-		fatal("Hunk_Double: %r");
+		fatal("Hunk_Double: %s", lerr());
 	if(hunk_head == m)
 		hunk_head = n;
 	m = n;
@@ -122,7 +122,7 @@ Hunk_TempAlloc(int size)
 	if(size > bufsz){
 		buf = realloc(buf, size);
 		if(buf == nil)
-			fatal("Hunk_TempAlloc: %r");
+			fatal("Hunk_TempAlloc: %s", lerr());
 		bufsz = size;
 	}
 	memset(buf, 0, size);
@@ -180,7 +180,7 @@ Cache_Alloc(mem_user_t *c, int size)
 
 	cs = calloc(1, sizeof(*cs) + size);
 	if(cs == nil)
-		fatal("Cache_Alloc: %r");
+		fatal("Cache_Alloc: %s", lerr());
 	cs->size = size;
 	cs->next = cache_head;
 	if(cache_head != nil)

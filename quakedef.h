@@ -181,7 +181,7 @@ extern	double		realtime;		// not bounded in any way, changed at
 void Host_ClearMemory (void);
 void Host_ServerFrame (void);
 void Host_InitCommands (void);
-void Host_Init (int argc, char **argv);
+void Host_Init (int argc, char **argv, char **paths);
 void Host_Shutdown(void);
 void Host_Error (char *error, ...);
 void Host_EndGame (char *message, ...);

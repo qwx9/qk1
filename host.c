@@ -574,7 +574,7 @@ void Host_Frame (float time)
 Host_Init
 ====================
 */
-void Host_Init (int argc, char **argv)
+void Host_Init (int argc, char **argv, char **paths)
 {
 	int i;
 
@@ -583,7 +583,7 @@ void Host_Init (int argc, char **argv)
 	Cmd_Init ();	
 	V_Init ();
 	Chase_Init ();
-	initfs();
+	initfs(paths);
 	Host_InitLocal ();
 	W_LoadWadFile ("gfx.wad");
 	Key_Init ();
@@ -599,10 +599,10 @@ void Host_Init (int argc, char **argv)
 	{
 		host_basepal = loadhunklmp("gfx/palette.lmp", nil);
 		if(host_basepal == nil)
-			fatal("Host_Init: %r");
+			fatal("Host_Init: %s", lerr());
 		host_colormap = loadhunklmp("gfx/colormap.lmp", nil);
 		if(host_colormap == nil)
-			fatal("Host_Init: %r");
+			fatal("Host_Init: %s", lerr());
 
 		initfb();
 
@@ -610,9 +610,9 @@ void Host_Init (int argc, char **argv)
 		SCR_Init ();
 		R_Init ();
 		if(initsnd() < 0)
-			Con_DPrintf("initsnd: %r\n");
+			Con_DPrintf("initsnd: %s\n", lerr());
 		if(initcd() < 0)
-			Con_DPrintf("initcd: %r\n");
+			Con_DPrintf("initcd: %s\n", lerr());
 		Sbar_Init ();
 		CL_Init ();
 	}

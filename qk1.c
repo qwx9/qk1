@@ -6,6 +6,29 @@ char *netmtpt = "/net";
 char *game;
 int debug;
 
+int
+sys_mkdir(char *path)
+{
+	int d;
+
+	if(access(path, AEXIST) == 0)
+		return 0;
+	if((d = create(path, OREAD, DMDIR|0777)) < 0){
+		Con_DPrintf("Sys_mkdir: create: %r\n");
+		return -1;
+	}
+	close(d);
+	return 0;
+}
+
+char *
+lerr(void)
+{
+	static char err[ERRMAX];
+	rerrstr(err, sizeof(err));
+	return err;
+}
+
 void
 fatal(char *fmt, ...)
 {
@@ -78,6 +101,12 @@ void
 threadmain(int argc, char **argv)
 {
 	double t, t´, Δt;
+	char *e;
+	static char *paths[] = {
+		"/sys/games/lib/quake",
+		nil,
+		nil,
+	};
 
 	ARGBEGIN{
 	case 'D':
@@ -98,7 +127,12 @@ threadmain(int argc, char **argv)
 	/* ignore fp exceptions: rendering shit assumes they are */
 	setfcr(getfcr() & ~(FPOVFL|FPUNFL|FPINVAL|FPZDIV));
 	notify(croak);
-	Host_Init(argc, argv);
+
+	e = getenv("home");
+	paths[1] = smprint("%s/lib/quake", e);
+	free(e);
+	Host_Init(argc, argv, paths);
+
 	t = dtime() - 1.0 / Fpsmax;
 	for(;;){
 		t´ = dtime();

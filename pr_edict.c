@@ -1035,7 +1035,7 @@ void PR_LoadProgs (void)
 
 	progs = loadhunklmp("progs.dat", &n);
 	if(progs == nil)
-		fatal("PR_LoadProgs: %r");
+		fatal("PR_LoadProgs: %s", lerr());
 	Con_DPrintf("Programs occupy %dK.\n", n/1024);
 
 	for (i=0 ; i<n ; i++)

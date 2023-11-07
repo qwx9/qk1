@@ -37,6 +37,7 @@ OBJS=\
 	d_zpoint.o\
 	dotproduct.o\
 	draw.o\
+	fs.o\
 	host.o\
 	host_cmd.o\
 	keys.o\
@@ -72,7 +73,6 @@ OBJS=\
 	sv_phys.o\
 	sv_user.o\
 	unix/cd.o\
-	unix/fs.o\
 	unix/in.o\
 	unix/net_udp.o\
 	unix/qk1.o\

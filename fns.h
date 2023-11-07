@@ -47,7 +47,7 @@ void	writedm(void);
 int	readdm(void);
 int	loaddm(char*);
 int	opendm(char*, int);
-void	initfs(void);
+void	initfs(char **paths);
 #pragma varargck	argpos	fatal	1
 void	fatal(char*, ...);
 void*	emalloc(ulong);
@@ -55,3 +55,6 @@ vlong	flen(int);
 double	dtime(void);
 void	game_shutdown(void);
 uvlong	nanosec(void);
+
+char *lerr(void);
+int	sys_mkdir(char *path);

@@ -53,7 +53,7 @@ void W_LoadWadFile (char *filename)
 
 	wad_base = loadhunklmp(filename, nil);
 	if(wad_base == nil)
-		fatal("W_LoadWadFile: %r");
+		fatal("W_LoadWadFile: %s", lerr());
 
 	header = (wadinfo_t *)wad_base;
 	

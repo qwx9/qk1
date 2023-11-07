@@ -22,11 +22,6 @@ typedef int32_t s32int;
 typedef uint32_t u32int;
 typedef uintptr_t uintptr;
 
-enum {
-	UTFmax = 4,
-	IOUNIT = 32768,
-};
-
 #define OREAD O_RDONLY
 #define OWRITE O_WRONLY
 #define OCEXEC O_CLOEXEC
@@ -47,6 +42,8 @@ enum {
 #define getcallerpc(x) nil
 #define getmalloctag(p) (USED(p), 0)
 #define setmalloctag(p, t) do{USED(p); USED(t);}while(0)
-#define werrstr(fmt, ...) do{}while(0)
+
+extern char lasterr[256];
+#define werrstr(fmt, ...) do{snprint(lasterr, sizeof(lasterr), fmt, __VA_ARGS__); }while(0)
 
 char *seprint(char *, char *, char *, ...);
