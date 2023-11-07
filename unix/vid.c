@@ -34,7 +34,7 @@ resetfb(void)
 	vid.conheight = vid.height;
 
 	free(vidbuffer);
-	vidbuffer = emalloc(vid.width*vid.height);
+	vidbuffer = emalloc(vid.width*vid.height+16);
 
 	if(fbi != nil)
 		SDL_DestroyTexture(fbi);
