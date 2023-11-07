@@ -29,21 +29,12 @@ auproc(void *p)
 void
 sndstop(void)
 {
-	if(ach != nil){
-		qlock(&alock);
-		mixbuf = nil;
-		sendul(ach, 0);
-		qunlock(&alock);
-		ach = nil;
-	}
-	close(afd);
-	afd = -1;
 }
 
 void
 sndwrite(uchar *buf, long sz)
 {
-	if(afd < 0 && sndopen() < 0)
+	if(afd < 0)
 		return;
 	if(ach == nil){
 		ach = chancreate(sizeof(ulong), 0);
