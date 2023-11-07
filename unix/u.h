@@ -47,3 +47,4 @@ extern char lasterr[256];
 #define werrstr(fmt, ...) do{snprint(lasterr, sizeof(lasterr), fmt, __VA_ARGS__); }while(0)
 
 char *seprint(char *, char *, char *, ...);
+int nrand(int);

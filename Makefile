@@ -66,6 +66,7 @@ OBJS=\
 	r_surf.o\
 	sbar.o\
 	screen.o\
+	snd.o\
 	span.o\
 	span_alpha.o\
 	sv_main.o\
@@ -77,7 +78,7 @@ OBJS=\
 	unix/net_udp.o\
 	unix/qk1.o\
 	unix/seprint.o\
-	unix/snd.o\
+	unix/snd_sdl.o\
 	unix/vid.o\
 	view.o\
 	wad.o\

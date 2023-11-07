@@ -69,6 +69,7 @@ OFILES=\
 	screen.$O\
 	sbar.$O\
 	snd.$O\
+	snd_plan9.$O\
 	sv_main.$O\
 	sv_move.$O\
 	sv_phys.$O\

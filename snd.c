@@ -1,5 +1,4 @@
 #include "quakedef.h"
-#include <thread.h>
 
 cvar_t volume = {"volume", "0.7", 1};
 
@@ -34,7 +33,7 @@ struct Chan{
 
 static Chan *chans, *che;
 
-static int afd = -1, mixbufi;
+static int ainit, mixbufi;
 static uchar mixbufs[2][Snbuf], *mixbuf = mixbufs[0];
 static vlong sndt, sampt;
 static int nsamp;
@@ -486,43 +485,12 @@ ambs(void)
 	}
 }
 
-static void
-auproc(void *p)
-{
-	long sz;
-	uchar *m;
-
-	for(;;){
-		if((sz = recvul(p)) == 0)
-			break;
-		m = mixbufs[0];
-		if(sz < 0){
-			m = mixbufs[1];
-			sz = -sz;
-		}
-		if(write(afd, m, sz) != sz){
-			Con_DPrintf("sndwrite: %r\n");
-			shutsnd();
-			break;
-		}
-	}
-	chanclose(p);
-	threadexits(nil);
-}
-
 void
 stepsnd(vec3_t origin, vec3_t forward, vec3_t right, vec3_t up)
 {
 	long ns;
 	Chan *c, *sum;
-	static Channel *ach;
 
-	if(afd < 0)
-		return;
-	if(ach == nil){
-		ach = chancreate(sizeof(ulong), 0);
-		proccreate(auproc, ach, 4096);
-	}
 	VectorCopy(origin, listener_origin);
 	VectorCopy(forward, listener_forward);
 	VectorCopy(right, listener_right);
@@ -559,15 +527,15 @@ stepsnd(vec3_t origin, vec3_t forward, vec3_t right, vec3_t up)
 		sndt = nanosec() - Te9 / Fpsmax;
 	nsamp = (nanosec() - sndt) / (Te9 / Srate);
 	if(!cls.timedemo)
-		nsamp = nsamp + 15 & ~15;
+		nsamp = (nsamp + 15) & ~15;
 	if(nsamp > Ssamp)
 		nsamp = Ssamp;
 	ns = nsamp * Sblk;
 	samplesfx();
 	sampt += nsamp;
 	if(ns != 0){
-		sendul(ach, mixbufi == 0 ? ns : -ns);
-		mixbufi = (mixbufi + 1) % 2;
+		sndwrite(mixbuf, ns);
+		mixbufi = (mixbufi + 1) % nelem(mixbufs);
 		mixbuf = mixbufs[mixbufi];
 	}
 	sndt = nanosec();
@@ -576,7 +544,7 @@ stepsnd(vec3_t origin, vec3_t forward, vec3_t right, vec3_t up)
 void
 stopallsfx(void)
 {
-	if(afd < 0)
+	if(!ainit)
 		return;
 	memset(chans, 0, sizeof(*chans)*Nchan);
 	che = chans + Sstat;
@@ -587,7 +555,7 @@ stopsfx(int n, int ch)
 {
 	Chan *c, *e;
 
-	if(afd < 0)
+	if(!ainit)
 		return;
 	c = chans;
 	e = chans + Ndyn;
@@ -633,7 +601,7 @@ startsfx(int entn, int entch, Sfx *sfx, vec3_t zp, float vol, float att)
 	Chan *c, *c2, *e;
 	sfxcache_t *sc;
 
-	if(afd < 0 || sfx == nil)
+	if(!ainit || sfx == nil)
 		return;
 	if(c = pickchan(entn, entch), c == nil)
 		return;
@@ -669,7 +637,7 @@ localsfx(char *s)
 {
 	Sfx *sfx;
 
-	if(afd < 0)
+	if(!ainit)
 		return;
 	sfx = precachesfx(s);
 	startsfx(cl.viewentity, -1, sfx, vec3_origin, 1, 1);
@@ -734,7 +702,7 @@ touchsfx(char *s)
 {
 	Sfx *sfx;
 
-	if(afd < 0)
+	if(!ainit)
 		return;
 	sfx = findsfx(s);
 	Cache_Check(&sfx->cu);
@@ -745,7 +713,7 @@ precachesfx(char *s)
 {
 	Sfx *sfx;
 
-	if(afd < 0)
+	if(!ainit)
 		return nil;
 	sfx = findsfx(s);
 	sfx->map = map;
@@ -830,22 +798,14 @@ sfxbegin(void)
 	map++;
 }
 
-void
-shutsnd(void)
-{
-	if(afd < 0)
-		return;
-	close(afd);
-	afd = -1;
-}
-
 int
 initsnd(void)
 {
 	int i, j, *p;
 
-	if(afd = open("/dev/audio", OWRITE), afd < 0)
+	if(sndopen() != 0)
 		return -1;
+	ainit = 1;
 	for(p=scalt[1], i=8; i<8*nelem(scalt); i+=8)
 		for(j=0; j<256; j++)
 			*p++ = (char)j * i;

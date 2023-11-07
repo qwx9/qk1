@@ -26,19 +26,6 @@ resetfb(void)
 		vid.width = 320;
 	if(vid.height < 160)
 		vid.height = 160;
-	if(d_pzbuffer != nil){
-		D_FlushCaches();
-		free(d_pzbuffer);
-		d_pzbuffer = nil;
-	}
-
-	// alloc an extra line in case we want to wrap, and allocate the z-buffer
-	hunkvbuf = vid.width * vid.height * sizeof *d_pzbuffer;
-	scachesz = D_SurfaceCacheForRes(vid.width, vid.height);
-	hunkvbuf += scachesz;
-	d_pzbuffer = emalloc(hunkvbuf);
-	surfcache = (byte *)d_pzbuffer + vid.width * vid.height * sizeof *d_pzbuffer;
-	D_InitCaches(surfcache, scachesz);
 
 	vid.rowbytes = vid.width;
 	vid.aspect = (float)vid.height / (float)vid.width * (320.0/240.0);
@@ -59,6 +46,20 @@ resetfb(void)
 
 	vid.buffer = vidbuffer;
 	vid.conbuffer = vid.buffer;
+
+	if(d_pzbuffer != nil){
+		D_FlushCaches();
+		free(d_pzbuffer);
+		d_pzbuffer = nil;
+	}
+
+	// alloc an extra line in case we want to wrap, and allocate the z-buffer
+	hunkvbuf = vid.width * vid.height * sizeof *d_pzbuffer;
+	scachesz = D_SurfaceCacheForRes(vid.width, vid.height);
+	hunkvbuf += scachesz;
+	d_pzbuffer = emalloc(hunkvbuf);
+	surfcache = (byte *)d_pzbuffer + vid.width * vid.height * sizeof *d_pzbuffer;
+	D_InitCaches(surfcache, scachesz);
 }
 
 void

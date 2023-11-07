@@ -664,7 +664,7 @@ void Host_Shutdown(void)
 
 	NET_Shutdown ();
 	shutcd();
-	shutsnd();
+	sndclose();
 	IN_Shutdown ();
 }
 

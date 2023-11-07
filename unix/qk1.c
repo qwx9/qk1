@@ -21,6 +21,12 @@ sys_mkdir(char *path)
 	return mkdir(path, 0770);
 }
 
+int
+nrand(int n)
+{
+	return random() % n;
+}
+
 void
 fatal(char *fmt, ...)
 {
