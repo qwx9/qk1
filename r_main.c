@@ -708,20 +708,6 @@ void R_EdgeDrawing (void)
 	R_ScanEdges();
 }
 
-static int
-R_SortEntities(const void *a_, const void *b_)
-{
-	entity_t *a, *b;
-	vec3_t v[2];
-
-	a = *(entity_t**)a_;
-	b = *(entity_t**)b_;
-	// FIXME(sigrid): this is the most dumb way, also incorrect
-	VectorSubtract(r_refdef.vieworg, a->origin, v[0]);
-	VectorSubtract(r_refdef.vieworg, b->origin, v[1]);
-	return Length(v[1]) - Length(v[0]);
-}
-
 /*
 ================
 R_RenderView
@@ -764,11 +750,10 @@ void R_RenderView (void)
 
 	r_drawflags = DRAW_BLEND;
 	R_EdgeDrawing();
-	for(i = 0, e = ent_reject; e != nil; e = e->last_reject, i++)
-		cl_visedicts[i] = e;
-	cl_numvisedicts = i;
-	qsort(cl_visedicts, cl_numvisedicts, sizeof(*cl_visedicts), R_SortEntities);
-	for(i = 0; i < cl_numvisedicts; i++)
+	// FIXME(sigrid): these need to be sorted and drawn back to front
+	for(i = cl_numvisedicts, e = ent_reject; e != nil; e = e->last_reject)
+		cl_visedicts[--i] = e;
+	for(; i < cl_numvisedicts; i++)
 		R_DrawEntity(cl_visedicts[i]);
 	r_drawflags = 0;
 
