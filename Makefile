@@ -2,7 +2,6 @@ TARG=qk1
 DESTDIR?=
 PREFIX?=/usr/local
 BIN=${DESTDIR}${PREFIX}/bin
-MAN=${DESTDIR}${PREFIX}/share/man/man1
 SDL2_CFLAGS=$$(pkg-config --cflags sdl2)
 SDL2_LDFLAGS=$$(pkg-config --libs sdl2)
 CFLAGS?=-O2 -g -Wall -Wextra -Wno-unknown-pragmas -Wno-missing-field-initializers -Wno-implicit-fallthrough
@@ -85,21 +84,59 @@ OBJS=\
 	world.o\
 	zone.o\
 
+HDRS=\
+	adivtab.h\
+	anorms.h\
+	bspfile.h\
+	client.h\
+	cmd.h\
+	common.h\
+	console.h\
+	cvar.h\
+	d_iface.h\
+	d_local.h\
+	dat.h\
+	draw.h\
+	fns.h\
+	input.h\
+	keys.h\
+	mathlib.h\
+	menu.h\
+	model.h\
+	modelgen.h\
+	net.h\
+	pr_comp.h\
+	progdefs.h\
+	progs.h\
+	protocol.h\
+	quakedef.h\
+	r_local.h\
+	r_shared.h\
+	render.h\
+	sbar.h\
+	screen.h\
+	server.h\
+	spritegn.h\
+	unix/libc.h\
+	unix/u.h\
+	vid.h\
+	view.h\
+	wad.h\
+	world.h\
+	zone.h\
+
 .PHONY: all default install uninstall clean
 
 all: default
 
 default: ${TARG}
 
-install: ${TARG} ${TARG}.1
+install: ${TARG}
 	install -d ${BIN}
 	install -m 755 ${TARG} ${BIN}
-	install -d ${MAN}
-	install -m 644 ${TARG}.1 ${MAN}
 
 uninstall:
 	rm -f ${BIN}/${TARG}
-	rm -f ${MAN}/${TARG}.1
 
 ${TARG}: ${OBJS}
 	${CC} -o $@ ${OBJS} ${LDFLAGS}
@@ -107,6 +144,8 @@ ${TARG}: ${OBJS}
 .SUFFIXES: .c .o
 .c.o:
 	${CC} -o $@ -c $< ${CFLAGS}
+
+${OBJS}: ${HDRS}
 
 clean:
 	rm -f ${TARG} ${OBJS}
