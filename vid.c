@@ -34,18 +34,15 @@ resetfb(void)
 	vid.height = Dy(screen->r);
 	if(vid.height < 160)
 		vid.height = 160;
-	if(d_pzbuffer != nil){
+	if(d_pzbuffer != nil)
 		D_FlushCaches();
-		free(d_pzbuffer);
-		d_pzbuffer = nil;
-	}
 
 	// alloc an extra line in case we want to wrap, and allocate the z-buffer
 	hunkvbuf = vid.width * vid.height * sizeof *d_pzbuffer;
 	scachesz = D_SurfaceCacheForRes(vid.width, vid.height);
 	hunkvbuf += scachesz;
-	if((d_pzbuffer = malloc(hunkvbuf)) == nil)
-		sysfatal("Not enough memory for video mode\n");
+	if((d_pzbuffer = realloc(d_pzbuffer, hunkvbuf)) == nil)
+		sysfatal("%r");
 	surfcache = (byte *)d_pzbuffer + vid.width * vid.height * sizeof *d_pzbuffer;
 	D_InitCaches(surfcache, scachesz);
 
@@ -60,16 +57,13 @@ resetfb(void)
 	fbr = Rpt(subpt(center, p), addpt(center, p));
 	p = Pt(vid.width/4, vid.height/4);
 	grabr = Rpt(subpt(center, p), addpt(center, p));
+	for(i = 0; i < nelem(vidbuffers); i++)
+		vidbuffers[i] = realloc(vidbuffers[i], vid.width*vid.height+16);
 	freeimage(fbi);
-	for(i = 0; i < nelem(vidbuffers); i++){
-		free(vidbuffers[i]);
-		vidbuffers[i] = mallocalign(vid.width*vid.height*4, 64, 0, 0);
-	}
 	fbi = allocimage(display, Rect(0, 0, vid.width, vid.height), XRGB32, 0, 0);
 	if(fbi == nil)
 		sysfatal("resetfb: %r (%d %d)", vid.width, vid.height);
-	bufi = 0;
-	vid.buffer = vidbuffers[0];
+	vid.buffer = vidbuffers[bufi = 0];
 	vid.conbuffer = vid.buffer;
 	draw(screen, screen->r, display->black, nil, ZP);
 }
@@ -78,15 +72,21 @@ static void
 loader(void *p)
 {
 	u8int *f, *fb;
+	Rectangle r;
+	int n;
 
 	fb = p;
+	r = Rect(0, 0, vid.width, vid.height);
+	n = vid.width * vid.height;
 	for(;;){
 		if((f = recvp(frame)) == nil)
 			break;
-		pal2xrgb(vid.width * vid.height, fbpal, f, (u32int*)fb);
-		loadimage(fbi, Rect(0, 0, vid.width, vid.height), fb, vid.height*vid.rowbytes*4);
+		pal2xrgb(n, fbpal, f, (u32int*)fb);
+		if(loadimage(fbi, r, fb, n*4) != n*4)
+			sysfatal("%r");
 		draw(screen, fbr, fbi, nil, ZP);
-		flushimage(display, 1);
+		if(flushimage(display, 1) < 0)
+			sysfatal("%r");
 	}
 	free(fb);
 	threadexits(nil);
@@ -107,6 +107,8 @@ flipfb(void)
 {
 	if(resized){		/* skip this frame if window resize */
 		stopfb();
+		if(getwindow(display, Refnone) < 0)
+			sysfatal("%r");
 		resized = 0;
 		resetfb();
 		vid.recalc_refdef = 1;	/* force a surface cache flush */
