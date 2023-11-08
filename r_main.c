@@ -751,10 +751,12 @@ void R_RenderView (void)
 	r_drawflags = DRAW_BLEND;
 	R_EdgeDrawing();
 	// FIXME(sigrid): these need to be sorted and drawn back to front
-	for(i = cl_numvisedicts, e = ent_reject; e != nil; e = e->last_reject)
-		cl_visedicts[--i] = e;
-	for(; i < cl_numvisedicts; i++)
-		R_DrawEntity(cl_visedicts[i]);
+	if(cl_numvisedicts > 0){
+		for(i = cl_numvisedicts, e = ent_reject; e != nil && i > 0; e = e->last_reject)
+			cl_visedicts[--i] = e;
+		for(; i < cl_numvisedicts; i++)
+			R_DrawEntity(cl_visedicts[i]);
+	}
 	r_drawflags = 0;
 
 	if (r_dowarp)
