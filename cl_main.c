@@ -56,6 +56,7 @@ void CL_ClearState (void)
 	memset(cl_lightstyle, 0, sizeof cl_lightstyle);
 	memset(cl_dlights, 0, sizeof cl_dlights);
 	memset(cl_beams, 0, sizeof cl_beams);
+	cl_numvisedicts = 0;
 
 //
 // allocate the efrags and chain together into a free list
