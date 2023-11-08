@@ -6,7 +6,7 @@ extern int resized;
 
 static cvar_t m_windowed = {"m_windowed", "1", true};
 static cvar_t m_filter = {"m_filter", "0", true};
-static int mouseon, oldmwin;
+static int mouseon, oldmwin, focuslost;
 static float olddx, olddy;
 static int mΔx, mΔy, oldmb;
 
@@ -34,8 +34,18 @@ Sys_SendKeyEvents(void)
 			Cbuf_AddText("menu_quit\n");
 			break;
 		case SDL_WINDOWEVENT:
-			if(event.window.event == SDL_WINDOWEVENT_RESIZED)
+			switch(event.window.event){
+			case SDL_WINDOWEVENT_RESIZED:
 				resized = 1;
+				break;
+			case SDL_WINDOWEVENT_FOCUS_LOST:
+				focuslost = mouseon;
+				IN_Grabm(0);
+				break;
+			case SDL_WINDOWEVENT_FOCUS_GAINED:
+				IN_Grabm(focuslost);
+				break;
+			}
 			break;
 		case SDL_MOUSEMOTION:
 			if(mouseon){
