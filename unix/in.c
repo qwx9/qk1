@@ -7,8 +7,13 @@ extern int resized;
 static cvar_t m_windowed = {"m_windowed", "1", true};
 static cvar_t m_filter = {"m_filter", "0", true};
 static int mouseon, oldmwin, focuslost;
-static float olddx, olddy;
-static int mΔx, mΔy, oldmb;
+static float dx, dy, olddx, olddy;
+
+static int mbuttons[] = {
+	K_MOUSE1,
+	K_MOUSE3,
+	K_MOUSE2,
+};
 
 void
 conscmd(void)
@@ -19,7 +24,7 @@ void
 Sys_SendKeyEvents(void)
 {
 	SDL_Event event;
-	int key;
+	int key, b;
 
 	if(cls.state == ca_dedicated)
 		return;
@@ -49,9 +54,14 @@ Sys_SendKeyEvents(void)
 			break;
 		case SDL_MOUSEMOTION:
 			if(mouseon){
-				mΔx += event.motion.xrel;
-				mΔy += event.motion.yrel;
+				dx += event.motion.xrel;
+				dy += event.motion.yrel;
 			}
+			break;
+		case SDL_MOUSEBUTTONDOWN:
+		case SDL_MOUSEBUTTONUP:
+			if(mouseon && (b = event.button.button-1) >= 0 && b < nelem(mbuttons))
+				Key_Event(mbuttons[b], event.type == SDL_MOUSEBUTTONDOWN);
 			break;
 		case SDL_KEYDOWN:
 		case SDL_KEYUP:
@@ -97,34 +107,14 @@ Sys_SendKeyEvents(void)
 void
 IN_Commands(void)
 {
-	int b, i, k, r;
-
-	if(!mouseon || cls.state == ca_dedicated)
-		return;
-	b = SDL_GetMouseState(nil, nil);
-	b = (b & 0x19) | ((b & 2) << 1) | ((b & 4) >> 1);
-	for(i=0, k=K_MOUSE1; i<5; i++, k++){
-		if(i == 3)
-			k = K_MWHEELUP;
-		r = b & 1<<i;
-		if(r ^ (oldmb & 1<<i))
-			Key_Event(k, r);
-	}
-	oldmb = b & 7;
 }
 
 void
 IN_Move(usercmd_t *cmd)
 {
-	float dx, dy;
-
 	if(!mouseon)
 		return;
 
-	dx = mΔx;
-	dy = mΔy;
-	mΔx = 0;
-	mΔy = 0;
 	if(m_filter.value){
 		dx = (dx + olddx) * 0.5;
 		dy = (dy + olddy) * 0.5;
@@ -151,13 +141,14 @@ IN_Move(usercmd_t *cmd)
 		else
 			cmd->forwardmove -= m_forward.value * dy;
 	}
+	dx = 0;
+	dy = 0;
 }
 
 void
 IN_Grabm(int on)
 {
-	mouseon = on;
-	SDL_SetRelativeMouseMode(on ? SDL_TRUE : SDL_FALSE);
+	SDL_SetRelativeMouseMode(mouseon = on);
 }
 
 void
