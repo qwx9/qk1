@@ -54,8 +54,6 @@ R_BeginEdgeFrame
 */
 void R_BeginEdgeFrame (void)
 {
-	int		v, n;
-
 	r_edges = Arr_AllocExtra(r_edges, &r_numallocatededges, r_outofedges);
 	edge_p = r_edges;
 	edge_max = &r_edges[r_numallocatededges];
@@ -75,10 +73,8 @@ void R_BeginEdgeFrame (void)
 	surfaces[1].key = 0x7FFFFFFF;
 	r_currentkey = 0;
 
-	v = r_refdef.vrect.y;
-	n = r_refdef.vrectbottom - v;
-	memset(newedges+v, 0, n*sizeof(*newedges));
-	memset(removeedges+v, 0, n*sizeof(*removeedges));
+	memset(newedges, 0, sizeof(newedges));
+	memset(removeedges, 0, sizeof(removeedges));
 }
 
 
@@ -131,7 +127,6 @@ R_RemoveEdges
 */
 void R_RemoveEdges (edge_t *pedge)
 {
-
 	do
 	{
 		pedge->next->prev = pedge->prev;
@@ -171,7 +166,7 @@ nextedge:
 		if (pedge->u < pedge->prev->u)
 			goto pushback;
 		pedge = pedge->next;
-			
+
 		goto nextedge;		
 		
 pushback:
@@ -537,8 +532,8 @@ void R_ScanEdges (void)
 	surf_t	*s;
 
 	r_basespans = Arr_AllocExtra(r_basespans, &r_numallocatedbasespans, r_outofspans);
-	basespan_p = (espan_t *)
-			((uintptr)(r_basespans + CACHE_SIZE - 1) & ~(CACHE_SIZE - 1));
+	basespan_p = (espan_t *)r_basespans;
+	assert(r_numallocatedbasespans > r_refdef.vrect.width);
 	max_span_p = &basespan_p[r_numallocatedbasespans - r_refdef.vrect.width];
 	span_p = basespan_p;
 	r_outofspans = 0;
@@ -567,7 +562,7 @@ void R_ScanEdges (void)
 	edge_aftertail.prev = &edge_tail;
 
 // FIXME: do we need this now that we clamp x in r_draw.c?
-	edge_sentinel.u = 2000 << 24;		// make sure nothing sorts past this
+	edge_sentinel.u = 0x7d << 24;		// make sure nothing sorts past this
 	edge_sentinel.prev = &edge_aftertail;
 
 //	

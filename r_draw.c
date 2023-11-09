@@ -107,9 +107,9 @@ void R_EmitEdge (mvertex_t *pv0, mvertex_t *pv1)
 	
 	// FIXME: build x/yscale into transform?
 		u0 = xcenter + xscale*lzi0*transformed[0];
-		//u0 = clamp(u0, r_refdef.fvrectx_adj, r_refdef.fvrectright_adj);
+		u0 = clamp(u0, r_refdef.fvrectx_adj, r_refdef.fvrectright_adj);
 		v0 = ycenter - yscale*lzi0*transformed[1];
-		//v0 = clamp(v0, r_refdef.fvrecty_adj, r_refdef.fvrectbottom_adj);
+		v0 = clamp(v0, r_refdef.fvrecty_adj, r_refdef.fvrectbottom_adj);
 		ceilv0 = (int)ceil(v0);
 	}
 
@@ -125,9 +125,9 @@ void R_EmitEdge (mvertex_t *pv0, mvertex_t *pv1)
 	r_lzi1 = 1.0 / transformed[2];
 
 	r_u1 = xcenter + xscale*r_lzi1*transformed[0];
-	//r_u1 = clamp(r_u1, r_refdef.fvrectx_adj, r_refdef.fvrectright_adj);
+	r_u1 = clamp(r_u1, r_refdef.fvrectx_adj, r_refdef.fvrectright_adj);
 	r_v1 = ycenter - yscale*r_lzi1*transformed[1];
-	//r_v1 = clamp(r_v1, r_refdef.fvrecty_adj, r_refdef.fvrectbottom_adj);
+	r_v1 = clamp(r_v1, r_refdef.fvrecty_adj, r_refdef.fvrectbottom_adj);
 	if (r_lzi1 > lzi0)
 		lzi0 = r_lzi1;
 	if (lzi0 > r_nearzi)	// for mipmap finding
@@ -185,14 +185,8 @@ void R_EmitEdge (mvertex_t *pv0, mvertex_t *pv1)
 
 	edge->u_step = u_step*0x100000;
 	edge->u = u*0x100000 + 0xFFFFF;
-
-// we need to do this to avoid stepping off the edges if a very nearly
-// horizontal edge is less than epsilon above a scan, and numeric error causes
-// it to incorrectly extend to the scan, and the extension of the line goes off
-// the edge of the screen
-// FIXME: is this actually needed?
-// FIXME(sigrid): looks like it isn't.
-	//edge->u = clamp(edge->u, r_refdef.vrect_x_adj_shift20, r_refdef.vrectright_adj_shift20);
+	/* with all the clamping before this one shouldn't be needed but kept to be 100% sure */
+	edge->u = clamp(edge->u, r_refdef.vrect_x_adj_shift20, r_refdef.vrectright_adj_shift20);
 
 //
 // sort the edge in normally
@@ -407,8 +401,7 @@ int R_RenderFace (msurface_t *fa, int clipflags)
 			{
 				if (r_pedge->cachededgeoffset & FULLY_CLIPPED_CACHED)
 				{
-					if ((r_pedge->cachededgeoffset & FRAMECOUNT_MASK) ==
-						r_framecount)
+					if ((int)(r_pedge->cachededgeoffset & FRAMECOUNT_MASK) == r_framecount)
 					{
 						r_lastvertvalid = false;
 						continue;
@@ -416,10 +409,8 @@ int R_RenderFace (msurface_t *fa, int clipflags)
 				}
 				else
 				{
-					if ((((uintptr)edge_p - (uintptr)r_edges) >
-						 r_pedge->cachededgeoffset) &&
-						(((edge_t *)((uintptr)r_edges +
-						 r_pedge->cachededgeoffset))->owner == r_pedge))
+					if ((((uintptr)edge_p - (uintptr)r_edges) > r_pedge->cachededgeoffset) &&
+						(((edge_t *)((uintptr)r_edges + r_pedge->cachededgeoffset))->owner == r_pedge))
 					{
 						R_EmitCachedEdge ();
 						r_lastvertvalid = false;
@@ -451,8 +442,7 @@ int R_RenderFace (msurface_t *fa, int clipflags)
 			{
 				if (r_pedge->cachededgeoffset & FULLY_CLIPPED_CACHED)
 				{
-					if ((r_pedge->cachededgeoffset & FRAMECOUNT_MASK) ==
-						r_framecount)
+					if ((int)(r_pedge->cachededgeoffset & FRAMECOUNT_MASK) == r_framecount)
 					{
 						r_lastvertvalid = false;
 						continue;
@@ -462,10 +452,8 @@ int R_RenderFace (msurface_t *fa, int clipflags)
 				{
 				// it's cached if the cached edge is valid and is owned
 				// by this medge_t
-					if ((((uintptr)edge_p - (uintptr)r_edges) >
-						 r_pedge->cachededgeoffset) &&
-						(((edge_t *)((uintptr)r_edges +
-						 r_pedge->cachededgeoffset))->owner == r_pedge))
+					if ((((uintptr)edge_p - (uintptr)r_edges) > r_pedge->cachededgeoffset) &&
+						(((edge_t *)((uintptr)r_edges + r_pedge->cachededgeoffset))->owner == r_pedge))
 					{
 						R_EmitCachedEdge ();
 						r_lastvertvalid = false;
@@ -555,8 +543,8 @@ void R_RenderBmodelFace (bedge_t *pedges, msurface_t *psurf)
 	mplane_t	*pplane;
 	float		distinv;
 	vec3_t		p_normal;
-	medge_t		tedge;
 	clipplane_t	*pclip;
+	static medge_t tedge;
 
 // skip out if no more surfs
 	if (surface_p >= surf_max)
@@ -722,6 +710,8 @@ void R_RenderPoly (msurface_t *fa, int clipflags)
 	while (pclip)
 	{
 		lastvert = lnumverts - 1;
+		assert(vertpage < 2);
+		assert(lastvert < 100);
 		lastdist = DotProduct (verts[vertpage][lastvert].position,
 							   pclip->normal) - pclip->dist;
 

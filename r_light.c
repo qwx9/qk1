@@ -49,7 +49,7 @@ void R_MarkLights (dlight_t *light, int bit, mnode_t *node)
 	mplane_t	*splitplane;
 	float		dist;
 	msurface_t	*surf;
-	int			i;
+	unsigned	i;
 	
 	if (node->contents < 0)
 		return;
@@ -125,7 +125,7 @@ int RecursiveLightPoint (mnode_t *node, vec3_t start, vec3_t end)
 	vec3_t		mid;
 	msurface_t	*surf;
 	int			s, t, ds, dt;
-	int			i;
+	unsigned	i;
 	mtexinfo_t	*tex;
 	byte		*lightmap;
 	unsigned	scale;

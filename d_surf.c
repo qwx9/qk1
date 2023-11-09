@@ -3,8 +3,8 @@
 float           surfscale;
 qboolean        r_cache_thrash;         // set if surface cache is thrashing
 
-int                                     sc_size;
-surfcache_t                     *sc_rover, *sc_base;
+int sc_size;
+surfcache_t *sc_rover, *sc_base;
 
 #define GUARDSIZE       4
 
@@ -111,13 +111,13 @@ surfcache_t     *D_SCAlloc (int width, uintptr size)
 	
 	size = (uintptr)&((surfcache_t *)0)->data[size];
 	size = (size + 3) & ~3;
-	if (size > sc_size)
+	if (size > (uintptr)sc_size)
 		Host_Error("D_SCAlloc: %zud > cache size",size);
 
 // if there is not size bytes after the rover, reset to the start
 	wrapped_this_time = false;
 
-	if ( !sc_rover || (byte *)sc_rover - (byte *)sc_base > sc_size - size)
+	if ( !sc_rover || (intptr)sc_rover-(intptr)sc_base > (intptr)sc_size-(intptr)size)
 	{
 		if (sc_rover)
 		{
@@ -131,7 +131,7 @@ surfcache_t     *D_SCAlloc (int width, uintptr size)
 	if (sc_rover->owner)
 		*sc_rover->owner = nil;
 	
-	while (new->size < size)
+	while ((uintptr)new->size < size)
 	{
 	// free another
 		sc_rover = sc_rover->next;
@@ -191,36 +191,6 @@ D_SCDump(void)
 	}
 }
 
-//=============================================================================
-
-// if the num is not a power of 2, assume it will not repeat
-
-int     MaskForNum (int num)
-{
-	if (num==128)
-		return 127;
-	if (num==64)
-		return 63;
-	if (num==32)
-		return 31;
-	if (num==16)
-		return 15;
-	return 255;
-}
-
-int D_log2 (int num)
-{
-	int     c;
-	
-	c = 0;
-	
-	while (num>>=1)
-		c++;
-	return c;
-}
-
-//=============================================================================
-
 /*
 ================
 D_CacheSurface
@@ -244,6 +214,7 @@ surfcache_t *D_CacheSurface (msurface_t *surface, int miplevel)
 //
 	cache = surface->cachespots[miplevel];
 
+	if(currententity == cl_entities || currententity->model->name[0] == '*')
 	if (cache && !cache->dlight && surface->dlightframe != r_framecount
 			&& cache->texture == r_drawsurf.texture
 			&& cache->lightadj[0] == r_drawsurf.lightadj[0]

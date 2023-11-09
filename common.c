@@ -281,19 +281,14 @@ char *MSG_ReadString (void)
 {
 	static char     string[2048];
 	int             l,c;
-	
-	l = 0;
-	do
-	{
-		c = MSG_ReadChar ();
-		if (c == -1 || c == 0)
+
+	for(l = 0; l < (int)sizeof(string)-1; l++){
+		if((c = MSG_ReadChar()) == -1 || c == 0)
 			break;
 		string[l] = c;
-		l++;
-	} while (l < sizeof(string)-1);
-	
+	}
 	string[l] = 0;
-	
+
 	return string;
 }
 

@@ -174,6 +174,7 @@ static int PartialIPAddress (char *in, Addr *hostaddr)
 
 int UDP_Connect (Addr *addr)
 {
+	USED(addr);
 	return 0;
 }
 

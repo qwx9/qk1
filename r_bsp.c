@@ -582,7 +582,7 @@ R_RenderWorldRejects(void)
 	model_t *clmodel;
 	nodereject_t *rej;
 	msurface_t *surf;
-	int i;
+	unsigned i;
 
 	currententity = &cl_entities[0];
 	VectorCopy (r_origin, modelorg);

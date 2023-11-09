@@ -10,9 +10,6 @@
 #define	GAMENAME	"id1"		// directory to look in by default
 
 enum {
-	// !!! if this is changed, it must be changed in d_ifacea.h too !!!
-	CACHE_SIZE = 32, // used to align key data structures
-
 	MAX_DATAGRAM = 1400,		// max length of unreliable message
 	MAX_DATAGRAM_LOCAL = 65000,	// on loopback we don't care
 

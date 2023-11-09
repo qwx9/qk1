@@ -20,15 +20,8 @@ typedef uint8_t u8int;
 typedef uint16_t u16int;
 typedef int32_t s32int;
 typedef uint32_t u32int;
+typedef intptr_t intptr;
 typedef uintptr_t uintptr;
-
-#define OREAD O_RDONLY
-#define OWRITE O_WRONLY
-#define OCEXEC O_CLOEXEC
-#define OTRUNC O_TRUNC
-#define AEXIST F_OK
-
-#define seek lseek
 
 #define nil NULL
 #define USED(x) (void)(x)

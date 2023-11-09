@@ -1139,8 +1139,6 @@ char *bindnames[][2] =
 {"+movedown",		"swim down"}
 };
 
-#define	NUMCOMMANDS	(sizeof(bindnames)/sizeof(bindnames[0]))
-
 int		keys_cursor;
 int		bind_grab;
 
@@ -1214,7 +1212,7 @@ void M_Keys_Draw (void)
 		M_Print (18, 32, "Enter to change, backspace to clear");
 
 // search for known bindings
-	for (i=0 ; i<NUMCOMMANDS ; i++)
+	for (i=0 ; i<nelem(bindnames) ; i++)
 	{
 		y = 48 + 8*i;
 
@@ -1275,14 +1273,14 @@ void M_Keys_Key (int k)
 		localsfx ("misc/menu1.wav");
 		keys_cursor--;
 		if (keys_cursor < 0)
-			keys_cursor = NUMCOMMANDS-1;
+			keys_cursor = nelem(bindnames)-1;
 		break;
 
 	case K_DOWNARROW:
 	case K_RIGHTARROW:
 		localsfx ("misc/menu1.wav");
 		keys_cursor++;
-		if (keys_cursor >= NUMCOMMANDS)
+		if (keys_cursor >= nelem(bindnames))
 			keys_cursor = 0;
 		break;
 

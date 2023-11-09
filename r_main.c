@@ -217,10 +217,10 @@ void R_NewMap (void)
 		cl.worldmodel->leafs[i].efrags = nil;
 
 	r_numallocatedbasespans = MAXSPANS;
-	r_basespans = Hunk_Alloc(r_numallocatedbasespans * sizeof(espan_t) + CACHE_SIZE);
 	r_cnumsurfs = MAXSURFACES;
-	surfaces = Hunk_Alloc(r_cnumsurfs * sizeof *surfaces);
 	r_numallocatededges = MAXEDGES;
+	r_basespans = Hunk_Alloc(r_numallocatedbasespans * sizeof(espan_t));
+	surfaces = Hunk_Alloc(r_cnumsurfs * sizeof *surfaces);
 	r_edges = Hunk_Alloc(r_numallocatededges * sizeof *r_edges);
 
 	r_viewleaf = nil;
@@ -747,7 +747,6 @@ void R_RenderView (void)
 
 	R_DrawViewModel ();
 	R_DrawParticles ();
-
 	r_drawflags = DRAW_BLEND;
 	R_EdgeDrawing();
 	// FIXME(sigrid): these need to be sorted and drawn back to front

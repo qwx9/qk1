@@ -243,11 +243,9 @@ void Draw_TransPic (int x, int y, qpic_t *pic)
 	byte	*dest, *source, tbyte;
 	int				v, u;
 
-	if (x < 0 || (unsigned)(x + pic->width) > vid.width || y < 0 ||
-		 (unsigned)(y + pic->height) > vid.height)
-	{
+	if (x < 0 || y < 0 || x+pic->width > vid.width || y+pic->height > vid.height)
 		fatal ("Draw_TransPic: bad coordinates");
-	}
+
 	source = pic->data;
 	dest = vid.buffer + y * vid.rowbytes + x;
 	if(pic->width & 7){	// general
@@ -295,11 +293,9 @@ void Draw_TransPicTranslate (int x, int y, qpic_t *pic, byte *translation)
 	byte	*dest, *source, tbyte;
 	int				v, u;
 
-	if (x < 0 || (unsigned)(x + pic->width) > vid.width || y < 0 ||
-		 (unsigned)(y + pic->height) > vid.height)
-	{
+	if (x < 0 || y < 0 || x+pic->width > vid.width || y+pic->height > vid.height)
 		fatal ("Draw_TransPic: bad coordinates");
-	}	
+
 	source = pic->data;
 	dest = vid.buffer + y * vid.rowbytes + x;
 	if (pic->width & 7){	// general
@@ -369,7 +365,7 @@ Draw_ConsoleBackground
 */
 void Draw_ConsoleBackground (int lines)
 {
-	int				x, y, v;
+	int				x, y, v, n;
 	byte			*src, *dest;
 	int				f, fstep;
 	qpic_t			*conback;
@@ -381,7 +377,8 @@ void Draw_ConsoleBackground (int lines)
 	sprint (ver, "(9)quake %4.2f", (float)VERSION);
 	dest = conback->data + 320*186 + 320 - 11 - 8*strlen(ver);
 
-	for (x=0 ; x<strlen(ver) ; x++)
+	n = strlen(ver);
+	for (x=0 ; x<n ; x++)
 		Draw_CharToConback (ver[x], dest+(x<<3));
 	dest = vid.conbuffer;
 	for(y=0; y<lines; y++, dest+=vid.conrowbytes){
@@ -392,7 +389,7 @@ void Draw_ConsoleBackground (int lines)
 		else{
 			f = 0;
 			fstep = 320 * 0x10000 / vid.conwidth;
-			for(x=0; x<vid.conwidth; x+=4){
+			for(x=0; x<(int)vid.conwidth; x+=4){
 				dest[x] = src[f>>16]; f += fstep;
 				dest[x+1] = src[f>>16]; f += fstep;
 				dest[x+2] = src[f>>16]; f += fstep;

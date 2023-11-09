@@ -48,7 +48,6 @@ enum{
 	CPRUINFO  = 1<<7 | 5,	/* rule[s] val[s] */
 
 	MAX_NET_DRIVERS = 8,
-	HOSTCACHESIZE = 8
 };
 
 typedef struct qsocket_s

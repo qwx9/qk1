@@ -1042,7 +1042,7 @@ void PR_LoadProgs (void)
 		crc (((byte *)progs)[i]);
 
 // byte swap the header
-	for (i=0 ; i<sizeof(*progs)/4 ; i++)
+	for (i=0 ; i<(int)sizeof(*progs)/4 ; i++)
 		((int *)progs)[i] = LittleLong ( ((int *)progs)[i] );		
 
 	if (progs->version != PROG_VERSION)

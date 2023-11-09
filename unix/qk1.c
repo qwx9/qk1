@@ -2,6 +2,7 @@
 #include "parg.h"
 #include <time.h>
 #include <errno.h>
+#include <fenv.h>
 
 char *game;
 int debug;
@@ -10,9 +11,12 @@ char lasterr[256] = {0};
 char *
 lerr(void)
 {
+	static char lasterrcopy[256];
+
 	if(*lasterr == 0 && errno != 0)
 		return strerror(errno);
-	return lasterr;
+	strcpy(lasterrcopy, lasterr);
+	return lasterrcopy;
 }
 
 int
@@ -121,10 +125,12 @@ main(int argc, char **argv)
 		}
 	}
 
-	srand(getpid());
+	srand(nanosec() + time(nil));
 
 	paths[1] = strdup(va("%s/.quake", getenv("HOME")));
 	Host_Init(nargs, argv, paths);
+
+	fesetround(FE_TOWARDZERO);
 
 	t = dtime() - 1.0 / Fpsmax;
 	for(;;){

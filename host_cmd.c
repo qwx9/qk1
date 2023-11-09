@@ -440,7 +440,7 @@ void Host_Say(qboolean teamonly)
 		sprint (text, "%c<%s> ", 1, hostname.string);
 
 	j = sizeof(text) - 2 - strlen(text);  // -2 for /n and null terminator
-	if(strlen(p) > j)
+	if(j < (int)strlen(p))
 		p[j] = 0;
 
 	strcat (text, p);
@@ -504,7 +504,7 @@ void Host_Tell_f(void)
 
 // check length & truncate if necessary
 	j = sizeof(text) - 2 - strlen(text);  // -2 for /n and null terminator
-	if(strlen(p) > j)
+	if(j < (int)strlen(p))
 		p[j] = 0;
 
 	strcat (text, p);
