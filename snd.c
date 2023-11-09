@@ -490,6 +490,8 @@ stepsnd(vec3_t origin, vec3_t forward, vec3_t right, vec3_t up)
 	long ns;
 	Chan *c, *sum;
 
+	if(!ainit)
+		return;
 	VectorCopy(origin, listener_origin);
 	VectorCopy(forward, listener_forward);
 	VectorCopy(right, listener_right);
