@@ -112,9 +112,9 @@ initfb(void)
 	vid.colormap = host_colormap;
 	vid.fullbright = 256 - LittleLong(*((int *)vid.colormap + 2048));
 
-	if(SDL_Init(SDL_INIT_VIDEO) < 0)
+	if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) < 0)
 		fatal("SDL_Init: %s", SDL_GetError());
-	win = SDL_CreateWindow("quake", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 800, 600, SDL_WINDOW_RESIZABLE);
+	win = SDL_CreateWindow("quake", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 800, 600, 0);
 	if(win == nil)
 		fatal("SDL_CreateWindow: %s", SDL_GetError());
 	if((rend = SDL_CreateRenderer(win, -1, 0)) == NULL)
@@ -122,9 +122,10 @@ initfb(void)
 	SDL_SetRenderDrawColor(rend, 0, 0, 0, 255);
 	SDL_RenderClear(rend);
 	SDL_RenderPresent(rend);
-	SDL_SetWindowPosition(win, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
-	SDL_ShowWindow(win);
 	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
 
 	resetfb();
+	SDL_SetWindowResizable(win, SDL_TRUE);
+	SDL_SetWindowMinimumSize(win, 320, 240);
+	IN_Grabm(1);
 }
