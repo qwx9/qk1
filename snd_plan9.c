@@ -6,6 +6,17 @@ static QLock alock;
 static uchar *mixbuf;
 static Channel *ach;
 
+long
+sndqueued(void)
+{
+	Dir *d;
+	long n;
+
+	n = (d = dirfstat(afd)) != nil ? d->length : 0;
+	free(d);
+	return n;
+}
+
 static void
 auproc(void *p)
 {

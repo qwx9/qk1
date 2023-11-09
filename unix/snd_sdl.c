@@ -3,6 +3,12 @@
 
 static SDL_AudioDeviceID adev;
 
+long
+sndqueued(void)
+{
+	return SDL_GetQueuedAudioSize(adev);
+}
+
 void
 sndstop(void)
 {

@@ -492,6 +492,27 @@ stepsnd(vec3_t origin, vec3_t forward, vec3_t right, vec3_t up)
 
 	if(!ainit)
 		return;
+
+	if(sndt == 0)
+		sndt = nanosec() - Te9 / Fpsmax;
+	nsamp = (nanosec() - sndt) / (Te9 / Srate);
+	if(!cls.timedemo)
+		nsamp = (nsamp + 15) & ~15;
+	nsamp -= sndqueued()/Sblk - Srate/Fpsmax;
+	if(nsamp < 1)
+		return;
+	if(nsamp > Ssamp)
+		nsamp = Ssamp;
+	ns = nsamp * Sblk;
+	mixbuf = mixbufs[mixbufi];
+	samplesfx();
+	sampt += nsamp;
+	if(ns != 0){
+		sndwrite(mixbuf, ns);
+		mixbufi = (mixbufi + 1) % nelem(mixbufs);
+	}
+	sndt = nanosec();
+
 	VectorCopy(origin, listener_origin);
 	VectorCopy(forward, listener_forward);
 	VectorCopy(right, listener_right);
@@ -524,22 +545,6 @@ stepsnd(vec3_t origin, vec3_t forward, vec3_t right, vec3_t up)
 			}
 		}
 	}
-	if(sndt == 0)
-		sndt = nanosec() - Te9 / Fpsmax;
-	nsamp = (nanosec() - sndt) / (Te9 / Srate);
-	if(!cls.timedemo)
-		nsamp = (nsamp + 15) & ~15;
-	if(nsamp > Ssamp)
-		nsamp = Ssamp;
-	ns = nsamp * Sblk;
-	mixbuf = mixbufs[mixbufi];
-	samplesfx();
-	sampt += nsamp;
-	if(ns != 0){
-		sndwrite(mixbuf, ns);
-		mixbufi = (mixbufi + 1) % nelem(mixbufs);
-	}
-	sndt = nanosec();
 }
 
 void
