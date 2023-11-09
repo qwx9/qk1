@@ -208,9 +208,9 @@ R_AliasClipTriangle
 */
 void R_AliasClipTriangle (mtriangle_t *ptri)
 {
-	int				i, k, pingpong;
-	mtriangle_t		mtri;
-	unsigned		clipflags;
+	int					i, k, pingpong;
+	static mtriangle_t	mtri;
+	unsigned			clipflags;
 
 	memset(fv, 0, sizeof(fv));
 
