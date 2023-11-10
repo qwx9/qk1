@@ -1,10 +1,5 @@
 #include "quakedef.h"
 
-// TODO: put in span spilling to shrink list size
-// !!! if this is changed, it must be changed in d_polysa.s too !!!
-#define DPS_MAXSPANS			MAXHEIGHT+1
-									// 1 extra for spanpackage that marks end
-
 // !!! if this is changed, it must be changed in asm_draw.h too !!!
 typedef struct {
 	void			*pdest;
@@ -26,16 +21,17 @@ typedef struct {
 	int		*prightedgevert2;
 } edgetable;
 
-int	r_p0[6], r_p1[6], r_p2[6];
+// TODO: put in span spilling to shrink list size
+// !!! if this is changed, it must be changed in d_polysa.s too !!!
+static spanpackage_t a_spans[MAXHEIGHT+1];
+									// 1 extra for spanpackage that marks end
 
-byte		*d_pcolormap;
+static int r_p0[6], r_p1[6], r_p2[6];
+static byte *d_pcolormap;
+static int d_xdenom;
+static edgetable *pedgetable;
 
-int			d_aflatcolor;
-int			d_xdenom;
-
-edgetable	*pedgetable;
-
-edgetable	edgetables[12] = {
+static edgetable edgetables[12] = {
 	{0, 1, r_p0, r_p2, nil, 2, r_p0, r_p1, r_p2 },
 	{0, 2, r_p1, r_p0, r_p2,   1, r_p1, r_p2, nil},
 	{1, 1, r_p0, r_p2, nil, 1, r_p1, r_p2, nil},
@@ -51,23 +47,22 @@ edgetable	edgetables[12] = {
 };
 
 // FIXME: some of these can become statics
-static int				a_sstepxfrac, a_tstepxfrac, r_lstepx, a_ststepxwhole;
-int				r_sstepx, r_tstepx, r_lstepy, r_sstepy, r_tstepy;
-int				r_zistepx, r_zistepy;
-int				d_aspancount, d_countextrastep;
+static int a_sstepxfrac, a_tstepxfrac, r_lstepx, a_ststepxwhole;
+static int r_sstepx, r_tstepx, r_lstepy, r_sstepy, r_tstepy;
+static int r_zistepx, r_zistepy;
+static int d_aspancount, d_countextrastep;
 
-static spanpackage_t *a_spans;
-spanpackage_t			*d_pedgespanpackage;
-static int				ystart;
-byte					*d_pdest, *d_ptex;
-uzint					*d_pz;
-int						d_sfrac, d_tfrac, d_light, d_zi;
-int						d_ptexextrastep, d_sfracextrastep;
-int						d_tfracextrastep, d_lightextrastep, d_pdestextrastep;
-int						d_lightbasestep, d_pdestbasestep, d_ptexbasestep;
-int						d_sfracbasestep, d_tfracbasestep;
-int						d_ziextrastep, d_zibasestep;
-int						d_pzextrastep, d_pzbasestep;
+spanpackage_t *d_pedgespanpackage;
+static int ystart;
+static byte *d_pdest, *d_ptex;
+static uzint *d_pz;
+static int d_sfrac, d_tfrac, d_light, d_zi;
+static int d_ptexextrastep, d_sfracextrastep;
+static int d_tfracextrastep, d_lightextrastep, d_pdestextrastep;
+static int d_lightbasestep, d_pdestbasestep, d_ptexbasestep;
+static int d_sfracbasestep, d_tfracbasestep;
+static int d_ziextrastep, d_zibasestep;
+static int d_pzextrastep, d_pzbasestep;
 
 typedef struct {
 	int		quotient;
@@ -78,9 +73,9 @@ static const adivtab_t adivtab[32*32] = {
 #include "adivtab.h"
 };
 
-byte	*skintable[MAX_LBM_HEIGHT];
-int		skinwidth;
-byte	*skinstart;
+static byte *skintable[MAX_LBM_HEIGHT];
+static byte *skinstart;
+int skinwidth;
 
 void D_PolysetDrawSpans8 (spanpackage_t *pspanpackage, byte *colormap, byte alpha);
 void D_PolysetCalcGradients (int skinwidth);
@@ -98,9 +93,6 @@ D_PolysetDraw
 */
 void D_PolysetDraw (byte *colormap)
 {
-	static spanpackage_t	spans[DPS_MAXSPANS];
-	a_spans = spans;
-
 	if (r_affinetridesc.drawtype)
 	{
 		D_DrawSubdiv (colormap);
@@ -621,44 +613,6 @@ void D_PolysetDrawSpans8 (spanpackage_t *pspanpackage, byte *colormap, byte alph
 
 		pspanpackage++;
 	} while (pspanpackage->count != Q_MININT);
-}
-
-
-/*
-================
-D_PolysetFillSpans8
-================
-*/
-void D_PolysetFillSpans8 (spanpackage_t *pspanpackage)
-{
-	int				color;
-
-	// FIXME: do z buffering
-
-	color = d_aflatcolor++;
-
-	while (1)
-	{
-		int		lcount;
-		byte	*lpdest;
-
-		lcount = pspanpackage->count;
-
-		if (lcount == -1)
-			return;
-
-		if (lcount)
-		{
-			lpdest = pspanpackage->pdest;
-
-			do
-			{
-				*lpdest++ = color;
-			} while (--lcount);
-		}
-
-		pspanpackage++;
-	}
 }
 
 /*
