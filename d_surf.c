@@ -3,11 +3,12 @@
 float		   surfscale;
 qboolean		r_cache_thrash;		 // set if surface cache is thrashing
 
-int sc_size;
-surfcache_t *sc_rover, *sc_base;
+surfcache_t *sc_rover;
+
+static surfcache_t *sc_base;
+static int sc_size;
 
 #define GUARDSIZE	   4
-
 
 int	 D_SurfaceCacheForRes (int width, int height)
 {
@@ -53,7 +54,6 @@ D_InitCaches
 */
 void D_InitCaches (void *buffer, int size)
 {
-
 	if (!msg_suppress_1)
 		Con_Printf ("%dk surface cache\n", size/1024);
 

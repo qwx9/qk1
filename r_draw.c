@@ -522,7 +522,6 @@ int R_RenderFace (msurface_t *fa, int clipflags)
 			xcenter * surface_p->d_zistepu -
 			ycenter * surface_p->d_zistepv;
 
-	//JDC	VectorCopy (r_worldmodelorg, surface_p->modelorg);
 	surface_p++;
 
 	return 1;
@@ -639,7 +638,6 @@ void R_RenderBmodelFace (bedge_t *pedges, msurface_t *psurf)
 			xcenter * surface_p->d_zistepu -
 			ycenter * surface_p->d_zistepv;
 
-	//JDC	VectorCopy (r_worldmodelorg, surface_p->modelorg);
 	surface_p++;
 }
 

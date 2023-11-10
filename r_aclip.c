@@ -206,7 +206,7 @@ int R_AliasClip (finalvert_t *in, finalvert_t *out, int flag, int count,
 R_AliasClipTriangle
 ================
 */
-void R_AliasClipTriangle (mtriangle_t *ptri)
+void R_AliasClipTriangle (mtriangle_t *ptri, auxvert_t *auxverts)
 {
 	int					i, k, pingpong;
 	static mtriangle_t	mtri;
@@ -238,7 +238,7 @@ void R_AliasClipTriangle (mtriangle_t *ptri)
 	if (clipflags & ALIAS_Z_CLIP)
 	{
 		for (i=0 ; i<3 ; i++)
-			av[i] = pauxverts[ptri->vertindex[i]];
+			av[i] = auxverts[ptri->vertindex[i]];
 
 		k = R_AliasClip (fv[0], fv[1], ALIAS_Z_CLIP, 3, R_Alias_clip_z);
 		if (k == 0)
@@ -319,7 +319,7 @@ void R_AliasClipTriangle (mtriangle_t *ptri)
 	{
 		mtri.vertindex[1] = i;
 		mtri.vertindex[2] = i+1;
-		D_PolysetDraw ();
+		D_PolysetDraw (currententity->colormap);
 	}
 }
 

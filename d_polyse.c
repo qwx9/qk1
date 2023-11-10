@@ -74,7 +74,7 @@ typedef struct {
 	int		remainder;
 } adivtab_t;
 
-static adivtab_t	adivtab[32*32] = {
+static const adivtab_t adivtab[32*32] = {
 #include "adivtab.h"
 };
 
@@ -82,9 +82,9 @@ byte	*skintable[MAX_LBM_HEIGHT];
 int		skinwidth;
 byte	*skinstart;
 
-void D_PolysetDrawSpans8 (spanpackage_t *pspanpackage, byte alpha);
+void D_PolysetDrawSpans8 (spanpackage_t *pspanpackage, byte *colormap, byte alpha);
 void D_PolysetCalcGradients (int skinwidth);
-void D_DrawSubdiv (void);
+void D_DrawSubdiv (byte *colormap);
 void D_DrawNonSubdiv (void);
 void D_PolysetRecursiveTriangle (int *p1, int *p2, int *p3, byte alpha);
 void D_PolysetSetEdgeTable (void);
@@ -96,14 +96,14 @@ void D_PolysetScanLeftEdge (int height);
 D_PolysetDraw
 ================
 */
-void D_PolysetDraw (void)
+void D_PolysetDraw (byte *colormap)
 {
 	static spanpackage_t	spans[DPS_MAXSPANS];
 	a_spans = spans;
 
 	if (r_affinetridesc.drawtype)
 	{
-		D_DrawSubdiv ();
+		D_DrawSubdiv (colormap);
 	}
 	else
 	{
@@ -117,7 +117,7 @@ void D_PolysetDraw (void)
 D_PolysetDrawFinalVerts
 ================
 */
-void D_PolysetDrawFinalVerts (finalvert_t *fv, int numverts, byte alpha)
+void D_PolysetDrawFinalVerts (finalvert_t *fv, int numverts, byte *colormap, byte alpha)
 {
 	int		i, z;
 	uzint	*zbuf;
@@ -135,13 +135,13 @@ void D_PolysetDrawFinalVerts (finalvert_t *fv, int numverts, byte alpha)
 				if(r_drawflags & DRAW_BLEND){
 					int n = d_scantable[fv->v[1]] + fv->v[0];
 					int pix = skintable[fv->v[3]>>16][fv->v[2]>>16];
-					pix = ((byte *)acolormap)[pix + (fv->v[4] & 0xFF00) ];
+					pix = colormap[pix + (fv->v[4] & 0xFF00) ];
 					d_viewbuffer[n] = blendalpha(pix, d_viewbuffer[n], alpha);
 				}else{
 					int		pix;
 					*zbuf = z;
 					pix = skintable[fv->v[3]>>16][fv->v[2]>>16];
-					pix = ((byte *)acolormap)[pix + (fv->v[4] & 0xFF00) ];
+					pix = colormap[pix + (fv->v[4] & 0xFF00) ];
 					d_viewbuffer[d_scantable[fv->v[1]] + fv->v[0]] = pix;
 				}
 			}
@@ -155,7 +155,7 @@ void D_PolysetDrawFinalVerts (finalvert_t *fv, int numverts, byte alpha)
 D_DrawSubdiv
 ================
 */
-void D_DrawSubdiv (void)
+void D_DrawSubdiv (byte *colormap)
 {
 	mtriangle_t		*ptri;
 	finalvert_t		*pfv, *index0, *index1, *index2;
@@ -180,7 +180,7 @@ void D_DrawSubdiv (void)
 			continue;
 		}
 
-		d_pcolormap = &((byte *)acolormap)[index0->v[4] & 0xFF00];
+		d_pcolormap = colormap + (index0->v[4] & 0xFF00);
 
 		if (ptri[i].facesfront)
 		{
@@ -463,8 +463,7 @@ void D_PolysetSetUpForLineScan(fixed8_t startvertu, fixed8_t startvertv,
 		fixed8_t endvertu, fixed8_t endvertv)
 {
 	double		dm, dn;
-	int			tm, tn;
-	adivtab_t	*ptemp;
+	int			tm, tn, n;
 
 	// TODO: implement x86 version
 
@@ -476,9 +475,9 @@ void D_PolysetSetUpForLineScan(fixed8_t startvertu, fixed8_t startvertv,
 	if (((tm <= 16) && (tm >= -15)) &&
 		((tn <= 16) && (tn >= -15)))
 	{
-		ptemp = &adivtab[((tm+15) << 5) + (tn+15)];
-		ubasestep = ptemp->quotient;
-		erroradjustup = ptemp->remainder;
+		n = ((tm+15) << 5) + (tn+15);
+		ubasestep = adivtab[n].quotient;
+		erroradjustup = adivtab[n].remainder;
 		erroradjustdown = tn;
 	}
 	else
@@ -553,7 +552,7 @@ void D_PolysetCalcGradients (int skinwidth)
 D_PolysetDrawSpans8
 ================
 */
-void D_PolysetDrawSpans8 (spanpackage_t *pspanpackage, byte alpha)
+void D_PolysetDrawSpans8 (spanpackage_t *pspanpackage, byte *colormap, byte alpha)
 {
 	int		lcount;
 	byte	*lpdest;
@@ -593,12 +592,12 @@ void D_PolysetDrawSpans8 (spanpackage_t *pspanpackage, byte alpha)
 				if ((lzi >> 16) >= *lpz){
 					if(r_drawflags & DRAW_BLEND){
 						*lpdest = blendalpha(
-							((byte *)acolormap)[*lptex + (llight & 0xFF00)],
+							colormap[*lptex + (llight & 0xFF00)],
 							*lpdest,
 							alpha
 						);
 					}else{
-						*lpdest = ((byte *)acolormap)[*lptex + (llight & 0xFF00)];
+						*lpdest = colormap[*lptex + (llight & 0xFF00)];
 						// gel mapping	*lpdest = gelmap[*lpdest];
 						*lpz = lzi >> 16;
 					}
@@ -844,7 +843,7 @@ void D_RasterizeAliasPolySmooth (void)
 	d_countextrastep = ubasestep + 1;
 	originalcount = a_spans[initialrightheight].count;
 	a_spans[initialrightheight].count = Q_MININT; // mark end of the spanpackages
-	D_PolysetDrawSpans8 (a_spans, currententity->alpha);
+	D_PolysetDrawSpans8 (a_spans, currententity->colormap, currententity->alpha);
 
 	// scan out the bottom part of the right edge, if it exists
 	if (pedgetable->numrightedges == 2)
@@ -868,7 +867,7 @@ void D_RasterizeAliasPolySmooth (void)
 		d_countextrastep = ubasestep + 1;
 		a_spans[initialrightheight + height].count = Q_MININT;
 											// mark end of the spanpackages
-		D_PolysetDrawSpans8 (pstart, currententity->alpha);
+		D_PolysetDrawSpans8 (pstart, currententity->colormap, currententity->alpha);
 	}
 }
 

@@ -101,7 +101,6 @@ extern	int		r_visframecount;
 
 //=============================================================================
 
-extern int	vstartscan;
 extern int r_drawflags;
 
 
@@ -112,8 +111,6 @@ void R_DrawPolyList (void);
 // current entity info
 //
 extern	qboolean		insubmodel;
-extern	vec3_t			r_worldmodelorg;
-
 
 void R_DrawSprite (void);
 int R_RenderFace (msurface_t *fa, int clipflags);
@@ -168,9 +165,6 @@ extern fixed16_t	bbextents, bbextentt;
 								//  to the world BSP
 extern mvertex_t	*r_ptverts, *r_ptvertsmax;
 
-extern vec3_t			sbaseaxis[3], tbaseaxis[3];
-extern float			entity_rotation[3][3];
-
 extern int		reinit_surfcache;
 
 extern int		r_currentkey;
@@ -186,15 +180,10 @@ void	R_ZDrawSubmodelPolys (model_t *clmodel);
 #define MAXALIASVERTS		2000	// TODO: tune this
 #define ALIAS_Z_CLIP_PLANE	5
 
-extern int				numverts;
-extern mtriangle_t		*ptriangles;
-extern int				numtriangles;
-extern aliashdr_t		*paliashdr;
-extern mdl_t			*pmdl;
-extern float			leftclip, topclip, rightclip, bottomclip;
-extern int				r_acliptype;
+#define NUMVERTEXNORMALS	162
+extern const float r_avertexnormals[NUMVERTEXNORMALS][3];
+
 extern finalvert_t		*pfinalverts;
-extern auxvert_t		*pauxverts;
 
 qboolean R_AliasCheckBBox (void);
 
@@ -237,7 +226,7 @@ extern int		r_outofspans;
 extern mvertex_t	*r_pcurrentvertbase;
 extern int			r_maxvalidedgeoffset;
 
-void R_AliasClipTriangle (mtriangle_t *ptri);
+void R_AliasClipTriangle (mtriangle_t *ptri, auxvert_t *auxverts);
 
 extern int		r_frustum_indexes[4*6];
 extern int		r_maxsurfsseen, r_maxedgesseen, r_cnumsurfs;

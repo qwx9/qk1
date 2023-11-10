@@ -4,7 +4,6 @@ static int	miplevel;
 
 float		scale_for_mip;
 int			ubasestep, errorterm, erroradjustup, erroradjustdown;
-int			vstartscan;
 
 // FIXME: should go away
 extern void			R_RotateBmodel (void);

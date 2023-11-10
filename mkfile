@@ -33,7 +33,6 @@ OFILES=\
 	d_sprite.$O\
 	d_surf.$O\
 	d_vars.$O\
-	d_zpoint.$O\
 	fs.$O\
 	host.$O\
 	host_cmd.$O\

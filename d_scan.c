@@ -1,9 +1,9 @@
 #include "quakedef.h"
 
-unsigned char	*r_turb_pbase, *r_turb_pdest;
-fixed16_t		r_turb_s, r_turb_t, r_turb_sstep, r_turb_tstep;
-int				*r_turb_turb;
-int				r_turb_spancount;
+static unsigned char	*r_turb_pbase, *r_turb_pdest;
+static fixed16_t		r_turb_s, r_turb_t, r_turb_sstep, r_turb_tstep;
+static int				*r_turb_turb;
+static int				r_turb_spancount;
 static uzint	*r_turb_z;
 
 /*
@@ -22,9 +22,9 @@ void D_WarpScreen (void)
 	int		*turb;
 	int		*col;
 	byte	**row;
-	static byte	*rowptr[MAXHEIGHT+(AMP2*2)];
-	static int		column[MAXWIDTH+(AMP2*2)];
 	float	wratio, hratio;
+	static byte	*rowptr[MAXHEIGHT+(AMP2*2)];
+	static int	column[MAXWIDTH+(AMP2*2)];
 
 	w = r_refdef.vrect.width;
 	h = r_refdef.vrect.height;

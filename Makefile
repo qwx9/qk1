@@ -35,7 +35,6 @@ OBJS=\
 	d_sprite.o\
 	d_surf.o\
 	d_vars.o\
-	d_zpoint.o\
 	dotproduct.o\
 	draw.o\
 	fs.o\

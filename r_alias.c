@@ -3,21 +3,15 @@
 #define LIGHT_MIN	5		// lowest light value we'll allow, to avoid the
 							//  need for inner-loop light clamping
 
-mtriangle_t		*ptriangles;
 affinetridesc_t	r_affinetridesc;
 
-void *			acolormap;	// FIXME: should go away
-
-trivertx_t		*r_apverts;
-
 // TODO: these probably will go away with optimized rasterization
-mdl_t				*pmdl;
-vec3_t				r_plightvec;
-int					r_ambientlight;
-float				r_shadelight;
-aliashdr_t			*paliashdr;
 finalvert_t			*pfinalverts;
-auxvert_t			*pauxverts;
+static mdl_t		*pmdl;
+static vec3_t		r_plightvec;
+static int			r_ambientlight;
+static float		r_shadelight;
+static aliashdr_t	*paliashdr;
 static float		ziscale;
 static model_t		*pmodel;
 
@@ -35,24 +29,19 @@ typedef struct {
 	int	index1;
 } aedge_t;
 
-static aedge_t	aedges[12] = {
-{0, 1}, {1, 2}, {2, 3}, {3, 0},
-{4, 5}, {5, 6}, {6, 7}, {7, 4},
-{0, 5}, {1, 4}, {2, 7}, {3, 6}
+static const aedge_t aedges[12] = {
+	{0, 1}, {1, 2}, {2, 3}, {3, 0},
+	{4, 5}, {5, 6}, {6, 7}, {7, 4},
+	{0, 5}, {1, 4}, {2, 7}, {3, 6}
 };
 
-#define NUMVERTEXNORMALS	162
-
-float	r_avertexnormals[NUMVERTEXNORMALS][3] = {
+const float r_avertexnormals[NUMVERTEXNORMALS][3] = {
 #include "anorms.h"
 };
 
-void R_AliasTransformAndProjectFinalVerts (finalvert_t *fv,
-	stvert_t *pstverts);
-void R_AliasSetUpTransform (int trivial_accept);
-void R_AliasTransformVector (vec3_t in, vec3_t out);
-void R_AliasTransformFinalVert (finalvert_t *fv, auxvert_t *av,
-	trivertx_t *pverts, stvert_t *pstverts);
+static void R_AliasSetUpTransform (int trivial_accept);
+static void R_AliasTransformVector (vec3_t in, vec3_t out);
+static void R_AliasTransformFinalVert (finalvert_t *fv, auxvert_t *av, trivertx_t *pverts, stvert_t *pstverts);
 void R_AliasProjectFinalVert (finalvert_t *fv, auxvert_t *av);
 
 
@@ -221,7 +210,7 @@ qboolean R_AliasCheckBBox (void)
 R_AliasTransformVector
 ================
 */
-void R_AliasTransformVector (vec3_t in, vec3_t out)
+static void R_AliasTransformVector (vec3_t in, vec3_t out)
 {
 	out[0] = DotProduct(in, aliastransform[0]) + aliastransform[0][3];
 	out[1] = DotProduct(in, aliastransform[1]) + aliastransform[1][3];
@@ -236,23 +225,23 @@ R_AliasPreparePoints
 General clipped case
 ================
 */
-void R_AliasPreparePoints (void)
+void R_AliasPreparePoints (trivertx_t *apverts, auxvert_t *auxverts, byte *colormap)
 {
 	int			i;
 	stvert_t	*pstverts;
 	finalvert_t	*fv;
-	auxvert_t	*av;
 	mtriangle_t	*ptri;
 	finalvert_t	*pfv[3];
+	auxvert_t *av;
 
 	pstverts = (stvert_t *)((byte *)paliashdr + paliashdr->stverts);
 	r_anumverts = pmdl->numverts;
  	fv = pfinalverts;
-	av = pauxverts;
+ 	av = auxverts;
 
-	for (i=0 ; i<r_anumverts ; i++, fv++, av++, r_apverts++, pstverts++)
+	for (i=0 ; i<r_anumverts ; i++, fv++, av++, apverts++, pstverts++)
 	{
-		R_AliasTransformFinalVert (fv, av, r_apverts, pstverts);
+		R_AliasTransformFinalVert (fv, av, apverts, pstverts);
 		if (av->fv[2] < ALIAS_Z_CLIP_PLANE)
 			fv->flags |= ALIAS_Z_CLIP;
 		else
@@ -288,11 +277,11 @@ void R_AliasPreparePoints (void)
 		{	// totally unclipped
 			r_affinetridesc.pfinalverts = pfinalverts;
 			r_affinetridesc.ptriangles = ptri;
-			D_PolysetDraw ();
+			D_PolysetDraw (colormap);
 		}
 		else
 		{	// partially clipped
-			R_AliasClipTriangle (ptri);
+			R_AliasClipTriangle (ptri, auxverts);
 		}
 	}
 }
@@ -303,13 +292,13 @@ void R_AliasPreparePoints (void)
 R_AliasSetUpTransform
 ================
 */
-void R_AliasSetUpTransform (int trivial_accept)
+static void R_AliasSetUpTransform (int trivial_accept)
 {
-	int				i;
-	float			rotationmatrix[3][4], t2matrix[3][4];
+	int		i;
+	float	rotationmatrix[3][4], t2matrix[3][4];
 	static float	tmatrix[3][4];
 	static float	viewmatrix[3][4];
-	vec3_t			angles;
+	vec3_t	angles;
 
 	// TODO: should really be stored with the entity instead of being reconstructed
 	// TODO: should use a look-up table
@@ -381,11 +370,10 @@ void R_AliasSetUpTransform (int trivial_accept)
 R_AliasTransformFinalVert
 ================
 */
-void R_AliasTransformFinalVert (finalvert_t *fv, auxvert_t *av,
-	trivertx_t *pverts, stvert_t *pstverts)
+static void R_AliasTransformFinalVert (finalvert_t *fv, auxvert_t *av, trivertx_t *pverts, stvert_t *pstverts)
 {
 	int		temp;
-	float	lightcos, *plightnormal;
+	float	lightcos;
 
 	av->fv[0] = DotProduct_(pverts->v, aliastransform[0]) +
 			aliastransform[0][3];
@@ -400,8 +388,7 @@ void R_AliasTransformFinalVert (finalvert_t *fv, auxvert_t *av,
 	fv->flags = pstverts->onseam;
 
 	// lighting
-	plightnormal = r_avertexnormals[pverts->lightnormalindex];
-	lightcos = DotProduct (plightnormal, r_plightvec);
+	lightcos = DotProduct(r_avertexnormals[pverts->lightnormalindex], r_plightvec);
 	temp = r_ambientlight;
 
 	if (lightcos < 0)
@@ -423,13 +410,10 @@ void R_AliasTransformFinalVert (finalvert_t *fv, auxvert_t *av,
 R_AliasTransformAndProjectFinalVerts
 ================
 */
-void R_AliasTransformAndProjectFinalVerts (finalvert_t *fv, stvert_t *pstverts)
+void R_AliasTransformAndProjectFinalVerts (finalvert_t *fv, stvert_t *pstverts, trivertx_t *pverts)
 {
 	int			i, temp;
-	float		lightcos, *plightnormal, zi;
-	trivertx_t	*pverts;
-
-	pverts = r_apverts;
+	float		lightcos, zi;
 
 	for (i=0 ; i<r_anumverts ; i++, fv++, pverts++, pstverts++)
 	{
@@ -452,8 +436,7 @@ void R_AliasTransformAndProjectFinalVerts (finalvert_t *fv, stvert_t *pstverts)
 		fv->flags = pstverts->onseam;
 
 		// lighting
-		plightnormal = r_avertexnormals[pverts->lightnormalindex];
-		lightcos = DotProduct (plightnormal, r_plightvec);
+		lightcos = DotProduct(r_avertexnormals[pverts->lightnormalindex], r_plightvec);
 		temp = r_ambientlight;
 
 		if (lightcos < 0)
@@ -495,7 +478,7 @@ void R_AliasProjectFinalVert (finalvert_t *fv, auxvert_t *av)
 R_AliasPrepareUnclippedPoints
 ================
 */
-void R_AliasPrepareUnclippedPoints (void)
+void R_AliasPrepareUnclippedPoints (trivertx_t *pverts, byte *colormap)
 {
 	stvert_t	*pstverts;
 	finalvert_t	*fv;
@@ -505,17 +488,17 @@ void R_AliasPrepareUnclippedPoints (void)
 	// FIXME: just use pfinalverts directly?
 	fv = pfinalverts;
 
-	R_AliasTransformAndProjectFinalVerts (fv, pstverts);
+	R_AliasTransformAndProjectFinalVerts (fv, pstverts, pverts);
 
 	if (r_affinetridesc.drawtype)
-		D_PolysetDrawFinalVerts (fv, r_anumverts, currententity->alpha);
+		D_PolysetDrawFinalVerts (fv, r_anumverts, colormap, currententity->alpha);
 
 	r_affinetridesc.pfinalverts = pfinalverts;
 	r_affinetridesc.ptriangles = (mtriangle_t *)
 			((byte *)paliashdr + paliashdr->triangles);
 	r_affinetridesc.numtriangles = pmdl->numtris;
 
-	D_PolysetDraw ();
+	D_PolysetDraw (colormap);
 }
 
 /*
@@ -613,7 +596,7 @@ R_AliasSetupFrame
 set r_apverts
 =================
 */
-void R_AliasSetupFrame (void)
+trivertx_t *R_AliasSetupFrame (void)
 {
 	int				frame;
 	int				i, numframes;
@@ -629,9 +612,8 @@ void R_AliasSetupFrame (void)
 
 	if (paliashdr->frames[frame].type == ALIAS_SINGLE)
 	{
-		r_apverts = (trivertx_t *)
+		return (trivertx_t *)
 				((byte *)paliashdr + paliashdr->frames[frame].frame);
-		return;
 	}
 
 	paliasgroup = (maliasgroup_t *)
@@ -652,7 +634,7 @@ void R_AliasSetupFrame (void)
 			break;
 	}
 
-	r_apverts = (trivertx_t *)
+	return (trivertx_t *)
 				((byte *)paliashdr + paliasgroup->frames[i].frame);
 }
 
@@ -666,10 +648,10 @@ void R_AliasDrawModel (alight_t *plighting)
 {
 	static finalvert_t		finalverts[MAXALIASVERTS];
 	static auxvert_t		auxverts[MAXALIASVERTS];
+	trivertx_t *pverts;
 
 	// cache align
 	pfinalverts = finalverts;
-	pauxverts = auxverts;
 
 	paliashdr = (aliashdr_t *)Mod_Extradata (currententity->model);
 	pmdl = (mdl_t *)((byte *)paliashdr + paliashdr->model);
@@ -677,7 +659,7 @@ void R_AliasDrawModel (alight_t *plighting)
 	R_AliasSetupSkin ();
 	R_AliasSetUpTransform (currententity->trivial_accept);
 	R_AliasSetupLighting (plighting);
-	R_AliasSetupFrame ();
+	pverts = R_AliasSetupFrame ();
 
 	if (!currententity->colormap)
 		fatal ("R_AliasDrawModel: !currententity->colormap");
@@ -688,15 +670,13 @@ void R_AliasDrawModel (alight_t *plighting)
 	if (r_affinetridesc.drawtype)
 		D_PolysetUpdateTables ();		// FIXME: precalc...
 
-	acolormap = currententity->colormap;
-
 	if (currententity != &cl.viewent)
 		ziscale = (float)0x8000 * (float)0x10000;
 	else
 		ziscale = (float)0x8000 * (float)0x10000 * 3.0;
 
 	if (currententity->trivial_accept)
-		R_AliasPrepareUnclippedPoints ();
+		R_AliasPrepareUnclippedPoints (pverts, currententity->colormap);
 	else
-		R_AliasPreparePoints ();
+		R_AliasPreparePoints (pverts, auxverts, currententity->colormap);
 }
