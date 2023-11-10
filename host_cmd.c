@@ -673,6 +673,7 @@ void Host_Spawn_f (void)
 	int		i;
 	client_t	*client;
 	edict_t	*ent;
+	float *a;
 
 	if (cmd_source == src_command)
 	{
@@ -773,8 +774,9 @@ void Host_Spawn_f (void)
 	// with a permanent head tilt
 	ent = EDICT_NUM( 1 + (host_client - svs.clients) );
 	MSG_WriteByte (&host_client->message, svc_setangle);
-	for (i=0 ; i < 2 ; i++)
-		sv.protocol->MSG_WriteAngle (&host_client->message, ent->v.angles[i] );
+	a = sv.loadgame ? ent->v.v_angle : ent->v.angles;
+	for(i = 0; i < 2; i++)
+		sv.protocol->MSG_WriteAngle(&host_client->message, a[i]);
 	sv.protocol->MSG_WriteAngle (&host_client->message, 0 );
 
 	SV_WriteClientdataToMessage (sv_player, &host_client->message);
