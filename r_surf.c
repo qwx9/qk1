@@ -2,10 +2,7 @@
 
 drawsurf_t	r_drawsurf;
 
-int				sourcesstep, blocksize, sourcetstep;
-int				lightdelta, lightdeltastep;
-int				lightleftstep, lightrightstep, blockdivshift;
-unsigned		blockdivmask;
+static int sourcetstep, lightleftstep, lightrightstep;
 void			*prowdestbase;
 unsigned char	*pbasesource;
 int				surfrowbytes;	// used by ASM files
@@ -15,19 +12,19 @@ int				r_lightwidth;
 int				r_numhblocks, r_numvblocks;
 unsigned char	*r_source, *r_sourcemax;
 
-void R_DrawSurfaceBlock8_mip0 (void);
-void R_DrawSurfaceBlock8_mip1 (void);
-void R_DrawSurfaceBlock8_mip2 (void);
-void R_DrawSurfaceBlock8_mip3 (void);
+static void R_DrawSurfaceBlock8_mip0 (void);
+static void R_DrawSurfaceBlock8_mip1 (void);
+static void R_DrawSurfaceBlock8_mip2 (void);
+static void R_DrawSurfaceBlock8_mip3 (void);
 
-static void	(*surfmiptable[4])(void) = {
+static void (*surfmiptable[4])(void) = {
 	R_DrawSurfaceBlock8_mip0,
 	R_DrawSurfaceBlock8_mip1,
 	R_DrawSurfaceBlock8_mip2,
 	R_DrawSurfaceBlock8_mip3
 };
 
-unsigned		blocklights[18*18];
+static unsigned blocklights[18*18];
 
 /*
 ===============
@@ -209,7 +206,7 @@ void R_DrawSurface (void)
 {
 	unsigned char	*basetptr;
 	int				smax, tmax, twidth;
-	int				u;
+	int				u, blockdivshift, blocksize;
 	int				soffset, basetoffset, texwidth;
 	int				horzblockstep;
 	unsigned char	*pcolumndest;
@@ -232,7 +229,6 @@ void R_DrawSurface (void)
 
 	blocksize = 16 >> r_drawsurf.surfmip;
 	blockdivshift = 4 - r_drawsurf.surfmip;
-	blockdivmask = (1 << blockdivshift) - 1;
 
 	r_lightwidth = (r_drawsurf.surf->extents[0]>>4)+1;
 
@@ -287,7 +283,7 @@ void R_DrawSurface (void)
 R_DrawSurfaceBlock8_mip0
 ================
 */
-void R_DrawSurfaceBlock8_mip0 (void)
+static void R_DrawSurfaceBlock8_mip0 (void)
 {
 	int				v, i, lightstep, lighttemp, light, lightleft, lightright;
 	unsigned char	*psource, *prowdest;
@@ -345,7 +341,7 @@ void R_DrawSurfaceBlock8_mip0 (void)
 R_DrawSurfaceBlock8_mip1
 ================
 */
-void R_DrawSurfaceBlock8_mip1 (void)
+static void R_DrawSurfaceBlock8_mip1 (void)
 {
 	int				v, i, b, lightstep, lighttemp, light, lightleft, lightright;
 	unsigned char	pix, *psource, *prowdest;
@@ -394,7 +390,7 @@ void R_DrawSurfaceBlock8_mip1 (void)
 R_DrawSurfaceBlock8_mip2
 ================
 */
-void R_DrawSurfaceBlock8_mip2 (void)
+static void R_DrawSurfaceBlock8_mip2 (void)
 {
 	int				v, i, b, lightstep, lighttemp, light, lightleft, lightright;
 	unsigned char	pix, *psource, *prowdest;
@@ -443,7 +439,7 @@ void R_DrawSurfaceBlock8_mip2 (void)
 R_DrawSurfaceBlock8_mip3
 ================
 */
-void R_DrawSurfaceBlock8_mip3 (void)
+static void R_DrawSurfaceBlock8_mip3 (void)
 {
 	int				v, i, b, lightstep, lighttemp, light, lightleft, lightright;
 	unsigned char	pix, *psource, *prowdest;

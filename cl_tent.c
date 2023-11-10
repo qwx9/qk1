@@ -4,13 +4,13 @@ static int num_temp_entities;
 static entity_t cl_temp_entities[MAX_TEMP_ENTITIES];
 beam_t		cl_beams[MAX_BEAMS];
 
-Sfx			*cl_sfx_wizhit;
-Sfx			*cl_sfx_knighthit;
-Sfx			*cl_Sfxink1;
-Sfx			*cl_sfx_ric1;
-Sfx			*cl_sfx_ric2;
-Sfx			*cl_sfx_ric3;
-Sfx			*cl_sfx_r_exp3;
+static Sfx *cl_Sfxink1;
+static Sfx *cl_sfx_wizhit;
+static Sfx *cl_sfx_knighthit;
+static Sfx *cl_sfx_ric1;
+static Sfx *cl_sfx_ric2;
+static Sfx *cl_sfx_ric3;
+static Sfx *cl_sfx_r_exp3;
 
 /*
 =================

@@ -3,9 +3,8 @@
 //define	PASSAGES
 
 void		*colormap;
-vec3_t		viewlightvec;
+static vec3_t viewlightvec;
 alight_t	r_viewlighting = {128, 192, viewlightvec};
-float		r_time1;
 int			r_numallocatededges;
 int			r_numallocatedbasespans;
 byte		*r_basespans;
@@ -25,8 +24,6 @@ qboolean	r_surfsonstack;
 int			r_clipflags;
 
 byte		*r_warpbuffer;
-
-byte		*r_stack_start;
 
 //
 // view origin
@@ -65,10 +62,6 @@ int		r_polycount;
 int		r_drawnpolycount;
 int		r_wholepolycount;
 
-#define		VIEWMODNAME_LENGTH	256
-char		viewmodname[VIEWMODNAME_LENGTH+1];
-int			modcount;
-
 int			*pfrustum_indexes[4];
 int			r_frustum_indexes[4*6];
 
@@ -82,9 +75,6 @@ texture_t	*r_notexture_mip;
 float		r_aliastransition, r_resfudge;
 
 int		d_lightstylevalue[256];	// 8.8 fraction of base light value
-
-float	dp_time1, dp_time2, db_time1, db_time2, rw_time1, rw_time2;
-float	se_time1, se_time2, de_time1, de_time2, dv_time1, dv_time2;
 
 void R_MarkLeaves (void);
 
@@ -158,11 +148,6 @@ R_Init
 */
 void R_Init (void)
 {
-	int		dummy;
-
-	// get stack position so we can guess if we are going to overflow
-	r_stack_start = (byte *)&dummy;
-
 	R_InitTurb ();
 
 	Cmd_AddCommand("pointfile", loadpoints);

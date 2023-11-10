@@ -51,12 +51,12 @@ edgetable	edgetables[12] = {
 };
 
 // FIXME: some of these can become statics
-int				a_sstepxfrac, a_tstepxfrac, r_lstepx, a_ststepxwhole;
+static int				a_sstepxfrac, a_tstepxfrac, r_lstepx, a_ststepxwhole;
 int				r_sstepx, r_tstepx, r_lstepy, r_sstepy, r_tstepy;
 int				r_zistepx, r_zistepy;
 int				d_aspancount, d_countextrastep;
 
-spanpackage_t			*a_spans;
+static spanpackage_t *a_spans;
 spanpackage_t			*d_pedgespanpackage;
 static int				ystart;
 byte					*d_pdest, *d_ptex;
