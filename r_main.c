@@ -8,19 +8,19 @@ alight_t	r_viewlighting = {128, 192, viewlightvec};
 int			r_numallocatededges;
 int			r_numallocatedbasespans;
 byte		*r_basespans;
-qboolean	r_recursiveaffinetriangles = true;
+bool	r_recursiveaffinetriangles = true;
 float		r_aliasuvscale = 1.0;
 int			r_outofsurfaces;
 int			r_outofedges;
 int			r_outofspans;
 
-qboolean	r_dowarp, r_dowarpold, r_viewchanged;
+bool	r_dowarp, r_dowarpold, r_viewchanged;
 
 mvertex_t	*r_pcurrentvertbase;
 
 int			c_surf;
 int			r_maxsurfsseen, r_maxedgesseen, r_cnumsurfs;
-qboolean	r_surfsonstack;
+bool	r_surfsonstack;
 int			r_clipflags;
 
 byte		*r_warpbuffer;

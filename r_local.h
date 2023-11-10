@@ -110,7 +110,7 @@ void R_DrawPolyList (void);
 //
 // current entity info
 //
-extern	qboolean		insubmodel;
+extern	bool		insubmodel;
 
 void R_DrawSprite (void);
 int R_RenderFace (msurface_t *fa, int clipflags);
@@ -185,7 +185,7 @@ extern const float r_avertexnormals[NUMVERTEXNORMALS][3];
 
 extern finalvert_t		*pfinalverts;
 
-qboolean R_AliasCheckBBox (void);
+bool R_AliasCheckBBox (void);
 
 //=========================================================
 // turbulence stuff
@@ -230,8 +230,8 @@ void R_AliasClipTriangle (mtriangle_t *ptri, auxvert_t *auxverts);
 
 extern int		r_frustum_indexes[4*6];
 extern int		r_maxsurfsseen, r_maxedgesseen, r_cnumsurfs;
-extern qboolean	r_surfsonstack;
-extern qboolean	r_dowarpold, r_viewchanged;
+extern bool	r_surfsonstack;
+extern bool	r_dowarpold, r_viewchanged;
 
 extern mleaf_t	*r_viewleaf, *r_oldviewleaf;
 

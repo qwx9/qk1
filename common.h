@@ -2,8 +2,8 @@ void *Arr_AllocExtra(void *arr, int *nel, int needextra);
 
 typedef struct sizebuf_s
 {
-	qboolean	allowoverflow;	// if false, do a fatal
-	qboolean	overflowed;		// set to true if the buffer size failed
+	bool	allowoverflow;	// if false, do a fatal
+	bool	overflowed;		// set to true if the buffer size failed
 	char	*name;
 	byte	*data;
 	int		maxsize;
@@ -79,7 +79,7 @@ void MSG_WriteAngle (sizebuf_t *sb, float f);
 void MSG_WriteAngleInt16 (sizebuf_t *sb, float f);
 
 extern	int			msg_readcount;
-extern	qboolean	msg_badread;		// set if a read goes beyond end of message
+extern	bool	msg_badread;		// set if a read goes beyond end of message
 
 void MSG_BeginReading (void);
 int MSG_ReadChar (void);
@@ -109,7 +109,7 @@ float MSG_ReadAngleInt16 (void);
 //============================================================================
 
 extern	char		com_token[1024];
-extern	qboolean	com_eof;
+extern	bool	com_eof;
 
 char *COM_Parse (char *data);
 extern	int		com_argc;
@@ -125,4 +125,4 @@ struct cache_user_s;
 
 extern cvar_t registered;
 
-extern qboolean		standard_quake, rogue, hipnotic;
+extern bool		standard_quake, rogue, hipnotic;

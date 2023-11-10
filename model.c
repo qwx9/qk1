@@ -6,7 +6,7 @@ char	loadname[32];	// for hunk tags
 void Mod_LoadSpriteModel (model_t *mod, void *buffer);
 void Mod_LoadBrushModel (model_t *mod, void *buffer);
 void Mod_LoadAliasModel (model_t *mod, void *buffer);
-model_t *Mod_LoadModel (model_t *mod, qboolean crash);
+model_t *Mod_LoadModel (model_t *mod, bool crash);
 
 #define	MAX_MOD_KNOWN	4096
 model_t	*mod_known;
@@ -225,7 +225,7 @@ Mod_LoadModel
 Loads a model into the cache
 ==================
 */
-model_t *Mod_LoadModel (model_t *mod, qboolean crash)
+model_t *Mod_LoadModel (model_t *mod, bool crash)
 {
 	unsigned *buf;
 	byte stackbuf[1024];		// avoid dirtying the cache heap
@@ -287,7 +287,7 @@ Mod_ForName
 Loads in a model for the given name
 ==================
 */
-model_t *Mod_ForName (char *name, qboolean crash)
+model_t *Mod_ForName (char *name, bool crash)
 {
 	model_t	*mod;
 

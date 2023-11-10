@@ -91,7 +91,7 @@ typedef struct
 extern int		d_spanpixcount;
 extern int		r_framecount;		// sequence # of current frame since Quake
 									//  started
-extern qboolean	r_recursiveaffinetriangles;	// true if a driver wants to use
+extern bool	r_recursiveaffinetriangles;	// true if a driver wants to use
 											//  recursive triangular subdivison
 											//  and vertex drawing via
 											//  D_PolysetDrawFinalVerts() past
@@ -100,7 +100,7 @@ extern qboolean	r_recursiveaffinetriangles;	// true if a driver wants to use
 											//  driver)
 extern float	r_aliasuvscale;		// scale-up factor for screen u and v
 									//  on Alias vertices passed to driver
-extern qboolean	r_dowarp;
+extern bool	r_dowarp;
 
 extern affinetridesc_t	r_affinetridesc;
 extern spritedesc_t		r_spritedesc;

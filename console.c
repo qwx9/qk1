@@ -7,7 +7,7 @@ static float con_cursorspeed = 4;
 #define		CON_TEXTSIZE	16384
 #define		MAXPRINTMSG		4096
 
-qboolean 	con_forcedup;		// because no entities to refresh
+bool 	con_forcedup;		// because no entities to refresh
 
 int			con_totallines;		// total lines in console scrollback
 int			con_backscroll;		// lines up from bottom to display
@@ -29,7 +29,7 @@ extern	int		edit_line;
 extern	int		key_linepos;
 
 
-qboolean	con_initialized;
+bool	con_initialized;
 
 int			con_notifylines;		// scan lines to clear for notify lines
 
@@ -82,7 +82,7 @@ void Con_ClearNotify (void)
 Con_MessageMode_f
 ================
 */
-extern qboolean team_message;
+extern bool team_message;
 
 void Con_MessageMode_f (void)
 {
@@ -286,7 +286,7 @@ Con_Printf(char *fmt, ...)
 {
 	va_list arg;
 	char msg[MAXPRINTMSG];
-	static qboolean	inupdate;
+	static bool	inupdate;
 
 	va_start(arg, fmt);
 	vsnprintf(msg, sizeof msg, fmt, arg);
@@ -453,7 +453,7 @@ Draws the console with the solid background
 The typing input line at the bottom should only be drawn if typing is allowed
 ================
 */
-void Con_DrawConsole (int lines, qboolean drawinput)
+void Con_DrawConsole (int lines, bool drawinput)
 {
 	int				i, x, y;
 	int				rows;

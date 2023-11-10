@@ -3,8 +3,8 @@
 //
 extern int con_totallines;
 extern int con_backscroll;
-extern	qboolean con_forcedup;	// because no entities to refresh
-extern qboolean con_initialized;
+extern	bool con_forcedup;	// because no entities to refresh
+extern bool con_initialized;
 extern byte *con_chars;
 extern	int	con_notifylines;		// scan lines to clear for notify lines
 
@@ -12,7 +12,7 @@ void Con_DrawCharacter (int cx, int line, int num);
 
 void Con_CheckResize (void);
 void Con_Init (void);
-void Con_DrawConsole (int lines, qboolean drawinput);
+void Con_DrawConsole (int lines, bool drawinput);
 #pragma varargck	argpos	Con_Printf	1
 void Con_Printf (char *fmt, ...);
 #pragma varargck	argpos	Con_DPrintf	1

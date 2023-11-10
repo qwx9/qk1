@@ -16,7 +16,7 @@ cmdalias_t	*cmd_alias;
 int trashtest;
 int *trashspot;
 
-qboolean	cmd_wait;
+bool	cmd_wait;
 
 //=============================================================================
 
@@ -534,7 +534,7 @@ void	Cmd_AddCommand (char *cmd_name, xcommand_t function)
 Cmd_Exists
 ============
 */
-qboolean	Cmd_Exists (char *cmd_name)
+bool	Cmd_Exists (char *cmd_name)
 {
 	cmd_function_t	*cmd;
 

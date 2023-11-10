@@ -23,7 +23,7 @@ static uchar netbuf[4+4+NET_MAXMESSAGE];
 
 extern int m_return_state;
 extern int m_state;
-extern qboolean m_return_onerror;
+extern bool m_return_onerror;
 extern char m_return_reason[32];
 
 static int
@@ -115,7 +115,7 @@ int ReSendMessage (qsocket_t *s)
 }
 
 
-qboolean Datagram_CanSendMessage (qsocket_t *sock)
+bool Datagram_CanSendMessage (qsocket_t *sock)
 {
 	if (sock->sendNext)
 		SendMessageNext (sock);
@@ -124,7 +124,7 @@ qboolean Datagram_CanSendMessage (qsocket_t *sock)
 }
 
 
-qboolean Datagram_CanSendUnreliableMessage (qsocket_t *)
+bool Datagram_CanSendUnreliableMessage (qsocket_t *)
 {
 	return true;
 }

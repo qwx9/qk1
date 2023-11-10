@@ -1,7 +1,7 @@
 #include "quakedef.h"
 
 float		   surfscale;
-qboolean		r_cache_thrash;		 // set if surface cache is thrashing
+bool		r_cache_thrash;		 // set if surface cache is thrashing
 
 surfcache_t *sc_rover;
 
@@ -101,7 +101,7 @@ D_SCAlloc
 surfcache_t	 *D_SCAlloc (int width, uintptr size)
 {
 	surfcache_t			 *new;
-	qboolean				wrapped_this_time;
+	bool				wrapped_this_time;
 
 	if ((width < 0) || (width > 256))
 		Host_Error("D_SCAlloc: bad cache width %d\n", width);

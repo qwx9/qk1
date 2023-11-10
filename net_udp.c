@@ -59,7 +59,7 @@ udpname(void)
 }
 
 void
-UDP_Listen(qboolean on)
+UDP_Listen(bool on)
 {
 	if(lpid < 0){
 		if(on)

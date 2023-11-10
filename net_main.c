@@ -411,7 +411,7 @@ Returns true or false if the given qsocket can currently accept a
 message to be transmitted.
 ==================
 */
-qboolean NET_CanSendMessage (qsocket_t *sock)
+bool NET_CanSendMessage (qsocket_t *sock)
 {
 	int		r;
 
@@ -434,8 +434,8 @@ int NET_SendToAll(sizebuf_t *data, int blocktime)
 	double		start;
 	int			i;
 	int			count = 0;
-	qboolean	state1 [MAX_SCOREBOARD];
-	qboolean	state2 [MAX_SCOREBOARD];
+	bool	state1 [MAX_SCOREBOARD];
+	bool	state2 [MAX_SCOREBOARD];
 
 	for (i=0, host_client = svs.clients ; i<svs.maxclients ; i++, host_client++)
 	{

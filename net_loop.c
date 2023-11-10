@@ -1,6 +1,6 @@
 #include "quakedef.h"
 
-qboolean	localconnectpending = false;
+bool	localconnectpending = false;
 qsocket_t	*loop_client = nil;
 qsocket_t	*loop_server = nil;
 
@@ -17,7 +17,7 @@ void Loop_Shutdown (void)
 }
 
 
-void Loop_Listen (qboolean) /*state*/
+void Loop_Listen (bool) /*state*/
 {
 }
 
@@ -178,7 +178,7 @@ int Loop_SendUnreliableMessage (qsocket_t *sock, sizebuf_t *data)
 }
 
 
-qboolean Loop_CanSendMessage (qsocket_t *sock)
+bool Loop_CanSendMessage (qsocket_t *sock)
 {
 	if (!sock->driverdata)
 		return false;
@@ -186,7 +186,7 @@ qboolean Loop_CanSendMessage (qsocket_t *sock)
 }
 
 
-qboolean Loop_CanSendUnreliableMessage (qsocket_t *) /*sock*/
+bool Loop_CanSendUnreliableMessage (qsocket_t *) /*sock*/
 {
 	return true;
 }

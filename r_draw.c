@@ -22,9 +22,9 @@ clipplane_t	world_clipplanes[16];
 
 static medge_t			*r_pedge;
 
-static qboolean r_leftclipped, r_rightclipped;
-static qboolean makeleftedge, makerightedge;
-static qboolean r_nearzionly;
+static bool r_leftclipped, r_rightclipped;
+static bool makeleftedge, makerightedge;
+static bool r_nearzionly;
 
 int		sintable[SIN_BUFFER_SIZE];
 int		intsintable[SIN_BUFFER_SIZE];
@@ -43,7 +43,7 @@ static float r_nearzi;
 static float r_u1, r_v1, r_lzi1;
 static int r_ceilv1;
 
-qboolean	r_lastvertvalid;
+bool	r_lastvertvalid;
 
 int
 surfdrawflags(int flags)
@@ -659,7 +659,7 @@ void R_RenderPoly (msurface_t *fa, int clipflags)
 	mvertex_t	verts[2][100];	//FIXME: do real number
 	polyvert_t	pverts[100];	//FIXME: do real number, safely
 	int			vertpage, newverts, newpage, lastvert;
-	qboolean	visible;
+	bool	visible;
 
 	// FIXME: clean this up and make it faster
 	// FIXME: guard against running out of vertices

@@ -57,10 +57,10 @@ typedef struct qsocket_s
 	double			lastMessageTime;
 	double			lastSendTime;
 
-	qboolean		disconnected;
-	qboolean		canSend;
-	qboolean		sendNext;
-	qboolean		local;
+	bool		disconnected;
+	bool		canSend;
+	bool		sendNext;
+	bool		local;
 
 	int				driver;
 	int				landriver;
@@ -92,7 +92,7 @@ typedef struct Netdrv Netdrv;
 
 struct Landrv{
 	char *name;
-	qboolean initialized;
+	bool initialized;
 	int	(*Init)(void);
 	void	(*Shutdown)(void);
 	int	(*Connect)(Addr *);
@@ -109,15 +109,15 @@ extern Landrv landrv[MAX_NET_DRIVERS];
 
 struct Netdrv{
 	char *name;
-	qboolean initialized;
+	bool initialized;
 	int	(*Init)(void);
 	qsocket_t*	(*Connect)(char *);
 	qsocket_t*	(*CheckNewConnections)(void);
 	int	(*QGetMessage)(qsocket_t *);
 	int	(*QSendMessage)(qsocket_t *, sizebuf_t *);
 	int	(*SendUnreliableMessage)(qsocket_t *, sizebuf_t *);
-	qboolean	(*CanSendMessage)(qsocket_t *);
-	qboolean	(*CanSendUnreliableMessage)(qsocket_t *);
+	bool	(*CanSendMessage)(qsocket_t *);
+	bool	(*CanSendUnreliableMessage)(qsocket_t *);
 	void	(*Close)(qsocket_t *);
 	void	(*Shutdown)(void);
 };
@@ -157,7 +157,7 @@ struct qsocket_s	*NET_CheckNewConnections (void);
 struct qsocket_s	*NET_Connect (char *host);
 // called by client to connect to a host.  Returns -1 if not able to
 
-qboolean NET_CanSendMessage (qsocket_t *sock);
+bool NET_CanSendMessage (qsocket_t *sock);
 // Returns true or false if the given qsocket can currently accept a
 // message to be transmitted.
 
@@ -189,32 +189,32 @@ void		NET_Close (struct qsocket_s *sock);
 // A netcon_t number will not be reused until this function is called for it
 
 int			Datagram_Init (void);
-void		Datagram_Listen (qboolean state);
+void		Datagram_Listen (bool state);
 qsocket_t	*Datagram_Connect (char *host);
 qsocket_t 	*Datagram_CheckNewConnections (void);
 int			Datagram_GetMessage (qsocket_t *sock);
 int			Datagram_SendMessage (qsocket_t *sock, sizebuf_t *data);
 int			Datagram_SendUnreliableMessage (qsocket_t *sock, sizebuf_t *data);
-qboolean	Datagram_CanSendMessage (qsocket_t *sock);
-qboolean	Datagram_CanSendUnreliableMessage (qsocket_t *sock);
+bool	Datagram_CanSendMessage (qsocket_t *sock);
+bool	Datagram_CanSendUnreliableMessage (qsocket_t *sock);
 void	Datagram_Close(qsocket_t *);
 void		Datagram_Shutdown (void);
 
 int			Loop_Init (void);
-void		Loop_Listen (qboolean state);
+void		Loop_Listen (bool state);
 qsocket_t 	*Loop_Connect (char *host);
 qsocket_t 	*Loop_CheckNewConnections (void);
 int			Loop_GetMessage (qsocket_t *sock);
 int			Loop_SendMessage (qsocket_t *sock, sizebuf_t *data);
 int			Loop_SendUnreliableMessage (qsocket_t *sock, sizebuf_t *data);
-qboolean	Loop_CanSendMessage (qsocket_t *sock);
-qboolean	Loop_CanSendUnreliableMessage (qsocket_t *sock);
+bool	Loop_CanSendMessage (qsocket_t *sock);
+bool	Loop_CanSendUnreliableMessage (qsocket_t *sock);
 void		Loop_Close (qsocket_t *sock);
 void		Loop_Shutdown (void);
 
 int	UDP_Init(void);
 void	UDP_Shutdown(void);
-void	UDP_Listen(qboolean);
+void	UDP_Listen(bool);
 int	UDP_Connect(Addr *);
 int	udpread(uchar *, int, Addr *);
 int	udpwrite(uchar *, int, Addr *);

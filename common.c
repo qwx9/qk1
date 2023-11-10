@@ -2,13 +2,13 @@
 
 cvar_t  registered = {"registered","0"};
 
-qboolean		msg_suppress_1 = 0;
+bool		msg_suppress_1 = 0;
 
 char	com_token[1024];
 int		com_argc;
 char	**com_argv;
 
-qboolean		standard_quake = true, rogue, hipnotic;
+bool		standard_quake = true, rogue, hipnotic;
 
 /*
 
@@ -178,7 +178,7 @@ void MSG_WriteAngleInt16 (sizebuf_t *sb, float f)
 // reading functions
 //
 int					 msg_readcount;
-qboolean		msg_badread;
+bool		msg_badread;
 
 void MSG_BeginReading (void)
 {

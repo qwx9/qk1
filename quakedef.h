@@ -4,6 +4,10 @@
 #include <libc.h>
 #include <stdio.h>
 
+#ifdef __plan9__
+typedef enum {false, true} bool;
+#endif
+
 #define	QUAKE_GAME			// as opposed to utilities
 #define	VERSION				1.09
 //#define	PARANOID			// speed sapping error checking
@@ -109,7 +113,6 @@ enum {
 //===========================================
 
 typedef u8int byte;
-typedef enum {false, true} qboolean;
 
 #include "cvar.h"
 #include "common.h"
@@ -158,7 +161,7 @@ extern cvar_t volume;
 #include "r_local.h"
 #include "d_local.h"
 
-extern qboolean noclip_anglehack;
+extern bool noclip_anglehack;
 
 
 //
@@ -167,7 +170,7 @@ extern qboolean noclip_anglehack;
 extern	cvar_t		sys_ticrate;
 extern	cvar_t		developer;
 
-extern	qboolean	host_initialized;		// true if into command execution
+extern	bool	host_initialized;		// true if into command execution
 extern	double		host_frametime;
 extern	byte		*host_basepal;
 extern	byte		*host_colormap;
@@ -185,10 +188,10 @@ void Host_EndGame (char *message, ...);
 void Host_Frame (float time);
 void Host_Quit_f (void);
 void Host_ClientCommands (char *fmt, ...);
-void Host_ShutdownServer (qboolean crash);
+void Host_ShutdownServer (bool crash);
 
 extern cvar_t	pausable;
-extern qboolean		msg_suppress_1;		// suppresses resolution and cache size console output
+extern bool		msg_suppress_1;		// suppresses resolution and cache size console output
 										//  an fullscreen DIB focus gain/loss
 extern int			current_skill;		// skill level for currently loaded level (in case
 										//  the user changes the cvar while the level is
