@@ -111,14 +111,14 @@ typedef struct mnode_s
 // common with leaf
 	int			contents;		// 0, to differentiate from leafs
 	int			visframe;		// node needs to be traversed if current
-	
+
 	float		minmaxs[6];		// for bounding box culling
 
 	struct mnode_s	*parent;
 
 // node specific
 	mplane_t	*plane;
-	struct mnode_s	*children[2];	
+	struct mnode_s	*children[2];
 
 	unsigned int		firstsurface;
 	unsigned int		numsurfaces;
@@ -293,12 +293,12 @@ typedef struct model_s
 	modtype_t	type;
 	int			numframes;
 	synctype_t	synctype;
-	
+
 	int			flags;
 
 //
 // volume occupied by the model
-//		
+//
 	vec3_t		mins, maxs;
 	float		radius;
 

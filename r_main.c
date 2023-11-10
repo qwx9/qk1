@@ -121,16 +121,16 @@ void	R_InitTextures (void)
 {
 	int		x,y, m;
 	byte	*dest;
-	
-// create a simple checkerboard texture for the default
+
+	// create a simple checkerboard texture for the default
 	r_notexture_mip = Hunk_Alloc(16*16+8*8+4*4+2*2 + sizeof *r_notexture_mip);
-	
+
 	r_notexture_mip->width = r_notexture_mip->height = 16;
 	r_notexture_mip->offsets[0] = sizeof *r_notexture_mip;
 	r_notexture_mip->offsets[1] = r_notexture_mip->offsets[0] + 16*16;
 	r_notexture_mip->offsets[2] = r_notexture_mip->offsets[1] + 8*8;
 	r_notexture_mip->offsets[3] = r_notexture_mip->offsets[2] + 4*4;
-	
+
 	for (m=0 ; m<4 ; m++)
 	{
 		dest = (byte *)r_notexture_mip + r_notexture_mip->offsets[m];
@@ -142,7 +142,7 @@ void	R_InitTextures (void)
 				else
 					*dest++ = 0xff;
 			}
-	}	
+	}
 }
 
 static void
@@ -159,10 +159,10 @@ R_Init
 void R_Init (void)
 {
 	int		dummy;
-	
-// get stack position so we can guess if we are going to overflow
+
+	// get stack position so we can guess if we are going to overflow
 	r_stack_start = (byte *)&dummy;
-	
+
 	R_InitTurb ();
 
 	Cmd_AddCommand("pointfile", loadpoints);
@@ -210,9 +210,9 @@ R_NewMap
 void R_NewMap (void)
 {
 	int		i;
-	
-// clear out efrags in case the level hasn't been reloaded
-// FIXME: is this one short?
+
+	// clear out efrags in case the level hasn't been reloaded
+	// FIXME: is this one short?
 	for (i=0 ; i<cl.worldmodel->numleafs ; i++)
 		cl.worldmodel->leafs[i].efrags = nil;
 
@@ -320,21 +320,21 @@ void R_ViewChanged (vrect_t *pvrect, int lineadj, float aspect)
 	pixelAspect = aspect;
 	xOrigin = r_refdef.xOrigin;
 	yOrigin = r_refdef.yOrigin;
-	
+
 	screenAspect = r_refdef.vrect.width*pixelAspect /
 			r_refdef.vrect.height;
-// 320*200 1.0 pixelAspect = 1.6 screenAspect
-// 320*240 1.0 pixelAspect = 1.3333 screenAspect
-// proper 320*200 pixelAspect = 0.8333333
+	// 320*200 1.0 pixelAspect = 1.6 screenAspect
+	// 320*240 1.0 pixelAspect = 1.3333 screenAspect
+	// proper 320*200 pixelAspect = 0.8333333
 
 	verticalFieldOfView = r_refdef.horizontalFieldOfView / screenAspect;
 
-// values for perspective projection
-// if math were exact, the values would range from 0.5 to to range+0.5
-// hopefully they wll be in the 0.000001 to range+.999999 and truncate
-// the polygon rasterization will never render in the first row or column
-// but will definately render in the [range] row and column, so adjust the
-// buffer origin to get an exact edge to edge fill
+	// values for perspective projection
+	// if math were exact, the values would range from 0.5 to to range+0.5
+	// hopefully they wll be in the 0.000001 to range+.999999 and truncate
+	// the polygon rasterization will never render in the first row or column
+	// but will definately render in the [range] row and column, so adjust the
+	// buffer origin to get an exact edge to edge fill
 	xcenter = ((float)r_refdef.vrect.width * XCENTERING) +
 			r_refdef.vrect.x - 0.5;
 	aliasxcenter = xcenter * r_aliasuvscale;
@@ -351,31 +351,31 @@ void R_ViewChanged (vrect_t *pvrect, int lineadj, float aspect)
 	xscaleshrink = (r_refdef.vrect.width-6)/r_refdef.horizontalFieldOfView;
 	yscaleshrink = xscaleshrink*pixelAspect;
 
-// left side clip
+	// left side clip
 	screenedge[0].normal[0] = -1.0 / (xOrigin*r_refdef.horizontalFieldOfView);
 	screenedge[0].normal[1] = 0;
 	screenedge[0].normal[2] = 1;
 	screenedge[0].type = PLANE_ANYZ;
-	
-// right side clip
+
+	// right side clip
 	screenedge[1].normal[0] =
 			1.0 / ((1.0-xOrigin)*r_refdef.horizontalFieldOfView);
 	screenedge[1].normal[1] = 0;
 	screenedge[1].normal[2] = 1;
 	screenedge[1].type = PLANE_ANYZ;
-	
-// top side clip
+
+	// top side clip
 	screenedge[2].normal[0] = 0;
 	screenedge[2].normal[1] = -1.0 / (yOrigin*verticalFieldOfView);
 	screenedge[2].normal[2] = 1;
 	screenedge[2].type = PLANE_ANYZ;
-	
-// bottom side clip
+
+	// bottom side clip
 	screenedge[3].normal[0] = 0;
 	screenedge[3].normal[1] = 1.0 / ((1.0-yOrigin)*verticalFieldOfView);
-	screenedge[3].normal[2] = 1;	
+	screenedge[3].normal[2] = 1;
 	screenedge[3].type = PLANE_ANYZ;
-	
+
 	for (i=0 ; i<4 ; i++)
 		VectorNormalize (screenedge[i].normal);
 
@@ -402,7 +402,7 @@ void R_MarkLeaves (void)
 
 	if (r_oldviewleaf == r_viewleaf)
 		return;
-	
+
 	r_visframecount++;
 	r_oldviewleaf = r_viewleaf;
 
@@ -452,16 +452,16 @@ R_BmodelCheckBBox(model_t *clmodel, float *minmaxs)
 	{
 		for (i=0 ; i<4 ; i++)
 		{
-		// generate accept and reject points
-		// FIXME: do with fast look-ups or integer tests based on the sign bit
-		// of the floating point values
+			// generate accept and reject points
+			// FIXME: do with fast look-ups or integer tests based on the sign bit
+			// of the floating point values
 
 			pindex = pfrustum_indexes[i];
 
 			rejectpt[0] = minmaxs[pindex[0]];
 			rejectpt[1] = minmaxs[pindex[1]];
 			rejectpt[2] = minmaxs[pindex[2]];
-			
+
 			d = DotProduct (rejectpt, view_clipplanes[i].normal);
 			d -= view_clipplanes[i].dist;
 
@@ -605,7 +605,7 @@ R_DrawEntity(entity_t *e)
 		break;
 	}
 
-	// put back world rotation and frustum clipping		
+	// put back world rotation and frustum clipping
 	// FIXME: R_RotateBmodel should just work off base_vxx
 	VectorCopy(base_vpn, vpn);
 	VectorCopy(base_vup, vup);
@@ -624,14 +624,14 @@ R_DrawViewModel
 */
 void R_DrawViewModel (void)
 {
-// FIXME: remove and do real lighting
+	// FIXME: remove and do real lighting
 	float		lightvec[3] = {-1, 0, 0};
 	int			j;
 	int			lnum;
 	vec3_t		dist;
 	float		add;
 	dlight_t	*dl;
-	
+
 	if (!r_drawviewmodel.value)
 		return;
 
@@ -658,7 +658,7 @@ void R_DrawViewModel (void)
 	r_viewlighting.ambientlight = j;
 	r_viewlighting.shadelight = j;
 
-// add dynamic lights		
+	// add dynamic lights
 	for (lnum=0 ; lnum<MAX_DLIGHTS ; lnum++)
 	{
 		dl = &cl_dlights[lnum];
@@ -671,7 +671,7 @@ void R_DrawViewModel (void)
 			r_viewlighting.ambientlight += add;
 	}
 
-// clamp lighting so it doesn't overbright as much
+	// clamp lighting so it doesn't overbright as much
 	if (r_viewlighting.ambientlight > 128)
 		r_viewlighting.ambientlight = 128;
 	if (r_viewlighting.ambientlight + r_viewlighting.shadelight > 192)
@@ -778,7 +778,7 @@ R_InitTurb
 void R_InitTurb (void)
 {
 	int i;
-	
+
 	for(i = 0; i < SIN_BUFFER_SIZE; i++){
 		sintable[i] = AMP + sin(i*M_PI*2/CYCLE)*AMP;
 		intsintable[i] = AMP2 + sin(i*M_PI*2/CYCLE)*AMP2;	// AMP2, not 20

@@ -187,7 +187,6 @@ void	R_ZDrawSubmodelPolys (model_t *clmodel);
 #define ALIAS_Z_CLIP_PLANE	5
 
 extern int				numverts;
-extern int				a_skinwidth;
 extern mtriangle_t		*ptriangles;
 extern int				numtriangles;
 extern aliashdr_t		*paliashdr;
@@ -213,7 +212,6 @@ void R_DrawParticles (void);
 void R_InitParticles (void);
 void R_ClearParticles (void);
 
-extern int		r_amodels_drawn;
 extern edge_t	*auxedges;
 extern int		r_numallocatededges;
 extern edge_t	*r_edges, *edge_p, *edge_max;

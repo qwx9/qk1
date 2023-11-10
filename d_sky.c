@@ -55,7 +55,7 @@ void D_DrawSkyScans8 (espan_t *pspan)
 
 		count = pspan->count;
 
-	// calculate the initial s & t
+		// calculate the initial s & t
 		u = pspan->u;
 		v = pspan->v;
 		D_Sky_uv_To_st (u, v, s, t, skydist);
@@ -73,8 +73,8 @@ void D_DrawSkyScans8 (espan_t *pspan)
 			{
 				u += spancount;
 
-			// calculate s and t at far end of span,
-			// calculate s and t steps across span by shifting
+				// calculate s and t at far end of span,
+				// calculate s and t steps across span by shifting
 				D_Sky_uv_To_st (u, v, snext, tnext, skydist);
 
 				sstep[0] = (snext[0] - s[0]) >> SKY_SPAN_SHIFT;
@@ -84,8 +84,8 @@ void D_DrawSkyScans8 (espan_t *pspan)
 			}
 			else
 			{
-			// calculate s and t at last pixel in span,
-			// calculate s and t steps across span by division
+				// calculate s and t at last pixel in span,
+				// calculate s and t steps across span by division
 				spancountminus1 = (float)(spancount - 1);
 
 				if (spancountminus1 > 0)

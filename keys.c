@@ -47,7 +47,7 @@ keyname_t keynames[] =
 	{"ALT", K_ALT},
 	{"CTRL", K_CTRL},
 	{"SHIFT", K_SHIFT},
-	
+
 	{"F1", K_F1},
 	{"F2", K_F2},
 	{"F3", K_F3},
@@ -139,7 +139,7 @@ Interactive line editing and console scrollback
 void Key_Console (int key)
 {
 	char	*cmd;
-	
+
 	if (key == K_ENTER)
 	{
 		Cbuf_AddText (key_lines[edit_line]+1);	// skip the >
@@ -170,7 +170,7 @@ void Key_Console (int key)
 			return;
 		}
 	}
-	
+
 	if (key == K_BACKSPACE || key == K_LEFTARROW)
 	{
 		if (key_linepos > 1)
@@ -241,10 +241,10 @@ void Key_Console (int key)
 		con_backscroll = 0;
 		return;
 	}
-	
+
 	if (key < 32 || key > 127)
 		return;	// non printable
-		
+
 	if (key_linepos < MAXCMDLINE-1)
 	{
 		key_lines[edit_line][key_linepos] = key;
@@ -313,7 +313,7 @@ int
 Key_StringToKeynum(char *s)
 {
 	keyname_t *k;
-	
+
 	if(s == nil || s[0] == 0)
 		return -1;
 	if(s[1] == 0)
@@ -336,9 +336,9 @@ FIXME: handle quote special (general escape sequence?)
 */
 char *Key_KeynumToString (int keynum)
 {
-	keyname_t	*kn;	
+	keyname_t	*kn;
 	static	char	tinystr[2];
-	
+
 	if (keynum == -1)
 		return "<KEY NOT FOUND>";
 	if (keynum > 32 && keynum < 127)
@@ -347,7 +347,7 @@ char *Key_KeynumToString (int keynum)
 		tinystr[1] = 0;
 		return tinystr;
 	}
-	
+
 	for (kn=keynames ; kn->name ; kn++)
 		if (keynum == kn->keynum)
 			return kn->name;
@@ -365,23 +365,23 @@ void Key_SetBinding (int keynum, char *binding)
 {
 	char	*new;
 	int		l;
-			
+
 	if (keynum == -1)
 		return;
 
-// free old bindings
+	// free old bindings
 	if (keybindings[keynum])
 	{
 		Z_Free (keybindings[keynum]);
 		keybindings[keynum] = nil;
 	}
-			
-// allocate memory for new binding
-	l = strlen(binding);	
+
+	// allocate memory for new binding
+	l = strlen(binding);
 	new = Z_Malloc (l+1);
 	strcpy(new, binding);
 	new[l] = 0;
-	keybindings[keynum] = new;	
+	keybindings[keynum] = new;
 }
 
 /*
@@ -398,7 +398,7 @@ void Key_Unbind_f (void)
 		Con_Printf ("unbind <key> : remove commands from a key\n");
 		return;
 	}
-	
+
 	b = Key_StringToKeynum (Cmd_Argv(1));
 	if (b==-1)
 	{
@@ -412,7 +412,7 @@ void Key_Unbind_f (void)
 void Key_Unbindall_f (void)
 {
 	int		i;
-	
+
 	for (i=0 ; i<256 ; i++)
 		if (keybindings[i])
 			Key_SetBinding (i, "");
@@ -428,7 +428,7 @@ void Key_Bind_f (void)
 {
 	int			i, c, b;
 	char		cmd[1024];
-	
+
 	c = Cmd_Argc();
 
 	if (c != 2 && c != 3)
@@ -451,8 +451,8 @@ void Key_Bind_f (void)
 			Con_Printf ("\"%s\" is not bound\n", Cmd_Argv(1) );
 		return;
 	}
-	
-// copy the rest of the command line
+
+	// copy the rest of the command line
 	cmd[0] = 0;		// start out with a null string
 	for (i=2 ; i< c ; i++)
 	{
@@ -479,10 +479,8 @@ void Key_Init (void)
 		key_lines[i][1] = 0;
 	}
 	key_linepos = 1;
-	
-//
-// init ascii characters in console mode
-//
+
+	// init ascii characters in console mode
 	for (i=32 ; i<128 ; i++)
 		consolekeys[i] = true;
 	consolekeys[K_ENTER] = true;
@@ -530,9 +528,7 @@ void Key_Init (void)
 	for (i=0 ; i<12 ; i++)
 		menubound[K_F1+i] = true;
 
-//
-// register our functions
-//
+	// register our functions
 	Cmd_AddCommand ("bind",Key_Bind_f);
 	Cmd_AddCommand ("unbind",Key_Unbind_f);
 	Cmd_AddCommand ("unbindall",Key_Unbindall_f);
@@ -561,7 +557,7 @@ void Key_Event (int key, qboolean down)
 	if (key_count <= 0)
 		return;
 
-// update auto-repeat status
+	// update auto-repeat status
 	if (down)
 	{
 		if(key != K_MWHEELUP && key != K_MWHEELDOWN)
@@ -579,9 +575,7 @@ void Key_Event (int key, qboolean down)
 	if (key == K_SHIFT)
 		shift_down = down;
 
-//
-// handle escape specialy, so the user can never unbind it
-//
+	// handle escape specialy, so the user can never unbind it
 	if (key == K_ESCAPE)
 	{
 		if (!down)
@@ -604,13 +598,11 @@ void Key_Event (int key, qboolean down)
 		return;
 	}
 
-//
-// key up events only generate commands if the game key binding is
-// a button command (leading + sign).  These will occur even in console mode,
-// to keep the character from continuing an action started before a console
-// switch.  Button commands include the kenum as a parameter, so multiple
-// downs can be matched with ups
-//
+	// key up events only generate commands if the game key binding is
+	// a button command (leading + sign).  These will occur even in console mode,
+	// to keep the character from continuing an action started before a console
+	// switch.  Button commands include the kenum as a parameter, so multiple
+	// downs can be matched with ups
 	if (!down)
 	{
 		kb = keybindings[key];
@@ -631,18 +623,14 @@ void Key_Event (int key, qboolean down)
 		return;
 	}
 
-//
-// during demo playback, most keys bring up the main menu
-//
+	// during demo playback, most keys bring up the main menu
 	if (cls.demoplayback && down && consolekeys[key] && key_dest == key_game)
 	{
 		M_ToggleMenu_f ();
 		return;
 	}
 
-//
-// if not a consolekey, send to the interpreter no matter what mode is
-//
+	// if not a consolekey, send to the interpreter no matter what mode is
 	if ( (key_dest == key_menu && menubound[key])
 	|| (key_dest == key_console && !consolekeys[key])
 	|| (key_dest == key_game && ( !con_forcedup || !consolekeys[key] ) ) )

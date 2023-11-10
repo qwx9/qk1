@@ -7,7 +7,7 @@ D_EndParticles
 */
 void D_EndParticles (void)
 {
-// not used by software driver
+	// not used by software driver
 }
 
 
@@ -18,7 +18,7 @@ D_StartParticles
 */
 void D_StartParticles (void)
 {
-// not used by software driver
+	// not used by software driver
 }
 
 
@@ -35,23 +35,23 @@ void D_DrawParticle (particle_t *pparticle)
 	uzint	*pz;
 	int		i, izi, pix, count, u, v;
 
-// transform point
+	// transform point
 	VectorSubtract (pparticle->org, r_origin, local);
 
 	transformed[0] = DotProduct(local, r_pright);
 	transformed[1] = DotProduct(local, r_pup);
-	transformed[2] = DotProduct(local, r_ppn);		
+	transformed[2] = DotProduct(local, r_ppn);
 
 	if (transformed[2] < PARTICLE_Z_CLIP)
 		return;
 
-// project the point
-// FIXME: preadjust xcenter and ycenter
+	// project the point
+	// FIXME: preadjust xcenter and ycenter
 	zi = 1.0 / transformed[2];
 	u = (int)(xcenter + zi * transformed[0] + 0.5);
 	v = (int)(ycenter - zi * transformed[1] + 0.5);
 
-	if ((v > d_vrectbottom_particle) || 
+	if ((v > d_vrectbottom_particle) ||
 		(u > d_vrectright_particle) ||
 		(v < d_vrecty) ||
 		(u < d_vrectx))

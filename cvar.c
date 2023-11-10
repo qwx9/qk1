@@ -11,7 +11,7 @@ Cvar_FindVar
 cvar_t *Cvar_FindVar (char *var_name)
 {
 	cvar_t	*var;
-	
+
 	for (var=cvar_vars ; var ; var=var->next)
 		if(strcmp(var_name, var->name) == 0)
 			return var;
@@ -26,7 +26,7 @@ Cvar_VariableValue
 float	Cvar_VariableValue (char *var_name)
 {
 	cvar_t	*var;
-	
+
 	var = Cvar_FindVar (var_name);
 	if (!var)
 		return 0;
@@ -42,7 +42,7 @@ Cvar_VariableString
 char *Cvar_VariableString (char *var_name)
 {
 	cvar_t *var;
-	
+
 	var = Cvar_FindVar (var_name);
 	if (!var)
 		return cvar_null_string;
@@ -59,11 +59,11 @@ char *Cvar_CompleteVariable (char *partial)
 {
 	cvar_t		*cvar;
 	int			len;
-	
+
 	len = strlen(partial);
 	if (!len)
 		return nil;
-// check functions
+	// check functions
 	for (cvar=cvar_vars ; cvar ; cvar=cvar->next)
 		if(strncmp(partial, cvar->name, len) == 0)
 			return cvar->name;
@@ -80,28 +80,28 @@ Adds a freestanding variable to the variable list.
 void Cvar_RegisterVariable (cvar_t *variable)
 {
 	char	*oldstr;
-	
-// first check to see if it has allready been defined
+
+	// first check to see if it has allready been defined
 	if (Cvar_FindVar (variable->name))
 	{
 		Con_Printf ("Can't register variable %s, allready defined\n", variable->name);
 		return;
 	}
-	
-// check for overlap with a command
+
+	// check for overlap with a command
 	if (Cmd_Exists (variable->name))
 	{
 		Con_Printf ("Cvar_RegisterVariable: %s is a command\n", variable->name);
 		return;
 	}
-		
-// copy the value off, because future sets will Z_Free it
+
+	// copy the value off, because future sets will Z_Free it
 	oldstr = variable->string;
-	variable->string = Z_Malloc(strlen(variable->string)+1);	
+	variable->string = Z_Malloc(strlen(variable->string)+1);
 	strcpy(variable->string, oldstr);
 	variable->value = atof(variable->string);
-	
-// link the variable in
+
+	// link the variable in
 	variable->next = cvar_vars;
 	cvar_vars = variable;
 }
@@ -117,12 +117,12 @@ qboolean	Cvar_Command (void)
 {
 	cvar_t			*v;
 
-// check variables
+	// check variables
 	v = Cvar_FindVar (Cmd_Argv(0));
 	if (!v)
 		return false;
-		
-// perform a variable print or set
+
+	// perform a variable print or set
 	if (Cmd_Argc() == 1)
 	{
 		Con_Printf ("\"%s\" is \"%s\"\n", v->name, v->string);

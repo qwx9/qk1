@@ -21,12 +21,12 @@ void WarpPalette (void)
 	int		i,j;
 	byte	newpalette[768];
 	int		basecolor[3];
-	
+
 	basecolor[0] = 130;
 	basecolor[1] = 80;
 	basecolor[2] = 50;
 
-// pull the colors halfway to bright brown
+	// pull the colors halfway to bright brown
 	for (i=0 ; i<256 ; i++)
 	{
 		for (j=0 ; j<3 ; j++)
@@ -34,7 +34,7 @@ void WarpPalette (void)
 			newpalette[i*3+j] = (host_basepal[i*3+j] + basecolor[j])/2;
 		}
 	}
-	
+
 	setpal(newpalette);
 }
 
@@ -48,7 +48,7 @@ void R_TransformFrustum (void)
 {
 	int		i;
 	vec3_t	v, v2;
-	
+
 	for (i=0 ; i<4 ; i++)
 	{
 		v[0] = screenedge[i].normal[2];
@@ -75,7 +75,7 @@ void TransformVector (vec3_t in, vec3_t out)
 {
 	out[0] = DotProduct(in,vright);
 	out[1] = DotProduct(in,vup);
-	out[2] = DotProduct(in,vpn);		
+	out[2] = DotProduct(in,vpn);
 }
 
 
@@ -87,10 +87,10 @@ R_TransformPlane
 void R_TransformPlane (mplane_t *p, float *normal, float *dist)
 {
 	float	d;
-	
+
 	d = DotProduct (r_origin, p->normal);
 	*dist = p->dist - d;
-// TODO: when we have rotating entities, this will need to use the view matrix
+	// TODO: when we have rotating entities, this will need to use the view matrix
 	TransformVector (p->normal, normal);
 }
 
@@ -122,7 +122,7 @@ void R_SetUpFrustumIndexes (void)
 			}
 		}
 
-	// FIXME: do just once at start
+		// FIXME: do just once at start
 		pfrustum_indexes[i] = pindex;
 		pindex += 6;
 	}
@@ -140,7 +140,7 @@ void R_SetupFrame (void)
 	vrect_t			vrect;
 	float			w, h;
 
-// don't allow cheats in multiplayer
+	// don't allow cheats in multiplayer
 	if (cl.maxclients > 1)
 	{
 		setcvar ("r_fullbright", "0");
@@ -173,7 +173,7 @@ void R_SetupFrame (void)
 		r_refdef.ambientlight = 0;
 
 	R_CheckVariables ();
-	
+
 	R_AnimateLight ();
 
 	r_framecount++;
@@ -187,13 +187,13 @@ r_refdef.viewangles[1]=    46.763641357;
 r_refdef.viewangles[2]=    0;
 */
 
-// build the transformation matrix for the given view angles
+	// build the transformation matrix for the given view angles
 	VectorCopy (r_refdef.vieworg, modelorg);
 	VectorCopy (r_refdef.vieworg, r_origin);
 
 	AngleVectors (r_refdef.viewangles, vpn, vright, vup);
 
-// current viewleaf
+	// current viewleaf
 	r_oldviewleaf = r_viewleaf;
 	r_viewleaf = Mod_PointInLeaf (r_origin, cl.worldmodel);
 
@@ -255,10 +255,10 @@ r_refdef.viewangles[2]=    0;
 		r_viewchanged = false;
 	}
 
-// start off with just the four screen edge clip planes
+	// start off with just the four screen edge clip planes
 	R_TransformFrustum ();
 
-// save base values
+	// save base values
 	VectorCopy (vpn, base_vpn);
 	VectorCopy (vright, base_vright);
 	VectorCopy (vup, base_vup);
@@ -270,13 +270,12 @@ r_refdef.viewangles[2]=    0;
 
 	r_cache_thrash = false;
 
-// clear frame counts
+	// clear frame counts
 	c_faceclip = 0;
 	d_spanpixcount = 0;
 	r_polycount = 0;
 	r_drawnpolycount = 0;
 	r_wholepolycount = 0;
-	r_amodels_drawn = 0;
 
 	D_SetupFrame ();
 }

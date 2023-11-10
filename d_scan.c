@@ -96,7 +96,7 @@ void Turbulent8 (espan_t *pspan, byte alpha)
 	fixed16_t		snext, tnext;
 	float			sdivz, tdivz, zi, z, du, dv, spancountminus1;
 	float			sdivz16stepu, tdivz16stepu, zi16stepu;
-	
+
 	r_turb_turb = sintable + ((int)(cl.time*SPEED)&(CYCLE-1));
 
 	r_turb_sstep = 0;	// keep compiler happy
@@ -116,7 +116,7 @@ void Turbulent8 (espan_t *pspan, byte alpha)
 
 		count = pspan->count;
 
-	// calculate the initial s/z, t/z, 1/z, s, and t and clamp
+		// calculate the initial s/z, t/z, 1/z, s, and t and clamp
 		du = (float)pspan->u;
 		dv = (float)pspan->v;
 
@@ -139,7 +139,7 @@ void Turbulent8 (espan_t *pspan, byte alpha)
 
 		do
 		{
-		// calculate s and t at the far end of the span
+			// calculate s and t at the far end of the span
 			if (count >= 16)
 				r_turb_spancount = 16;
 			else
@@ -149,8 +149,8 @@ void Turbulent8 (espan_t *pspan, byte alpha)
 
 			if (count)
 			{
-			// calculate s/z, t/z, zi->fixed s and t at far end of span,
-			// calculate s and t steps across span by shifting
+				// calculate s/z, t/z, zi->fixed s and t at far end of span,
+				// calculate s and t steps across span by shifting
 				sdivz += sdivz16stepu;
 				tdivz += tdivz16stepu;
 				zi += zi16stepu;
@@ -175,10 +175,10 @@ void Turbulent8 (espan_t *pspan, byte alpha)
 			}
 			else
 			{
-			// calculate s/z, t/z, zi->fixed s and t at last pixel in span (so
-			// can't step off polygon), clamp, calculate s and t steps across
-			// span by division, biasing steps low so we don't run off the
-			// texture
+				// calculate s/z, t/z, zi->fixed s and t at last pixel in span (so
+				// can't step off polygon), clamp, calculate s and t steps across
+				// span by division, biasing steps low so we don't run off the
+				// texture
 				spancountminus1 = (float)(r_turb_spancount - 1);
 				sdivz += d_sdivzstepu * spancountminus1;
 				tdivz += d_tdivzstepu * spancountminus1;
@@ -408,7 +408,7 @@ void D_DrawSpans16 (espan_t *pspan, byte alpha) //qbism- up it from 8 to 16
 
 		count = pspan->count;
 
-	// calculate the initial s/z, t/z, 1/z, s, and t and clamp
+		// calculate the initial s/z, t/z, 1/z, s, and t and clamp
 		du = (float)pspan->u;
 		dv = (float)pspan->v;
 
@@ -431,7 +431,7 @@ void D_DrawSpans16 (espan_t *pspan, byte alpha) //qbism- up it from 8 to 16
 
 		do
 		{
-		// calculate s and t at the far end of the span
+			// calculate s and t at the far end of the span
 			if (count >= 16)
 				spancount = 16;
 			else
@@ -441,8 +441,8 @@ void D_DrawSpans16 (espan_t *pspan, byte alpha) //qbism- up it from 8 to 16
 
 			if (count)
 			{
-			// calculate s/z, t/z, zi->fixed s and t at far end of span,
-			// calculate s and t steps across span by shifting
+				// calculate s/z, t/z, zi->fixed s and t at far end of span,
+				// calculate s and t steps across span by shifting
 				sdivz += sdivzstepu;
 				tdivz += tdivzstepu;
 				zi += zistepu;
@@ -467,10 +467,10 @@ void D_DrawSpans16 (espan_t *pspan, byte alpha) //qbism- up it from 8 to 16
 			}
 			else
 			{
-			// calculate s/z, t/z, zi->fixed s and t at last pixel in span (so
-			// can't step off polygon), clamp, calculate s and t steps across
-			// span by division, biasing steps low so we don't run off the
-			// texture
+				// calculate s/z, t/z, zi->fixed s and t at last pixel in span (so
+				// can't step off polygon), clamp, calculate s and t steps across
+				// span by division, biasing steps low so we don't run off the
+				// texture
 				spancountminus1 = (float)(spancount - 1);
 				sdivz += d_sdivzstepu * spancountminus1;
 				tdivz += d_tdivzstepu * spancountminus1;
@@ -532,8 +532,8 @@ void D_DrawZSpans (espan_t *pspan)
 	if((r_drawflags & DRAW_BLEND) != 0)
 		return;
 
-// FIXME: check for clamping/range problems
-// we count on FP exceptions being turned off to avoid range problems
+	// FIXME: check for clamping/range problems
+	// we count on FP exceptions being turned off to avoid range problems
 	izistep = (int)(d_zistepu * 0x8000 * 0x10000);
 
 	do
@@ -542,12 +542,12 @@ void D_DrawZSpans (espan_t *pspan)
 
 		count = pspan->count;
 
-	// calculate the initial 1/z
+		// calculate the initial 1/z
 		du = (float)pspan->u;
 		dv = (float)pspan->v;
 
 		zi = d_ziorigin + dv*d_zistepv + du*d_zistepu;
-	// we count on FP exceptions being turned off to avoid range problems
+		// we count on FP exceptions being turned off to avoid range problems
 		izi = (int)(zi * 0x8000 * 0x10000);
 
 		if ((uintptr)pdest & 0x02)

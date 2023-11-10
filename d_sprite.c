@@ -29,7 +29,7 @@ void D_SpriteDrawSpans (sspan_t *pspan, byte alpha)
 	tdivz8stepu = d_tdivzstepu * 8;
 	zi8stepu = d_zistepu * 8;
 
-// we count on FP exceptions being turned off to avoid range problems
+	// we count on FP exceptions being turned off to avoid range problems
 	izistep = (int)(d_zistepu * 0x8000 * 0x10000);
 
 	do
@@ -42,7 +42,7 @@ void D_SpriteDrawSpans (sspan_t *pspan, byte alpha)
 		if (count <= 0)
 			goto NextSpan;
 
-	// calculate the initial s/z, t/z, 1/z, s, and t and clamp
+		// calculate the initial s/z, t/z, 1/z, s, and t and clamp
 		du = (float)pspan->u;
 		dv = (float)pspan->v;
 
@@ -50,7 +50,7 @@ void D_SpriteDrawSpans (sspan_t *pspan, byte alpha)
 		tdivz = d_tdivzorigin + dv*d_tdivzstepv + du*d_tdivzstepu;
 		zi = d_ziorigin + dv*d_zistepv + du*d_zistepu;
 		z = (float)0x10000 / zi;	// prescale to 16.16 fixed-point
-	// we count on FP exceptions being turned off to avoid range problems
+		// we count on FP exceptions being turned off to avoid range problems
 		izi = (int)(zi * 0x8000 * 0x10000);
 
 		s = (int)(sdivz * z) + sadjust;
@@ -67,7 +67,7 @@ void D_SpriteDrawSpans (sspan_t *pspan, byte alpha)
 
 		do
 		{
-		// calculate s and t at the far end of the span
+			// calculate s and t at the far end of the span
 			if (count >= 8)
 				spancount = 8;
 			else
@@ -77,8 +77,8 @@ void D_SpriteDrawSpans (sspan_t *pspan, byte alpha)
 
 			if (count)
 			{
-			// calculate s/z, t/z, zi->fixed s and t at far end of span,
-			// calculate s and t steps across span by shifting
+				// calculate s/z, t/z, zi->fixed s and t at far end of span,
+				// calculate s and t steps across span by shifting
 				sdivz += sdivz8stepu;
 				tdivz += tdivz8stepu;
 				zi += zi8stepu;
@@ -103,10 +103,10 @@ void D_SpriteDrawSpans (sspan_t *pspan, byte alpha)
 			}
 			else
 			{
-			// calculate s/z, t/z, zi->fixed s and t at last pixel in span (so
-			// can't step off polygon), clamp, calculate s and t steps across
-			// span by division, biasing steps low so we don't run off the
-			// texture
+				// calculate s/z, t/z, zi->fixed s and t at last pixel in span (so
+				// can't step off polygon), clamp, calculate s and t steps across
+				// span by division, biasing steps low so we don't run off the
+				// texture
 				spancountminus1 = (float)(spancount - 1);
 				sdivz += d_sdivzstepu * spancountminus1;
 				tdivz += d_tdivzstepu * spancountminus1;
@@ -204,7 +204,7 @@ void D_SpriteScanLeftEdge (void)
 			dv = pnext->v - pvert->v;
 			slope = du / dv;
 			u_step = (int)(slope * 0x10000);
-		// adjust u to ceil the integer portion
+			// adjust u to ceil the integer portion
 			u = (int)((pvert->u + (slope * (vtop - pvert->v))) * 0x10000) +
 					(0x10000 - 1);
 			itop = (int)vtop;
@@ -284,7 +284,7 @@ void D_SpriteScanRightEdge (void)
 			dv = vnext - vvert;
 			slope = du / dv;
 			u_step = (int)(slope * 0x10000);
-		// adjust u to ceil the integer portion
+			// adjust u to ceil the integer portion
 			u = (int)((uvert + (slope * (vtop - vvert))) * 0x10000) +
 					(0x10000 - 1);
 			itop = (int)vtop;
@@ -307,7 +307,7 @@ void D_SpriteScanRightEdge (void)
 
 	} while (i != maxindex);
 
-	pspan->count = DS_SPAN_LIST_END;	// mark the end of the span list 
+	pspan->count = DS_SPAN_LIST_END;	// mark the end of the span list
 }
 
 
@@ -351,7 +351,7 @@ void D_SpriteCalculateGradients (void)
 	tadjust = ((fixed16_t)(DotProduct (p_temp1, p_taxis) * 0x10000 + 0.5)) -
 			(-(sprite_height >> 1) << 16);
 
-// -1 (-epsilon) so we never wander off the edge of the texture
+	// -1 (-epsilon) so we never wander off the edge of the texture
 	bbextents = (cachewidth << 16) - 1;
 	bbextentt = (sprite_height << 16) - 1;
 }
@@ -371,8 +371,8 @@ void D_DrawSprite (void)
 
 	sprite_spans = spans;
 
-// find the top and bottom vertices, and make sure there's at least one scan to
-// draw
+	// find the top and bottom vertices, and make sure there's at least one scan to
+	// draw
 	ymin = Q_MAXFLOAT;
 	ymax = -Q_MAXFLOAT;
 	pverts = r_spritedesc.pverts;
@@ -404,8 +404,8 @@ void D_DrawSprite (void)
 	sprite_height = r_spritedesc.pspriteframe->height;
 	cacheblock = (byte *)&r_spritedesc.pspriteframe->pixels[0];
 
-// copy the first vertex to the last vertex, so we don't have to deal with
-// wrapping
+	// copy the first vertex to the last vertex, so we don't have to deal with
+	// wrapping
 	nump = r_spritedesc.nump;
 	pverts = r_spritedesc.pverts;
 	pverts[nump] = pverts[0];

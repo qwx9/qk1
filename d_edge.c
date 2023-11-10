@@ -62,7 +62,7 @@ void D_DrawSolidSurface (surf_t *surf, int color)
 	espan_t	*span;
 	byte	*pdest;
 	int		u, u2, pix;
-	
+
 	pix = (color<<24) | (color<<16) | (color<<8) | color;
 	for (span=surf->spans ; span ; span=span->pnext)
 	{
@@ -132,9 +132,7 @@ void D_CalcGradients (msurface_t *pface)
 			((pface->texturemins[1] << 16) >> miplevel)
 			+ pface->texinfo->vecs[1][3]*t;
 
-//
-// -1 (-epsilon) so we never wander off the edge of the texture
-//
+	// -1 (-epsilon) so we never wander off the edge of the texture
 	bbextents = ((pface->extents[0] << 16) >> miplevel) - 1;
 	bbextentt = ((pface->extents[1] << 16) >> miplevel) - 1;
 }
@@ -157,7 +155,7 @@ void D_DrawSurfaces (void)
 	TransformVector (modelorg, transformed_modelorg);
 	VectorCopy (transformed_modelorg, world_transformed_modelorg);
 
-// TODO: could preset a lot of this at mode set time
+	// TODO: could preset a lot of this at mode set time
 	for (s = &surfaces[1] ; s<surface_p ; s++)
 	{
 		if (!s->spans)
@@ -186,8 +184,8 @@ void D_DrawSurfaces (void)
 		}
 		else if (s->flags & SURF_DRAWBACKGROUND)
 		{
-		// set up a gradient for the background surface that places it
-		// effectively at infinity distance from the viewpoint
+			// set up a gradient for the background surface that places it
+			// effectively at infinity distance from the viewpoint
 			d_zistepu = 0;
 			d_zistepv = 0;
 			d_ziorigin = -0.9;
@@ -206,8 +204,8 @@ void D_DrawSurfaces (void)
 
 			if (s->insubmodel)
 			{
-			// FIXME: we don't want to do all this for every polygon!
-			// TODO: store once at start of frame
+				// FIXME: we don't want to do all this for every polygon!
+				// TODO: store once at start of frame
 				currententity = s->entity;	//FIXME: make this passed in to
 											// R_RotateBmodel ()
 				VectorSubtract (r_origin, currententity->origin,
@@ -224,11 +222,9 @@ void D_DrawSurfaces (void)
 
 			if (s->insubmodel)
 			{
-			//
-			// restore the old drawing state
-			// FIXME: we don't want to do this every time!
-			// TODO: speed up
-			//
+				// restore the old drawing state
+				// FIXME: we don't want to do this every time!
+				// TODO: speed up
 				currententity = &cl_entities[0];
 				VectorCopy (world_transformed_modelorg,
 							transformed_modelorg);
@@ -243,8 +239,8 @@ void D_DrawSurfaces (void)
 		{
 			if (s->insubmodel)
 			{
-			// FIXME: we don't want to do all this for every polygon!
-			// TODO: store once at start of frame
+				// FIXME: we don't want to do all this for every polygon!
+				// TODO: store once at start of frame
 				currententity = s->entity;	//FIXME: make this passed in to
 											// R_RotateBmodel ()
 				VectorSubtract (r_origin, currententity->origin, local_modelorg);
@@ -261,7 +257,7 @@ void D_DrawSurfaces (void)
 				miplevel = D_MipLevelForScale (s->nearzi * scale_for_mip
 				* pface->texinfo->mipadjust);
 
-		// FIXME: make this passed in to D_CacheSurface
+			// FIXME: make this passed in to D_CacheSurface
 			pcurrentcache = D_CacheSurface (pface, miplevel);
 
 			cacheblock = (pixel_t *)pcurrentcache->data;
@@ -278,11 +274,11 @@ void D_DrawSurfaces (void)
 
 			if (s->insubmodel)
 			{
-			//
-			// restore the old drawing state
-			// FIXME: we don't want to do this every time!
-			// TODO: speed up
-			//
+				//
+				// restore the old drawing state
+				// FIXME: we don't want to do this every time!
+				// TODO: speed up
+				//
 				currententity = &cl_entities[0];
 				VectorCopy (world_transformed_modelorg,
 							transformed_modelorg);

@@ -44,7 +44,7 @@ void KeyDown (kbutton_t *b)
 
 	if (k == b->down[0] || k == b->down[1])
 		return;		// repeating key
-	
+
 	if (!b->down[0])
 		b->down[0] = k;
 	else if (!b->down[1])
@@ -54,7 +54,7 @@ void KeyDown (kbutton_t *b)
 		Con_Printf ("Three keys down for a button!\n");
 		return;
 	}
-	
+
 	if (b->state & 1)
 		return;		// still down
 	b->state |= 1 + 2;	// down + impulse down
@@ -64,7 +64,7 @@ void KeyUp (kbutton_t *b)
 {
 	int		k;
 	char	*c;
-	
+
 	c = Cmd_Argv(1);
 	if (c[0])
 		k = atoi(c);
@@ -152,12 +152,12 @@ float CL_KeyState (kbutton_t *key)
 {
 	float		val;
 	qboolean	impulsedown, impulseup, down;
-	
+
 	impulsedown = key->state & 2;
 	impulseup = key->state & 4;
 	down = key->state & 1;
 	val = 0;
-	
+
 	if (impulsedown && !impulseup)
 		val = down ? 0.5 : 0;
 	else if (impulseup && !impulsedown)
@@ -168,7 +168,7 @@ float CL_KeyState (kbutton_t *key)
 		val = down ? 0.75 : 0.25;
 
 	key->state &= 1;		// clear impulses
-	
+
 	return val;
 }
 
@@ -201,7 +201,7 @@ void CL_AdjustAngles (void)
 {
 	float	speed;
 	float	up, down;
-	
+
 	if (in_speed.state & 1)
 		speed = host_frametime * cl_anglespeedkey.value;
 	else
@@ -219,16 +219,16 @@ void CL_AdjustAngles (void)
 		cl.viewangles[PITCH] -= speed*cl_pitchspeed.value * CL_KeyState (&in_forward);
 		cl.viewangles[PITCH] += speed*cl_pitchspeed.value * CL_KeyState (&in_back);
 	}
-	
+
 	up = CL_KeyState (&in_lookup);
 	down = CL_KeyState(&in_lookdown);
-	
+
 	cl.viewangles[PITCH] -= speed*cl_pitchspeed.value * up;
 	cl.viewangles[PITCH] += speed*cl_pitchspeed.value * down;
 
 	if (up || down)
 		V_StopPitchDrift ();
-		
+
 	if (cl.viewangles[PITCH] > 80)
 		cl.viewangles[PITCH] = 80;
 	if (cl.viewangles[PITCH] < -70)
@@ -238,7 +238,7 @@ void CL_AdjustAngles (void)
 		cl.viewangles[ROLL] = 50;
 	if (cl.viewangles[ROLL] < -50)
 		cl.viewangles[ROLL] = -50;
-		
+
 }
 
 /*
@@ -249,14 +249,14 @@ Send the intended movement message to the server
 ================
 */
 void CL_BaseMove (usercmd_t *cmd)
-{	
+{
 	if (cls.signon != SIGNONS)
 		return;
-			
+
 	CL_AdjustAngles ();
-	
+
 	memset(cmd, 0, sizeof *cmd);
-	
+
 	if (in_strafe.state & 1)
 	{
 		cmd->sidemove += cl_sidespeed.value * CL_KeyState (&in_right);
@@ -270,14 +270,12 @@ void CL_BaseMove (usercmd_t *cmd)
 	cmd->upmove -= cl_upspeed.value * CL_KeyState (&in_down);
 
 	if (! (in_klook.state & 1) )
-	{	
+	{
 		cmd->forwardmove += cl_forwardspeed.value * CL_KeyState (&in_forward);
 		cmd->forwardmove -= cl_backspeed.value * CL_KeyState (&in_back);
-	}	
+	}
 
-//
-// adjust for speed key
-//
+	// adjust for speed key
 	if (in_speed.state & 1)
 	{
 		cmd->forwardmove *= cl_movespeedkey.value;
@@ -299,58 +297,50 @@ void CL_SendMove (usercmd_t *cmd)
 	int		bits;
 	sizebuf_t	buf;
 	byte	data[128];
-	
+
 	buf.maxsize = 128;
 	buf.cursize = 0;
 	buf.data = data;
-	
+
 	cl.cmd = *cmd;
 
-//
-// send the movement message
-//
-    MSG_WriteByte (&buf, clc_move);
+	// send the movement message
+	MSG_WriteByte (&buf, clc_move);
 
 	MSG_WriteFloat (&buf, cl.mtime[0]);	// so server can get ping times
 
 	for (i=0 ; i<3 ; i++)
 		cl.protocol.MSG_WriteAngle(&buf, cl.viewangles[i]);
-	
-    MSG_WriteShort (&buf, cmd->forwardmove);
-    MSG_WriteShort (&buf, cmd->sidemove);
-    MSG_WriteShort (&buf, cmd->upmove);
 
-//
-// send button bits
-//
+	MSG_WriteShort (&buf, cmd->forwardmove);
+	MSG_WriteShort (&buf, cmd->sidemove);
+	MSG_WriteShort (&buf, cmd->upmove);
+
+	// send button bits
 	bits = 0;
-	
+
 	if ( in_attack.state & 3 )
 		bits |= 1;
 	in_attack.state &= ~2;
-	
+
 	if (in_jump.state & 3)
 		bits |= 2;
 	in_jump.state &= ~2;
-	
-    MSG_WriteByte (&buf, bits);
 
-    MSG_WriteByte (&buf, in_impulse);
+	MSG_WriteByte (&buf, bits);
+
+	MSG_WriteByte (&buf, in_impulse);
 	in_impulse = 0;
 
-//
-// deliver the message
-//
+	// deliver the message
 	if (cls.demoplayback)
 		return;
 
-//
-// allways dump the first two message, because it may contain leftover inputs
-// from the last level
-//
+	// allways dump the first two message, because it may contain leftover inputs
+	// from the last level
 	if (++cl.movemessages <= 2)
 		return;
-	
+
 	if (NET_SendUnreliableMessage (cls.netcon, &buf) == -1)
 	{
 		Con_Printf ("CL_SendMove: lost server connection\n");

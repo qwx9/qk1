@@ -19,7 +19,7 @@ The "base directory" is the path to the directory holding the quake.exe and all 
 only used during filesystem initialization.
 
 The "game directory" is the first tree on the search path and directory that all generated files (savegames, screenshots, demos, config files) will be saved to.  This can be overridden with the "-game" command line parameter.  The game directory can never be changed while quake is executing.  This is a precacution against having a malicious server instruct clients to write files over areas they shouldn't.
-	
+
 */
 
 //============================================================================
@@ -62,8 +62,8 @@ void InsertLinkAfter (link_t *l, link_t *after)
 
 short   (*BigShort) (short l);
 short   (*LittleShort) (short l);
-int     (*BigLong) (int l);
-int     (*LittleLong) (int l);
+int	 (*BigLong) (int l);
+int	 (*LittleLong) (int l);
 float   (*BigFloat) (float l);
 float   (*LittleFloat) (float l);
 
@@ -82,8 +82,8 @@ Handles byte ordering and avoids alignment errors
 
 void MSG_WriteChar (sizebuf_t *sb, int c)
 {
-	byte    *buf;
-	
+	byte	*buf;
+
 #ifdef PARANOID
 	if (c < -128 || c > 127)
 		fatal ("MSG_WriteChar: range error");
@@ -95,8 +95,8 @@ void MSG_WriteChar (sizebuf_t *sb, int c)
 
 void MSG_WriteByte (sizebuf_t *sb, int c)
 {
-	byte    *buf;
-	
+	byte	*buf;
+
 #ifdef PARANOID
 	if (c < 0 || c > 255)
 		fatal ("MSG_WriteByte: range error");
@@ -108,8 +108,8 @@ void MSG_WriteByte (sizebuf_t *sb, int c)
 
 void MSG_WriteShort (sizebuf_t *sb, int c)
 {
-	byte    *buf;
-	
+	byte	*buf;
+
 #ifdef PARANOID
 	if (c < ((short)0x8000) || c > (short)0x7fff)
 		fatal ("MSG_WriteShort: range error");
@@ -122,8 +122,8 @@ void MSG_WriteShort (sizebuf_t *sb, int c)
 
 void MSG_WriteLong (sizebuf_t *sb, int c)
 {
-	byte    *buf;
-	
+	byte	*buf;
+
 	buf = SZ_GetSpace (sb, 4);
 	buf[0] = c&0xff;
 	buf[1] = (c>>8)&0xff;
@@ -136,13 +136,13 @@ void MSG_WriteFloat (sizebuf_t *sb, float f)
 	union
 	{
 		float   f;
-		int     l;
+		int	 l;
 	} dat;
-	
-	
+
+
 	dat.f = f;
 	dat.l = LittleLong (dat.l);
-	
+
 	SZ_Write (sb, &dat.l, 4);
 }
 
@@ -177,8 +177,8 @@ void MSG_WriteAngleInt16 (sizebuf_t *sb, float f)
 //
 // reading functions
 //
-int                     msg_readcount;
-qboolean        msg_badread;
+int					 msg_readcount;
+qboolean		msg_badread;
 
 void MSG_BeginReading (void)
 {
@@ -189,71 +189,71 @@ void MSG_BeginReading (void)
 // returns -1 and sets msg_badread if no more characters are available
 int MSG_ReadChar (void)
 {
-	int     c;
-	
+	int	 c;
+
 	if (msg_readcount+1 > net_message.cursize)
 	{
 		msg_badread = true;
 		return -1;
 	}
-		
+
 	c = (signed char)net_message.data[msg_readcount];
 	msg_readcount++;
-	
+
 	return c;
 }
 
 int MSG_ReadByte (void)
 {
-	int     c;
-	
+	int	 c;
+
 	if (msg_readcount+1 > net_message.cursize)
 	{
 		msg_badread = true;
 		return -1;
 	}
-		
+
 	c = (unsigned char)net_message.data[msg_readcount];
 	msg_readcount++;
-	
+
 	return c;
 }
 
 int MSG_ReadShort (void)
 {
-	int     c;
-	
+	int	 c;
+
 	if (msg_readcount+2 > net_message.cursize)
 	{
 		msg_badread = true;
 		return -1;
 	}
-		
+
 	c = (short)(net_message.data[msg_readcount]
 	+ (net_message.data[msg_readcount+1]<<8));
-	
+
 	msg_readcount += 2;
-	
+
 	return c;
 }
 
 int MSG_ReadLong (void)
 {
-	int     c;
-	
+	int	 c;
+
 	if (msg_readcount+4 > net_message.cursize)
 	{
 		msg_badread = true;
 		return -1;
 	}
-		
+
 	c = net_message.data[msg_readcount]
 	+ (net_message.data[msg_readcount+1]<<8)
 	+ (net_message.data[msg_readcount+2]<<16)
 	+ (net_message.data[msg_readcount+3]<<24);
-	
+
 	msg_readcount += 4;
-	
+
 	return c;
 }
 
@@ -261,26 +261,26 @@ float MSG_ReadFloat (void)
 {
 	union
 	{
-		byte    b[4];
+		byte	b[4];
 		float   f;
-		int     l;
+		int	 l;
 	} dat;
-	
-	dat.b[0] =      net_message.data[msg_readcount];
-	dat.b[1] =      net_message.data[msg_readcount+1];
-	dat.b[2] =      net_message.data[msg_readcount+2];
-	dat.b[3] =      net_message.data[msg_readcount+3];
+
+	dat.b[0] =	  net_message.data[msg_readcount];
+	dat.b[1] =	  net_message.data[msg_readcount+1];
+	dat.b[2] =	  net_message.data[msg_readcount+2];
+	dat.b[3] =	  net_message.data[msg_readcount+3];
 	msg_readcount += 4;
-	
+
 	dat.l = LittleLong (dat.l);
 
-	return dat.f;   
+	return dat.f;
 }
 
 char *MSG_ReadString (void)
 {
-	static char     string[2048];
-	int             l,c;
+	static char	 string[2048];
+	int			 l,c;
 
 	for(l = 0; l < (int)sizeof(string)-1; l++){
 		if((c = MSG_ReadChar()) == -1 || c == 0)
@@ -340,9 +340,9 @@ SZ_Alloc(sizebuf_t *buf, int startsize)
 void
 SZ_Free(sizebuf_t *buf)
 {
-//      Z_Free (buf->data);
-//      buf->data = nil;
-//      buf->maxsize = 0;
+	//Z_Free (buf->data);
+	//buf->data = nil;
+	//buf->maxsize = 0;
 	buf->cursize = 0;
 }
 
@@ -356,7 +356,7 @@ void *
 SZ_GetSpace(sizebuf_t *buf, int length)
 {
 	void *data;
-	
+
 	if(buf->cursize + length > buf->maxsize){
 		if(!buf->allowoverflow)
 			Host_Error("SZ_GetSpace: %s: overflow without allowoverflow set", buf->name);
@@ -364,7 +364,7 @@ SZ_GetSpace(sizebuf_t *buf, int length)
 			Host_Error("SZ_GetSpace: %s: %d is > full buffer size", buf->name, length);
 		buf->overflowed = true;
 		Con_Printf("SZ_GetSpace: %s: overflow", buf->name);
-		SZ_Clear(buf); 
+		SZ_Clear(buf);
 	}
 	data = buf->data + buf->cursize;
 	buf->cursize += length;
@@ -400,34 +400,33 @@ Parse a token out of a string
 */
 char *COM_Parse (char *data)
 {
-	int             c;
-	int             len;
-	
+	int			 c;
+	int			 len;
+
 	len = 0;
 	com_token[0] = 0;
-	
+
 	if (data == nil)
 		return nil;
-		
-// skip whitespace
+
+	// skip whitespace
 skipwhite:
 	while ( (c = *data) <= ' ')
 	{
 		if (c == 0)
-			return nil;                    // end of file;
+			return nil;					// end of file;
 		data++;
 	}
-	
-// skip // comments
+
+	// skip // comments
 	if (c=='/' && data[1] == '/')
 	{
 		while (*data && *data != '\n')
 			data++;
 		goto skipwhite;
 	}
-	
 
-// handle quoted strings specially
+	// handle quoted strings specially
 	if (c == '\"')
 	{
 		data++;
@@ -444,7 +443,7 @@ skipwhite:
 		}
 	}
 
-// parse single characters
+	// parse single characters
 	if (c=='{' || c=='}'|| c==')'|| c=='(' || c=='\'' || c==':')
 	{
 		com_token[len] = c;
@@ -453,7 +452,7 @@ skipwhite:
 		return data+1;
 	}
 
-// parse a regular word
+	// parse a regular word
 	do
 	{
 		com_token[len] = c;
@@ -463,7 +462,7 @@ skipwhite:
 	if (c=='{' || c=='}'|| c==')'|| c=='(' || c=='\'' || c==':')
 			break;
 	} while (c>32);
-	
+
 	com_token[len] = 0;
 	return data;
 }
@@ -487,7 +486,7 @@ va(char *fmt, ...)
 	vsnprint(s, sizeof s, fmt, arg);
 	va_end(arg);
 
-	return s;  
+	return s;
 }
 
 float

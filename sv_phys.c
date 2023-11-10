@@ -5,7 +5,7 @@
 
 pushmove objects do not obey gravity, and do not interact with each other or trigger fields, but block normal movement and push normal objects when they move.
 
-onground is set for toss objects when they come to a complete rest.  it is set for steping or walking objects 
+onground is set for toss objects when they come to a complete rest.  it is set for steping or walking objects
 
 doors, plats, etc are SOLID_BSP, and MOVETYPE_PUSH
 bonus items are SOLID_TRIGGER touch, and MOVETYPE_TOSS
@@ -38,7 +38,7 @@ void SV_CheckAllEnts (void)
 	int			e;
 	edict_t		*check;
 
-// see if any solid entities are inside the final position
+	// see if any solid entities are inside the final position
 	check = NEXT_EDICT(sv.edicts);
 	for (e=1 ; e<sv.num_edicts ; e++, check = NEXT_EDICT(check))
 	{
@@ -63,9 +63,7 @@ void SV_CheckVelocity (edict_t *ent)
 {
 	int		i;
 
-//
-// bound velocity
-//
+	// bound velocity
 	for (i=0 ; i<3 ; i++)
 	{
 		if (isnanf(ent->v.velocity[i]))
@@ -102,7 +100,7 @@ qboolean SV_RunThink (edict_t *ent)
 	thinktime = ent->v.nextthink;
 	if (thinktime <= 0 || thinktime > sv.time + host_frametime)
 		return true;
-		
+
 	if (thinktime < sv.time)
 		thinktime = sv.time;	// don't let things stay in the past.
 								// it is possible to start that way
@@ -125,10 +123,10 @@ Two entities have touched, so run their touch functions
 void SV_Impact (edict_t *e1, edict_t *e2)
 {
 	int		old_self, old_other;
-	
+
 	old_self = pr_global_struct->self;
 	old_other = pr_global_struct->other;
-	
+
 	pr_global_struct->time = sv.time;
 	if (e1->v.touch && e1->v.solid != SOLID_NOT)
 	{
@@ -136,7 +134,7 @@ void SV_Impact (edict_t *e1, edict_t *e2)
 		pr_global_struct->other = EDICT_TO_PROG(e2);
 		PR_ExecuteProgram (e1->v.touch);
 	}
-	
+
 	if (e2->v.touch && e2->v.solid != SOLID_NOT)
 	{
 		pr_global_struct->self = EDICT_TO_PROG(e2);
@@ -164,13 +162,13 @@ int ClipVelocity (vec3_t in, vec3_t normal, vec3_t out, float overbounce)
 	float	backoff;
 	float	change;
 	int		i, blocked;
-	
+
 	blocked = 0;
 	if (normal[2] > 0)
 		blocked |= 1;		// floor
 	if (!normal[2])
 		blocked |= 2;		// step
-	
+
 	backoff = DotProduct (in, normal) * overbounce;
 
 	for (i=0 ; i<3 ; i++)
@@ -180,7 +178,7 @@ int ClipVelocity (vec3_t in, vec3_t normal, vec3_t out, float overbounce)
 		if (out[i] > -STOP_EPSILON && out[i] < STOP_EPSILON)
 			out[i] = 0;
 	}
-	
+
 	return blocked;
 }
 
@@ -211,14 +209,14 @@ int SV_FlyMove (edict_t *ent, float time, trace_t *steptrace)
 	vec3_t		end;
 	float		time_left;
 	int			blocked;
-	
+
 	numbumps = 4;
-	
+
 	blocked = 0;
 	VectorCopy (ent->v.velocity, original_velocity);
 	VectorCopy (ent->v.velocity, primal_velocity);
 	numplanes = 0;
-	
+
 	time_left = time;
 
 	for (bumpcount=0 ; bumpcount<numbumps ; bumpcount++)
@@ -266,17 +264,15 @@ int SV_FlyMove (edict_t *ent, float time, trace_t *steptrace)
 				*steptrace = trace;	// save for player extrafriction
 		}
 
-//
-// run the impact function
-//
+		// run the impact function
 		SV_Impact (ent, trace.ent);
 		if (ent->free)
 			break;		// removed by the impact function
 
-		
+
 		time_left -= time_left * trace.fraction;
-		
-	// cliped to another plane
+
+		// cliped to another plane
 		if (numplanes >= MAX_CLIP_PLANES)
 		{	// this shouldn't really happen
 			VectorCopy (vec3_origin, ent->v.velocity);
@@ -286,9 +282,7 @@ int SV_FlyMove (edict_t *ent, float time, trace_t *steptrace)
 		VectorCopy (trace.plane.normal, planes[numplanes]);
 		numplanes++;
 
-//
-// modify original_velocity so it parallels all of the clip planes
-//
+		// modify original_velocity so it parallels all of the clip planes
 		for (i=0 ; i<numplanes ; i++)
 		{
 			ClipVelocity (original_velocity, planes[i], new_velocity, 1);
@@ -301,7 +295,7 @@ int SV_FlyMove (edict_t *ent, float time, trace_t *steptrace)
 			if (j == numplanes)
 				break;
 		}
-		
+
 		if (i != numplanes)
 		{	// go along this plane
 			VectorCopy (new_velocity, ent->v.velocity);
@@ -310,7 +304,7 @@ int SV_FlyMove (edict_t *ent, float time, trace_t *steptrace)
 		{	// go along the crease
 			if (numplanes != 2)
 			{
-//				Con_Printf ("clip velocity, numplanes == %d\n",numplanes);
+				//Con_Printf ("clip velocity, numplanes == %d\n",numplanes);
 				VectorCopy (vec3_origin, ent->v.velocity);
 				return 7;
 			}
@@ -319,10 +313,8 @@ int SV_FlyMove (edict_t *ent, float time, trace_t *steptrace)
 			VectorScale (dir, d, ent->v.velocity);
 		}
 
-//
-// if original velocity is against the original velocity, stop dead
-// to avoid tiny occilations in sloping corners
-//
+		// if original velocity is against the original velocity, stop dead
+		// to avoid tiny occilations in sloping corners
 		if (DotProduct (ent->v.velocity, primal_velocity) <= 0)
 		{
 			VectorCopy (vec3_origin, ent->v.velocity);
@@ -374,25 +366,25 @@ trace_t SV_PushEntity (edict_t *ent, vec3_t push)
 {
 	trace_t	trace;
 	vec3_t	end;
-		
+
 	VectorAdd (ent->v.origin, push, end);
 
 	if (ent->v.movetype == MOVETYPE_FLYMISSILE)
 		trace = SV_Move (ent->v.origin, ent->v.mins, ent->v.maxs, end, MOVE_MISSILE, ent);
 	else if (ent->v.solid == SOLID_TRIGGER || ent->v.solid == SOLID_NOT)
-	// only clip against bmodels
+		// only clip against bmodels
 		trace = SV_Move (ent->v.origin, ent->v.mins, ent->v.maxs, end, MOVE_NOMONSTERS, ent);
 	else
-		trace = SV_Move (ent->v.origin, ent->v.mins, ent->v.maxs, end, MOVE_NORMAL, ent);	
-	
+		trace = SV_Move (ent->v.origin, ent->v.mins, ent->v.maxs, end, MOVE_NORMAL, ent);
+
 	VectorCopy (trace.endpos, ent->v.origin);
 	SV_LinkEdict (ent, true);
 
 	if (trace.ent)
-		SV_Impact (ent, trace.ent);		
+		SV_Impact (ent, trace.ent);
 
 	return trace;
-}					
+}
 
 
 /*
@@ -425,15 +417,15 @@ void SV_PushMove (edict_t *pusher, float movetime)
 	}
 
 	VectorCopy (pusher->v.origin, pushorig);
-	
-// move the pusher to it's final position
+
+	// move the pusher to it's final position
 
 	VectorAdd (pusher->v.origin, move, pusher->v.origin);
 	pusher->v.ltime += movetime;
 	SV_LinkEdict (pusher, false);
 
 
-// see if any solid entities are inside the final position
+	// see if any solid entities are inside the final position
 	num_moved = 0;
 	check = NEXT_EDICT(sv.edicts);
 	for (e=1 ; e<sv.num_edicts ; e++, check = NEXT_EDICT(check))
@@ -445,7 +437,7 @@ void SV_PushMove (edict_t *pusher, float movetime)
 		|| check->v.movetype == MOVETYPE_NOCLIP)
 			continue;
 
-	// if the entity is standing on the pusher, it will definately be moved
+		// if the entity is standing on the pusher, it will definately be moved
 		if ( ! ( ((int)check->v.flags & FL_ONGROUND)
 		&& PROG_TO_EDICT(check->v.groundentity) == pusher) )
 		{
@@ -457,26 +449,26 @@ void SV_PushMove (edict_t *pusher, float movetime)
 			|| check->v.absmax[2] <= mins[2] )
 				continue;
 
-		// see if the ent's bbox is inside the pusher's final position
+			// see if the ent's bbox is inside the pusher's final position
 			if (!SV_TestEntityPosition (check))
 				continue;
 		}
 
-	// remove the onground flag for non-players
+		// remove the onground flag for non-players
 		if (check->v.movetype != MOVETYPE_WALK)
 			check->v.flags = (int)check->v.flags & ~FL_ONGROUND;
-		
+
 		VectorCopy (check->v.origin, entorig);
 		VectorCopy (check->v.origin, moved_from[num_moved]);
 		moved_edict[num_moved] = check;
 		num_moved++;
 
-		// try moving the contacted entity 
+		// try moving the contacted entity
 		pusher->v.solid = SOLID_NOT;
 		SV_PushEntity (check, move);
 		pusher->v.solid = SOLID_BSP;
 
-	// if it is still inside the pusher, block
+		// if it is still inside the pusher, block
 		block = SV_TestEntityPosition (check);
 		if (block)
 		{	// fail the move
@@ -488,7 +480,7 @@ void SV_PushMove (edict_t *pusher, float movetime)
 				VectorCopy (check->v.mins, check->v.maxs);
 				continue;
 			}
-			
+
 			VectorCopy (entorig, check->v.origin);
 			SV_LinkEdict (check, true);
 
@@ -504,18 +496,18 @@ void SV_PushMove (edict_t *pusher, float movetime)
 				pr_global_struct->other = EDICT_TO_PROG(check);
 				PR_ExecuteProgram (pusher->v.blocked);
 			}
-			
-		// move back any entities we already moved
+
+			// move back any entities we already moved
 			for (i=0 ; i<num_moved ; i++)
 			{
 				VectorCopy (moved_from[i], moved_edict[i]->v.origin);
 				SV_LinkEdict (moved_edict[i], false);
 			}
 			return;
-		}	
+		}
 	}
 
-	
+
 }
 
 /*
@@ -531,7 +523,7 @@ void SV_Physics_Pusher (edict_t *ent)
 	float	movetime;
 
 	oldltime = ent->v.ltime;
-	
+
 	thinktime = ent->v.nextthink;
 	if (thinktime < ent->v.ltime + host_frametime)
 	{
@@ -544,7 +536,7 @@ void SV_Physics_Pusher (edict_t *ent)
 
 	if (movetime)
 		SV_PushMove (ent, movetime);	// advances ent->v.ltime if not blocked
-		
+
 	if (thinktime > oldltime && thinktime <= ent->v.ltime)
 	{
 		ent->v.nextthink = 0;
@@ -595,7 +587,7 @@ void SV_CheckStuck (edict_t *ent)
 		SV_LinkEdict (ent, true);
 		return;
 	}
-	
+
 	for (z=0 ; z< 18 ; z++)
 		for (i=-1 ; i <= 1 ; i++)
 			for (j=-1 ; j <= 1 ; j++)
@@ -610,7 +602,7 @@ void SV_CheckStuck (edict_t *ent)
 					return;
 				}
 			}
-			
+
 	VectorCopy (org, ent->v.origin);
 	Con_DPrintf("player is stuck\n");
 }
@@ -628,8 +620,8 @@ qboolean SV_CheckWater (edict_t *ent)
 
 	point[0] = ent->v.origin[0];
 	point[1] = ent->v.origin[1];
-	point[2] = ent->v.origin[2] + ent->v.mins[2] + 1;	
-	
+	point[2] = ent->v.origin[2] + ent->v.mins[2] + 1;
+
 	ent->v.waterlevel = 0;
 	ent->v.watertype = CONTENTS_EMPTY;
 	cont = SV_PointContents (point);
@@ -648,7 +640,7 @@ qboolean SV_CheckWater (edict_t *ent)
 				ent->v.waterlevel = 3;
 		}
 	}
-	
+
 	return ent->v.waterlevel > 1;
 }
 
@@ -663,19 +655,19 @@ void SV_WallFriction (edict_t *ent, trace_t *trace)
 	vec3_t		forward, right, up;
 	float		d, i;
 	vec3_t		into, side;
-	
+
 	AngleVectors (ent->v.v_angle, forward, right, up);
 	d = DotProduct (trace->plane.normal, forward);
-	
+
 	d += 0.5;
 	if (d >= 0)
 		return;
-		
-// cut the tangential velocity
+
+	// cut the tangential velocity
 	i = DotProduct (trace->plane.normal, ent->v.velocity);
 	VectorScale (trace->plane.normal, i, into);
 	VectorSubtract (ent->v.velocity, into, side);
-	
+
 	ent->v.velocity[0] = side[0] * (1 + d);
 	ent->v.velocity[1] = side[1] * (1 + d);
 }
@@ -699,13 +691,13 @@ int SV_TryUnstick (edict_t *ent, vec3_t oldvel)
 	vec3_t	dir;
 	int		clip;
 	trace_t	steptrace;
-	
+
 	VectorCopy (ent->v.origin, oldorg);
 	VectorCopy (vec3_origin, dir);
 
 	for (i=0 ; i<8 ; i++)
 	{
-// try pushing a little in an axial direction
+		// try pushing a little in an axial direction
 		switch (i)
 		{
 			case 0:	dir[0] = 2; dir[1] = 0; break;
@@ -717,10 +709,10 @@ int SV_TryUnstick (edict_t *ent, vec3_t oldvel)
 			case 6:	dir[0] = 2; dir[1] = -2; break;
 			case 7:	dir[0] = -2; dir[1] = -2; break;
 		}
-		
+
 		SV_PushEntity (ent, dir);
 
-// retry the original move
+		// retry the original move
 		ent->v.velocity[0] = oldvel[0];
 		ent->v. velocity[1] = oldvel[1];
 		ent->v. velocity[2] = 0;
@@ -729,14 +721,14 @@ int SV_TryUnstick (edict_t *ent, vec3_t oldvel)
 		if ( fabs(oldorg[1] - ent->v.origin[1]) > 4
 		|| fabs(oldorg[0] - ent->v.origin[0]) > 4 )
 		{
-//Con_DPrintf ("unstuck!\n");
+			//Con_DPrintf ("unstuck!\n");
 			return clip;
 		}
-			
-// go back to the original pos and try again
+
+		// go back to the original pos and try again
 		VectorCopy (oldorg, ent->v.origin);
 	}
-	
+
 	VectorCopy (vec3_origin, ent->v.velocity);
 	return 7;		// still not moving
 }
@@ -757,16 +749,14 @@ void SV_WalkMove (edict_t *ent)
 	int			clip;
 	int			oldonground;
 	trace_t		steptrace, downtrace;
-	
-//
-// do a regular slide move unless it looks like you ran into a step
-//
+
+	// do a regular slide move unless it looks like you ran into a step
 	oldonground = (int)ent->v.flags & FL_ONGROUND;
 	ent->v.flags = (int)ent->v.flags & ~FL_ONGROUND;
-	
+
 	VectorCopy (ent->v.origin, oldorg);
 	VectorCopy (ent->v.velocity, oldvel);
-	
+
 	clip = SV_FlyMove (ent, host_frametime, &steptrace);
 
 	if ( !(clip & 2) )
@@ -774,22 +764,20 @@ void SV_WalkMove (edict_t *ent)
 
 	if (!oldonground && ent->v.waterlevel == 0)
 		return;		// don't stair up while jumping
-	
+
 	if (ent->v.movetype != MOVETYPE_WALK)
 		return;		// gibbed by a trigger
-	
+
 	if (sv_nostep.value)
 		return;
-	
+
 	if ( (int)sv_player->v.flags & FL_WATERJUMP )
 		return;
 
 	VectorCopy (ent->v.origin, nosteporg);
 	VectorCopy (ent->v.velocity, nostepvel);
 
-//
-// try moving up and forward to go up a step
-//
+	// try moving up and forward to go up a step
 	VectorCopy (oldorg, ent->v.origin);	// back to start pos
 
 	VectorCopy (vec3_origin, upmove);
@@ -797,17 +785,17 @@ void SV_WalkMove (edict_t *ent)
 	upmove[2] = STEPSIZE;
 	downmove[2] = -STEPSIZE + oldvel[2]*host_frametime;
 
-// move up
+	// move up
 	SV_PushEntity (ent, upmove);	// FIXME: don't link?
 
-// move forward
+	// move forward
 	ent->v.velocity[0] = oldvel[0];
 	ent->v. velocity[1] = oldvel[1];
 	ent->v. velocity[2] = 0;
 	clip = SV_FlyMove (ent, host_frametime, &steptrace);
 
-// check for stuckness, possibly due to the limited precision of floats
-// in the clipping hulls
+	// check for stuckness, possibly due to the limited precision of floats
+	// in the clipping hulls
 	if (clip)
 	{
 		if ( fabs(oldorg[1] - ent->v.origin[1]) < 0.03125
@@ -816,12 +804,12 @@ void SV_WalkMove (edict_t *ent)
 			clip = SV_TryUnstick (ent, oldvel);
 		}
 	}
-	
-// extra friction based on view angle
+
+	// extra friction based on view angle
 	if ( clip & 2 )
 		SV_WallFriction (ent, &steptrace);
 
-// move down
+	// move down
 	downtrace = SV_PushEntity (ent, downmove);	// FIXME: don't link?
 
 	if (downtrace.plane.normal[2] > 0.7)
@@ -834,9 +822,9 @@ void SV_WalkMove (edict_t *ent)
 	}
 	else
 	{
-// if the push down didn't end up on good ground, use the move without
-// the step up.  This happens near wall / slope combinations, and can
-// cause the player to hop up higher on a slope too steep to climb	
+		// if the push down didn't end up on good ground, use the move without
+		// the step up.  This happens near wall / slope combinations, and can
+		// cause the player to hop up higher on a slope too steep to climb
 		VectorCopy (nosteporg, ent->v.origin);
 		VectorCopy (nostepvel, ent->v.velocity);
 	}
@@ -855,21 +843,15 @@ void SV_Physics_Client (edict_t	*ent, int num)
 	if ( ! svs.clients[num-1].active )
 		return;		// unconnected slot
 
-//
-// call standard client pre-think
-//	
+	// call standard client pre-think
 	pr_global_struct->time = sv.time;
 	pr_global_struct->self = EDICT_TO_PROG(ent);
 	PR_ExecuteProgram (pr_global_struct->PlayerPreThink);
-	
-//
-// do a move
-//
+
+	// do a move
 	SV_CheckVelocity (ent);
 
-//
-// decide which move function to call
-//
+	// decide which move function to call
 	switch ((int)ent->v.movetype)
 	{
 	case MOVETYPE_NONE:
@@ -885,7 +867,7 @@ void SV_Physics_Client (edict_t	*ent, int num)
 		SV_CheckStuck (ent);
 		SV_WalkMove (ent);
 		break;
-		
+
 	case MOVETYPE_TOSS:
 	case MOVETYPE_BOUNCE:
 		SV_Physics_Toss (ent);
@@ -896,20 +878,18 @@ void SV_Physics_Client (edict_t	*ent, int num)
 			return;
 		SV_FlyMove (ent, host_frametime, nil);
 		break;
-		
+
 	case MOVETYPE_NOCLIP:
 		if (!SV_RunThink (ent))
 			return;
 		VectorMA (ent->v.origin, host_frametime, ent->v.velocity, ent->v.origin);
 		break;
-		
+
 	default:
 		fatal ("SV_Physics_client: bad movetype %d", (int)ent->v.movetype);
 	}
 
-//
-// call standard player post-think
-//		
+	// call standard player post-think
 	SV_LinkEdict (ent, true);
 
 	pr_global_struct->time = sv.time;
@@ -928,7 +908,7 @@ Non moving objects can only think
 */
 void SV_Physics_None (edict_t *ent)
 {
-// regular thinking
+	// regular thinking
 	SV_RunThink (ent);
 }
 
@@ -941,10 +921,10 @@ A moving object that doesn't obey physics
 */
 void SV_Physics_Noclip (edict_t *ent)
 {
-// regular thinking
+	// regular thinking
 	if (!SV_RunThink (ent))
 		return;
-	
+
 	VectorMA (ent->v.angles, host_frametime, ent->v.avelocity, ent->v.angles);
 	VectorMA (ent->v.origin, host_frametime, ent->v.velocity, ent->v.origin);
 
@@ -975,13 +955,13 @@ void SV_CheckWaterTransition (edict_t *ent)
 		ent->v.waterlevel = 1;
 		return;
 	}
-	
+
 	if (cont <= CONTENTS_WATER)
 	{
 		if (ent->v.watertype == CONTENTS_EMPTY)
 		{	// just crossed into water
 			SV_StartSound (ent, 0, "misc/h2ohit1.wav", 255, 1);
-		}		
+		}
 		ent->v.watertype = cont;
 		ent->v.waterlevel = 1;
 	}
@@ -990,7 +970,7 @@ void SV_CheckWaterTransition (edict_t *ent)
 		if (ent->v.watertype != CONTENTS_EMPTY)
 		{	// just crossed into water
 			SV_StartSound (ent, 0, "misc/h2ohit1.wav", 255, 1);
-		}		
+		}
 		ent->v.watertype = CONTENTS_EMPTY;
 		ent->v.waterlevel = cont;
 	}
@@ -1013,28 +993,28 @@ void SV_Physics_Toss (edict_t *ent)
 	if (!SV_RunThink (ent))
 		return;
 
-// if onground, return without moving
+	// if onground, return without moving
 	if ( ((int)ent->v.flags & FL_ONGROUND) )
 		return;
 
 	SV_CheckVelocity (ent);
 
-// add gravity
+	// add gravity
 	if (ent->v.movetype != MOVETYPE_FLY
 	&& ent->v.movetype != MOVETYPE_FLYMISSILE)
 		SV_AddGravity (ent);
 
-// move angles
+	// move angles
 	VectorMA (ent->v.angles, host_frametime, ent->v.avelocity, ent->v.angles);
 
-// move origin
+	// move origin
 	VectorScale (ent->v.velocity, host_frametime, move);
 	trace = SV_PushEntity (ent, move);
 	if (trace.fraction == 1)
 		return;
 	if (ent->free)
 		return;
-	
+
 	if (ent->v.movetype == MOVETYPE_BOUNCE)
 		backoff = 1.5;
 	else
@@ -1042,9 +1022,9 @@ void SV_Physics_Toss (edict_t *ent)
 
 	ClipVelocity (ent->v.velocity, trace.plane.normal, ent->v.velocity, backoff);
 
-// stop if on ground
+	// stop if on ground
 	if (trace.plane.normal[2] > 0.7)
-	{		
+	{
 		if (ent->v.velocity[2] < 60 || ent->v.movetype != MOVETYPE_BOUNCE)
 		{
 			ent->v.flags = (int)ent->v.flags | FL_ONGROUND;
@@ -1053,8 +1033,8 @@ void SV_Physics_Toss (edict_t *ent)
 			VectorCopy (vec3_origin, ent->v.avelocity);
 		}
 	}
-	
-// check for in water
+
+	// check for in water
 	SV_CheckWaterTransition (ent);
 }
 
@@ -1081,7 +1061,7 @@ void SV_Physics_Step (edict_t *ent)
 {
 	qboolean	hitsound;
 
-// freefall if not onground
+	// freefall if not onground
 	if ( ! ((int)ent->v.flags & (FL_ONGROUND | FL_FLY | FL_SWIM) ) )
 	{
 		if (ent->v.velocity[2] < sv_gravity.value*-0.1)
@@ -1101,9 +1081,9 @@ void SV_Physics_Step (edict_t *ent)
 		}
 	}
 
-// regular thinking
+	// regular thinking
 	SV_RunThink (ent);
-	
+
 	SV_CheckWaterTransition (ent);
 }
 
@@ -1120,17 +1100,15 @@ void SV_Physics (void)
 	int		i;
 	edict_t	*ent;
 
-// let the progs know that a new frame has started
+	// let the progs know that a new frame has started
 	pr_global_struct->self = EDICT_TO_PROG(sv.edicts);
 	pr_global_struct->other = EDICT_TO_PROG(sv.edicts);
 	pr_global_struct->time = sv.time;
 	PR_ExecuteProgram (pr_global_struct->StartFrame);
 
-//SV_CheckAllEnts ();
+	//SV_CheckAllEnts ();
 
-//
-// treat each object in turn
-//
+	// treat each object in turn
 	ent = sv.edicts;
 	for (i=0 ; i<sv.num_edicts ; i++, ent = NEXT_EDICT(ent))
 	{
@@ -1152,17 +1130,17 @@ void SV_Physics (void)
 			SV_Physics_Noclip (ent);
 		else if (ent->v.movetype == MOVETYPE_STEP)
 			SV_Physics_Step (ent);
-		else if (ent->v.movetype == MOVETYPE_TOSS 
+		else if (ent->v.movetype == MOVETYPE_TOSS
 		|| ent->v.movetype == MOVETYPE_BOUNCE
 		|| ent->v.movetype == MOVETYPE_FLY
 		|| ent->v.movetype == MOVETYPE_FLYMISSILE)
 			SV_Physics_Toss (ent);
 		else
-			fatal ("SV_Physics: bad movetype %d", (int)ent->v.movetype);			
+			fatal ("SV_Physics: bad movetype %d", (int)ent->v.movetype);
 	}
-	
+
 	if (pr_global_struct->force_retouch)
-		pr_global_struct->force_retouch--;	
+		pr_global_struct->force_retouch--;
 
 	sv.time += host_frametime;
 }

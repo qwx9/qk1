@@ -39,13 +39,13 @@ static void CL_ParseBeam (model_t *m)
 	vec3_t	start, end;
 	beam_t	*b;
 	int		i;
-	
+
 	ent = MSG_ReadShort ();
 
 	MSG_ReadVec(cl.protocol, start);
 	MSG_ReadVec(cl.protocol, end);
 
-// override any beam with the same entity
+	// override any beam with the same entity
 	for (i=0, b=cl_beams ; i< MAX_BEAMS ; i++, b++)
 		if (b->entity == ent)
 		{
@@ -57,7 +57,7 @@ static void CL_ParseBeam (model_t *m)
 			return;
 		}
 
-// find a free beam
+	// find a free beam
 	for (i=0, b=cl_beams ; i< MAX_BEAMS ; i++, b++)
 	{
 		if (!b->model || b->endtime < cl.time)
@@ -70,7 +70,7 @@ static void CL_ParseBeam (model_t *m)
 			return;
 		}
 	}
-	Con_Printf ("beam list overflow!\n");	
+	Con_Printf ("beam list overflow!\n");
 }
 
 /*
@@ -94,13 +94,13 @@ void CL_ParseTEnt (void)
 		R_RunParticleEffect (pos, vec3_origin, 20, 30);
 		startsfx (-1, 0, cl_sfx_wizhit, pos, 1, 1);
 		break;
-		
+
 	case TE_KNIGHTSPIKE:			// spike hitting wall
 		MSG_ReadVec(cl.protocol, pos);
 		R_RunParticleEffect (pos, vec3_origin, 226, 20);
 		startsfx (-1, 0, cl_sfx_knighthit, pos, 1, 1);
 		break;
-		
+
 	case TE_SPIKE:			// spike hitting wall
 		MSG_ReadVec(cl.protocol, pos);
 		R_RunParticleEffect (pos, vec3_origin, 0, 10);
@@ -134,12 +134,12 @@ void CL_ParseTEnt (void)
 				startsfx (-1, 0, cl_sfx_ric3, pos, 1, 1);
 		}
 		break;
-		
+
 	case TE_GUNSHOT:			// bullet hitting wall
 		MSG_ReadVec(cl.protocol, pos);
 		R_RunParticleEffect (pos, vec3_origin, 0, 20);
 		break;
-		
+
 	case TE_EXPLOSION:			// rocket explosion
 		MSG_ReadVec(cl.protocol, pos);
 		R_ParticleExplosion (pos);
@@ -150,7 +150,7 @@ void CL_ParseTEnt (void)
 		dl->decay = 300;
 		startsfx (-1, 0, cl_sfx_r_exp3, pos, 1, 1);
 		break;
-		
+
 	case TE_TAREXPLOSION:			// tarbaby explosion
 		MSG_ReadVec(cl.protocol, pos);
 		R_BlobExplosion (pos);
@@ -161,31 +161,29 @@ void CL_ParseTEnt (void)
 	case TE_LIGHTNING1:				// lightning bolts
 		CL_ParseBeam (Mod_ForName("progs/bolt.mdl", true));
 		break;
-	
+
 	case TE_LIGHTNING2:				// lightning bolts
 		CL_ParseBeam (Mod_ForName("progs/bolt2.mdl", true));
 		break;
-	
+
 	case TE_LIGHTNING3:				// lightning bolts
 		CL_ParseBeam (Mod_ForName("progs/bolt3.mdl", true));
 		break;
-	
-// PGM 01/21/97 
+
 	case TE_BEAM:				// grappling hook beam
 		CL_ParseBeam (Mod_ForName("progs/beam.mdl", true));
 		break;
-// PGM 01/21/97
 
-	case TE_LAVASPLASH:	
+	case TE_LAVASPLASH:
 		MSG_ReadVec(cl.protocol, pos);
 		R_LavaSplash (pos);
 		break;
-	
+
 	case TE_TELEPORT:
 		MSG_ReadVec(cl.protocol, pos);
 		R_TeleportSplash (pos);
 		break;
-		
+
 	case TE_EXPLOSION2:				// color mapped explosion
 		MSG_ReadVec(cl.protocol, pos);
 		colorStart = MSG_ReadByte ();
@@ -252,19 +250,19 @@ void CL_UpdateTEnts (void)
 
 	num_temp_entities = 0;
 
-// update lightning
+	// update lightning
 	for (i=0, b=cl_beams ; i< MAX_BEAMS ; i++, b++)
 	{
 		if (!b->model || b->endtime < cl.time)
 			continue;
 
-	// if coming from the player, update the start position
+		// if coming from the player, update the start position
 		if (b->entity == cl.viewentity)
 		{
 			VectorCopy (cl_entities[cl.viewentity].origin, b->start);
 		}
 
-	// calculate pitch and yaw
+		// calculate pitch and yaw
 		VectorSubtract (b->end, b->start, dist);
 
 		if (dist[1] == 0 && dist[0] == 0)
@@ -280,14 +278,14 @@ void CL_UpdateTEnts (void)
 			yaw = (int) (atan2(dist[1], dist[0]) * 180 / M_PI);
 			if (yaw < 0)
 				yaw += 360;
-	
+
 			forward = sqrt (dist[0]*dist[0] + dist[1]*dist[1]);
 			pitch = (int) (atan2(dist[2], forward) * 180 / M_PI);
 			if (pitch < 0)
 				pitch += 360;
 		}
 
-	// add new entities for the lightning
+		// add new entities for the lightning
 		VectorCopy (b->start, org);
 		d = VectorNormalize(dist);
 		while (d > 0)
@@ -306,7 +304,7 @@ void CL_UpdateTEnts (void)
 			d -= 30;
 		}
 	}
-	
+
 }
 
 

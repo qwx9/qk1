@@ -25,11 +25,10 @@ static vec3_t		alias_forward, alias_right, alias_up;
 
 static maliasskindesc_t	*pskindesc;
 
-int				r_amodels_drawn;
-int				a_skinwidth;
-int				r_anumverts;
+static int				a_skinwidth;
+static int				r_anumverts;
 
-float	aliastransform[3][4];
+static float	aliastransform[3][4];
 
 typedef struct {
 	int	index0;
@@ -73,8 +72,8 @@ qboolean R_AliasCheckBBox (void)
 	qboolean			zclipped, zfullyclipped;
 	unsigned			anyclip, allclip;
 	int					minz;
-	
-// expand, rotate, and translate points into worldspace
+
+	// expand, rotate, and translate points into worldspace
 
 	currententity->trivial_accept = 0;
 	pmodel = currententity->model;
@@ -83,9 +82,9 @@ qboolean R_AliasCheckBBox (void)
 
 	R_AliasSetUpTransform (0);
 
-// construct the base bounding box for this frame
+	// construct the base bounding box for this frame
 	frame = currententity->frame;
-// TODO: don't repeat this check when drawing?
+	// TODO: don't repeat this check when drawing?
 	if ((frame >= pmdl->numframes) || (frame < 0))
 	{
 		Con_DPrintf("No such frame %d %s\n", frame, pmodel->name);
@@ -94,23 +93,21 @@ qboolean R_AliasCheckBBox (void)
 
 	pframedesc = &pahdr->frames[frame];
 
-// x worldspace coordinates
+	// x worldspace coordinates
 	basepts[0][0] = basepts[1][0] = basepts[2][0] = basepts[3][0] =
 			(float)pframedesc->bboxmin.v[0];
 	basepts[4][0] = basepts[5][0] = basepts[6][0] = basepts[7][0] =
 			(float)pframedesc->bboxmax.v[0];
 
-// y worldspace coordinates
+	// y worldspace coordinates
 	basepts[0][1] = basepts[3][1] = basepts[5][1] = basepts[6][1] =
 			(float)pframedesc->bboxmin.v[1];
 	basepts[1][1] = basepts[2][1] = basepts[4][1] = basepts[7][1] =
 			(float)pframedesc->bboxmax.v[1];
 
-// z worldspace coordinates
-	basepts[0][2] = basepts[1][2] = basepts[4][2] = basepts[5][2] =
-			(float)pframedesc->bboxmin.v[2];
-	basepts[2][2] = basepts[3][2] = basepts[6][2] = basepts[7][2] =
-			(float)pframedesc->bboxmax.v[2];
+	// z worldspace coordinates
+	basepts[0][2] = basepts[1][2] = basepts[4][2] = basepts[5][2] = (float)pframedesc->bboxmin.v[2];
+	basepts[2][2] = basepts[3][2] = basepts[6][2] = basepts[7][2] = (float)pframedesc->bboxmax.v[2];
 
 	zclipped = false;
 	zfullyclipped = true;
@@ -122,7 +119,7 @@ qboolean R_AliasCheckBBox (void)
 
 		if (viewaux[i].fv[2] < ALIAS_Z_CLIP_PLANE)
 		{
-		// we must clip points that are closer than the near clip plane
+			// we must clip points that are closer than the near clip plane
 			viewpts[i].flags = ALIAS_Z_CLIP;
 			zclipped = true;
 		}
@@ -135,7 +132,7 @@ qboolean R_AliasCheckBBox (void)
 		}
 	}
 
-	
+
 	if (zfullyclipped)
 	{
 		return false;	// everything was near-z-clipped
@@ -145,17 +142,16 @@ qboolean R_AliasCheckBBox (void)
 
 	if (zclipped)
 	{
-	// organize points by edges, use edges to get new points (possible trivial
-	// reject)
+		// organize points by edges, use edges to get new points (possible trivial reject)
 		for (i=0 ; i<12 ; i++)
 		{
-		// edge endpoints
+			// edge endpoints
 			pv0 = &viewpts[aedges[i].index0];
 			pv1 = &viewpts[aedges[i].index1];
 			pa0 = &viewaux[aedges[i].index0];
 			pa1 = &viewaux[aedges[i].index1];
 
-		// if one end is clipped and the other isn't, make a new point
+			// if one end is clipped and the other isn't, make a new point
 			if (pv0->flags ^ pv1->flags)
 			{
 				frac = (ALIAS_Z_CLIP_PLANE - pa0->fv[2]) /
@@ -171,11 +167,11 @@ qboolean R_AliasCheckBBox (void)
 		}
 	}
 
-// project the vertices that remain after clipping
+	// project the vertices that remain after clipping
 	anyclip = 0;
 	allclip = ALIAS_XY_CLIP_MASK;
 
-// TODO: probably should do this loop in ASM, especially if we use floats
+	// TODO: probably should do this loop in ASM, especially if we use floats
 	for (i=0 ; i<numv ; i++)
 	{
 	// we don't need to bother with vertices that were z-clipped
@@ -184,7 +180,7 @@ qboolean R_AliasCheckBBox (void)
 
 		zi = 1.0 / viewaux[i].fv[2];
 
-	// FIXME: do with chop mode in ASM, or convert to float
+		// FIXME: do with chop mode in ASM, or convert to float
 		v0 = (viewaux[i].fv[0] * xscale * zi) + xcenter;
 		v1 = (viewaux[i].fv[1] * yscale * zi) + ycenter;
 
@@ -270,13 +266,11 @@ void R_AliasPreparePoints (void)
 			if (fv->v[0] > r_refdef.aliasvrectright)
 				fv->flags |= ALIAS_RIGHT_CLIP;
 			if (fv->v[1] > r_refdef.aliasvrectbottom)
-				fv->flags |= ALIAS_BOTTOM_CLIP;	
+				fv->flags |= ALIAS_BOTTOM_CLIP;
 		}
 	}
 
-//
-// clip and draw all triangles
-//
+	// clip and draw all triangles
 	r_affinetridesc.numtriangles = 1;
 
 	ptri = (mtriangle_t *)((byte *)paliashdr + paliashdr->triangles);
@@ -288,7 +282,7 @@ void R_AliasPreparePoints (void)
 
 		if ( pfv[0]->flags & pfv[1]->flags & pfv[2]->flags & (ALIAS_XY_CLIP_MASK | ALIAS_Z_CLIP) )
 			continue;		// completely clipped
-		
+
 		if ( ! ( (pfv[0]->flags | pfv[1]->flags | pfv[2]->flags) &
 			(ALIAS_XY_CLIP_MASK | ALIAS_Z_CLIP) ) )
 		{	// totally unclipped
@@ -296,7 +290,7 @@ void R_AliasPreparePoints (void)
 			r_affinetridesc.ptriangles = ptri;
 			D_PolysetDraw ();
 		}
-		else		
+		else
 		{	// partially clipped
 			R_AliasClipTriangle (ptri);
 		}
@@ -317,9 +311,9 @@ void R_AliasSetUpTransform (int trivial_accept)
 	static float	viewmatrix[3][4];
 	vec3_t			angles;
 
-// TODO: should really be stored with the entity instead of being reconstructed
-// TODO: should use a look-up table
-// TODO: could cache lazily, stored in the entity
+	// TODO: should really be stored with the entity instead of being reconstructed
+	// TODO: should use a look-up table
+	// TODO: could cache lazily, stored in the entity
 
 	angles[ROLL] = currententity->angles[ROLL];
 	angles[PITCH] = -currententity->angles[PITCH];
@@ -347,26 +341,26 @@ void R_AliasSetUpTransform (int trivial_accept)
 	t2matrix[1][3] = -modelorg[1];
 	t2matrix[2][3] = -modelorg[2];
 
-// FIXME: can do more efficiently than full concatenation
+	// FIXME: can do more efficiently than full concatenation
 	R_ConcatTransforms (t2matrix, tmatrix, rotationmatrix);
 
-// TODO: should be global, set when vright, etc., set
+	// TODO: should be global, set when vright, etc., set
 	VectorCopy (vright, viewmatrix[0]);
 	VectorCopy (vup, viewmatrix[1]);
 	VectorInverse (viewmatrix[1]);
 	VectorCopy (vpn, viewmatrix[2]);
 
-//	viewmatrix[0][3] = 0;
-//	viewmatrix[1][3] = 0;
-//	viewmatrix[2][3] = 0;
+	//	viewmatrix[0][3] = 0;
+	//	viewmatrix[1][3] = 0;
+	//	viewmatrix[2][3] = 0;
 
 	R_ConcatTransforms (viewmatrix, rotationmatrix, aliastransform);
 
-// do the scaling up of x and y to screen coordinates as part of the transform
-// for the unclipped case (it would mess up clipping in the clipped case).
-// Also scale down z, so 1/z is scaled 31 bits for free, and scale down x and y
-// correspondingly so the projected x and y come out right
-// FIXME: make this work for clipped case too?
+	// do the scaling up of x and y to screen coordinates as part of the transform
+	// for the unclipped case (it would mess up clipping in the clipped case).
+	// Also scale down z, so 1/z is scaled 31 bits for free, and scale down x and y
+	// correspondingly so the projected x and y come out right
+	// FIXME: make this work for clipped case too?
 	if (trivial_accept)
 	{
 		for (i=0 ; i<4 ; i++)
@@ -405,7 +399,7 @@ void R_AliasTransformFinalVert (finalvert_t *fv, auxvert_t *av,
 
 	fv->flags = pstverts->onseam;
 
-// lighting
+	// lighting
 	plightnormal = r_avertexnormals[pverts->lightnormalindex];
 	lightcos = DotProduct (plightnormal, r_plightvec);
 	temp = r_ambientlight;
@@ -414,8 +408,8 @@ void R_AliasTransformFinalVert (finalvert_t *fv, auxvert_t *av,
 	{
 		temp += (int)(r_shadelight * lightcos);
 
-	// clamp; because we limited the minimum ambient and shading light, we
-	// don't have to clamp low light, just bright
+		// clamp; because we limited the minimum ambient and shading light, we
+		// don't have to clamp low light, just bright
 		if (temp < 0)
 			temp = 0;
 	}
@@ -439,13 +433,13 @@ void R_AliasTransformAndProjectFinalVerts (finalvert_t *fv, stvert_t *pstverts)
 
 	for (i=0 ; i<r_anumverts ; i++, fv++, pverts++, pstverts++)
 	{
-	// transform and project
+		// transform and project
 		zi = 1.0 / (DotProduct_(pverts->v, aliastransform[2]) +
 				aliastransform[2][3]);
 
-	// x, y, and z are scaled down by 1/2**31 in the transform, so 1/z is
-	// scaled up by 1/2**31, and the scaling cancels out for x and y in the
-	// projection
+		// x, y, and z are scaled down by 1/2**31 in the transform, so 1/z is
+		// scaled up by 1/2**31, and the scaling cancels out for x and y in the
+		// projection
 		fv->v[5] = zi;
 
 		fv->v[0] = ((DotProduct_(pverts->v, aliastransform[0]) +
@@ -457,7 +451,7 @@ void R_AliasTransformAndProjectFinalVerts (finalvert_t *fv, stvert_t *pstverts)
 		fv->v[3] = pstverts->t;
 		fv->flags = pstverts->onseam;
 
-	// lighting
+		// lighting
 		plightnormal = r_avertexnormals[pverts->lightnormalindex];
 		lightcos = DotProduct (plightnormal, r_plightvec);
 		temp = r_ambientlight;
@@ -466,8 +460,8 @@ void R_AliasTransformAndProjectFinalVerts (finalvert_t *fv, stvert_t *pstverts)
 		{
 			temp += (int)(r_shadelight * lightcos);
 
-		// clamp; because we limited the minimum ambient and shading light, we
-		// don't have to clamp low light, just bright
+			// clamp; because we limited the minimum ambient and shading light, we
+			// don't have to clamp low light, just bright
 			if (temp < 0)
 				temp = 0;
 		}
@@ -486,7 +480,7 @@ void R_AliasProjectFinalVert (finalvert_t *fv, auxvert_t *av)
 {
 	float	zi;
 
-// project points
+	// project points
 	zi = 1.0 / av->fv[2];
 
 	fv->v[5] = zi * ziscale;
@@ -508,7 +502,7 @@ void R_AliasPrepareUnclippedPoints (void)
 
 	pstverts = (stvert_t *)((byte *)paliashdr + paliashdr->stverts);
 	r_anumverts = pmdl->numverts;
-// FIXME: just use pfinalverts directly?
+	// FIXME: just use pfinalverts directly?
 	fv = pfinalverts;
 
 	R_AliasTransformAndProjectFinalVerts (fv, pstverts);
@@ -556,20 +550,20 @@ void R_AliasSetupSkin (void)
 				((byte *)paliashdr + paliasskingroup->intervals);
 		numskins = paliasskingroup->numskins;
 		fullskininterval = pskinintervals[numskins-1];
-	
+
 		skintime = cl.time + currententity->syncbase;
-	
-	// when loading in Mod_LoadAliasSkinGroup, we guaranteed all interval
-	// values are positive, so we don't have to worry about division by 0
+
+		// when loading in Mod_LoadAliasSkinGroup, we guaranteed all interval
+		// values are positive, so we don't have to worry about division by 0
 		skintargettime = skintime -
 				((int)(skintime / fullskininterval)) * fullskininterval;
-	
+
 		for (i=0 ; i<(numskins-1) ; i++)
 		{
 			if (pskinintervals[i] > skintargettime)
 				break;
 		}
-	
+
 		pskindesc = &paliasskingroup->skindescs[i];
 	}
 
@@ -587,9 +581,8 @@ R_AliasSetupLighting
 */
 void R_AliasSetupLighting (alight_t *plighting)
 {
-
-// guarantee that no vertex will ever be lit below LIGHT_MIN, so we don't have
-// to clamp off the bottom
+	// guarantee that no vertex will ever be lit below LIGHT_MIN, so we don't have
+	// to clamp off the bottom
 	r_ambientlight = plighting->ambientlight;
 
 	if (r_ambientlight < LIGHT_MIN)
@@ -607,7 +600,7 @@ void R_AliasSetupLighting (alight_t *plighting)
 
 	r_shadelight *= VID_GRADES;
 
-// rotate the lighting vector into the model's frame of reference
+	// rotate the lighting vector into the model's frame of reference
 	r_plightvec[0] = DotProduct (plighting->plightvec, alias_forward);
 	r_plightvec[1] = -DotProduct (plighting->plightvec, alias_right);
 	r_plightvec[2] = DotProduct (plighting->plightvec, alias_up);
@@ -640,7 +633,7 @@ void R_AliasSetupFrame (void)
 				((byte *)paliashdr + paliashdr->frames[frame].frame);
 		return;
 	}
-	
+
 	paliasgroup = (maliasgroup_t *)
 				((byte *)paliashdr + paliashdr->frames[frame].frame);
 	pintervals = (float *)((byte *)paliashdr + paliasgroup->intervals);
@@ -649,10 +642,8 @@ void R_AliasSetupFrame (void)
 
 	time = cl.time + currententity->syncbase;
 
-//
-// when loading in Mod_LoadAliasGroup, we guaranteed all interval values
-// are positive, so we don't have to worry about division by 0
-//
+	// when loading in Mod_LoadAliasGroup, we guaranteed all interval values
+	// are positive, so we don't have to worry about division by 0
 	targettime = time - ((int)(time / fullinterval)) * fullinterval;
 
 	for (i=0 ; i<(numframes-1) ; i++)
@@ -676,9 +667,7 @@ void R_AliasDrawModel (alight_t *plighting)
 	static finalvert_t		finalverts[MAXALIASVERTS];
 	static auxvert_t		auxverts[MAXALIASVERTS];
 
-	r_amodels_drawn++;
-
-// cache align
+	// cache align
 	pfinalverts = finalverts;
 	pauxverts = auxverts;
 

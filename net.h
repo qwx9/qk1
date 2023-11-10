@@ -61,7 +61,7 @@ typedef struct qsocket_s
 	qboolean		canSend;
 	qboolean		sendNext;
 	qboolean		local;
-	
+
 	int				driver;
 	int				landriver;
 	int				socket;

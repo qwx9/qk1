@@ -165,7 +165,7 @@ FindNextChunk(char *name)
 			data_p = nil;
 			return;
 		}
-		
+
 		data_p += 4;
 		iff_chunk_len = GetLittleLong();
 		if (iff_chunk_len < 0)
@@ -201,7 +201,7 @@ GetWavinfo(char *name, byte *wav, vlong wavlength)
 
 	if (!wav)
 		return info;
-		
+
 	iff_data = wav;
 	iff_end = wav + wavlength;
 
@@ -278,7 +278,7 @@ GetWavinfo(char *name, byte *wav, vlong wavlength)
 		info.samples = samples;
 
 	info.dataofs = data_p - wav;
-	
+
 	return info;
 }
 
@@ -303,7 +303,7 @@ loadsfx(Sfx *sfx)
 		Con_DPrintf("loadsfx: non mono wave %s\n", sfx->s);
 		return nil;
 	}
-	stepscale = (float)info.rate / Srate;	
+	stepscale = (float)info.rate / Srate;
 	len = info.samples / stepscale;
 	len *= info.width * info.channels;
 	if(sc = Cache_Alloc(&sfx->cu, len + sizeof *sc), sc == nil)
@@ -599,7 +599,7 @@ pickchan(int entn, int entch)
 	if(p != nil)
 		p->sfx = nil;
 	return p;
-}       
+}
 
 void
 startsfx(int entn, int entch, Sfx *sfx, vec3_t zp, float vol, float att)
@@ -829,7 +829,7 @@ initsnd(void)
 	chans = calloc(Nchan, sizeof(*chans));
 	known_sfx = Hunk_Alloc(MAX_SOUNDS * sizeof *known_sfx);
 	num_sfx = 0;
-	
+
 	ambsfx[Ambwater] = precachesfx("ambience/water1.wav");
 	ambsfx[Ambsky] = precachesfx("ambience/wind2.wav");
 	stopallsfx();

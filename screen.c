@@ -1,6 +1,6 @@
 #include "quakedef.h"
 
-// only the refresh window will be updated unless these variables are flagged 
+// only the refresh window will be updated unless these variables are flagged
 int			scr_copytop;
 int			scr_copyeverything;
 
@@ -68,7 +68,7 @@ void SCR_CenterPrint (char *str)
 	scr_centertime_off = scr_centertime.value;
 	scr_centertime_start = cl.time;
 
-// count the number of lines for centering
+	// count the number of lines for centering
 	scr_center_lines = 1;
 	while (*str)
 	{
@@ -105,7 +105,7 @@ void SCR_DrawCenterString (void)
 	int		x, y;
 	int		remaining;
 
-// the finale prints the characters one at a time
+	// the finale prints the characters one at a time
 	if (cl.intermission)
 		remaining = scr_printspeed.value * (cl.time - scr_centertime_start);
 	else
@@ -119,20 +119,20 @@ void SCR_DrawCenterString (void)
 	else
 		y = 48;
 
-	do	
+	do
 	{
-	// scan the width of the line
+		// scan the width of the line
 		for (l=0 ; l<40 ; l++)
 			if (start[l] == '\n' || !start[l])
 				break;
 		x = (vid.width - l*8)/2;
 		for (j=0 ; j<l ; j++, x+=8)
 		{
-			Draw_Character (x, y, start[j]);	
+			Draw_Character (x, y, start[j]);
 			if (!remaining--)
 				return;
 		}
-			
+
 		y += 8;
 
 		while (*start && *start != '\n')
@@ -151,7 +151,7 @@ void SCR_CheckDrawCenterString (void)
 		scr_erase_lines = scr_center_lines;
 
 	scr_centertime_off -= host_frametime;
-	
+
 	if (scr_centertime_off <= 0 && !cl.intermission)
 		return;
 	if (key_dest != key_game)
@@ -169,19 +169,19 @@ CalcFov
 */
 float CalcFov (float fov_x, float width, float height)
 {
-        float   a = 0;
-        float   x;
+	float   a = 0;
+	float   x;
 
-        if (fov_x < 1 || fov_x > 179)
-                fatal ("Bad fov: %f", fov_x);
+	if (fov_x < 1 || fov_x > 179)
+		fatal ("Bad fov: %f", fov_x);
 
-        x = width/tan(fov_x/360*M_PI);
+	x = width/tan(fov_x/360*M_PI);
 
 	if(x != 0)
-        	a = atan (height/x);
-        a = a*360/M_PI;
+		a = atan (height/x);
+	a = a*360/M_PI;
 
-        return a;
+	return a;
 }
 
 /*
@@ -200,18 +200,18 @@ static void SCR_CalcRefdef (void)
 	scr_fullupdate = 0;		// force a background redraw
 	vid.recalc_refdef = 0;
 
-// force the status bar to redraw
+	// force the status bar to redraw
 	Sbar_Changed ();
 
 //========================================
-	
-// bound viewsize
+
+	// bound viewsize
 	if (scr_viewsize.value < 100)
 		setcvar ("viewsize","100");
 	if (scr_viewsize.value > 120)
 		setcvar ("viewsize","120");
 
-// bound field of view
+	// bound field of view
 	if (scr_fov.value < 10)
 		setcvar ("fov","10");
 	if (scr_fov.value > 170)
@@ -220,7 +220,7 @@ static void SCR_CalcRefdef (void)
 	r_refdef.fov_x = scr_fov.value;
 	r_refdef.fov_y = CalcFov (r_refdef.fov_x, r_refdef.vrect.width, r_refdef.vrect.height);
 
-// intermission is always full screen	
+	// intermission is always full screen
 	if (cl.intermission)
 		size = 120;
 	else
@@ -233,8 +233,8 @@ static void SCR_CalcRefdef (void)
 	else
 		sb_lines = 24+16+8;
 
-// these calculations mirror those in R_Init() for r_refdef, but take no
-// account of water warping
+	// these calculations mirror those in R_Init() for r_refdef, but take no
+	// account of water warping
 	vrect.x = 0;
 	vrect.y = 0;
 	vrect.width = vid.width;
@@ -242,12 +242,12 @@ static void SCR_CalcRefdef (void)
 
 	R_SetVrect (&vrect, &scr_vrect, sb_lines);
 
-// guard against going from one mode to another that's less than half the
-// vertical resolution
+	// guard against going from one mode to another that's less than half the
+	// vertical resolution
 	if (scr_con_current > vid.height)
 		scr_con_current = vid.height;
 
-// notify the refresh of the change
+	// notify the refresh of the change
 	R_ViewChanged (&vrect, sb_lines, vid.aspect);
 }
 
@@ -307,7 +307,7 @@ SCR_DrawTurtle
 void SCR_DrawTurtle (void)
 {
 	static int	count;
-	
+
 	if (!scr_showturtle.value)
 		return;
 
@@ -375,7 +375,7 @@ void SCR_DrawPause (void)
 		return;
 
 	pic = Draw_CachePic ("gfx/pause.lmp");
-	Draw_Pic ( (vid.width - pic->width)/2, 
+	Draw_Pic ( (vid.width - pic->width)/2,
 		(vid.height - 48 - pic->height)/2, pic);
 }
 
@@ -392,9 +392,9 @@ void SCR_DrawLoading (void)
 
 	if (!scr_drawloading)
 		return;
-		
+
 	pic = Draw_CachePic ("gfx/loading.lmp");
-	Draw_Pic ( (vid.width - pic->width)/2, 
+	Draw_Pic ( (vid.width - pic->width)/2,
 		(vid.height - 48 - pic->height)/2, pic);
 }
 
@@ -411,11 +411,11 @@ SCR_SetUpToDrawConsole
 void SCR_SetUpToDrawConsole (void)
 {
 	Con_CheckResize ();
-	
+
 	if (scr_drawloading)
 		return;		// never a console with loading plaque
-		
-// decide on the height of the console
+
+	// decide on the height of the console
 	con_forcedup = !cl.worldmodel || cls.signon != SIGNONS;
 
 	if (con_forcedup)
@@ -427,7 +427,7 @@ void SCR_SetUpToDrawConsole (void)
 		scr_conlines = vid.height/2;	// half screen
 	else
 		scr_conlines = 0;				// none visible
-	
+
 	if (scr_conlines < scr_con_current)
 	{
 		scr_con_current -= scr_conspeed.value*host_frametime;
@@ -456,7 +456,7 @@ void SCR_SetUpToDrawConsole (void)
 	else
 		con_notifylines = 0;
 }
-	
+
 /*
 ==================
 SCR_DrawConsole
@@ -491,8 +491,8 @@ void SCR_BeginLoadingPlaque (void)
 		return;
 	if (cls.signon != SIGNONS)
 		return;
-	
-// redraw with no console and the loading plaque
+
+	// redraw with no console and the loading plaque
 	Con_ClearNotify ();
 	scr_centertime_off = 0;
 	scr_con_current = 0;
@@ -537,16 +537,16 @@ void SCR_DrawNotifyString (void)
 
 	y = vid.height*0.35;
 
-	do	
+	do
 	{
-	// scan the width of the line
+		// scan the width of the line
 		for (l=0 ; l<40 ; l++)
 			if (start[l] == '\n' || !start[l])
 				break;
 		x = (vid.width - l*8)/2;
 		for (j=0 ; j<l ; j++, x+=8)
-			Draw_Character (x, y, start[j]);	
-			
+			Draw_Character (x, y, start[j]);
+
 		y += 8;
 
 		while (*start && *start != '\n')
@@ -563,7 +563,7 @@ void SCR_DrawNotifyString (void)
 SCR_ModalMessage
 
 Displays a text string in the center of the screen and waits for a Y or N
-keypress.  
+keypress.
 ==================
 */
 int SCR_ModalMessage (char *text)
@@ -572,8 +572,8 @@ int SCR_ModalMessage (char *text)
 		return true;
 
 	scr_notifystring = text;
- 
-// draw a fresh screen
+
+	// draw a fresh screen
 	scr_fullupdate = 0;
 	scr_drawdialog = true;
 	SCR_UpdateScreen ();
@@ -603,9 +603,9 @@ Brings the console down and fades the palettes back to normal
 void SCR_BringDownConsole (void)
 {
 	int		i;
-	
+
 	scr_centertime_off = 0;
-	
+
 	for (i=0 ; i<20 && scr_conlines != scr_con_current ; i++)
 		SCR_UpdateScreen ();
 
@@ -628,7 +628,7 @@ needs almost the entire 256k of stack space!
 void SCR_UpdateScreen (void)
 {
 	static float	oldlcd_x;
-	
+
 	if (scr_skipupdate || block_drawing)
 		return;
 
@@ -651,37 +651,33 @@ void SCR_UpdateScreen (void)
 
 	if (!scr_initialized || !con_initialized)
 		return;				// not initialized yet
-	
-//
-// check for vid changes
-//
+
+	// check for vid changes
 	if (oldfov != scr_fov.value)
 	{
 		oldfov = scr_fov.value;
 		vid.recalc_refdef = true;
 	}
-	
+
 	if (oldlcd_x != lcd_x.value)
 	{
 		oldlcd_x = lcd_x.value;
 		vid.recalc_refdef = true;
 	}
-	
+
 	if (oldscreensize != scr_viewsize.value)
 	{
 		oldscreensize = scr_viewsize.value;
 		vid.recalc_refdef = true;
 	}
-	
+
 	if (vid.recalc_refdef)
 	{
-	// something changed, so reorder the screen
+		// something changed, so reorder the screen
 		SCR_CalcRefdef ();
 	}
 
-//
-// do 3D refresh drawing, and then update the screen
-//
+	// do 3D refresh drawing, and then update the screen
 	if (scr_fullupdate++ < vid.numpages)
 	{	// clear the entire screen
 		scr_copyeverything = 1;

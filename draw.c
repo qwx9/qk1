@@ -43,7 +43,7 @@ qpic_t	*Draw_CachePic (char *path)
 	cachepic_t	*pic;
 	int			i;
 	qpic_t		*dat;
-	
+
 	for (pic=menu_cachepics, i=0 ; i<menu_numcachepics ; pic++, i++)
 		if (!strcmp (path, pic->name))
 			break;
@@ -61,9 +61,7 @@ qpic_t	*Draw_CachePic (char *path)
 	if (dat)
 		return dat;
 
-//
-// load the pic from disk
-//
+	// load the pic from disk
 	dat = loadcachelmp(path, &pic->cache);
 	if(dat == nil)
 		fatal("Draw_CachePic: %s", lerr());
@@ -106,11 +104,11 @@ void Draw_Character (int x, int y, int num)
 {
 	byte			*dest;
 	byte			*source;
-	int				drawline;	
+	int				drawline;
 	int				row, col;
 
 	num &= 255;
-	
+
 	if (y <= -8)
 		return;			// totally off screen
 
@@ -176,7 +174,7 @@ void Draw_DebugChar (char num)
 {
 	byte			*dest;
 	byte			*source;
-	int				drawline;	
+	int				drawline;
 	extern byte		*draw_chars;
 	int				row, col;
 
@@ -373,7 +371,7 @@ void Draw_ConsoleBackground (int lines)
 
 	conback = Draw_CachePic ("gfx/conback.lmp");
 
-// hack the version number directly into the pic
+	// hack the version number directly into the pic
 	sprint (ver, "(9)quake %4.2f", (float)VERSION);
 	dest = conback->data + 320*186 + 320 - 11 - 8*strlen(ver);
 

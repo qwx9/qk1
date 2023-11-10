@@ -134,7 +134,7 @@ recdemo(void)
 		return;
 	}
 	cls.demorecording = 1;
-	cls.forcetrack = trk;	
+	cls.forcetrack = trk;
 }
 
 /* when a demo is playing back, all NET_SendMessages are skipped, and

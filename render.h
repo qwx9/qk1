@@ -25,10 +25,10 @@ typedef struct entity_s
 	entity_state_t			baseline;		// to fill in defaults in updates
 
 	double					msgtime;		// time of last update
-	vec3_t					msg_origins[2];	// last two updates (0 is newest)	
+	vec3_t					msg_origins[2];	// last two updates (0 is newest)
 	vec3_t					origin;
 	vec3_t					msg_angles[2];	// last two updates (0 is newest)
-	vec3_t					angles;	
+	vec3_t					angles;
 	struct model_s			*model;			// NULL = no model
 	struct efrag_s			*efrag;			// linked list of efrags
 	int						frame;
@@ -38,10 +38,10 @@ typedef struct entity_s
 	int						skinnum;		// for Alias models
 	int						visframe;		// last frame this entity was
 											//  found in an active leaf
-											
+
 	int						dlightframe;	// dynamic lighting
 	int						dlightbits;
-	
+
 // FIXME: could turn these into a union
 	int						trivial_accept;
 	struct mnode_s			*topnode;		// for bmodels, first world node
@@ -71,14 +71,14 @@ typedef struct
 										// right and bottom edges, for clamping
 	float		fvrectright;			// rightmost edge, for Alias clamping
 	float		fvrectbottom;			// bottommost edge, for Alias clamping
-	float		horizontalFieldOfView;	// at Z = 1.0, this many X is visible 
+	float		horizontalFieldOfView;	// at Z = 1.0, this many X is visible
 										// 2.0 = 90 degrees
 	float		xOrigin;			// should probably allways be 0.5
 	float		yOrigin;			// between be around 0.3 to 0.5
 
 	vec3_t		vieworg;
 	vec3_t		viewangles;
-	
+
 	float		fov_x, fov_y;
 
 	int			ambientlight;

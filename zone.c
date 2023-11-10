@@ -140,7 +140,7 @@ static void
 Cache_Flush(void)
 {
 	mem_t *s;
-		
+
 	while(cache_head != nil){
 		s = cache_head->next;
 		free(cache_head);
@@ -188,7 +188,7 @@ Cache_Alloc(mem_user_t *c, int size)
 	cache_head = cs;
 	c->data = cs+1;
 	cs->user = c;
-	
+
 	return c->data;
 }
 

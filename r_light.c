@@ -11,10 +11,9 @@ R_AnimateLight
 void R_AnimateLight (void)
 {
 	int			i,j,k;
-	
-//
-// light animations
-// 'm' is normal light, 'a' is no light, 'z' is double bright
+
+	// light animations
+	// 'm' is normal light, 'a' is no light, 'z' is double bright
 	i = (int)(cl.time*10);
 	for (j=0 ; j<Nlights ; j++)
 	{
@@ -27,7 +26,7 @@ void R_AnimateLight (void)
 		k = cl_lightstyle[j].map[k] - 'a';
 		k = k*22;
 		d_lightstylevalue[j] = k;
-	}	
+	}
 }
 
 
@@ -50,13 +49,13 @@ void R_MarkLights (dlight_t *light, int bit, mnode_t *node)
 	float		dist;
 	msurface_t	*surf;
 	unsigned	i;
-	
+
 	if (node->contents < 0)
 		return;
 
 	splitplane = node->plane;
 	dist = DotProduct (light->origin, splitplane->normal) - splitplane->dist;
-	
+
 	if (dist > light->radius)
 	{
 		R_MarkLights (light, bit, node->children[0]);
@@ -67,8 +66,8 @@ void R_MarkLights (dlight_t *light, int bit, mnode_t *node)
 		R_MarkLights (light, bit, node->children[1]);
 		return;
 	}
-		
-// mark the polygons
+
+	// mark the polygons
 	surf = cl.worldmodel->surfaces + node->firstsurface;
 	for (i=0 ; i<node->numsurfaces ; i++, surf++)
 	{
@@ -133,32 +132,32 @@ int RecursiveLightPoint (mnode_t *node, vec3_t start, vec3_t end)
 
 	if (node->contents < 0)
 		return -1;		// didn't hit anything
-	
-// calculate mid point
 
-// FIXME: optimize for axial
+	// calculate mid point
+
+	// FIXME: optimize for axial
 	plane = node->plane;
 	front = DotProduct (start, plane->normal) - plane->dist;
 	back = DotProduct (end, plane->normal) - plane->dist;
 	side = front < 0;
-	
+
 	if ( (back < 0) == side)
 		return RecursiveLightPoint (node->children[side], start, end);
-	
+
 	frac = front / (front-back);
 	mid[0] = start[0] + (end[0] - start[0])*frac;
 	mid[1] = start[1] + (end[1] - start[1])*frac;
 	mid[2] = start[2] + (end[2] - start[2])*frac;
-	
-// go down front side	
+
+	// go down front side
 	r = RecursiveLightPoint (node->children[side], start, mid);
 	if (r >= 0)
 		return r;		// hit something
-		
+
 	if ( (back < 0) == side )
 		return -1;		// didn't hit anuthing
-		
-// check for impact on this node
+
+	// check for impact on this node
 
 	surf = cl.worldmodel->surfaces + node->firstsurface;
 	for (i=0 ; i<node->numsurfaces ; i++, surf++)
@@ -167,17 +166,17 @@ int RecursiveLightPoint (mnode_t *node, vec3_t start, vec3_t end)
 			continue;	// no lightmaps
 
 		tex = surf->texinfo;
-		
+
 		s = DotProductDouble (mid, tex->vecs[0]) + tex->vecs[0][3];
 		t = DotProductDouble (mid, tex->vecs[1]) + tex->vecs[1][3];;
 
 		if (s < surf->texturemins[0] ||
 		t < surf->texturemins[1])
 			continue;
-		
+
 		ds = s - surf->texturemins[0];
 		dt = t - surf->texturemins[1];
-		
+
 		if ( ds > surf->extents[0] || dt > surf->extents[1] )
 			continue;
 
@@ -202,14 +201,14 @@ int RecursiveLightPoint (mnode_t *node, vec3_t start, vec3_t end)
 				lightmap += ((surf->extents[0]>>4)+1) *
 						((surf->extents[1]>>4)+1);
 			}
-			
+
 			r >>= 8;
 		}
-		
+
 		return r;
 	}
 
-// go down back side
+	// go down back side
 	return RecursiveLightPoint (node->children[!side], mid, end);
 }
 
@@ -217,16 +216,16 @@ int R_LightPoint (vec3_t p)
 {
 	vec3_t		end;
 	int			r;
-	
+
 	if (!cl.worldmodel->lightdata)
 		return 255;
-	
+
 	end[0] = p[0];
 	end[1] = p[1];
 	end[2] = p[2] - 2048;
-	
+
 	r = RecursiveLightPoint (cl.worldmodel->nodes, p, end);
-	
+
 	if (r == -1)
 		r = 0;
 

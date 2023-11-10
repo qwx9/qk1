@@ -243,7 +243,7 @@ qsocket_t *NET_Connect (char *host)
 		if (ret)
 			return ret;
 	}
-	
+
 	return nil;
 }
 
@@ -362,7 +362,7 @@ returns -1 if the connection died
 int NET_SendMessage (qsocket_t *sock, sizebuf_t *data)
 {
 	int		r;
-	
+
 	if (!sock)
 		return -1;
 
@@ -384,7 +384,7 @@ int NET_SendMessage (qsocket_t *sock, sizebuf_t *data)
 int NET_SendUnreliableMessage (qsocket_t *sock, sizebuf_t *data)
 {
 	int		r;
-	
+
 	if (!sock)
 		return -1;
 
@@ -398,7 +398,7 @@ int NET_SendUnreliableMessage (qsocket_t *sock, sizebuf_t *data)
 	r = sfunc.SendUnreliableMessage(sock, data);
 	if (r == 1 && sock->driver)
 		unreliableMessagesSent++;
-	
+
 	return r;
 }
 
@@ -414,7 +414,7 @@ message to be transmitted.
 qboolean NET_CanSendMessage (qsocket_t *sock)
 {
 	int		r;
-	
+
 	if (!sock)
 		return false;
 
@@ -562,9 +562,7 @@ void		NET_Shutdown (void)
 	for (sock = net_activeSockets; sock; sock = sock->next)
 		NET_Close(sock);
 
-//
-// shutdown the drivers
-//
+	// shutdown the drivers
 	for (net_driverlevel = 0; net_driverlevel < net_numdrivers; net_driverlevel++)
 	{
 		if (netdrv[net_driverlevel].initialized == true)

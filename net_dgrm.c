@@ -347,9 +347,7 @@ void Datagram_Shutdown (void)
 {
 	int i;
 
-//
-// shutdown the lan drivers
-//
+	// shutdown the lan drivers
 	for (i = 0; i < net_numlandrivers; i++)
 	{
 		if (landrv[i].initialized)
@@ -416,7 +414,7 @@ static qsocket_t *_Datagram_CheckNewConnections (void)
 		int			activeNumber;
 		int			clientNumber;
 		client_t	*client;
-		
+
 		playerNumber = MSG_ReadByte();
 		activeNumber = -1;
 		for (clientNumber = 0, client = svs.clients; clientNumber < svs.maxclients; clientNumber++, client++)
@@ -557,7 +555,7 @@ static qsocket_t *_Datagram_CheckNewConnections (void)
 	// allocate a network socket
 	newsock = 1;
 
-	// everything is allocated, just fill in the details	
+	// everything is allocated, just fill in the details
 	sock->socket = newsock;
 	sock->landriver = net_landriverlevel;
 	memcpy(&sock->addr, &clientaddr, sizeof clientaddr);

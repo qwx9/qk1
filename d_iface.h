@@ -19,10 +19,10 @@ typedef enum {
 // !!! if this is changed, it must be changed in d_ifacea.h too !!!
 typedef struct particle_s
 {
-// driver-usable fields
+	// driver-usable fields
 	vec3_t		org;
 	float		color;
-// drivers never touch the following fields
+	// drivers never touch the following fields
 	struct particle_s	*next;
 	vec3_t		vel;
 	float		ramp;
@@ -73,7 +73,7 @@ typedef struct {
 typedef struct
 {
 	int			nump;
-	emitpoint_t	*pverts;	// there's room for an extra element at [nump], 
+	emitpoint_t	*pverts;	// there's room for an extra element at [nump],
 							//  if the driver wants to duplicate element [0] at
 							//  element [nump] to avoid dealing with wrapping
 	mspriteframe_t	*pspriteframe;
@@ -95,7 +95,7 @@ extern qboolean	r_recursiveaffinetriangles;	// true if a driver wants to use
 											//  recursive triangular subdivison
 											//  and vertex drawing via
 											//  D_PolysetDrawFinalVerts() past
-											//  a certain distance (normally 
+											//  a certain distance (normally
 											//  only used by the software
 											//  driver)
 extern float	r_aliasuvscale;		// scale-up factor for screen u and v

@@ -59,7 +59,7 @@ flen(int fd)
 	vlong l;
 	Dir *d;
 
-	if((d = dirfstat(fd)) == nil)	/* file assumed extant and readable */ 
+	if((d = dirfstat(fd)) == nil)	/* file assumed extant and readable */
 		sysfatal("flen: %r");
 	l = d->length;
 	free(d);

@@ -425,7 +425,7 @@ void M_Load_Draw (void)
 	for (i=0 ; i< Nsav; i++)
 		M_Print (16, 32 + 8*i, savs[i]);
 
-// line cursor
+	// line cursor
 	M_DrawCharacter (8, 32 + load_cursor*8, 12+((int)(realtime*4)&1));
 }
 
@@ -441,7 +441,7 @@ void M_Save_Draw (void)
 	for (i=0 ; i<Nsav ; i++)
 		M_Print (16, 32 + 8*i, savs[i]);
 
-// line cursor
+	// line cursor
 	M_DrawCharacter (8, 32 + load_cursor*8, 12+((int)(realtime*4)&1));
 }
 
@@ -461,11 +461,11 @@ void M_Load_Key (int k)
 		m_state = m_none;
 		key_dest = key_game;
 
-	// Host_Loadgame_f can't bring up the loading plaque because too much
-	// stack space has been used, so do it now
+		// Host_Loadgame_f can't bring up the loading plaque because too much
+		// stack space has been used, so do it now
 		SCR_BeginLoadingPlaque ();
 
-	// issue the load command
+		// issue the load command
 		Cbuf_AddText (va ("load s%d\n", load_cursor) );
 		return;
 
@@ -1050,7 +1050,7 @@ void M_Options_Draw (void)
 	M_Print (16, 120, "            Lookstrafe");
 	M_DrawCheckbox (220, 120, lookstrafe.value);
 
-// cursor
+	// cursor
 	M_DrawCharacter (200, 32 + options_cursor*8, 12+((int)(realtime*4)&1));
 }
 
@@ -1119,24 +1119,24 @@ void M_Options_Key (int k)
 
 char *bindnames[][2] =
 {
-{"+attack", 		"attack"},
-{"impulse 10", 		"change weapon"},
-{"+jump", 			"jump / swim up"},
-{"+forward", 		"walk forward"},
-{"+back", 			"backpedal"},
-{"+left", 			"turn left"},
-{"+right", 			"turn right"},
-{"+speed", 			"run"},
-{"+moveleft", 		"step left"},
-{"+moveright", 		"step right"},
-{"+strafe", 		"sidestep"},
-{"+lookup", 		"look up"},
-{"+lookdown", 		"look down"},
-{"centerview", 		"center view"},
-{"+mlook", 			"mouse look"},
-{"+klook", 			"keyboard look"},
-{"+moveup",			"swim up"},
-{"+movedown",		"swim down"}
+	{"+attack", 		"attack"},
+	{"impulse 10", 		"change weapon"},
+	{"+jump", 			"jump / swim up"},
+	{"+forward", 		"walk forward"},
+	{"+back", 			"backpedal"},
+	{"+left", 			"turn left"},
+	{"+right", 			"turn right"},
+	{"+speed", 			"run"},
+	{"+moveleft", 		"step left"},
+	{"+moveright", 		"step right"},
+	{"+strafe", 		"sidestep"},
+	{"+lookup", 		"look up"},
+	{"+lookdown", 		"look down"},
+	{"centerview", 		"center view"},
+	{"+mlook", 			"mouse look"},
+	{"+klook", 			"keyboard look"},
+	{"+moveup",			"swim up"},
+	{"+movedown",		"swim down"}
 };
 
 int		keys_cursor;
@@ -1211,7 +1211,7 @@ void M_Keys_Draw (void)
 	else
 		M_Print (18, 32, "Enter to change, backspace to clear");
 
-// search for known bindings
+	// search for known bindings
 	for (i=0 ; i<nelem(bindnames) ; i++)
 	{
 		y = 48 + 8*i;
@@ -1355,14 +1355,14 @@ int		msgNumber;
 int		m_quit_prevstate;
 qboolean	wasInMenus;
 
-char *quitMessage [] = 
+char *quitMessage [] =
 {
 /* .........1.........2.... */
   "  Are you gonna quit    ",
   "  this game just like   ",
   "   everything else?     ",
   "                        ",
- 
+
   " Milord, methinks that  ",
   "   thou art a lowly     ",
   " quitter. Is this true? ",
@@ -1377,22 +1377,22 @@ char *quitMessage [] =
   "   for trying to quit!  ",
   "     Press Y to get     ",
   "      smacked out.      ",
- 
+
   " Press Y to quit like a ",
   "   big loser in life.   ",
   "  Press N to stay proud ",
   "    and successful!     ",
- 
+
   "   If you press Y to    ",
   "  quit, I will summon   ",
   "  Satan all over your   ",
   "      hard drive!       ",
- 
+
   "  Um, Asmodeus dislikes ",
   " his children trying to ",
   " quit. Press Y to return",
   "   to your Tinkertoys.  ",
- 
+
   "  If you quit now, I'll ",
   "  throw a blanket-party ",
   "   for you next time!   ",
@@ -1687,31 +1687,31 @@ level_t		levels[] =
 };
 
 //MED 01/06/97 added hipnotic levels
-level_t     hipnoticlevels[] =
+level_t hipnoticlevels[] =
 {
-   {"start", "Command HQ"},  // 0
+	{"start", "Command HQ"},  // 0
 
-   {"hip1m1", "The Pumping Station"},          // 1
-   {"hip1m2", "Storage Facility"},
-   {"hip1m3", "The Lost Mine"},
-   {"hip1m4", "Research Facility"},
-   {"hip1m5", "Military Complex"},
+	{"hip1m1", "The Pumping Station"},			 // 1
+	{"hip1m2", "Storage Facility"},
+	{"hip1m3", "The Lost Mine"},
+	{"hip1m4", "Research Facility"},
+	{"hip1m5", "Military Complex"},
 
-   {"hip2m1", "Ancient Realms"},          // 6
-   {"hip2m2", "The Black Cathedral"},
-   {"hip2m3", "The Catacombs"},
-   {"hip2m4", "The Crypt"},
-   {"hip2m5", "Mortum's Keep"},
-   {"hip2m6", "The Gremlin's Domain"},
+	{"hip2m1", "Ancient Realms"},			 // 6
+	{"hip2m2", "The Black Cathedral"},
+	{"hip2m3", "The Catacombs"},
+	{"hip2m4", "The Crypt"},
+	{"hip2m5", "Mortum's Keep"},
+	{"hip2m6", "The Gremlin's Domain"},
 
-   {"hip3m1", "Tur Torment"},       // 12
-   {"hip3m2", "Pandemonium"},
-   {"hip3m3", "Limbo"},
-   {"hip3m4", "The Gauntlet"},
+	{"hip3m1", "Tur Torment"},		 // 12
+	{"hip3m2", "Pandemonium"},
+	{"hip3m3", "Limbo"},
+	{"hip3m4", "The Gauntlet"},
 
-   {"hipend", "Armagon's Lair"},       // 16
+	{"hipend", "Armagon's Lair"},		 // 16
 
-   {"hipdm1", "The Edge of Oblivion"}           // 17
+	{"hipdm1", "The Edge of Oblivion"}			  // 17
 };
 
 //PGM 01/07/97 added rogue levels
@@ -1758,12 +1758,12 @@ episode_t	episodes[] =
 //MED 01/06/97  added hipnotic episodes
 episode_t   hipnoticepisodes[] =
 {
-   {"Scourge of Armagon", 0, 1},
-   {"Fortress of the Dead", 1, 5},
-   {"Dominion of Darkness", 6, 6},
-   {"The Rift", 12, 4},
-   {"Final Level", 16, 1},
-   {"Deathmatch Arena", 17, 1}
+	{"Scourge of Armagon", 0, 1},
+	{"Fortress of the Dead", 1, 5},
+	{"Dominion of Darkness", 6, 6},
+	{"The Rift", 12, 4},
+	{"Final Level", 16, 1},
+	{"Deathmatch Arena", 17, 1}
 };
 
 //PGM 01/07/97 added rogue episodes
@@ -1872,35 +1872,35 @@ void M_GameOptions_Draw (void)
 		M_Print (160, 96, va("%d minutes", (int)timelimit.value));
 
 	M_Print (0, 112, "         Episode");
-   //MED 01/06/97 added hipnotic episodes
-   if (hipnotic)
-      M_Print (160, 112, hipnoticepisodes[startepisode].description);
-   //PGM 01/07/97 added rogue episodes
-   else if (rogue)
-      M_Print (160, 112, rogueepisodes[startepisode].description);
-   else
-      M_Print (160, 112, episodes[startepisode].description);
+	//MED 01/06/97 added hipnotic episodes
+	if (hipnotic)
+		M_Print (160, 112, hipnoticepisodes[startepisode].description);
+	//PGM 01/07/97 added rogue episodes
+	else if (rogue)
+		M_Print (160, 112, rogueepisodes[startepisode].description);
+	else
+		M_Print (160, 112, episodes[startepisode].description);
 
 	M_Print (0, 120, "           Level");
-   //MED 01/06/97 added hipnotic episodes
-   if (hipnotic)
-   {
-      M_Print (160, 120, hipnoticlevels[hipnoticepisodes[startepisode].firstLevel + startlevel].description);
-      M_Print (160, 128, hipnoticlevels[hipnoticepisodes[startepisode].firstLevel + startlevel].name);
-   }
-   //PGM 01/07/97 added rogue episodes
-   else if (rogue)
-   {
-      M_Print (160, 120, roguelevels[rogueepisodes[startepisode].firstLevel + startlevel].description);
-      M_Print (160, 128, roguelevels[rogueepisodes[startepisode].firstLevel + startlevel].name);
-   }
-   else
-   {
-      M_Print (160, 120, levels[episodes[startepisode].firstLevel + startlevel].description);
-      M_Print (160, 128, levels[episodes[startepisode].firstLevel + startlevel].name);
-   }
+	//MED 01/06/97 added hipnotic episodes
+	if (hipnotic)
+	{
+		M_Print (160, 120, hipnoticlevels[hipnoticepisodes[startepisode].firstLevel + startlevel].description);
+		M_Print (160, 128, hipnoticlevels[hipnoticepisodes[startepisode].firstLevel + startlevel].name);
+	}
+	//PGM 01/07/97 added rogue episodes
+	else if (rogue)
+	{
+		M_Print (160, 120, roguelevels[rogueepisodes[startepisode].firstLevel + startlevel].description);
+		M_Print (160, 128, roguelevels[rogueepisodes[startepisode].firstLevel + startlevel].name);
+	}
+	else
+	{
+		M_Print (160, 120, levels[episodes[startepisode].firstLevel + startlevel].description);
+		M_Print (160, 128, levels[episodes[startepisode].firstLevel + startlevel].name);
+	}
 
-// line cursor
+	// line cursor
 	M_DrawCharacter (144, gameoptions_cursor_table[gameoptions_cursor], 12+((int)(realtime*4)&1));
 
 	if (m_serverInfoMessage)
@@ -1984,11 +1984,11 @@ void M_NetStart_Change (int dir)
 
 	case 7:
 		startepisode += dir;
-	//MED 01/06/97 added hipnotic count
+		//MED 01/06/97 added hipnotic count
 		if (hipnotic)
 			count = 6;
-	//PGM 01/07/97 added rogue count
-	//PGM 03/02/97 added 1 for dmatch episode
+		//PGM 01/07/97 added rogue count
+		//PGM 03/02/97 added 1 for dmatch episode
 		else if (rogue)
 			count = 4;
 		else if (registered.value)
@@ -2007,10 +2007,10 @@ void M_NetStart_Change (int dir)
 
 	case 8:
 		startlevel += dir;
-    //MED 01/06/97 added hipnotic episodes
+		//MED 01/06/97 added hipnotic episodes
 		if (hipnotic)
 			count = hipnoticepisodes[startepisode].levels;
-	//PGM 01/06/97 added hipnotic episodes
+		//PGM 01/06/97 added hipnotic episodes
 		else if (rogue)
 			count = rogueepisodes[startepisode].levels;
 		else

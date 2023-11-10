@@ -20,10 +20,10 @@ typedef struct
 	qboolean	loadgame;			// handle connections specially
 
 	double		time;
-	
+
 	int			lastcheck;			// used by PF_checkclient
 	double		lastchecktime;
-	
+
 	char		name[64];			// map name
 	char		modelname[64];		// maps/<name>.bsp, for model_precache[0]
 	struct model_s 	*worldmodel;
@@ -72,14 +72,14 @@ typedef struct client_s
 	edict_t			*edict;				// EDICT_NUM(clientnum+1)
 	char			name[32];			// for printing to other people
 	int				colors;
-		
+
 	float			ping_times[NUM_PING_TIMES];
 	int				num_pings;			// ping_times[num_pings%NUM_PING_TIMES]
 
 // spawn parms are carried from level to level
 	float			spawn_parms[Nparms];
 
-// client known data for deltas	
+// client known data for deltas
 	int				old_frags;
 } client_t;
 

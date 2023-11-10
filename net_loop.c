@@ -25,7 +25,7 @@ qsocket_t *Loop_Connect (char *host)
 {
 	if(strcmp(host, "local") != 0)
 		return nil;
-	
+
 	localconnectpending = true;
 
 	if (!loop_client)
@@ -59,7 +59,7 @@ qsocket_t *Loop_Connect (char *host)
 	loop_client->driverdata = (void *)loop_server;
 	loop_server->driverdata = (void *)loop_client;
 
-	return loop_client;	
+	return loop_client;
 }
 
 

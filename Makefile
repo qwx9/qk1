@@ -4,8 +4,10 @@ PREFIX?=/usr/local
 BIN=${DESTDIR}${PREFIX}/bin
 SDL2_CFLAGS=$$(pkg-config --cflags sdl2)
 SDL2_LDFLAGS=$$(pkg-config --libs sdl2)
-CFLAGS?=-O2 -g -Wall -Wextra -Wno-unknown-pragmas -Wno-missing-field-initializers -Wno-implicit-fallthrough
-CFLAGS+=-fms-extensions -I3rd/parg -Iunix -I. ${SDL2_CFLAGS}
+CFLAGS?=-O2 -g
+CFLAGS+=-Wall -Wextra -Wno-unknown-pragmas -Wno-missing-field-initializers -Wno-implicit-fallthrough
+CFLAGS+=-ffast-math -fms-extensions
+CFLAGS+=-I3rd/parg -Iunix -I. ${SDL2_CFLAGS}
 LDFLAGS?=
 LDFLAGS+=-lm ${SDL2_LDFLAGS}
 

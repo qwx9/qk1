@@ -915,7 +915,7 @@ chkreg(void)
 static short
 ShortSwap(short l)
 {
-	byte    b1,b2;
+	byte	b1,b2;
 
 	b1 = l&255;
 	b2 = (l>>8)&255;
@@ -929,7 +929,7 @@ ShortNoSwap(short l)
 static int
 LongSwap(int l)
 {
-	byte    b1,b2,b3,b4;
+	byte	b1,b2,b3,b4;
 
 	b1 = l&255;
 	b2 = (l>>8)&255;
@@ -947,7 +947,7 @@ FloatSwap(float f)
 {
 	union{
 		float   f;
-		byte    b[4];
+		byte	b[4];
 	} dat1, dat2;
 
 	dat1.f = f;

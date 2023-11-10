@@ -23,7 +23,7 @@ void Chase_Init (void)
 void Chase_Reset (void)
 {
 	// for respawning and teleporting
-//	start position 12 units behind head
+	//	start position 12 units behind head
 }
 
 void TraceLine (vec3_t start, vec3_t end, vec3_t impact)
@@ -49,7 +49,7 @@ void Chase_Update (void)
 
 	// calc exact destination
 	for (i=0 ; i<3 ; i++)
-		chase_dest[i] = r_refdef.vieworg[i] 
+		chase_dest[i] = r_refdef.vieworg[i]
 		- forward[i]*chase_back.value
 		- right[i]*chase_right.value;
 	chase_dest[2] = r_refdef.vieworg[2] + chase_up.value;

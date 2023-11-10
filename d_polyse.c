@@ -2,7 +2,7 @@
 
 // TODO: put in span spilling to shrink list size
 // !!! if this is changed, it must be changed in d_polysa.s too !!!
-#define DPS_MAXSPANS			MAXHEIGHT+1	
+#define DPS_MAXSPANS			MAXHEIGHT+1
 									// 1 extra for spanpackage that marks end
 
 // !!! if this is changed, it must be changed in asm_draw.h too !!!
@@ -124,8 +124,8 @@ void D_PolysetDrawFinalVerts (finalvert_t *fv, int numverts, byte alpha)
 
 	for (i=0 ; i<numverts ; i++, fv++)
 	{
-	// valid triangle coordinates for filling can include the bottom and
-	// right clip edges, due to the fill rule; these shouldn't be drawn
+		// valid triangle coordinates for filling can include the bottom and
+		// right clip edges, due to the fill rule; these shouldn't be drawn
 		if ((fv->v[0] < r_refdef.vrectright) &&
 			(fv->v[1] < r_refdef.vrectbottom))
 		{
@@ -174,7 +174,7 @@ void D_DrawSubdiv (void)
 
 		if (((index0->v[1]-index1->v[1]) *
 			 (index0->v[0]-index2->v[0]) -
-			 (index0->v[0]-index1->v[0]) * 
+			 (index0->v[0]-index1->v[0]) *
 			 (index0->v[1]-index2->v[1])) >= 0)
 		{
 			continue;
@@ -330,14 +330,14 @@ split2:
 	lp3 = temp;
 
 split:
-// split this edge
+	// split this edge
 	new[0] = (lp1[0] + lp2[0]) >> 1;
 	new[1] = (lp1[1] + lp2[1]) >> 1;
 	new[2] = (lp1[2] + lp2[2]) >> 1;
 	new[3] = (lp1[3] + lp2[3]) >> 1;
 	new[5] = (lp1[5] + lp2[5]) >> 1;
 
-// draw the point if splitting a leading edge
+	// draw the point if splitting a leading edge
 	if (lp2[1] > lp1[1])
 		goto nodraw;
 	if ((lp2[1] == lp1[1]) && (lp2[0] < lp1[0]))
@@ -360,7 +360,7 @@ split:
 	}
 
 nodraw:
-// recursively continue
+	// recursively continue
 	D_PolysetRecursiveTriangle (lp3, lp1, new, alpha);
 	D_PolysetRecursiveTriangle (lp3, new, lp2, alpha);
 }
@@ -375,7 +375,7 @@ void D_PolysetUpdateTables (void)
 {
 	int		i;
 	byte	*s;
-	
+
 	if (r_affinetridesc.skinwidth != skinwidth ||
 		r_affinetridesc.pskin != skinstart)
 	{
@@ -405,7 +405,7 @@ void D_PolysetScanLeftEdge (int height)
 		d_pedgespanpackage->sfrac = d_sfrac;
 		d_pedgespanpackage->tfrac = d_tfrac;
 
-	// FIXME: need to clamp l, s, t, at both ends?
+		// FIXME: need to clamp l, s, t, at both ends?
 		d_pedgespanpackage->light = d_light;
 		d_pedgespanpackage->zi = d_zi;
 
@@ -466,7 +466,7 @@ void D_PolysetSetUpForLineScan(fixed8_t startvertu, fixed8_t startvertv,
 	int			tm, tn;
 	adivtab_t	*ptemp;
 
-// TODO: implement x86 version
+	// TODO: implement x86 version
 
 	errorterm = -1;
 
@@ -512,9 +512,9 @@ void D_PolysetCalcGradients (int skinwidth)
 
 	ystepdenominv = -xstepdenominv;
 
-// ceil () for light so positive steps are exaggerated, negative steps
-// diminished,  pushing us away from underflow toward overflow. Underflow is
-// very visible, overflow is very unlikely, because of ambient lighting
+	// ceil () for light so positive steps are exaggerated, negative steps
+	// diminished,  pushing us away from underflow toward overflow. Underflow is
+	// very visible, overflow is very unlikely, because of ambient lighting
 	t0 = r_p0[4] - r_p2[4];
 	t1 = r_p1[4] - r_p2[4];
 	r_lstepx = (int)
@@ -599,7 +599,7 @@ void D_PolysetDrawSpans8 (spanpackage_t *pspanpackage, byte alpha)
 						);
 					}else{
 						*lpdest = ((byte *)acolormap)[*lptex + (llight & 0xFF00)];
-	// gel mapping					*lpdest = gelmap[*lpdest];
+						// gel mapping	*lpdest = gelmap[*lpdest];
 						*lpz = lzi >> 16;
 					}
 				}
@@ -634,7 +634,7 @@ void D_PolysetFillSpans8 (spanpackage_t *pspanpackage)
 {
 	int				color;
 
-// FIXME: do z buffering
+	// FIXME: do z buffering
 
 	color = d_aflatcolor++;
 
@@ -682,19 +682,12 @@ void D_RasterizeAliasPolySmooth (void)
 	initialleftheight = pleftbottom[1] - plefttop[1];
 	initialrightheight = prightbottom[1] - prighttop[1];
 
-//
-// set the s, t, and light gradients, which are consistent across the triangle
-// because being a triangle, things are affine
-//
+	// set the s, t, and light gradients, which are consistent across the triangle
+	// because being a triangle, things are affine
 	D_PolysetCalcGradients (r_affinetridesc.skinwidth);
 
-//
-// rasterize the polygon
-//
-
-//
-// scan out the top (and possibly only) part of the left edge
-//
+	// rasterize the polygon
+	// scan out the top (and possibly only) part of the left edge
 	d_pedgespanpackage = a_spans;
 
 	ystart = plefttop[1];
@@ -721,7 +714,7 @@ void D_RasterizeAliasPolySmooth (void)
 		d_pedgespanpackage->sfrac = d_sfrac;
 		d_pedgespanpackage->tfrac = d_tfrac;
 
-	// FIXME: need to clamp l, s, t, at both ends?
+		// FIXME: need to clamp l, s, t, at both ends?
 		d_pedgespanpackage->light = d_light;
 		d_pedgespanpackage->zi = d_zi;
 
@@ -737,11 +730,11 @@ void D_RasterizeAliasPolySmooth (void)
 		d_pdestbasestep = screenwidth + ubasestep;
 		d_pdestextrastep = d_pdestbasestep + 1;
 
-	// TODO: can reuse partial expressions here
+		// TODO: can reuse partial expressions here
 
-	// for negative steps in x along left edge, bias toward overflow rather than
-	// underflow (sort of turning the floor () we did in the gradient calcs into
-	// ceil (), but plus a little bit)
+		// for negative steps in x along left edge, bias toward overflow rather than
+		// underflow (sort of turning the floor () we did in the gradient calcs into
+		// ceil (), but plus a little bit)
 		if (ubasestep < 0)
 			working_lstepx = r_lstepx - 1;
 		else
@@ -767,9 +760,7 @@ void D_RasterizeAliasPolySmooth (void)
 		D_PolysetScanLeftEdge (initialleftheight);
 	}
 
-//
-// scan out the bottom part of the left edge, if it exists
-//
+	// scan out the bottom part of the left edge, if it exists
 	if (pedgetable->numleftedges == 2)
 	{
 		int		height;
@@ -779,7 +770,7 @@ void D_RasterizeAliasPolySmooth (void)
 
 		height = pleftbottom[1] - plefttop[1];
 
-// TODO: make this a function; modularize this function in general
+		// TODO: make this a function; modularize this function in general
 
 		ystart = plefttop[1];
 		d_aspancount = plefttop[0] - prighttop[0];
@@ -803,7 +794,7 @@ void D_RasterizeAliasPolySmooth (void)
 			d_pedgespanpackage->sfrac = d_sfrac;
 			d_pedgespanpackage->tfrac = d_tfrac;
 
-		// FIXME: need to clamp l, s, t, at both ends?
+			// FIXME: need to clamp l, s, t, at both ends?
 			d_pedgespanpackage->light = d_light;
 			d_pedgespanpackage->zi = d_zi;
 		}
@@ -843,8 +834,8 @@ void D_RasterizeAliasPolySmooth (void)
 		}
 	}
 
-// scan out the top (and possibly only) part of the right edge, updating the
-// count field
+	// scan out the top (and possibly only) part of the right edge, updating the
+	// count field
 	d_pedgespanpackage = a_spans;
 
 	D_PolysetSetUpForLineScan(prighttop[0], prighttop[1],
@@ -855,7 +846,7 @@ void D_RasterizeAliasPolySmooth (void)
 	a_spans[initialrightheight].count = Q_MININT; // mark end of the spanpackages
 	D_PolysetDrawSpans8 (a_spans, currententity->alpha);
 
-// scan out the bottom part of the right edge, if it exists
+	// scan out the bottom part of the right edge, if it exists
 	if (pedgetable->numrightedges == 2)
 	{
 		int				height;
@@ -894,10 +885,8 @@ void D_PolysetSetEdgeTable (void)
 	edgetableindex = 0;	// assume the vertices are already in
 						//  top to bottom order
 
-//
-// determine which edges are right & left, and the order in which
-// to rasterize them
-//
+	// determine which edges are right & left, and the order in which
+	// to rasterize them
 	if (r_p0[1] >= r_p1[1])
 	{
 		if (r_p0[1] == r_p1[1])

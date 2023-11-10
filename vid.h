@@ -19,7 +19,7 @@ typedef struct
 	unsigned short	*colormap16;	// 256 * VID_GRADES size
 	int				fullbright;		// index of first fullbright color
 	unsigned		rowbytes;	// may be > width if displayed in a window
-	int				width;		
+	int				width;
 	int				height;
 	float			aspect;		// width / height -- < 0 is taller than wide
 	int				numpages;

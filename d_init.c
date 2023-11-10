@@ -75,9 +75,7 @@ D_UpdateRects
 */
 void D_UpdateRects (vrect_t *prect)
 {
-
-// the software driver draws these directly to the vid buffer
-
+	// the software driver draws these directly to the vid buffer
 	USED(prect);
 }
 

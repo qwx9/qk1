@@ -88,11 +88,11 @@ void Host_Error (char *fmt, ...)
 	va_list arg;
 	char s[1024];
 	static qboolean inerror = false;
-	
+
 	if(inerror)
 		fatal("Host_Error: recursively entered");
 	inerror = true;
-	
+
 	SCR_EndLoadingPlaque();	// reenable screen updates
 
 	va_start(arg, fmt);
@@ -100,7 +100,7 @@ void Host_Error (char *fmt, ...)
 	va_end(arg);
 
 	Con_Printf("Host_Error: %s\n", s);
-	
+
 	if(sv.active)
 		Host_ShutdownServer(false);
 	if(cls.state == ca_dedicated)
@@ -151,7 +151,7 @@ Host_InitLocal
 void Host_InitLocal (void)
 {
 	Host_InitCommands ();
-	
+
 	Cvar_RegisterVariable (&host_framerate);
 	Cvar_RegisterVariable (&host_speeds);
 
@@ -172,7 +172,7 @@ void Host_InitLocal (void)
 	Cvar_RegisterVariable (&temp1);
 
 	Host_FindMaxClients ();
-	
+
 	host_time = 1.0;		// so a think at time 0 won't get called
 }
 
@@ -180,7 +180,7 @@ void Host_InitLocal (void)
 =================
 SV_ClientPrintf
 
-Sends text across to be displayed 
+Sends text across to be displayed
 FIXME: make this just a stuffed echo?
 =================
 */
@@ -209,7 +209,7 @@ void SV_BroadcastPrintf (char *fmt, ...)
 	va_list arg;
 	char s[1024];
 	int i;
-	
+
 	va_start(arg, fmt);
 	vsnprint(s, sizeof s, fmt, arg);
 	va_end(arg);
@@ -263,11 +263,11 @@ void SV_DropClient (qboolean crash)
 			MSG_WriteByte (&host_client->message, svc_disconnect);
 			NET_SendMessage (host_client->netconnection, &host_client->message);
 		}
-	
+
 		if (host_client->edict && host_client->spawned)
 		{
-		// call the prog function for removing a client
-		// this will set the body to a dead frame, among other things
+			// call the prog function for removing a client
+			// this will set the body to a dead frame, among other things
 			saveSelf = pr_global_struct->self;
 			pr_global_struct->self = EDICT_TO_PROG(host_client->edict);
 			PR_ExecuteProgram (pr_global_struct->ClientDisconnect);
@@ -277,17 +277,17 @@ void SV_DropClient (qboolean crash)
 		Con_DPrintf("client %s removed\n", host_client->name);
 	}
 
-// break the net connection
+	// break the net connection
 	NET_Close (host_client->netconnection);
 	host_client->netconnection = nil;
 
-// free the client (the body stays around)
+	// free the client (the body stays around)
 	host_client->active = false;
 	host_client->name[0] = 0;
 	host_client->old_frags = Q_MININT;
 	net_activeconnections--;
 
-// send notification to all clients
+	// send notification to all clients
 	for (i=0, client = svs.clients ; i<svs.maxclients ; i++, client++)
 	{
 		if (!client->active)
@@ -324,11 +324,11 @@ void Host_ShutdownServer(qboolean crash)
 	UDP_Listen(0);
 	sv.active = false;
 
-// stop all client sounds immediately
+	// stop all client sounds immediately
 	if (cls.state == ca_connected)
 		CL_Disconnect ();
 
-// flush any pending messages - like the score!!!
+	// flush any pending messages - like the score!!!
 	start = dtime();
 	do
 	{
@@ -354,7 +354,7 @@ void Host_ShutdownServer(qboolean crash)
 	}
 	while (count);
 
-// make sure all the clients know we're disconnecting
+	// make sure all the clients know we're disconnecting
 	buf.data = (uchar *)message;
 	buf.maxsize = 4;
 	buf.cursize = 0;
@@ -367,9 +367,7 @@ void Host_ShutdownServer(qboolean crash)
 		if (host_client->active)
 			SV_DropClient(crash);
 
-//
-// clear structures
-//
+	// clear structures
 	memset(&sv, 0, sizeof sv);
 	memset(svs.clients, 0, svs.maxclientslimit * sizeof *svs.clients);
 }
@@ -404,24 +402,24 @@ Host_ServerFrame
 */
 void Host_ServerFrame (void)
 {
-// run the world state	
+	// run the world state
 	pr_global_struct->frametime = host_frametime;
 
-// set the time and clear the general datagram
+	// set the time and clear the general datagram
 	SV_ClearDatagram ();
-	
-// check for new clients
+
+	// check for new clients
 	SV_CheckForNewClients ();
 
-// read client messages
+	// read client messages
 	SV_RunClients ();
-	
-// move things around and think
-// always pause in single player if in console or menus
+
+	// move things around and think
+	// always pause in single player if in console or menus
 	if (!sv.paused && (svs.maxclients > 1 || key_dest == key_game) )
 		SV_Physics ();
 
-// send all messages to the clients
+	// send all messages to the clients
 	SV_SendClientMessages ();
 }
 
@@ -450,66 +448,66 @@ void _Host_Frame (float time)
 	if (setjmp (host_abortserver) )
 		return;			// something bad happened, or the server disconnected
 
-// keep the random time dependent
+	// keep the random time dependent
 	rand ();
 
 	if(boundfps(time) < 0)
 		return;
-		
-// get new key events
+
+	// get new key events
 	Sys_SendKeyEvents ();
 
-// allow mice or other external controllers to add commands
+	// allow mice or other external controllers to add commands
 	IN_Commands ();
 
-// process console commands
+	// process console commands
 	Cbuf_Execute ();
 
-// if running the server locally, make intentions now
+	// if running the server locally, make intentions now
 	if (sv.active)
 		CL_SendCmd ();
-	
-//-------------------
-//
-// server operations
-//
-//-------------------
 
-// check for commands typed to the host
+	//-------------------
+	//
+	// server operations
+	//
+	//-------------------
+
+	// check for commands typed to the host
 	conscmd();
-	
+
 	if (sv.active)
 		Host_ServerFrame ();
 
-//-------------------
-//
-// client operations
-//
-//-------------------
+	//-------------------
+	//
+	// client operations
+	//
+	//-------------------
 
-// if running the server remotely, send intentions now after
-// the incoming messages have been read
+	// if running the server remotely, send intentions now after
+	// the incoming messages have been read
 	if (!sv.active)
 		CL_SendCmd ();
 
 	host_time += host_frametime;
 
-// fetch results from server
+	// fetch results from server
 	if (cls.state == ca_connected)
 	{
 		CL_ReadFromServer ();
 	}
 
-// update video
+	// update video
 	if (host_speeds.value)
 		time1 = dtime ();
-		
+
 	SCR_UpdateScreen ();
 
 	if (host_speeds.value)
 		time2 = dtime ();
-		
-// update audio
+
+	// update audio
 	if (cls.signon == SIGNONS)
 	{
 		stepsnd (r_origin, vpn, vright, vup);
@@ -517,7 +515,7 @@ void _Host_Frame (float time)
 	}
 	else
 		stepsnd (vec3_origin, vec3_origin, vec3_origin, vec3_origin);
-	
+
 	stepcd();
 
 	if (host_speeds.value)
@@ -529,7 +527,7 @@ void _Host_Frame (float time)
 		Con_Printf ("%3d tot %3d server %3d gfx %3d snd\n",
 					pass1+pass2+pass3, pass1, pass2, pass3);
 	}
-	
+
 	host_framecount++;
 }
 
@@ -545,14 +543,14 @@ void Host_Frame (float time)
 		_Host_Frame (time);
 		return;
 	}
-	
+
 	time1 = dtime ();
 	_Host_Frame (time);
-	time2 = dtime ();	
-	
+	time2 = dtime ();
+
 	timetotal += time2 - time1;
 	timecount++;
-	
+
 	if (timecount < 1000)
 		return;
 
@@ -580,21 +578,21 @@ void Host_Init (int argc, char **argv, char **paths)
 
 	Memory_Init();
 	Cbuf_Init ();
-	Cmd_Init ();	
+	Cmd_Init ();
 	V_Init ();
 	Chase_Init ();
 	initfs(paths);
 	Host_InitLocal ();
 	W_LoadWadFile ("gfx.wad");
 	Key_Init ();
-	Con_Init ();	
-	M_Init ();	
+	Con_Init ();
+	M_Init ();
 	PR_Init ();
 	Mod_Init ();
 	NET_Init ();
 	SV_Init ();
 	R_InitTextures ();		// needed even for dedicated servers
- 
+
 	if (cls.state != ca_dedicated)
 	{
 		host_basepal = loadhunklmp("gfx/palette.lmp", nil);
@@ -634,7 +632,7 @@ void Host_Init (int argc, char **argv, char **paths)
 			Cbuf_AddText(argv[i++]);
 		}
 		Cbuf_AddText("\n");
-	}	
+	}
 }
 
 
@@ -649,7 +647,7 @@ to run quit through here before the final handoff to the sys code.
 void Host_Shutdown(void)
 {
 	static qboolean isdown = false;
-	
+
 	if (isdown)
 	{
 		Con_DPrintf("Host_Shutdown: recursive shutdown\n");
@@ -657,10 +655,10 @@ void Host_Shutdown(void)
 	}
 	isdown = true;
 
-// keep Con_Printf from trying to update the screen
+	// keep Con_Printf from trying to update the screen
 	scr_disabled_for_loading = true;
 
-	dumpcfg(); 
+	dumpcfg();
 
 	NET_Shutdown ();
 	shutcd();

@@ -70,13 +70,13 @@ void R_RotateBmodel (void)
 {
 	float	angle, s, c, temp1[3][3], temp2[3][3], temp3[3][3];
 
-// TODO: should use a look-up table
-// TODO: should really be stored with the entity instead of being reconstructed
-// TODO: could cache lazily, stored in the entity
-// TODO: share work with R_SetUpAliasTransform
+	// TODO: should use a look-up table
+	// TODO: should really be stored with the entity instead of being reconstructed
+	// TODO: could cache lazily, stored in the entity
+	// TODO: share work with R_SetUpAliasTransform
 
-// yaw
-	angle = currententity->angles[YAW];		
+	// yaw
+	angle = currententity->angles[YAW];
 	angle = angle * M_PI*2 / 360;
 	s = sin(angle);
 	c = cos(angle);
@@ -92,8 +92,8 @@ void R_RotateBmodel (void)
 	temp1[2][2] = 1;
 
 
-// pitch
-	angle = currententity->angles[PITCH];		
+	// pitch
+	angle = currententity->angles[PITCH];
 	angle = angle * M_PI*2 / 360;
 	s = sin(angle);
 	c = cos(angle);
@@ -110,8 +110,8 @@ void R_RotateBmodel (void)
 
 	R_ConcatRotations (temp2, temp1, temp3);
 
-// roll
-	angle = currententity->angles[ROLL];		
+	// roll
+	angle = currententity->angles[ROLL];
 	angle = angle * M_PI*2 / 360;
 	s = sin(angle);
 	c = cos(angle);
@@ -128,9 +128,7 @@ void R_RotateBmodel (void)
 
 	R_ConcatRotations (temp1, temp3, entity_rotation);
 
-//
-// rotate modelorg and the transformation matrix
-//
+	// rotate modelorg and the transformation matrix
 	R_EntityRotate (modelorg);
 	R_EntityRotate (vpn);
 	R_EntityRotate (vright);
@@ -159,21 +157,21 @@ next:
 
 	makeclippededge = false;
 
-// transform the BSP plane into model space
-// FIXME: cache these?
+	// transform the BSP plane into model space
+	// FIXME: cache these?
 	splitplane = pnode->plane;
 	tplane.dist = splitplane->dist - DotProduct(r_entorigin, splitplane->normal);
 	tplane.normal[0] = DotProduct (entity_rotation[0], splitplane->normal);
 	tplane.normal[1] = DotProduct (entity_rotation[1], splitplane->normal);
 	tplane.normal[2] = DotProduct (entity_rotation[2], splitplane->normal);
 
-// clip edges to BSP plane
+	// clip edges to BSP plane
 	for ( ; pedges ; pedges = pnextedge)
 	{
 		pnextedge = pedges->pnext;
 
-	// set the status for the last point as the previous point
-	// FIXME: cache this stuff somehow?
+		// set the status for the last point as the previous point
+		// FIXME: cache this stuff somehow?
 		plastvert = pedges->v[0];
 		lastdist = DotProduct (plastvert->position, tplane.normal) -
 				   tplane.dist;
@@ -182,15 +180,15 @@ next:
 		pvert = pedges->v[1];
 		dist = DotProduct (pvert->position, tplane.normal) - tplane.dist;
 		side = dist <= 0;
-		
+
 
 		if (side != lastside)
 		{
-		// clipped
+			// clipped
 			if (numbverts >= MAX_BMODEL_VERTS)
 				return;
 
-		// generate the clipped vertex
+			// generate the clipped vertex
 			frac = lastdist / (lastdist - dist);
 			ptvert = &pbverts[numbverts++];
 			ptvert->position[0] = plastvert->position[0] +
@@ -203,9 +201,9 @@ next:
 					frac * (pvert->position[2] -
 					plastvert->position[2]);
 
-		// split into two edges, one on each side, and remember entering
-		// and exiting points
-		// FIXME: share the clip edge by having a winding direction flag?
+			// split into two edges, one on each side, and remember entering
+			// and exiting points
+			// FIXME: share the clip edge by having a winding direction flag?
 			if (numbedges >= (MAX_BMODEL_EDGES - 1))
 			{
 				Con_Printf ("Out of edges for bmodel\n");
@@ -228,7 +226,7 @@ next:
 
 			if (side == 0)
 			{
-			// entering for front, exiting for back
+				// entering for front, exiting for back
 				pfrontenter = ptvert;
 				makeclippededge = true;
 			}
@@ -246,8 +244,8 @@ next:
 		}
 	}
 
-// if anything was clipped, reconstitute and add the edges along the clip
-// plane to both sides (but in opposite directions)
+	// if anything was clipped, reconstitute and add the edges along the clip
+	// plane to both sides (but in opposite directions)
 	if (makeclippededge)
 	{
 		if (numbedges >= (MAX_BMODEL_EDGES - 2))
@@ -271,16 +269,16 @@ next:
 		numbedges += 2;
 	}
 
-// draw or recurse further
+	// draw or recurse further
 	for (i=0 ; i<2 ; i++)
 	{
 		if (psideedges[i])
 		{
-		// draw if we've reached a non-solid leaf, done if all that's left is a
-		// solid leaf, and continue down the tree if it's not a leaf
+			// draw if we've reached a non-solid leaf, done if all that's left is a
+			// solid leaf, and continue down the tree if it's not a leaf
 			pn = pnode->children[i];
 
-		// we're done with this branch if the node or leaf isn't in the PVS
+			// we're done with this branch if the node or leaf isn't in the PVS
 			if (pn->visframe == r_visframecount)
 			{
 				if (pn->contents < 0)
@@ -322,7 +320,7 @@ void R_DrawSolidClippedSubmodelPolygons (model_t *pmodel)
 	if(entdrawflags(currententity) ^ r_drawflags)
 		return;
 
-// FIXME: use bounding-box-based frustum clipping info?
+	// FIXME: use bounding-box-based frustum clipping info?
 
 	psurf = &pmodel->surfaces[pmodel->firstmodelsurface];
 	numsurfaces = pmodel->nummodelsurfaces;
@@ -330,20 +328,20 @@ void R_DrawSolidClippedSubmodelPolygons (model_t *pmodel)
 
 	for (i=0 ; i<numsurfaces ; i++, psurf++)
 	{
-	// find which side of the node we are on
+		// find which side of the node we are on
 		pplane = psurf->plane;
 
 		dot = DotProduct (modelorg, pplane->normal) - pplane->dist;
 
-	// draw the polygon
+		// draw the polygon
 		if ((dot > 0) ^ !!(psurf->flags & SURF_PLANEBACK))
 		{
-		// FIXME: use bounding-box-based frustum clipping info?
+			// FIXME: use bounding-box-based frustum clipping info?
 
-		// copy the edges to bedges, flipping if necessary so always
-		// clockwise winding
-		// FIXME: if edges and vertices get caches, these assignments must move
-		// outside the loop, and overflow checking must be done here
+			// copy the edges to bedges, flipping if necessary so always
+			// clockwise winding
+			// FIXME: if edges and vertices get caches, these assignments must move
+			// outside the loop, and overflow checking must be done here
 			pbverts = bverts;
 			pbedges = bedges;
 			numbverts = numbedges = 0;
@@ -391,7 +389,7 @@ void R_DrawSubmodelPolygons (model_t *pmodel, int clipflags)
 	int			numsurfaces;
 	mplane_t	*pplane;
 
-// FIXME: use bounding-box-based frustum clipping info?
+	// FIXME: use bounding-box-based frustum clipping info?
 
 	if(entdrawflags(currententity) ^ r_drawflags)
 		return;
@@ -401,17 +399,17 @@ void R_DrawSubmodelPolygons (model_t *pmodel, int clipflags)
 
 	for (i=0 ; i<numsurfaces ; i++, psurf++)
 	{
-	// find which side of the node we are on
+		// find which side of the node we are on
 		pplane = psurf->plane;
 
 		dot = DotProduct (modelorg, pplane->normal) - pplane->dist;
 
-	// draw the polygon
+		// draw the polygon
 		if ((dot > 0) ^ !!(psurf->flags & SURF_PLANEBACK))
 		{
 			r_currentkey = ((mleaf_t *)currententity->topnode)->key;
 
-		// FIXME: use bounding-box-based frustum clipping info?
+			// FIXME: use bounding-box-based frustum clipping info?
 			R_RenderFace (psurf, clipflags);
 		}
 	}
@@ -439,9 +437,9 @@ again:
 	if (node->visframe != r_visframecount)
 		return;
 
-// cull the clipping planes if not trivial accept
-// FIXME: the compiler is doing a lousy job of optimizing here; it could be
-//  twice as fast in ASM
+	// cull the clipping planes if not trivial accept
+	// FIXME: the compiler is doing a lousy job of optimizing here; it could be
+	//  twice as fast in ASM
 	if (clipflags)
 	{
 		for (i=0 ; i<4 ; i++)
@@ -449,16 +447,16 @@ again:
 			if (! (clipflags & (1<<i)) )
 				continue;	// don't need to clip against it
 
-		// generate accept and reject points
-		// FIXME: do with fast look-ups or integer tests based on the sign bit
-		// of the floating point values
+			// generate accept and reject points
+			// FIXME: do with fast look-ups or integer tests based on the sign bit
+			// of the floating point values
 
 			pindex = pfrustum_indexes[i];
 
 			rejectpt[0] = node->minmaxs[pindex[0]];
 			rejectpt[1] = node->minmaxs[pindex[1]];
 			rejectpt[2] = node->minmaxs[pindex[2]];
-			
+
 			d = DotProduct (rejectpt, view_clipplanes[i].normal);
 			d -= view_clipplanes[i].dist;
 
@@ -476,8 +474,8 @@ again:
 				clipflags &= ~(1<<i);	// node is entirely on screen
 		}
 	}
-	
-// if a leaf node, draw stuff
+
+	// if a leaf node, draw stuff
 	if (node->contents < 0)
 	{
 		pleaf = (mleaf_t *)node;
@@ -494,7 +492,7 @@ again:
 			} while (--c);
 		}
 
-	// deal with model fragments in this leaf
+		// deal with model fragments in this leaf
 		if (pleaf->efrags)
 		{
 			R_StoreEfrags (&pleaf->efrags);
@@ -505,18 +503,18 @@ again:
 	}
 	else
 	{
-	// node is just a decision point, so go down the apropriate sides
+		// node is just a decision point, so go down the apropriate sides
 
-	// find which side of the node we are on
+		// find which side of the node we are on
 		plane = node->plane;
 		dot = plane->type <= PLANE_Z ? modelorg[plane->type] : DotProduct(modelorg, plane->normal);
 		dot -= plane->dist;
 		side = dot < 0;
 
-	// recurse down the children, front side first
+		// recurse down the children, front side first
 		R_RecursiveWorldNode (node->children[side], clipflags);
 
-	// draw stuff
+		// draw stuff
 		c = node->numsurfaces;
 
 		if(c){
@@ -546,11 +544,11 @@ again:
 				node_rejects[num_node_rejects++].clipflags = clipflags;
 			}
 
-		// all surfaces on the same node share the same sequence number
+			// all surfaces on the same node share the same sequence number
 			r_currentkey++;
 		}
 
-	// recurse down the back side
+		// recurse down the back side
 		node = node->children[!side];
 		goto again;
 	}
