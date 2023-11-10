@@ -43,7 +43,8 @@ static cvar_t cl_crossy = {"cl_crossy", "0", false};
 
 static cvar_t gl_cshiftpercent = {"gl_cshiftpercent", "100", false};
 
-static float v_dmg_time, v_dmg_roll, v_dmg_pitch;
+static double v_dmg_time, v_dmg_roll, v_dmg_pitch;
+static double v_step_time, v_step_z, v_step_oldz;
 
 extern	int			in_forward, in_forward2, in_back;
 
@@ -701,7 +702,6 @@ void V_CalcRefdef (void)
 	vec3_t		forward, right, up;
 	vec3_t		angles;
 	float		bob;
-	static float oldz = 0;
 
 	V_DriftPitch ();
 
@@ -787,27 +787,34 @@ void V_CalcRefdef (void)
 	VectorAdd (r_refdef.viewangles, cl.punchangle, r_refdef.viewangles);
 
 	// smooth out stair step ups
-	if (cl.onground && ent->origin[2] - oldz > 0){
-		float steptime;
+	if(!noclip_anglehack && cl.onground && ent->origin[2] - v_step_z > 0){
+		v_step_z = v_step_oldz + (cl.time - v_step_time) * 80.0;
 
-		steptime = cl.time - cl.oldtime;
-		if (steptime < 0){
-			//FIXME I_Error ("steptime < 0");
-			steptime = 0;
+		if(v_step_z > ent->origin[2]){
+			v_step_z = v_step_oldz = ent->origin[2];
+			v_step_time = cl.time;
+		}
+		if(v_step_z < ent->origin[2]-12.0){
+			v_step_z = v_step_oldz = ent->origin[2] - 12.0;
+			v_step_time = cl.time;
 		}
 
-		oldz += steptime * 80;
-		if (oldz > ent->origin[2])
-			oldz = ent->origin[2];
-		if (ent->origin[2] - oldz > 12)
-			oldz = ent->origin[2] - 12;
-		r_refdef.vieworg[2] += oldz - ent->origin[2];
-		view->origin[2] += oldz - ent->origin[2];
-	}else
-		oldz = ent->origin[2];
+		r_refdef.vieworg[2] += v_step_z - ent->origin[2];
+		view->origin[2] += v_step_z - ent->origin[2];
+	}else{
+		v_step_z = v_step_oldz = ent->origin[2];
+		v_step_time = cl.time;
+	}
 
 	if (chase_active.value)
 		Chase_Update ();
+}
+
+void
+V_NewMap(void)
+{
+	v_step_z = v_step_oldz = 0.0;
+	v_step_time = 0.0;
 }
 
 /*

@@ -283,7 +283,8 @@ static void CL_ParseServerInfo (void)
 	// local state
 	cl_entities[0].model = cl.worldmodel = cl.model_precache[1];
 
-	R_NewMap ();
+	R_NewMap();
+	V_NewMap();
 
 	noclip_anglehack = false;		// noclip is turned off at start
 }
