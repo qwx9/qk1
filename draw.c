@@ -212,7 +212,7 @@ Draw_Pic
 void Draw_Pic (int x, int y, qpic_t *pic)
 {
 	byte			*dest, *source;
-	int v;
+	int px, py;
 
 	if ((x < 0) ||
 		(x + pic->width > vid.width) ||
@@ -223,8 +223,11 @@ void Draw_Pic (int x, int y, qpic_t *pic)
 	}
 	source = pic->data;
 	dest = vid.buffer + y * vid.rowbytes + x;
-	for(v=0; v<pic->height; v++){
-		memcpy(dest, source, pic->width);
+	for(py = 0; py < pic->height; py++){
+		for(px = 0; px < pic->width; px++){
+			if(source[px] != 255)
+				dest[px] = source[px];
+		}
 		dest += vid.rowbytes;
 		source += pic->width;
 	}
