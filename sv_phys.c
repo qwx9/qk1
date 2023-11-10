@@ -1000,8 +1000,7 @@ void SV_Physics_Toss (edict_t *ent)
 	SV_CheckVelocity (ent);
 
 	// add gravity
-	if (ent->v.movetype != MOVETYPE_FLY
-	&& ent->v.movetype != MOVETYPE_FLYMISSILE)
+	if (ent->v.movetype != MOVETYPE_FLY && ent->v.movetype != MOVETYPE_FLYMISSILE)
 		SV_AddGravity (ent);
 
 	// move angles
@@ -1010,28 +1009,23 @@ void SV_Physics_Toss (edict_t *ent)
 	// move origin
 	VectorScale (ent->v.velocity, host_frametime, move);
 	trace = SV_PushEntity (ent, move);
-	if (trace.fraction == 1)
-		return;
-	if (ent->free)
+	if(ent->free || trace.fraction == 1)
 		return;
 
-	if (ent->v.movetype == MOVETYPE_BOUNCE)
+	if(ent->v.movetype == MOVETYPE_BOUNCE)
 		backoff = 1.5;
 	else
 		backoff = 1;
 
-	ClipVelocity (ent->v.velocity, trace.plane.normal, ent->v.velocity, backoff);
+	ClipVelocity(ent->v.velocity, trace.plane.normal, ent->v.velocity, backoff);
 
 	// stop if on ground
-	if (trace.plane.normal[2] > 0.7)
-	{
-		if (ent->v.velocity[2] < 60 || ent->v.movetype != MOVETYPE_BOUNCE)
-		{
-			ent->v.flags = (int)ent->v.flags | FL_ONGROUND;
-			ent->v.groundentity = EDICT_TO_PROG(trace.ent);
-			VectorCopy (vec3_origin, ent->v.velocity);
-			VectorCopy (vec3_origin, ent->v.avelocity);
-		}
+	if(trace.plane.normal[2] > 0.5 && DotProduct(trace.plane.normal, ent->v.velocity) < 15){
+		ent->v.flags = (int)ent->v.flags | FL_ONGROUND;
+		ent->v.groundentity = EDICT_TO_PROG(trace.ent);
+		ClipVelocity(ent->v.velocity, trace.plane.normal, ent->v.velocity, backoff + trace.plane.normal[2]);
+	}else{
+		ent->v.flags = (int)ent->v.flags & ~FL_ONGROUND;
 	}
 
 	// check for in water
