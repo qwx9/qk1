@@ -1,14 +1,15 @@
 #include "quakedef.h"
 
-int		iskyspeed = 8;
-int		iskyspeed2 = 2;
-float	skyspeed, skyspeed2;
+static int iskyspeed = 8;
+static int iskyspeed2 = 2;
+static float skyspeed2;
 
-float		skytime;
+float skyspeed, skytime;
 
-byte		*r_skysource[2];
+byte *r_skysource[2];
 
-int r_skymade, skyw, skyh;
+static int r_skymade;
+int skyw, skyh;
 
 /*
 =============

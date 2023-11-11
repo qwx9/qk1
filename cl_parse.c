@@ -1,6 +1,6 @@
 #include "quakedef.h"
 
-static char *svc_strings[] =
+static const char *svc_strings[] =
 {
 	"svc_bad",
 	"svc_nop",

@@ -304,10 +304,10 @@ Con_Printf(char *fmt, ...)
 	// update the screen if the console is displayed
 	if(cls.signon != SIGNONS && !scr_disabled_for_loading){
 		/* protect against infinite loop if something in
-		 * SCR_UpdateScreen() calls Con_Printf() */
+		 * SCR_UpdateScreen(...) calls Con_Printf() */
 		if(!inupdate){
 			inupdate = true;
-			SCR_UpdateScreen();
+			SCR_UpdateScreen(false);
 			inupdate = false;
 		}
 	}
@@ -415,7 +415,6 @@ void Con_DrawNotify (void)
 		text = con_text + (i % con_totallines)*con_linewidth;
 
 		clearnotify = 0;
-		scr_copytop = 1;
 
 		for (x = 0 ; x < con_linewidth ; x++)
 			Draw_Character ( (x+1)<<3, v, text[x]);
@@ -427,7 +426,6 @@ void Con_DrawNotify (void)
 	if (key_dest == key_message)
 	{
 		clearnotify = 0;
-		scr_copytop = 1;
 
 		x = 0;
 

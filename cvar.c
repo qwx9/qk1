@@ -1,7 +1,6 @@
 #include "quakedef.h"
 
 cvar_t	*cvar_vars;
-char	*cvar_null_string = "";
 
 /*
 ============
@@ -45,7 +44,7 @@ char *Cvar_VariableString (char *var_name)
 
 	var = Cvar_FindVar (var_name);
 	if (!var)
-		return cvar_null_string;
+		return "";
 	return var->string;
 }
 

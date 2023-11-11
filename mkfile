@@ -23,7 +23,6 @@ OFILES=\
 	draw.$O\
 	d_alpha.$O\
 	d_edge.$O\
-	d_fill.$O\
 	d_init.$O\
 	d_modech.$O\
 	d_part.$O\

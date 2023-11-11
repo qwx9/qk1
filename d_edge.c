@@ -9,26 +9,12 @@ int			ubasestep, errorterm, erroradjustup, erroradjustdown;
 extern void			R_RotateBmodel (void);
 extern void			R_TransformFrustum (void);
 
-vec3_t		transformed_modelorg;
-
-/*
-==============
-D_DrawPoly
-
-==============
-*/
-void D_DrawPoly (void)
-{
-// this driver takes spans, not polygons
-}
-
-
 /*
 =============
 D_MipLevelForScale
 =============
 */
-int D_MipLevelForScale (float scale)
+static int D_MipLevelForScale (float scale)
 {
 	int		lmiplevel;
 
@@ -56,7 +42,7 @@ D_DrawSolidSurface
 
 // FIXME: clean this up
 
-void D_DrawSolidSurface (surf_t *surf, int color)
+static void D_DrawSolidSurface (surf_t *surf, int color)
 {
 	espan_t	*span;
 	byte	*pdest;
@@ -96,7 +82,7 @@ void D_DrawSolidSurface (surf_t *surf, int color)
 D_CalcGradients
 ==============
 */
-void D_CalcGradients (msurface_t *pface)
+static void D_CalcGradients (msurface_t *pface, vec3_t transformed_modelorg)
 {
 	float		mipscale;
 	vec3_t		p_temp1;
@@ -148,6 +134,7 @@ void D_DrawSurfaces (void)
 	surfcache_t		*pcurrentcache;
 	vec3_t			world_transformed_modelorg;
 	vec3_t			local_modelorg;
+	vec3_t			transformed_modelorg;
 	byte			alpha;
 
 	currententity = &cl_entities[0];
@@ -215,7 +202,7 @@ void D_DrawSurfaces (void)
 									// make entity passed in
 			}
 
-			D_CalcGradients (pface);
+			D_CalcGradients (pface, transformed_modelorg);
 			Turbulent8 (s->spans, alpha);
 			D_DrawZSpans (s->spans);
 
@@ -262,7 +249,7 @@ void D_DrawSurfaces (void)
 			cacheblock = (pixel_t *)pcurrentcache->data;
 			cachewidth = pcurrentcache->width;
 
-			D_CalcGradients (pface);
+			D_CalcGradients (pface, transformed_modelorg);
 
 			if(s->flags & SURF_FENCE)
 				D_DrawSpans16_Fence(s->spans, alpha);

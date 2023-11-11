@@ -1,7 +1,7 @@
 #include "quakedef.h"
 
-float		   surfscale;
-bool		r_cache_thrash;		 // set if surface cache is thrashing
+static float surfscale;
+bool r_cache_thrash;		 // set if surface cache is thrashing
 
 surfcache_t *sc_rover;
 
@@ -54,8 +54,7 @@ D_InitCaches
 */
 void D_InitCaches (void *buffer, int size)
 {
-	if (!msg_suppress_1)
-		Con_Printf ("%dk surface cache\n", size/1024);
+	Con_Printf ("%dk surface cache\n", size/1024);
 
 	sc_size = size - GUARDSIZE;
 	sc_base = (surfcache_t *)buffer;
@@ -177,18 +176,6 @@ surfcache_t	 *D_SCAlloc (int width, uintptr size)
 
 D_CheckCacheGuard ();   // DEBUG
 	return new;
-}
-
-void
-D_SCDump(void)
-{
-	surfcache_t *s;
-
-	for(s = sc_base; s != nil; s = s->next){
-		if(s == sc_rover)
-			Con_DPrintf("ROVER:\n");
-		Con_DPrintf("%p : %d bytes	 %ud width\n", s, s->size, s->width);
-	}
 }
 
 /*

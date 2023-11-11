@@ -2,11 +2,7 @@
 
 cvar_t  registered = {"registered","0"};
 
-bool		msg_suppress_1 = 0;
-
 char	com_token[1024];
-int		com_argc;
-char	**com_argv;
 
 bool		standard_quake = true, rogue, hipnotic;
 
@@ -41,13 +37,6 @@ void InsertLinkBefore (link_t *l, link_t *before)
 {
 	l->next = before;
 	l->prev = before->prev;
-	l->prev->next = l;
-	l->next->prev = l;
-}
-void InsertLinkAfter (link_t *l, link_t *after)
-{
-	l->next = after->next;
-	l->prev = after;
 	l->prev->next = l;
 	l->next->prev = l;
 }
@@ -334,16 +323,6 @@ SZ_Alloc(sizebuf_t *buf, int startsize)
 	buf->maxsize = startsize;
 	buf->cursize = 0;
 	setmalloctag(buf->data, getcallerpc(&buf));
-}
-
-
-void
-SZ_Free(sizebuf_t *buf)
-{
-	//Z_Free (buf->data);
-	//buf->data = nil;
-	//buf->maxsize = 0;
-	buf->cursize = 0;
 }
 
 void

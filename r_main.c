@@ -4,7 +4,7 @@
 
 void		*colormap;
 static vec3_t viewlightvec;
-alight_t	r_viewlighting = {128, 192, viewlightvec};
+static alight_t r_viewlighting = {128, 192, viewlightvec};
 int			r_numallocatededges;
 int			r_numallocatedbasespans;
 byte		*r_basespans;
@@ -78,18 +78,19 @@ int		d_lightstylevalue[256];	// 8.8 fraction of base light value
 
 void R_MarkLeaves (void);
 
+static cvar_t r_drawentities = {"r_drawentities","1"};
+static cvar_t r_drawviewmodel = {"r_drawviewmodel","1"};
+
 cvar_t	r_clearcolor = {"r_clearcolor","2"};
 cvar_t	r_waterwarp = {"r_waterwarp","1"};
 cvar_t	r_fullbright = {"r_fullbright","0"};
-cvar_t	r_drawentities = {"r_drawentities","1"};
-cvar_t	r_drawviewmodel = {"r_drawviewmodel","1"};
 cvar_t	r_ambient = {"r_ambient", "0"};
 cvar_t	r_reportsurfout = {"r_reportsurfout", "0"};
 cvar_t	r_numsurfs = {"r_numsurfs", "0"};
 cvar_t	r_reportedgeout = {"r_reportedgeout", "0"};
 cvar_t	r_numedges = {"r_numedges", "0"};
-cvar_t	r_aliastransbase = {"r_aliastransbase", "200"};
-cvar_t	r_aliastransadj = {"r_aliastransadj", "100"};
+static cvar_t r_aliastransbase = {"r_aliastransbase", "200"};
+static cvar_t r_aliastransadj = {"r_aliastransadj", "100"};
 cvar_t	r_part_scale = {"r_part_scale", "0.75", true};
 cvar_t	r_wateralpha = {"r_wateralpha", "1", true};
 cvar_t	r_lavaalpha = {"r_lavaalpha", "1", true};

@@ -616,21 +616,6 @@ void PF_traceline (void)
 		pr_global_struct->trace_ent = EDICT_TO_PROG(sv.edicts);
 }
 
-
-/*
-=================
-PF_checkpos
-
-Returns true if the given entity can move to the given position from it's
-current position by walking or rolling.
-FIXME: make work...
-scalar checkpos (entity, vector)
-=================
-*/
-void PF_checkpos (void)
-{
-}
-
 //============================================================================
 
 static byte *checkpvs;
@@ -706,7 +691,6 @@ name checkclient ()
 =================
 */
 #define	MAX_CHECK	16
-int c_invis, c_notvis;
 void PF_checkclient (void)
 {
 	edict_t	*ent, *self;
@@ -736,13 +720,11 @@ void PF_checkclient (void)
 	l = (leaf - sv.worldmodel->leafs) - 1;
 	if ( (l<0) || !(checkpvs[l>>3] & (1<<(l&7)) ) )
 	{
-		c_notvis++;
 		RETURN_EDICT(sv.edicts);
 		return;
 	}
 
 	// might be able to see it
-	c_invis++;
 	RETURN_EDICT(ent);
 }
 
@@ -1549,7 +1531,7 @@ static void PF_clientstat (void)
 	// even though it does *not* check for the extension
 }
 
-builtin_t pr_builtin[] =
+static const builtin_t pr_builtin[] =
 {
 PF_Fixme,
 PF_makevectors,	// void(entity e)	makevectors 		= #1;
@@ -1643,6 +1625,6 @@ PF_setspawnparms, // #78
 [232] = PF_clientstat,
 };
 
-builtin_t *pr_builtins = pr_builtin;
-int pr_numbuiltins = sizeof(pr_builtin)/sizeof(pr_builtin[0]);
+const builtin_t *pr_builtins = pr_builtin;
+const int pr_numbuiltins = nelem(pr_builtin);
 

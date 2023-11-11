@@ -2,7 +2,7 @@
 
 qsocket_t	*net_activeSockets = nil;
 qsocket_t	*net_freeSockets = nil;
-int			net_numsockets = 0;
+static int net_numsockets;
 
 sizebuf_t		net_message;
 int				net_activeconnections = 0;
@@ -15,7 +15,7 @@ int unreliableMessagesReceived = 0;
 static cvar_t	net_messagetimeout = {"net_messagetimeout","300"};
 cvar_t	hostname = {"hostname", "UNNAMED"};
 
-Netdrv netdrv[MAX_NET_DRIVERS] = {
+static Netdrv netdrv[MAX_NET_DRIVERS] = {
 	{
 	"Loopback",
 	false,
@@ -48,7 +48,7 @@ Netdrv netdrv[MAX_NET_DRIVERS] = {
 	}
 #endif
 };
-int net_numdrivers = 0;
+static int net_numdrivers;
 
 Landrv landrv[MAX_NET_DRIVERS] = {
 #ifdef __plan9__

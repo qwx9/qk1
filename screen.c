@@ -1,43 +1,36 @@
 #include "quakedef.h"
 
-// only the refresh window will be updated unless these variables are flagged
-int			scr_copytop;
-int			scr_copyeverything;
+float scr_con_current;
+static float scr_conlines; // lines of console to display
 
-float		scr_con_current;
-float		scr_conlines;		// lines of console to display
+static float oldscreensize, oldfov;
+cvar_t scr_viewsize = {"viewsize","100", true};
 
-float		oldscreensize, oldfov;
-cvar_t		scr_viewsize = {"viewsize","100", true};
-cvar_t		scr_fov = {"fov","90",true};	// 10 - 170
-cvar_t		scr_conspeed = {"scr_conspeed","300",true};
-cvar_t		scr_centertime = {"scr_centertime","2"};
-cvar_t		scr_showram = {"showram","1"};
-cvar_t		scr_showturtle = {"showturtle","0"};
-cvar_t		scr_showpause = {"showpause","1"};
-cvar_t		scr_printspeed = {"scr_printspeed","8"};
-cvar_t		scr_showfps = {"showfps","0", true};
+static cvar_t scr_fov = {"fov","90",true}; // 10 - 170
+static cvar_t scr_conspeed = {"scr_conspeed","300",true};
+static cvar_t scr_centertime = {"scr_centertime","2"};
+static cvar_t scr_showram = {"showram","1"};
+static cvar_t scr_showturtle = {"showturtle","0"};
+static cvar_t scr_showpause = {"showpause","1"};
+static cvar_t scr_printspeed = {"scr_printspeed","8"};
+static cvar_t scr_showfps = {"showfps","0", true};
 
-bool	scr_initialized;		// ready to draw
+static bool scr_initialized; // ready to draw
 
-qpic_t		*scr_net;
-qpic_t		*scr_turtle;
+static qpic_t *scr_net, *scr_turtle;
 
-int			scr_fullupdate;
+int scr_fullupdate;
 
-int			clearconsole;
-int			clearnotify;
+static int clearconsole;
+int clearnotify;
 
-viddef_t	vid;				// global video state
+viddef_t vid; // global video state
 
-vrect_t		scr_vrect;
+vrect_t scr_vrect;
 
-bool	scr_disabled_for_loading;
-bool	scr_drawloading;
-float		scr_disabled_time;
-bool	scr_skipupdate;
-
-bool	block_drawing;
+bool scr_disabled_for_loading;
+static bool scr_drawloading;
+static float scr_disabled_time;
 
 /*
 ===============================================================================
@@ -47,12 +40,12 @@ CENTER PRINTING
 ===============================================================================
 */
 
-char		scr_centerstring[1024];
-float		scr_centertime_start;	// for slow victory printing
-float		scr_centertime_off;
-int			scr_center_lines;
-int			scr_erase_lines;
-int			scr_erase_center;
+float scr_centertime_off;
+static char scr_centerstring[1024];
+static float scr_centertime_start; // for slow victory printing
+static int scr_center_lines;
+static int scr_erase_lines;
+static int scr_erase_center;
 
 /*
 ==============
@@ -78,7 +71,7 @@ void SCR_CenterPrint (char *str)
 	}
 }
 
-void SCR_EraseCenterString (void)
+static void SCR_EraseCenterString (void)
 {
 	int		y;
 
@@ -93,11 +86,10 @@ void SCR_EraseCenterString (void)
 	else
 		y = 48;
 
-	scr_copytop = 1;
 	Draw_TileClear (0, y,vid.width, 8*scr_erase_lines);
 }
 
-void SCR_DrawCenterString (void)
+static void SCR_DrawCenterString (void)
 {
 	char	*start;
 	int		l;
@@ -144,9 +136,8 @@ void SCR_DrawCenterString (void)
 	} while (1);
 }
 
-void SCR_CheckDrawCenterString (void)
+static void SCR_CheckDrawCenterString (void)
 {
-	scr_copytop = 1;
 	if (scr_center_lines > scr_erase_lines)
 		scr_erase_lines = scr_center_lines;
 
@@ -167,7 +158,7 @@ void SCR_CheckDrawCenterString (void)
 CalcFov
 ====================
 */
-float CalcFov (float fov_x, float width, float height)
+static float CalcFov (float fov_x, float width, float height)
 {
 	float   a = 0;
 	float   x;
@@ -259,7 +250,7 @@ SCR_SizeUp_f
 Keybinding command
 =================
 */
-void SCR_SizeUp_f (void)
+static void SCR_SizeUp_f (void)
 {
 	setcvarv ("viewsize",scr_viewsize.value+10);
 	vid.recalc_refdef = 1;
@@ -273,7 +264,7 @@ SCR_SizeDown_f
 Keybinding command
 =================
 */
-void SCR_SizeDown_f (void)
+static void SCR_SizeDown_f (void)
 {
 	setcvarv ("viewsize",scr_viewsize.value-10);
 	vid.recalc_refdef = 1;
@@ -304,7 +295,7 @@ void SCR_Init (void)
 SCR_DrawTurtle
 ==============
 */
-void SCR_DrawTurtle (void)
+static void SCR_DrawTurtle (void)
 {
 	static int	count;
 
@@ -324,7 +315,7 @@ void SCR_DrawTurtle (void)
 	Draw_Pic (scr_vrect.x, scr_vrect.y, scr_turtle);
 }
 
-void SCR_DrawFPS (void)
+static void SCR_DrawFPS (void)
 {
 	static uvlong lastframetime;
 	static int lastcnt, fps;
@@ -349,7 +340,7 @@ void SCR_DrawFPS (void)
 SCR_DrawNet
 ==============
 */
-void SCR_DrawNet (void)
+static void SCR_DrawNet (void)
 {
 	if (realtime - cl.last_received_message < 0.3)
 		return;
@@ -364,7 +355,7 @@ void SCR_DrawNet (void)
 DrawPause
 ==============
 */
-void SCR_DrawPause (void)
+static void SCR_DrawPause (void)
 {
 	qpic_t	*pic;
 
@@ -386,7 +377,7 @@ void SCR_DrawPause (void)
 SCR_DrawLoading
 ==============
 */
-void SCR_DrawLoading (void)
+static void SCR_DrawLoading (void)
 {
 	qpic_t	*pic;
 
@@ -408,7 +399,7 @@ void SCR_DrawLoading (void)
 SCR_SetUpToDrawConsole
 ==================
 */
-void SCR_SetUpToDrawConsole (void)
+static void SCR_SetUpToDrawConsole (void)
 {
 	Con_CheckResize ();
 
@@ -444,13 +435,11 @@ void SCR_SetUpToDrawConsole (void)
 
 	if (clearconsole++ < vid.numpages)
 	{
-		scr_copytop = 1;
 		Draw_TileClear (0,(int)scr_con_current,vid.width, vid.height - (int)scr_con_current);
 		Sbar_Changed ();
 	}
 	else if (clearnotify++ < vid.numpages)
 	{
-		scr_copytop = 1;
 		Draw_TileClear (0,0,vid.width, con_notifylines);
 	}
 	else
@@ -462,11 +451,10 @@ void SCR_SetUpToDrawConsole (void)
 SCR_DrawConsole
 ==================
 */
-void SCR_DrawConsole (void)
+static void SCR_DrawConsole (void)
 {
 	if (scr_con_current)
 	{
-		scr_copyeverything = 1;
 		Con_DrawConsole (scr_con_current, true);
 		clearconsole = 0;
 	}
@@ -500,7 +488,7 @@ void SCR_BeginLoadingPlaque (void)
 	scr_drawloading = true;
 	scr_fullupdate = 0;
 	Sbar_Changed ();
-	SCR_UpdateScreen ();
+	SCR_UpdateScreen(false);
 	scr_drawloading = false;
 
 	scr_disabled_for_loading = true;
@@ -523,10 +511,9 @@ void SCR_EndLoadingPlaque (void)
 
 //=============================================================================
 
-char	*scr_notifystring;
-bool	scr_drawdialog;
+static char *scr_notifystring;
 
-void SCR_DrawNotifyString (void)
+static void SCR_DrawNotifyString (void)
 {
 	char	*start;
 	int		l;
@@ -575,9 +562,7 @@ int SCR_ModalMessage (char *text)
 
 	// draw a fresh screen
 	scr_fullupdate = 0;
-	scr_drawdialog = true;
-	SCR_UpdateScreen ();
-	scr_drawdialog = false;
+	SCR_UpdateScreen (true);
 	do
 	{
 		key_count = -1;		// wait for a key down and up
@@ -585,7 +570,7 @@ int SCR_ModalMessage (char *text)
 	} while (key_lastpress != 'y' && key_lastpress != 'n' && key_lastpress != K_ESCAPE);
 
 	scr_fullupdate = 0;
-	SCR_UpdateScreen ();
+	SCR_UpdateScreen (false);
 
 	return key_lastpress == 'y';
 }
@@ -607,7 +592,7 @@ void SCR_BringDownConsole (void)
 	scr_centertime_off = 0;
 
 	for (i=0 ; i<20 && scr_conlines != scr_con_current ; i++)
-		SCR_UpdateScreen ();
+		SCR_UpdateScreen(false);
 
 	cl.cshifts[0].percent = 0;		// no area contents palette on next frame
 	setpal(host_basepal);
@@ -625,15 +610,9 @@ WARNING: be very careful calling this from elsewhere, because the refresh
 needs almost the entire 256k of stack space!
 ==================
 */
-void SCR_UpdateScreen (void)
+void SCR_UpdateScreen (bool drawdialog)
 {
 	static float	oldlcd_x;
-
-	if (scr_skipupdate || block_drawing)
-		return;
-
-	scr_copytop = 0;
-	scr_copyeverything = 0;
 
 	if (scr_disabled_for_loading)
 	{
@@ -680,7 +659,6 @@ void SCR_UpdateScreen (void)
 	// do 3D refresh drawing, and then update the screen
 	if (scr_fullupdate++ < vid.numpages)
 	{	// clear the entire screen
-		scr_copyeverything = 1;
 		Draw_TileClear (0,0,vid.width,vid.height);
 		Sbar_Changed ();
 	}
@@ -690,12 +668,11 @@ void SCR_UpdateScreen (void)
 
 	V_RenderView ();
 
-	if (scr_drawdialog)
+	if (drawdialog)
 	{
 		Sbar_Draw ();
 		Draw_FadeScreen ();
 		SCR_DrawNotifyString ();
-		scr_copyeverything = true;
 	}
 	else if (scr_drawloading)
 	{

@@ -1,8 +1,8 @@
 #include "quakedef.h"
 
-bool	localconnectpending = false;
-qsocket_t	*loop_client = nil;
-qsocket_t	*loop_server = nil;
+static bool localconnectpending;
+static qsocket_t *loop_client;
+static qsocket_t *loop_server;
 
 int Loop_Init (void)
 {
@@ -11,13 +11,7 @@ int Loop_Init (void)
 	return 0;
 }
 
-
 void Loop_Shutdown (void)
-{
-}
-
-
-void Loop_Listen (bool) /*state*/
 {
 }
 

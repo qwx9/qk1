@@ -16,12 +16,6 @@ void Chase_Init (void)
 	Cvar_RegisterVariable (&chase_active);
 }
 
-void Chase_Reset (void)
-{
-	// for respawning and teleporting
-	//	start position 12 units behind head
-}
-
 void TraceLine (vec3_t start, vec3_t end, vec3_t impact)
 {
 	trace_t	trace;

@@ -11,12 +11,9 @@ typedef struct cmdalias_s
 	char	*value;
 } cmdalias_t;
 
-cmdalias_t	*cmd_alias;
+static cmdalias_t	*cmd_alias;
 
-int trashtest;
-int *trashspot;
-
-bool	cmd_wait;
+static bool	cmd_wait;
 
 //=============================================================================
 
@@ -29,7 +26,7 @@ next frame.  This allows commands like:
 bind g "impulse 5 ; +attack ; wait ; -attack ; impulse 2"
 ============
 */
-void Cmd_Wait_f (void)
+static void Cmd_Wait_f (void)
 {
 	cmd_wait = true;
 }
@@ -42,7 +39,7 @@ void Cmd_Wait_f (void)
 =============================================================================
 */
 
-sizebuf_t	cmd_text;
+static sizebuf_t	cmd_text;
 
 /*
 ============
@@ -176,81 +173,6 @@ void Cbuf_Execute (void)
 
 ==============================================================================
 */
-
-/*
-===============
-Cmd_StuffCmds_f
-
-Adds command line parameters as script statements
-Commands lead with a +, and continue until a - or another +
-quake +prog jctest.qp +cmd amlev1
-quake -nosound +cmd amlev1
-===============
-*/
-void Cmd_StuffCmds_f (void)
-{
-	int		i, j;
-	int		s;
-	char	*text, *build, c;
-
-	if (Cmd_Argc () != 1)
-	{
-		Con_Printf ("stuffcmds : execute command line parameters\n");
-		return;
-	}
-
-	// build the combined string to parse from
-	s = 0;
-	for (i=1 ; i<com_argc ; i++)
-	{
-		if (!com_argv[i])
-			continue;		// NEXTSTEP nulls out -NXHost
-		s += strlen(com_argv[i]) + 1;
-	}
-	if (!s)
-		return;
-
-	text = Z_Malloc (s+1);
-	text[0] = 0;
-	for (i=1 ; i<com_argc ; i++)
-	{
-		if (!com_argv[i])
-			continue;		// NEXTSTEP nulls out -NXHost
-		strcat(text, com_argv[i]);
-		if (i != com_argc-1)
-			strcat(text, " ");
-	}
-
-	// pull out the commands
-	build = Z_Malloc (s+1);
-	build[0] = 0;
-
-	for (i=0 ; i<s-1 ; i++)
-	{
-		if (text[i] == '+')
-		{
-			i++;
-
-			for (j=i ; (text[j] != '+') && (text[j] != '-') && (text[j] != 0) ; j++)
-				;
-
-			c = text[j];
-			text[j] = 0;
-
-			strcat(build, text+i);
-			strcat(build, "\n");
-			text[j] = c;
-			i = j-1;
-		}
-	}
-
-	if (build[0])
-		Cbuf_InsertText (build);
-
-	Z_Free (text);
-	Z_Free (build);
-}
-
 
 /*
 ===============
@@ -403,7 +325,6 @@ Cmd_Init
 */
 void Cmd_Init (void)
 {
-	Cmd_AddCommand ("stuffcmds",Cmd_StuffCmds_f);
 	Cmd_AddCommand ("exec",Cmd_Exec_f);
 	Cmd_AddCommand ("echo",Cmd_Echo_f);
 	Cmd_AddCommand ("alias",Cmd_Alias_f);

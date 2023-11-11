@@ -52,7 +52,7 @@ static int r_sstepx, r_tstepx, r_lstepy, r_sstepy, r_tstepy;
 static int r_zistepx, r_zistepy;
 static int d_aspancount, d_countextrastep;
 
-spanpackage_t *d_pedgespanpackage;
+static spanpackage_t *d_pedgespanpackage;
 static int ystart;
 static byte *d_pdest, *d_ptex;
 static uzint *d_pz;

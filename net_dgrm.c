@@ -10,12 +10,12 @@
 static int net_landriverlevel;
 
 /* statistic counters */
-int packetsSent;
-int packetsReSent;
-int packetsReceived;
-int receivedDuplicateCount;
-int shortPacketCount;
-int droppedDatagrams;
+static int packetsSent;
+static int packetsReSent;
+static int packetsReceived;
+static int receivedDuplicateCount;
+static int shortPacketCount;
+static int droppedDatagrams;
 
 static int myDriverLevel;
 
@@ -619,7 +619,7 @@ static qsocket_t *_Datagram_Connect (char *host)
 	memcpy(&readaddr, &sendaddr, sizeof readaddr);
 
 	// send the connection request
-	Con_Printf("trying...\n"); SCR_UpdateScreen ();
+	Con_Printf("trying...\n"); SCR_UpdateScreen (false);
 	start_time = net_time;
 
 	UDP_Listen(1);
@@ -671,7 +671,7 @@ static qsocket_t *_Datagram_Connect (char *host)
 		while (ret == 0 && (SetNetTime() - start_time) < 2.5);
 		if (ret)
 			break;
-		Con_Printf("still trying...\n"); SCR_UpdateScreen ();
+		Con_Printf("still trying...\n"); SCR_UpdateScreen (false);
 		start_time = SetNetTime();
 	}
 	/* bullshit workaround for non-plan9 servers replying from different

@@ -11,8 +11,6 @@ is not a staircase.
 
 =============
 */
-int c_yes, c_no;
-
 bool SV_CheckBottom (edict_t *ent)
 {
 	vec3_t	mins, maxs, start, stop;
@@ -36,11 +34,9 @@ bool SV_CheckBottom (edict_t *ent)
 				goto realcheck;
 		}
 
-	c_yes++;
 	return true;		// we got out easy
 
 realcheck:
-	c_no++;
 
 	// check it for real...
 	start[2] = mins[2];
@@ -70,7 +66,6 @@ realcheck:
 				return false;
 		}
 
-	c_yes++;
 	return true;
 }
 

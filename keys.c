@@ -10,21 +10,22 @@ key up events are sent even if in console mode
 #define		MAXCMDLINE	256
 char	key_lines[32][MAXCMDLINE];
 int		key_linepos;
-int		shift_down=false;
 int		key_lastpress;
+static bool shift_down;
 
 int		edit_line=0;
-int		history_line=0;
+static int history_line;
 
 keydest_t	key_dest;
 
 int		key_count;			// incremented every key event
 
-char	*keybindings[256];
-bool	consolekeys[256];	// if true, can't be rebound while in console
-bool	menubound[256];	// if true, can't be rebound while in menu
-int		keyshift[256];		// key to map to if shift held down in console
-int		key_repeats[256];	// if > 1, it is autorepeating
+char *keybindings[256];
+static bool menubound[256]; // if true, can't be rebound while in menu
+static int keyshift[256]; // key to map to if shift held down in console
+
+static int key_repeats[256]; // if > 1, it is autorepeating
+static bool consolekeys[256]; // if true, can't be rebound while in console
 
 typedef struct
 {
@@ -32,7 +33,7 @@ typedef struct
 	int		keynum;
 } keyname_t;
 
-keyname_t keynames[] =
+static keyname_t keynames[] =
 {
 	{"TAB", K_TAB},
 	{"ENTER", K_ENTER},
@@ -150,7 +151,7 @@ void Key_Console (int key)
 		key_lines[edit_line][0] = ']';
 		key_linepos = 1;
 		if (cls.state == ca_disconnected)
-			SCR_UpdateScreen ();	// force an update, because the command
+			SCR_UpdateScreen (false);	// force an update, because the command
 									// may take some time
 		return;
 	}
@@ -676,13 +677,4 @@ void Key_Event (int key, bool down)
 	default:
 		fatal ("Bad key_dest");
 	}
-}
-
-void
-Key_ClearStates(void)
-{
-	int i;
-
-	for(i=0; i<256; i++)
-		key_repeats[i] = 0;
 }

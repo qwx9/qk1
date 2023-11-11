@@ -8,11 +8,11 @@ typedef struct {
 	int		rowbytes;
 } rectdesc_t;
 
-static rectdesc_t	r_rectdesc;
+qpic_t *draw_disc;
 
-byte		*draw_chars;				// 8*8 graphic characters
-qpic_t		*draw_disc;
-qpic_t		*draw_backtile;
+static rectdesc_t	r_rectdesc;
+static byte *draw_chars;				// 8*8 graphic characters
+static qpic_t *draw_backtile;
 
 //=============================================================================
 /* Support Routines */
@@ -24,9 +24,8 @@ typedef struct cachepic_s
 } cachepic_t;
 
 #define	MAX_CACHED_PICS		128
-cachepic_t	menu_cachepics[MAX_CACHED_PICS];
-int			menu_numcachepics;
-
+static cachepic_t menu_cachepics[MAX_CACHED_PICS];
+static int menu_numcachepics;
 
 qpic_t	*Draw_PicFromWad (char *name)
 {
@@ -158,49 +157,6 @@ void Draw_String (int x, int y, char *str)
 		Draw_Character (x, y, *str);
 		str++;
 		x += 8;
-	}
-}
-
-/*
-================
-Draw_DebugChar
-
-Draws a single character directly to the upper right corner of the screen.
-This is for debugging lockups by drawing different chars in different parts
-of the code.
-================
-*/
-void Draw_DebugChar (char num)
-{
-	byte			*dest;
-	byte			*source;
-	int				drawline;
-	extern byte		*draw_chars;
-	int				row, col;
-
-	if (!vid.direct)
-		return;		// don't have direct FB access, so no debugchars...
-
-	drawline = 8;
-
-	row = num>>4;
-	col = num&15;
-	source = draw_chars + (row<<10) + (col<<3);
-
-	dest = vid.direct + 312;
-
-	while (drawline--)
-	{
-		dest[0] = source[0];
-		dest[1] = source[1];
-		dest[2] = source[2];
-		dest[3] = source[3];
-		dest[4] = source[4];
-		dest[5] = source[5];
-		dest[6] = source[6];
-		dest[7] = source[7];
-		source += 128;
-		dest += 320;
 	}
 }
 

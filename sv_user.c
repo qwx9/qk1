@@ -10,8 +10,8 @@ extern	cvar_t	sv_stopspeed;
 
 static	vec3_t		forward, right, up;
 
-vec3_t	wishdir;
-float	wishspeed;
+static vec3_t wishdir;
+static float wishspeed;
 
 // world
 float	*angles;

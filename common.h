@@ -11,7 +11,6 @@ typedef struct sizebuf_s
 } sizebuf_t;
 
 void SZ_Alloc (sizebuf_t *buf, int startsize);
-void SZ_Free (sizebuf_t *buf);
 void SZ_Clear (sizebuf_t *buf);
 void *SZ_GetSpace (sizebuf_t *buf, int length);
 void SZ_Write (sizebuf_t *buf, void *data, int length);
@@ -28,7 +27,6 @@ typedef struct link_s
 void ClearLink (link_t *l);
 void RemoveLink (link_t *l);
 void InsertLinkBefore (link_t *l, link_t *before);
-void InsertLinkAfter (link_t *l, link_t *after);
 
 //============================================================================
 
@@ -112,8 +110,6 @@ extern	char		com_token[1024];
 extern	bool	com_eof;
 
 char *COM_Parse (char *data);
-extern	int		com_argc;
-extern	char	**com_argv;
 
 #pragma varargck	argpos	va	1
 char	*va(char *format, ...);

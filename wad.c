@@ -1,8 +1,8 @@
 #include "quakedef.h"
 
-int			wad_numlumps;
-lumpinfo_t	*wad_lumps;
-byte		*wad_base;
+static int wad_numlumps;
+static lumpinfo_t *wad_lumps;
+static byte *wad_base;
 
 void SwapPic (qpic_t *pic);
 
@@ -106,18 +106,6 @@ void *W_GetLumpName (char *name)
 	lumpinfo_t	*lump;
 
 	lump = W_GetLumpinfo (name);
-
-	return (void *)(wad_base + lump->filepos);
-}
-
-void *W_GetLumpNum (int num)
-{
-	lumpinfo_t	*lump;
-
-	if (num < 0 || num > wad_numlumps)
-		fatal ("W_GetLumpNum: bad number: %d", num);
-
-	lump = wad_lumps + num;
 
 	return (void *)(wad_base + lump->filepos);
 }

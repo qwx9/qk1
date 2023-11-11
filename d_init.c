@@ -2,8 +2,8 @@
 
 #define NUM_MIPS	4
 
-cvar_t	d_mipcap = {"d_mipcap", "0"};
-cvar_t	d_mipscale = {"d_mipscale", "1"};
+static cvar_t	d_mipcap = {"d_mipcap", "0"};
+static cvar_t	d_mipscale = {"d_mipscale", "1"};
 
 surfcache_t		*d_initial_rover;
 bool		d_roverwrapped;
@@ -62,16 +62,3 @@ void D_SetupFrame (void)
 
 	d_drawspans = D_DrawSpans16;
 }
-
-
-/*
-===============
-D_UpdateRects
-===============
-*/
-void D_UpdateRects (vrect_t *prect)
-{
-	// the software driver draws these directly to the vid buffer
-	USED(prect);
-}
-

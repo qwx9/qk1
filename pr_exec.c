@@ -17,12 +17,12 @@ static int			localstack_used;
 
 bool	pr_trace;
 dfunction_t	*pr_xfunction;
-int			pr_xstatement;
+static int pr_xstatement;
 
 
 int		pr_argc;
 
-char *pr_opnames[] =
+static const char *pr_opnames[] =
 {
 "DONE",
 

@@ -3,14 +3,14 @@
 drawsurf_t	r_drawsurf;
 
 static int sourcetstep, lightleftstep, lightrightstep;
-void			*prowdestbase;
-unsigned char	*pbasesource;
-int				surfrowbytes;	// used by ASM files
-unsigned		*r_lightptr;
-int				r_stepback;
-int				r_lightwidth;
-int				r_numhblocks, r_numvblocks;
-unsigned char	*r_source, *r_sourcemax;
+static int surfrowbytes;	// used by ASM files
+static int r_stepback;
+static int r_numhblocks, r_numvblocks;
+static byte *r_source, *r_sourcemax;
+static unsigned *r_lightptr;
+static int r_lightwidth;
+static byte *pbasesource;
+static void *prowdestbase;
 
 static void R_DrawSurfaceBlock8_mip0 (void);
 static void R_DrawSurfaceBlock8_mip1 (void);
@@ -480,40 +480,4 @@ static void R_DrawSurfaceBlock8_mip3 (void)
 		if (psource >= r_sourcemax)
 			psource -= r_stepback;
 	}
-}
-
-/*
-================
-R_GenTurbTile
-================
-*/
-void R_GenTurbTile (pixel_t *pbasetex, void *pdest)
-{
-	int		*turb;
-	int		i, j, s, t;
-	byte	*pd;
-
-	turb = sintable + ((int)(cl.time*SPEED)&(CYCLE-1));
-	pd = (byte *)pdest;
-
-	for (i=0 ; i<TILE_SIZE ; i++)
-	{
-		for (j=0 ; j<TILE_SIZE ; j++)
-		{
-			s = (((j << 16) + turb[i & (CYCLE-1)]) >> 16) & 63;
-			t = (((i << 16) + turb[j & (CYCLE-1)]) >> 16) & 63;
-			*pd++ = *(pbasetex + (t<<6) + s);
-		}
-	}
-}
-
-void
-R_GenTile(msurface_t *psurf, void *pdest)
-{
-	if(psurf->flags & SURF_DRAWTURB){
-		R_GenTurbTile((pixel_t *)
-			((byte *)psurf->texinfo->texture
-			+ psurf->texinfo->texture->offsets[0]), pdest);
-	}else if((psurf->flags & SURF_DRAWSKY) == 0)
-		fatal("Unknown tile type");
 }

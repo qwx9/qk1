@@ -33,7 +33,6 @@ typedef struct edict_s
 
 extern	dprograms_t		*progs;
 extern	dfunction_t		*pr_functions;
-extern	char			*pr_strings;
 extern	ddef_t			*pr_globaldefs;
 extern	ddef_t			*pr_fielddefs;
 extern	dstatement_t	*pr_statements;
@@ -99,14 +98,13 @@ int NUM_FOR_EDICT(edict_t *e);
 extern	int		type_size[8];
 
 typedef void (*builtin_t) (void);
-extern	builtin_t *pr_builtins;
-extern int pr_numbuiltins;
+extern const builtin_t *pr_builtins;
+extern const int pr_numbuiltins;
 
 extern int		pr_argc;
 
 extern	bool	pr_trace;
 extern	dfunction_t	*pr_xfunction;
-extern	int			pr_xstatement;
 
 #pragma varargck	argpos	PR_RunError	1
 void PR_RunError (char *error, ...);

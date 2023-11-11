@@ -221,7 +221,6 @@ extern	cvar_t	cl_pitchspeed;
 extern	cvar_t	cl_anglespeedkey;
 
 extern	cvar_t	cl_shownet;
-extern	cvar_t	cl_nolerp;
 
 extern	cvar_t	cl_pitchdriftspeed;
 extern	cvar_t	lookspring;
@@ -239,8 +238,6 @@ extern	cvar_t	m_side;
 
 extern	client_state_t	cl;
 
-// FIXME, allocate dynamically
-extern	efrag_t			*cl_efrags;
 extern	entity_t		*cl_entities;
 extern	entity_t		*cl_static_entities;
 extern	lightstyle_t	cl_lightstyle[Nlights];
@@ -280,9 +277,7 @@ typedef struct
 	int		state;			// low bit is down state
 } kbutton_t;
 
-extern	kbutton_t	in_mlook, in_klook;
-extern 	kbutton_t 	in_strafe;
-extern 	kbutton_t 	in_speed;
+extern kbutton_t in_mlook, in_strafe;
 
 void CL_InitInput (void);
 void CL_SendCmd (void);
@@ -300,7 +295,6 @@ void CL_WriteToServer (usercmd_t *cmd);
 void CL_BaseMove (usercmd_t *cmd);
 
 
-float CL_KeyState (kbutton_t *key);
 char *Key_KeynumToString (int keynum);
 
 //

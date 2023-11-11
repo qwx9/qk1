@@ -30,32 +30,6 @@ void SV_Physics_Toss (edict_t *ent);
 
 /*
 ================
-SV_CheckAllEnts
-================
-*/
-void SV_CheckAllEnts (void)
-{
-	int			e;
-	edict_t		*check;
-
-	// see if any solid entities are inside the final position
-	check = NEXT_EDICT(sv.edicts);
-	for (e=1 ; e<sv.num_edicts ; e++, check = NEXT_EDICT(check))
-	{
-		if (check->free)
-			continue;
-		if (check->v.movetype == MOVETYPE_PUSH
-		|| check->v.movetype == MOVETYPE_NONE
-		|| check->v.movetype == MOVETYPE_NOCLIP)
-			continue;
-
-		if (SV_TestEntityPosition (check))
-			Con_Printf ("entity in invalid position\n");
-	}
-}
-
-/*
-================
 SV_CheckVelocity
 ================
 */
@@ -1099,8 +1073,6 @@ void SV_Physics (void)
 	pr_global_struct->other = EDICT_TO_PROG(sv.edicts);
 	pr_global_struct->time = sv.time;
 	PR_ExecuteProgram (pr_global_struct->StartFrame);
-
-	//SV_CheckAllEnts ();
 
 	// treat each object in turn
 	ent = sv.edicts;

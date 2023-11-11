@@ -8,7 +8,7 @@ cvar_t	cl_name = {"_cl_name", "player", true};
 cvar_t	cl_color = {"_cl_color", "0", true};
 
 cvar_t	cl_shownet = {"cl_shownet","0"};	// can be 0, 1, or 2
-cvar_t	cl_nolerp = {"cl_nolerp","0"};
+static cvar_t cl_nolerp = {"cl_nolerp","0"};
 
 cvar_t	lookspring = {"lookspring","0", true};
 cvar_t	lookstrafe = {"lookstrafe","0", true};
@@ -19,11 +19,11 @@ cvar_t	m_yaw = {"m_yaw","0.022", true};
 cvar_t	m_forward = {"m_forward","1", true};
 cvar_t	m_side = {"m_side","0.8", true};
 
+static efrag_t *cl_efrags;
 
 client_static_t	cls;
 client_state_t	cl;
 entity_t		**cl_visedicts;
-efrag_t			*cl_efrags;
 entity_t		*cl_entities;
 entity_t		*cl_static_entities;
 lightstyle_t	cl_lightstyle[Nlights];
@@ -77,7 +77,7 @@ void CL_Disconnect (void)
 	stopallsfx();
 
 	// bring the console down and fade the colors back to normal
-	//	SCR_BringDownConsole ();
+	SCR_BringDownConsole ();
 
 	// if running a local server, shut it down
 	if (cls.demoplayback)
@@ -109,9 +109,6 @@ void CL_Disconnect_f (void)
 	if (sv.active)
 		Host_ShutdownServer (false);
 }
-
-
-
 
 /*
 =====================
@@ -220,7 +217,7 @@ void CL_NextDemo (void)
 CL_PrintEntities_f
 ==============
 */
-void CL_PrintEntities_f (void)
+static void CL_PrintEntities_f (void)
 {
 	entity_t	*ent;
 	int			i;
@@ -235,18 +232,6 @@ void CL_PrintEntities_f (void)
 			ent->angles[0], ent->angles[1], ent->angles[2]
 		);
 	}
-}
-
-
-/*
-===============
-SetPal
-
-Debugging tool, just flashes the screen
-===============
-*/
-void SetPal (int /*i*/)
-{
 }
 
 /*
@@ -329,7 +314,7 @@ Determines the fraction between the last two messages that the objects
 should be put at.
 ===============
 */
-float	CL_LerpPoint (void)
+static float	CL_LerpPoint (void)
 {
 	float	f, frac;
 
@@ -347,29 +332,18 @@ float	CL_LerpPoint (void)
 		f = 0.1;
 	}
 	frac = (cl.time - cl.mtime[1]) / f;
-	//Con_Printf ("frac: %f\n",frac);
 	if (frac < 0)
 	{
 		if (frac < -0.01)
-		{
-			SetPal(1);
 			cl.time = cl.mtime[1];
-			//Con_Printf ("low frac\n");
-		}
 		frac = 0;
 	}
 	else if (frac > 1)
 	{
 		if (frac > 1.01)
-		{
-			SetPal(2);
 			cl.time = cl.mtime[0];
-			//Con_Printf ("high frac\n");
-		}
 		frac = 1;
 	}
-	else
-		SetPal(0);
 
 	return frac;
 }
@@ -380,7 +354,7 @@ float	CL_LerpPoint (void)
 CL_RelinkEntities
 ===============
 */
-void CL_RelinkEntities (void)
+static void CL_RelinkEntities (void)
 {
 	entity_t	*ent;
 	int			i, j;
@@ -588,13 +562,13 @@ void CL_SendCmd (void)
 
 	if (cls.signon == SIGNONS)
 	{
-	// get basic movement from keyboard
+		// get basic movement from keyboard
 		CL_BaseMove (&cmd);
 
-	// allow mice or other external controllers to add to the move
+		// allow mice or other external controllers to add to the move
 		IN_Move (&cmd);
 
-	// send the unreliable message
+		// send the unreliable message
 		CL_SendMove (&cmd);
 
 	}
@@ -661,8 +635,8 @@ void CL_Init (void)
 	Cvar_RegisterVariable (&m_forward);
 	Cvar_RegisterVariable (&m_side);
 
-	Cmd_AddCommand ("entities", CL_PrintEntities_f);
-	Cmd_AddCommand ("disconnect", CL_Disconnect_f);
+	Cmd_AddCommand("entities", CL_PrintEntities_f);
+	Cmd_AddCommand("disconnect", CL_Disconnect_f);
 	Cmd_AddCommand("stop", stopdemo);
 	Cmd_AddCommand("record", recdemo);
 	Cmd_AddCommand("playdemo", playdemo);

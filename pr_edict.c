@@ -2,7 +2,7 @@
 
 dprograms_t		*progs;
 dfunction_t		*pr_functions;
-char			*pr_strings;
+static char		*pr_strings;
 static int		pr_strings_size;
 ddef_t			*pr_fielddefs;
 ddef_t			*pr_globaldefs;
@@ -26,17 +26,18 @@ ddef_t *ED_FieldAtOfs (int ofs);
 bool	ED_ParseEpair (void *base, ddef_t *key, char *s);
 
 cvar_t	nomonsters = {"nomonsters", "0"};
-cvar_t	gamecfg = {"gamecfg", "0"};
-cvar_t	scratch1 = {"scratch1", "0"};
-cvar_t	scratch2 = {"scratch2", "0"};
-cvar_t	scratch3 = {"scratch3", "0"};
-cvar_t	scratch4 = {"scratch4", "0"};
-cvar_t	savedgamecfg = {"savedgamecfg", "0", true};
-cvar_t	saved1 = {"saved1", "0", true};
-cvar_t	saved2 = {"saved2", "0", true};
-cvar_t	saved3 = {"saved3", "0", true};
-cvar_t	saved4 = {"saved4", "0", true};
-cvar_t	pr_checkextension = {"pr_checkextension", "1"};
+
+static cvar_t scratch1 = {"scratch1", "0"};
+static cvar_t scratch2 = {"scratch2", "0"};
+static cvar_t scratch3 = {"scratch3", "0"};
+static cvar_t scratch4 = {"scratch4", "0"};
+static cvar_t saved1 = {"saved1", "0", true};
+static cvar_t saved2 = {"saved2", "0", true};
+static cvar_t saved3 = {"saved3", "0", true};
+static cvar_t saved4 = {"saved4", "0", true};
+static cvar_t gamecfg = {"gamecfg", "0"};
+static cvar_t savedgamecfg = {"savedgamecfg", "0", true};
+static cvar_t pr_checkextension = {"pr_checkextension", "1"};
 
 #define	MAX_FIELD_LEN	64
 #define GEFV_CACHESIZE	2
@@ -49,14 +50,14 @@ typedef struct {
 static gefv_cache	gefvCache[GEFV_CACHESIZE] = {{nil, ""}, {nil, ""}};
 
 #define MAX_PRSTR 1024
-char **prstr;
-int num_prstr;
-int max_prstr;
+static char **prstr;
+static int max_prstr;
+static int num_prstr;
 
 #define MAX_PRTEMPSTR 1024
 #define PRTEMPSTR_SIZE 1024
-char *prtempstr;
-int num_prtempstr;
+static char *prtempstr;
+static int num_prtempstr;
 
 char *
 PR_StrTmp(void)

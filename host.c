@@ -17,10 +17,11 @@ bool	host_initialized;		// true if into command execution
 double		host_frametime;
 double		host_time;
 double		realtime;				// without any filtering or bounding
-double		oldrealtime;			// last frame run
 int			host_framecount;
 
-void		*host_hunklevel;
+static double oldrealtime;			// last frame run
+
+static void *host_hunklevel;
 
 client_t	*host_client;			// current client
 
@@ -502,7 +503,7 @@ void _Host_Frame (float time)
 	if (host_speeds.value)
 		time1 = dtime ();
 
-	SCR_UpdateScreen ();
+	SCR_UpdateScreen (false);
 
 	if (host_speeds.value)
 		time2 = dtime ();

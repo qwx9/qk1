@@ -85,7 +85,6 @@ typedef struct qsocket_s
 
 extern qsocket_t	*net_activeSockets;
 extern qsocket_t	*net_freeSockets;
-extern int			net_numsockets;
 
 typedef struct Landrv Landrv;
 typedef struct Netdrv Netdrv;
@@ -121,8 +120,6 @@ struct Netdrv{
 	void	(*Close)(qsocket_t *);
 	void	(*Shutdown)(void);
 };
-extern int net_numdrivers;
-extern Netdrv netdrv[MAX_NET_DRIVERS];
 
 extern int net_driverlevel;
 extern cvar_t		hostname;
@@ -201,7 +198,6 @@ void	Datagram_Close(qsocket_t *);
 void		Datagram_Shutdown (void);
 
 int			Loop_Init (void);
-void		Loop_Listen (bool state);
 qsocket_t 	*Loop_Connect (char *host);
 qsocket_t 	*Loop_CheckNewConnections (void);
 int			Loop_GetMessage (qsocket_t *sock);

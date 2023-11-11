@@ -21,24 +21,17 @@ surf_t	*surfaces, *surface_p, *surf_max;
 edge_t	*newedges[MAXHEIGHT];
 edge_t	*removeedges[MAXHEIGHT];
 
-espan_t	*span_p, *max_span_p;
+static espan_t *span_p, *max_span_p;
 
 int		r_currentkey;
 
 extern	int	screenwidth;
 
-int	current_iv;
-
-int	edge_head_u_shift20, edge_tail_u_shift20;
+static int current_iv, edge_head_u_shift20, edge_tail_u_shift20;
+static edge_t edge_head, edge_tail, edge_aftertail, edge_sentinel;
+static float fv;
 
 static void (*pdrawfunc)(void);
-
-edge_t	edge_head;
-edge_t	edge_tail;
-edge_t	edge_aftertail;
-edge_t	edge_sentinel;
-
-float	fv;
 
 void R_GenerateSpans (void);
 
@@ -233,87 +226,6 @@ void R_CleanupSpan (void)
 		surf = surf->next;
 	} while (surf != &surfaces[1]);
 }
-
-
-/*
-==============
-R_LeadingEdgeBackwards
-==============
-*/
-void R_LeadingEdgeBackwards (edge_t *edge)
-{
-	espan_t			*span;
-	surf_t			*surf, *surf2;
-	int				iu;
-
-	// it's adding a new surface in, so find the correct place
-	surf = &surfaces[edge->surfs[1]];
-
-	// don't start a span if this is an inverted span, with the end
-	// edge preceding the start edge (that is, we've already seen the
-	// end edge)
-	if (++surf->spanstate == 1)
-	{
-		surf2 = surfaces[1].next;
-
-		if (surf->key > surf2->key)
-			goto newtop;
-
-		// if it's two surfaces on the same plane, the one that's already
-		// active is in front, so keep going unless it's a bmodel
-		if (surf->insubmodel && (surf->key == surf2->key))
-		{
-			// must be two bmodels in the same leaf; don't care, because they'll
-			// never be farthest anyway
-			goto newtop;
-		}
-
-continue_search:
-
-		do
-		{
-			surf2 = surf2->next;
-		} while (surf->key < surf2->key);
-
-		if (surf->key == surf2->key)
-		{
-			// if it's two surfaces on the same plane, the one that's already
-			// active is in front, so keep going unless it's a bmodel
-			if (!surf->insubmodel)
-				goto continue_search;
-
-			// must be two bmodels in the same leaf; don't care which is really
-			// in front, because they'll never be farthest anyway
-		}
-
-		goto gotposition;
-
-newtop:
-		// emit a span (obscures current top)
-		iu = edge->u >> 20;
-
-		if (iu > surf2->last_u)
-		{
-			span = span_p++;
-			span->u = surf2->last_u;
-			span->count = iu - span->u;
-			span->v = current_iv;
-			span->pnext = surf2->spans;
-			surf2->spans = span;
-		}
-
-		// set last_u on the new span
-		surf->last_u = iu;
-
-gotposition:
-		// insert before surf2
-		surf->next = surf2;
-		surf->prev = surf2->prev;
-		surf2->prev->next = surf;
-		surf2->prev = surf;
-	}
-}
-
 
 /*
 ==============

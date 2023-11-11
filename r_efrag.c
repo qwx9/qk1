@@ -13,11 +13,9 @@ mnode_t	*r_pefragtopnode;
 ===============================================================================
 */
 
-efrag_t		**lastlink;
+static efrag_t **lastlink;
 
 vec3_t		r_emins, r_emaxs;
-
-entity_t	*r_addent;
 
 
 /*
@@ -66,7 +64,7 @@ void R_RemoveEfrags (entity_t *ent)
 R_SplitEntityOnNode
 ===================
 */
-void R_SplitEntityOnNode (mnode_t *node)
+static void R_SplitEntityOnNode (mnode_t *node, entity_t *add)
 {
 	efrag_t		*ef;
 	mplane_t	*splitplane;
@@ -96,7 +94,7 @@ void R_SplitEntityOnNode (mnode_t *node)
 		}
 		cl.free_efrags = cl.free_efrags->entnext;
 
-		ef->entity = r_addent;
+		ef->entity = add;
 
 		// add the entity link
 		*lastlink = ef;
@@ -126,10 +124,10 @@ void R_SplitEntityOnNode (mnode_t *node)
 
 	// recurse down the contacted sides
 	if (sides & 1)
-		R_SplitEntityOnNode (node->children[0]);
+		R_SplitEntityOnNode (node->children[0], add);
 
 	if (sides & 2)
-		R_SplitEntityOnNode (node->children[1]);
+		R_SplitEntityOnNode (node->children[1], add);
 }
 
 
@@ -188,8 +186,6 @@ void R_AddEfrags (entity_t *ent)
 	if (ent == cl_entities)
 		return;		// never add the world
 
-	r_addent = ent;
-
 	lastlink = &ent->efrag;
 	r_pefragtopnode = nil;
 
@@ -201,7 +197,7 @@ void R_AddEfrags (entity_t *ent)
 		r_emaxs[i] = ent->origin[i] + entmodel->maxs[i];
 	}
 
-	R_SplitEntityOnNode (cl.worldmodel->nodes);
+	R_SplitEntityOnNode (cl.worldmodel->nodes, ent);
 
 	ent->topnode = r_pefragtopnode;
 }

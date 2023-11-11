@@ -45,7 +45,6 @@ typedef struct {
 extern cvar_t	r_clearcolor;
 extern cvar_t	r_waterwarp;
 extern cvar_t	r_fullbright;
-extern cvar_t	r_drawentities;
 extern cvar_t	r_ambient;
 extern cvar_t	r_reportsurfout;
 extern cvar_t	r_numsurfs;
@@ -114,9 +113,7 @@ extern	bool		insubmodel;
 
 void R_DrawSprite (void);
 int R_RenderFace (msurface_t *fa, int clipflags);
-void R_RenderPoly (msurface_t *fa, int clipflags);
 void R_RenderBmodelFace (bedge_t *pedges, msurface_t *psurf);
-void R_TransformPlane (mplane_t *p, float *normal, float *dist);
 void R_TransformFrustum (void);
 void R_SetSkyFrame (void);
 void R_DrawSurfaceBlock8 (void);
@@ -171,7 +168,6 @@ extern int		r_currentkey;
 extern int		r_currentbkey;
 
 void	R_InitTurb (void);
-void	R_ZDrawSubmodelPolys (model_t *clmodel);
 
 //=========================================================
 // Alias models
@@ -211,9 +207,6 @@ extern	edge_t	*removeedges[MAXHEIGHT];
 extern	int	screenwidth;
 
 // FIXME: make stack vars when debugging done
-extern	edge_t	edge_head;
-extern	edge_t	edge_tail;
-extern	edge_t	edge_aftertail;
 extern int		r_bmodelactive;
 
 extern float		aliasxscale, aliasyscale, aliasxcenter, aliasycenter;

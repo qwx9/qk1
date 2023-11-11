@@ -1,7 +1,7 @@
 #include "quakedef.h"
 
-model_t	*loadmodel;
-char	loadname[32];	// for hunk tags
+static model_t *loadmodel;
+static char loadname[32];	// for hunk tags
 
 void Mod_LoadSpriteModel (model_t *mod, void *buffer);
 void Mod_LoadBrushModel (model_t *mod, void *buffer);
@@ -9,8 +9,8 @@ void Mod_LoadAliasModel (model_t *mod, void *buffer);
 model_t *Mod_LoadModel (model_t *mod, bool crash);
 
 #define	MAX_MOD_KNOWN	4096
-model_t	*mod_known;
-int		mod_numknown;
+static model_t *mod_known;
+static int mod_numknown;
 
 // values for model_t's needload
 #define NL_PRESENT		0
@@ -305,8 +305,7 @@ model_t *Mod_ForName (char *name, bool crash)
 ===============================================================================
 */
 
-byte	*mod_base;
-
+static byte *mod_base;
 
 /*
 =================
