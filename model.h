@@ -273,16 +273,31 @@ typedef struct {
 // Whole model
 //
 
-typedef enum {mod_brush, mod_sprite, mod_alias} modtype_t;
+typedef enum {
+	mod_brush,
+	mod_sprite,
+	mod_alias,
+} modtype_t;
 
-#define	EF_ROCKET	1			// leave a trail
-#define	EF_GRENADE	2			// leave a trail
-#define	EF_GIB		4			// leave a trail
-#define	EF_ROTATE	8			// rotate (bonus items)
-#define	EF_TRACER	16			// green split trail
-#define	EF_ZOMGIB	32			// small blood trail
-#define	EF_TRACER2	64			// orange split trail + rotate
-#define	EF_TRACER3	128			// purple trail
+enum {
+	EF_ROCKET = 1<<0, // leave a trail
+	EF_GRENADE = 1<<1, // leave a trail
+	EF_GIB = 1<<2, // leave a trail
+	EF_ROTATE = 1<<3, // rotate (bonus items)
+	EF_TRACER = 1<<4, // green split trail
+	EF_ZOMGIB = 1<<5, // small blood trail
+	EF_TRACER2 = 1<<6, // orange split trail + rotate
+	EF_TRACER3 = 1<<7, // purple trail
+};
+
+typedef struct
+{
+	float		mins[3], maxs[3];
+	float		origin[3];
+	int			headnode[MAX_MAP_HULLS];
+	int			visleafs;		// not including the solid leaf 0
+	int			firstface, numfaces;
+} submodel_t;
 
 typedef struct model_s
 {
@@ -308,7 +323,7 @@ typedef struct model_s
 	int			firstmodelsurface, nummodelsurfaces;
 
 	int			numsubmodels;
-	dmodel_t	*submodels;
+	submodel_t	*submodels;
 
 	int			numplanes;
 	mplane_t	*planes;

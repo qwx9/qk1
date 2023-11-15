@@ -41,6 +41,9 @@ OFILES=\
 	mathlib.$O\
 	menu.$O\
 	model.$O\
+	model_brush.$O\
+	model_bsp.$O\
+	model_bsp2.$O\
 	nanosec.$O\
 	net_dgrm.$O\
 	net_loop.$O\

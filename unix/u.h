@@ -38,7 +38,7 @@ typedef uintptr_t uintptr;
 #define setmalloctag(p, t) do{USED(p); USED(t);}while(0)
 
 extern char lasterr[256];
-#define werrstr(fmt, ...) do{snprint(lasterr, sizeof(lasterr), fmt, __VA_ARGS__); }while(0)
+#define werrstr(fmt...) do{snprint(lasterr, sizeof(lasterr), fmt); }while(0)
 
 char *seprint(char *, char *, char *, ...);
 int nrand(int);

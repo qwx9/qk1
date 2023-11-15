@@ -43,6 +43,9 @@ OBJS=\
 	mathlib.o\
 	menu.o\
 	model.o\
+	model_brush.o\
+	model_bsp.o\
+	model_bsp2.o\
 	net_loop.o\
 	net_main.o\
 	pal.o\
