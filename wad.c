@@ -98,7 +98,6 @@ lumpinfo_t	*W_GetLumpinfo (char *name)
 	}
 
 	fatal ("W_GetLumpinfo: %s not found", name);
-	return nil;
 }
 
 void *W_GetLumpName (char *name)

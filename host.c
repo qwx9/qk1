@@ -84,7 +84,7 @@ Host_Error
 This shuts down both the client and server
 ================
 */
-void Host_Error (char *fmt, ...)
+_Noreturn void Host_Error (char *fmt, ...)
 {
 	va_list arg;
 	char s[1024];

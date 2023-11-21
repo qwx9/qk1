@@ -109,7 +109,6 @@ PR_Str(int i)
 	if(i < 0 && i >= -num_prstr && prstr[-1-i] != nil)
 		return prstr[-1-i];
 	Host_Error("PR_Str: invalid offset %d", i);
-	return "";
 }
 
 /*

@@ -29,7 +29,7 @@ lerr(void)
 	return err;
 }
 
-void
+_Noreturn void
 fatal(char *fmt, ...)
 {
 	char s[1024];

@@ -49,7 +49,7 @@ int	loaddm(char*);
 int	opendm(char*, int);
 void	initfs(char **paths);
 #pragma varargck	argpos	fatal	1
-void	fatal(char*, ...);
+_Noreturn void	fatal(char*, ...);
 void*	emalloc(ulong);
 vlong	flen(int);
 double	dtime(void);
