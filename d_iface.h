@@ -74,7 +74,6 @@ typedef struct
 	float			nearzi;
 } spritedesc_t;
 
-extern int		d_spanpixcount;
 extern int		r_framecount;		// sequence # of current frame since Quake
 									//  started
 extern bool	r_recursiveaffinetriangles;	// true if a driver wants to use

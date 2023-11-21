@@ -232,10 +232,6 @@ r_refdef.viewangles[2]=    0;
 
 	// clear frame counts
 	c_faceclip = 0;
-	d_spanpixcount = 0;
-	r_polycount = 0;
-	r_drawnpolycount = 0;
-	r_wholepolycount = 0;
 
 	D_SetupFrame ();
 }

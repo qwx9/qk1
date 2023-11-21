@@ -1,7 +1,5 @@
 #include "quakedef.h"
 
-//define	PASSAGES
-
 void		*colormap;
 static vec3_t viewlightvec;
 static alight_t r_viewlighting = {128, 192, viewlightvec};
@@ -57,16 +55,9 @@ mplane_t	screenedge[4];
 //
 int		r_framecount = 1;	// so frame counts initialized to 0 don't match
 int		r_visframecount;
-int		d_spanpixcount;
-int		r_polycount;
-int		r_drawnpolycount;
-int		r_wholepolycount;
 
 int			*pfrustum_indexes[4];
 int			r_frustum_indexes[4*6];
-
-int		reinit_surfcache = 1;	// if 1, surface cache is currently empty and
-								// must be reinitialized for current cache size
 
 mleaf_t		*r_viewleaf, *r_oldviewleaf;
 
@@ -215,9 +206,6 @@ void R_NewMap (void)
 	r_maxsurfsseen = 0;
 	r_dowarpold = false;
 	r_viewchanged = false;
-#ifdef PASSAGES
-CreatePassages ();
-#endif
 }
 
 
@@ -710,13 +698,7 @@ void R_RenderView (void)
 	r_warpbuffer = warpbuffer;
 
 	R_SetupFrame ();
-
-#ifdef PASSAGES
-	SetVisibilityByPassages ();
-#endif
-#ifndef PASSAGES
 	R_MarkLeaves ();	// done here so we know if we're in water
-#endif
 
 	if (!cl_entities[0].model || !cl.worldmodel)
 		fatal ("R_RenderView: NULL worldmodel");

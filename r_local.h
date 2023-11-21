@@ -143,7 +143,6 @@ extern void R_RotateBmodel (void);
 
 extern int	c_faceclip;
 extern int	r_polycount;
-extern int	r_wholepolycount;
 
 extern	model_t		*cl_worldmodel;
 
@@ -152,17 +151,12 @@ extern int		*pfrustum_indexes[4];
 // !!! if this is changed, it must be changed in asm_draw.h too !!!
 #define	NEAR_CLIP	0.01
 
-extern int			ubasestep, errorterm, erroradjustup, erroradjustdown;
-extern int			vstartscan;
-
 extern fixed16_t	sadjust, tadjust;
 extern fixed16_t	bbextents, bbextentt;
 
 #define MAXBVERTINDEXES	1000	// new clipped vertices when clipping bmodels
 								//  to the world BSP
 extern mvertex_t	*r_ptverts, *r_ptvertsmax;
-
-extern int		reinit_surfcache;
 
 extern int		r_currentkey;
 extern int		r_currentbkey;

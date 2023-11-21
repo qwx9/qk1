@@ -50,14 +50,11 @@ extern float	d_sdivzorigin, d_tdivzorigin, d_ziorigin;
 extern fixed16_t	sadjust, tadjust;
 extern fixed16_t	bbextents, bbextentt;
 
-void D_DrawSpans8 (espan_t *pspans);
-void D_DrawSpans16 (espan_t *pspans, byte alpha);
+void D_DrawSpans16 (espan_t *pspans, int forceblend, byte alpha);
 void D_DrawZSpans (espan_t *pspans);
 void Turbulent8 (espan_t *pspan, byte alpha);
-void D_DrawSpans16_Fence (espan_t *pspan, byte alpha);
 
 void D_DrawSkyScans8 (espan_t *pspan);
-void D_DrawSkyScans16 (espan_t *pspan);
 
 void R_ShowSubDiv (void);
 surfcache_t	*D_CacheSurface (msurface_t *surface, int miplevel);
@@ -78,8 +75,6 @@ extern uzint	*zspantable[MAXHEIGHT];
 
 extern int		d_minmip;
 extern float	d_scalemip[3];
-
-extern void (*d_drawspans) (espan_t *pspan, byte alpha);
 
 enum {
 	// perhaps a bit too much, but looks ok

@@ -32,7 +32,7 @@ void InsertLinkBefore (link_t *l, link_t *before);
 
 #define max(a,b) ((a)>(b)?(a):(b))
 #define min(a,b) ((a)<(b)?(a):(b))
-#define clamp(x,a,b) (min(max((x),(a)),(b)))
+#define clamp(x,a,b) ((x)>(b)?(b):((x)<(a)?(a):(x)))
 
 #define Q_MAXCHAR ((char)0x7f)
 #define Q_MAXSHORT ((short)0x7fff)

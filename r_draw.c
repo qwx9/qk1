@@ -493,8 +493,6 @@ int R_RenderFace (msurface_t *fa, int clipflags)
 	if (!r_emitted)
 		return 1;
 
-	r_polycount++;
-
 	surface_p->data = (void *)fa;
 	surface_p->nearzi = r_nearzi;
 	surface_p->flags = fa->flags;
@@ -608,8 +606,6 @@ void R_RenderBmodelFace (bedge_t *pedges, msurface_t *psurf)
 	// if no edges made it out, return without posting the surface
 	if (!r_emitted)
 		return;
-
-	r_polycount++;
 
 	surface_p->data = (void *)psurf;
 	surface_p->nearzi = r_nearzi;

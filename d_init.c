@@ -1,64 +1,43 @@
 #include "quakedef.h"
 
-#define NUM_MIPS	4
+static cvar_t d_mipcap = {"d_mipcap", "0"};
+static cvar_t d_mipscale = {"d_mipscale", "1"};
 
-static cvar_t	d_mipcap = {"d_mipcap", "0"};
-static cvar_t	d_mipscale = {"d_mipscale", "1"};
+surfcache_t *d_initial_rover;
+bool d_roverwrapped;
+int d_minmip;
+float d_scalemip[MIPLEVELS-1];
 
-surfcache_t		*d_initial_rover;
-bool		d_roverwrapped;
-int				d_minmip;
-float			d_scalemip[NUM_MIPS-1];
+static float basemip[MIPLEVELS-1] = {1.0, 0.5*0.8, 0.25*0.8};
 
-static float	basemip[NUM_MIPS-1] = {1.0, 0.5*0.8, 0.25*0.8};
-
-void (*d_drawspans) (espan_t *pspan, byte alpha);
-
-
-/*
-===============
-D_Init
-===============
-*/
-void D_Init (void)
+void
+D_Init(void)
 {
-	Cvar_RegisterVariable (&d_mipcap);
-	Cvar_RegisterVariable (&d_mipscale);
+	Cvar_RegisterVariable(&d_mipcap);
+	Cvar_RegisterVariable(&d_mipscale);
 
 	r_recursiveaffinetriangles = true;
 	r_aliasuvscale = 1.0;
 }
 
-/*
-===============
-D_SetupFrame
-===============
-*/
-void D_SetupFrame (void)
+void
+D_SetupFrame(void)
 {
-	int		i;
+	int i;
 
-	if (r_dowarp)
+	if(r_dowarp){
 		d_viewbuffer = r_warpbuffer;
-	else
-		d_viewbuffer = (void *)(byte *)vid.buffer;
-
-	if (r_dowarp)
 		screenwidth = WARP_WIDTH;
-	else
+	}else{
+		d_viewbuffer = (void *)vid.buffer;
 		screenwidth = vid.rowbytes;
+	}
 
 	d_roverwrapped = false;
 	d_initial_rover = sc_rover;
 
-	d_minmip = d_mipcap.value;
-	if (d_minmip > 3)
-		d_minmip = 3;
-	else if (d_minmip < 0)
-		d_minmip = 0;
+	d_minmip = clamp(d_mipcap.value, 0, MIPLEVELS-1);
 
-	for (i=0 ; i<(NUM_MIPS-1) ; i++)
+	for(i = 0; i < MIPLEVELS-1; i++)
 		d_scalemip[i] = basemip[i] * d_mipscale.value;
-
-	d_drawspans = D_DrawSpans16;
 }

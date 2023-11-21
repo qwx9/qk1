@@ -99,8 +99,6 @@ extern void TransformVector (vec3_t in, vec3_t out);
 extern void SetUpForLineScan(fixed8_t startvertu, fixed8_t startvertv,
 	fixed8_t endvertu, fixed8_t endvertv);
 
-extern int	ubasestep, errorterm, erroradjustup, erroradjustdown;
-
 // flags in finalvert_t.flags
 #define ALIAS_LEFT_CLIP				0x0001
 #define ALIAS_TOP_CLIP				0x0002

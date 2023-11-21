@@ -63,6 +63,7 @@ static int d_lightbasestep, d_pdestbasestep, d_ptexbasestep;
 static int d_sfracbasestep, d_tfracbasestep;
 static int d_ziextrastep, d_zibasestep;
 static int d_pzextrastep, d_pzbasestep;
+static int ubasestep, errorterm, erroradjustup, erroradjustdown;
 
 typedef struct {
 	int		quotient;
