@@ -277,13 +277,10 @@ Mod_ForName
 Loads in a model for the given name
 ==================
 */
-model_t *Mod_ForName (char *name, bool crash)
+model_t *
+Mod_ForName(char *name, bool crash)
 {
-	model_t	*mod;
-
-	mod = Mod_FindName (name);
-
-	return Mod_LoadModel (mod, crash);
+	return Mod_LoadModel(Mod_FindName(name), crash);
 }
 
 /*

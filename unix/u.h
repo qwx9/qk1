@@ -18,6 +18,7 @@ typedef unsigned char uchar;
 typedef long long vlong;
 typedef unsigned long long uvlong;
 typedef uint8_t u8int;
+typedef int16_t s16int;
 typedef uint16_t u16int;
 typedef int32_t s32int;
 typedef uint32_t u32int;

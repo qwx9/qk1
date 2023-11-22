@@ -31,11 +31,6 @@ typedef struct
 	struct model_s	*models[MAX_MODELS];
 	char		*sound_precache[MAX_SOUNDS];	// NULL terminated
 	char		*lightstyles[Nlights];
-	int			num_edicts;
-	int			max_edicts;
-	edict_t		*edicts;			// can NOT be array indexed, because
-									// edict_t is variable sized, but can
-									// be used to reference the world ent
 	server_state_t	state;			// some actions are only valid during load
 
 	sizebuf_t	datagram;
@@ -46,6 +41,8 @@ typedef struct
 
 	sizebuf_t	signon;
 	byte		signon_buf[NET_MAXMESSAGE];
+
+	pr_t *pr;
 } server_t;
 
 
@@ -197,8 +194,6 @@ bool SV_CheckBottom (edict_t *ent);
 bool SV_movestep (edict_t *ent, vec3_t move, bool relink);
 
 void SV_WriteClientdataToMessage (edict_t *ent, sizebuf_t *msg);
-
-void SV_MoveToGoal (void);
 
 void SV_CheckForNewClients (void);
 void SV_RunClients (void);

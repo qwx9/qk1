@@ -151,7 +151,7 @@ void SV_StartSound (edict_t *entity, int channel, char *sample, int volume,
 	volume = clamp(volume, 0, 255);
 	attenuation = clamp(attenuation, 0, 4);
 	channel = max(channel, 0);
-	ent = NUM_FOR_EDICT(entity);
+	ent = NUM_FOR_EDICT(sv.pr, entity);
 	if(ent >= sv.protocol->limit_entity || channel >= sv.protocol->limit_channel || sound_num >= sv.protocol->limit_sound)
 		return;
 
@@ -219,7 +219,7 @@ void SV_SendServerinfo (client_t *client)
 
 	MSG_WriteByte (&client->message, (!coop.value && deathmatch.value) ? GAME_DEATHMATCH : GAME_COOP);
 
-	MSG_WriteString (&client->message, PR_Str(sv.edicts->v.message));
+	MSG_WriteString (&client->message, PR_Str(sv.pr, sv.pr->edicts->v.message));
 
 	for (n = 1, s = sv.model_precache+1 ; *s && n < sv.protocol->limit_model ; s++)
 		MSG_WriteString(&client->message, *s);
@@ -231,12 +231,12 @@ void SV_SendServerinfo (client_t *client)
 
 	// send music
 	MSG_WriteByte (&client->message, svc_cdtrack);
-	MSG_WriteByte (&client->message, sv.edicts->v.sounds);
-	MSG_WriteByte (&client->message, sv.edicts->v.sounds);
+	MSG_WriteByte (&client->message, sv.pr->edicts->v.sounds);
+	MSG_WriteByte (&client->message, sv.pr->edicts->v.sounds);
 
 	// set view
 	MSG_WriteByte (&client->message, svc_setview);
-	MSG_WriteShort (&client->message, NUM_FOR_EDICT(client->edict));
+	MSG_WriteShort (&client->message, NUM_FOR_EDICT(sv.pr, client->edict));
 
 	MSG_WriteByte (&client->message, svc_signonnum);
 	MSG_WriteByte (&client->message, 1);
@@ -267,7 +267,7 @@ void SV_ConnectClient (int clientnum)
 
 	edictnum = clientnum+1;
 
-	ent = EDICT_NUM(edictnum);
+	ent = EDICT_NUM(sv.pr, edictnum);
 
 	// set up the client_t
 	netconnection = client->netconnection;
@@ -289,9 +289,9 @@ void SV_ConnectClient (int clientnum)
 		memcpy(client->spawn_parms, spawn_parms, sizeof spawn_parms);
 	else{
 		// call the progs to get default spawn parms for the new client
-		PR_ExecuteProgram(pr_global_struct->SetNewParms);
+		PR_ExecuteProgram(sv.pr, sv.pr->global_struct->SetNewParms);
 		for(i=0; i<Nparms; i++)
-			client->spawn_parms[i] = (&pr_global_struct->parm1)[i];
+			client->spawn_parms[i] = (&sv.pr->global_struct->parm1)[i];
 	}
 
 	SV_SendServerinfo(client);
@@ -445,13 +445,13 @@ void SV_WriteEntitiesToClient (edict_t	*clent, sizebuf_t *msg)
 	pvs = SV_FatPVS (org, sv.worldmodel);
 
 	// send over all entities (excpet the client) that touch the pvs
-	ent = NEXT_EDICT(sv.edicts);
-	for (e=1 ; e<sv.num_edicts ; e++, ent = NEXT_EDICT(ent))
+	ent = NEXT_EDICT(sv.pr, sv.pr->edicts);
+	for (e=1 ; e<sv.pr->num_edicts ; e++, ent = NEXT_EDICT(sv.pr, ent))
 	{
 		// ignore if not touching a PV leaf
 		model = ent->v.modelindex;
 
-		v = GetEdictFieldValue(ent, "alpha");
+		v = GetEdictFieldValue(sv.pr, ent, "alpha");
 		alpha = v ? f2alpha(v->_float) : DEFAULT_ALPHA;
 
 		if (ent != clent)	// clent is ALLWAYS sent
@@ -459,7 +459,7 @@ void SV_WriteEntitiesToClient (edict_t	*clent, sizebuf_t *msg)
 			if((int)ent->v.effects == EF_NODRAW)
 				continue;
 			// ignore ents without visible models
-			if(!model || !*PR_Str(ent->v.model))
+			if(!model || !*PR_Str(sv.pr, ent->v.model))
 				continue;
 			if(model >= sv.protocol->limit_model)
 				continue;
@@ -581,8 +581,8 @@ void SV_CleanupEnts (void)
 	int		e;
 	edict_t	*ent;
 
-	ent = NEXT_EDICT(sv.edicts);
-	for (e=1 ; e<sv.num_edicts ; e++, ent = NEXT_EDICT(ent))
+	ent = NEXT_EDICT(sv.pr, sv.pr->edicts);
+	for (e=1 ; e<sv.pr->num_edicts ; e++, ent = NEXT_EDICT(sv.pr, ent))
 	{
 		ent->v.effects = (int)ent->v.effects & ~EF_MUZZLEFLASH;
 	}
@@ -606,7 +606,7 @@ void SV_WriteClientdataToMessage (edict_t *ent, sizebuf_t *msg)
 	// send a damage message
 	if (ent->v.dmg_take || ent->v.dmg_save)
 	{
-		other = PROG_TO_EDICT(ent->v.dmg_inflictor);
+		other = PROG_TO_EDICT(sv.pr, ent->v.dmg_inflictor);
 		MSG_WriteByte (msg, svc_damage);
 		MSG_WriteByte (msg, ent->v.dmg_save);
 		MSG_WriteByte (msg, ent->v.dmg_take);
@@ -637,9 +637,9 @@ void SV_WriteClientdataToMessage (edict_t *ent, sizebuf_t *msg)
 
 	// stuff the sigil bits into the high bits of items for sbar, or else
 	// mix in items2
-	val = GetEdictFieldValue(ent, "items2");
-	items = (int)ent->v.items | (val ? ((int)val->_float << 23) : ((int)pr_global_struct->serverflags << 28));
-	weaponmodel = SV_ModelIndex(PR_Str(ent->v.weaponmodel));
+	val = GetEdictFieldValue(sv.pr, ent, "items2");
+	items = (int)ent->v.items | (val ? ((int)val->_float << 23) : ((int)sv.pr->global_struct->serverflags << 28));
+	weaponmodel = SV_ModelIndex(PR_Str(sv.pr, ent->v.weaponmodel));
 
 	if ((int)ent->v.flags & FL_ONGROUND)
 		bits |= SU_ONGROUND;
@@ -960,10 +960,10 @@ void SV_CreateBaseline (void)
 	edict_t			*svent;
 	int				entnum;
 
-	for (entnum = 0; entnum < sv.num_edicts ; entnum++)
+	for (entnum = 0; entnum < sv.pr->num_edicts ; entnum++)
 	{
 		// get the current server version
-		svent = EDICT_NUM(entnum);
+		svent = EDICT_NUM(sv.pr, entnum);
 		if (svent->free)
 			continue;
 		if (entnum > svs.maxclients && !svent->v.modelindex)
@@ -983,7 +983,7 @@ void SV_CreateBaseline (void)
 		else
 		{
 			svent->baseline.colormap = 0;
-			svent->baseline.modelindex = SV_ModelIndex(PR_Str(svent->v.model));
+			svent->baseline.modelindex = SV_ModelIndex(PR_Str(sv.pr, svent->v.model));
 			svent->baseline.alpha = svent->alpha;
 		}
 
@@ -1059,7 +1059,7 @@ void SV_SaveSpawnparms (void)
 {
 	int		i, j;
 
-	svs.serverflags = pr_global_struct->serverflags;
+	svs.serverflags = sv.pr->global_struct->serverflags;
 
 	for (i=0, host_client = svs.clients ; i<svs.maxclients ; i++, host_client++)
 	{
@@ -1067,10 +1067,10 @@ void SV_SaveSpawnparms (void)
 			continue;
 
 		// call the progs to get default spawn parms for the new client
-		pr_global_struct->self = EDICT_TO_PROG(host_client->edict);
-		PR_ExecuteProgram (pr_global_struct->SetChangeParms);
+		sv.pr->global_struct->self = EDICT_TO_PROG(sv.pr, host_client->edict);
+		PR_ExecuteProgram(sv.pr, sv.pr->global_struct->SetChangeParms);
 		for (j=0 ; j<Nparms ; j++)
-			host_client->spawn_parms[j] = (&pr_global_struct->parm1)[j];
+			host_client->spawn_parms[j] = (&sv.pr->global_struct->parm1)[j];
 	}
 }
 
@@ -1124,12 +1124,9 @@ void SV_SpawnServer (char *server)
 	sv.protocol = sv_protocol;
 
 	// load progs to get entity field count
-	PR_LoadProgs ();
+	sv.pr = PR_LoadProgs("progs.dat");
 
 	// allocate server memory
-	sv.max_edicts = MAX_EDICTS;
-
-	sv.edicts = Hunk_Alloc(sv.max_edicts*pr_edict_size);
 
 	sv.datagram.maxsize = sizeof sv.datagram_buf;
 	sv.datagram.cursize = 0;
@@ -1147,10 +1144,10 @@ void SV_SpawnServer (char *server)
 	sv.signon.name = "sv.signon";
 
 	// leave slots at start for clients only
-	sv.num_edicts = svs.maxclients+1;
+	sv.pr->num_edicts = svs.maxclients+1;
 	for (i=0 ; i<svs.maxclients ; i++)
 	{
-		ent = EDICT_NUM(i+1);
+		ent = EDICT_NUM(sv.pr, i+1);
 		svs.clients[i].edict = ent;
 	}
 
@@ -1183,25 +1180,25 @@ void SV_SpawnServer (char *server)
 	}
 
 	// load the rest of the entities
-	ent = EDICT_NUM(0);
-	memset(&ent->v, 0, progs->entityfields * 4);
+	ent = EDICT_NUM(sv.pr, 0);
+	memset(&ent->v, 0, sv.pr->entityfields * 4);
 	ent->free = false;
-	ent->v.model = PR_SetStr(sv.worldmodel->name);
+	ent->v.model = PR_SetStr(sv.pr, sv.worldmodel->name);
 	ent->v.modelindex = 1;		// world model
 	ent->v.solid = SOLID_BSP;
 	ent->v.movetype = MOVETYPE_PUSH;
 
 	if (coop.value)
-		pr_global_struct->coop = coop.value;
+		sv.pr->global_struct->coop = coop.value;
 	else
-		pr_global_struct->deathmatch = deathmatch.value;
+		sv.pr->global_struct->deathmatch = deathmatch.value;
 
-	pr_global_struct->mapname = PR_SetStr(sv.name);
+	sv.pr->global_struct->mapname = PR_SetStr(sv.pr, sv.name);
 
 	// serverflags are for cross level information (sigils)
-	pr_global_struct->serverflags = svs.serverflags;
+	sv.pr->global_struct->serverflags = svs.serverflags;
 
-	ED_LoadFromFile (sv.worldmodel->entities);
+	ED_LoadFromFile(sv.pr, sv.worldmodel->entities);
 
 	sv.active = true;
 

@@ -103,7 +103,7 @@ static void CL_ParseStartSoundPacket(void)
 	}
 	sound_num = (field_mask & cl.protocol.fl_large_sound) ? MSG_ReadShort() : MSG_ReadByte();
 
-	if(ent > MAX_EDICTS)
+	if(ent >= MAX_EDICTS)
 		Host_Error("CL_ParseStartSoundPacket: ent = %d", ent);
 
 	MSG_ReadVec(cl.protocol, pos);

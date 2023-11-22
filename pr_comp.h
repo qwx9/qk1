@@ -3,21 +3,44 @@
 typedef int	func_t;
 typedef int	string_t;
 
-typedef enum {ev_void, ev_string, ev_float, ev_vector, ev_entity, ev_field, ev_function, ev_pointer} etype_t;
+typedef enum {
+	ev_void,
+	ev_string,
+	ev_float,
+	ev_vector,
+	ev_entity,
+	ev_field,
+	ev_function,
+	ev_pointer,
+}etype_t;
 
+enum {
+	OFS_NULL,
+	OFS_RETURN,
+	OFS_PARM0 = 4, // leave 3 ofs for each parm to hold vectors
+	OFS_PARM1 = 7,
+	OFS_PARM2 = 10,
+	OFS_PARM3 = 13,
+	OFS_PARM4 = 16,
+	OFS_PARM5 = 19,
+	OFS_PARM6 = 22,
+	OFS_PARM7 = 25,
+	RESERVED_OFS = 28,
 
-#define	OFS_NULL		0
-#define	OFS_RETURN		1
-#define	OFS_PARM0		4		// leave 3 ofs for each parm to hold vectors
-#define	OFS_PARM1		7
-#define	OFS_PARM2		10
-#define	OFS_PARM3		13
-#define	OFS_PARM4		16
-#define	OFS_PARM5		19
-#define	OFS_PARM6		22
-#define	OFS_PARM7		25
-#define	RESERVED_OFS	28
+	PROG_VERSION = 6,
 
+	MAX_PARMS = 8,
+
+	DEF_SAVEGLOBAL = 1<<15,
+
+	PR_LUMP_STATEMENTS = 0, // statement 0 is an error
+	PR_LUMP_GLOBALDEFS,
+	PR_LUMP_FIELDDEFS,
+	PR_LUMP_FUNCTIONS, // function 0 is an empty one
+	PR_LUMP_STRINGS, // first string is a null string
+	PR_LUMP_GLOBALS,
+	NUM_PR_LUMPS,
+};
 
 enum {
 	OP_DONE,
@@ -97,74 +120,38 @@ enum {
 	OP_BITOR
 };
 
-#ifdef __plan9__
-#pragma pack on
-#else
-#pragma pack(1)
-#endif
+typedef struct {
+	u16int op;
+	s16int a,b,c;
+}dstatement_t;
 
-typedef struct statement_s
-{
-	unsigned short	op;
-	short	a,b,c;
-} dstatement_t;
+typedef struct {
+	// if DEF_SAVEGLOBGAL bit is set
+	// the variable needs to be saved in savegames
+	u16int type;
+	u16int ofs;
+	int s_name;
+}ddef_t;
 
-typedef struct
-{
-	unsigned short	type;		// if DEF_SAVEGLOBGAL bit is set
-								// the variable needs to be saved in savegames
-	unsigned short	ofs;
-	int			s_name;
-} ddef_t;
-#define	DEF_SAVEGLOBAL	(1<<15)
+typedef struct {
+	int first_statement; // negative numbers are builtins
+	int parm_start;
+	int locals; // total ints of parms + locals
+	int profile; // runtime
+	int s_name;
+	int s_file; // source file defined in
+	int numparms;
+	byte parm_size[MAX_PARMS];
+}dfunction_t;
 
-#define	MAX_PARMS	8
+typedef struct {
+	int off;
+	int num;
+}dproglump_t;
 
-typedef struct
-{
-	int		first_statement;	// negative numbers are builtins
-	int		parm_start;
-	int		locals;				// total ints of parms + locals
-
-	int		profile;		// runtime
-
-	int		s_name;
-	int		s_file;			// source file defined in
-
-	int		numparms;
-	byte	parm_size[MAX_PARMS];
-} dfunction_t;
-
-
-#define	PROG_VERSION	6
-typedef struct
-{
-	int		version;
-	int		crc;			// check of header file
-
-	int		ofs_statements;
-	int		numstatements;	// statement 0 is an error
-
-	int		ofs_globaldefs;
-	int		numglobaldefs;
-
-	int		ofs_fielddefs;
-	int		numfielddefs;
-
-	int		ofs_functions;
-	int		numfunctions;	// function 0 is an empty
-
-	int		ofs_strings;
-	int		numstrings;		// first string is a null string
-
-	int		ofs_globals;
-	int		numglobals;
-
-	int		entityfields;
-} dprograms_t;
-
-#ifdef __plan9__
-#pragma pack off
-#else
-#pragma pack(0)
-#endif
+typedef struct {
+	int version;
+	int crc; // check of header file
+	dproglump_t lumps[NUM_PR_LUMPS];
+	int entityfields;
+}dprograms_t;

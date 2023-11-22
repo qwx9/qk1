@@ -77,7 +77,7 @@ SV_movestep
 Called by monster program code.
 The move will be adjusted for slopes and stairs, but if the move isn't
 possible, no move is done, false is returned, and
-pr_global_struct->trace_normal is set to the normal of the blocking wall
+sv.pr->global_struct->trace_normal is set to the normal of the blocking wall
 =============
 */
 bool SV_movestep (edict_t *ent, vec3_t move, bool relink)
@@ -99,13 +99,13 @@ bool SV_movestep (edict_t *ent, vec3_t move, bool relink)
 		for (i=0 ; i<2 ; i++)
 		{
 			VectorAdd (ent->v.origin, move, neworg);
-			enemy = PROG_TO_EDICT(ent->v.enemy);
-			if (i == 0 && enemy != sv.edicts)
+			enemy = PROG_TO_EDICT(sv.pr, ent->v.enemy);
+			if (i == 0 && enemy != sv.pr->edicts)
 			{
-				dz = ent->v.origin[2] - PROG_TO_EDICT(ent->v.enemy)->v.origin[2];
+				dz = ent->v.origin[2] - PROG_TO_EDICT(sv.pr, ent->v.enemy)->v.origin[2];
 				if (dz > 40)
 					neworg[2] -= 8;
-				if (dz < 30)
+				else if (dz < 30)
 					neworg[2] += 8;
 			}
 			trace = SV_Move (ent->v.origin, ent->v.mins, ent->v.maxs, neworg, false, ent);
@@ -121,7 +121,7 @@ bool SV_movestep (edict_t *ent, vec3_t move, bool relink)
 				return true;
 			}
 
-			if (enemy == sv.edicts)
+			if (enemy == sv.pr->edicts)
 				break;
 		}
 
@@ -182,7 +182,7 @@ bool SV_movestep (edict_t *ent, vec3_t move, bool relink)
 		//Con_Printf ("back on ground\n");
 		ent->v.flags = (int)ent->v.flags & ~FL_PARTIALGROUND;
 	}
-	ent->v.groundentity = EDICT_TO_PROG(trace.ent);
+	ent->v.groundentity = EDICT_TO_PROG(sv.pr, trace.ent);
 
 	// the move is ok
 	if (relink)
@@ -202,14 +202,14 @@ facing it.
 
 ======================
 */
-void PF_changeyaw (void);
+void PF_changeyaw (pr_t *pr);
 bool SV_StepDirection (edict_t *ent, float yaw, float dist)
 {
 	vec3_t		move, oldorigin;
 	float		delta;
 
 	ent->v.ideal_yaw = yaw;
-	PF_changeyaw();
+	PF_changeyaw(sv.pr);
 
 	yaw = yaw*M_PI*2 / 360;
 	move[0] = cos(yaw)*dist;
@@ -336,57 +336,3 @@ void SV_NewChaseDir (edict_t *actor, edict_t *enemy, float dist)
 		SV_FixCheckBottom (actor);
 
 }
-
-/*
-======================
-SV_CloseEnough
-
-======================
-*/
-bool SV_CloseEnough (edict_t *ent, edict_t *goal, float dist)
-{
-	int		i;
-
-	for (i=0 ; i<3 ; i++)
-	{
-		if (goal->v.absmin[i] > ent->v.absmax[i] + dist)
-			return false;
-		if (goal->v.absmax[i] < ent->v.absmin[i] - dist)
-			return false;
-	}
-	return true;
-}
-
-/*
-======================
-SV_MoveToGoal
-
-======================
-*/
-void SV_MoveToGoal (void)
-{
-	edict_t		*ent, *goal;
-	float		dist;
-
-	ent = PROG_TO_EDICT(pr_global_struct->self);
-	goal = PROG_TO_EDICT(ent->v.goalentity);
-	dist = G_FLOAT(OFS_PARM0);
-
-	if ( !( (int)ent->v.flags & (FL_ONGROUND|FL_FLY|FL_SWIM) ) )
-	{
-		G_FLOAT(OFS_RETURN) = 0;
-		return;
-	}
-
-	// if the next step hits the enemy, return immediately
-	if ( PROG_TO_EDICT(ent->v.enemy) != sv.edicts &&  SV_CloseEnough (ent, goal, dist) )
-		return;
-
-	// bump around...
-	if ( (rand()&3)==1 ||
-	!SV_StepDirection (ent, ent->v.ideal_yaw, dist))
-	{
-		SV_NewChaseDir (ent, goal, dist);
-	}
-}
-

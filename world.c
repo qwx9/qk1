@@ -275,16 +275,16 @@ void SV_TouchLinks ( edict_t *ent, areanode_t *node )
 		|| ent->v.absmax[1] < touch->v.absmin[1]
 		|| ent->v.absmax[2] < touch->v.absmin[2] )
 			continue;
-		old_self = pr_global_struct->self;
-		old_other = pr_global_struct->other;
+		old_self = sv.pr->global_struct->self;
+		old_other = sv.pr->global_struct->other;
 
-		pr_global_struct->self = EDICT_TO_PROG(touch);
-		pr_global_struct->other = EDICT_TO_PROG(ent);
-		pr_global_struct->time = sv.time;
-		PR_ExecuteProgram (touch->v.touch);
+		sv.pr->global_struct->self = EDICT_TO_PROG(sv.pr, touch);
+		sv.pr->global_struct->other = EDICT_TO_PROG(sv.pr, ent);
+		sv.pr->global_struct->time = sv.time;
+		PR_ExecuteProgram (sv.pr, touch->v.touch);
 
-		pr_global_struct->self = old_self;
-		pr_global_struct->other = old_other;
+		sv.pr->global_struct->self = old_self;
+		sv.pr->global_struct->other = old_other;
 	}
 
 	// recurse down both sides
@@ -339,7 +339,7 @@ void SV_LinkEdict (edict_t *ent, bool touch_triggers)
 	if (ent->area.prev)
 		SV_UnlinkEdict (ent);	// unlink from old position
 
-	if (ent == sv.edicts)
+	if (ent == sv.pr->edicts)
 		return;		// don't add the world
 
 	if (ent->free)
@@ -473,7 +473,7 @@ edict_t	*SV_TestEntityPosition (edict_t *ent)
 	trace = SV_Move (ent->v.origin, ent->v.mins, ent->v.maxs, ent->v.origin, 0, ent);
 
 	if (trace.startsolid)
-		return sv.edicts;
+		return sv.pr->edicts;
 
 	return nil;
 }
@@ -711,9 +711,9 @@ void SV_ClipToLinks ( areanode_t *node, moveclip_t *clip )
 			return;
 		if (clip->passedict)
 		{
-		 	if (PROG_TO_EDICT(touch->v.owner) == clip->passedict)
+			if (PROG_TO_EDICT(sv.pr, touch->v.owner) == clip->passedict)
 				continue;	// don't clip against own missiles
-			if (PROG_TO_EDICT(clip->passedict->v.owner) == touch)
+			if (PROG_TO_EDICT(sv.pr, clip->passedict->v.owner) == touch)
 				continue;	// don't clip against owner
 		}
 
@@ -790,7 +790,7 @@ trace_t SV_Move (vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end, int type, e
 	memset(&clip, 0, sizeof clip);
 
 	// clip to world
-	clip.trace = SV_ClipMoveToEntity ( sv.edicts, start, mins, maxs, end );
+	clip.trace = SV_ClipMoveToEntity ( sv.pr->edicts, start, mins, maxs, end );
 
 	clip.start = start;
 	clip.end = end;

@@ -512,7 +512,7 @@ savnames(void)
 }
 
 static void
-dumpedicts(FILE *bf, edict_t *ed)
+dumpedict(FILE *bf, pr_t *pr, edict_t *ed)
 {
 	int *vp, *ve;
 	char *s;
@@ -524,9 +524,9 @@ dumpedicts(FILE *bf, edict_t *ed)
 	if(ed->free)
 		goto end;
 	ev = (uchar *)&ed->v;
-	de = pr_fielddefs + progs->numfielddefs;
-	for(d=pr_fielddefs+1; d<de; d++){
-		s = PR_Str(d->s_name);
+	de = pr->fielddefs + pr->numfielddefs;
+	for(d=pr->fielddefs+1; d<de; d++){
+		s = PR_Str(pr, d->s_name);
 		if(s[strlen(s)-2] == '_')
 			continue;
 		/* TODO: pragma pack hazard */
@@ -539,29 +539,29 @@ dumpedicts(FILE *bf, edict_t *ed)
 		if(vp == ve)
 			continue;
 		fprintf(bf, "\"%s\" ", s);
-		fprintf(bf, "\"%s\"\n", PR_UglyValueString(d->type, v));
+		fprintf(bf, "\"%s\"\n", PR_UglyValueString(pr, d->type, v));
 	}
 end:
 	fprintf(bf, "}\n");
 }
 
 static void
-dumpdefs(FILE *bf)
+dumpdefs(FILE *bf, pr_t *pr)
 {
 	ushort t;
 	ddef_t *d, *de;
 
 	fprintf(bf, "{\n");
-	de = pr_globaldefs + progs->numglobaldefs;
-	for(d=pr_globaldefs; d<de; d++){
+	de = pr->globaldefs + pr->numglobaldefs;
+	for(d=pr->globaldefs; d<de; d++){
 		t = d->type;
 		if((t & DEF_SAVEGLOBAL) == 0)
 			continue;
 		t &= ~DEF_SAVEGLOBAL;
 		if(t != ev_string && t != ev_float && t != ev_entity)
 			continue;
-		fprintf(bf, "\"%s\" \"%s\"\n", PR_Str(d->s_name),
-			PR_UglyValueString(t, (eval_t *)&pr_globals[d->ofs]));
+		fprintf(bf, "\"%s\" \"%s\"\n", PR_Str(pr, d->s_name),
+			PR_UglyValueString(pr, t, (eval_t *)&pr->globals[d->ofs]));
 	}
 	fprintf(bf, "}\n");
 }
@@ -589,15 +589,15 @@ dumpsav(char *f, char *cm)
 		fprintf(bf, "%s\n", *s != nil ? *s : "m");
 		s++;
 	}
-	dumpdefs(bf);
-	for(i=0; i<sv.num_edicts; i++)
-		dumpedicts(bf, EDICT_NUM(i));
+	dumpdefs(bf, sv.pr);
+	for(i=0; i<sv.pr->num_edicts; i++)
+		dumpedict(bf, sv.pr, EDICT_NUM(sv.pr, i));
 	fclose(bf);
 	return 0;
 }
 
 static void
-loadedicts(FILE *bf)
+loadedicts(FILE *bf, pr_t *pr)
 {
 	int ent, c;
 	char sb[32768], *s;
@@ -624,19 +624,19 @@ loadedicts(FILE *bf)
 		if(strcmp(com_token, "{") != 0)
 			fatal("loadgame: missing opening brace");
 		if(ent == -1)
-			ED_ParseGlobals(s);
+			ED_ParseGlobals(pr, s);
 		else{
-			ed = EDICT_NUM(ent);
+			ed = EDICT_NUM(pr, ent);
 			/* TODO: pragma pack hazard */
-			memset(&ed->v, 0, progs->entityfields * 4);
+			memset(&ed->v, 0, pr->entityfields * 4);
 			ed->free = 0;
-			ED_ParseEdict(s, ed);
+			ED_ParseEdict(pr, s, ed);
 			if(!ed->free)
 				SV_LinkEdict(ed, 0);
 		}
 		ent++;
 	}while(!feof(bf) && !ferror(bf));
-	sv.num_edicts = ent;
+	pr->num_edicts = ent;
 }
 
 static int
@@ -680,7 +680,7 @@ loadparms(FILE *bf, char *f)
 		free(s);
 	}
 	r = 0;
-	loadedicts(bf);
+	loadedicts(bf, sv.pr);
 	memcpy(svs.clients->spawn_parms, sp, sizeof sp);
 exit:
 	return r;

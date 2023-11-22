@@ -90,7 +90,7 @@ void Host_God_f (void)
 		return;
 	}
 
-	if (pr_global_struct->deathmatch)
+	if (sv.pr->global_struct->deathmatch)
 		return;
 
 	sv_player->v.flags = (int)sv_player->v.flags ^ FL_GODMODE;
@@ -108,7 +108,7 @@ void Host_Notarget_f (void)
 		return;
 	}
 
-	if (pr_global_struct->deathmatch)
+	if (sv.pr->global_struct->deathmatch)
 		return;
 
 	sv_player->v.flags = (int)sv_player->v.flags ^ FL_NOTARGET;
@@ -128,7 +128,7 @@ void Host_Noclip_f (void)
 		return;
 	}
 
-	if (pr_global_struct->deathmatch)
+	if (sv.pr->global_struct->deathmatch)
 		return;
 
 	if (sv_player->v.movetype != MOVETYPE_NOCLIP)
@@ -160,7 +160,7 @@ void Host_Fly_f (void)
 		return;
 	}
 
-	if (pr_global_struct->deathmatch)
+	if (sv.pr->global_struct->deathmatch)
 		return;
 
 	if (sv_player->v.movetype != MOVETYPE_FLY)
@@ -380,7 +380,7 @@ void Host_Name_f (void)
 		if(strcmp(host_client->name, newName) != 0)
 			Con_Printf ("%s renamed to %s\n", host_client->name, newName);
 	strcpy(host_client->name, newName);
-	host_client->edict->v.netname = PR_SetStr(host_client->name);
+	host_client->edict->v.netname = PR_SetStr(sv.pr, host_client->name);
 
 	// send notification to all clients
 
@@ -595,9 +595,9 @@ void Host_Kill_f (void)
 		return;
 	}
 
-	pr_global_struct->time = sv.time;
-	pr_global_struct->self = EDICT_TO_PROG(sv_player);
-	PR_ExecuteProgram (pr_global_struct->ClientKill);
+	sv.pr->global_struct->time = sv.time;
+	sv.pr->global_struct->self = EDICT_TO_PROG(sv.pr, sv_player);
+	PR_ExecuteProgram (sv.pr, sv.pr->global_struct->ClientKill);
 }
 
 
@@ -622,11 +622,11 @@ void Host_Pause_f (void)
 
 		if (sv.paused)
 		{
-			SV_BroadcastPrintf ("%s paused the game\n", PR_Str(sv_player->v.netname));
+			SV_BroadcastPrintf ("%s paused the game\n", PR_Str(sv.pr, sv_player->v.netname));
 		}
 		else
 		{
-			SV_BroadcastPrintf ("%s unpaused the game\n", PR_Str(sv_player->v.netname));
+			SV_BroadcastPrintf ("%s unpaused the game\n", PR_Str(sv.pr, sv_player->v.netname));
 		}
 
 		// send notification to all clients
@@ -698,26 +698,26 @@ void Host_Spawn_f (void)
 		// set up the edict
 		ent = host_client->edict;
 
-		memset (&ent->v, 0, progs->entityfields * 4);
-		ent->v.colormap = NUM_FOR_EDICT(ent);
+		memset (&ent->v, 0, sv.pr->entityfields * 4);
+		ent->v.colormap = NUM_FOR_EDICT(sv.pr, ent);
 		ent->v.team = (host_client->colors & 15) + 1;
-		ent->v.netname = PR_SetStr(host_client->name);
+		ent->v.netname = PR_SetStr(sv.pr, host_client->name);
 
 		// copy spawn parms out of the client_t
 
 		for (i=0 ; i< Nparms ; i++)
-			(&pr_global_struct->parm1)[i] = host_client->spawn_parms[i];
+			(&sv.pr->global_struct->parm1)[i] = host_client->spawn_parms[i];
 
 		// call the spawn function
 
-		pr_global_struct->time = sv.time;
-		pr_global_struct->self = EDICT_TO_PROG(sv_player);
-		PR_ExecuteProgram (pr_global_struct->ClientConnect);
+		sv.pr->global_struct->time = sv.time;
+		sv.pr->global_struct->self = EDICT_TO_PROG(sv.pr, sv_player);
+		PR_ExecuteProgram (sv.pr, sv.pr->global_struct->ClientConnect);
 
 		if ((dtime() - host_client->netconnection->connecttime) <= sv.time)
 			Con_DPrintf("%s entered the game\n", host_client->name);
 
-		PR_ExecuteProgram (pr_global_struct->PutClientInServer);
+		PR_ExecuteProgram (sv.pr, sv.pr->global_struct->PutClientInServer);
 	}
 
 
@@ -752,19 +752,19 @@ void Host_Spawn_f (void)
 	// send some stats
 	MSG_WriteByte (&host_client->message, svc_updatestat);
 	MSG_WriteByte (&host_client->message, STAT_TOTALSECRETS);
-	MSG_WriteLong (&host_client->message, pr_global_struct->total_secrets);
+	MSG_WriteLong (&host_client->message, sv.pr->global_struct->total_secrets);
 
 	MSG_WriteByte (&host_client->message, svc_updatestat);
 	MSG_WriteByte (&host_client->message, STAT_TOTALMONSTERS);
-	MSG_WriteLong (&host_client->message, pr_global_struct->total_monsters);
+	MSG_WriteLong (&host_client->message, sv.pr->global_struct->total_monsters);
 
 	MSG_WriteByte (&host_client->message, svc_updatestat);
 	MSG_WriteByte (&host_client->message, STAT_SECRETS);
-	MSG_WriteLong (&host_client->message, pr_global_struct->found_secrets);
+	MSG_WriteLong (&host_client->message, sv.pr->global_struct->found_secrets);
 
 	MSG_WriteByte (&host_client->message, svc_updatestat);
 	MSG_WriteByte (&host_client->message, STAT_MONSTERS);
-	MSG_WriteLong (&host_client->message, pr_global_struct->killed_monsters);
+	MSG_WriteLong (&host_client->message, sv.pr->global_struct->killed_monsters);
 
 
 	// send a fixangle
@@ -772,7 +772,7 @@ void Host_Spawn_f (void)
 	// in a state where it is expecting the client to correct the angle
 	// and it won't happen if the game was just loaded, so you wind up
 	// with a permanent head tilt
-	ent = EDICT_NUM( 1 + (host_client - svs.clients) );
+	ent = EDICT_NUM(sv.pr, 1 + (host_client - svs.clients) );
 	MSG_WriteByte (&host_client->message, svc_setangle);
 	a = sv.loadgame ? ent->v.v_angle : ent->v.angles;
 	for(i = 0; i < 2; i++)
@@ -916,7 +916,7 @@ void Host_Kick_f (void)
 			return;
 		}
 	}
-	else if (pr_global_struct->deathmatch)
+	else if (sv.pr->global_struct->deathmatch)
 		return;
 
 	save = host_client;
@@ -1004,7 +1004,7 @@ void Host_Give_f (void)
 		return;
 	}
 
-	if (pr_global_struct->deathmatch)
+	if (sv.pr->global_struct->deathmatch)
 		return;
 
 	t = Cmd_Argv(1);
@@ -1049,7 +1049,7 @@ void Host_Give_f (void)
 	case 's':
 		if (rogue)
 		{
-			val = GetEdictFieldValue(sv_player, "ammo_shells1");
+			val = GetEdictFieldValue(sv.pr, sv_player, "ammo_shells1");
 			if (val)
 				val->_float = v;
 		}
@@ -1059,7 +1059,7 @@ void Host_Give_f (void)
 	case 'n':
 		if (rogue)
 		{
-			val = GetEdictFieldValue(sv_player, "ammo_nails1");
+			val = GetEdictFieldValue(sv.pr, sv_player, "ammo_nails1");
 			if (val)
 			{
 				val->_float = v;
@@ -1075,7 +1075,7 @@ void Host_Give_f (void)
 	case 'l':
 		if (rogue)
 		{
-			val = GetEdictFieldValue(sv_player, "ammo_lava_nails");
+			val = GetEdictFieldValue(sv.pr, sv_player, "ammo_lava_nails");
 			if (val)
 			{
 				val->_float = v;
@@ -1087,7 +1087,7 @@ void Host_Give_f (void)
 	case 'r':
 		if (rogue)
 		{
-			val = GetEdictFieldValue(sv_player, "ammo_rockets1");
+			val = GetEdictFieldValue(sv.pr, sv_player, "ammo_rockets1");
 			if (val)
 			{
 				val->_float = v;
@@ -1103,7 +1103,7 @@ void Host_Give_f (void)
 	case 'm':
 		if (rogue)
 		{
-			val = GetEdictFieldValue(sv_player, "ammo_multi_rockets");
+			val = GetEdictFieldValue(sv.pr, sv_player, "ammo_multi_rockets");
 			if (val)
 			{
 				val->_float = v;
@@ -1118,7 +1118,7 @@ void Host_Give_f (void)
 	case 'c':
 		if (rogue)
 		{
-			val = GetEdictFieldValue(sv_player, "ammo_cells1");
+			val = GetEdictFieldValue(sv.pr, sv_player, "ammo_cells1");
 			if (val)
 			{
 				val->_float = v;
@@ -1134,7 +1134,7 @@ void Host_Give_f (void)
 	case 'p':
 		if (rogue)
 		{
-			val = GetEdictFieldValue(sv_player, "ammo_plasma");
+			val = GetEdictFieldValue(sv.pr, sv_player, "ammo_plasma");
 			if (val)
 			{
 				val->_float = v;
@@ -1151,10 +1151,10 @@ edict_t	*FindViewthing (void)
 	int		i;
 	edict_t	*e;
 
-	for (i=0 ; i<sv.num_edicts ; i++)
+	for (i=0 ; i<sv.pr->num_edicts ; i++)
 	{
-		e = EDICT_NUM(i);
-		if(strcmp(PR_Str(e->v.classname), "viewthing") == 0)
+		e = EDICT_NUM(sv.pr, i);
+		if(strcmp(PR_Str(sv.pr, e->v.classname), "viewthing") == 0)
 			return e;
 	}
 	Con_Printf ("No viewthing on map\n");
