@@ -214,7 +214,7 @@ static void NET_Port_f (void)
 		Con_Printf ("Bad value, must be between 1 and 65534\n");
 		return;
 	}
-	snprint(myip.srv, sizeof myip.srv, "%hud", n);
+	snprint(myip.srv, sizeof myip.srv, "%d", n);
 }
 
 /*

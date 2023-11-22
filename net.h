@@ -3,7 +3,7 @@ typedef struct Addr Addr;
 struct Addr{
 	int fd;
 	char ip[46];
-	char srv[6];
+	char srv[8];
 	char sys[52];
 };
 extern Addr myip;
