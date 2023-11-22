@@ -1,12 +1,19 @@
 // spritegn.h: header file for sprite generation program
 
-#define SPRITE_VERSION	1
+enum {
+	SPRITE_VERSION = 1,
 
-#ifdef __plan9__
-#pragma pack on
-#else
-#pragma pack(1)
-#endif
+	SPR_VP_PARALLEL_UPRIGHT = 0,
+	SPR_FACING_UPRIGHT,
+	SPR_VP_PARALLEL,
+	SPR_ORIENTED,
+	SPR_VP_PARALLEL_ORIENTED,
+};
+
+typedef enum {
+	SPR_SINGLE,
+	SPR_GROUP,
+}spriteframetype_t;
 
 // TODO: shorten these?
 typedef struct {
@@ -20,12 +27,6 @@ typedef struct {
 	float		beamlength;
 	synctype_t	synctype;
 } dsprite_t;
-
-#define SPR_VP_PARALLEL_UPRIGHT		0
-#define SPR_FACING_UPRIGHT			1
-#define SPR_VP_PARALLEL				2
-#define SPR_ORIENTED				3
-#define SPR_VP_PARALLEL_ORIENTED	4
 
 typedef struct {
 	int			origin[2];
@@ -41,17 +42,9 @@ typedef struct {
 	float	interval;
 } dspriteinterval_t;
 
-typedef enum { SPR_SINGLE=0, SPR_GROUP } spriteframetype_t;
-
 typedef struct {
 	spriteframetype_t	type;
 } dspriteframetype_t;
 
 #define IDSPRITEHEADER	(('P'<<24)+('S'<<16)+('D'<<8)+'I')
-														// little-endian "IDSP"
-
-#ifdef __plan9__
-#pragma pack off
-#else
-#pragma pack(0)
-#endif
+// little-endian "IDSP"
