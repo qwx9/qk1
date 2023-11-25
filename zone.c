@@ -58,9 +58,10 @@ Hunk_Alloc(int size)
 {
 	mem_t *m;
 
+	assert(size >= 0);
 	m = calloc(1, sizeof(*m) + size);
 	if(m == nil)
-		fatal("Hunk_Alloc: %s", lerr());
+		fatal("Hunk_Alloc: size=%d: %s", size, lerr());
 	m->size = size;
 	m->next = hunk_head;
 	if(hunk_head != nil)
