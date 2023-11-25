@@ -44,6 +44,7 @@ OFILES=\
 	model_brush.$O\
 	model_bsp.$O\
 	model_bsp2.$O\
+	model_sprite.$O\
 	nanosec.$O\
 	net_dgrm.$O\
 	net_loop.$O\

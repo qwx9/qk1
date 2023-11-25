@@ -43,11 +43,11 @@ RadiusFromBounds(vec3_t mins, vec3_t maxs)
 }
 
 void
-Mod_LoadBrushModel(model_t *mod, void *buffer, int total)
+Mod_LoadBrushModel(model_t *mod, byte *in0, int total)
 {
 	int i, j, ver, off, sz;
 	model_t *submod;
-	byte *in, *in0;
+	byte *in;
 	submodel_t *bm;
 	char name[16];
 	int (*loadf[HEADER_LUMPS])(model_t *, byte *, int) = {
@@ -85,7 +85,7 @@ Mod_LoadBrushModel(model_t *mod, void *buffer, int total)
 		LUMP_MODELS,
 	};
 
-	in0 = in = buffer;
+	in = in0;
 	ver = le32(in);
 	if(ver == BSPVERSION){
 		loadf[LUMP_EDGES] = BSP_LoadEdges;

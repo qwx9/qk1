@@ -186,24 +186,28 @@ typedef struct
 {
 	int				numframes;
 	float			*intervals;
-	mspriteframe_t	*frames[1];
+	mspriteframe_t	*frames[0];
 } mspritegroup_t;
 
 typedef struct
 {
 	spriteframetype_t	type;
-	mspriteframe_t		*frameptr;
+	union {
+		mspriteframe_t *frameptr;
+		mspritegroup_t *framegrp;
+	};
 } mspriteframedesc_t;
 
 typedef struct
 {
 	int					type;
+	float				boundingradius;
 	int					maxwidth;
 	int					maxheight;
 	int					numframes;
 	float				beamlength;		// remove?
 	void				*cachespot;		// remove?
-	mspriteframedesc_t	frames[1];
+	mspriteframedesc_t	frames[0];
 } msprite_t;
 
 

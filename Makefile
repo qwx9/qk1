@@ -46,6 +46,7 @@ OBJS=\
 	model_brush.o\
 	model_bsp.o\
 	model_bsp2.o\
+	model_sprite.o\
 	net_loop.o\
 	net_main.o\
 	pal.o\
