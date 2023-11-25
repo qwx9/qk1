@@ -2,6 +2,10 @@
 
 #define ALIAS_VERSION	6
 
+#ifdef __plan9__
+#pragma pack on
+#endif
+
 typedef enum {
 	ALIAS_SINGLE,
 	ALIAS_GROUP,
@@ -87,3 +91,7 @@ typedef struct {
 
 #define IDPOLYHEADER	(('O'<<24)+('P'<<16)+('D'<<8)+'I')
 // little-endian "IDPO"
+
+#ifdef __plan9__
+#pragma pack off
+#endif

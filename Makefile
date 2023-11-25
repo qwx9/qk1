@@ -43,6 +43,7 @@ OBJS=\
 	mathlib.o\
 	menu.o\
 	model.o\
+	model_alias.o\
 	model_brush.o\
 	model_bsp.o\
 	model_bsp2.o\

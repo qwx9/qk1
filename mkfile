@@ -41,6 +41,7 @@ OFILES=\
 	mathlib.$O\
 	menu.$O\
 	model.$O\
+	model_alias.$O\
 	model_brush.$O\
 	model_bsp.$O\
 	model_bsp2.$O\
