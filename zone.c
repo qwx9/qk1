@@ -39,7 +39,7 @@ Hunk_CacheFrom(mem_user_t *c, void *p)
 		if((void*)(n+1) == p)
 			break;
 	}
-	assert((void*)(n+1) == p);
+	assert(n != nil && (void*)(n+1) == p);
 	data = Cache_Alloc(c, size);
 
 	hunk_head = n->next;
@@ -118,8 +118,9 @@ void *
 Hunk_TempAlloc(int size)
 {
 	static void	*buf;
-	static int bufsz;
+	static int bufsz = -1;
 
+	assert(size >= 0);
 	if(size > bufsz){
 		buf = realloc(buf, size);
 		if(buf == nil)
