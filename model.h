@@ -186,7 +186,7 @@ typedef struct
 {
 	int				numframes;
 	float			*intervals;
-	mspriteframe_t	*frames[0];
+	mspriteframe_t	*frames[];
 } mspritegroup_t;
 
 typedef struct
@@ -207,7 +207,7 @@ typedef struct
 	int					numframes;
 	float				beamlength;		// remove?
 	void				*cachespot;		// remove?
-	mspriteframedesc_t	frames[0];
+	mspriteframedesc_t	frames[];
 } msprite_t;
 
 
