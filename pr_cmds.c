@@ -1562,6 +1562,7 @@ void PF_Fixme (pr_t *pr)
 
 static const char *exts[] = {
 	"DP_EF_NODRAW",
+	"DP_QC_ASINACOSATANATAN2TAN",
 	"DP_QC_SINCOSSQRTPOW",
 	"DP_QC_TOKENIZE_CONSOLE", /* FIXME(sigrid): not really; see somewhere below */
 	"KRIMZON_SV_PARSECLIENTCOMMAND",
@@ -1640,6 +1641,36 @@ PF_clientcommand(pr_t *pr)
 	host_client = &svs.clients[n];
 	Cmd_ExecuteString(cmd, src_client);
 	host_client = tmp;
+}
+
+static void
+PF_asin(pr_t *pr)
+{
+	G_FLOAT(pr, OFS_RETURN) = asin(G_FLOAT(pr, OFS_PARM0));
+}
+
+static void
+PF_acos(pr_t *pr)
+{
+	G_FLOAT(pr, OFS_RETURN) = acos(G_FLOAT(pr, OFS_PARM0));
+}
+
+static void
+PF_atan(pr_t *pr)
+{
+	G_FLOAT(pr, OFS_RETURN) = atan(G_FLOAT(pr, OFS_PARM0));
+}
+
+static void
+PF_atan2(pr_t *pr)
+{
+	G_FLOAT(pr, OFS_RETURN) = atan2(G_FLOAT(pr, OFS_PARM0), G_FLOAT(pr, OFS_PARM1));
+}
+
+static void
+PF_tan(pr_t *pr)
+{
+	G_FLOAT(pr, OFS_RETURN) = tan(G_FLOAT(pr, OFS_PARM0));
 }
 
 static void
@@ -1766,6 +1797,11 @@ PF_setspawnparms, // #78
 [440] = PF_clientcommand,
 [441] = PF_tokenize,
 [442] = PF_argv,
+[471] = PF_asin,
+[472] = PF_acos,
+[473] = PF_atan,
+[474] = PF_atan2,
+[475] = PF_tan,
 [514] = PF_tokenize, /* FIXME(sigrid): strictly speaking, this is supposed to be "tokenize_console" */
 };
 
