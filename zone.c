@@ -176,7 +176,7 @@ Cache_Alloc(mem_user_t *c, int size)
 	mem_t *cs;
 
 	if(c->data)
-		fatal("Cache_Alloc: allready allocated");
+		fatal("Cache_Alloc: already allocated");
 	if(size <= 0)
 		fatal("Cache_Alloc: size %d", size);
 

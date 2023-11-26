@@ -929,7 +929,7 @@ static void M_AdjustSliders (int dir)
 		setcvarv ("volume", volume.value);
 		break;
 
-	case 8:	// allways run
+	case 8:	// always run
 		if (cl_forwardspeed.value > 200)
 		{
 			setcvarv ("cl_forwardspeed", 200);

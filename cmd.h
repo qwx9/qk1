@@ -76,7 +76,7 @@ char	*Cmd_Argv (int arg);
 char	*Cmd_Args (void);
 // The functions that execute commands get their parameters with these
 // functions. Cmd_Argv () will return an empty string, not a NULL
-// if arg > argc, so string operations are allways safe.
+// if arg > argc, so string operations are always safe.
 
 void	Cmd_ExecuteString (char *text, cmd_source_t src);
 // Parses a single line of text into arguments and tries to execute it.
