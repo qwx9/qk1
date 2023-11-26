@@ -49,7 +49,7 @@ static gefv_cache	gefvCache[GEFV_CACHESIZE] = {{nil, ""}, {nil, ""}};
 char *
 PR_StrTmp(pr_t *pr)
 {
-	return &pr->tempstr[PRTEMPSTR_SIZE * (pr->num_tempstr++ & MAX_PRTEMPSTR)];
+	return &pr->tempstr[PRTEMPSTR_SIZE * (pr->num_tempstr++ % MAX_PRTEMPSTR)];
 }
 
 int
