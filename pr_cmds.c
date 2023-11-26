@@ -1562,9 +1562,34 @@ void PF_Fixme (pr_t *pr)
 
 static const char *exts[] = {
 	"DP_EF_NODRAW",
+	"DP_QC_SINCOSSQRTPOW",
 	"DP_QC_TOKENIZE_CONSOLE", /* FIXME(sigrid): not really; see somewhere below */
 	"KRIMZON_SV_PARSECLIENTCOMMAND",
 };
+
+static void
+PF_sin(pr_t *pr)
+{
+	G_FLOAT(pr, OFS_RETURN) = sin(G_FLOAT(pr, OFS_PARM0));
+}
+
+static void
+PF_cos(pr_t *pr)
+{
+	G_FLOAT(pr, OFS_RETURN) = cos(G_FLOAT(pr, OFS_PARM0));
+}
+
+static void
+PF_sqrt(pr_t *pr)
+{
+	G_FLOAT(pr, OFS_RETURN) = sqrt(G_FLOAT(pr, OFS_PARM0));
+}
+
+static void
+PF_pow(pr_t *pr)
+{
+	G_FLOAT(pr, OFS_RETURN) = pow(G_FLOAT(pr, OFS_PARM0), G_FLOAT(pr, OFS_PARM1));
+}
 
 static void
 PF_checkextension(pr_t *pr)
@@ -1709,9 +1734,9 @@ PF_WriteAngle,
 PF_WriteString,
 PF_WriteEntity,
 
-PF_Fixme,
-PF_Fixme,
-PF_Fixme,
+[60] = PF_sin,
+[61] = PF_cos,
+[62] = PF_sqrt,
 PF_Fixme,
 PF_Fixme,
 PF_Fixme,
@@ -1735,6 +1760,7 @@ PF_precache_file,
 
 PF_setspawnparms, // #78
 
+[97] = PF_pow,
 [99] = PF_checkextension,
 [232] = PF_clientstat,
 [440] = PF_clientcommand,
