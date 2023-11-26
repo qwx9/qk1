@@ -7,6 +7,7 @@
 
 #ifdef __plan9__
 typedef enum {false, true} bool;
+#define RAND_MAX ((2<<15)-1)
 #endif
 
 #define	QUAKE_GAME			// as opposed to utilities
