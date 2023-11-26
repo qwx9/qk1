@@ -1567,6 +1567,7 @@ void PF_Fixme (pr_t *pr)
 static const char *exts[] = {
 	"DP_EF_NODRAW",
 	"DP_QC_ASINACOSATANATAN2TAN",
+	"DP_QC_MINMAXBOUND",
 	"DP_QC_SINCOSSQRTPOW",
 	"DP_QC_TOKENIZE_CONSOLE", /* FIXME(sigrid): not really; see somewhere below */
 	"KRIMZON_SV_PARSECLIENTCOMMAND",
@@ -1588,6 +1589,41 @@ static void
 PF_sqrt(pr_t *pr)
 {
 	G_FLOAT(pr, OFS_RETURN) = sqrt(G_FLOAT(pr, OFS_PARM0));
+}
+
+static void
+PF_min(pr_t *pr)
+{
+	float v = Q_MAXFLOAT, n;
+	int i;
+
+	for(i = 0; i < pr->argc; i++){
+		if(v > (n = G_FLOAT(pr, OFS_PARM0 + i*3)))
+			v = n;
+	}
+	G_FLOAT(pr, OFS_RETURN) = v;
+}
+
+static void
+PF_max(pr_t *pr)
+{
+	float v = Q_MINFLOAT, n;
+	int i;
+
+	for(i = 0; i < pr->argc; i++){
+		if(v < (n = G_FLOAT(pr, OFS_PARM0 + i*3)))
+			v = n;
+	}
+	G_FLOAT(pr, OFS_RETURN) = v;
+}
+
+static void
+PF_bound(pr_t *pr)
+{
+	float l = G_FLOAT(pr, OFS_PARM0);
+	float v = G_FLOAT(pr, OFS_PARM1);
+	float r = G_FLOAT(pr, OFS_PARM2);
+	G_FLOAT(pr, OFS_RETURN) = clamp(v, l, r);
 }
 
 static void
@@ -1795,6 +1831,9 @@ PF_precache_file,
 
 PF_setspawnparms, // #78
 
+[94] = PF_min,
+[95] = PF_max,
+[96] = PF_bound,
 [97] = PF_pow,
 [99] = PF_checkextension,
 [232] = PF_clientstat,
