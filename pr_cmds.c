@@ -442,11 +442,20 @@ random()
 */
 void PF_random (pr_t *pr)
 {
-	float		num;
+	static double xmax;
+	static long xand;
 
-	num = (rand ()&0x7fff) / ((float)0x7fff);
+	if(xand == 0){
+		if((RAND_MAX & ((ulong)RAND_MAX+1)) == 0){
+			xmax = (ulong)RAND_MAX+1;
+			xand = RAND_MAX;
+		}else{
+			xmax = 0x8000;
+			xand = 0x7fff;
+		}
+	}
 
-	G_FLOAT(pr, OFS_RETURN) = num;
+	G_FLOAT(pr, OFS_RETURN) = ((double)(rand() & xand) + 0.5) / xmax;
 }
 
 /*
