@@ -645,22 +645,17 @@ Host_PreSpawn_f
 */
 void Host_PreSpawn_f (void)
 {
-	if (cmd_source == src_command)
-	{
-		Con_Printf ("prespawn is not valid from the console\n");
+	if(cmd_source == src_command){
+		Con_Printf("prespawn is not valid from the console\n");
+		return;
+	}
+	if(host_client->spawned){
+		Con_Printf("prespawn not valid -- already spawned\n");
 		return;
 	}
 
-	if (host_client->spawned)
-	{
-		Con_Printf ("prespawn not valid -- allready spawned\n");
-		return;
-	}
-
-	SZ_Write (&host_client->message, sv.signon.data, sv.signon.cursize);
-	MSG_WriteByte (&host_client->message, svc_signonnum);
-	MSG_WriteByte (&host_client->message, 2);
-	host_client->sendsignon = true;
+	host_client->signon.state = SIGNON_SENDING;
+	host_client->signon.id = 0;
 }
 
 /*
@@ -783,7 +778,7 @@ void Host_Spawn_f (void)
 
 	MSG_WriteByte (&host_client->message, svc_signonnum);
 	MSG_WriteByte (&host_client->message, 3);
-	host_client->sendsignon = true;
+	host_client->signon.state = SIGNON_KICK;
 }
 
 /*

@@ -39,8 +39,10 @@ typedef struct
 	sizebuf_t	reliable_datagram;	// copied to all clients at end of frame
 	byte		reliable_datagram_buf[MAX_DATAGRAM];
 
-	sizebuf_t	signon;
-	byte		signon_buf[NET_MAXMESSAGE];
+	sizebuf_t *signon;
+	int signon_frame;
+	sizebuf_t *signons[256];
+	int numsignons;
 
 	pr_t *pr;
 } server_t;
@@ -48,12 +50,23 @@ typedef struct
 
 #define	NUM_PING_TIMES		16
 
+enum {
+	SIGNON_INIT,
+	SIGNON_SENDING,
+	SIGNON_DONE,
+	SIGNON_KICK,
+};
+
 typedef struct client_s
 {
 	bool		active;				// false = client is free
 	bool		spawned;			// false = don't send datagrams
 	bool		dropasap;			// has been told to go to another level
-	bool		sendsignon;			// only valid before spawned
+
+	struct {
+		int state;
+		int id;
+	}signon;
 
 	double			last_message;		// reliable messages must be sent
 										// periodically
@@ -162,6 +175,8 @@ extern	double		host_time;
 extern	edict_t		*sv_player;
 
 //===========================================================
+
+void SV_SignonFrame(void);
 
 void SV_Init (void);
 

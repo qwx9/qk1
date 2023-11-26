@@ -1,5 +1,9 @@
 #include "quakedef.h"
 
+enum {
+	MAX_SIGNON_SIZE = 32000,
+};
+
 server_t		sv;
 server_static_t	svs;
 
@@ -9,6 +13,41 @@ cvar_t developer = {"developer", "0"}; // show extra messages
 static protocol_t *sv_protocol = &protos[PROTO_RMQ];
 
 static char	localmodels[MAX_MODELS][8];			// inline model names for precache
+
+static void SV_AllocSignon(void);
+
+static sizebuf_t *
+signon_overflow_sb(sizebuf_t *s)
+{
+	int frame;
+
+	if(s == sv.signon){
+		frame = sv.signon_frame;
+		SV_AllocSignon();
+		SZ_Write(sv.signon, s->data + frame, s->cursize - frame);
+		s->cursize = frame;
+	}
+	return sv.signon;
+}
+
+static void
+SV_AllocSignon(void)
+{
+	if(sv.numsignons == 256)
+		Host_Error("too many signons");
+	sv.signon = sv.signons[sv.numsignons++] = Hunk_Alloc(sizeof(*sv.signon) + MAX_SIGNON_SIZE);
+	sv.signon->data = (byte*)(sv.signon + 1);
+	sv.signon->maxsize = MAX_SIGNON_SIZE;
+	sv.signon->name = "sv.signon";
+	sv.signon->overflow_cb = signon_overflow_sb;
+	sv.signon_frame = 0;
+}
+
+void
+SV_SignonFrame(void)
+{
+	sv.signon_frame = sv.signon->cursize;
+}
 
 //============================================================================
 
@@ -241,7 +280,7 @@ void SV_SendServerinfo (client_t *client)
 	MSG_WriteByte (&client->message, svc_signonnum);
 	MSG_WriteByte (&client->message, 1);
 
-	client->sendsignon = true;
+	client->signon.state = SIGNON_KICK;
 	client->spawned = false;		// need prespawn, spawn, etc
 }
 
@@ -849,7 +888,8 @@ SV_SendClientMessages
 */
 void SV_SendClientMessages (void)
 {
-	int			i;
+	int i;
+	sizebuf_t *s;
 
 	// update frags, names, etc
 	SV_UpdateToReliableMessages ();
@@ -872,11 +912,26 @@ void SV_SendClientMessages (void)
 		// send a full message when the next signon stage has been requested
 		// some other message data (name changes, etc) may accumulate
 		// between signon stages
-			if (!host_client->sendsignon)
-			{
-				if (realtime - host_client->last_message > 5)
+			if(host_client->signon.state == SIGNON_INIT){
+				if(realtime - host_client->last_message > 5)
 					SV_SendNop (host_client);
 				continue;	// don't send out non-signon messages
+			}
+			if(host_client->signon.state == SIGNON_SENDING){
+				if(host_client->signon.id < sv.numsignons){
+					s = sv.signons[host_client->signon.id];
+					if(host_client->message.cursize+s->cursize <= host_client->message.maxsize){
+						SZ_Write(&host_client->message, s->data, s->cursize);
+						host_client->signon.id++;
+					}
+				}
+				if(host_client->signon.id == sv.numsignons)
+					host_client->signon.state = SIGNON_DONE;
+			}
+			if(host_client->signon.state == SIGNON_DONE && host_client->message.cursize+2 < host_client->message.maxsize){
+					MSG_WriteByte(&host_client->message, svc_signonnum);
+					MSG_WriteByte(&host_client->message, 2);
+					host_client->signon.state = SIGNON_KICK;
 			}
 		}
 
@@ -902,12 +957,12 @@ void SV_SendClientMessages (void)
 				SV_DropClient (false);	// went to another level
 			else
 			{
-				if (NET_SendMessage (host_client->netconnection
-				, &host_client->message) == -1)
-					SV_DropClient (true);	// if the message couldn't send, kick off
-				SZ_Clear (&host_client->message);
+				if(NET_SendMessage(host_client->netconnection, &host_client->message) < 0)
+					SV_DropClient(true);	// if the message couldn't send, kick off
+				SZ_Clear(&host_client->message);
 				host_client->last_message = realtime;
-				host_client->sendsignon = false;
+				if(host_client->signon.state == SIGNON_KICK)
+					host_client->signon.state = SIGNON_INIT;
 			}
 		}
 	}
@@ -1000,24 +1055,24 @@ void SV_CreateBaseline (void)
 			bits |= sv.protocol->fl_baseline_alpha;
 
 		// add to the message
-		MSG_WriteByte (&sv.signon, bits ? svc_spawnbaseline2 : svc_spawnbaseline);
-		MSG_WriteShort (&sv.signon, entnum);
+		SV_SignonFrame();
+		MSG_WriteByte(sv.signon, bits ? svc_spawnbaseline2 : svc_spawnbaseline);
+		MSG_WriteShort(sv.signon, entnum);
 		if(bits != 0)
-			MSG_WriteByte(&sv.signon, bits);
+			MSG_WriteByte(sv.signon, bits);
 
 		((bits & sv.protocol->fl_large_baseline_model) ? MSG_WriteShort : MSG_WriteByte)
-			(&sv.signon, svent->baseline.modelindex);
+			(sv.signon, svent->baseline.modelindex);
 		((bits & sv.protocol->fl_large_baseline_frame) ? MSG_WriteShort : MSG_WriteByte)
-			(&sv.signon, svent->baseline.frame);
-		MSG_WriteByte (&sv.signon, svent->baseline.colormap);
-		MSG_WriteByte (&sv.signon, svent->baseline.skin);
-		for (i=0 ; i<3 ; i++)
-		{
-			sv.protocol->MSG_WriteCoord(&sv.signon, svent->baseline.origin[i]);
-			sv.protocol->MSG_WriteAngle(&sv.signon, svent->baseline.angles[i]);
+			(sv.signon, svent->baseline.frame);
+		MSG_WriteByte(sv.signon, svent->baseline.colormap);
+		MSG_WriteByte(sv.signon, svent->baseline.skin);
+		for(i = 0; i < 3; i++){
+			sv.protocol->MSG_WriteCoord(sv.signon, svent->baseline.origin[i]);
+			sv.protocol->MSG_WriteAngle(sv.signon, svent->baseline.angles[i]);
 		}
 		if(bits & sv.protocol->fl_baseline_alpha)
-			MSG_WriteByte(&sv.signon, svent->baseline.alpha);
+			MSG_WriteByte(sv.signon, svent->baseline.alpha);
 	}
 }
 
@@ -1138,10 +1193,7 @@ void SV_SpawnServer (char *server)
 	sv.reliable_datagram.data = sv.reliable_datagram_buf;
 	sv.reliable_datagram.name = "sv.reliable_datagram";
 
-	sv.signon.maxsize = sizeof sv.signon_buf;
-	sv.signon.cursize = 0;
-	sv.signon.data = sv.signon_buf;
-	sv.signon.name = "sv.signon";
+	SV_AllocSignon();
 
 	// leave slots at start for clients only
 	sv.pr->num_edicts = svs.maxclients+1;

@@ -514,18 +514,20 @@ void PF_ambientsound (pr_t *pr)
 	if(soundnum >= sv.protocol->limit_sound)
 		return;
 
+	SV_SignonFrame();
+
 	MSG_WriteByte(
-		&sv.signon,
+		sv.signon,
 		soundnum < sv.protocol->large_sound ?
 			svc_spawnstaticsound :
 			svc_spawnstaticsound2
 	);
 	for (i=0 ; i<3 ; i++)
-		sv.protocol->MSG_WriteCoord(&sv.signon, pos[i]);
+		sv.protocol->MSG_WriteCoord(sv.signon, pos[i]);
 
-	(soundnum < sv.protocol->large_sound ? MSG_WriteByte : MSG_WriteShort)(&sv.signon, soundnum);
-	MSG_WriteByte(&sv.signon, vol*255);
-	MSG_WriteByte(&sv.signon, attenuation*64);
+	(soundnum < sv.protocol->large_sound ? MSG_WriteByte : MSG_WriteShort)(sv.signon, soundnum);
+	MSG_WriteByte(sv.signon, vol*255);
+	MSG_WriteByte(sv.signon, attenuation*64);
 
 }
 
@@ -1411,7 +1413,7 @@ sizebuf_t *WriteDest (pr_t *pr)
 		return &sv.reliable_datagram;
 
 	case MSG_INIT:
-		return &sv.signon;
+		return sv.signon;
 
 	default:
 		PR_RunError (pr, "WriteDest: bad destination");
@@ -1490,26 +1492,28 @@ void PF_makestatic (pr_t *pr)
 	if(!defalpha(ent->alpha))
 		bits |= sv.protocol->fl_baseline_alpha;
 
-	MSG_WriteByte (&sv.signon, bits ? svc_spawnstatic2 : svc_spawnstatic);
+	SV_SignonFrame();
+
+	MSG_WriteByte(sv.signon, bits ? svc_spawnstatic2 : svc_spawnstatic);
 	if(bits)
-		MSG_WriteByte(&sv.signon, bits);
+		MSG_WriteByte(sv.signon, bits);
 
 	((bits & sv.protocol->fl_large_baseline_model) ? MSG_WriteShort : MSG_WriteByte)
-		(&sv.signon, model);
+		(sv.signon, model);
 	((bits & sv.protocol->fl_large_baseline_frame) ? MSG_WriteShort : MSG_WriteByte)
-		(&sv.signon, frame);
-	MSG_WriteByte (&sv.signon, ent->v.colormap);
-	MSG_WriteByte (&sv.signon, ent->v.skin);
+		(sv.signon, frame);
+	MSG_WriteByte(sv.signon, ent->v.colormap);
+	MSG_WriteByte(sv.signon, ent->v.skin);
 	for (i=0 ; i<3 ; i++)
 	{
-		sv.protocol->MSG_WriteCoord(&sv.signon, ent->v.origin[i]);
-		sv.protocol->MSG_WriteAngle(&sv.signon, ent->v.angles[i]);
+		sv.protocol->MSG_WriteCoord(sv.signon, ent->v.origin[i]);
+		sv.protocol->MSG_WriteAngle(sv.signon, ent->v.angles[i]);
 	}
 	if(bits & sv.protocol->fl_baseline_alpha)
-		MSG_WriteByte(&sv.signon, ent->alpha);
+		MSG_WriteByte(sv.signon, ent->alpha);
 
 	// throw the entity away now
-	ED_Free (ent);
+	ED_Free(ent);
 }
 
 //=============================================================================

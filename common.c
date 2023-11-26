@@ -335,8 +335,17 @@ void *
 SZ_GetSpace(sizebuf_t *buf, int length)
 {
 	void *data;
+	sizebuf_t *next;
 
+again:
 	if(buf->cursize + length > buf->maxsize){
+		if(buf->overflow_cb != nil){
+			next = buf->overflow_cb(buf);
+			if(next != buf){
+				buf = next;
+				goto again;
+			}
+		}
 		if(!buf->allowoverflow)
 			Host_Error("SZ_GetSpace: %s: overflow without allowoverflow set", buf->name);
 		if(length > buf->maxsize)

@@ -1,14 +1,16 @@
 void *Arr_AllocExtra(void *arr, int *nel, int needextra);
 
-typedef struct sizebuf_s
-{
+typedef struct sizebuf_t sizebuf_t;
+
+struct sizebuf_t {
 	bool	allowoverflow;	// if false, do a fatal
 	bool	overflowed;		// set to true if the buffer size failed
 	char	*name;
 	byte	*data;
 	int		maxsize;
 	int		cursize;
-} sizebuf_t;
+	sizebuf_t *(*overflow_cb)(sizebuf_t *s);
+};
 
 void SZ_Alloc (sizebuf_t *buf, int startsize);
 void SZ_Clear (sizebuf_t *buf);

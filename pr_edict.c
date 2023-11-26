@@ -929,6 +929,7 @@ void ED_LoadFromFile (pr_t *pr, char *data)
 			continue;
 		}
 
+		SV_SignonFrame();
 		pr->global_struct->self = EDICT_TO_PROG(pr, ent);
 		PR_ExecuteProgram (pr, func - pr->functions);
 	}
