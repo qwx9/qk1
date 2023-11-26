@@ -3,6 +3,7 @@
 #include <u.h>
 #include <libc.h>
 #include <stdio.h>
+#include <ctype.h>
 
 #ifdef __plan9__
 typedef enum {false, true} bool;

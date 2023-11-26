@@ -425,9 +425,35 @@ Returns false if the client should be killed
 */
 bool SV_ReadClientMessage (void)
 {
-	int		ret;
-	int		cmd;
-	char		*s;
+	int ret, i, cmd;
+	client_t *tmp;
+	char *s;
+	static const char *ret1[] = {
+		"\03ban",
+		"\03fly",
+		"\03god",
+		"\03say",
+		"\04give",
+		"\04kick",
+		"\04kill",
+		"\04name",
+		"\04ping",
+		"\04tell",
+		"\05begin",
+		"\05color",
+		"\05pause",
+		"\05spawn",
+		"\06noclip",
+		"\06status",
+		"\010notarget",
+		"\010prespawn",
+		"\010say_team",
+	};
+	static const char *nooverride[] = {
+		"\05begin",
+		"\05spawn",
+		"\010prespawn",
+	};
 
 	do
 	{
@@ -469,50 +495,34 @@ nextmsg:
 				break;
 
 			case clc_stringcmd:
-				s = MSG_ReadString ();
+				s = MSG_ReadString();
+				if(sv.pr->parse_cl_command.func != nil){
+					for(i = 0; i < nelem(nooverride); i++){
+						if(cistrncmp(nooverride[i]+1, s, nooverride[i][0]) == 0)
+							break;
+					}
+					if(i >= nelem(nooverride)){
+						tmp = host_client;
+						G_INT(sv.pr, OFS_PARM0) = PR_SetStr(sv.pr, s);
+						sv.pr->global_struct->self = EDICT_TO_PROG(sv.pr, tmp->edict);
+						sv.pr->global_struct->time = sv.time;
+						sv.pr->parse_cl_command.in_callback = true;
+						PR_ExecuteProgram(sv.pr, sv.pr->parse_cl_command.func - sv.pr->functions);
+						sv.pr->parse_cl_command.in_callback = false;
+						break;
+					}
+				}
 				ret = 0;
-				if (cistrncmp(s, "status", 6) == 0)
-					ret = 1;
-				else if (cistrncmp(s, "god", 3) == 0)
-					ret = 1;
-				else if (cistrncmp(s, "notarget", 8) == 0)
-					ret = 1;
-				else if (cistrncmp(s, "fly", 3) == 0)
-					ret = 1;
-				else if (cistrncmp(s, "name", 4) == 0)
-					ret = 1;
-				else if (cistrncmp(s, "noclip", 6) == 0)
-					ret = 1;
-				else if (cistrncmp(s, "say", 3) == 0)
-					ret = 1;
-				else if (cistrncmp(s, "say_team", 8) == 0)
-					ret = 1;
-				else if (cistrncmp(s, "tell", 4) == 0)
-					ret = 1;
-				else if (cistrncmp(s, "color", 5) == 0)
-					ret = 1;
-				else if (cistrncmp(s, "kill", 4) == 0)
-					ret = 1;
-				else if (cistrncmp(s, "pause", 5) == 0)
-					ret = 1;
-				else if (cistrncmp(s, "spawn", 5) == 0)
-					ret = 1;
-				else if (cistrncmp(s, "begin", 5) == 0)
-					ret = 1;
-				else if (cistrncmp(s, "prespawn", 8) == 0)
-					ret = 1;
-				else if (cistrncmp(s, "kick", 4) == 0)
-					ret = 1;
-				else if (cistrncmp(s, "ping", 4) == 0)
-					ret = 1;
-				else if (cistrncmp(s, "give", 4) == 0)
-					ret = 1;
-				else if (cistrncmp(s, "ban", 3) == 0)
-					ret = 1;
-				if (ret == 2)
-					Cbuf_InsertText (s);
-				else if (ret == 1)
-					Cmd_ExecuteString (s, src_client);
+				for(i = 0; i < nelem(ret1); i++){
+					if(cistrncmp(ret1[i]+1, s, ret1[i][0]) == 0){
+						ret = 1;
+						break;
+					}
+				}
+				if(ret == 2)
+					Cbuf_InsertText(s);
+				else if(ret == 1)
+					Cmd_ExecuteString(s, src_client);
 				else
 					Con_DPrintf("%s tried to %s\n", host_client->name, s);
 				break;

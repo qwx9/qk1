@@ -14,7 +14,7 @@ const int type_size[8] = {
 ddef_t *ED_FieldAtOfs (pr_t *pr, int ofs);
 bool	ED_ParseEpair (pr_t *pr, void *base, ddef_t *key, char *s);
 
-void PR_SetBuiltinsSV(pr_t *pr);
+void PR_InitSV(pr_t *pr);
 
 cvar_t	nomonsters = {"nomonsters", "0"};
 
@@ -1108,7 +1108,7 @@ err:
 	pr->max_edicts = MAX_EDICTS;
 	pr->edicts = Hunk_Alloc(pr->max_edicts*pr->edict_size);
 
-	PR_SetBuiltinsSV(pr);
+	PR_InitSV(pr);
 
 	return pr;
 }

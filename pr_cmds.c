@@ -1553,9 +1553,12 @@ void PF_Fixme (pr_t *pr)
 
 static const char *exts[] = {
 	"DP_EF_NODRAW",
+	"DP_QC_TOKENIZE_CONSOLE", /* FIXME(sigrid): not really; see somewhere below */
+	"KRIMZON_SV_PARSECLIENTCOMMAND",
 };
 
-static void PF_checkextension (pr_t *pr)
+static void
+PF_checkextension(pr_t *pr)
 {
 	const char *ext = G_STRING(pr, OFS_PARM0);
 	int i;
@@ -1570,12 +1573,67 @@ static void PF_checkextension (pr_t *pr)
 	}
 }
 
-static void PF_clientstat (pr_t *pr)
+static void
+PF_clientstat(pr_t *pr)
 {
 	// FIXME
 	// Arcane Dimensions will fall off if this one isn't defined
 	// even though it does *not* check for the extension
 	USED(pr);
+}
+
+static void
+PF_clientcommand(pr_t *pr)
+{
+	client_t *tmp;
+	edict_t *e;
+	char *cmd;
+	int n;
+
+	if(!pr->parse_cl_command.in_callback){
+		Con_DPrintf("clientcommand(...) outside of SV_ParseClientCommand\n");
+		return;
+	}
+	e = G_EDICT(pr, OFS_PARM0);
+	cmd = G_STRING(pr, OFS_PARM1);
+	if((n = NUM_FOR_EDICT(pr, e)-1) >= svs.maxclients || !svs.clients[n].active){
+		Con_DPrintf("clientcommand(...) on a non-client entity\n");
+		return;
+	}
+	if(!*cmd)
+		return;
+	tmp = host_client;
+	host_client = &svs.clients[n];
+	Cmd_ExecuteString(cmd, src_client);
+	host_client = tmp;
+}
+
+static void
+PF_tokenize(pr_t *pr)
+{
+	char *s;
+	int n;
+
+	s = G_STRING(pr, OFS_PARM0);
+	for(n = 0; s != nil && n < nelem(pr->parse_cl_command.argv); n++){
+		while(*s && isspace(*s))
+			s++;
+		if(*s == 0 || (s = COM_Parse(s)) == nil)
+			break;
+		pr->parse_cl_command.argv[n] = PR_CopyStrTmp(pr, com_token);
+	}
+	pr->parse_cl_command.argc = n;
+	G_FLOAT(pr, OFS_RETURN) = n;
+}
+
+static void
+PF_argv(pr_t *pr)
+{
+	int i;
+
+	if((i = G_FLOAT(pr, OFS_PARM0)) < 0)
+		i += pr->parse_cl_command.argc;
+	G_INT(pr, OFS_RETURN) = i >= pr->parse_cl_command.argc ? 0 : pr->parse_cl_command.argv[i];
 }
 
 static const builtin_t pr_sv_builtins[] =
@@ -1670,11 +1728,17 @@ PF_setspawnparms, // #78
 
 [99] = PF_checkextension,
 [232] = PF_clientstat,
+[440] = PF_clientcommand,
+[441] = PF_tokenize,
+[442] = PF_argv,
+[514] = PF_tokenize, /* FIXME(sigrid): strictly speaking, this is supposed to be "tokenize_console" */
 };
 
 void
-PR_SetBuiltinsSV(pr_t *pr)
+PR_InitSV(pr_t *pr)
 {
 	pr->builtins = pr_sv_builtins;
 	pr->numbuiltins = nelem(pr_sv_builtins);
+
+	pr->parse_cl_command.func = ED_FindFunction(pr, "SV_ParseClientCommand");
 }

@@ -68,6 +68,13 @@ struct pr_t {
 	edict_t *edicts;
 	int num_edicts;
 	int max_edicts;
+
+	// krimzon parse client command
+	struct {
+		dfunction_t *func;
+		int argc, argv[64];
+		bool in_callback;
+	}parse_cl_command;
 };
 
 typedef union eval_s
@@ -103,6 +110,8 @@ string_t ED_NewString (pr_t *pr, char *string);
 
 void ED_Print (pr_t *pr, edict_t *ed);
 char *ED_ParseEdict (pr_t *pr, char *data, edict_t *ent);
+
+dfunction_t *ED_FindFunction (pr_t *pr, char *name);
 
 void ED_ParseGlobals (pr_t *pr, char *data);
 void ED_LoadFromFile (pr_t *pr, char *data);
