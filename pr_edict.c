@@ -821,6 +821,9 @@ char *ED_ParseEdict (pr_t *pr, char *data, edict_t *ent)
 		if (keyname[0] == '_')
 			continue;
 
+		if(strcmp(keyname, "taregtname") == 0) // you'd be surprised (rrp)
+			strcpy(keyname, "targetname");
+
 		key = ED_FindField (pr, keyname);
 		if (!key)
 		{
