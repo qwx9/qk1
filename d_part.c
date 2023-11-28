@@ -7,7 +7,7 @@ D_DrawParticle (particle_t *pparticle)
 {
 	vec3_t local, transformed;
 	double zi;
-	byte *pdest, color;
+	pixel_t *pdest, color;
 	uzint *pz;
 	int i, izi, pix, count, u, v;
 

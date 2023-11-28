@@ -5,7 +5,6 @@ TARG=quake
 CFLAGS=$CFLAGS -D__plan9__
 
 OFILES=\
-	pal`{test -f pal_$objtype.s && echo -n _$objtype}.$O\
 	span`{test -f span_$objtype.s && echo -n _$objtype}.$O\
 	span_alpha.$O\
 	dotproduct`{test -f span_$objtype.s && echo -n _$objtype}.$O\

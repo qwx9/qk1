@@ -532,7 +532,7 @@ static void CL_NewTranslation (int slot)
 {
 	int		i, j;
 	int		top, bottom;
-	byte	*dest, *source;
+	pixel_t	*dest, *source;
 
 	if (slot > cl.maxclients)
 		fatal ("CL_NewTranslation: slot > cl.maxclients");
@@ -544,14 +544,14 @@ static void CL_NewTranslation (int slot)
 
 	for (i=0 ; i<VID_GRADES ; i++, dest += 256, source+=256)
 	{
-		if (top < 128)	// the artists made some backwards ranges.  sigh.
-			memcpy (dest + TOP_RANGE, source + top, 16);
+		if(top < 128)	// the artists made some backwards ranges.  sigh.
+			memcpy (dest + TOP_RANGE, source + top, 16*sizeof(pixel_t));
 		else
 			for (j=0 ; j<16 ; j++)
 				dest[TOP_RANGE+j] = source[top+15-j];
 
-		if (bottom < 128)
-			memcpy (dest + BOTTOM_RANGE, source + bottom, 16);
+		if(bottom < 128)
+			memcpy (dest + BOTTOM_RANGE, source + bottom, 16*sizeof(pixel_t));
 		else
 			for (j=0 ; j<16 ; j++)
 				dest[BOTTOM_RANGE+j] = source[bottom+15-j];

@@ -94,11 +94,13 @@ _Noreturn void Host_Error (char *fmt, ...)
 		fatal("Host_Error: recursively entered");
 	inerror = true;
 
-	SCR_EndLoadingPlaque();	// reenable screen updates
-
 	va_start(arg, fmt);
 	vsnprint(s, sizeof s, fmt, arg);
 	va_end(arg);
+
+	fprintf(stderr, "Host_Error: %s\n", s);
+
+	SCR_EndLoadingPlaque();	// reenable screen updates
 
 	Con_Printf("Host_Error: %s\n", s);
 
@@ -599,6 +601,7 @@ void Host_Init (int argc, char **argv, char **paths)
 		host_basepal = loadhunklmp("gfx/palette.lmp", nil);
 		if(host_basepal == nil)
 			fatal("Host_Init: %s", lerr());
+		setpal(host_basepal);
 		host_colormap = loadhunklmp("gfx/colormap.lmp", nil);
 		if(host_colormap == nil)
 			fatal("Host_Init: %s", lerr());

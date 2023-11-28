@@ -6,11 +6,10 @@ int resized;
 static SDL_Renderer *rend;
 static SDL_Texture *fbi;
 static SDL_Window *win;
-static u8int *vidbuffer;
+static pixel_t *vidbuffer;
 
 s32int fbpal[256];
-
-void pal2xrgb(int n, s32int *pal, u8int *s, u32int *d);
+pixel_t q1pal[256];
 
 static void
 resetfb(void)
@@ -34,11 +33,11 @@ resetfb(void)
 	vid.conheight = vid.height;
 
 	free(vidbuffer);
-	vidbuffer = emalloc(vid.width*vid.height+16);
+	vidbuffer = emalloc((vid.width*vid.height+16)*4);
 
 	if(fbi != nil)
 		SDL_DestroyTexture(fbi);
-	fbi = SDL_CreateTexture(rend, SDL_PIXELFORMAT_XRGB8888, SDL_TEXTUREACCESS_STREAMING, vid.width, vid.height);
+	fbi = SDL_CreateTexture(rend, SDL_PIXELFORMAT_RGB888, SDL_TEXTUREACCESS_STREAMING, vid.width, vid.height);
 	if(fbi == NULL)
 		fatal("SDL_CreateTexture: %s", SDL_GetError());
 	SDL_SetTextureBlendMode(fbi, SDL_BLENDMODE_NONE);
@@ -58,7 +57,7 @@ resetfb(void)
 	scachesz = D_SurfaceCacheForRes(vid.width, vid.height);
 	hunkvbuf += scachesz;
 	d_pzbuffer = emalloc(hunkvbuf);
-	surfcache = (byte *)d_pzbuffer + vid.width * vid.height * sizeof *d_pzbuffer;
+	surfcache = (byte *)(d_pzbuffer + vid.width * vid.height);
 	D_InitCaches(surfcache, scachesz);
 }
 
@@ -84,21 +83,23 @@ flipfb(void)
 	}
 
 	SDL_LockTexture(fbi, NULL, &p, &pitch);
-	pal2xrgb(vid.width*vid.height, fbpal, vidbuffer, p);
+	memmove(p, vidbuffer, vid.width*vid.height*4);
 	SDL_UnlockTexture(fbi);
 	SDL_RenderCopy(rend, fbi, NULL, NULL);
 	SDL_RenderPresent(rend);
 }
 
 void
-setpal(uchar *p)
+setpal(uchar *p0)
 {
-	int *fp;
+	int *fp, x;
+	uchar *p;
 
-	for(fp=fbpal; fp<fbpal+nelem(fbpal); p+=3, fp++)
+	for(p = p0, fp=fbpal; fp<fbpal+nelem(fbpal); p+=3, fp++)
 		*fp = p[0] << 16 | p[1] << 8 | p[2];
 
-	initalpha();
+	for(p = p0, x = 0; x < 256; x++, p += 3)
+		q1pal[x] = x<<24 | p[0]<<16 | p[1]<<8 | p[2];
 
 	scr_fullupdate = 0;
 }
@@ -109,7 +110,8 @@ initfb(void)
 	vid.maxwarpwidth = WARP_WIDTH;
 	vid.maxwarpheight = WARP_HEIGHT;
 	vid.numpages = 2;
-	vid.colormap = host_colormap;
+	vid.colormap = malloc(256*64*sizeof(pixel_t));
+	torgbx(host_colormap, vid.colormap, 256*64);
 	vid.fullbright = 256 - LittleLong(*((int *)vid.colormap + 2048));
 
 	if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) < 0)

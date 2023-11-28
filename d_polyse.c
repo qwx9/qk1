@@ -2,10 +2,10 @@
 
 // !!! if this is changed, it must be changed in asm_draw.h too !!!
 typedef struct {
-	void			*pdest;
+	pixel_t			*pdest;
 	uzint			*pz;
 	int				count;
-	byte			*ptex;
+	pixel_t			*ptex;
 	int				sfrac, tfrac, light, zi;
 } spanpackage_t;
 
@@ -27,7 +27,7 @@ static spanpackage_t a_spans[MAXHEIGHT+1];
 									// 1 extra for spanpackage that marks end
 
 static int r_p0[6], r_p1[6], r_p2[6];
-static byte *d_pcolormap;
+static pixel_t *d_pcolormap;
 static int d_xdenom;
 static edgetable *pedgetable;
 
@@ -54,7 +54,7 @@ static int d_aspancount, d_countextrastep;
 
 static spanpackage_t *d_pedgespanpackage;
 static int ystart;
-static byte *d_pdest, *d_ptex;
+static pixel_t *d_pdest, *d_ptex;
 static uzint *d_pz;
 static int d_sfrac, d_tfrac, d_light, d_zi;
 static int d_ptexextrastep, d_sfracextrastep;
@@ -74,13 +74,13 @@ static const adivtab_t adivtab[32*32] = {
 #include "adivtab.h"
 };
 
-static byte *skintable[MAX_LBM_HEIGHT];
-static byte *skinstart;
+static pixel_t *skintable[MAX_LBM_HEIGHT];
+static pixel_t *skinstart;
 int skinwidth;
 
-void D_PolysetDrawSpans8 (spanpackage_t *pspanpackage, byte *colormap, byte alpha);
+void D_PolysetDrawSpans8 (spanpackage_t *pspanpackage, pixel_t *colormap, byte alpha);
 void D_PolysetCalcGradients (int skinwidth);
-void D_DrawSubdiv (byte *colormap);
+void D_DrawSubdiv (pixel_t *colormap);
 void D_DrawNonSubdiv (void);
 void D_PolysetRecursiveTriangle (int *p1, int *p2, int *p3, byte alpha);
 void D_PolysetSetEdgeTable (void);
@@ -92,7 +92,7 @@ void D_PolysetScanLeftEdge (int height);
 D_PolysetDraw
 ================
 */
-void D_PolysetDraw (byte *colormap)
+void D_PolysetDraw (pixel_t *colormap)
 {
 	if (r_affinetridesc.drawtype)
 	{
@@ -110,7 +110,7 @@ void D_PolysetDraw (byte *colormap)
 D_PolysetDrawFinalVerts
 ================
 */
-void D_PolysetDrawFinalVerts (finalvert_t *fv, int numverts, byte *colormap, byte alpha)
+void D_PolysetDrawFinalVerts (finalvert_t *fv, int numverts, pixel_t *colormap, byte alpha)
 {
 	int		i, z;
 	uzint	*zbuf;
@@ -125,17 +125,14 @@ void D_PolysetDrawFinalVerts (finalvert_t *fv, int numverts, byte *colormap, byt
 			z = fv->v[5]>>16;
 			zbuf = zspantable[fv->v[1]] + fv->v[0];
 			if (z >= *zbuf){
+				int pix = CIND(skintable[fv->v[3]>>16][fv->v[2]>>16]);
+				pixel_t p = colormap[pix + (fv->v[4] & 0xFF00)];
+				int n = d_scantable[fv->v[1]] + fv->v[0];
 				if(r_drawflags & DRAW_BLEND){
-					int n = d_scantable[fv->v[1]] + fv->v[0];
-					int pix = skintable[fv->v[3]>>16][fv->v[2]>>16];
-					pix = colormap[pix + (fv->v[4] & 0xFF00) ];
-					d_viewbuffer[n] = blendalpha(pix, d_viewbuffer[n], alpha);
+					d_viewbuffer[n] = blendalpha(p, d_viewbuffer[n], alpha);
 				}else{
-					int		pix;
+					d_viewbuffer[n] = p;
 					*zbuf = z;
-					pix = skintable[fv->v[3]>>16][fv->v[2]>>16];
-					pix = colormap[pix + (fv->v[4] & 0xFF00) ];
-					d_viewbuffer[d_scantable[fv->v[1]] + fv->v[0]] = pix;
 				}
 			}
 		}
@@ -148,7 +145,7 @@ void D_PolysetDrawFinalVerts (finalvert_t *fv, int numverts, byte *colormap, byt
 D_DrawSubdiv
 ================
 */
-void D_DrawSubdiv (byte *colormap)
+void D_DrawSubdiv (pixel_t *colormap)
 {
 	mtriangle_t		*ptri;
 	finalvert_t		*pfv, *index0, *index1, *index2;
@@ -340,15 +337,13 @@ split:
 	z = new[5]>>16;
 	zbuf = zspantable[new[1]] + new[0];
 	if (z >= *zbuf){
+		pixel_t p = d_pcolormap[CIND(skintable[new[3]>>16][new[2]>>16])];
+		int n = d_scantable[new[1]] + new[0];
 		if(r_drawflags & DRAW_BLEND){
-			int n = d_scantable[new[1]] + new[0];
-			int pix = d_pcolormap[skintable[new[3]>>16][new[2]>>16]];
-			d_viewbuffer[n] = blendalpha(pix, d_viewbuffer[n], alpha);
+			d_viewbuffer[n] = blendalpha(p, d_viewbuffer[n], alpha);
 		}else{
-			int		pix;
+			d_viewbuffer[n] = p;
 			*zbuf = z;
-			pix = d_pcolormap[skintable[new[3]>>16][new[2]>>16]];
-			d_viewbuffer[d_scantable[new[1]] + new[0]] = pix;
 		}
 	}
 
@@ -367,7 +362,7 @@ D_PolysetUpdateTables
 void D_PolysetUpdateTables (void)
 {
 	int		i;
-	byte	*s;
+	pixel_t	*s;
 
 	if (r_affinetridesc.skinwidth != skinwidth ||
 		r_affinetridesc.pskin != skinstart)
@@ -545,11 +540,10 @@ void D_PolysetCalcGradients (int skinwidth)
 D_PolysetDrawSpans8
 ================
 */
-void D_PolysetDrawSpans8 (spanpackage_t *pspanpackage, byte *colormap, byte alpha)
+void D_PolysetDrawSpans8 (spanpackage_t *pspanpackage, pixel_t *colormap, byte alpha)
 {
 	int		lcount;
-	byte	*lpdest;
-	byte	*lptex;
+	pixel_t	*lpdest, *lptex;
 	int		lsfrac, ltfrac;
 	int		llight;
 	int		lzi;
@@ -583,14 +577,15 @@ void D_PolysetDrawSpans8 (spanpackage_t *pspanpackage, byte *colormap, byte alph
 			do
 			{
 				if ((lzi >> 16) >= *lpz){
+					pixel_t p = colormap[CIND(*lptex) + (llight & 0xFF00)];
 					if(r_drawflags & DRAW_BLEND){
 						*lpdest = blendalpha(
-							colormap[*lptex + (llight & 0xFF00)],
+							p,
 							*lpdest,
 							alpha
 						);
 					}else{
-						*lpdest = colormap[*lptex + (llight & 0xFF00)];
+						*lpdest = p;
 						// gel mapping	*lpdest = gelmap[*lpdest];
 						*lpz = lzi >> 16;
 					}
@@ -647,15 +642,14 @@ void D_RasterizeAliasPolySmooth (void)
 	ystart = plefttop[1];
 	d_aspancount = plefttop[0] - prighttop[0];
 
-	d_ptex = (byte *)r_affinetridesc.pskin + (plefttop[2] >> 16) +
+	d_ptex = r_affinetridesc.pskin + (plefttop[2] >> 16) +
 			(plefttop[3] >> 16) * r_affinetridesc.skinwidth;
 	d_sfrac = plefttop[2] & 0xFFFF;
 	d_tfrac = plefttop[3] & 0xFFFF;
 	d_light = plefttop[4];
 	d_zi = plefttop[5];
 
-	d_pdest = (byte *)d_viewbuffer +
-			ystart * screenwidth + plefttop[0];
+	d_pdest = d_viewbuffer + ystart * screenwidth + plefttop[0];
 	d_pz = d_pzbuffer + ystart * d_zwidth + plefttop[0];
 
 	if (initialleftheight == 1)
@@ -728,14 +722,14 @@ void D_RasterizeAliasPolySmooth (void)
 
 		ystart = plefttop[1];
 		d_aspancount = plefttop[0] - prighttop[0];
-		d_ptex = (byte *)r_affinetridesc.pskin + (plefttop[2] >> 16) +
+		d_ptex = r_affinetridesc.pskin + (plefttop[2] >> 16) +
 				(plefttop[3] >> 16) * r_affinetridesc.skinwidth;
 		d_sfrac = 0;
 		d_tfrac = 0;
 		d_light = plefttop[4];
 		d_zi = plefttop[5];
 
-		d_pdest = (byte *)d_viewbuffer + ystart * screenwidth + plefttop[0];
+		d_pdest = d_viewbuffer + ystart * screenwidth + plefttop[0];
 		d_pz = d_pzbuffer + ystart * d_zwidth + plefttop[0];
 
 		if (height == 1)

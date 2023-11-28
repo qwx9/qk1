@@ -6,10 +6,10 @@ static int sourcetstep, lightleftstep, lightrightstep;
 static int surfrowbytes;	// used by ASM files
 static int r_stepback;
 static int r_numhblocks, r_numvblocks;
-static byte *r_source, *r_sourcemax;
+static pixel_t *r_source, *r_sourcemax;
 static unsigned *r_lightptr;
 static int r_lightwidth;
-static byte *pbasesource;
+static pixel_t *pbasesource;
 static void *prowdestbase;
 
 static void R_DrawSurfaceBlock8_mip0 (void);
@@ -204,12 +204,12 @@ R_DrawSurface
 */
 void R_DrawSurface (void)
 {
-	unsigned char	*basetptr;
+	pixel_t	*basetptr;
 	int				smax, tmax, twidth;
 	int				u, blockdivshift, blocksize;
 	int				soffset, basetoffset, texwidth;
 	int				horzblockstep;
-	unsigned char	*pcolumndest;
+	pixel_t	*pcolumndest;
 	void			(*pblockdrawer)(void);
 	texture_t		*mt;
 
@@ -220,7 +220,7 @@ void R_DrawSurface (void)
 
 	mt = r_drawsurf.texture;
 
-	r_source = (byte *)mt + mt->offsets[r_drawsurf.surfmip];
+	r_source = (pixel_t*)((byte*)mt + mt->offsets[r_drawsurf.surfmip]);
 
 	// the fractional light values should range from 0 to (VID_GRADES - 1) << 16
 	// from a source range of 0 - 255
@@ -286,7 +286,7 @@ R_DrawSurfaceBlock8_mip0
 static void R_DrawSurfaceBlock8_mip0 (void)
 {
 	int				v, i, lightstep, lighttemp, light, lightleft, lightright;
-	unsigned char	*psource, *prowdest;
+	pixel_t	*psource, *prowdest;
 
 	psource = pbasesource;
 	prowdest = prowdestbase;
@@ -307,22 +307,22 @@ static void R_DrawSurfaceBlock8_mip0 (void)
 
 			light = lightright;
 
-			prowdest[15] = vid.colormap[((light += lightstep) & 0xFF00) + psource[15]];
-			prowdest[14] = vid.colormap[((light += lightstep) & 0xFF00) + psource[14]];
-			prowdest[13] = vid.colormap[((light += lightstep) & 0xFF00) + psource[13]];
-			prowdest[12] = vid.colormap[((light += lightstep) & 0xFF00) + psource[12]];
-			prowdest[11] = vid.colormap[((light += lightstep) & 0xFF00) + psource[11]];
-			prowdest[10] = vid.colormap[((light += lightstep) & 0xFF00) + psource[10]];
-			prowdest[9] = vid.colormap[((light += lightstep) & 0xFF00) + psource[9]];
-			prowdest[8] = vid.colormap[((light += lightstep) & 0xFF00) + psource[8]];
-			prowdest[7] = vid.colormap[((light += lightstep) & 0xFF00) + psource[7]];
-			prowdest[6] = vid.colormap[((light += lightstep) & 0xFF00) + psource[6]];
-			prowdest[5] = vid.colormap[((light += lightstep) & 0xFF00) + psource[5]];
-			prowdest[4] = vid.colormap[((light += lightstep) & 0xFF00) + psource[4]];
-			prowdest[3] = vid.colormap[((light += lightstep) & 0xFF00) + psource[3]];
-			prowdest[2] = vid.colormap[((light += lightstep) & 0xFF00) + psource[2]];
-			prowdest[1] = vid.colormap[((light += lightstep) & 0xFF00) + psource[1]];
-			prowdest[0] = vid.colormap[(light & 0xFF00) + psource[0]];
+			prowdest[15] = vid.colormap[((light += lightstep) & 0xFF00) + CIND(psource[15])];
+			prowdest[14] = vid.colormap[((light += lightstep) & 0xFF00) + CIND(psource[14])];
+			prowdest[13] = vid.colormap[((light += lightstep) & 0xFF00) + CIND(psource[13])];
+			prowdest[12] = vid.colormap[((light += lightstep) & 0xFF00) + CIND(psource[12])];
+			prowdest[11] = vid.colormap[((light += lightstep) & 0xFF00) + CIND(psource[11])];
+			prowdest[10] = vid.colormap[((light += lightstep) & 0xFF00) + CIND(psource[10])];
+			prowdest[9] = vid.colormap[((light += lightstep) & 0xFF00) + CIND(psource[9])];
+			prowdest[8] = vid.colormap[((light += lightstep) & 0xFF00) + CIND(psource[8])];
+			prowdest[7] = vid.colormap[((light += lightstep) & 0xFF00) + CIND(psource[7])];
+			prowdest[6] = vid.colormap[((light += lightstep) & 0xFF00) + CIND(psource[6])];
+			prowdest[5] = vid.colormap[((light += lightstep) & 0xFF00) + CIND(psource[5])];
+			prowdest[4] = vid.colormap[((light += lightstep) & 0xFF00) + CIND(psource[4])];
+			prowdest[3] = vid.colormap[((light += lightstep) & 0xFF00) + CIND(psource[3])];
+			prowdest[2] = vid.colormap[((light += lightstep) & 0xFF00) + CIND(psource[2])];
+			prowdest[1] = vid.colormap[((light += lightstep) & 0xFF00) + CIND(psource[1])];
+			prowdest[0] = vid.colormap[(light & 0xFF00) + CIND(psource[0])];
 
 			psource += sourcetstep;
 			lightright += lightrightstep;
@@ -344,7 +344,7 @@ R_DrawSurfaceBlock8_mip1
 static void R_DrawSurfaceBlock8_mip1 (void)
 {
 	int				v, i, b, lightstep, lighttemp, light, lightleft, lightright;
-	unsigned char	pix, *psource, *prowdest;
+	pixel_t	pix, *psource, *prowdest;
 
 	psource = pbasesource;
 	prowdest = prowdestbase;
@@ -368,8 +368,7 @@ static void R_DrawSurfaceBlock8_mip1 (void)
 			for (b=7; b>=0; b--)
 			{
 				pix = psource[b];
-				prowdest[b] = ((unsigned char *)vid.colormap)
-						[(light & 0xFF00) + pix];
+				prowdest[b] = vid.colormap[(light & 0xFF00) + CIND(pix)];
 				light += lightstep;
 			}
 
@@ -392,8 +391,8 @@ R_DrawSurfaceBlock8_mip2
 */
 static void R_DrawSurfaceBlock8_mip2 (void)
 {
-	int				v, i, b, lightstep, lighttemp, light, lightleft, lightright;
-	unsigned char	pix, *psource, *prowdest;
+	int v, i, b, lightstep, lighttemp, light, lightleft, lightright;
+	pixel_t pix, *psource, *prowdest;
 
 	psource = pbasesource;
 	prowdest = prowdestbase;
@@ -417,8 +416,7 @@ static void R_DrawSurfaceBlock8_mip2 (void)
 			for (b=3; b>=0; b--)
 			{
 				pix = psource[b];
-				prowdest[b] = ((unsigned char *)vid.colormap)
-						[(light & 0xFF00) + pix];
+				prowdest[b] = vid.colormap[(light & 0xFF00) + CIND(pix)];
 				light += lightstep;
 			}
 
@@ -441,8 +439,8 @@ R_DrawSurfaceBlock8_mip3
 */
 static void R_DrawSurfaceBlock8_mip3 (void)
 {
-	int				v, i, b, lightstep, lighttemp, light, lightleft, lightright;
-	unsigned char	pix, *psource, *prowdest;
+	int v, i, b, lightstep, lighttemp, light, lightleft, lightright;
+	pixel_t pix, *psource, *prowdest;
 
 	psource = pbasesource;
 	prowdest = prowdestbase;
@@ -466,8 +464,7 @@ static void R_DrawSurfaceBlock8_mip3 (void)
 			for (b=1; b>=0; b--)
 			{
 				pix = psource[b];
-				prowdest[b] = ((unsigned char *)vid.colormap)
-						[(light & 0xFF00) + pix];
+				prowdest[b] = vid.colormap[(light & 0xFF00) + CIND(pix)];
 				light += lightstep;
 			}
 

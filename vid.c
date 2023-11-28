@@ -8,10 +8,10 @@ Point center;		/* of window */
 Rectangle grabr;
 
 s32int fbpal[256];
-static uchar *fbs;
+pixel_t q1pal[256];
 static Image *fbi;
 static Rectangle fbr;
-static u8int *vidbuffers[2];
+static pixel_t *vidbuffers[2];
 static int bufi = 0;
 static Channel *frame;
 
@@ -43,7 +43,7 @@ resetfb(void)
 	hunkvbuf += scachesz;
 	if((d_pzbuffer = realloc(d_pzbuffer, hunkvbuf)) == nil)
 		sysfatal("%r");
-	surfcache = (byte *)d_pzbuffer + vid.width * vid.height * sizeof *d_pzbuffer;
+	surfcache = (byte*)(d_pzbuffer + vid.width * vid.height);
 	D_InitCaches(surfcache, scachesz);
 
 	vid.rowbytes = vid.width;
@@ -58,7 +58,7 @@ resetfb(void)
 	p = Pt(vid.width/4, vid.height/4);
 	grabr = Rpt(subpt(center, p), addpt(center, p));
 	for(i = 0; i < nelem(vidbuffers); i++)
-		vidbuffers[i] = realloc(vidbuffers[i], vid.width*vid.height+16);
+		vidbuffers[i] = realloc(vidbuffers[i], (vid.width*vid.height+16)*sizeof(pixel_t));
 	freeimage(fbi);
 	fbi = allocimage(display, Rect(0, 0, vid.width, vid.height), XRGB32, 0, 0);
 	if(fbi == nil)
@@ -69,26 +69,23 @@ resetfb(void)
 }
 
 static void
-loader(void *p)
+loader(void *)
 {
-	u8int *f, *fb;
+	byte *f;
 	Rectangle r;
 	int n;
 
-	fb = p;
 	r = Rect(0, 0, vid.width, vid.height);
 	n = vid.width * vid.height;
 	for(;;){
 		if((f = recvp(frame)) == nil)
 			break;
-		pal2xrgb(n, fbpal, f, (u32int*)fb);
-		if(loadimage(fbi, r, fb, n*4) != n*4)
+		if(loadimage(fbi, r, f, n*4) != n*4)
 			sysfatal("%r");
 		draw(screen, fbr, fbi, nil, ZP);
 		if(flushimage(display, 1) < 0)
 			sysfatal("%r");
 	}
-	free(fb);
 	threadexits(nil);
 }
 
@@ -117,8 +114,8 @@ flipfb(void)
 		return;
 	}
 	if(frame == nil){
-		frame = chancreate(sizeof(u8int*), 0);
-		proccreate(loader, mallocalign(vid.width*vid.height*4+16, 64, 0, 0), 4096);
+		frame = chancreate(sizeof(pixel_t*), 0);
+		proccreate(loader, nil, 4096);
 	}
 	if(sendp(frame, vidbuffers[bufi]) > 0){
 		bufi = (bufi+1) % nelem(vidbuffers);
@@ -128,14 +125,16 @@ flipfb(void)
 }
 
 void
-setpal(uchar *p)
+setpal(uchar *p0)
 {
-	int *fp;
+	int *fp, x;
+	uchar *p;
 
-	for(fp=fbpal; fp<fbpal+nelem(fbpal); p+=3, fp++)
+	for(p = p0, fp=fbpal; fp<fbpal+nelem(fbpal); p+=3, fp++)
 		*fp = p[0] << 16 | p[1] << 8 | p[2];
 
-	initalpha();
+	for(p = p0, x = 0; x < 256; x++, p += 3)
+		q1pal[x] = x<<24 | p[0]<<16 | p[1]<<8 | p[2];
 
 	scr_fullupdate = 0;
 }
@@ -146,7 +145,8 @@ initfb(void)
 	vid.maxwarpwidth = WARP_WIDTH;
 	vid.maxwarpheight = WARP_HEIGHT;
 	vid.numpages = 2;
-	vid.colormap = host_colormap;
+	vid.colormap = malloc(256*64*sizeof(pixel_t));
+	torgbx(host_colormap, vid.colormap, 256*64);
 	vid.fullbright = 256 - LittleLong(*((int *)vid.colormap + 2048));
 	if(initdraw(nil, nil, "quake") < 0)
 		sysfatal("initdraw: %r\n");

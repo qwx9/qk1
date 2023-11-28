@@ -41,6 +41,7 @@ Hunk_CacheFrom(mem_user_t *c, void *p)
 	}
 	assert(n != nil && (void*)(n+1) == p);
 	data = Cache_Alloc(c, size);
+	setmalloctag((mem_t*)data-1, getcallerpc(&c));
 
 	hunk_head = n->next;
 	if(hunk_head != nil)
@@ -62,6 +63,7 @@ Hunk_Alloc(int size)
 	m = calloc(1, sizeof(*m) + size);
 	if(m == nil)
 		fatal("Hunk_Alloc: size=%d: %s", size, lerr());
+	setmalloctag(m, getcallerpc(&size));
 	m->size = size;
 	m->next = hunk_head;
 	if(hunk_head != nil)
@@ -75,18 +77,16 @@ void *
 Hunk_Double(void *p)
 {
 	mem_t *m, *n;
-	ulong t;
 
 	m = p;
 	m--;
-	t = getmalloctag(m);
 	n = realloc(m, sizeof(*m) + m->size*2);
 	if(m == nil)
 		fatal("Hunk_Double: %s", lerr());
 	if(hunk_head == m)
 		hunk_head = n;
 	m = n;
-	setmalloctag(m, t);
+	setrealloctag(m, getcallerpc(&p));
 	memset((byte*)(m+1) + m->size, 0, m->size);
 	m->size *= 2;
 	if(m->prev != nil)
@@ -125,6 +125,7 @@ Hunk_TempAlloc(int size)
 		buf = realloc(buf, size);
 		if(buf == nil)
 			fatal("Hunk_TempAlloc: %s", lerr());
+		setmalloctag(buf, getcallerpc(&size));
 		bufsz = size;
 	}
 	memset(buf, 0, size);
@@ -175,7 +176,7 @@ Cache_Alloc(mem_user_t *c, int size)
 {
 	mem_t *cs;
 
-	if(c->data)
+	if(c->data != nil)
 		fatal("Cache_Alloc: already allocated");
 	if(size <= 0)
 		fatal("Cache_Alloc: size %d", size);
@@ -183,13 +184,45 @@ Cache_Alloc(mem_user_t *c, int size)
 	cs = calloc(1, sizeof(*cs) + size);
 	if(cs == nil)
 		fatal("Cache_Alloc: %s", lerr());
+	setmalloctag(cs, getcallerpc(&c));
 	cs->size = size;
 	cs->next = cache_head;
 	if(cache_head != nil)
 		cache_head->prev = cs;
 	cache_head = cs;
-	c->data = cs+1;
 	cs->user = c;
+	c->data = cs+1;
+
+	return c->data;
+}
+
+void *
+Cache_Realloc(mem_user_t *c, int size)
+{
+	mem_t *cs, *o;
+
+	if(c->data == nil)
+		return Cache_Alloc(c, size);
+	if(size <= 0)
+		fatal("Cache_Alloc: size %d", size);
+
+	cs = (mem_t *)c->data - 1;
+	o = cs;
+	cs = realloc(cs, sizeof(*cs) + size);
+	if(cs == nil)
+		fatal("Cache_Realloc: %s", lerr());
+	if(cache_head == o)
+		cache_head = cs;
+	if(cs->prev != nil)
+		cs->prev->next = cs;
+	if(cs->next != nil)
+		cs->next->prev = cs;
+	setrealloctag(cs, getcallerpc(&c));
+	if(size > cs->size)
+		memset((byte*)(cs+1) + cs->size, 0, size - cs->size);
+	cs->size = size;
+	cs->user = c;
+	c->data = cs+1;
 
 	return c->data;
 }

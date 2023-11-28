@@ -16,7 +16,7 @@ int	 D_SurfaceCacheForRes (int width, int height)
 
 	size = SURFCACHE_SIZE_AT_320X200;
 
-	pix = width*height;
+	pix = width*height*sizeof(pixel_t);
 	if (pix > 64000)
 		size += (pix-64000)*3;
 
@@ -97,21 +97,18 @@ void D_FlushCaches (void)
 D_SCAlloc
 =================
 */
-surfcache_t	 *D_SCAlloc (int width, uintptr size)
+static surfcache_t *
+D_SCAlloc(int width, int size)
 {
 	surfcache_t			 *new;
 	bool				wrapped_this_time;
 
-	if ((width < 0) || (width > 256))
-		Host_Error("D_SCAlloc: bad cache width %d\n", width);
+	if(width < 0 || size <= 0)
+		Host_Error("D_SCAlloc: width=%d size=%d\n", width, size);
 
-	if ((size <= 0) || (size > 0x10000))
-		Host_Error("D_SCAlloc: bad cache size %zud\n", size);
-
-	size = (uintptr)&((surfcache_t *)0)->data[size];
-	size = (size + 3) & ~3;
-	if (size > (uintptr)sc_size)
-		Host_Error("D_SCAlloc: %zud > cache size",size);
+	size = (sizeof(surfcache_t) + size + 3) & ~3;
+	if(size > sc_size)
+		Host_Error("D_SCAlloc: %d > cache size",size);
 
 	// if there is not size bytes after the rover, reset to the start
 	wrapped_this_time = false;
@@ -130,7 +127,7 @@ surfcache_t	 *D_SCAlloc (int width, uintptr size)
 	if (sc_rover->owner)
 		*sc_rover->owner = nil;
 
-	while ((uintptr)new->size < size)
+	while (new->size < size)
 	{
 		// free another
 		sc_rover = sc_rover->next;
@@ -160,7 +157,7 @@ surfcache_t	 *D_SCAlloc (int width, uintptr size)
 	new->width = width;
 	// DEBUG
 	if (width > 0)
-		new->height = (size - sizeof(*new) + sizeof(new->data)) / width;
+		new->height = (size - sizeof(*new)) / width / sizeof(pixel_t);
 
 	new->owner = nil;			  // should be set properly after return
 
@@ -217,16 +214,13 @@ surfcache_t *D_CacheSurface (msurface_t *surface, int miplevel)
 	if (!cache)	 // if a texture just animated, don't reallocate it
 	{
 		cache = D_SCAlloc (r_drawsurf.surfwidth,
-						   r_drawsurf.surfwidth * r_drawsurf.surfheight);
+						   r_drawsurf.surfwidth * r_drawsurf.surfheight * sizeof(pixel_t));
 		surface->cachespots[miplevel] = cache;
 		cache->owner = &surface->cachespots[miplevel];
 		cache->mipscale = surfscale;
 	}
 
-	if (surface->dlightframe == r_framecount)
-		cache->dlight = 1;
-	else
-		cache->dlight = 0;
+	cache->dlight = surface->dlightframe == r_framecount;
 
 	r_drawsurf.surfdat = (pixel_t *)cache->data;
 

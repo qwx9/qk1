@@ -17,11 +17,9 @@
 
 typedef struct
 {
-	int			width, height;
-	byte		data[4];			// variably sized
+	int width, height;
+	pixel_t data[]; // variably sized
 } qpic_t;
-
-
 
 typedef struct
 {

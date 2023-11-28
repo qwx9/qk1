@@ -1,14 +1,14 @@
 #include "quakedef.h"
 
 void
-dospan_alpha(byte *pdest, byte *pbase, int s, int t, int sstep, int tstep, int spancount, int cachewidth, u8int alpha, uzint *pz, int izi, int izistep)
+dospan_alpha(pixel_t *pdest, pixel_t *pbase, int s, int t, int sstep, int tstep, int spancount, int cachewidth, u8int alpha, uzint *pz, int izi, int izistep)
 {
-	uchar pix;
+	pixel_t pix;
 
 	if(alpha != 255){
 		do{
 			pix = pbase[(s >> 16) + (t >> 16) * cachewidth];
-			if(pix != 255 && *pz <= (izi >> 16))
+			if(opaque(pix) && *pz <= (izi >> 16))
 				*pdest = blendalpha(pix, *pdest, alpha);
 			pdest++;
 			pz++;
@@ -19,7 +19,7 @@ dospan_alpha(byte *pdest, byte *pbase, int s, int t, int sstep, int tstep, int s
 	}else{
 		do{
 			pix = pbase[(s >> 16) + (t >> 16) * cachewidth];
-			if(pix != 255 && *pz <= (izi >> 16)){
+			if(opaque(pix) && *pz <= (izi >> 16)){
 				*pdest = pix;
 				*pz = izi >> 16;
 			}

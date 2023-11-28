@@ -1,10 +1,10 @@
 #include "quakedef.h"
 
-static unsigned char	*r_turb_pbase, *r_turb_pdest;
-static fixed16_t		r_turb_s, r_turb_t, r_turb_sstep, r_turb_tstep;
-static int				*r_turb_turb;
-static int				r_turb_spancount;
-static uzint	*r_turb_z;
+static pixel_t *r_turb_pbase, *r_turb_pdest;
+static fixed16_t r_turb_s, r_turb_t, r_turb_sstep, r_turb_tstep;
+static int *r_turb_turb;
+static int r_turb_spancount;
+static uzint *r_turb_z;
 
 /*
 =============
@@ -16,14 +16,11 @@ D_WarpScreen
 */
 void D_WarpScreen (void)
 {
-	int		w, h;
-	int		u,v;
-	byte	*dest;
-	int		*turb;
-	int		*col;
-	byte	**row;
+	int		w, h, u, v, *turb, *col;
+	pixel_t	*dest;
+	pixel_t	**row;
 	float	wratio, hratio;
-	static byte	*rowptr[MAXHEIGHT+(AMP2*2)];
+	static pixel_t	*rowptr[MAXHEIGHT+(AMP2*2)];
 	static int	column[MAXWIDTH+(AMP2*2)];
 
 	w = r_refdef.vrect.width;
@@ -89,14 +86,14 @@ Turbulent8(espan_t *pspan, byte alpha)
 	r_turb_sstep = 0;	// keep compiler happy
 	r_turb_tstep = 0;	// ditto
 
-	r_turb_pbase = (byte*)cacheblock;
+	r_turb_pbase = cacheblock;
 
 	sdivz16stepu = d_sdivzstepu * 16;
 	tdivz16stepu = d_tdivzstepu * 16;
 	zi16stepu = d_zistepu * 16;
 
 	do{
-		r_turb_pdest = (byte *)d_viewbuffer + screenwidth*pspan->v + pspan->u;
+		r_turb_pdest = d_viewbuffer + screenwidth*pspan->v + pspan->u;
 		r_turb_z = d_pzbuffer + d_zwidth*pspan->v + pspan->u;
 
 		count = pspan->count;
@@ -178,7 +175,7 @@ void
 D_DrawSpans16(espan_t *pspan, int forceblend, byte alpha) //qbism- up it from 8 to 16
 {
 	int			count, spancount, izistep;
-	byte		*pbase, *pdest;
+	pixel_t		*pbase, *pdest;
 	uzint		*pz;
 	fixed16_t	s, t, snext, tnext, sstep, tstep;
 	double		sdivz, tdivz, zi, z, du, dv, spancountminus1;
@@ -187,7 +184,7 @@ D_DrawSpans16(espan_t *pspan, int forceblend, byte alpha) //qbism- up it from 8 
 	sstep = 0;	// keep compiler happy
 	tstep = 0;	// ditto
 
-	pbase = (byte*)cacheblock;
+	pbase = cacheblock;
 
 	sdivzstepu = d_sdivzstepu * 16;
 	tdivzstepu = d_tdivzstepu * 16;
@@ -195,7 +192,7 @@ D_DrawSpans16(espan_t *pspan, int forceblend, byte alpha) //qbism- up it from 8 
 	izistep = (int)(d_zistepu * 0x8000 * 0x10000);
 
 	do{
-		pdest = (byte *)d_viewbuffer + screenwidth*pspan->v + pspan->u;
+		pdest = d_viewbuffer + screenwidth*pspan->v + pspan->u;
 		pz = d_pzbuffer + d_zwidth*pspan->v + pspan->u;
 
 		count = pspan->count;
@@ -267,8 +264,8 @@ D_DrawSpans16(espan_t *pspan, int forceblend, byte alpha) //qbism- up it from 8 
 			}
 
 			if(spancount > 0){
-				void dospan(byte *, byte *, int, int, int, int, int, int);
-				void dospan_alpha(byte *, byte *, int, int, int, int, int, int, byte, uzint *, int,int);
+				void dospan(pixel_t *, pixel_t *, int, int, int, int, int, int);
+				void dospan_alpha(pixel_t *, pixel_t *, int, int, int, int, int, int, byte, uzint *, int, int);
 				if((r_drawflags & DRAW_BLEND) != 0 || forceblend)
 					dospan_alpha(pdest, pbase, s, t, sstep, tstep, spancount, cachewidth, alpha, pz, (int)(zi * 0x8000 * 0x10000), izistep);
 				else
@@ -287,8 +284,7 @@ D_DrawSpans16(espan_t *pspan, int forceblend, byte alpha) //qbism- up it from 8 
 void
 D_DrawZSpans(espan_t *pspan)
 {
-	int			count, doublecount, izistep;
-	int			izi;
+	int			count, doublecount, izistep, izi;
 	uzint		*pdest;
 	unsigned	ltemp;
 	double		zi;

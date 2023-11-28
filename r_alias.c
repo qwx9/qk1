@@ -225,7 +225,7 @@ R_AliasPreparePoints
 General clipped case
 ================
 */
-void R_AliasPreparePoints (trivertx_t *apverts, auxvert_t *auxverts, byte *colormap)
+void R_AliasPreparePoints (trivertx_t *apverts, auxvert_t *auxverts, pixel_t *colormap)
 {
 	int			i;
 	stvert_t	*pstverts;
@@ -478,7 +478,7 @@ void R_AliasProjectFinalVert (finalvert_t *fv, auxvert_t *av)
 R_AliasPrepareUnclippedPoints
 ================
 */
-void R_AliasPrepareUnclippedPoints (trivertx_t *pverts, byte *colormap)
+void R_AliasPrepareUnclippedPoints (trivertx_t *pverts, pixel_t *colormap)
 {
 	stvert_t	*pstverts;
 	finalvert_t	*fv;

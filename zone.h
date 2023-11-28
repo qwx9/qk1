@@ -15,6 +15,7 @@ void Hunk_FreeToMark(void *mark);
 void *Hunk_TempAlloc(int size);
 
 void *Cache_Alloc(mem_user_t *c, int size);
+void *Cache_Realloc(mem_user_t *c, int size);
 void *Cache_Check(mem_user_t *c);
 void Cache_Free(mem_user_t *c);
 

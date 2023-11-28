@@ -29,7 +29,7 @@ D_SetupFrame(void)
 		d_viewbuffer = r_warpbuffer;
 		screenwidth = WARP_WIDTH;
 	}else{
-		d_viewbuffer = (void *)vid.buffer;
+		d_viewbuffer = vid.buffer;
 		screenwidth = vid.rowbytes;
 	}
 

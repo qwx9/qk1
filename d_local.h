@@ -20,11 +20,11 @@ typedef struct surfcache_s
 	int					lightadj[MAXLIGHTMAPS]; // checked for strobe flush
 	int					dlight;
 	int					size;		// including header
-	unsigned			width;
-	unsigned			height;		// DEBUG only needed for debug
+	int					width;
+	int					height;		// DEBUG only needed for debug
 	float				mipscale;
 	struct texture_s	*texture;	// checked for animating textures
-	byte				data[4];	// width*height elements
+	pixel_t				data[];	// width*height elements
 } surfcache_t;
 
 // !!! if this is changed, it must be changed in asm_draw.h too !!!
@@ -73,15 +73,24 @@ extern uzint *zspantable[MAXHEIGHT];
 extern int d_minmip;
 extern float d_scalemip[3];
 
-enum {
-	// perhaps a bit too much, but looks ok
-	AlphaStep = 2,
-};
+#define blendalpha(ca, cb, alpha) \
+	((((alpha)*(((ca)>> 0)&0xff) + (255-(alpha))*(((cb)>> 0)&0xff))>> 8) << 0 | \
+	 (((alpha)*(((ca)>> 8)&0xff) + (255-(alpha))*(((cb)>> 8)&0xff))>> 8) << 8 | \
+	 (((alpha)*(((ca)>>16)&0xff) + (255-(alpha))*(((cb)>>16)&0xff))>> 8) << 16)
 
-extern byte *alphamap[256>>AlphaStep];
+#define CIND(p) ((p)>>24)
 
-#define blendalpha(a, b, alpha) \
-	alphamap[alpha>>AlphaStep][(u16int)((a)<<8 | (b))]
-
-void initalpha(void);
+/*
+static inline pixel_t
+blendalpha(pixel_t ca, pixel_t cb, int alpha)
+{
+	//pixel_t x;
+	//x.r = alpha*ca.r + (255-alpha)*cb.r;
+	//x.g = alpha*ca.g + (255-alpha)*cb.g;
+	//x.b = alpha*ca.b + (255-alpha)*cb.b;
+	USED(cb);
+	USED(alpha);
+	return ca;
+}
+*/
 float alphafor(int flags);

@@ -4,14 +4,14 @@ typedef struct {
 	vrect_t	rect;
 	int		width;
 	int		height;
-	byte	*ptexbytes;
+	pixel_t	*ptexpixels;
 	int		rowbytes;
 } rectdesc_t;
 
 qpic_t *draw_disc;
 
-static rectdesc_t	r_rectdesc;
-static byte *draw_chars;				// 8*8 graphic characters
+static rectdesc_t r_rectdesc;
+static pixel_t *draw_chars;				// 8*8 graphic characters
 static qpic_t *draw_backtile;
 
 //=============================================================================
@@ -27,9 +27,31 @@ typedef struct cachepic_s
 static cachepic_t menu_cachepics[MAX_CACHED_PICS];
 static int menu_numcachepics;
 
-qpic_t	*Draw_PicFromWad (char *name)
+qpic_t *
+Draw_PicFromWad (char *name)
 {
-	return W_GetLumpName (name);
+	mem_user_t dummy = {0};
+	qpic_t *p, *q = W_GetLumpName (name);
+	int n;
+
+	n = q->width*q->height;
+	memset(&dummy, 0, sizeof(dummy));
+	p = Cache_Alloc(&dummy, sizeof(*q)+n*sizeof(pixel_t));
+	memmove(p, q, sizeof(*q));
+	torgbx((byte*)q->data, p->data, n);
+	return p;
+}
+
+void
+CachedPicConv(cachepic_t *p)
+{
+	qpic_t *q;
+	int n;
+
+	q = Cache_Check(&p->cache);
+	n = q->width*q->height;
+	q = Cache_Realloc(&p->cache, sizeof(*q)+n*sizeof(pixel_t));
+	torgbx((byte*)q->data, q->data, n);
 }
 
 /*
@@ -55,19 +77,19 @@ qpic_t	*Draw_CachePic (char *path)
 		strcpy (pic->name, path);
 	}
 
-	dat = Cache_Check (&pic->cache);
+	dat = Cache_Check(&pic->cache);
 
-	if (dat)
+	if(dat)
 		return dat;
 
 	// load the pic from disk
 	dat = loadcachelmp(path, &pic->cache);
 	if(dat == nil)
 		fatal("Draw_CachePic: %s", lerr());
+	SwapPic(dat);
+	CachedPicConv(pic);
 
-	SwapPic (dat);
-
-	return dat;
+	return Cache_Check(&pic->cache);
 }
 
 
@@ -79,16 +101,17 @@ Draw_Init
 */
 void Draw_Init (void)
 {
-	draw_chars = W_GetLumpName ("conchars");
-	draw_disc = W_GetLumpName ("disc");
-	draw_backtile = W_GetLumpName ("backtile");
+	mem_user_t dummy = {0};
+
+	draw_chars = Cache_Alloc(&dummy, 128*128*sizeof(pixel_t));
+	torgbx(W_GetLumpName("conchars"), draw_chars, 128*128);
+	draw_disc = Draw_PicFromWad("disc");
+	draw_backtile = Draw_PicFromWad("backtile");
 	r_rectdesc.width = draw_backtile->width;
 	r_rectdesc.height = draw_backtile->height;
-	r_rectdesc.ptexbytes = draw_backtile->data;
+	r_rectdesc.ptexpixels = draw_backtile->data;
 	r_rectdesc.rowbytes = draw_backtile->width;
 }
-
-
 
 /*
 ================
@@ -101,10 +124,8 @@ smoothly scrolled off.
 */
 void Draw_Character (int x, int y, int num)
 {
-	byte			*dest;
-	byte			*source;
-	int				drawline;
-	int				row, col;
+	pixel_t *dest, *source;
+	int drawline, row, col;
 
 	num &= 255;
 
@@ -167,7 +188,7 @@ Draw_Pic
 */
 void Draw_Pic (int x, int y, qpic_t *pic)
 {
-	byte			*dest, *source;
+	pixel_t *dest, *source;
 	int px, py;
 
 	if ((x < 0) ||
@@ -181,7 +202,7 @@ void Draw_Pic (int x, int y, qpic_t *pic)
 	dest = vid.buffer + y * vid.rowbytes + x;
 	for(py = 0; py < pic->height; py++){
 		for(px = 0; px < pic->width; px++){
-			if(source[px] != 255)
+			if(opaque(source[px]))
 				dest[px] = source[px];
 		}
 		dest += vid.rowbytes;
@@ -197,8 +218,8 @@ Draw_TransPic
 */
 void Draw_TransPic (int x, int y, qpic_t *pic)
 {
-	byte	*dest, *source, tbyte;
-	int				v, u;
+	pixel_t *dest, *source, tpix;
+	int v, u;
 
 	if (x < 0 || y < 0 || x+pic->width > vid.width || y+pic->height > vid.height)
 		fatal ("Draw_TransPic: bad coordinates");
@@ -208,30 +229,30 @@ void Draw_TransPic (int x, int y, qpic_t *pic)
 	if(pic->width & 7){	// general
 		for(v=0; v<pic->height; v++){
 			for(u=0; u<pic->width; u++)
-				if((tbyte = source[u]) != TRANSPARENT_COLOR)
-					dest[u] = tbyte;
+				if(opaque(tpix = source[u]))
+					dest[u] = tpix;
 			dest += vid.rowbytes;
 			source += pic->width;
 		}
 	}else{	// unwound
 		for(v=0; v<pic->height; v++){
 			for(u=0; u<pic->width; u+=8){
-				if((tbyte = source[u]) != TRANSPARENT_COLOR)
-					dest[u] = tbyte;
-				if((tbyte = source[u+1]) != TRANSPARENT_COLOR)
-					dest[u+1] = tbyte;
-				if((tbyte = source[u+2]) != TRANSPARENT_COLOR)
-					dest[u+2] = tbyte;
-				if((tbyte = source[u+3]) != TRANSPARENT_COLOR)
-					dest[u+3] = tbyte;
-				if((tbyte = source[u+4]) != TRANSPARENT_COLOR)
-					dest[u+4] = tbyte;
-				if((tbyte = source[u+5]) != TRANSPARENT_COLOR)
-					dest[u+5] = tbyte;
-				if((tbyte = source[u+6]) != TRANSPARENT_COLOR)
-					dest[u+6] = tbyte;
-				if((tbyte = source[u+7]) != TRANSPARENT_COLOR)
-					dest[u+7] = tbyte;
+				if(opaque(tpix = source[u]))
+					dest[u] = tpix;
+				if(opaque(tpix = source[u+1]))
+					dest[u+1] = tpix;
+				if(opaque(tpix = source[u+2]))
+					dest[u+2] = tpix;
+				if(opaque(tpix = source[u+3]))
+					dest[u+3] = tpix;
+				if(opaque(tpix = source[u+4]))
+					dest[u+4] = tpix;
+				if(opaque(tpix = source[u+5]))
+					dest[u+5] = tpix;
+				if(opaque(tpix = source[u+6]))
+					dest[u+6] = tpix;
+				if(opaque(tpix = source[u+7]))
+					dest[u+7] = tpix;
 			}
 			dest += vid.rowbytes;
 			source += pic->width;
@@ -247,7 +268,7 @@ Draw_TransPicTranslate
 */
 void Draw_TransPicTranslate (int x, int y, qpic_t *pic, byte *translation)
 {
-	byte	*dest, *source, tbyte;
+	pixel_t	*dest, *source, tpix;
 	int				v, u;
 
 	if (x < 0 || y < 0 || x+pic->width > vid.width || y+pic->height > vid.height)
@@ -258,30 +279,30 @@ void Draw_TransPicTranslate (int x, int y, qpic_t *pic, byte *translation)
 	if (pic->width & 7){	// general
 		for(v=0; v<pic->height; v++){
 			for(u=0; u<pic->width; u++)
-				if((tbyte = source[u]) != TRANSPARENT_COLOR)
-					dest[u] = translation[tbyte];
+				if(opaque(tpix = source[u]))
+					dest[u] = q1pal[translation[CIND(tpix)]];
 			dest += vid.rowbytes;
 			source += pic->width;
 		}
 	}else{	// unwound
 		for(v=0; v<pic->height; v++){
 			for(u=0; u<pic->width; u+=8){
-				if((tbyte = source[u]) != TRANSPARENT_COLOR)
-					dest[u] = translation[tbyte];
-				if((tbyte = source[u+1]) != TRANSPARENT_COLOR)
-					dest[u+1] = translation[tbyte];
-				if((tbyte = source[u+2]) != TRANSPARENT_COLOR)
-					dest[u+2] = translation[tbyte];
-				if((tbyte = source[u+3]) != TRANSPARENT_COLOR)
-					dest[u+3] = translation[tbyte];
-				if((tbyte = source[u+4]) != TRANSPARENT_COLOR)
-					dest[u+4] = translation[tbyte];
-				if((tbyte = source[u+5]) != TRANSPARENT_COLOR)
-					dest[u+5] = translation[tbyte];
-				if((tbyte = source[u+6]) != TRANSPARENT_COLOR)
-					dest[u+6] = translation[tbyte];
-				if((tbyte = source[u+7]) != TRANSPARENT_COLOR)
-					dest[u+7] = translation[tbyte];
+				if(opaque(tpix = source[u]))
+					dest[u] = q1pal[translation[CIND(tpix)]];
+				if(opaque(tpix = source[u+1]))
+					dest[u+1] = q1pal[translation[CIND(tpix)]];
+				if(opaque(tpix = source[u+2]))
+					dest[u+2] = q1pal[translation[CIND(tpix)]];
+				if(opaque(tpix = source[u+3]))
+					dest[u+3] = q1pal[translation[CIND(tpix)]];
+				if(opaque(tpix = source[u+4]))
+					dest[u+4] = q1pal[translation[CIND(tpix)]];
+				if(opaque(tpix = source[u+5]))
+					dest[u+5] = q1pal[translation[CIND(tpix)]];
+				if(opaque(tpix = source[u+6]))
+					dest[u+6] = q1pal[translation[CIND(tpix)]];
+				if(opaque(tpix = source[u+7]))
+					dest[u+7] = q1pal[translation[CIND(tpix)]];
 			}
 			dest += vid.rowbytes;
 			source += pic->width;
@@ -290,12 +311,10 @@ void Draw_TransPicTranslate (int x, int y, qpic_t *pic, byte *translation)
 }
 
 
-void Draw_CharToConback (int num, byte *dest)
+static void Draw_CharToConback (int num, pixel_t *dest)
 {
-	int		row, col;
-	byte	*source;
-	int		drawline;
-	int		x;
+	int row, col, drawline, x;
+	pixel_t	*source;
 
 	row = num>>4;
 	col = num&15;
@@ -306,8 +325,8 @@ void Draw_CharToConback (int num, byte *dest)
 	while (drawline--)
 	{
 		for (x=0 ; x<8 ; x++)
-			if (source[x])
-				dest[x] = 0x60 + source[x];
+			if(source[x] != 0) /* black is transparent */
+				dest[x] = q1pal[0x60 + CIND(source[x])];
 		source += 128;
 		dest += 320;
 	}
@@ -323,7 +342,7 @@ Draw_ConsoleBackground
 void Draw_ConsoleBackground (int lines)
 {
 	int				x, y, v, n;
-	byte			*src, *dest;
+	pixel_t			*src, *dest;
 	int				f, fstep;
 	qpic_t			*conback;
 	char			ver[100];
@@ -342,7 +361,7 @@ void Draw_ConsoleBackground (int lines)
 		v = (vid.conheight - lines + y) * 200 / vid.conheight;
 		src = conback->data + v * 320;
 		if(vid.conwidth == 320)
-			memcpy(dest, src, vid.conwidth);
+			memcpy(dest, src, vid.conwidth*sizeof(pixel_t));
 		else{
 			f = 0;
 			fstep = 320 * 0x10000 / vid.conwidth;
@@ -362,12 +381,10 @@ void Draw_ConsoleBackground (int lines)
 R_DrawRect8
 ==============
 */
-void R_DrawRect8 (vrect_t *prect, int rowbytes, byte *psrc,
-	int transparent)
+void R_DrawRect8 (vrect_t *prect, int rowbytes, pixel_t *psrc, int transparent)
 {
-	byte	t;
+	pixel_t	t, *pdest;
 	int		i, j, srcdelta, destdelta;
-	byte	*pdest;
 
 	pdest = vid.buffer + (prect->y * vid.rowbytes) + prect->x;
 
@@ -376,16 +393,10 @@ void R_DrawRect8 (vrect_t *prect, int rowbytes, byte *psrc,
 
 	if (transparent)
 	{
-		for (i=0 ; i<prect->height ; i++)
-		{
-			for (j=0 ; j<prect->width ; j++)
-			{
-				t = *psrc;
-				if (t != TRANSPARENT_COLOR)
-				{
+		for (i=0 ; i<prect->height ; i++){
+			for (j=0 ; j<prect->width ; j++){
+				if(opaque(t = *psrc))
 					*pdest = t;
-				}
-
 				psrc++;
 				pdest++;
 			}
@@ -393,12 +404,9 @@ void R_DrawRect8 (vrect_t *prect, int rowbytes, byte *psrc,
 			psrc += srcdelta;
 			pdest += destdelta;
 		}
-	}
-	else
-	{
-		for (i=0 ; i<prect->height ; i++)
-		{
-			memcpy (pdest, psrc, prect->width);
+	}else{
+		for (i=0 ; i<prect->height ; i++){
+			memcpy (pdest, psrc, prect->width*sizeof(pixel_t));
 			psrc += rowbytes;
 			pdest += vid.rowbytes;
 		}
@@ -416,7 +424,7 @@ refresh window.
 void Draw_TileClear (int x, int y, int w, int h)
 {
 	int				width, height, tileoffsetx, tileoffsety;
-	byte			*psrc;
+	pixel_t			*psrc;
 	vrect_t			vr;
 
 	r_rectdesc.rect.x = x;
@@ -454,7 +462,7 @@ void Draw_TileClear (int x, int y, int w, int h)
 			if (vr.width > width)
 				vr.width = width;
 
-			psrc = r_rectdesc.ptexbytes +
+			psrc = r_rectdesc.ptexpixels +
 					(tileoffsety * r_rectdesc.rowbytes) + tileoffsetx;
 			R_DrawRect8(&vr, r_rectdesc.rowbytes, psrc, 0);
 			vr.x += vr.width;
@@ -476,9 +484,9 @@ Draw_Fill
 Fills a box of pixels with a single color
 =============
 */
-void Draw_Fill (int x, int y, int w, int h, int c)
+void Draw_Fill (int x, int y, int w, int h, pixel_t c)
 {
-	byte			*dest;
+	pixel_t			*dest;
 	int				u, v;
 
 	dest = vid.buffer + y*vid.rowbytes + x;
@@ -496,13 +504,13 @@ Draw_FadeScreen
 void Draw_FadeScreen (void)
 {
 	int			x,y;
-	byte		*pbuf;
+	pixel_t		*pbuf;
 
 	for (y=0 ; y<vid.height ; y++)
 	{
 		int	t;
 
-		pbuf = (byte *)(vid.buffer + vid.rowbytes*y);
+		pbuf = vid.buffer + vid.rowbytes*y;
 		t = (y & 1) << 1;
 
 		for (x=0 ; x<vid.width ; x++)

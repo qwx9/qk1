@@ -23,14 +23,14 @@ toosmall:
 	if(e-in < (size = w*h))
 		goto toosmall;
 
-	*ppframe = pspriteframe = Hunk_Alloc(sizeof(*pspriteframe) + size);
+	*ppframe = pspriteframe = Hunk_Alloc(sizeof(*pspriteframe) + size*sizeof(pixel_t));
 	pspriteframe->width = w;
 	pspriteframe->height = h;
 	pspriteframe->up = origin[1];
 	pspriteframe->down = origin[1] - h;
 	pspriteframe->left = origin[0];
 	pspriteframe->right = w + origin[0];
-	memmove(pspriteframe->pixels, in, size);
+	torgbx(in, pspriteframe->pixels, size);
 	in += size;
 
 	return in;

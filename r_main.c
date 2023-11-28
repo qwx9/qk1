@@ -5,7 +5,7 @@ static vec3_t viewlightvec;
 static alight_t r_viewlighting = {128, 192, viewlightvec};
 int			r_numallocatededges;
 int			r_numallocatedbasespans;
-byte		*r_basespans;
+void		*r_basespans;
 bool	r_recursiveaffinetriangles = true;
 float		r_aliasuvscale = 1.0;
 int			r_outofsurfaces;
@@ -21,7 +21,7 @@ int			r_maxsurfsseen, r_maxedgesseen, r_cnumsurfs;
 bool	r_surfsonstack;
 int			r_clipflags;
 
-byte		*r_warpbuffer;
+pixel_t *r_warpbuffer;
 
 //
 // view origin
@@ -102,27 +102,27 @@ R_InitTextures
 void	R_InitTextures (void)
 {
 	int		x,y, m;
-	byte	*dest;
+	pixel_t	*dest;
 
 	// create a simple checkerboard texture for the default
-	r_notexture_mip = Hunk_Alloc(16*16+8*8+4*4+2*2 + sizeof *r_notexture_mip);
+	r_notexture_mip = Hunk_Alloc((16*16+8*8+4*4+2*2)*sizeof(pixel_t) + sizeof *r_notexture_mip);
 
 	r_notexture_mip->width = r_notexture_mip->height = 16;
-	r_notexture_mip->offsets[0] = sizeof *r_notexture_mip;
-	r_notexture_mip->offsets[1] = r_notexture_mip->offsets[0] + 16*16;
-	r_notexture_mip->offsets[2] = r_notexture_mip->offsets[1] + 8*8;
-	r_notexture_mip->offsets[3] = r_notexture_mip->offsets[2] + 4*4;
+	r_notexture_mip->offsets[0] = sizeof(*r_notexture_mip);
+	r_notexture_mip->offsets[1] = r_notexture_mip->offsets[0] + 16*16*sizeof(pixel_t);
+	r_notexture_mip->offsets[2] = r_notexture_mip->offsets[1] + 8*8*sizeof(pixel_t);
+	r_notexture_mip->offsets[3] = r_notexture_mip->offsets[2] + 4*4*sizeof(pixel_t);
 
 	for (m=0 ; m<4 ; m++)
 	{
-		dest = (byte *)r_notexture_mip + r_notexture_mip->offsets[m];
+		dest = (pixel_t*)((byte*)r_notexture_mip + r_notexture_mip->offsets[m]);
 		for (y=0 ; y< (16>>m) ; y++)
-			for (x=0 ; x< (16>>m) ; x++)
+			for (x=0 ; x< (16>>m) ; x++, dest++)
 			{
 				if (  (y< (8>>m) ) ^ (x< (8>>m) ) )
-					*dest++ = 0;
+					*dest = 0;
 				else
-					*dest++ = 0xff;
+					*dest = 0xf0f0f0f0;
 			}
 	}
 }
@@ -691,10 +691,12 @@ r_refdef must be set before the first call
 */
 void R_RenderView (void)
 {
-	static byte	warpbuffer[WARP_WIDTH * WARP_HEIGHT];
+	static pixel_t *warpbuffer;
 	entity_t *e;
 	int i;
 
+	if(warpbuffer == nil)
+		warpbuffer = malloc(WARP_WIDTH * WARP_HEIGHT * sizeof(*warpbuffer));
 	r_warpbuffer = warpbuffer;
 
 	R_SetupFrame ();

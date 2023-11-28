@@ -100,17 +100,17 @@ BSP_LoadTextures(model_t *mod, byte *in, int sz)
 		p = in0+off+16;
 		w = le32(p);
 		h = le32(p);
-		pixels = w*h/64*85;
-		tx = Hunk_Alloc(sizeof(*tx) + pixels);
+		pixels = w*h*85/64;
+		tx = Hunk_Alloc(sizeof(*tx) + pixels*sizeof(pixel_t));
 		strncpy(tx->name, (char*)in0+off, sizeof(tx->name)-1);
 		tx->name[sizeof(tx->name)-1] = 0;
 		for(j = 0; j < MIPLEVELS; j++)
-			tx->offsets[j] = le32(p) + sizeof(texture_t) - (16+2*4+4*4);
+			tx->offsets[j] = sizeof(texture_t) + (le32(p) - (16+2*4+4*4))*sizeof(pixel_t);
 		mod->textures[i] = tx;
 		tx->width = w;
 		tx->height = h;
 		// the pixels immediately follow the structures
-		memcpy(tx+1, p, pixels);
+		torgbx(p, (pixel_t*)(tx+1), pixels);
 		if(strncmp(tx->name, "sky", 3) == 0)
 			R_InitSky(tx);
 	}

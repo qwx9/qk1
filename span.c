@@ -1,7 +1,7 @@
 #include "quakedef.h"
 
 void
-dospan(byte *pdest, byte *pbase, int s, int t, int sstep, int tstep, int spancount, int cachewidth)
+dospan(pixel_t *pdest, pixel_t *pbase, int s, int t, int sstep, int tstep, int spancount, int cachewidth)
 {
 	do{
 		*pdest++ = pbase[(s >> 16) + (t >> 16) * cachewidth];

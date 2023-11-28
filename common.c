@@ -6,6 +6,18 @@ char	com_token[1024];
 
 bool		standard_quake = true, rogue, hipnotic;
 
+void
+torgbx(byte *in, pixel_t *out, int n)
+{
+	if(in < (byte*)out || in > (byte*)(out+n) || in+n < (byte*)out){
+		while(n-- > 0)
+			*out++ = q1pal[*in++];
+	}else{
+		while(n-- > 0)
+			out[n] = q1pal[in[n]];
+	}
+}
+
 /*
 
 

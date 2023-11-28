@@ -695,8 +695,8 @@ void Sbar_DrawFrags (void)
 		top = Sbar_ColorForMap (top);
 		bottom = Sbar_ColorForMap (bottom);
 
-		Draw_Fill (xofs + x*8 + 10, y, 28, 4, top);
-		Draw_Fill (xofs + x*8 + 10, y+4, 28, 3, bottom);
+		Draw_Fill (xofs + x*8 + 10, y, 28, 4, q1pal[top]);
+		Draw_Fill (xofs + x*8 + 10, y+4, 28, 3, q1pal[bottom]);
 
 		// draw number
 		f = s->frags;
@@ -752,8 +752,8 @@ void Sbar_DrawFace (void)
 			xofs = ((vid.width - 320)>>1) + 113;
 
 		Sbar_DrawPic (112, 0, rsb_teambord);
-		Draw_Fill (xofs, vid.height-SBAR_HEIGHT+3, 22, 9, top);
-		Draw_Fill (xofs, vid.height-SBAR_HEIGHT+12, 22, 9, bottom);
+		Draw_Fill (xofs, vid.height-SBAR_HEIGHT+3, 22, 9, q1pal[top]);
+		Draw_Fill (xofs, vid.height-SBAR_HEIGHT+12, 22, 9, q1pal[bottom]);
 
 		// draw number
 		f = s->frags;
@@ -1014,8 +1014,8 @@ void Sbar_DeathmatchOverlay (void)
 		top = Sbar_ColorForMap (top);
 		bottom = Sbar_ColorForMap (bottom);
 
-		Draw_Fill ( x, y, 40, 4, top);
-		Draw_Fill ( x, y+4, 40, 4, bottom);
+		Draw_Fill ( x, y, 40, 4, q1pal[top]);
+		Draw_Fill ( x, y+4, 40, 4, q1pal[bottom]);
 
 		// draw number
 		f = s->frags;
@@ -1111,8 +1111,8 @@ void Sbar_MiniDeathmatchOverlay (void)
 		top = Sbar_ColorForMap (top);
 		bottom = Sbar_ColorForMap (bottom);
 
-		Draw_Fill ( x, y+1, 40, 3, top);
-		Draw_Fill ( x, y+4, 40, 4, bottom);
+		Draw_Fill ( x, y+1, 40, 3, q1pal[top]);
+		Draw_Fill ( x, y+4, 40, 4, q1pal[bottom]);
 
 		// draw number
 		f = s->frags;

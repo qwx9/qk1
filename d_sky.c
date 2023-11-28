@@ -38,11 +38,10 @@ D_DrawSkyScans8
 */
 void D_DrawSkyScans8 (espan_t *pspan)
 {
-	int				count, spancount, u, v;
-	unsigned char	*pdest, m;
-	fixed16_t		s[2], t[2], snext[2], tnext[2], sstep[2], tstep[2];
-	int				spancountminus1;
-	float			skydist;
+	int count, spancount, u, v, spancountminus1;
+	pixel_t *pdest, m;
+	fixed16_t s[2], t[2], snext[2], tnext[2], sstep[2], tstep[2];
+	float skydist;
 
 	sstep[0] = sstep[1] = 0;	// keep compiler happy
 	tstep[0] = tstep[1] = 0;	// ditto
@@ -50,9 +49,7 @@ void D_DrawSkyScans8 (espan_t *pspan)
 
 	do
 	{
-		pdest = (unsigned char *)((byte *)d_viewbuffer +
-				(screenwidth * pspan->v) + pspan->u);
-
+		pdest = d_viewbuffer + (screenwidth * pspan->v) + pspan->u;
 		count = pspan->count;
 
 		// calculate the initial s & t

@@ -13,11 +13,10 @@ void D_SpriteDrawSpans (sspan_t *pspan, byte alpha)
 {
 	int			count, spancount, izistep;
 	int			izi;
-	byte		*pbase, *pdest;
+	pixel_t		*pbase, *pdest, btemp;
 	fixed16_t	s, t, snext, tnext, sstep, tstep;
 	float		sdivz, tdivz, zi, z, du, dv, spancountminus1;
 	float		sdivz8stepu, tdivz8stepu, zi8stepu;
-	byte		btemp;
 	uzint		*pz;
 
 	sstep = 0;	// keep compiler happy
@@ -34,7 +33,7 @@ void D_SpriteDrawSpans (sspan_t *pspan, byte alpha)
 
 	do
 	{
-		pdest = (byte *)d_viewbuffer + (screenwidth * pspan->v) + pspan->u;
+		pdest = d_viewbuffer + (screenwidth * pspan->v) + pspan->u;
 		pz = d_pzbuffer + (d_zwidth * pspan->v) + pspan->u;
 
 		count = pspan->count;
@@ -136,7 +135,7 @@ void D_SpriteDrawSpans (sspan_t *pspan, byte alpha)
 			do
 			{
 				btemp = *(pbase + (s >> 16) + (t >> 16) * cachewidth);
-				if (btemp != 255)
+				if (opaque(btemp))
 				{
 					if (*pz <= (izi >> 16)){	/* FIXME: segfault: assumed 32bit ptr? */
 						if(r_drawflags & DRAW_BLEND){
@@ -402,7 +401,7 @@ void D_DrawSprite (void)
 
 	cachewidth = r_spritedesc.pspriteframe->width;
 	sprite_height = r_spritedesc.pspriteframe->height;
-	cacheblock = (byte *)&r_spritedesc.pspriteframe->pixels[0];
+	cacheblock = &r_spritedesc.pspriteframe->pixels[0];
 
 	// copy the first vertex to the last vertex, so we don't have to deal with
 	// wrapping

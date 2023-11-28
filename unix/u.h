@@ -37,6 +37,7 @@ typedef uintptr_t uintptr;
 #define getcallerpc(x) nil
 #define getmalloctag(p) (USED(p), 0)
 #define setmalloctag(p, t) do{USED(p); USED(t);}while(0)
+#define setrealloctag(p, t) do{USED(p); USED(t);}while(0)
 
 extern char lasterr[256];
 #define werrstr(fmt...) do{snprint(lasterr, sizeof(lasterr), fmt); }while(0)

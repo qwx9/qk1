@@ -21,7 +21,7 @@ typedef struct particle_s
 {
 	// driver-usable fields
 	vec3_t		org;
-	float		color;
+	pixel_t		color;
 	// drivers never touch the following fields
 	struct particle_s	*next;
 	vec3_t		vel;
@@ -47,7 +47,7 @@ typedef struct finalvert_s {
 // !!! if this is changed, it must be changed in d_ifacea.h too !!!
 typedef struct
 {
-	void				*pskin;
+	pixel_t				*pskin;
 	maliasskindesc_t	*pskindesc;
 	int					skinwidth;
 	int					skinheight;
@@ -57,11 +57,6 @@ typedef struct
 	int					drawtype;
 	int					seamfixupX16;
 } affinetridesc_t;
-
-// !!! if this is changed, it must be changed in d_ifacea.h too !!!
-typedef struct {
-	float	u, v, zi, color;
-} screenpart_t;
 
 typedef struct
 {
@@ -92,9 +87,8 @@ extern spritedesc_t		r_spritedesc;
 extern vec3_t	r_pright, r_pup, r_ppn;
 
 
-void D_Aff8Patch (void *pcolormap);
-void D_PolysetDraw (byte *colormap);
-void D_PolysetDrawFinalVerts (finalvert_t *fv, int numverts, byte *colormap, byte alpha);
+void D_PolysetDraw (pixel_t *colormap);
+void D_PolysetDrawFinalVerts (finalvert_t *fv, int numverts, pixel_t *colormap, byte alpha);
 void D_DrawParticle (particle_t *pparticle);
 void D_DrawPoly (void);
 void D_DrawSprite (void);
@@ -112,14 +106,11 @@ void D_DrawRect (void);
 void D_PolysetUpdateTables (void);
 
 // these are currently for internal use only, and should not be used by drivers
-extern byte				*r_skysource[2];
+extern pixel_t *r_skysource[2];
 
 // transparency types for D_DrawRect ()
 #define DR_SOLID		0
 #define DR_TRANSPARENT	1
-
-// !!! must be kept the same as in quakeasm.h !!!
-#define TRANSPARENT_COLOR	0xFF
 
 extern void *acolormap;	// FIXME: should go away
 
@@ -158,5 +149,5 @@ extern float	skytime;
 extern int		c_surf;
 extern vrect_t	scr_vrect;
 
-extern byte		*r_warpbuffer;
+extern pixel_t *r_warpbuffer;
 

@@ -174,11 +174,15 @@ extern	cvar_t		developer;
 
 extern	bool	host_initialized;		// true if into command execution
 extern	double		host_frametime;
-extern	byte		*host_basepal;
-extern	byte		*host_colormap;
+extern	byte		*host_basepal, *host_colormap;
 extern	int		host_framecount;	// incremented every frame, never reset
 extern	double		realtime;		// not bounded in any way, changed at
 						// start of every frame, never reset
+
+#define opaque(p) (((p)>>24) != 0xff)
+
+extern pixel_t q1pal[256];
+void torgbx(byte *in, pixel_t *out, int n);
 
 void Host_ClearMemory (void);
 void Host_ServerFrame (void);

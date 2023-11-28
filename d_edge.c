@@ -27,30 +27,17 @@ D_MipLevelForScale(float scale)
 
 // FIXME: clean this up
 static void
-D_DrawSolidSurface(surf_t *surf, int color)
+D_DrawSolidSurface(surf_t *surf, pixel_t color)
 {
 	espan_t *span;
-	byte *pdest;
-	int u, u2, pix;
+	pixel_t *pdest;
+	int u, u2;
 
-	pix = (color<<24) | (color<<16) | (color<<8) | color;
 	for(span = surf->spans; span; span=span->pnext){
-		pdest = (byte *)d_viewbuffer + screenwidth*span->v;
-		u = span->u;
+		pdest = d_viewbuffer + screenwidth*span->v;
 		u2 = span->u + span->count - 1;
-		pdest[u] = pix;
-
-		if (u2 - u < 8){
-			for(u++; u <= u2; u++)
-				pdest[u] = pix;
-		}else{
-			for(u++ ; u & 3; u++)
-				pdest[u] = pix;
-			for(u2 -= 4; u <= u2; u += 4)
-				*(int *)(pdest + u) = pix;
-			for(u2 += 4; u <= u2; u++)
-				pdest[u] = pix;
-		}
+		for(u = span->u; u <= u2; u++)
+			pdest[u] = color;
 	}
 }
 
@@ -137,7 +124,7 @@ D_DrawSurfaces (void)
 			d_zistepv = 0;
 			d_ziorigin = -0.9;
 
-			D_DrawSolidSurface(s, (int)r_clearcolor.value & 0xFF);
+			D_DrawSolidSurface(s, q1pal[(int)r_clearcolor.value & 0xFF]);
 			D_DrawZSpans(s->spans);
 		}else if(s->flags & SURF_DRAWTURB){
 			pface = s->data;

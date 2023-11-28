@@ -71,7 +71,7 @@ typedef struct surf_s
 } surf_t;
 
 extern int r_numallocatedbasespans;
-extern byte *r_basespans;
+extern void *r_basespans;
 
 extern	surf_t	*surfaces, *surface_p, *surf_max;
 
