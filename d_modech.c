@@ -12,7 +12,7 @@ D_ViewChanged (void)
 	int rowbytes, i;
 
 	d_zwidth = vid.width;
-	rowbytes = r_dowarp ? WARP_WIDTH : vid.rowbytes;
+	rowbytes = vid.rowbytes;
 	scale_for_mip = max(xscale, yscale);
 
 	d_pix_scale = 90.0 / r_refdef.fov_x;

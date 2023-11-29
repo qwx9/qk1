@@ -691,13 +691,8 @@ r_refdef must be set before the first call
 */
 void R_RenderView (void)
 {
-	static pixel_t *warpbuffer;
 	entity_t *e;
 	int i;
-
-	if(warpbuffer == nil)
-		warpbuffer = malloc(WARP_WIDTH * WARP_HEIGHT * sizeof(*warpbuffer));
-	r_warpbuffer = warpbuffer;
 
 	R_SetupFrame ();
 	R_MarkLeaves ();	// done here so we know if we're in water

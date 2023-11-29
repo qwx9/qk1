@@ -7,6 +7,7 @@ static SDL_Renderer *rend;
 static SDL_Texture *fbi;
 static SDL_Window *win;
 static pixel_t *vidbuffer;
+extern pixel_t *r_warpbuffer;
 
 s32int fbpal[256];
 pixel_t q1pal[256];
@@ -33,7 +34,11 @@ resetfb(void)
 	vid.conheight = vid.height;
 
 	free(vidbuffer);
-	vidbuffer = emalloc((vid.width*vid.height+16)*4);
+	vidbuffer = emalloc((vid.width*vid.height+16)*sizeof(pixel_t));
+	free(r_warpbuffer);
+	r_warpbuffer = emalloc((vid.width*vid.height+16)*sizeof(pixel_t));
+	vid.maxwarpwidth = vid.width;
+	vid.maxwarpheight = vid.height;
 
 	if(fbi != nil)
 		SDL_DestroyTexture(fbi);
@@ -107,8 +112,6 @@ setpal(uchar *p0)
 void
 initfb(void)
 {
-	vid.maxwarpwidth = WARP_WIDTH;
-	vid.maxwarpheight = WARP_HEIGHT;
 	vid.numpages = 2;
 	vid.colormap = malloc(256*64*sizeof(pixel_t));
 	torgbx(host_colormap, vid.colormap, 256*64);

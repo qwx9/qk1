@@ -59,6 +59,10 @@ resetfb(void)
 	grabr = Rpt(subpt(center, p), addpt(center, p));
 	for(i = 0; i < nelem(vidbuffers); i++)
 		vidbuffers[i] = realloc(vidbuffers[i], (vid.width*vid.height+16)*sizeof(pixel_t));
+	free(r_warpbuffer);
+	r_warpbuffer = emalloc((vid.width*vid.height+16)*sizeof(pixel_t));
+	vid.maxwarpwidth = vid.width;
+	vid.maxwarpheight = vid.height;
 	freeimage(fbi);
 	fbi = allocimage(display, Rect(0, 0, vid.width, vid.height), XRGB32, 0, 0);
 	if(fbi == nil)
@@ -142,8 +146,6 @@ setpal(uchar *p0)
 void
 initfb(void)
 {
-	vid.maxwarpwidth = WARP_WIDTH;
-	vid.maxwarpheight = WARP_HEIGHT;
 	vid.numpages = 2;
 	vid.colormap = malloc(256*64*sizeof(pixel_t));
 	torgbx(host_colormap, vid.colormap, 256*64);

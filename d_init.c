@@ -25,13 +25,8 @@ D_SetupFrame(void)
 {
 	int i;
 
-	if(r_dowarp){
-		d_viewbuffer = r_warpbuffer;
-		screenwidth = WARP_WIDTH;
-	}else{
-		d_viewbuffer = vid.buffer;
-		screenwidth = vid.rowbytes;
-	}
+	d_viewbuffer = r_dowarp ? r_warpbuffer : vid.buffer;
+	screenwidth = vid.rowbytes;
 
 	d_roverwrapped = false;
 	d_initial_rover = sc_rover;
