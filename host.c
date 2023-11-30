@@ -90,15 +90,13 @@ _Noreturn void Host_Error (char *fmt, ...)
 	char s[1024];
 	static bool inerror = false;
 
-	if(inerror)
-		fatal("Host_Error: recursively entered");
-	inerror = true;
-
 	va_start(arg, fmt);
 	vsnprint(s, sizeof s, fmt, arg);
 	va_end(arg);
 
-	fprintf(stderr, "Host_Error: %s\n", s);
+	if(inerror)
+		fatal("Host_Error: recursively entered: %s", fmt);
+	inerror = true;
 
 	SCR_EndLoadingPlaque();	// reenable screen updates
 
