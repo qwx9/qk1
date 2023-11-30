@@ -93,7 +93,6 @@ extern	vec3_t	r_origin;
 extern	vec3_t	r_entorigin;
 
 extern	float	screenAspect;
-extern	float	verticalFieldOfView;
 extern	float	xOrigin, yOrigin;
 
 extern	int		r_visframecount;

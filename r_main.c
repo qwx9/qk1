@@ -45,8 +45,9 @@ int		screenwidth;
 
 float	pixelAspect;
 float	screenAspect;
-float	verticalFieldOfView;
 float	xOrigin, yOrigin;
+
+static float verticalFieldOfView;
 
 mplane_t	screenedge[4];
 
