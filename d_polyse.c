@@ -125,8 +125,7 @@ void D_PolysetDrawFinalVerts (finalvert_t *fv, int numverts, pixel_t *colormap, 
 			z = fv->v[5]>>16;
 			zbuf = zspantable[fv->v[1]] + fv->v[0];
 			if (z >= *zbuf){
-				int pix = CIND(skintable[fv->v[3]>>16][fv->v[2]>>16]);
-				pixel_t p = colormap[pix + (fv->v[4] & 0xFF00)];
+				pixel_t p = skintable[fv->v[3]>>16][fv->v[2]>>16];
 				int n = d_scantable[fv->v[1]] + fv->v[0];
 				if(r_drawflags & DRAW_BLEND){
 					d_viewbuffer[n] = blendalpha(p, d_viewbuffer[n], alpha);
@@ -337,7 +336,7 @@ split:
 	z = new[5]>>16;
 	zbuf = zspantable[new[1]] + new[0];
 	if (z >= *zbuf){
-		pixel_t p = d_pcolormap[CIND(skintable[new[3]>>16][new[2]>>16])];
+		pixel_t p = skintable[new[3]>>16][new[2]>>16];
 		int n = d_scantable[new[1]] + new[0];
 		if(r_drawflags & DRAW_BLEND){
 			d_viewbuffer[n] = blendalpha(p, d_viewbuffer[n], alpha);
@@ -576,8 +575,9 @@ void D_PolysetDrawSpans8 (spanpackage_t *pspanpackage, pixel_t *colormap, byte a
 
 			do
 			{
+pixel_t addlight(pixel_t x, int light);
 				if ((lzi >> 16) >= *lpz){
-					pixel_t p = colormap[CIND(*lptex) + (llight & 0xFF00)];
+					pixel_t p = addlight(*lptex, llight);
 					if(r_drawflags & DRAW_BLEND){
 						*lpdest = blendalpha(
 							p,

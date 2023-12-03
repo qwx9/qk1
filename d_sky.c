@@ -101,7 +101,7 @@ void D_DrawSkyScans8 (espan_t *pspan)
 			{
 				m = r_skysource[1][((t[1] & R_SKY_TMASK) >> 9) +
 						((s[1] & R_SKY_SMASK) >> 16)];
-				if(m == 0)
+				if((m & 0xffffff) == 0)
 					*pdest = r_skysource[0][((t[0] & R_SKY_TMASK) >> 9) +
 							((s[0] & R_SKY_SMASK) >> 16)];
 				else

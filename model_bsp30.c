@@ -162,7 +162,7 @@ BSP30_LoadTextures(model_t *mod, byte *in, int sz)
 			x = p + pixels;
 			palsz = le16(x);
 			if(palsz == 256)
-				pal3torgbx(p, (pixel_t*)(tx+1), pixels, x);
+				pal3torgbx(p, tx->data, pixels, x);
 		}else{
 			// alternative: outside, in a wad
 			for(j = 0; j < mod->numwads; j++){
@@ -174,6 +174,12 @@ BSP30_LoadTextures(model_t *mod, byte *in, int sz)
 		}
 		if(strncmp(tx->name, "sky", 3) == 0)
 			R_InitSky(tx);
+		else if(tx->name[0] == '{'){
+			for(j = 0; j < pixels; j++){
+				if((tx->data[j] & 0xffffff) == 0x0000ff)
+					tx->data[j] = 0;
+			}
+		}
 	}
 
 	// sequence the animations

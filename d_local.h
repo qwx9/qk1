@@ -78,8 +78,6 @@ extern float d_scalemip[3];
 	 (((alpha)*(((ca)>> 8)&0xff) + (255-(alpha))*(((cb)>> 8)&0xff))>> 8) << 8 | \
 	 (((alpha)*(((ca)>>16)&0xff) + (255-(alpha))*(((cb)>>16)&0xff))>> 8) << 16)
 
-#define CIND(p) ((p)>>24)
-
 /*
 static inline pixel_t
 blendalpha(pixel_t ca, pixel_t cb, int alpha)

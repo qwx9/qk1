@@ -82,8 +82,14 @@ Draw_Init
 */
 void Draw_Init (void)
 {
+	int i;
 	if(W_ReadPixels(wad_gfx, "conchars", draw_chars, nelem(draw_chars)) < 0)
 		fatal("Draw_Init: %s", lerr());
+	/* black is transparent */
+	for(i = 0; i < nelem(draw_chars); i++){
+		if((draw_chars[i] & 0xffffff) == 0)
+			draw_chars[i] = 0;
+	}
 	if((draw_disc = Draw_PicFromWad("disc")) == nil)
 		fatal("Draw_Init: %s", lerr());
 	if((draw_backtile = Draw_PicFromWad("backtile")) == nil)
@@ -261,7 +267,7 @@ void Draw_TransPicTranslate (int x, int y, qpic_t *pic, byte *translation)
 		for(v=0; v<pic->height; v++){
 			for(u=0; u<pic->width; u++)
 				if(opaque(tpix = source[u]))
-					dest[u] = q1pal[translation[CIND(tpix)]];
+					dest[u] = tpix;
 			dest += vid.rowbytes;
 			source += pic->width;
 		}
@@ -269,21 +275,21 @@ void Draw_TransPicTranslate (int x, int y, qpic_t *pic, byte *translation)
 		for(v=0; v<pic->height; v++){
 			for(u=0; u<pic->width; u+=8){
 				if(opaque(tpix = source[u]))
-					dest[u] = q1pal[translation[CIND(tpix)]];
+					dest[u] = tpix;
 				if(opaque(tpix = source[u+1]))
-					dest[u+1] = q1pal[translation[CIND(tpix)]];
+					dest[u+1] = tpix;
 				if(opaque(tpix = source[u+2]))
-					dest[u+2] = q1pal[translation[CIND(tpix)]];
+					dest[u+2] = tpix;
 				if(opaque(tpix = source[u+3]))
-					dest[u+3] = q1pal[translation[CIND(tpix)]];
+					dest[u+3] = tpix;
 				if(opaque(tpix = source[u+4]))
-					dest[u+4] = q1pal[translation[CIND(tpix)]];
+					dest[u+4] = tpix;
 				if(opaque(tpix = source[u+5]))
-					dest[u+5] = q1pal[translation[CIND(tpix)]];
+					dest[u+5] = tpix;
 				if(opaque(tpix = source[u+6]))
-					dest[u+6] = q1pal[translation[CIND(tpix)]];
+					dest[u+6] = tpix;
 				if(opaque(tpix = source[u+7]))
-					dest[u+7] = q1pal[translation[CIND(tpix)]];
+					dest[u+7] = tpix;
 			}
 			dest += vid.rowbytes;
 			source += pic->width;
@@ -306,8 +312,8 @@ static void Draw_CharToConback (int num, pixel_t *dest)
 	while (drawline--)
 	{
 		for (x=0 ; x<8 ; x++)
-			if(source[x] != 0) /* black is transparent */
-				dest[x] = q1pal[0x60 + CIND(source[x])];
+			if((source[x] & 0xffffff) != 0)
+				dest[x] = source[x];
 		source += 128;
 		dest += 320;
 	}

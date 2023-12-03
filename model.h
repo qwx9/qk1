@@ -53,6 +53,7 @@ typedef struct texture_s
 	struct texture_s *anim_next;		// in the animation sequence
 	struct texture_s *alternate_anims;	// bmodels in frmae 1 use these
 	int offsets[MIPLEVELS];		// four mip maps stored
+	pixel_t data[];
 } texture_t;
 
 enum {

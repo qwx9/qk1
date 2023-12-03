@@ -101,10 +101,11 @@ setpal(uchar *p0)
 	uchar *p;
 
 	for(p = p0, fp=fbpal; fp<fbpal+nelem(fbpal); p+=3, fp++)
-		*fp = p[0] << 16 | p[1] << 8 | p[2];
+		*fp = 0xff<<24 | p[0] << 16 | p[1] << 8 | p[2];
 
 	for(p = p0, x = 0; x < 256; x++, p += 3)
-		q1pal[x] = x<<24 | p[0]<<16 | p[1]<<8 | p[2];
+		q1pal[x] = 0xff<<24 | x<<24 | p[0]<<16 | p[1]<<8 | p[2];
+	q1pal[255] &= 0;
 
 	scr_fullupdate = 0;
 }

@@ -179,7 +179,7 @@ extern	int		host_framecount;	// incremented every frame, never reset
 extern	double		realtime;		// not bounded in any way, changed at
 						// start of every frame, never reset
 
-#define opaque(p) (((p)>>24) != 0xff)
+#define opaque(p) ((p) != 0)
 
 extern pixel_t q1pal[256];
 void pal3torgbx(byte *in, pixel_t *out, int n, byte *pal);

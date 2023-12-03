@@ -142,11 +142,11 @@ W_ReadQpic(Wad *wad, char *name, mem_user_t *c)
 
 	if(wad->ver == WAD_VER2){
 		for(i = 0; i < n; i++)
-			q->data[i] = q1pal[*p++];
+			q->data[i] = q1pal[p[i]];
 	}else if(wad->ver == WAD_VER3 && palsz > 0){
 		for(i = 0; i < n; i++){
 			j = (*p++)*3;
-			q->data[i] = j < palsz*3 ? (pal[j+0]<<16 | pal[j+1]<<8 | pal[j+2]) : 0;
+			q->data[i] = j < palsz*3 ? (0xff<<24 | pal[j+0]<<16 | pal[j+1]<<8 | pal[j+2]) : 0;
 		}
 	}
 
@@ -182,7 +182,7 @@ W_ReadPixelsAt(Wad *wad, int off, int sz, pixel_t *out, int num)
 		}
 		for(n = 0; n < num; n++){
 			x = (*t++)*3;
-			*out++ = x < palsz*3 ? (pal[x+0]<<16 | pal[x+1]<<8 | pal[x+2]) : 0;
+			*out++ = x < palsz*3 ? (0xff<<24 | pal[x+0]<<16 | pal[x+1]<<8 | pal[x+2]) : 0;
 		}
 	}
 	return num;
