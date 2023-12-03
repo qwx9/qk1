@@ -84,7 +84,8 @@ Host_Error
 This shuts down both the client and server
 ================
 */
-_Noreturn void Host_Error (char *fmt, ...)
+_Noreturn void
+Host_Error (char *fmt, ...)
 {
 	va_list arg;
 	char s[1024];
@@ -94,8 +95,10 @@ _Noreturn void Host_Error (char *fmt, ...)
 	vsnprint(s, sizeof s, fmt, arg);
 	va_end(arg);
 
-	if(inerror)
-		fatal("Host_Error: recursively entered: %s", fmt);
+	if(inerror){
+		assert(nil);
+		fatal("Host_Error: recursively entered: %s", s);
+	}
 	inerror = true;
 
 	SCR_EndLoadingPlaque();	// reenable screen updates
@@ -584,7 +587,8 @@ void Host_Init (int argc, char **argv, char **paths)
 	Chase_Init ();
 	initfs(paths);
 	Host_InitLocal ();
-	W_LoadWadFile ("gfx.wad");
+	extern Wad *wad_gfx;
+	wad_gfx = W_OpenWad("gfx.wad");
 	Key_Init ();
 	Con_Init ();
 	M_Init ();

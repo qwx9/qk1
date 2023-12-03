@@ -2,9 +2,10 @@
 
 BIN=/$objtype/bin/games
 TARG=quake
-CFLAGS=$CFLAGS -D__plan9__
+CFLAGS=$CFLAGS -p -D__plan9__
 
 OFILES=\
+	${SOFTFLOAT}\
 	span`{test -f span_$objtype.s && echo -n _$objtype}.$O\
 	span_alpha.$O\
 	dotproduct`{test -f span_$objtype.s && echo -n _$objtype}.$O\
@@ -19,6 +20,7 @@ OFILES=\
 	common.$O\
 	console.$O\
 	cvar.$O\
+	dotadd.$O\
 	draw.$O\
 	d_alpha.$O\
 	d_edge.$O\
@@ -44,6 +46,7 @@ OFILES=\
 	model_brush.$O\
 	model_bsp.$O\
 	model_bsp2.$O\
+	model_bsp30.$O\
 	model_sprite.$O\
 	nanosec.$O\
 	net_dgrm.$O\
@@ -72,6 +75,7 @@ OFILES=\
 	sbar.$O\
 	snd.$O\
 	snd_plan9.$O\
+	softfloat.$O\
 	sv_main.$O\
 	sv_move.$O\
 	sv_phys.$O\

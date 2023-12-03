@@ -11,8 +11,9 @@ typedef struct {
 qpic_t *draw_disc;
 
 static rectdesc_t r_rectdesc;
-static pixel_t *draw_chars;				// 8*8 graphic characters
+static pixel_t draw_chars[128*128];				// 8*8 graphic characters
 static qpic_t *draw_backtile;
+Wad *wad_gfx;
 
 //=============================================================================
 /* Support Routines */
@@ -27,33 +28,6 @@ typedef struct cachepic_s
 static cachepic_t menu_cachepics[MAX_CACHED_PICS];
 static int menu_numcachepics;
 
-qpic_t *
-Draw_PicFromWad (char *name)
-{
-	mem_user_t dummy = {0};
-	qpic_t *p, *q = W_GetLumpName (name);
-	int n;
-
-	n = q->width*q->height;
-	memset(&dummy, 0, sizeof(dummy));
-	p = Cache_Alloc(&dummy, sizeof(*q)+n*sizeof(pixel_t));
-	memmove(p, q, sizeof(*q));
-	torgbx((byte*)q->data, p->data, n);
-	return p;
-}
-
-void
-CachedPicConv(cachepic_t *p)
-{
-	qpic_t *q;
-	int n;
-
-	q = Cache_Check(&p->cache);
-	n = q->width*q->height;
-	q = Cache_Realloc(&p->cache, sizeof(*q)+n*sizeof(pixel_t));
-	torgbx((byte*)q->data, q->data, n);
-}
-
 /*
 ================
 Draw_CachePic
@@ -62,8 +36,8 @@ Draw_CachePic
 qpic_t	*Draw_CachePic (char *path)
 {
 	cachepic_t	*pic;
-	int			i;
-	qpic_t		*dat;
+	int			i, n;
+	qpic_t		*q;
 
 	for (pic=menu_cachepics, i=0 ; i<menu_numcachepics ; pic++, i++)
 		if (!strcmp (path, pic->name))
@@ -77,22 +51,29 @@ qpic_t	*Draw_CachePic (char *path)
 		strcpy (pic->name, path);
 	}
 
-	dat = Cache_Check(&pic->cache);
+	q = Cache_Check(&pic->cache);
 
-	if(dat)
-		return dat;
+	if(q)
+		return q;
 
 	// load the pic from disk
-	dat = loadcachelmp(path, &pic->cache);
-	if(dat == nil)
+	q = loadcachelmp(path, &pic->cache);
+	if(q == nil)
 		fatal("Draw_CachePic: %s", lerr());
-	SwapPic(dat);
-	CachedPicConv(pic);
+	q->width = LittleLong(q->width);
+	q->height = LittleLong(q->height);
+	n = q->width*q->height;
+	q = Cache_Realloc(&pic->cache, sizeof(*q)+n*sizeof(pixel_t));
+	torgbx((byte*)q->data, q->data, n);
 
-	return Cache_Check(&pic->cache);
+	return q;
 }
 
-
+qpic_t *
+Draw_PicFromWad(char *name)
+{
+	return W_ReadQpic(wad_gfx, name, nil);
+}
 
 /*
 ===============
@@ -101,12 +82,12 @@ Draw_Init
 */
 void Draw_Init (void)
 {
-	mem_user_t dummy = {0};
-
-	draw_chars = Cache_Alloc(&dummy, 128*128*sizeof(pixel_t));
-	torgbx(W_GetLumpName("conchars"), draw_chars, 128*128);
-	draw_disc = Draw_PicFromWad("disc");
-	draw_backtile = Draw_PicFromWad("backtile");
+	if(W_ReadPixels(wad_gfx, "conchars", draw_chars, nelem(draw_chars)) < 0)
+		fatal("Draw_Init: %s", lerr());
+	if((draw_disc = Draw_PicFromWad("disc")) == nil)
+		fatal("Draw_Init: %s", lerr());
+	if((draw_backtile = Draw_PicFromWad("backtile")) == nil)
+		fatal("Draw_Init: %s", lerr());
 	r_rectdesc.width = draw_backtile->width;
 	r_rectdesc.height = draw_backtile->height;
 	r_rectdesc.ptexpixels = draw_backtile->data;

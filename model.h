@@ -309,6 +309,10 @@ typedef struct model_s
 	int	needload;		// bmodels and sprites don't cache normally
 	bool	blend;
 
+	int ver;
+	int numwads;
+	Wad **wads;
+
 	modtype_t	type;
 	int			numframes;
 	synctype_t	synctype;

@@ -103,7 +103,7 @@ static byte *Mod_DecompressVis (byte *in, model_t *model, int *outsz)
 
 		c = in[1];
 		in += 2;
-		while(c){
+		while(c && out - decompressed < row){
 			*out++ = 0;
 			c--;
 		}

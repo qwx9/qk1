@@ -1,5 +1,6 @@
 #define BSPVERSION 29
 #define BSP2VERSION ('B'|'S'<<8|'P'<<16|'2'<<24)
+#define BSP30VERSION 30
 
 enum {
 	// upper design bounds

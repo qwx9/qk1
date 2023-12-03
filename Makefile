@@ -23,6 +23,7 @@ OBJS=\
 	common.o\
 	console.o\
 	cvar.o\
+	dotadd.o\
 	d_alpha.o\
 	d_edge.o\
 	d_init.o\
@@ -47,6 +48,7 @@ OBJS=\
 	model_brush.o\
 	model_bsp.o\
 	model_bsp2.o\
+	model_bsp30.o\
 	model_sprite.o\
 	net_loop.o\
 	net_main.o\
@@ -71,6 +73,7 @@ OBJS=\
 	sbar.o\
 	screen.o\
 	snd.o\
+	softfloat.o\
 	span.o\
 	span_alpha.o\
 	sv_main.o\

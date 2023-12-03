@@ -1,5 +1,7 @@
 #include "quakedef.h"
 
+float dotadd(float *a, float *b);
+
 void
 BSP_SetParent(mnode_t *node, mnode_t *parent)
 {
@@ -31,10 +33,13 @@ BSP_CalcSurfaceExtents(model_t *mod, msurface_t *s)
 			v = &mod->vertexes[mod->edges[-e].v[1]];
 
 		for(j = 0; j < 2; j++){
-			val = (double)v->position[0] * (double)tex->vecs[j][0] +
-				(double)v->position[1] * (double)tex->vecs[j][1] +
-				(double)v->position[2] * (double)tex->vecs[j][2] +
-				(double)tex->vecs[j][3];
+			// this is... weird.
+			// because everybody built maps long time ago, precision was
+			// (most likely) 80 bits. we could just cast to double here,
+			// but it's not 80 bits and stuff will still be broken.
+			// instead we literally run 80-bit calculation emulated
+			// using SoftFloat. enjoy. or not.
+			val = dotadd(v->position, tex->vecs[j]);
 			if(val < mins[j])
 				mins[j] = val;
 			if(val > maxs[j])
@@ -297,8 +302,7 @@ BSP_LoadEdges(model_t *mod, byte *in, int sz)
 		return -1;
 	}
 	mod->numedges = sz / elsz;
-	// FIXME(sigrid): why +1?
-	mod->edges = out = Hunk_Alloc((mod->numedges+1) * sizeof(*out));
+	mod->edges = out = Hunk_Alloc(mod->numedges * sizeof(*out));
 
 	for(i = 0; i < mod->numedges; i++, out++){
 		out->v[0] = le16u(in);
@@ -385,7 +389,8 @@ BSP_LoadFaces(model_t *mod, byte *in, int sz)
 
 		memmove(out->styles, in, MAXLIGHTMAPS);
 		in += MAXLIGHTMAPS;
-		out->samples = (i = le32(in)) < 0 ? nil : mod->lightdata + i;
+		i = le32(in);
+		out->samples = i < 0 ? nil : mod->lightdata + i;
 
 		// set the drawing flags flag
 
@@ -623,8 +628,7 @@ BSP_LoadPlanes(model_t *mod, byte *in, int sz)
 		return -1;
 	}
 	mod->numplanes = sz / elsz;
-	// FIXME(sigrid): why " * 2"???
-	mod->planes = out = Hunk_Alloc(mod->numplanes * 2 * sizeof(*out));
+	mod->planes = out = Hunk_Alloc(mod->numplanes * sizeof(*out));
 
 	for(i = 0; i < mod->numplanes; i++, out++){
 		bits = 0;

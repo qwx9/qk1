@@ -78,6 +78,7 @@ Hunk_Double(void *p)
 {
 	mem_t *m, *n;
 
+	assert(p != nil);
 	m = p;
 	m--;
 	n = realloc(m, sizeof(*m) + m->size*2);

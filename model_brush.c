@@ -26,6 +26,11 @@ int BSP2_LoadLeafs(model_t *mod, byte *in, int sz);
 int BSP2_LoadMarksurfaces(model_t *mod, byte *in, int sz);
 int BSP2_LoadNodes(model_t *mod, byte *in, int sz);
 
+int BSP30_LoadEntities(model_t *mod, byte *in, int sz);
+int BSP30_LoadLighting(model_t *mod, byte *in, int sz);
+int BSP30_LoadFaces(model_t *mod, byte *in, int sz);
+int BSP30_LoadTextures(model_t *mod, byte *in, int sz);
+
 static float
 RadiusFromBounds(vec3_t mins, vec3_t maxs)
 {
@@ -51,23 +56,24 @@ Mod_LoadBrushModel(model_t *mod, byte *in0, int total)
 	submodel_t *bm;
 	char name[16];
 	int (*loadf[HEADER_LUMPS])(model_t *, byte *, int) = {
+		[LUMP_ENTITIES] = BSP_LoadEntities,
 		[LUMP_VERTEXES] = BSP_LoadVertexes,
-		[LUMP_EDGES] = nil,
+		[LUMP_EDGES] = BSP_LoadEdges,
 		[LUMP_SURFEDGES] = BSP_LoadSurfedges,
 		[LUMP_TEXTURES] = BSP_LoadTextures,
 		[LUMP_LIGHTING] = BSP_LoadLighting,
 		[LUMP_PLANES] = BSP_LoadPlanes,
 		[LUMP_TEXINFO] = BSP_LoadTexinfo,
-		[LUMP_FACES] = nil,
-		[LUMP_MARKSURFACES] = nil,
+		[LUMP_FACES] = BSP_LoadFaces,
+		[LUMP_MARKSURFACES] = BSP_LoadMarksurfaces,
 		[LUMP_VISIBILITY] = BSP_LoadVisibility,
-		[LUMP_LEAFS] = nil,
-		[LUMP_NODES] = nil,
-		[LUMP_CLIPNODES] = nil,
-		[LUMP_ENTITIES] = BSP_LoadEntities,
+		[LUMP_LEAFS] = BSP_LoadLeafs,
+		[LUMP_NODES] = BSP_LoadNodes,
+		[LUMP_CLIPNODES] = BSP_LoadClipnodes,
 		[LUMP_MODELS] = BSP_LoadSubmodels,
 	};
 	static const int order[HEADER_LUMPS] = {
+		LUMP_ENTITIES,
 		LUMP_VERTEXES,
 		LUMP_EDGES,
 		LUMP_SURFEDGES,
@@ -81,19 +87,18 @@ Mod_LoadBrushModel(model_t *mod, byte *in0, int total)
 		LUMP_LEAFS,
 		LUMP_NODES,
 		LUMP_CLIPNODES,
-		LUMP_ENTITIES,
 		LUMP_MODELS,
 	};
 
 	in = in0;
 	ver = le32(in);
 	if(ver == BSPVERSION){
-		loadf[LUMP_EDGES] = BSP_LoadEdges;
-		loadf[LUMP_FACES] = BSP_LoadFaces;
-		loadf[LUMP_MARKSURFACES] = BSP_LoadMarksurfaces;
-		loadf[LUMP_LEAFS] = BSP_LoadLeafs;
-		loadf[LUMP_NODES] = BSP_LoadNodes;
-		loadf[LUMP_CLIPNODES] = BSP_LoadClipnodes;
+		// all set
+	}else if(ver == BSP30VERSION){
+		loadf[LUMP_ENTITIES] = BSP30_LoadEntities,
+		loadf[LUMP_FACES] = BSP30_LoadFaces;
+		loadf[LUMP_LIGHTING] = BSP30_LoadLighting;
+		loadf[LUMP_TEXTURES] = BSP30_LoadTextures;
 	}else if(ver == BSP2VERSION){
 		loadf[LUMP_EDGES] = BSP2_LoadEdges;
 		loadf[LUMP_FACES] = BSP2_LoadFaces;
@@ -102,7 +107,7 @@ Mod_LoadBrushModel(model_t *mod, byte *in0, int total)
 		loadf[LUMP_NODES] = BSP2_LoadNodes;
 		loadf[LUMP_CLIPNODES] = BSP2_LoadClipnodes;
 	}else{
-		werrstr("unsupported version: %ux", ver);
+		werrstr("unsupported version: %d", ver);
 		goto err;
 	}
 
@@ -112,6 +117,7 @@ Mod_LoadBrushModel(model_t *mod, byte *in0, int total)
 	}
 
 	mod->type = mod_brush;
+	mod->ver = ver;
 
 	for(i = 0; i < nelem(loadf); i++){
 		in = in0+4+2*4*order[i];
