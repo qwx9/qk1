@@ -173,7 +173,7 @@ BSP30_LoadTextures(model_t *mod, byte *in, int sz)
 				Con_Printf("missing texture: %s\n", tx->name);
 		}
 		if(strncmp(tx->name, "sky", 3) == 0)
-			R_InitSky(tx);
+			R_InitSky(nil); /* FIXME(sigrid): skybox */
 		else if(tx->name[0] == '{'){
 			for(j = 0; j < pixels; j++){
 				if((tx->data[j] & 0xffffff) == 0x0000ff)

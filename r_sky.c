@@ -21,7 +21,12 @@ void R_InitSky (texture_t *mt)
 	int x, y, w, n;
 	pixel_t *src;
 
-	src = (pixel_t*)((byte *)mt + mt->offsets[0]);
+	if(mt == nil){
+		r_skysource[0] = r_skysource[1] = nil;
+		return;
+	}
+
+	src = mt->data + mt->offsets[0];
 	w = mt->width;
 	skyh = mt->height;
 	if(w == skyh){ // probably without a mask?

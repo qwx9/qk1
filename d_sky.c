@@ -43,6 +43,9 @@ void D_DrawSkyScans8 (espan_t *pspan)
 	fixed16_t s[2], t[2], snext[2], tnext[2], sstep[2], tstep[2];
 	float skydist;
 
+	if(r_skysource[0] == nil || r_skysource[1] == nil)
+		return;
+
 	sstep[0] = sstep[1] = 0;	// keep compiler happy
 	tstep[0] = tstep[1] = 0;	// ditto
 	skydist = skytime*skyspeed;	// TODO: add D_SetupFrame & set this there
