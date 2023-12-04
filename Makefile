@@ -124,6 +124,7 @@ HDRS=\
 	sbar.h\
 	screen.h\
 	server.h\
+	softfloat.h\
 	spritegn.h\
 	unix/libc.h\
 	unix/u.h\

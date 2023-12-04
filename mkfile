@@ -2,10 +2,9 @@
 
 BIN=/$objtype/bin/games
 TARG=quake
-CFLAGS=$CFLAGS -p -D__plan9__
+CFLAGS=$CFLAGS -D__plan9__
 
 OFILES=\
-	${SOFTFLOAT}\
 	span`{test -f span_$objtype.s && echo -n _$objtype}.$O\
 	span_alpha.$O\
 	dotproduct`{test -f span_$objtype.s && echo -n _$objtype}.$O\
@@ -118,6 +117,7 @@ HFILES=\
 	sbar.h\
 	screen.h\
 	server.h\
+	softfloat.h\
 	spritegn.h\
 	vid.h\
 	view.h\
@@ -126,3 +126,9 @@ HFILES=\
 	zone.h\
 
 </sys/src/cmd/mkone
+
+dotadd.$O: dotadd.c
+	$CC $CFLAGS -p dotadd.c
+
+softfloat.$O: softfloat.c
+	$CC $CFLAGS -p softfloat.c
