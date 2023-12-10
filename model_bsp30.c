@@ -86,7 +86,7 @@ BSP30_LoadFaces(model_t *mod, byte *in, int sz)
 		memmove(out->styles, in, MAXLIGHTMAPS);
 		in += MAXLIGHTMAPS;
 		i = le32(in);
-		if(i > 0){
+		if(i >= 0){
 			if(i % 3)
 				Con_Printf("misaligned light samples: %d\n", i);
 			else{
