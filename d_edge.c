@@ -129,7 +129,7 @@ D_DrawSurfaces (void)
 		}else if(s->flags & SURF_DRAWTURB){
 			pface = s->data;
 			miplevel = 0;
-			cacheblock = (pixel_t *)((byte *)pface->texinfo->texture + pface->texinfo->texture->offsets[0]);
+			cacheblock = pface->texinfo->texture->pixels + pface->texinfo->texture->offsets[0];
 			cachewidth = 64;
 
 			if(s->insubmodel){
@@ -183,7 +183,7 @@ D_DrawSurfaces (void)
 			// FIXME: make this passed in to D_CacheSurface
 			pcurrentcache = D_CacheSurface(pface, miplevel);
 
-			cacheblock = (pixel_t *)pcurrentcache->data;
+			cacheblock = pcurrentcache->pixels;
 			cachewidth = pcurrentcache->width;
 
 			D_CalcGradients(pface, transformed_modelorg);

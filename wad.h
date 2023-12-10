@@ -5,7 +5,7 @@ typedef struct
 {
 	int width;
 	int height;
-	pixel_t data[];
+	pixel_t pixels[];
 }qpic_t;
 
 struct texture_s;

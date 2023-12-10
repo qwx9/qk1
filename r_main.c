@@ -109,14 +109,14 @@ void	R_InitTextures (void)
 	r_notexture_mip = Hunk_Alloc((16*16+8*8+4*4+2*2)*sizeof(pixel_t) + sizeof *r_notexture_mip);
 
 	r_notexture_mip->width = r_notexture_mip->height = 16;
-	r_notexture_mip->offsets[0] = sizeof(*r_notexture_mip);
-	r_notexture_mip->offsets[1] = r_notexture_mip->offsets[0] + 16*16*sizeof(pixel_t);
-	r_notexture_mip->offsets[2] = r_notexture_mip->offsets[1] + 8*8*sizeof(pixel_t);
-	r_notexture_mip->offsets[3] = r_notexture_mip->offsets[2] + 4*4*sizeof(pixel_t);
+	r_notexture_mip->offsets[0] = 0;
+	r_notexture_mip->offsets[1] = r_notexture_mip->offsets[0] + 16*16;
+	r_notexture_mip->offsets[2] = r_notexture_mip->offsets[1] + 8*8;
+	r_notexture_mip->offsets[3] = r_notexture_mip->offsets[2] + 4*4;
 
 	for (m=0 ; m<4 ; m++)
 	{
-		dest = (pixel_t*)((byte*)r_notexture_mip + r_notexture_mip->offsets[m]);
+		dest = r_notexture_mip->pixels + r_notexture_mip->offsets[m];
 		for (y=0 ; y< (16>>m) ; y++)
 			for (x=0 ; x< (16>>m) ; x++, dest++)
 			{

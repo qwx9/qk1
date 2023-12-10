@@ -153,16 +153,16 @@ BSP30_LoadTextures(model_t *mod, byte *in, int sz)
 		strncpy(tx->name, (char*)in0+off, sizeof(tx->name)-1);
 		tx->name[sizeof(tx->name)-1] = 0;
 		for(j = 0; j < MIPLEVELS; j++)
-			tx->offsets[j] = sizeof(texture_t) + (le32(p) - (16+2*4+4*4))*sizeof(pixel_t);
+			tx->offsets[j] = le32(p) - (16+2*4+4*4);
 		mod->textures[i] = tx;
 		tx->width = w;
 		tx->height = h;
-		if(tx->offsets[0] > 0){
+		if(tx->offsets[0] >= 0){
 			// the pixels immediately follow the structures
 			x = p + pixels;
 			palsz = le16(x);
 			if(palsz == 256)
-				pal3torgbx(p, tx->data, pixels, x);
+				pal3torgbx(p, tx->pixels, pixels, x);
 		}else{
 			// alternative: outside, in a wad
 			for(j = 0; j < mod->numwads; j++){

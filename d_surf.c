@@ -222,7 +222,7 @@ surfcache_t *D_CacheSurface (msurface_t *surface, int miplevel)
 
 	cache->dlight = surface->dlightframe == r_framecount;
 
-	r_drawsurf.surfdat = (pixel_t *)cache->data;
+	r_drawsurf.surfdat = cache->pixels;
 
 	cache->texture = r_drawsurf.texture;
 	cache->lightadj[0] = r_drawsurf.lightadj[0];

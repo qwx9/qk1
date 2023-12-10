@@ -64,7 +64,7 @@ qpic_t	*Draw_CachePic (char *path)
 	q->height = LittleLong(q->height);
 	n = q->width*q->height;
 	q = Cache_Realloc(&pic->cache, sizeof(*q)+n*sizeof(pixel_t));
-	torgbx((byte*)q->data, q->data, n);
+	torgbx((byte*)q->pixels, q->pixels, n);
 
 	return q;
 }
@@ -96,7 +96,7 @@ void Draw_Init (void)
 		fatal("Draw_Init: %s", lerr());
 	r_rectdesc.width = draw_backtile->width;
 	r_rectdesc.height = draw_backtile->height;
-	r_rectdesc.ptexpixels = draw_backtile->data;
+	r_rectdesc.ptexpixels = draw_backtile->pixels;
 	r_rectdesc.rowbytes = draw_backtile->width;
 }
 
@@ -185,7 +185,7 @@ void Draw_Pic (int x, int y, qpic_t *pic)
 	{
 		fatal ("Draw_Pic: bad coordinates");
 	}
-	source = pic->data;
+	source = pic->pixels;
 	dest = vid.buffer + y * vid.rowbytes + x;
 	for(py = 0; py < pic->height; py++){
 		for(px = 0; px < pic->width; px++){
@@ -211,7 +211,7 @@ void Draw_TransPic (int x, int y, qpic_t *pic)
 	if (x < 0 || y < 0 || x+pic->width > vid.width || y+pic->height > vid.height)
 		fatal ("Draw_TransPic: bad coordinates");
 
-	source = pic->data;
+	source = pic->pixels;
 	dest = vid.buffer + y * vid.rowbytes + x;
 	if(pic->width & 7){	// general
 		for(v=0; v<pic->height; v++){
@@ -261,7 +261,7 @@ void Draw_TransPicTranslate (int x, int y, qpic_t *pic, byte *translation)
 	if (x < 0 || y < 0 || x+pic->width > vid.width || y+pic->height > vid.height)
 		fatal ("Draw_TransPic: bad coordinates");
 
-	source = pic->data;
+	source = pic->pixels;
 	dest = vid.buffer + y * vid.rowbytes + x;
 	if (pic->width & 7){	// general
 		for(v=0; v<pic->height; v++){
@@ -338,7 +338,7 @@ void Draw_ConsoleBackground (int lines)
 
 	// hack the version number directly into the pic
 	sprint (ver, "(9)quake %4.2f", (float)VERSION);
-	dest = conback->data + 320*186 + 320 - 11 - 8*strlen(ver);
+	dest = conback->pixels + 320*186 + 320 - 11 - 8*strlen(ver);
 
 	n = strlen(ver);
 	for (x=0 ; x<n ; x++)
@@ -346,7 +346,7 @@ void Draw_ConsoleBackground (int lines)
 	dest = vid.conbuffer;
 	for(y=0; y<lines; y++, dest+=vid.conrowbytes){
 		v = (vid.conheight - lines + y) * 200 / vid.conheight;
-		src = conback->data + v * 320;
+		src = conback->pixels + v * 320;
 		if(vid.conwidth == 320)
 			memcpy(dest, src, vid.conwidth*sizeof(pixel_t));
 		else{

@@ -220,7 +220,7 @@ void R_DrawSurface (void)
 
 	mt = r_drawsurf.texture;
 
-	r_source = (pixel_t*)((byte*)mt + mt->offsets[r_drawsurf.surfmip]);
+	r_source = mt->pixels + mt->offsets[r_drawsurf.surfmip];
 
 	// the fractional light values should range from 0 to (VID_GRADES - 1) << 16
 	// from a source range of 0 - 255

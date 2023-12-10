@@ -142,11 +142,11 @@ W_ReadQpic(Wad *wad, char *name, mem_user_t *c)
 
 	if(wad->ver == WAD_VER2){
 		for(i = 0; i < n; i++)
-			q->data[i] = q1pal[p[i]];
+			q->pixels[i] = q1pal[p[i]];
 	}else if(wad->ver == WAD_VER3 && palsz > 0){
 		for(i = 0; i < n; i++){
 			j = (*p++)*3;
-			q->data[i] = j < palsz*3 ? (0xff<<24 | pal[j+0]<<16 | pal[j+1]<<8 | pal[j+2]) : 0;
+			q->pixels[i] = j < palsz*3 ? (0xff<<24 | pal[j+0]<<16 | pal[j+1]<<8 | pal[j+2]) : 0;
 		}
 	}
 
@@ -208,7 +208,7 @@ W_ReadMipTex(Wad *wad, char *name, texture_t *t)
 	}
 	n = w*h*85/64;
 	for(i = 0; i < nelem(t->offsets); i++)
-		t->offsets[i] = sizeof(texture_t) + (le32(p) - (16+2*4+4*4))*sizeof(pixel_t);
+		t->offsets[i] = le32(p) - (16+2*4+4*4);
 	off = p - wad->in;
 	if((n = W_ReadPixelsAt(wad, off, lmp->off+lmp->sz-off, (pixel_t*)(t+1), n)) < 0)
 		werrstr("%s: %s", name, lerr());

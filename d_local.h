@@ -24,7 +24,7 @@ typedef struct surfcache_s
 	int					height;		// DEBUG only needed for debug
 	float				mipscale;
 	struct texture_s	*texture;	// checked for animating textures
-	pixel_t				data[];	// width*height elements
+	pixel_t				pixels[];	// width*height elements
 } surfcache_t;
 
 // !!! if this is changed, it must be changed in asm_draw.h too !!!

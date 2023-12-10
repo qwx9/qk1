@@ -26,7 +26,7 @@ void R_InitSky (texture_t *mt)
 		return;
 	}
 
-	src = mt->data + mt->offsets[0];
+	src = mt->pixels + mt->offsets[0];
 	w = mt->width;
 	skyh = mt->height;
 	if(w == skyh){ // probably without a mask?
@@ -34,7 +34,7 @@ void R_InitSky (texture_t *mt)
 		n = skyw*skyh;
 		r_skysource[0] = Hunk_Alloc(n*sizeof(pixel_t));
 		r_skysource[1] = r_skysource[0];
-		memmove(r_skysource[0], src, n);
+		memmove(r_skysource[0], src, n*sizeof(pixel_t));
 		return;
 	}
 	skyw = w/2;
