@@ -283,6 +283,7 @@ int SV_FlyMove (edict_t *ent, float time, trace_t *steptrace)
 				return 7;
 			}
 			CrossProduct (planes[0], planes[1], dir);
+			VectorNormalize(dir);
 			d = DotProduct (dir, ent->v.velocity);
 			VectorScale (dir, d, ent->v.velocity);
 		}
