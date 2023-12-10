@@ -176,8 +176,8 @@ BSP30_LoadTextures(model_t *mod, byte *in, int sz)
 			R_InitSky(nil); /* FIXME(sigrid): skybox */
 		else if(tx->name[0] == '{'){
 			for(j = 0; j < pixels; j++){
-				if((tx->data[j] & 0xffffff) == 0x0000ff)
-					tx->data[j] = 0;
+				if((tx->pixels[j] & 0xffffff) == 0x0000ff)
+					tx->pixels[j] = 0;
 			}
 		}
 	}
