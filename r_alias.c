@@ -9,8 +9,8 @@ affinetridesc_t	r_affinetridesc;
 finalvert_t			*pfinalverts;
 static mdl_t		*pmdl;
 static vec3_t		r_plightvec;
-static int			r_ambientlight;
-static float		r_shadelight;
+static int			r_ambientlight[3];
+static float		r_shadelight[3];
 static aliashdr_t	*paliashdr;
 static float		ziscale;
 static model_t		*pmodel;
@@ -248,13 +248,13 @@ void R_AliasPreparePoints (trivertx_t *apverts, auxvert_t *auxverts, pixel_t *co
 		{
 			 R_AliasProjectFinalVert (fv, av);
 
-			if (fv->v[0] < r_refdef.aliasvrect.x)
+			if (fv->u < r_refdef.aliasvrect.x)
 				fv->flags |= ALIAS_LEFT_CLIP;
-			if (fv->v[1] < r_refdef.aliasvrect.y)
+			if (fv->v < r_refdef.aliasvrect.y)
 				fv->flags |= ALIAS_TOP_CLIP;
-			if (fv->v[0] > r_refdef.aliasvrectright)
+			if (fv->u > r_refdef.aliasvrectright)
 				fv->flags |= ALIAS_RIGHT_CLIP;
-			if (fv->v[1] > r_refdef.aliasvrectbottom)
+			if (fv->v > r_refdef.aliasvrectbottom)
 				fv->flags |= ALIAS_BOTTOM_CLIP;
 		}
 	}
@@ -372,36 +372,35 @@ R_AliasTransformFinalVert
 */
 static void R_AliasTransformFinalVert (finalvert_t *fv, auxvert_t *av, trivertx_t *pverts, stvert_t *pstverts)
 {
-	int		temp;
 	float	lightcos;
 
-	av->fv[0] = DotProduct_(pverts->v, aliastransform[0]) +
-			aliastransform[0][3];
-	av->fv[1] = DotProduct_(pverts->v, aliastransform[1]) +
-			aliastransform[1][3];
-	av->fv[2] = DotProduct_(pverts->v, aliastransform[2]) +
-			aliastransform[2][3];
+	av->fv[0] = DotProduct_(pverts->v, aliastransform[0]) + aliastransform[0][3];
+	av->fv[1] = DotProduct_(pverts->v, aliastransform[1]) + aliastransform[1][3];
+	av->fv[2] = DotProduct_(pverts->v, aliastransform[2]) + aliastransform[2][3];
 
-	fv->v[2] = pstverts->s;
-	fv->v[3] = pstverts->t;
+	fv->s = pstverts->s;
+	fv->t = pstverts->t;
 
 	fv->flags = pstverts->onseam;
 
 	// lighting
 	lightcos = DotProduct(r_avertexnormals[pverts->lightnormalindex], r_plightvec);
-	temp = r_ambientlight;
+	fv->l[0] = r_ambientlight[0];
+	fv->l[1] = r_ambientlight[1];
+	fv->l[2] = r_ambientlight[2];
 
 	if (lightcos < 0)
 	{
-		temp += (int)(r_shadelight * lightcos);
+		fv->l[0] += r_shadelight[0] * lightcos;
+		fv->l[1] += r_shadelight[1] * lightcos;
+		fv->l[2] += r_shadelight[2] * lightcos;
 
 		// clamp; because we limited the minimum ambient and shading light, we
 		// don't have to clamp low light, just bright
-		if (temp < 0)
-			temp = 0;
+		fv->l[0] = max(0, fv->l[0]);
+		fv->l[1] = max(0, fv->l[1]);
+		fv->l[2] = max(0, fv->l[2]);
 	}
-
-	fv->v[4] = temp;
 }
 
 
@@ -412,44 +411,44 @@ R_AliasTransformAndProjectFinalVerts
 */
 void R_AliasTransformAndProjectFinalVerts (finalvert_t *fv, stvert_t *pstverts, trivertx_t *pverts)
 {
-	int			i, temp;
+	int			i;
 	float		lightcos, zi;
 
 	for (i=0 ; i<r_anumverts ; i++, fv++, pverts++, pstverts++)
 	{
 		// transform and project
-		zi = 1.0 / (DotProduct_(pverts->v, aliastransform[2]) +
-				aliastransform[2][3]);
+		zi = 1.0 / (DotProduct_(pverts->v, aliastransform[2]) + aliastransform[2][3]);
 
 		// x, y, and z are scaled down by 1/2**31 in the transform, so 1/z is
 		// scaled up by 1/2**31, and the scaling cancels out for x and y in the
 		// projection
-		fv->v[5] = zi;
+		fv->zi = zi;
 
-		fv->v[0] = ((DotProduct_(pverts->v, aliastransform[0]) +
-				aliastransform[0][3]) * zi) + aliasxcenter;
-		fv->v[1] = ((DotProduct_(pverts->v, aliastransform[1]) +
-				aliastransform[1][3]) * zi) + aliasycenter;
+		fv->u = ((DotProduct_(pverts->v, aliastransform[0]) + aliastransform[0][3]) * zi) + aliasxcenter;
+		fv->v = ((DotProduct_(pverts->v, aliastransform[1]) + aliastransform[1][3]) * zi) + aliasycenter;
 
-		fv->v[2] = pstverts->s;
-		fv->v[3] = pstverts->t;
+		fv->s = pstverts->s;
+		fv->t = pstverts->t;
 		fv->flags = pstverts->onseam;
 
 		// lighting
 		lightcos = DotProduct(r_avertexnormals[pverts->lightnormalindex], r_plightvec);
-		temp = r_ambientlight;
+		fv->l[0] = r_ambientlight[0];
+		fv->l[1] = r_ambientlight[1];
+		fv->l[2] = r_ambientlight[2];
 
 		if (lightcos < 0)
 		{
-			temp += (int)(r_shadelight * lightcos);
+			fv->l[0] += r_shadelight[0] * lightcos;
+			fv->l[1] += r_shadelight[1] * lightcos;
+			fv->l[2] += r_shadelight[2] * lightcos;
 
 			// clamp; because we limited the minimum ambient and shading light, we
 			// don't have to clamp low light, just bright
-			if (temp < 0)
-				temp = 0;
+			fv->l[0] = max(0, fv->l[0]);
+			fv->l[1] = max(0, fv->l[1]);
+			fv->l[2] = max(0, fv->l[2]);
 		}
-
-		fv->v[4] = temp;
 	}
 }
 
@@ -466,10 +465,10 @@ void R_AliasProjectFinalVert (finalvert_t *fv, auxvert_t *av)
 	// project points
 	zi = 1.0 / av->fv[2];
 
-	fv->v[5] = zi * ziscale;
+	fv->zi = zi * ziscale;
 
-	fv->v[0] = (av->fv[0] * aliasxscale * zi) + aliasxcenter;
-	fv->v[1] = (av->fv[1] * aliasyscale * zi) + aliasycenter;
+	fv->u = (av->fv[0] * aliasxscale * zi) + aliasxcenter;
+	fv->v = (av->fv[1] * aliasyscale * zi) + aliasycenter;
 }
 
 
@@ -494,8 +493,7 @@ void R_AliasPrepareUnclippedPoints (trivertx_t *pverts, pixel_t *colormap)
 		D_PolysetDrawFinalVerts (fv, r_anumverts, colormap, currententity->alpha);
 
 	r_affinetridesc.pfinalverts = pfinalverts;
-	r_affinetridesc.ptriangles = (mtriangle_t *)
-			((byte *)paliashdr + paliashdr->triangles);
+	r_affinetridesc.ptriangles = (mtriangle_t *)((byte *)paliashdr + paliashdr->triangles);
 	r_affinetridesc.numtriangles = pmdl->numtris;
 
 	D_PolysetDraw (colormap);
@@ -564,29 +562,27 @@ R_AliasSetupLighting
 */
 void R_AliasSetupLighting (alight_t *plighting)
 {
+	int i;
+
 	// guarantee that no vertex will ever be lit below LIGHT_MIN, so we don't have
 	// to clamp off the bottom
-	r_ambientlight = plighting->ambientlight;
-
-	if (r_ambientlight < LIGHT_MIN)
-		r_ambientlight = LIGHT_MIN;
-
-	r_ambientlight = (255 - r_ambientlight) << VID_CBITS;
-
-	if (r_ambientlight < LIGHT_MIN)
-		r_ambientlight = LIGHT_MIN;
-
-	r_shadelight = plighting->shadelight;
-
-	if (r_shadelight < 0)
-		r_shadelight = 0;
-
-	r_shadelight *= VID_GRADES;
+	for(i = 0; i < 3; i++){
+		r_ambientlight[i] = plighting->ambientlight[i];
+		if (r_ambientlight[i] < LIGHT_MIN)
+			r_ambientlight[i] = LIGHT_MIN;
+		r_ambientlight[i] = (255 - r_ambientlight[i]) << VID_CBITS;
+		if (r_ambientlight[i] < LIGHT_MIN)
+			r_ambientlight[i] = LIGHT_MIN;
+		r_shadelight[i] = plighting->shadelight[i];
+		if (r_shadelight[i] < 0)
+			r_shadelight[i] = 0;
+		r_shadelight[i] *= VID_GRADES;
+	}
 
 	// rotate the lighting vector into the model's frame of reference
-	r_plightvec[0] = DotProduct (plighting->plightvec, alias_forward);
-	r_plightvec[1] = -DotProduct (plighting->plightvec, alias_right);
-	r_plightvec[2] = DotProduct (plighting->plightvec, alias_up);
+	r_plightvec[0] = DotProduct(plighting->plightvec, alias_forward);
+	r_plightvec[1] = -DotProduct(plighting->plightvec, alias_right);
+	r_plightvec[2] = DotProduct(plighting->plightvec, alias_up);
 }
 
 /*
@@ -646,8 +642,8 @@ R_AliasDrawModel
 */
 void R_AliasDrawModel (alight_t *plighting)
 {
-	static finalvert_t		finalverts[MAXALIASVERTS];
-	static auxvert_t		auxverts[MAXALIASVERTS];
+	static finalvert_t finalverts[MAXALIASVERTS];
+	static auxvert_t auxverts[MAXALIASVERTS];
 	trivertx_t *pverts;
 
 	// cache align
@@ -656,9 +652,9 @@ void R_AliasDrawModel (alight_t *plighting)
 	paliashdr = (aliashdr_t *)Mod_Extradata (currententity->model);
 	pmdl = (mdl_t *)((byte *)paliashdr + paliashdr->model);
 
-	R_AliasSetupSkin ();
-	R_AliasSetUpTransform (currententity->trivial_accept);
-	R_AliasSetupLighting (plighting);
+	R_AliasSetupSkin();
+	R_AliasSetUpTransform(currententity->trivial_accept);
+	R_AliasSetupLighting(plighting);
 	pverts = R_AliasSetupFrame ();
 
 	if (!currententity->colormap)

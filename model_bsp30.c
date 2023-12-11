@@ -43,18 +43,12 @@ BSP30_LoadEntities(model_t *mod, byte *in, int sz)
 int
 BSP30_LoadLighting(model_t *mod, byte *in, int sz)
 {
-	int i;
-
 	if(sz == 0){
 		mod->lightdata = nil;
 		return 0;
 	}
 
-	// FIXME(sigrid): change when colored lighting support is in
-	sz /= 3;
-	mod->lightdata = Hunk_Alloc(sz);
-	for(i = 0; i < sz; i++, in += 3)
-		mod->lightdata[i] = (in[0] + in[1] + in[2])/3;
+	memcpy(mod->lightdata = Hunk_Alloc(sz), in, sz);
 	return 0;
 }
 
@@ -90,8 +84,7 @@ BSP30_LoadFaces(model_t *mod, byte *in, int sz)
 			if(i % 3)
 				Con_Printf("misaligned light samples: %d\n", i);
 			else{
-				// FIXME(sigrid): change when colored lighting support is in
-				out->samples = mod->lightdata + i/3;
+				out->samples = mod->lightdata + i;
 			}
 		}
 

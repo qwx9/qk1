@@ -2,7 +2,7 @@
 
 void		*colormap;
 static vec3_t viewlightvec;
-static alight_t r_viewlighting = {128, 192, viewlightvec};
+static alight_t r_viewlighting = {{128,128,128}, {192,192,192}, viewlightvec};
 int			r_numallocatededges;
 int			r_numallocatedbasespans;
 void		*r_basespans;
@@ -466,7 +466,7 @@ R_DrawEntity(entity_t *e)
 	float		lightvec[3] = {-1, 0, 0}; // FIXME: remove and do real lighting
 	float		minmaxs[6];
 	vec3_t		dist, oldorigin;
-	float		add;
+	int		add;
 	model_t		*clmodel;
 
 	if(!r_drawentities.value || e == &cl_entities[cl.viewentity])
@@ -493,26 +493,30 @@ R_DrawEntity(entity_t *e)
 		if(!R_AliasCheckBBox())
 			break;
 
-		j = R_LightPoint(currententity->origin);
-		lighting.ambientlight = j;
-		lighting.shadelight = j;
+		R_LightPoint(currententity->origin, lighting.ambientlight);
+		lighting.shadelight[0] = lighting.ambientlight[0];
+		lighting.shadelight[1] = lighting.ambientlight[1];
+		lighting.shadelight[2] = lighting.ambientlight[2];
 		lighting.plightvec = lightvec;
 
-		add = 0;
 		for(k = 0; k < MAX_DLIGHTS; k++){
 			if(cl_dlights[k].die < cl.time || cl_dlights[k].radius == 0)
 				continue;
 			VectorSubtract(e->origin, cl_dlights[k].origin, dist);
-			add += cl_dlights[k].radius - Length(dist);
-			if(add > 0)
-				lighting.ambientlight += add;
+			add = cl_dlights[k].radius - Length(dist);
+			if(add > 0){
+				lighting.ambientlight[0] += add;
+				lighting.ambientlight[1] += add;
+				lighting.ambientlight[2] += add;
+			}
 		}
 
 		// clamp lighting so it doesn't overbright as much
-		if(lighting.ambientlight > 128)
-			lighting.ambientlight = 128;
-		if(lighting.ambientlight + lighting.shadelight > 192)
-			lighting.shadelight = 192 - lighting.ambientlight;
+		for(j = 0; j < 3; j++){
+			lighting.ambientlight[j] = min(lighting.ambientlight[j], 128);
+			if(lighting.ambientlight[j] + lighting.shadelight[j] > 192)
+				lighting.shadelight[j] = 192 - lighting.ambientlight[j];
+		}
 
 		R_AliasDrawModel(&lighting);
 		break;
@@ -601,8 +605,7 @@ void R_DrawViewModel (void)
 {
 	// FIXME: remove and do real lighting
 	float		lightvec[3] = {-1, 0, 0};
-	int			j;
-	int			lnum;
+	int			lnum, i;
 	vec3_t		dist;
 	float		add;
 	dlight_t	*dl;
@@ -626,12 +629,14 @@ void R_DrawViewModel (void)
 	VectorCopy (vup, viewlightvec);
 	VectorInverse (viewlightvec);
 
-	j = R_LightPoint (currententity->origin);
-
-	if (j < 24)
-		j = 24;		// always give some light on gun
-	r_viewlighting.ambientlight = j;
-	r_viewlighting.shadelight = j;
+	R_LightPoint(currententity->origin, r_viewlighting.ambientlight);
+	// always give some light on gun
+	r_viewlighting.ambientlight[0] = max(r_viewlighting.ambientlight[0], 24);
+	r_viewlighting.ambientlight[1] = max(r_viewlighting.ambientlight[1], 24);
+	r_viewlighting.ambientlight[2] = max(r_viewlighting.ambientlight[2], 24);
+	r_viewlighting.shadelight[0] = r_viewlighting.ambientlight[0];
+	r_viewlighting.shadelight[1] = r_viewlighting.ambientlight[1];
+	r_viewlighting.shadelight[2] = r_viewlighting.ambientlight[2];
 
 	// add dynamic lights
 	for (lnum=0 ; lnum<MAX_DLIGHTS ; lnum++)
@@ -642,19 +647,23 @@ void R_DrawViewModel (void)
 
 		VectorSubtract (currententity->origin, dl->origin, dist);
 		add = dl->radius - Length(dist);
-		if (add > 0)
-			r_viewlighting.ambientlight += add;
+		if (add > 0){
+			r_viewlighting.ambientlight[0] += add;
+			r_viewlighting.ambientlight[1] += add;
+			r_viewlighting.ambientlight[2] += add;
+		}
 	}
 
 	// clamp lighting so it doesn't overbright as much
-	if (r_viewlighting.ambientlight > 128)
-		r_viewlighting.ambientlight = 128;
-	if (r_viewlighting.ambientlight + r_viewlighting.shadelight > 192)
-		r_viewlighting.shadelight = 192 - r_viewlighting.ambientlight;
+	for(i = 0; i < 3; i++){
+		r_viewlighting.ambientlight[i] = min(r_viewlighting.ambientlight[i], 128);
+		if(r_viewlighting.ambientlight[i] + r_viewlighting.shadelight[i] > 192)
+			r_viewlighting.shadelight[i] = 192 - r_viewlighting.ambientlight[i];
+	}
 
 	r_viewlighting.plightvec = lightvec;
 
-	R_AliasDrawModel (&r_viewlighting);
+	R_AliasDrawModel(&r_viewlighting);
 }
 
 /*

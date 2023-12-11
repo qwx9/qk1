@@ -212,10 +212,37 @@ err:
 int
 BSP_LoadLighting(model_t *mod, byte *in, int sz)
 {
-	if(sz == 0)
+	int i, litsz;
+	byte *lit;
+	char s[64], *t;
+
+	if(sz == 0){
 		mod->lightdata = nil;
-	else
-		memcpy(mod->lightdata = Hunk_Alloc(sz), in, sz);
+		return 0;
+	}
+
+	strcpy(s, mod->name);
+	lit = nil;
+	if((t = strrchr(s, '.')) != nil){
+		strcpy(t, ".lit");
+		if((lit = loadhunklmp(s, &litsz)) != nil && litsz >= 4+4+sz*3){
+			if(memcmp(lit, "QLIT", 4) == 0 && lit[4] == 1 && lit[5] == 0 && lit[6] == 0 && lit[7] == 0){
+				mod->lightdata = lit + 8;
+				return 0;
+			}else{
+				Con_Printf("%s: invalid/unsupported LIT file\n", s);
+			}
+		}else{
+			lit = nil;
+		}
+	}
+
+	mod->lightdata = lit ? lit : Hunk_Alloc(sz*3);
+	for(i = 0; i < sz; i++){
+		mod->lightdata[i*3+0] = in[i];
+		mod->lightdata[i*3+1] = in[i];
+		mod->lightdata[i*3+2] = in[i];
+	}
 	return 0;
 }
 
@@ -390,7 +417,7 @@ BSP_LoadFaces(model_t *mod, byte *in, int sz)
 		memmove(out->styles, in, MAXLIGHTMAPS);
 		in += MAXLIGHTMAPS;
 		i = le32(in);
-		out->samples = i < 0 ? nil : mod->lightdata + i;
+		out->samples = i < 0 ? nil : mod->lightdata + i*3;
 
 		// set the drawing flags flag
 

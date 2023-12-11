@@ -22,8 +22,8 @@ int entdrawflags(entity_t *e);
 // viewmodel lighting
 
 typedef struct {
-	int			ambientlight;
-	int			shadelight;
+	int			ambientlight[3];
+	int			shadelight[3];
 	float		*plightvec;
 } alight_t;
 
@@ -115,8 +115,9 @@ int R_RenderFace (msurface_t *fa, int clipflags);
 void R_RenderBmodelFace (bedge_t *pedges, msurface_t *psurf);
 void R_TransformFrustum (void);
 void R_SetSkyFrame (void);
-void R_DrawSurfaceBlock8 (void);
 texture_t *R_TextureAnimation (texture_t *base);
+
+pixel_t addlight(pixel_t x, int lr, int lg, int lb);
 
 void R_DrawSubmodelPolygons (model_t *pmodel, int clipflags);
 void R_DrawSolidClippedSubmodelPolygons (model_t *pmodel);
@@ -228,7 +229,7 @@ extern int		r_dlightframecount;
 
 void R_StoreEfrags (efrag_t **ppefrag);
 void R_AnimateLight (void);
-int R_LightPoint (vec3_t p);
+void R_LightPoint (vec3_t p, int *r);
 void R_SetupFrame (void);
 void R_cshift_f (void);
 void R_EmitEdge (mvertex_t *pv0, mvertex_t *pv1);

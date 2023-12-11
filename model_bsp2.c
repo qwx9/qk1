@@ -86,7 +86,7 @@ BSP2_LoadFaces(model_t *mod, byte *in, int sz)
 
 		memmove(out->styles, in, MAXLIGHTMAPS);
 		in += MAXLIGHTMAPS;
-		out->samples = (i = le32(in)) < 0 ? nil : mod->lightdata + i;
+		out->samples = (i = le32(in)) < 0 ? nil : mod->lightdata + i*3;
 
 		// set the drawing flags flag
 

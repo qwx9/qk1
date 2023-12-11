@@ -15,8 +15,6 @@
 
 //===================================================================
 
-extern void	R_DrawLine (polyvert_t *polyvert0, polyvert_t *polyvert1);
-
 extern int		cachewidth;
 extern pixel_t	*cacheblock;
 extern int		screenwidth;

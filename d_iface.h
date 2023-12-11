@@ -4,9 +4,7 @@
 
 typedef struct
 {
-	float	u, v;
-	float	s, t;
-	float	zi;
+	float u, v, s, t, zi;
 } emitpoint_t;
 
 typedef enum {
@@ -30,15 +28,16 @@ extern particle_t	*active_particles, *free_particles;
 
 #define PARTICLE_Z_CLIP	8.0
 
-typedef struct polyvert_s {
-	float	u, v, zi, s, t;
-} polyvert_t;
-
 // !!! if this is changed, it must be changed in d_ifacea.h too !!!
 typedef struct finalvert_s {
-	int		v[6];		// u, v, s, t, l, 1/z
-	int		flags;
-	float	reserved;
+	union {
+		struct {
+			int u, v, s, t, zi;
+			int l[3];
+		};
+		int x[5+3];
+	};
+	int flags;
 } finalvert_t;
 
 // !!! if this is changed, it must be changed in d_ifacea.h too !!!

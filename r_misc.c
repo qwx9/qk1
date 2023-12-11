@@ -127,10 +127,9 @@ void R_SetupFrame (void)
 				r_numallocatededges, r_maxedgesseen);
 	}
 
-	r_refdef.ambientlight = r_ambient.value;
-
-	if (r_refdef.ambientlight < 0)
-		r_refdef.ambientlight = 0;
+	r_refdef.ambientlight[0] = max(0, r_ambient.value);
+	r_refdef.ambientlight[1] = max(0, r_ambient.value);
+	r_refdef.ambientlight[2] = max(0, r_ambient.value);
 
 	R_CheckVariables ();
 
