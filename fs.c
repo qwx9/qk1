@@ -2,6 +2,7 @@
 
 u16int crcn;
 char fsdir[Nfspath];
+char *fs_lmpfrom;
 
 typedef struct Lump Lump;
 typedef struct Pak Pak;
@@ -322,6 +323,7 @@ openlmp(char *f, int *len)
 	Pak *p;
 	Lump *l;
 
+	fs_lmpfrom = nil;
 	for(pl=pkl; pl != nil; pl=pl->pl){
 		if(pl->p != nil){
 			p = pl->p;
@@ -331,6 +333,7 @@ openlmp(char *f, int *len)
 					fseek(p->bf, l->ofs, SEEK_SET);
 					if(len != nil)
 						*len = l->len;
+					fs_lmpfrom = pl->f;
 					return p->bf;
 				}
 				l++;
@@ -342,6 +345,7 @@ openlmp(char *f, int *len)
 			continue;
 		if(len != nil)
 			*len = bsize(bf);
+		fs_lmpfrom = pl->f;
 		return bf;
 	}
 	werrstr("openlmp %s: not found", f);
@@ -858,6 +862,7 @@ pakdir(char *d)
 			break;
 		}
 		pl = Hunk_Alloc(sizeof *pl);
+		strncpy(pl->f, d, sizeof(pl->f)-1);
 		pl->p = p;
 		pl->pl = pkl;
 		pkl = pl;

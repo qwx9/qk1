@@ -23,6 +23,7 @@ extern char *game;
 
 extern char fsdir[];
 extern u16int crcn;
+extern char *fs_lmpfrom;
 
 extern char savs[][Nsavcm];
 extern int savcanld[];
