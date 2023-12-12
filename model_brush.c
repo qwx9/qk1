@@ -50,7 +50,7 @@ RadiusFromBounds(vec3_t mins, vec3_t maxs)
 void
 Mod_LoadBrushModel(model_t *mod, byte *in0, int total)
 {
-	int i, j, ver, off, sz;
+	int i, j, off, sz;
 	model_t *submod;
 	byte *in;
 	submodel_t *bm;
@@ -91,15 +91,17 @@ Mod_LoadBrushModel(model_t *mod, byte *in0, int total)
 	};
 
 	in = in0;
-	ver = le32(in);
-	if(ver == BSPVERSION){
+	mod->type = mod_brush;
+	mod->ver = le32(in);
+	mod->leafs = nil;
+	if(mod->ver == BSPVERSION){
 		// all set
-	}else if(ver == BSP30VERSION){
+	}else if(mod->ver == BSP30VERSION){
 		loadf[LUMP_ENTITIES] = BSP30_LoadEntities,
 		loadf[LUMP_FACES] = BSP30_LoadFaces;
 		loadf[LUMP_LIGHTING] = BSP30_LoadLighting;
 		loadf[LUMP_TEXTURES] = BSP30_LoadTextures;
-	}else if(ver == BSP2VERSION){
+	}else if(mod->ver == BSP2VERSION){
 		loadf[LUMP_EDGES] = BSP2_LoadEdges;
 		loadf[LUMP_FACES] = BSP2_LoadFaces;
 		loadf[LUMP_MARKSURFACES] = BSP2_LoadMarksurfaces;
@@ -107,7 +109,7 @@ Mod_LoadBrushModel(model_t *mod, byte *in0, int total)
 		loadf[LUMP_NODES] = BSP2_LoadNodes;
 		loadf[LUMP_CLIPNODES] = BSP2_LoadClipnodes;
 	}else{
-		werrstr("unsupported version: %d", ver);
+		werrstr("unsupported version: %d", mod->ver);
 		goto err;
 	}
 
@@ -115,9 +117,6 @@ Mod_LoadBrushModel(model_t *mod, byte *in0, int total)
 		werrstr("truncated: total=%d", total);
 		goto err;
 	}
-
-	mod->type = mod_brush;
-	mod->ver = ver;
 
 	for(i = 0; i < nelem(loadf); i++){
 		in = in0+4+2*4*order[i];

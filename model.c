@@ -248,6 +248,7 @@ model_t *Mod_LoadModel (model_t *mod, bool crash)
 	radix(mod->name, loadname);
 
 	// fill it in
+	mod->lmpfrom = fs_lmpfrom;
 
 	// call the apropriate loader
 	mod->needload = NL_PRESENT;

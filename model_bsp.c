@@ -247,11 +247,90 @@ BSP_LoadLighting(model_t *mod, byte *in, int sz)
 }
 
 int
+BSP_LoadLeafs(model_t *mod, byte *in, int sz)
+{
+	mleaf_t *out;
+	int i, j, p;
+	static const int elsz = 4+4+3*2+3*2+2+2+Namb;
+
+	// skip if loaded external one
+	if(mod->leafs != nil)
+		return 0;
+
+	if(sz % elsz){
+		werrstr("BSP_LoadLeafs: funny lump size");
+		return -1;
+	}
+	mod->numleafs = sz / elsz;
+	mod->leafs = out = Hunk_Alloc(mod->numleafs * sizeof(*out));
+
+	for(i = 0; i < mod->numleafs; i++, out++){
+		out->contents = le32(in);
+		out->compressed_vis = (p = le32(in)) < 0 ? nil : mod->visdata + p;
+
+		for(j = 0; j < 3; j++)
+			out->minmaxs[0+j] = le16(in);
+		for(j = 0; j < 3; j++)
+			out->minmaxs[3+j] = le16(in);
+
+		out->firstmarksurface = mod->marksurfaces + le16u(in);
+		out->nummarksurfaces = le16u(in);
+
+		memmove(out->ambient_sound_level, in, Namb);
+		in += Namb;
+	}
+	return 0;
+}
+
+int
 BSP_LoadVisibility(model_t *mod, byte *in, int sz)
 {
+	char s[32+1], *t;
+	byte *vis, *leaf;
+	int filesz, combined, vissz, leafsz;
+
+	mod->visdata = nil;
 	if(sz == 0)
-		mod->visdata = nil;
-	else
+		return 0;
+
+	// external vis files
+	// FIXME(sigrid): add support for big combo ("id1.vis") files?
+	if(mod->ver == BSPVERSION){ // bsp2 should have proper vis built in already
+		strcpy(s, mod->name);
+		if((t = strrchr(s, '.')) != nil){
+			strcpy(t, ".vis");
+			if((t = strrchr(mod->name, '/')) != nil)
+				t++;
+			else
+				t = mod->name;
+			vis = loadhunklmp(s, &filesz);
+			if(vis != nil && strcmp(fs_lmpfrom, mod->lmpfrom) == 0 && filesz >= 32+4+4+4){
+				vis += 32;
+				combined = le32(vis);
+				filesz -= 32+4;
+				vis[-4] = 0;
+				if(combined > filesz || strcmp(t, (char*)&vis[-32-4]) != 0){
+bad:
+					Con_Printf("%s: invalid/unsupported VIS file\n", s);
+					mod->visdata = nil;
+					mod->leafs = nil;
+				}else{
+					vissz = le32(vis);
+					combined -= 4;
+					if(vissz+4 > combined)
+						goto bad;
+					mod->visdata = vis;
+					leaf = vis + vissz;
+					leafsz = le32(leaf);
+					combined -= 4;
+					if(leafsz > combined || BSP_LoadLeafs(mod, leaf, leafsz) != 0)
+						goto bad;
+				}
+			}
+		}
+	}
+
+	if(mod->visdata == nil)
 		memcpy(mod->visdata = Hunk_Alloc(sz), in, sz);
 	return 0;
 }
@@ -484,38 +563,6 @@ BSP_LoadNodes(model_t *mod, byte *in, int sz)
 	}
 
 	BSP_SetParent(mod->nodes, nil); // sets nodes and leafs
-	return 0;
-}
-
-int
-BSP_LoadLeafs(model_t *mod, byte *in, int sz)
-{
-	mleaf_t *out;
-	int i, j, p;
-	static const int elsz = 4+4+3*2+3*2+2+2+Namb;
-
-	if(sz % elsz){
-		werrstr("BSP_LoadLeafs: funny lump size");
-		return -1;
-	}
-	mod->numleafs = sz / elsz;
-	mod->leafs = out = Hunk_Alloc(mod->numleafs * sizeof(*out));
-
-	for(i = 0; i < mod->numleafs; i++, out++){
-		out->contents = le32(in);
-		out->compressed_vis = (p = le32(in)) < 0 ? nil : mod->visdata + p;
-
-		for(j = 0; j < 3; j++)
-			out->minmaxs[0+j] = le16(in);
-		for(j = 0; j < 3; j++)
-			out->minmaxs[3+j] = le16(in);
-
-		out->firstmarksurface = mod->marksurfaces + le16u(in);
-		out->nummarksurfaces = le16u(in);
-
-		memmove(out->ambient_sound_level, in, Namb);
-		in += Namb;
-	}
 	return 0;
 }
 

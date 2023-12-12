@@ -313,6 +313,7 @@ typedef struct model_s
 	int ver;
 	int numwads;
 	Wad **wads;
+	char *lmpfrom;
 
 	modtype_t	type;
 	int			numframes;
