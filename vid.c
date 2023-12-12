@@ -139,6 +139,7 @@ setpal(uchar *p0)
 
 	for(p = p0, x = 0; x < 256; x++, p += 3)
 		q1pal[x] = x<<24 | p[0]<<16 | p[1]<<8 | p[2];
+	q1pal[255] &= 0;
 
 	scr_fullupdate = 0;
 }
