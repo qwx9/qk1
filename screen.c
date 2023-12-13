@@ -153,26 +153,15 @@ static void SCR_CheckDrawCenterString (void)
 
 //=============================================================================
 
-/*
-====================
-CalcFov
-====================
-*/
-static float CalcFov (float fov_x, float width, float height)
+static float
+CalcFov(float fov, float a, float b)
 {
-	float   a = 0;
-	float   x;
+	float v;
 
-	if (fov_x < 1 || fov_x > 179)
-		fatal ("Bad fov: %f", fov_x);
+	fov = clamp(fov, 1, 179);
+	v = a / tan(fov / 360 * M_PI);
 
-	x = width/tan(fov_x/360*M_PI);
-
-	if(x != 0)
-		a = atan (height/x);
-	a = a*360/M_PI;
-
-	return a;
+	return atan(b / v) * 360.0 / M_PI;
 }
 
 /*
@@ -189,7 +178,7 @@ static void SCR_CalcRefdef (void)
 	float		size;
 
 	scr_fullupdate = 0;		// force a background redraw
-	vid.recalc_refdef = 0;
+	vid.recalc_refdef = false;
 
 	// force the status bar to redraw
 	Sbar_Changed ();
@@ -208,8 +197,10 @@ static void SCR_CalcRefdef (void)
 	if (scr_fov.value > 170)
 		setcvar ("fov","170");
 
-	r_refdef.fov_x = scr_fov.value;
-	r_refdef.fov_y = CalcFov (r_refdef.fov_x, r_refdef.vrect.width, r_refdef.vrect.height);
+	r_refdef.fov_y = CalcFov(scr_fov.value, 640, 432); // 480→432 adjusted for a status bar
+	r_refdef.fov_x = CalcFov(r_refdef.fov_y, r_refdef.vrect.height, r_refdef.vrect.width);
+
+	scr_vrect = r_refdef.vrect;
 
 	// intermission is always full screen
 	if (cl.intermission)
@@ -253,7 +244,7 @@ Keybinding command
 static void SCR_SizeUp_f (void)
 {
 	setcvarv ("viewsize",scr_viewsize.value+10);
-	vid.recalc_refdef = 1;
+	vid.recalc_refdef = true;
 }
 
 
@@ -267,7 +258,7 @@ Keybinding command
 static void SCR_SizeDown_f (void)
 {
 	setcvarv ("viewsize",scr_viewsize.value-10);
-	vid.recalc_refdef = 1;
+	vid.recalc_refdef = true;
 }
 
 void SCR_Init (void)
@@ -612,7 +603,7 @@ needs almost the entire 256k of stack space!
 */
 void SCR_UpdateScreen (bool drawdialog)
 {
-	static float	oldlcd_x;
+	static float oldlcd_x;
 
 	if (scr_disabled_for_loading)
 	{
