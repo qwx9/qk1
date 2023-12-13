@@ -43,11 +43,14 @@ Sys_SendKeyEvents(void)
 			case SDL_WINDOWEVENT_RESIZED:
 				resized = 1;
 				break;
-			case SDL_WINDOWEVENT_FOCUS_LOST:
+			case SDL_WINDOWEVENT_CLOSE:
+				Cbuf_AddText("menu_quit\n");
+				break;
+			case SDL_WINDOWEVENT_LEAVE:
 				focuslost = mouseon;
 				IN_Grabm(0);
 				break;
-			case SDL_WINDOWEVENT_FOCUS_GAINED:
+			case SDL_WINDOWEVENT_ENTER:
 				IN_Grabm(focuslost);
 				break;
 			}
