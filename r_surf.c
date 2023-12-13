@@ -279,6 +279,10 @@ pixel_t
 addlight(pixel_t x, int lr, int lg, int lb)
 {
 	int r, g, b, y[3];
+
+	if((x & 0xff000000U) == 0)
+		return x;
+
 	r = (x>>16) & 0xff;
 	g = (x>>8)  & 0xff;
 	b = (x>>0)  & 0xff;
