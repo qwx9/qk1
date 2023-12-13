@@ -156,9 +156,17 @@ BSP30_LoadTextures(model_t *mod, byte *in, int sz)
 			if((palsz = le16(x)) > 0){
 				pal3torgbx(p, tx->pixels, pixels, x, palsz);
 				if(tx->name[0] == '{'){
+					/* last color is transparent */
 					for(j = 0; j < pixels; j++){
 						if(p[j] == palsz-1)
 							tx->pixels[j] = 0;
+					}
+				}
+				if(strchr(tx->name, '~') != nil){
+					/* last 32 colors are fullbright */
+					for(j = 0; j < pixels; j++){
+						if(p[j] >= 256-32)
+							tx->pixels[j] &= 0xffffff;
 					}
 				}
 			}

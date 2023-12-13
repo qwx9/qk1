@@ -159,7 +159,7 @@ err:
 static int
 W_ReadPixelsAt(Wad *wad, char *name, int off, int sz, pixel_t *out, int num)
 {
-	int n, palsz, x;
+	int n, palsz, x, fb;
 	byte *t, *pal;
 
 	num = min(num, sz);
@@ -181,12 +181,13 @@ W_ReadPixelsAt(Wad *wad, char *name, int off, int sz, pixel_t *out, int num)
 			goto err;
 		}
 		palsz *= 3;
-		for(n = 0; n < num; n++, out++){
-			x = (*t++)*3;
-			if(x >= palsz || (wad->ver == WAD_VER3 && name[0] == '{' && x == palsz-3))
+		fb = strchr(name, '~') != nil;
+		for(n = 0; n < num; n++, t++, out++){
+			x = *t*3;
+			if(x >= palsz || (name[0] == '{' && x == palsz-3))
 				*out = 0;
 			else
-				*out = 0xff<<24 | pal[x+0]<<16 | pal[x+1]<<8 | pal[x+2];
+				*out = ((fb && x >= (256-32)*3) ? 0 : 0xff)<<24 | pal[x+0]<<16 | pal[x+1]<<8 | pal[x+2];
 		}
 	}
 	return num;
