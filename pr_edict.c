@@ -829,7 +829,14 @@ char *ED_ParseEdict (pr_t *pr, char *data, edict_t *ent)
 		{
 			if(strcmp(keyname, "alpha") == 0)
 				ent->alpha = f2alpha(atof(com_token));
-			else
+			else if(strcmp(keyname, "renderamt") == 0){
+				ent->alpha = atoi(com_token);
+				if(ent->alpha == ZERO_ALPHA)
+					ent->alpha++;
+				else if(ent->alpha == 0)
+					ent->alpha = ZERO_ALPHA;
+				ent->alpha = clamp(ent->alpha, 1, 255);
+			}else
 				Con_Printf ("ED_ParseEdict: '%s' is not a field\n", keyname);
 			continue;
 		}
