@@ -7,18 +7,23 @@ char	com_token[1024];
 bool		standard_quake = true, rogue, hipnotic;
 
 void
-pal3torgbx(byte *in, pixel_t *out, int n, byte *pal)
+pal3torgbx(byte *in, pixel_t *out, int n, byte *pal, int palsz)
 {
 	int x;
 
+	palsz *= 3;
 	if(in < (byte*)out || in > (byte*)(out+n) || in+n < (byte*)out){
 		while(n-- > 0){
 			x = (*in++)*3;
+			if(x >= palsz)
+				x = 0;
 			*out++ = 0xff<<24 | pal[x+0]<<16 | pal[x+1]<<8 | pal[x+2];
 		}
 	}else{
 		while(n-- > 0){
 			x = in[n]*3;
+			if(x >= palsz)
+				x = 0;
 			out[n] = 0xff<<24 | pal[x+0]<<16 | pal[x+1]<<8 | pal[x+2];
 		}
 	}

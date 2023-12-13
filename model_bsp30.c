@@ -153,9 +153,15 @@ BSP30_LoadTextures(model_t *mod, byte *in, int sz)
 		if(tx->offsets[0] >= 0){
 			// the pixels immediately follow the structures
 			x = p + pixels;
-			palsz = le16(x);
-			if(palsz == 256)
-				pal3torgbx(p, tx->pixels, pixels, x);
+			if((palsz = le16(x)) > 0){
+				pal3torgbx(p, tx->pixels, pixels, x, palsz);
+				if(tx->name[0] == '{'){
+					for(j = 0; j < pixels; j++){
+						if(p[j] == palsz-1)
+							tx->pixels[j] = 0;
+					}
+				}
+			}
 		}else{
 			// alternative: outside, in a wad
 			for(j = 0; j < mod->numwads; j++){
@@ -167,12 +173,6 @@ BSP30_LoadTextures(model_t *mod, byte *in, int sz)
 		}
 		if(strncmp(tx->name, "sky", 3) == 0)
 			R_InitSky(nil); /* FIXME(sigrid): skybox */
-		else if(tx->name[0] == '{'){
-			for(j = 0; j < pixels; j++){
-				if((tx->pixels[j] & 0xffffff) == 0x0000ff)
-					tx->pixels[j] = 0;
-			}
-		}
 	}
 
 	// sequence the animations

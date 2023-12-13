@@ -182,7 +182,7 @@ extern	double		realtime;		// not bounded in any way, changed at
 #define opaque(p) ((p) != 0)
 
 extern pixel_t q1pal[256];
-void pal3torgbx(byte *in, pixel_t *out, int n, byte *pal);
+void pal3torgbx(byte *in, pixel_t *out, int n, byte *pal, int palsz);
 void paltorgbx(byte *in, pixel_t *out, int n, pixel_t *pal);
 void torgbx(byte *in, pixel_t *out, int n);
 

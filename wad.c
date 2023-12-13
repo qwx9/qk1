@@ -157,7 +157,7 @@ err:
 }
 
 static int
-W_ReadPixelsAt(Wad *wad, int off, int sz, pixel_t *out, int num)
+W_ReadPixelsAt(Wad *wad, char *name, int off, int sz, pixel_t *out, int num)
 {
 	int n, palsz, x;
 	byte *t, *pal;
@@ -175,14 +175,18 @@ W_ReadPixelsAt(Wad *wad, int off, int sz, pixel_t *out, int num)
 		}
 		pal = t + num;
 		palsz = le16(pal);
-		if(palsz < 0 || palsz > 256 || off+num+2+palsz*3 > wad->sz){
+		if(palsz <= 0 || palsz > 256 || off+num+2+palsz*3 > wad->sz){
 			werrstr("invalid palette: palsz=%d pal_end=%d wad_sz=%d",
 				palsz, off+num+2+palsz*3, wad->sz);
 			goto err;
 		}
-		for(n = 0; n < num; n++){
+		palsz *= 3;
+		for(n = 0; n < num; n++, out++){
 			x = (*t++)*3;
-			*out++ = x < palsz*3 ? (0xff<<24 | pal[x+0]<<16 | pal[x+1]<<8 | pal[x+2]) : 0;
+			if(x >= palsz || (wad->ver == WAD_VER3 && name[0] == '{' && x == palsz-3))
+				*out = 0;
+			else
+				*out = 0xff<<24 | pal[x+0]<<16 | pal[x+1]<<8 | pal[x+2];
 		}
 	}
 	return num;
@@ -210,7 +214,7 @@ W_ReadMipTex(Wad *wad, char *name, texture_t *t)
 	for(i = 0; i < nelem(t->offsets); i++)
 		t->offsets[i] = le32(p) - (16+2*4+4*4);
 	off = p - wad->in;
-	if((n = W_ReadPixelsAt(wad, off, lmp->off+lmp->sz-off, (pixel_t*)(t+1), n)) < 0)
+	if((n = W_ReadPixelsAt(wad, name, off, lmp->off+lmp->sz-off, (pixel_t*)(t+1), n)) < 0)
 		werrstr("%s: %s", name, lerr());
 	return n;
 }
@@ -223,7 +227,7 @@ W_ReadPixels(Wad *wad, char *name, pixel_t *out, int num)
 
 	if((lmp = W_FindName(wad, name)) == nil)
 		return -1;
-	if((n = W_ReadPixelsAt(wad, lmp->off, lmp->sz, out, num)) < 0)
+	if((n = W_ReadPixelsAt(wad, name, lmp->off, lmp->sz, out, num)) < 0)
 		werrstr("%s: %s", name, lerr());
 	return n;
 }
