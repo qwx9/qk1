@@ -6,7 +6,8 @@ extern int resized;
 
 static cvar_t m_windowed = {"m_windowed", "1", true};
 static cvar_t m_filter = {"m_filter", "0", true};
-static int mouseon, oldmwin, focuslost;
+static cvar_t m_raw = {"m_raw", "1", true};
+static int mouseon, oldmwin, focuslost, oldraw = -1;
 static float dx, dy, olddx, olddy;
 
 static int mbuttons[] = {
@@ -118,6 +119,11 @@ IN_Move(usercmd_t *cmd)
 	if(!mouseon)
 		return;
 
+	if(oldraw != (int)m_raw.value){
+		oldraw = m_raw.value;
+		SDL_SetHint(SDL_HINT_MOUSE_RELATIVE_MODE_WARP, oldraw ? "0" : "1");
+	}
+
 	if(m_filter.value){
 		dx = (dx + olddx) * 0.5;
 		dy = (dy + olddy) * 0.5;
@@ -165,4 +171,5 @@ IN_Init(void)
 {
 	Cvar_RegisterVariable(&m_windowed);
 	Cvar_RegisterVariable(&m_filter);
+	Cvar_RegisterVariable(&m_raw);
 }
