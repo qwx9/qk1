@@ -30,6 +30,38 @@ lightstyle_t	cl_lightstyle[Nlights];
 dlight_t		cl_dlights[MAX_DLIGHTS];
 int				cl_numvisedicts;
 
+void
+CL_ApplyInterpolation(entity_t *e, float frac)
+{
+	float d, f;
+	vec3_t delta;
+	int i;
+
+	if(e->forcelink){
+		// the entity was not updated in the last message
+		// so move to the final spot
+		VectorCopy(e->msg_origins[0], e->origin);
+		VectorCopy(e->msg_angles[0], e->angles);
+	}else{
+		f = frac;
+		for(i = 0; i < 3; i++){
+			delta[i] = e->msg_origins[0][i] - e->msg_origins[1][i];
+			if(delta[i] > 100 || delta[i] < -100)
+				f = 1;
+		}
+
+		for(i = 0; i < 3; i++){
+			e->origin[i] = e->msg_origins[1][i] + f*delta[i];
+			d = e->msg_angles[0][i] - e->msg_angles[1][i];
+			if(d > 180.0)
+				d -= 360.0;
+			else if(d < -180.0)
+				d += 360.0;
+			e->angles[i] = e->msg_angles[1][i] + f*d;
+		}
+	}
+}
+
 /*
 =====================
 CL_ClearState
@@ -316,7 +348,7 @@ should be put at.
 */
 static float	CL_LerpPoint (void)
 {
-	float	f, frac;
+	double f, frac;
 
 	f = cl.mtime[0] - cl.mtime[1];
 
@@ -358,31 +390,27 @@ static void CL_RelinkEntities (void)
 {
 	entity_t	*ent;
 	int			i, j;
-	float		frac, f, d;
-	vec3_t		delta;
+	float		frac, d;
 	float		bobjrotate;
 	vec3_t		oldorg;
 	dlight_t	*dl;
 
 	// determine partial update time
-	frac = CL_LerpPoint ();
+	frac = CL_LerpPoint();
 
 	cl_numvisedicts = 0;
 
 	// interpolate player info
-	for (i=0 ; i<3 ; i++)
-		cl.velocity[i] = cl.mvelocity[1][i] +
-			frac * (cl.mvelocity[0][i] - cl.mvelocity[1][i]);
+	for(i = 0; i < 3; i++)
+		cl.velocity[i] = cl.mvelocity[1][i] + frac * (cl.mvelocity[0][i] - cl.mvelocity[1][i]);
 
-	if (cls.demoplayback)
-	{
+	if(cls.demoplayback){
 		// interpolate the angles
-		for (j=0 ; j<3 ; j++)
-		{
+		for(j = 0; j < 3; j++){
 			d = cl.mviewangles[0][j] - cl.mviewangles[1][j];
-			if (d > 180)
+			if(d > 180)
 				d -= 360;
-			else if (d < -180)
+			else if(d < -180)
 				d += 360;
 			cl.viewangles[j] = cl.mviewangles[1][j] + frac*d;
 		}
@@ -409,36 +437,7 @@ static void CL_RelinkEntities (void)
 
 		VectorCopy (ent->origin, oldorg);
 
-		if (ent->forcelink)
-		{	// the entity was not updated in the last message
-			// so move to the final spot
-			VectorCopy (ent->msg_origins[0], ent->origin);
-			VectorCopy (ent->msg_angles[0], ent->angles);
-		}
-		else
-		{	// if the delta is large, assume a teleport and don't lerp
-			f = frac;
-			for (j=0 ; j<3 ; j++)
-			{
-				delta[j] = ent->msg_origins[0][j] - ent->msg_origins[1][j];
-				if (delta[j] > 100 || delta[j] < -100)
-					f = 1;		// assume a teleportation, not a motion
-			}
-
-		// interpolate the origin and angles
-			for (j=0 ; j<3 ; j++)
-			{
-				ent->origin[j] = ent->msg_origins[1][j] + f*delta[j];
-
-				d = ent->msg_angles[0][j] - ent->msg_angles[1][j];
-				if (d > 180)
-					d -= 360;
-				else if (d < -180)
-					d += 360;
-				ent->angles[j] = ent->msg_angles[1][j] + f*d;
-			}
-
-		}
+		CL_ApplyInterpolation(ent, frac);
 
 		// rotate binary objects locally
 		if (ent->model->flags & EF_ROTATE)

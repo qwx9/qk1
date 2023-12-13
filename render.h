@@ -15,7 +15,6 @@ typedef struct efrag_s
 	struct efrag_s		*entnext;
 } efrag_t;
 
-
 typedef struct entity_s
 {
 	bool				forcelink;		// model changed
@@ -52,6 +51,8 @@ typedef struct entity_s
 
 	byte alpha;
 } entity_t;
+
+
 
 // !!! if this is changed, it must be changed in asm_draw.h too !!!
 typedef struct
