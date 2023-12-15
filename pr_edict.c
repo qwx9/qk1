@@ -827,17 +827,20 @@ char *ED_ParseEdict (pr_t *pr, char *data, edict_t *ent)
 		key = ED_FindField (pr, keyname);
 		if (!key)
 		{
-			if(strcmp(keyname, "alpha") == 0)
+			if(strcmp(keyname, "alpha") == 0){
 				ent->alpha = f2alpha(atof(com_token));
-			else if(strcmp(keyname, "renderamt") == 0){
+			}else if(strcmp(keyname, "renderamt") == 0){
 				ent->alpha = atoi(com_token);
 				if(ent->alpha == ZERO_ALPHA)
 					ent->alpha++;
 				else if(ent->alpha == 0)
 					ent->alpha = ZERO_ALPHA;
-				ent->alpha = clamp(ent->alpha, 1, 255);
-			}else
+			}else if(strcmp(keyname, "rendermode") == 0){
+				if((n = atoi(com_token)) == 5)
+					ent->v.effects = (int)ent->v.effects | EF_ADDITIVE;
+			}else{
 				Con_Printf ("ED_ParseEdict: '%s' is not a field\n", keyname);
+			}
 			continue;
 		}
 
