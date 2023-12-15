@@ -132,7 +132,7 @@ void SV_StartParticle (vec3_t org, vec3_t dir, int color, int count)
 {
 	int		i, v;
 
-	if (sv.datagram.cursize > MAX_DATAGRAM-16)
+	if(sv.datagram.cursize > MAX_DATAGRAM-(1+3*4+3*1+1+1))
 		return;
 	MSG_WriteByte(&sv.datagram, svc_particle);
 	MSG_WriteVec(*sv.protocol, &sv.datagram, org);
@@ -172,7 +172,7 @@ void SV_StartSound (edict_t *entity, int channel, char *sample, int volume,
     int			i;
 	int			ent;
 
-	if (sv.datagram.cursize > MAX_DATAGRAM-21)
+	if (sv.datagram.cursize > MAX_DATAGRAM-(1+1+1+1+2+1+2+3*4))
 		return;
 
 	// find precache number for sound
@@ -323,6 +323,7 @@ void SV_ConnectClient (int clientnum)
 	client->message.data = client->msgbuf;
 	client->message.maxsize = sizeof client->msgbuf;
 	client->message.allowoverflow = true;		// we can catch it
+	client->message.name = "client.message";
 
 	if(sv.loadgame)
 		memcpy(client->spawn_parms, spawn_parms, sizeof spawn_parms);
@@ -508,8 +509,7 @@ void SV_WriteEntitiesToClient (edict_t	*clent, sizebuf_t *msg)
 				continue;
 		}
 
-		if (msg->cursize + 18 > msg->maxsize)
-		{
+		if (msg->cursize + 32 > msg->maxsize){
 			Con_Printf ("packet overflow\n");
 			return;
 		}
@@ -645,6 +645,11 @@ void SV_WriteClientdataToMessage (edict_t *ent, sizebuf_t *msg)
 	// send a damage message
 	if (ent->v.dmg_take || ent->v.dmg_save)
 	{
+		if(msg->cursize + 3+3*4 > msg->maxsize){
+			Con_Printf ("packet overflow\n");
+			return;
+		}
+
 		other = PROG_TO_EDICT(sv.pr, ent->v.dmg_inflictor);
 		MSG_WriteByte (msg, svc_damage);
 		MSG_WriteByte (msg, ent->v.dmg_save);
@@ -660,12 +665,20 @@ void SV_WriteClientdataToMessage (edict_t *ent, sizebuf_t *msg)
 	SV_SetIdealPitch ();		// how much to look up / down ideally
 
 	// a fixangle might get lost in a dropped packet.  Oh well.
-	if ( ent->v.fixangle )
-	{
+	if(ent->v.fixangle ){
+		if(msg->cursize + 1+3*2 > msg->maxsize){
+			Con_Printf ("packet overflow\n");
+			return;
+		}
 		MSG_WriteByte (msg, svc_setangle);
 		for (i=0 ; i < 3 ; i++)
 			sv.protocol->MSG_WriteAngle (msg, ent->v.angles[i]);
 		ent->v.fixangle = 0;
+	}
+
+	if(msg->cursize + 64 > msg->maxsize){
+		Con_Printf("packet overflow\n");
+		return;
 	}
 
 	bits = SU_ITEMS | SU_WEAPON;
@@ -795,6 +808,7 @@ bool SV_SendClientDatagram (client_t *client)
 	// allow big messages locally, but otherwise (real world) we're forced to use 1400 at most
 	msg.maxsize = client->netconnection->local ? MAX_DATAGRAM_LOCAL : MAX_DATAGRAM;
 	msg.cursize = 0;
+	msg.name = "client datagram";
 
 	MSG_WriteByte (&msg, svc_time);
 	MSG_WriteFloat (&msg, sv.time);
@@ -873,6 +887,7 @@ void SV_SendNop (client_t *client)
 	msg.data = buf;
 	msg.maxsize = sizeof buf;
 	msg.cursize = 0;
+	msg.name = "nop";
 
 	MSG_WriteChar (&msg, svc_nop);
 
@@ -1092,6 +1107,7 @@ void SV_SendReconnect (void)
 	msg.data = data;
 	msg.cursize = 0;
 	msg.maxsize = sizeof data;
+	msg.name = "reconnect";
 
 	MSG_WriteChar (&msg, svc_stufftext);
 	MSG_WriteString (&msg, "reconnect\n");
