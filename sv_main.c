@@ -537,7 +537,7 @@ void SV_WriteEntitiesToClient (edict_t	*clent, sizebuf_t *msg)
 			bits |= U_SKIN;
 		if (ent->v.frame != ent->baseline.frame)
 			bits |= U_FRAME;
-		if (ent->v.effects != ent->baseline.effects)
+		if (((int)ent->v.effects & 0xff) != (ent->baseline.effects & 0xff))
 			bits |= U_EFFECTS;
 		if (model != ent->baseline.modelindex)
 			bits |= U_MODEL;
