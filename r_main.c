@@ -687,7 +687,7 @@ void R_EdgeDrawing (void)
 		R_RenderWorld();
 		for(i = 0; i < cl_numvisedicts; i++){
 			e = cl_visedicts[i];
-			if(e->model->type == mod_brush && !R_DrawEntity(e)){
+			if(e->model != nil && e->model->type == mod_brush && !R_DrawEntity(e)){
 				e->last_reject = ent_reject;
 				ent_reject = e;
 			}
