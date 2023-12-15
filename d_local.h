@@ -73,22 +73,22 @@ extern uzint *zspantable[MAXHEIGHT];
 extern int d_minmip;
 extern float d_scalemip[3];
 
-#define blendalpha(ca, cb, alpha) \
-	((((alpha)*(((ca)>> 0)&0xff) + (255-(alpha))*(((cb)>> 0)&0xff))>> 8) << 0 | \
-	 (((alpha)*(((ca)>> 8)&0xff) + (255-(alpha))*(((cb)>> 8)&0xff))>> 8) << 8 | \
-	 (((alpha)*(((ca)>>16)&0xff) + (255-(alpha))*(((cb)>>16)&0xff))>> 8) << 16)
-
-/*
 static inline pixel_t
 blendalpha(pixel_t ca, pixel_t cb, int alpha)
 {
-	//pixel_t x;
-	//x.r = alpha*ca.r + (255-alpha)*cb.r;
-	//x.g = alpha*ca.g + (255-alpha)*cb.g;
-	//x.b = alpha*ca.b + (255-alpha)*cb.b;
-	USED(cb);
-	USED(alpha);
-	return ca;
+	int a, b, c;
+
+	if(currententity != nil && currententity->effects & EF_ADDITIVE){
+		a = (alpha*((ca>> 0)&0xff) + 255*((cb>> 0)&0xff))>> 8;
+		b = (alpha*((ca>> 8)&0xff) + 255*((cb>> 8)&0xff))>> 8;
+		c = (alpha*((ca>>16)&0xff) + 255*((cb>>16)&0xff))>> 8;
+		return min(a, 255) | min(b, 255)<<8 | min(c, 255)<<16;
+	}
+
+	return
+		((alpha*((ca>> 0)&0xff) + (255-alpha)*((cb>> 0)&0xff))>> 8) << 0 |
+		((alpha*((ca>> 8)&0xff) + (255-alpha)*((cb>> 8)&0xff))>> 8) << 8 |
+		((alpha*((ca>>16)&0xff) + (255-alpha)*((cb>>16)&0xff))>> 8) << 16;
 }
-*/
+
 float alphafor(int flags);

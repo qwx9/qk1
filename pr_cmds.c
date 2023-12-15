@@ -1629,6 +1629,7 @@ PF_Fixme(pr_t *pr)
 }
 
 static const char *exts[] = {
+	"DP_EF_ADDITIVE",
 	"DP_EF_NODRAW",
 	"DP_QC_ASINACOSATANATAN2TAN",
 	"DP_QC_MINMAXBOUND",

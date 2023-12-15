@@ -53,12 +53,12 @@ surfdrawflags(int flags)
 int
 entdrawflags(entity_t *e)
 {
-	if(e != nil){
+	if(e == nil || e->model == nil)
+		return DRAW_NO;
+	if(e->model != cl.worldmodel){
 		if(e->effects & EF_NODRAW)
 			return DRAW_NO;
-		if(!defalpha(e->alpha))
-			return DRAW_BLEND;
-		if(e->model != nil && e->model != cl.worldmodel && e->model->blend)
+		if(e->model->blend || (e->effects & EF_ADDITIVE) || !defalpha(e->alpha))
 			return DRAW_BLEND;
 	}
 	return 0;
