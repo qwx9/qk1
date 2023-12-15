@@ -49,6 +49,8 @@ struct protocol_t {
 	u32int fl_baseline_alpha;
 	u32int fl_weapon_alpha;
 
+	u32int fl_baseline_effects; /* FIXME(sigrid): this is absolutely made up and NOT a standard anywhere */
+
 	// absolute limits for the protocol
 	int limit_entity;
 	int limit_channel;

@@ -425,6 +425,7 @@ static void CL_ParseBaseline (int withbits, entity_t *ent)
 		ent->baseline.angles[i] = cl.protocol.MSG_ReadAngle ();
 	}
 	ent->baseline.alpha = (bits & cl.protocol.fl_baseline_alpha) ? MSG_ReadByte() : DEFAULT_ALPHA;
+	ent->baseline.effects = (bits & cl.protocol.fl_baseline_effects) ? MSG_ReadByte() : 0;
 }
 
 

@@ -58,6 +58,7 @@ protocol_t protos[PROTO_NUM] = {
 		.fl_large_baseline_frame = 1<<1,
 		.fl_alpha = 1<<16,
 		.fl_baseline_alpha = 1<<2,
+		.fl_baseline_effects = 1<<3,
 		.fl_weapon_alpha = 1<<25,
 		.MSG_WriteCoord = MSG_WriteCoordInt32,
 		.MSG_WriteAngle = MSG_WriteAngleInt16,

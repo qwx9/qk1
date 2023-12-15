@@ -494,7 +494,7 @@ void SV_WriteEntitiesToClient (edict_t	*clent, sizebuf_t *msg)
 		v = GetEdictFieldValue(sv.pr, ent, "alpha");
 		alpha = v ? f2alpha(v->_float) : DEFAULT_ALPHA;
 
-		if (ent != clent)	// clent is ALLWAYS sent
+		if (ent != clent)	// clent is ALWAYS sent
 		{
 			if((int)ent->v.effects == EF_NODRAW)
 				continue;
@@ -1068,6 +1068,8 @@ void SV_CreateBaseline (void)
 			bits |= sv.protocol->fl_large_baseline_frame;
 		if(!defalpha(svent->baseline.alpha))
 			bits |= sv.protocol->fl_baseline_alpha;
+		if(((int)svent->baseline.effects & 0xff) != 0)
+			bits |= sv.protocol->fl_baseline_effects;
 
 		// add to the message
 		SV_SignonFrame();
@@ -1088,6 +1090,8 @@ void SV_CreateBaseline (void)
 		}
 		if(bits & sv.protocol->fl_baseline_alpha)
 			MSG_WriteByte(sv.signon, svent->baseline.alpha);
+		if(bits & sv.protocol->fl_baseline_effects)
+			MSG_WriteByte(sv.signon, svent->baseline.effects);
 	}
 }
 

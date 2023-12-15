@@ -1552,6 +1552,8 @@ PF_makestatic(pr_t *pr)
 	}
 	if(!defalpha(ent->alpha))
 		bits |= sv.protocol->fl_baseline_alpha;
+	if(((int)ent->v.effects & 0xff) != 0)
+		bits |= sv.protocol->fl_baseline_effects;
 
 	SV_SignonFrame();
 
@@ -1572,6 +1574,8 @@ PF_makestatic(pr_t *pr)
 	}
 	if(bits & sv.protocol->fl_baseline_alpha)
 		MSG_WriteByte(sv.signon, ent->alpha);
+	if(bits & sv.protocol->fl_baseline_effects)
+		MSG_WriteByte(sv.signon, ent->v.effects);
 
 	// throw the entity away now
 	ED_Free(ent);
