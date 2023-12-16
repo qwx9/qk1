@@ -33,7 +33,7 @@ typedef struct sspan_s
 	int				u, v, count;
 } sspan_t;
 
-typedef u16int uzint;
+typedef s32int uzint;
 
 extern cvar_t	d_subdiv16;
 

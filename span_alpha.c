@@ -8,7 +8,7 @@ dospan_alpha(pixel_t *pdest, pixel_t *pbase, int s, int t, int sstep, int tstep,
 	if(alpha != 255){
 		do{
 			pix = pbase[(s >> 16) + (t >> 16) * cachewidth];
-			if(opaque(pix) && *pz <= (izi >> 16))
+			if(opaque(pix) && *pz <= izi)
 				*pdest = blendalpha(pix, *pdest, alpha);
 			pdest++;
 			pz++;
@@ -19,9 +19,9 @@ dospan_alpha(pixel_t *pdest, pixel_t *pbase, int s, int t, int sstep, int tstep,
 	}else{
 		do{
 			pix = pbase[(s >> 16) + (t >> 16) * cachewidth];
-			if(opaque(pix) && *pz <= (izi >> 16)){
+			if(opaque(pix) && *pz <= izi){
 				*pdest = pix;
-				*pz = izi >> 16;
+				*pz = izi;
 			}
 			pdest++;
 			pz++;

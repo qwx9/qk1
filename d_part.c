@@ -37,7 +37,7 @@ D_DrawParticle (particle_t *pparticle)
 
 	pz = d_pzbuffer + d_zwidth*v + u;
 	pdest = d_viewbuffer + d_scantable[v] + u;
-	izi = zi * 0x8000;
+	izi = zi * 0x8000 * 0x10000;
 
 	zi = 1024.0 * d_pix_scale / Length(local);
 	pix = clamp(zi, d_pix_min, d_pix_max) * r_part_scale.value;

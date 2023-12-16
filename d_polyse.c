@@ -117,7 +117,7 @@ void D_PolysetDrawFinalVerts (finalvert_t *fv, int numverts, pixel_t *colormap, 
 		// valid triangle coordinates for filling can include the bottom and
 		// right clip edges, due to the fill rule; these shouldn't be drawn
 		if (fv->u < r_refdef.vrectright && fv->v < r_refdef.vrectbottom){
-			z = fv->zi >> 16;
+			z = fv->zi;
 			zbuf = zspantable[fv->v] + fv->u;
 			if(z >= *zbuf){
 				pixel_t p = addlight(skintable[fv->t >> 16][fv->s >> 16], fv->l[0], fv->l[1], fv->l[2]);
@@ -305,7 +305,7 @@ split:
 	if ((lp2->v == lp1->v) && (lp2->u < lp1->u))
 		goto nodraw;
 
-	z = new.zi >> 16;
+	z = new.zi;
 	zbuf = zspantable[new.v] + new.u;
 	if (z >= *zbuf){
 		pixel_t p = addlight(skintable[new.t >> 16][new.s >> 16], l[0], l[1], l[2]);
@@ -549,7 +549,7 @@ void D_PolysetDrawSpans8 (spanpackage_t *pspanpackage, pixel_t *colormap, byte a
 
 			do
 			{
-				if ((lzi >> 16) >= *lpz){
+				if (lzi >= *lpz){
 					pixel_t p = addlight(*lptex, llight[0], llight[1], llight[2]);
 					if(r_drawflags & DRAW_BLEND){
 						*lpdest = blendalpha(
@@ -560,7 +560,7 @@ void D_PolysetDrawSpans8 (spanpackage_t *pspanpackage, pixel_t *colormap, byte a
 					}else{
 						*lpdest = p;
 						// gel mapping	*lpdest = gelmap[*lpdest];
-						*lpz = lzi >> 16;
+						*lpz = lzi;
 					}
 				}
 				lpdest++;

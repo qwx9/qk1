@@ -63,7 +63,7 @@ void D_DrawTurbulent8Span (int izi, byte alpha)
 	do{
 		sturb = ((r_turb_s + r_turb_turb[(r_turb_t>>16)&(CYCLE-1)])>>16)&63;
 		tturb = ((r_turb_t + r_turb_turb[(r_turb_s>>16)&(CYCLE-1)])>>16)&63;
-		if(*r_turb_z <= (izi >> 16) || (r_drawflags & DRAW_BLEND) == 0)
+		if(*r_turb_z <= izi || (r_drawflags & DRAW_BLEND) == 0)
 			*r_turb_pdest = blendalpha(*(r_turb_pbase + (tturb<<6) + sturb), *r_turb_pdest, alpha);
 		r_turb_s += r_turb_sstep;
 		r_turb_t += r_turb_tstep;
@@ -140,7 +140,7 @@ Turbulent8(espan_t *pspan, byte alpha)
 				// can't step off polygon), clamp, calculate s and t steps across
 				// span by division, biasing steps low so we don't run off the
 				// texture
-				spancountminus1 = (float)(r_turb_spancount - 1);
+				spancountminus1 = r_turb_spancount - 1;
 				sdivz += d_sdivzstepu * spancountminus1;
 				tdivz += d_tdivzstepu * spancountminus1;
 				zi += d_zistepu * spancountminus1;
@@ -242,7 +242,7 @@ D_DrawSpans16(espan_t *pspan, int forceblend, byte alpha) //qbism- up it from 8 
 				// can't step off polygon), clamp, calculate s and t steps across
 				// span by division, biasing steps low so we don't run off the
 				// texture
-				spancountminus1 = (float)(spancount - 1);
+				spancountminus1 = spancount - 1;
 				sdivz += d_sdivzstepu * spancountminus1;
 				tdivz += d_tdivzstepu * spancountminus1;
 				zi += d_zistepu * spancountminus1;
@@ -284,50 +284,44 @@ D_DrawSpans16(espan_t *pspan, int forceblend, byte alpha) //qbism- up it from 8 
 void
 D_DrawZSpans(espan_t *pspan)
 {
-	int			count, doublecount, izistep, izi;
-	uzint		*pdest;
-	unsigned	ltemp;
-	double		zi;
-	float		du, dv;
+	int			count, spancount, izi, izistep;
+	uzint		*pz;
+	double		zi, du, dv, spancountminus1;
+	double		zistepu;
 
 	if((r_drawflags & DRAW_BLEND) != 0)
 		return;
 
-	// FIXME: check for clamping/range problems
-	// we count on FP exceptions being turned off to avoid range problems
+	zistepu = d_zistepu * 16;
 	izistep = (int)(d_zistepu * 0x8000 * 0x10000);
 
 	do{
-		pdest = d_pzbuffer + (d_zwidth * pspan->v) + pspan->u;
+		pz = d_pzbuffer + d_zwidth*pspan->v + pspan->u;
+
 		count = pspan->count;
 
-		// calculate the initial 1/z
-		du = (float)pspan->u;
-		dv = (float)pspan->v;
+		// calculate the initial s/z, t/z, 1/z, s, and t and clamp
+		du = pspan->u;
+		dv = pspan->v;
 
 		zi = d_ziorigin + dv*d_zistepv + du*d_zistepu;
-		// we count on FP exceptions being turned off to avoid range problems
-		izi = (int)(zi * 0x8000 * 0x10000);
 
-		if((uintptr)pdest & 0x02){
-			*pdest++ = (short)(izi >> 16);
-			izi += izistep;
-			count--;
-		}
+		do{
+			spancount = min(count, 16);
+			count -= spancount;
 
-		if((doublecount = count >> 1) > 0){
-			do{
-				ltemp = izi >> 16;
+			if(count){
+				zi += zistepu;
+			}else{
+				spancountminus1 = spancount - 1;
+				zi += d_zistepu * spancountminus1;
+			}
+
+			izi = (int)(zi * 0x8000 * 0x10000);
+			while(spancount-- > 0){
+				*pz++ = izi;
 				izi += izistep;
-				ltemp |= izi & 0xFFFF0000;
-				izi += izistep;
-				*(int *)pdest = ltemp;
-				pdest += 2;
-			}while (--doublecount > 0);
-		}
-
-		if(count & 1)
-			*pdest = (short)(izi >> 16);
-
+			}
+		}while(count > 0);
 	}while((pspan = pspan->pnext) != nil);
 }

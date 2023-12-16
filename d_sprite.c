@@ -137,11 +137,11 @@ void D_SpriteDrawSpans (sspan_t *pspan, byte alpha)
 				btemp = *(pbase + (s >> 16) + (t >> 16) * cachewidth);
 				if (opaque(btemp))
 				{
-					if (*pz <= (izi >> 16)){	/* FIXME: segfault: assumed 32bit ptr? */
+					if (*pz <= izi){
 						if(r_drawflags & DRAW_BLEND){
 							*pdest = blendalpha(btemp, *pdest, alpha);
 						}else{
-							*pz = izi >> 16;
+							*pz = izi;
 							*pdest = btemp;
 						}
 					}
