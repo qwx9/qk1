@@ -101,6 +101,7 @@ extern	int		r_visframecount;
 
 extern int r_drawflags;
 
+void R_ResetFog(void);
 void R_DrawFog(void);
 void R_InitFog(void);
 

@@ -39,6 +39,13 @@ fog(void)
 }
 
 void
+R_ResetFog(void)
+{
+	r_fog.density = 0;
+	setcvar("r_skyfog", "0");
+}
+
+void
 R_DrawFog(void)
 {
 	byte skyfogalpha, a;

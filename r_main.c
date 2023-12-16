@@ -197,6 +197,7 @@ void R_NewMap (void)
 
 	r_viewleaf = nil;
 	R_ClearParticles ();
+	R_ResetFog();
 	r_maxedgesseen = 0;
 	r_maxsurfsseen = 0;
 	r_dowarpold = false;
