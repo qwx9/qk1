@@ -116,6 +116,7 @@ D_DrawSurfaces (void)
 
 		if(s->flags & SURF_DRAWSKY){
 			D_DrawSkyScans8(s->spans);
+			d_ziorigin = -0.8;
 			D_DrawZSpans(s->spans);
 		}else if(s->flags & SURF_DRAWBACKGROUND){
 			// set up a gradient for the background surface that places it
