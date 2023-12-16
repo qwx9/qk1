@@ -7,7 +7,6 @@ CFLAGS=$CFLAGS -D__plan9__ -D__${objtype}__ -Iplan9
 OFILES=\
 	span`{test -f span_$objtype.s && echo -n _$objtype}.$O\
 	span_alpha.$O\
-	dotproduct`{test -f span_$objtype.s && echo -n _$objtype}.$O\
 	cd.$O\
 	cl_demo.$O\
 	cl_input.$O\
@@ -19,7 +18,6 @@ OFILES=\
 	common.$O\
 	console.$O\
 	cvar.$O\
-	dotadd.$O\
 	draw.$O\
 	d_alpha.$O\
 	d_edge.$O\
@@ -38,6 +36,7 @@ OFILES=\
 	in.$O\
 	isnanf.$O\
 	keys.$O\
+	m_dotproduct`{test -f span_$objtype.s && echo -n _$objtype}.$O\
 	mathlib.$O\
 	menu.$O\
 	model.$O\

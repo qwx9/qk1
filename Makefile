@@ -23,7 +23,6 @@ OBJS=\
 	common.o\
 	console.o\
 	cvar.o\
-	dotadd.o\
 	d_alpha.o\
 	d_edge.o\
 	d_init.o\
@@ -35,12 +34,12 @@ OBJS=\
 	d_sprite.o\
 	d_surf.o\
 	d_vars.o\
-	dotproduct.o\
 	draw.o\
 	fs.o\
 	host.o\
 	host_cmd.o\
 	keys.o\
+	m_dotproduct.o\
 	mathlib.o\
 	menu.o\
 	model.o\

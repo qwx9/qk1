@@ -1,6 +1,22 @@
 #include "quakedef.h"
+#include "softfloat.h"
 
-float dotadd(float *a, float *b);
+static float
+dotadd80(float *a, float *b)
+{
+	extFloat80_t x, y, m, z;
+	int i;
+
+	f32_to_extF80M(b[3], &z);
+	for(i = 0; i < 3; i++){
+		f32_to_extF80M(a[i], &x);
+		f32_to_extF80M(b[i], &y);
+		extF80M_mul(&x, &y, &m);
+		extF80M_add(&z, &m, &z);
+	}
+
+	return extF80M_to_f32(&z);;
+}
 
 void
 BSP_SetParent(mnode_t *node, mnode_t *parent)
@@ -39,7 +55,7 @@ BSP_CalcSurfaceExtents(model_t *mod, msurface_t *s)
 			// but it's not 80 bits and stuff will still be broken.
 			// instead we literally run 80-bit calculation emulated
 			// using SoftFloat. enjoy. or not.
-			val = dotadd(v->position, tex->vecs[j]);
+			val = dotadd80(v->position, tex->vecs[j]);
 			if(val < mins[j])
 				mins[j] = val;
 			if(val > maxs[j])
