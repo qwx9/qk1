@@ -76,7 +76,6 @@ int BoxOnPlaneSide (vec3_t emins, vec3_t emaxs, mplane_t *p)
 	return sides;
 }
 
-
 void AngleVectors (vec3_t angles, vec3_t forward, vec3_t right, vec3_t up)
 {
 	double		angle;
@@ -119,26 +118,15 @@ void CrossProduct (vec3_t v1, vec3_t v2, vec3_t cross)
 
 vec_t Length(vec3_t v)
 {
-	int		i;
-	float	length;
-
-	length = 0;
-	for (i=0 ; i< 3 ; i++)
-		length += v[i]*v[i];
-	length = sqrt (length);		// FIXME
-
-	return length;
+	return sqrt(v[0]*v[0] + v[1]*v[1] + v[2]*v[2]);
 }
 
 float VectorNormalize (vec3_t v)
 {
-	float	length, ilength;
+	float length, ilength;
 
-	length = v[0]*v[0] + v[1]*v[1] + v[2]*v[2];
-	length = sqrt (length);		// FIXME
-
-	if (length)
-	{
+	length = sqrt(v[0]*v[0] + v[1]*v[1] + v[2]*v[2]);
+	if(length != 0){
 		ilength = 1/length;
 		v[0] *= ilength;
 		v[1] *= ilength;
