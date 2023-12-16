@@ -78,8 +78,8 @@ Turbulent8(espan_t *pspan, byte alpha)
 {
 	int			count;
 	fixed16_t	snext, tnext;
-	double		sdivz, tdivz, zi, z, du, dv, spancountminus1;
-	double		sdivz16stepu, tdivz16stepu, zi16stepu;
+	float		sdivz, tdivz, zi, z, du, dv, spancountminus1;
+	float		sdivz16stepu, tdivz16stepu, zi16stepu;
 
 	r_turb_turb = sintable + ((int)(cl.time*SPEED)&(CYCLE-1));
 
@@ -178,8 +178,8 @@ D_DrawSpans16(espan_t *pspan, int forceblend, byte alpha) //qbism- up it from 8 
 	pixel_t		*pbase, *pdest;
 	uzint		*pz;
 	fixed16_t	s, t, snext, tnext, sstep, tstep;
-	double		sdivz, tdivz, zi, z, du, dv, spancountminus1;
-	double		sdivzstepu, tdivzstepu, zistepu;
+	float		sdivz, tdivz, zi, z, du, dv, spancountminus1;
+	float		sdivzstepu, tdivzstepu, zistepu;
 
 	sstep = 0;	// keep compiler happy
 	tstep = 0;	// ditto
@@ -286,8 +286,8 @@ D_DrawZSpans(espan_t *pspan)
 {
 	int			count, spancount, izi, izistep;
 	uzint		*pz;
-	double		zi, du, dv, spancountminus1;
-	double		zistepu;
+	float		zi, spancountminus1;
+	float		zistepu;
 
 	if((r_drawflags & DRAW_BLEND) != 0)
 		return;
@@ -297,14 +297,8 @@ D_DrawZSpans(espan_t *pspan)
 
 	do{
 		pz = d_pzbuffer + d_zwidth*pspan->v + pspan->u;
-
 		count = pspan->count;
-
-		// calculate the initial s/z, t/z, 1/z, s, and t and clamp
-		du = pspan->u;
-		dv = pspan->v;
-
-		zi = d_ziorigin + dv*d_zistepv + du*d_zistepu;
+		zi = d_ziorigin + (float)pspan->v*d_zistepv + (float)pspan->u*d_zistepu;
 
 		do{
 			spancount = min(count, 16);

@@ -65,7 +65,7 @@ R_DrawFog(void)
 		z = d_pzbuffer + i;
 		for(x = r_refdef.vrect.x; x < r_refdef.vrectright; x++, i++, pix++, z++){
 			if(*z >= 65536){
-				d = 65536.0 / (float)(d_pzbuffer[i] >> 16);
+				d = 65536.0 / (float)(*z >> 16);
 				d = 1.0 - exp2(-r_fog.density * d*d);
 				a = 255 * clamp(d, 0.0, 1.0);
 			}else if(*z < 0){
