@@ -4,11 +4,14 @@
 #include <ctype.h>
 
 #define RAND_MAX ((2<<15)-1)
+
 #define acosf acos
 #define asinf asin
 #define atan2f atan2
 #define atanf atan
+#define ceilf ceil
 #define cosf cos
+#define floorf floor
 #define sinf sin
 #define sqrtf sqrt
 #define tanf tan

@@ -1234,13 +1234,13 @@ PF_rint(pr_t *pr)
 static void
 PF_floor(pr_t *pr)
 {
-	G_FLOAT(pr, OFS_RETURN) = floor(G_FLOAT(pr, OFS_PARM0));
+	G_FLOAT(pr, OFS_RETURN) = floorf(G_FLOAT(pr, OFS_PARM0));
 }
 
 static void
 PF_ceil(pr_t *pr)
 {
-	G_FLOAT(pr, OFS_RETURN) = ceil(G_FLOAT(pr, OFS_PARM0));
+	G_FLOAT(pr, OFS_RETURN) = ceilf(G_FLOAT(pr, OFS_PARM0));
 }
 
 /*

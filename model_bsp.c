@@ -48,8 +48,8 @@ BSP_CalcSurfaceExtents(model_t *mod, msurface_t *s)
 	}
 
 	for(i = 0; i < 2; i++){
-		bmins[i] = floor(mins[i]/16.0);
-		bmaxs[i] = ceil(maxs[i]/16.0);
+		bmins[i] = floorf(mins[i]/16.0);
+		bmaxs[i] = ceilf(maxs[i]/16.0);
 
 		s->texturemins[i] = bmins[i] * 16;
 		s->extents[i] = (bmaxs[i] - bmins[i]) * 16;

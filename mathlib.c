@@ -78,8 +78,7 @@ int BoxOnPlaneSide (vec3_t emins, vec3_t emaxs, mplane_t *p)
 
 void AngleVectors (vec3_t angles, vec3_t forward, vec3_t right, vec3_t up)
 {
-	double		angle;
-	double		sr, sp, sy, cr, cp, cy;
+	float angle, sr, sp, sy, cr, cp, cy;
 
 	angle = angles[YAW] * (M_PI*2 / 360.0);
 	sy = sinf(angle);
@@ -202,8 +201,7 @@ quotient must fit in 32 bits.
 ====================
 */
 
-void FloorDivMod (double numer, double denom, int *quotient,
-		int *rem)
+void FloorDivMod (double numer, double denom, int *quotient, int *rem)
 {
 	int		q, r;
 	double	x;
