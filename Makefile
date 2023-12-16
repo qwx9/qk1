@@ -63,6 +63,7 @@ OBJS=\
 	r_draw.o\
 	r_edge.o\
 	r_efrag.o\
+	r_fog.o\
 	r_light.o\
 	r_main.o\
 	r_misc.o\

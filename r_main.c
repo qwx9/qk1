@@ -128,12 +128,6 @@ void	R_InitTextures (void)
 	}
 }
 
-static void
-fog(void)
-{
-	// FIXME - this was added early to shut up the spam
-}
-
 /*
 ===============
 R_Init
@@ -141,10 +135,10 @@ R_Init
 */
 void R_Init (void)
 {
-	R_InitTurb ();
+	R_InitTurb();
+	R_InitFog();
 
 	Cmd_AddCommand("pointfile", loadpoints);
-	Cmd_AddCommand("fog", fog);
 
 	Cvar_RegisterVariable (&r_ambient);
 	Cvar_RegisterVariable (&r_clearcolor);
@@ -736,6 +730,8 @@ void R_RenderView (void)
 			R_DrawEntity(cl_visedicts[i]);
 	}
 	r_drawflags = 0;
+
+	R_DrawFog();
 
 	if (r_dowarp)
 		D_WarpScreen ();

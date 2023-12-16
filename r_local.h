@@ -101,9 +101,8 @@ extern	int		r_visframecount;
 
 extern int r_drawflags;
 
-
-void R_ClearPolyList (void);
-void R_DrawPolyList (void);
+void R_DrawFog(void);
+void R_InitFog(void);
 
 //
 // current entity info

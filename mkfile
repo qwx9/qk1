@@ -63,6 +63,7 @@ OFILES=\
 	r_draw.$O\
 	r_efrag.$O\
 	r_edge.$O\
+	r_fog.$O\
 	r_light.$O\
 	r_main.$O\
 	r_misc.$O\
