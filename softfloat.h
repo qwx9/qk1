@@ -38,26 +38,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 typedef struct extFloat80M extFloat80_t;
 typedef float float32_t;
 
-#ifdef __plan9__
-#define LITTLE_ENDIAN 1234
-#define BIG_ENDIAN 4321
-#if defined(__mips__) || \
-    defined(__power__) || defined(__power64__) || \
-    defined(__sparc__) || defined(__sparc64__)
-#define BYTE_ORDER BIG_ENDIAN
-#else
-#define BYTE_ORDER LITTLE_ENDIAN
-#endif
-#else
-#include <endian.h>
-#ifndef BYTE_ORDER
-#define LITTLE_ENDIAN __LITTLE_ENDIAN
-#define BIG_ENDIAN __BIG_ENDIAN
-#define BYTE_ORDER __BYTE_ORDER
-#endif
-#endif
-
-#if BYTE_ORDER == LITTLE_ENDIAN
+#ifdef QUAKE_LITTLE_ENDIAN
 struct extFloat80M { u64int signif; u16int signExp; };
 #else
 struct extFloat80M { u16int signExp; u64int signif; };

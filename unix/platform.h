@@ -1,6 +1,6 @@
-#pragma once
-
 #include <assert.h>
+#include <ctype.h>
+#include <endian.h>
 #include <fcntl.h>
 #include <math.h>
 #include <setjmp.h>
@@ -41,6 +41,18 @@ typedef uintptr_t uintptr;
 #define getmalloctag(p) (USED(p), 0)
 #define setmalloctag(p, t) do{USED(p); USED(t);}while(0)
 #define setrealloctag(p, t) do{USED(p); USED(t);}while(0)
+
+#ifndef BYTE_ORDER
+#define LITTLE_ENDIAN __LITTLE_ENDIAN
+#define BIG_ENDIAN __BIG_ENDIAN
+#define BYTE_ORDER __BYTE_ORDER
+#endif
+
+#if BYTE_ORDER == LITTLE_ENDIAN
+#define QUAKE_LITTLE_ENDIAN
+#else
+#define QUAKE_BIG_ENDIAN
+#endif
 
 extern char lasterr[256];
 #define werrstr(fmt...) do{snprint(lasterr, sizeof(lasterr), fmt); }while(0)

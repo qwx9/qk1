@@ -7,11 +7,6 @@ static struct {
 	pixel_t color;
 }r_fog;
 
-#ifdef __plan9__
-static double ln2c;
-#define exp2(x) (exp((x) * (ln2c ? ln2c : (ln2c = log(2.0)))))
-#endif
-
 static void
 fog(void)
 {

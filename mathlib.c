@@ -82,14 +82,14 @@ void AngleVectors (vec3_t angles, vec3_t forward, vec3_t right, vec3_t up)
 	double		sr, sp, sy, cr, cp, cy;
 
 	angle = angles[YAW] * (M_PI*2 / 360.0);
-	sy = sin(angle);
-	cy = cos(angle);
+	sy = sinf(angle);
+	cy = cosf(angle);
 	angle = angles[PITCH] * (M_PI*2 / 360.0);
-	sp = sin(angle);
-	cp = cos(angle);
+	sp = sinf(angle);
+	cp = cosf(angle);
 	angle = angles[ROLL] * (M_PI*2 / 360.0);
-	sr = sin(angle);
-	cr = cos(angle);
+	sr = sinf(angle);
+	cr = cosf(angle);
 
 	forward[0] = cp*cy;
 	forward[1] = cp*sy;
@@ -118,14 +118,14 @@ void CrossProduct (vec3_t v1, vec3_t v2, vec3_t cross)
 
 vec_t Length(vec3_t v)
 {
-	return sqrt(v[0]*v[0] + v[1]*v[1] + v[2]*v[2]);
+	return sqrtf(v[0]*v[0] + v[1]*v[1] + v[2]*v[2]);
 }
 
 float VectorNormalize (vec3_t v)
 {
 	float length, ilength;
 
-	length = sqrt(v[0]*v[0] + v[1]*v[1] + v[2]*v[2]);
+	length = sqrtf(v[0]*v[0] + v[1]*v[1] + v[2]*v[2]);
 	if(length != 0){
 		ilength = 1/length;
 		v[0] *= ilength;

@@ -159,9 +159,9 @@ CalcFov(float fov, float a, float b)
 	float v;
 
 	fov = clamp(fov, 1, 179);
-	v = a / tan(fov / 360 * M_PI);
+	v = a / tanf(fov / 360 * M_PI);
 
-	return atan(b / v) * 360.0 / M_PI;
+	return atanf(b / v) * 360.0 / M_PI;
 }
 
 /*

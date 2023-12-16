@@ -127,8 +127,7 @@ HDRS=\
 	server.h\
 	softfloat.h\
 	spritegn.h\
-	unix/libc.h\
-	unix/u.h\
+	unix/platform.h\
 	vid.h\
 	view.h\
 	wad.h\

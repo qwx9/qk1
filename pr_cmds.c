@@ -140,10 +140,10 @@ SetMinMaxSize(pr_t *pr, edict_t *e, float *min, float *max, bool rotate)
 
 		a = angles[1]/180 * M_PI;
 
-		xvector[0] = cos(a);
-		xvector[1] = sin(a);
-		yvector[0] = -sin(a);
-		yvector[1] = cos(a);
+		xvector[0] = cosf(a);
+		xvector[1] = sinf(a);
+		yvector[0] = -sinf(a);
+		yvector[1] = cosf(a);
 
 		VectorCopy (min, bounds[0]);
 		VectorCopy (max, bounds[1]);
@@ -343,7 +343,7 @@ PF_normalize(pr_t *pr)
 	a = v[0];
 	b = v[1];
 	c = v[2];
-	ln = sqrt(a*a + b*b + c*c);
+	ln = sqrtf(a*a + b*b + c*c);
 
 	if(ln == 0)
 		newvalue[0] = newvalue[1] = newvalue[2] = 0;
@@ -373,7 +373,7 @@ PF_vlen(pr_t *pr)
 	a = v[0];
 	b = v[1];
 	c = v[2];
-	G_FLOAT(pr, OFS_RETURN) = sqrt(a*a + b*b + c*c);
+	G_FLOAT(pr, OFS_RETURN) = sqrtf(a*a + b*b + c*c);
 }
 
 /*
@@ -395,7 +395,7 @@ PF_vectoyaw(pr_t *pr)
 		yaw = 0;
 	else
 	{
-		yaw = atan2(value1[1], value1[0]) * 180.0 / M_PI;
+		yaw = atan2f(value1[1], value1[0]) * 180.0 / M_PI;
 		if (yaw < 0)
 			yaw += 360;
 	}
@@ -430,12 +430,12 @@ PF_vectoangles(pr_t *pr)
 	}
 	else
 	{
-		yaw = atan2(value1[1], value1[0]) * 180.0 / M_PI;
+		yaw = atan2f(value1[1], value1[0]) * 180.0 / M_PI;
 		if (yaw < 0)
 			yaw += 360;
 
-		forward = sqrt (value1[0]*value1[0] + value1[1]*value1[1]);
-		pitch = atan2(value1[2], forward) * 180 / M_PI;
+		forward = sqrtf(value1[0]*value1[0] + value1[1]*value1[1]);
+		pitch = atan2f(value1[2], forward) * 180 / M_PI;
 		if (pitch < 0)
 			pitch += 360;
 	}
@@ -1140,8 +1140,8 @@ PF_walkmove(pr_t *pr)
 
 	yaw = yaw*M_PI*2 / 360;
 
-	move[0] = cos(yaw)*dist;
-	move[1] = sin(yaw)*dist;
+	move[0] = cosf(yaw)*dist;
+	move[1] = sinf(yaw)*dist;
 	move[2] = 0;
 
 	// save program state, because SV_movestep may call other progs
@@ -1643,21 +1643,21 @@ static const char *exts[] = {
 };
 
 static void
-PF_sin(pr_t *pr)
+PF_sinf(pr_t *pr)
 {
-	G_FLOAT(pr, OFS_RETURN) = sin(G_FLOAT(pr, OFS_PARM0));
+	G_FLOAT(pr, OFS_RETURN) = sinf(G_FLOAT(pr, OFS_PARM0));
 }
 
 static void
-PF_cos(pr_t *pr)
+PF_cosf(pr_t *pr)
 {
-	G_FLOAT(pr, OFS_RETURN) = cos(G_FLOAT(pr, OFS_PARM0));
+	G_FLOAT(pr, OFS_RETURN) = cosf(G_FLOAT(pr, OFS_PARM0));
 }
 
 static void
-PF_sqrt(pr_t *pr)
+PF_sqrtf(pr_t *pr)
 {
-	G_FLOAT(pr, OFS_RETURN) = sqrt(G_FLOAT(pr, OFS_PARM0));
+	G_FLOAT(pr, OFS_RETURN) = sqrtf(G_FLOAT(pr, OFS_PARM0));
 }
 
 static void
@@ -1753,33 +1753,33 @@ PF_clientcommand(pr_t *pr)
 }
 
 static void
-PF_asin(pr_t *pr)
+PF_asinf(pr_t *pr)
 {
-	G_FLOAT(pr, OFS_RETURN) = asin(G_FLOAT(pr, OFS_PARM0));
+	G_FLOAT(pr, OFS_RETURN) = asinf(G_FLOAT(pr, OFS_PARM0));
 }
 
 static void
-PF_acos(pr_t *pr)
+PF_acosf(pr_t *pr)
 {
-	G_FLOAT(pr, OFS_RETURN) = acos(G_FLOAT(pr, OFS_PARM0));
+	G_FLOAT(pr, OFS_RETURN) = acosf(G_FLOAT(pr, OFS_PARM0));
 }
 
 static void
-PF_atan(pr_t *pr)
+PF_atanf(pr_t *pr)
 {
-	G_FLOAT(pr, OFS_RETURN) = atan(G_FLOAT(pr, OFS_PARM0));
+	G_FLOAT(pr, OFS_RETURN) = atanf(G_FLOAT(pr, OFS_PARM0));
 }
 
 static void
-PF_atan2(pr_t *pr)
+PF_atan2f(pr_t *pr)
 {
-	G_FLOAT(pr, OFS_RETURN) = atan2(G_FLOAT(pr, OFS_PARM0), G_FLOAT(pr, OFS_PARM1));
+	G_FLOAT(pr, OFS_RETURN) = atan2f(G_FLOAT(pr, OFS_PARM0), G_FLOAT(pr, OFS_PARM1));
 }
 
 static void
-PF_tan(pr_t *pr)
+PF_tanf(pr_t *pr)
 {
-	G_FLOAT(pr, OFS_RETURN) = tan(G_FLOAT(pr, OFS_PARM0));
+	G_FLOAT(pr, OFS_RETURN) = tanf(G_FLOAT(pr, OFS_PARM0));
 }
 
 static void
@@ -1874,9 +1874,9 @@ PF_WriteAngle,
 PF_WriteString,
 PF_WriteEntity,
 
-[60] = PF_sin,
-[61] = PF_cos,
-[62] = PF_sqrt,
+[60] = PF_sinf,
+[61] = PF_cosf,
+[62] = PF_sqrtf,
 PF_Fixme,
 PF_Fixme,
 PF_Fixme,
@@ -1909,11 +1909,11 @@ PF_setspawnparms, // #78
 [440] = PF_clientcommand,
 [441] = PF_tokenize,
 [442] = PF_argv,
-[471] = PF_asin,
-[472] = PF_acos,
-[473] = PF_atan,
-[474] = PF_atan2,
-[475] = PF_tan,
+[471] = PF_asinf,
+[472] = PF_acosf,
+[473] = PF_atanf,
+[474] = PF_atan2f,
+[475] = PF_tanf,
 [514] = PF_tokenize, /* FIXME(sigrid): strictly speaking, this is supposed to be "tokenize_console" */
 };
 

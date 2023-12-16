@@ -36,11 +36,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "quakedef.h"
 #include "softfloat.h"
 
-#ifndef UINT64_C
-#define UINT64_C(x) x##ULL
-#endif
-
-#if BYTE_ORDER == LITTLE_ENDIAN
+#ifdef QUAKE_LITTLE_ENDIAN
 struct uint128 { u64int v0, v64; };
 struct uint64_extra { u64int extra, v; };
 #define wordIncr 1
@@ -77,7 +73,7 @@ struct uint64_extra { u64int v, extra; };
 *----------------------------------------------------------------------------*/
 struct commonNaN {
     bool sign;
-#if BYTE_ORDER == LITTLE_ENDIAN
+#ifdef QUAKE_LITTLE_ENDIAN
     u64int v0, v64;
 #else
     u64int v64, v0;
@@ -135,7 +131,7 @@ typedef enum {
 | The bit pattern for a default generated 80-bit extended floating-point NaN.
 *----------------------------------------------------------------------------*/
 #define defaultNaNExtF80UI64 0xFFFF
-#define defaultNaNExtF80UI0  UINT64_C( 0xC000000000000000 )
+#define defaultNaNExtF80UI0  0xC000000000000000ULL
 
 /*----------------------------------------------------------------------------
 | Returns true when the 80-bit unsigned integer formed from concatenating
@@ -143,7 +139,7 @@ typedef enum {
 | floating-point signaling NaN.
 | Note:  This macro evaluates its arguments more than once.
 *----------------------------------------------------------------------------*/
-#define softfloat_isSigNaNExtF80UI( uiA64, uiA0 ) ((((uiA64) & 0x7FFF) == 0x7FFF) && ! ((uiA0) & UINT64_C( 0x4000000000000000 )) && ((uiA0) & UINT64_C( 0x3FFFFFFFFFFFFFFF )))
+#define softfloat_isSigNaNExtF80UI( uiA64, uiA0 ) ((((uiA64) & 0x7FFF) == 0x7FFF) && ! ((uiA0) & 0x4000000000000000ULL ) && ((uiA0) & 0x3FFFFFFFFFFFFFFFULL ))
 
 #define signF32UI( a ) ((bool) ((u32int) (a)>>31))
 #define expF32UI( a ) ((s16int) ((a)>>23) & 0xFF)
@@ -161,16 +157,16 @@ static float32_t softfloat_roundPackToF32( bool, s16int, u32int );
 #define expExtF80UI64( a64 ) ((a64) & 0x7FFF)
 #define packToExtF80UI64( sign, exp ) ((u16int) (sign)<<15 | (exp))
 
-#define isNaNExtF80UI( a64, a0 ) ((((a64) & 0x7FFF) == 0x7FFF) && ((a0) & UINT64_C( 0x7FFFFFFFFFFFFFFF )))
+#define isNaNExtF80UI( a64, a0 ) ((((a64) & 0x7FFF) == 0x7FFF) && ((a0) & 0x7FFFFFFFFFFFFFFFULL ))
 
 struct exp32_sig64 { s32int exp; u64int sig; };
 
 #define signF128UI64( a64 ) ((bool) ((u64int) (a64)>>63))
 #define expF128UI64( a64 ) ((s32int) ((a64)>>48) & 0x7FFF)
-#define fracF128UI64( a64 ) ((a64) & UINT64_C( 0x0000FFFFFFFFFFFF ))
+#define fracF128UI64( a64 ) ((a64) & 0x0000FFFFFFFFFFFFULL )
 #define packToF128UI64( sign, exp, sig64 ) (((u64int) (sign)<<63) + ((u64int) (exp)<<48) + (sig64))
 
-#define isNaNF128UI( a64, a0 ) (((~(a64) & UINT64_C( 0x7FFF000000000000 )) == 0) && (a0 || ((a64) & UINT64_C( 0x0000FFFFFFFFFFFF ))))
+#define isNaNF128UI( a64, a0 ) (((~(a64) & 0x7FFF000000000000ULL ) == 0) && (a0 || ((a64) & 0x0000FFFFFFFFFFFFULL )))
 
 struct exp32_sig128 { s32int exp; struct uint128 sig; };
 
@@ -194,8 +190,8 @@ extF80M_isSignalingNaN( const extFloat80_t *aPtr )
     if ( (aSPtr->signExp & 0x7FFF) != 0x7FFF ) return false;
     uiA0 = aSPtr->signif;
     return
-        ! (uiA0 & UINT64_C( 0x4000000000000000 ))
-            && (uiA0 & UINT64_C( 0x3FFFFFFFFFFFFFFF));
+        ! (uiA0 & 0x4000000000000000ULL )
+            && (uiA0 & 0x3FFFFFFFFFFFFFFFULL );
 
 }
 
@@ -209,7 +205,7 @@ softfloat_commonNaNToExtF80M(const struct commonNaN *aPtr, struct extFloat80M *z
 {
 
     zSPtr->signExp = packToExtF80UI64( aPtr->sign, 0x7FFF );
-    zSPtr->signif = UINT64_C( 0xC000000000000000 ) | aPtr->v64>>1;
+    zSPtr->signif = 0xC000000000000000ULL | aPtr->v64>>1;
 
 }
 
@@ -323,7 +319,7 @@ softfloat_propagateNaNExtF80M(
     sPtr = bSPtr;
  copy:
     zSPtr->signExp = sPtr->signExp;
-    zSPtr->signif = sPtr->signif | UINT64_C( 0xC000000000000000 );
+    zSPtr->signif = sPtr->signif | 0xC000000000000000ULL;
 
 }
 
@@ -356,8 +352,8 @@ static struct uint128
     /*------------------------------------------------------------------------
     | Make NaNs non-signaling.
     *------------------------------------------------------------------------*/
-    uiNonsigA0 = uiA0 | UINT64_C( 0xC000000000000000 );
-    uiNonsigB0 = uiB0 | UINT64_C( 0xC000000000000000 );
+    uiNonsigA0 = uiA0 | 0xC000000000000000ULL;
+    uiNonsigB0 = uiB0 | 0xC000000000000000ULL;
     /*------------------------------------------------------------------------
     *------------------------------------------------------------------------*/
     if ( isSigNaNA | isSigNaNB ) {
@@ -698,11 +694,11 @@ static extFloat80_t
     roundNearEven = (roundingMode == softfloat_round_near_even);
     if ( roundingPrecision == 80 ) goto precision80;
     if ( roundingPrecision == 64 ) {
-        roundIncrement = UINT64_C( 0x0000000000000400 );
-        roundMask = UINT64_C( 0x00000000000007FF );
+        roundIncrement = 0x0000000000000400ULL;
+        roundMask = 0x00000000000007FFULL;
     } else if ( roundingPrecision == 32 ) {
-        roundIncrement = UINT64_C( 0x0000008000000000 );
-        roundMask = UINT64_C( 0x000000FFFFFFFFFF );
+        roundIncrement = 0x0000008000000000ULL;
+        roundMask = 0x000000FFFFFFFFFFULL;
     } else {
         goto precision80;
     }
@@ -733,7 +729,7 @@ static extFloat80_t
                 softfloat_exceptionFlags |= softfloat_flag_inexact;
             }
             sig += roundIncrement;
-            exp = ((sig & UINT64_C( 0x8000000000000000 )) != 0);
+            exp = ((sig & 0x8000000000000000ULL) != 0);
             roundIncrement = roundMask + 1;
             if ( roundNearEven && (roundBits<<1 == roundIncrement) ) {
                 roundMask |= roundIncrement;
@@ -756,7 +752,7 @@ static extFloat80_t
     sig = (u64int) (sig + roundIncrement);
     if ( sig < roundIncrement ) {
         ++exp;
-        sig = UINT64_C( 0x8000000000000000 );
+        sig = 0x8000000000000000ULL;
     }
     roundIncrement = roundMask + 1;
     if ( roundNearEven && (roundBits<<1 == roundIncrement) ) {
@@ -767,7 +763,7 @@ static extFloat80_t
     /*------------------------------------------------------------------------
     *------------------------------------------------------------------------*/
  precision80:
-    doIncrement = (UINT64_C( 0x8000000000000000 ) <= sigExtra);
+    doIncrement = (0x8000000000000000ULL <= sigExtra);
     if ( ! roundNearEven && (roundingMode != softfloat_round_near_maxMag) ) {
         doIncrement =
             (roundingMode
@@ -785,7 +781,7 @@ static extFloat80_t
                         == softfloat_tininess_beforeRounding)
                 || (exp < 0)
                 || ! doIncrement
-                || (sig < UINT64_C( 0xFFFFFFFFFFFFFFFF ));
+                || (sig < 0xFFFFFFFFFFFFFFFFULL);
             sig64Extra =
                 softfloat_shiftRightJam64Extra( sig, sigExtra, 1 - exp );
             exp = 0;
@@ -795,7 +791,7 @@ static extFloat80_t
                 if ( isTiny ) softfloat_raiseFlags( softfloat_flag_underflow );
                 softfloat_exceptionFlags |= softfloat_flag_inexact;
             }
-            doIncrement = (UINT64_C( 0x8000000000000000 ) <= sigExtra);
+            doIncrement = (0x8000000000000000ULL <= sigExtra);
             if (
                 ! roundNearEven
                     && (roundingMode != softfloat_round_near_maxMag)
@@ -809,15 +805,15 @@ static extFloat80_t
                 ++sig;
                 sig &=
                     ~(u64int)
-                         (! (sigExtra & UINT64_C( 0x7FFFFFFFFFFFFFFF ))
+                         (! (sigExtra & 0x7FFFFFFFFFFFFFFFULL)
                               & roundNearEven);
-                exp = ((sig & UINT64_C( 0x8000000000000000 )) != 0);
+                exp = ((sig & 0x8000000000000000ULL) != 0);
             }
             goto packReturn;
         }
         if (
                (0x7FFE < exp)
-            || ((exp == 0x7FFE) && (sig == UINT64_C( 0xFFFFFFFFFFFFFFFF ))
+            || ((exp == 0x7FFE) && (sig == 0xFFFFFFFFFFFFFFFFULL)
                     && doIncrement)
         ) {
             /*----------------------------------------------------------------
@@ -833,7 +829,7 @@ static extFloat80_t
                         == (sign ? softfloat_round_min : softfloat_round_max))
             ) {
                 exp = 0x7FFF;
-                sig = UINT64_C( 0x8000000000000000 );
+                sig = 0x8000000000000000ULL;
             } else {
                 exp = 0x7FFE;
                 sig = ~roundMask;
@@ -850,11 +846,11 @@ static extFloat80_t
         ++sig;
         if ( ! sig ) {
             ++exp;
-            sig = UINT64_C( 0x8000000000000000 );
+            sig = 0x8000000000000000ULL;
         } else {
             sig &=
                 ~(u64int)
-                     (! (sigExtra & UINT64_C( 0x7FFFFFFFFFFFFFFF ))
+                     (! (sigExtra & 0x7FFFFFFFFFFFFFFFULL)
                           & roundNearEven);
         }
     }
@@ -930,7 +926,7 @@ static extFloat80_t
     if ( 0 < expDiff ) goto expABigger;
     if ( expDiff < 0 ) goto expBBigger;
     if ( expA == 0x7FFF ) {
-        if ( (sigA | sigB) & UINT64_C( 0x7FFFFFFFFFFFFFFF ) ) {
+        if ( (sigA | sigB) & 0x7FFFFFFFFFFFFFFFULL ) {
             goto propagateNaN;
         }
         softfloat_raiseFlags( softfloat_flag_invalid );
@@ -953,9 +949,9 @@ static extFloat80_t
     *------------------------------------------------------------------------*/
  expBBigger:
     if ( expB == 0x7FFF ) {
-        if ( sigB & UINT64_C( 0x7FFFFFFFFFFFFFFF ) ) goto propagateNaN;
+        if ( sigB & 0x7FFFFFFFFFFFFFFFULL ) goto propagateNaN;
         uiZ64 = packToExtF80UI64( signZ ^ 1, 0x7FFF );
-        uiZ0  = UINT64_C( 0x8000000000000000 );
+        uiZ0  = 0x8000000000000000ULL;
         goto uiZ;
     }
     if ( ! expA ) {
@@ -976,7 +972,7 @@ static extFloat80_t
     *------------------------------------------------------------------------*/
  expABigger:
     if ( expA == 0x7FFF ) {
-        if ( sigA & UINT64_C( 0x7FFFFFFFFFFFFFFF ) ) goto propagateNaN;
+        if ( sigA & 0x7FFFFFFFFFFFFFFFULL ) goto propagateNaN;
         uiZ64 = uiA64;
         uiZ0  = uiA0;
         goto uiZ;
@@ -1045,7 +1041,7 @@ static extFloat80_t
     expDiff = expA - expB;
     if ( ! expDiff ) {
         if ( expA == 0x7FFF ) {
-            if ( (sigA | sigB) & UINT64_C( 0x7FFFFFFFFFFFFFFF ) ) {
+            if ( (sigA | sigB) & 0x7FFFFFFFFFFFFFFFULL ) {
                 goto propagateNaN;
             }
             uiZ64 = uiA64;
@@ -1067,7 +1063,7 @@ static extFloat80_t
     *------------------------------------------------------------------------*/
     if ( expDiff < 0 ) {
         if ( expB == 0x7FFF ) {
-            if ( sigB & UINT64_C( 0x7FFFFFFFFFFFFFFF ) ) goto propagateNaN;
+            if ( sigB & 0x7FFFFFFFFFFFFFFFULL ) goto propagateNaN;
             uiZ64 = packToExtF80UI64( signZ, 0x7FFF );
             uiZ0  = uiB0;
             goto uiZ;
@@ -1083,7 +1079,7 @@ static extFloat80_t
         sigZExtra = sig64Extra.extra;
     } else {
         if ( expA == 0x7FFF ) {
-            if ( sigA & UINT64_C( 0x7FFFFFFFFFFFFFFF ) ) goto propagateNaN;
+            if ( sigA & 0x7FFFFFFFFFFFFFFFULL ) goto propagateNaN;
             uiZ64 = uiA64;
             uiZ0  = uiA0;
             goto uiZ;
@@ -1100,12 +1096,12 @@ static extFloat80_t
     }
  newlyAligned:
     sigZ = sigA + sigB;
-    if ( sigZ & UINT64_C( 0x8000000000000000 ) ) goto roundAndPack;
+    if ( sigZ & 0x8000000000000000ULL ) goto roundAndPack;
     /*------------------------------------------------------------------------
     *------------------------------------------------------------------------*/
  shiftRight1:
     sig64Extra = softfloat_shortShiftRightJam64Extra( sigZ, sigZExtra, 1 );
-    sigZ = sig64Extra.v | UINT64_C( 0x8000000000000000 );
+    sigZ = sig64Extra.v | 0x8000000000000000ULL;
     sigZExtra = sig64Extra.extra;
     ++expZ;
  roundAndPack:
@@ -1330,11 +1326,11 @@ static void
             | extSigPtr[indexWord( 3, 1 )];
     if ( roundingPrecision == 80 ) goto precision80;
     if ( roundingPrecision == 64 ) {
-        roundIncrement = UINT64_C( 0x0000000000000400 );
-        roundMask = UINT64_C( 0x00000000000007FF );
+        roundIncrement = 0x0000000000000400ULL;
+        roundMask = 0x00000000000007FFULL;
     } else if ( roundingPrecision == 32 ) {
-        roundIncrement = UINT64_C( 0x0000008000000000 );
-        roundMask = UINT64_C( 0x000000FFFFFFFFFF );
+        roundIncrement = 0x0000008000000000ULL;
+        roundMask = 0x000000FFFFFFFFFFULL;
     } else {
         goto precision80;
     }
@@ -1367,7 +1363,7 @@ static void
                 softfloat_exceptionFlags |= softfloat_flag_inexact;
             }
             sig += roundIncrement;
-            exp = ((sig & UINT64_C( 0x8000000000000000 )) != 0);
+            exp = ((sig & 0x8000000000000000ULL) != 0);
             roundIncrement = roundMask + 1;
             if ( roundNearEven && (roundBits<<1 == roundIncrement) ) {
                 roundMask |= roundIncrement;
@@ -1390,7 +1386,7 @@ static void
     sig += roundIncrement;
     if ( sig < roundIncrement ) {
         ++exp;
-        sig = UINT64_C( 0x8000000000000000 );
+        sig = 0x8000000000000000ULL;
     }
     roundIncrement = roundMask + 1;
     if ( roundNearEven && (roundBits<<1 == roundIncrement) ) {
@@ -1420,7 +1416,7 @@ static void
                         == softfloat_tininess_beforeRounding)
                 || (exp < 0)
                 || ! doIncrement
-                || (sig < UINT64_C( 0xFFFFFFFFFFFFFFFF ));
+                || (sig < 0xFFFFFFFFFFFFFFFFULL);
             softfloat_shiftRightJam96M( extSigPtr, 1 - exp, extSigPtr );
             exp = 0;
             sig =
@@ -1444,13 +1440,13 @@ static void
             if ( doIncrement ) {
                 ++sig;
                 sig &= ~(u64int) (! (sigExtra & 0x7FFFFFFF) & roundNearEven);
-                exp = ((sig & UINT64_C( 0x8000000000000000 )) != 0);
+                exp = ((sig & 0x8000000000000000ULL) != 0);
             }
             goto packReturn;
         }
         if (
                (0x7FFE < exp)
-            || ((exp == 0x7FFE) && (sig == UINT64_C( 0xFFFFFFFFFFFFFFFF ))
+            || ((exp == 0x7FFE) && (sig == 0xFFFFFFFFFFFFFFFFULL)
                     && doIncrement)
         ) {
             /*----------------------------------------------------------------
@@ -1466,7 +1462,7 @@ static void
                         == (sign ? softfloat_round_min : softfloat_round_max))
             ) {
                 exp = 0x7FFF;
-                sig = UINT64_C( 0x8000000000000000 );
+                sig = 0x8000000000000000ULL;
             } else {
                 exp = 0x7FFE;
                 sig = ~roundMask;
@@ -1483,7 +1479,7 @@ static void
         ++sig;
         if ( ! sig ) {
             ++exp;
-            sig = UINT64_C( 0x8000000000000000 );
+            sig = 0x8000000000000000ULL;
         } else {
             sig &= ~(u64int) (! (sigExtra & 0x7FFFFFFF) & roundNearEven);
         }
@@ -1576,7 +1572,7 @@ extF80M_to_f32( const extFloat80_t *aPtr )
     /*------------------------------------------------------------------------
     *------------------------------------------------------------------------*/
     if ( exp == 0x7FFF ) {
-        if ( sig & UINT64_C( 0x7FFFFFFFFFFFFFFF ) ) {
+        if ( sig & 0x7FFFFFFFFFFFFFFFULL ) {
             softfloat_extF80MToCommonNaN( aSPtr, &commonNaN );
             uiZ = softfloat_commonNaNToF32UI( &commonNaN );
         } else {
@@ -1586,7 +1582,7 @@ extF80M_to_f32( const extFloat80_t *aPtr )
     }
     /*------------------------------------------------------------------------
     *------------------------------------------------------------------------*/
-    if ( ! (sig & UINT64_C( 0x8000000000000000 )) ) {
+    if ( ! (sig & 0x8000000000000000ULL ) ) {
         if ( ! sig ) {
             uiZ = packToF32UI( sign, 0, 0 );
             goto uiZ;
@@ -1676,20 +1672,20 @@ void
             return;
         }
         uiZ64 = packToExtF80UI64( signZ, 0x7FFF );
-        uiZ0  = UINT64_C( 0x8000000000000000 );
+        uiZ0  = 0x8000000000000000ULL;
         goto uiZ;
     }
     /*------------------------------------------------------------------------
     *------------------------------------------------------------------------*/
     if ( ! expA ) expA = 1;
     sigA = aSPtr->signif;
-    if ( ! (sigA & UINT64_C( 0x8000000000000000 )) ) {
+    if ( ! (sigA & 0x8000000000000000ULL ) ) {
         if ( ! sigA ) goto zero;
         expA += softfloat_normExtF80SigM( &sigA );
     }
     if ( ! expB ) expB = 1;
     sigB = bSPtr->signif;
-    if ( ! (sigB & UINT64_C( 0x8000000000000000 )) ) {
+    if ( ! (sigB & 0x8000000000000000ULL ) ) {
         if ( ! sigB ) goto zero;
         expB += softfloat_normExtF80SigM( &sigB );
     }

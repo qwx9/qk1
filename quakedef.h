@@ -1,14 +1,6 @@
 #pragma once
 
-#include <u.h>
-#include <libc.h>
-#include <stdio.h>
-#include <ctype.h>
-
-#ifdef __plan9__
-typedef enum {false, true} bool;
-#define RAND_MAX ((2<<15)-1)
-#endif
+#include "platform.h"
 
 #define	QUAKE_GAME			// as opposed to utilities
 #define	VERSION				1.09
