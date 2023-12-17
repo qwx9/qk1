@@ -215,6 +215,7 @@ D_DrawSpans16(espan_t *pspan, int forceblend, byte alpha) //qbism- up it from 8 
 		do{
 			// calculate s and t at the far end of the span
 			spancount = min(count, 16);
+			spancountminus1 = spancount - 1;
 			count -= spancount;
 
 			if(count){
@@ -241,7 +242,6 @@ D_DrawSpans16(espan_t *pspan, int forceblend, byte alpha) //qbism- up it from 8 
 				// can't step off polygon), clamp, calculate s and t steps across
 				// span by division, biasing steps low so we don't run off the
 				// texture
-				spancountminus1 = spancount - 1;
 				sdivz += d_sdivzstepu * spancountminus1;
 				tdivz += d_tdivzstepu * spancountminus1;
 				z = (float)0x10000 / (zi + d_zistepu * spancountminus1);	// prescale to 16.16 fixed-point
