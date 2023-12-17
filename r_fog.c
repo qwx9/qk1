@@ -1,11 +1,12 @@
 #include "quakedef.h"
 
+static cvar_t r_fog = {"r_fog", "1", true};
 static cvar_t r_skyfog = {"r_skyfog", "0.5"};
 
 static struct {
 	float density;
 	pixel_t color;
-}r_fog;
+}r_fog_data;
 
 static void
 fog(void)
@@ -19,15 +20,15 @@ fog(void)
 	case 5:
 	case 2:
 		x = atof(Cmd_Argv(i++));
-		r_fog.density = max(0.0, x) * 0.016;
-		r_fog.density *= r_fog.density;
+		r_fog_data.density = max(0.0, x) * 0.016;
+		r_fog_data.density *= r_fog_data.density;
 		if(n == 2)
 			break;
 	case 4:
-		r_fog.color = 0;
+		r_fog_data.color = 0;
 		for(j = 0; j < 3; j++, i++){
 			x = atof(Cmd_Argv(i));
-			r_fog.color = r_fog.color << 8 | (int)(0xff * clamp(x, 0.0, 1.0));
+			r_fog_data.color = r_fog_data.color << 8 | (int)(0xff * clamp(x, 0.0, 1.0));
 		}
 		break;
 	}
@@ -36,7 +37,8 @@ fog(void)
 void
 R_ResetFog(void)
 {
-	r_fog.density = 0;
+	r_fog_data.density = 0;
+	r_fog_data.color = 0x808080;
 	setcvar("r_skyfog", "0");
 }
 
@@ -49,12 +51,12 @@ R_DrawFog(void)
 	uzint *z;
 	float d;
 
-	if(r_fog.density <= 0.0)
+	if(r_fog.value <= 0 || r_fog_data.density <= 0.0)
 		return;
 
-	ca0 = r_fog.color>> 0;
-	ca1 = r_fog.color>> 8;
-	ca2 = r_fog.color>>16;
+	ca0 = r_fog_data.color>> 0;
+	ca1 = r_fog_data.color>> 8;
+	ca2 = r_fog_data.color>>16;
 
 	skyfogalpha = 255 * clamp(r_skyfog.value, 0, 1.0);
 	/* FIXME(sigrid): this is super slow */
@@ -65,7 +67,7 @@ R_DrawFog(void)
 		for(x = r_refdef.vrect.x; x < r_refdef.vrectright; x++, i++, pix++, z++){
 			if(*z > 65536){
 				d = 65536.0 / (float)(*z >> 16);
-				d = 1.0 - exp2(-r_fog.density * d*d);
+				d = 1.0 - exp2(-r_fog_data.density * d*d);
 				a = 255*clamp(d, 0.0, 1.0);
 			}else if(*z < 0){
 				a = skyfogalpha;
@@ -86,5 +88,6 @@ void
 R_InitFog(void)
 {
 	Cmd_AddCommand("fog", fog);
+	Cvar_RegisterVariable(&r_fog);
 	Cvar_RegisterVariable(&r_skyfog);
 }
