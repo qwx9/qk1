@@ -139,7 +139,7 @@ void D_SpriteDrawSpans (sspan_t *pspan, byte alpha)
 				{
 					if (*pz <= izi){
 						if(r_drawflags & DRAW_BLEND){
-							*pdest = blendalpha(btemp, *pdest, alpha);
+							*pdest = blendalpha(btemp, *pdest, alpha, izi);
 						}else{
 							*pz = izi;
 							*pdest = btemp;

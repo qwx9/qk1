@@ -64,7 +64,7 @@ void D_DrawTurbulent8Span (int izi, byte alpha)
 		sturb = ((r_turb_s + r_turb_turb[(r_turb_t>>16)&(CYCLE-1)])>>16)&63;
 		tturb = ((r_turb_t + r_turb_turb[(r_turb_s>>16)&(CYCLE-1)])>>16)&63;
 		if(*r_turb_z <= izi || (r_drawflags & DRAW_BLEND) == 0)
-			*r_turb_pdest = blendalpha(*(r_turb_pbase + (tturb<<6) + sturb), *r_turb_pdest, alpha);
+			*r_turb_pdest = blendalpha(*(r_turb_pbase + (tturb<<6) + sturb), *r_turb_pdest, alpha, izi);
 		r_turb_s += r_turb_sstep;
 		r_turb_t += r_turb_tstep;
 		r_turb_pdest++;

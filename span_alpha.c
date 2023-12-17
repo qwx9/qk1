@@ -9,7 +9,7 @@ dospan_alpha(pixel_t *pdest, pixel_t *pbase, int s, int t, int sstep, int tstep,
 		do{
 			pix = pbase[(s >> 16) + (t >> 16) * cachewidth];
 			if(opaque(pix) && *pz <= izi)
-				*pdest = blendalpha(pix, *pdest, alpha);
+				*pdest = blendalpha(pix, *pdest, alpha, izi);
 			pdest++;
 			pz++;
 			izi += izistep;
