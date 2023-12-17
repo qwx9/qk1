@@ -293,7 +293,7 @@ addlight(pixel_t x, int lr, int lg, int lb)
 	r = (r * ((64<<8)-(lr & 0xffff))) >> (8+VID_CBITS);
 	g = (g * ((64<<8)-(lg & 0xffff))) >> (8+VID_CBITS);
 	b = (b * ((64<<8)-(lb & 0xffff))) >> (8+VID_CBITS);
-	x = r<<16 | g<<8 | b<<0;
+	x = (x & 0xff000000) | r<<16 | g<<8 | b<<0;
 
 	return x;
 }
