@@ -222,8 +222,7 @@ D_DrawSpans16(espan_t *pspan, int forceblend, byte alpha) //qbism- up it from 8 
 				// calculate s and t steps across span by shifting
 				sdivz += sdivzstepu;
 				tdivz += tdivzstepu;
-				zi += zistepu;
-				z = (float)0x10000 / zi;	// prescale to 16.16 fixed-point
+				z = (float)0x10000 / (zi + zistepu);	// prescale to 16.16 fixed-point
 
 				snext = (int)(sdivz * z) + sadjust;
 				// prevent round-off error on <0 steps from
@@ -245,8 +244,7 @@ D_DrawSpans16(espan_t *pspan, int forceblend, byte alpha) //qbism- up it from 8 
 				spancountminus1 = spancount - 1;
 				sdivz += d_sdivzstepu * spancountminus1;
 				tdivz += d_tdivzstepu * spancountminus1;
-				zi += d_zistepu * spancountminus1;
-				z = (float)0x10000 / zi;	// prescale to 16.16 fixed-point
+				z = (float)0x10000 / (zi + d_zistepu * spancountminus1);	// prescale to 16.16 fixed-point
 				snext = (int)(sdivz * z) + sadjust;
 				// prevent round-off error on <0 steps from
 				//  from causing overstepping & running off the
@@ -273,49 +271,44 @@ D_DrawSpans16(espan_t *pspan, int forceblend, byte alpha) //qbism- up it from 8 
 				pdest += spancount;
 				pz += spancount;
 			}
+
+			zi += count ? zistepu : d_zistepu*spancountminus1;
 			s = snext;
 			t = tnext;
-
 		}while(count > 0);
-
 	}while((pspan = pspan->pnext) != nil);
 }
 
 void
 D_DrawZSpans(espan_t *pspan)
 {
-	int			count, spancount, izi, izistep;
+	int			count, spancount, spancountminus1, izi, izistep;
 	uzint		*pz;
-	float		zi, spancountminus1;
+	float		zi;
 	float		zistepu;
 
 	if((r_drawflags & DRAW_BLEND) != 0)
 		return;
 
 	zistepu = d_zistepu * 16;
-	izistep = (int)(d_zistepu * 0x8000 * 0x10000);
+	izistep = d_zistepu * 0x8000 * 0x10000;
 
 	do{
 		pz = d_pzbuffer + d_zwidth*pspan->v + pspan->u;
+		zi = d_ziorigin + pspan->v*d_zistepv + pspan->u*d_zistepu;
 		count = pspan->count;
-		zi = d_ziorigin + (float)pspan->v*d_zistepv + (float)pspan->u*d_zistepu;
 
 		do{
 			spancount = min(count, 16);
+			spancountminus1 = spancount - 1;
 			count -= spancount;
-
-			if(count){
-				zi += zistepu;
-			}else{
-				spancountminus1 = spancount - 1;
-				zi += d_zistepu * spancountminus1;
-			}
 
 			izi = (int)(zi * 0x8000 * 0x10000);
 			while(spancount-- > 0){
 				*pz++ = izi;
 				izi += izistep;
 			}
+			zi += count ? zistepu : d_zistepu*spancountminus1;
 		}while(count > 0);
 	}while((pspan = pspan->pnext) != nil);
 }
