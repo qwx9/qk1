@@ -732,10 +732,10 @@ void R_RenderView (void)
 	}
 	r_drawflags = 0;
 
-	R_DrawFog();
-
 	if (r_dowarp)
 		D_WarpScreen ();
+
+	R_DrawFog();
 
 	V_SetContentsColor (r_viewleaf->contents);
 
