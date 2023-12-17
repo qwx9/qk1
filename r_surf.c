@@ -275,10 +275,10 @@ void R_DrawSurface (void)
 
 //=============================================================================
 
-pixel_t
+inline pixel_t
 addlight(pixel_t x, int lr, int lg, int lb)
 {
-	int r, g, b, y[3];
+	int r, g, b;
 
 	if((x & 0xff000000U) == 0)
 		return x;
@@ -289,14 +289,11 @@ addlight(pixel_t x, int lr, int lg, int lb)
 	r = (x>>16) & 0xff;
 	g = (x>>8)  & 0xff;
 	b = (x>>0)  & 0xff;
-	y[0] = (lr & 0xff00) >> 8;
-	y[1] = (lg & 0xff00) >> 8;
-	y[2] = (lb & 0xff00) >> 8;
 
-	r = (r * (63-y[0])+16) >> 5; r = min(r, 255);
-	g = (g * (63-y[1])+16) >> 5; g = min(g, 255);
-	b = (b * (63-y[2])+16) >> 5; b = min(b, 255);
-	x = (x & ~0xffffff) | r<<16 | g<<8 | b<<0;
+	r = (r * ((64<<8)-(lr & 0xffff))) >> (8+VID_CBITS);
+	g = (g * ((64<<8)-(lg & 0xffff))) >> (8+VID_CBITS);
+	b = (b * ((64<<8)-(lb & 0xffff))) >> (8+VID_CBITS);
+	x = r<<16 | g<<8 | b<<0;
 
 	return x;
 }
