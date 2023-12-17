@@ -43,7 +43,7 @@ R_ResetFog(void)
 void
 R_DrawFog(void)
 {
-	byte skyfogalpha, a;
+	byte ca0, ca1, ca2, skyfogalpha, a;
 	pixel_t *pix;
 	int i, x, y;
 	uzint *z;
@@ -52,6 +52,10 @@ R_DrawFog(void)
 	if(r_fog.density <= 0.0)
 		return;
 
+	ca0 = r_fog.color>> 0;
+	ca1 = r_fog.color>> 8;
+	ca2 = r_fog.color>>16;
+
 	skyfogalpha = 255 * clamp(r_skyfog.value, 0, 1.0);
 	/* FIXME(sigrid): this is super slow */
 	for(y = r_refdef.vrect.y; y < r_refdef.vrectbottom; y++){
@@ -59,17 +63,21 @@ R_DrawFog(void)
 		pix = vid.buffer + i;
 		z = d_pzbuffer + i;
 		for(x = r_refdef.vrect.x; x < r_refdef.vrectright; x++, i++, pix++, z++){
-			if(*z >= 65536){
+			if(*z > 65536){
 				d = 65536.0 / (float)(*z >> 16);
 				d = 1.0 - exp2(-r_fog.density * d*d);
-				a = 255 * clamp(d, 0.0, 1.0);
+				a = 255*clamp(d, 0.0, 1.0);
 			}else if(*z < 0){
 				a = skyfogalpha;
 			}else
 				continue;
 
-			if(a > 0)
-				*pix = blendalpha(r_fog.color, *pix, a);
+			if(a > 0){
+				*pix =
+					((a*ca0 + (255-a)*((*pix>> 0)&0xff)) >> 8) << 0 |
+					((a*ca1 + (255-a)*((*pix>> 8)&0xff)) >> 8) << 8 |
+					((a*ca2 + (255-a)*((*pix>>16)&0xff)) >> 8) << 16;
+			}
 		}
 	}
 }
