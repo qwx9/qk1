@@ -13,6 +13,8 @@
 
 #define SIN_BUFFER_SIZE	(MAXDIMENSION+CYCLE)
 
+typedef s32int uzint;
+
 //===================================================================
 
 extern int		cachewidth;

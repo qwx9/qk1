@@ -102,6 +102,7 @@ extern	int		r_visframecount;
 extern int r_drawflags;
 
 void R_ResetFog(void);
+pixel_t R_BlendFog(pixel_t pix, uzint z);
 void R_DrawFog(void);
 void R_InitFog(void);
 
