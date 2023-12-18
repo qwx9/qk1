@@ -50,14 +50,14 @@ Load_ExternalTexture(char *map, char *name)
 	tx->offsets[0] = 0;
 	for(i = 1; i < MIPLEVELS; i++){
 		tx->offsets[i] = tx->offsets[i-1] + n;
-		stbir_resize_uint8_srgb(
-			(byte*)(tx->pixels+tx->offsets[i-1]), w, h, w*sizeof(pixel_t),
-			(byte*)(tx->pixels+tx->offsets[i-0]), w/2, h/2, w/2*sizeof(pixel_t),
-			premult ? STBIR_RGBA_PM : STBIR_RGBA
-		);
 		w /= 2;
 		h /= 2;
 		n = w*h;
+		stbir_resize_uint8_srgb(
+			(byte*)(tx->pixels+tx->offsets[0]), tx->width, tx->height, tx->width*sizeof(pixel_t),
+			(byte*)(tx->pixels+tx->offsets[i]), w, h, w*sizeof(pixel_t),
+			premult ? STBIR_RGBA_PM : STBIR_RGBA
+		);
 	}
 
 	return tx;
