@@ -77,10 +77,11 @@ blendalpha(pixel_t ca, pixel_t cb, int alpha, uzint izi)
 	int a, b, c;
 
 	if(currententity != nil && currententity->effects & EF_ADDITIVE){
+		ca = R_BlendFog(ca, izi);
 		a = (alpha*((ca>> 0)&0xff) + 255*((cb>> 0)&0xff))>> 8;
 		b = (alpha*((ca>> 8)&0xff) + 255*((cb>> 8)&0xff))>> 8;
 		c = (alpha*((ca>>16)&0xff) + 255*((cb>>16)&0xff))>> 8;
-		return R_BlendFog((cb & 0xff000000) | min(a, 255) | min(b, 255)<<8 | min(c, 255)<<16, izi);
+		return (cb & 0xff000000) | min(a, 255) | min(b, 255)<<8 | min(c, 255)<<16;
 	}
 
 	return R_BlendFog(
