@@ -133,6 +133,20 @@ BSP_LoadTextures(model_t *mod, byte *in, int sz)
 			tx->height = h;
 			// the pixels immediately follow the structures
 			torgbx(p, tx->pixels, pixels);
+			if(tx->name[0] == '{'){
+				for(j = 1; j < MIPLEVELS; j++){
+					w /= 2;
+					h /= 2;
+					pixels_resize(
+						tx->pixels+tx->offsets[0],
+						tx->pixels+tx->offsets[j],
+						tx->width, tx->height,
+						w, h,
+						false,
+						true
+					);
+				}
+			}
 		}
 		if(strncmp(tx->name, "sky", 3) == 0)
 			R_InitSky(tx);

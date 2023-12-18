@@ -8,11 +8,11 @@
 #pragma GCC diagnostic pop
 
 void
-pixels_resize(pixel_t *in, pixel_t *out, int iw, int ih, int ow, int oh, bool premulalpha)
+pixels_resize(pixel_t *in, pixel_t *out, int iw, int ih, int ow, int oh, bool premul, bool fence)
 {
 	stbir_resize_uint8_srgb(
 		(byte*)in, iw, ih, iw*sizeof(pixel_t),
 		(byte*)out, ow, oh, ow*sizeof(pixel_t),
-		premulalpha ? STBIR_RGBA_PM : STBIR_RGBA
+		(premul || fence) ? STBIR_RGBA_PM : STBIR_RGBA
 	);
 }

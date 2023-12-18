@@ -51,7 +51,8 @@ Load_ExternalTexture(char *map, char *name)
 			tx->pixels+tx->offsets[i],
 			tx->width, tx->height,
 			w, h,
-			premult
+			premult,
+			name[0] == '{'
 		);
 	}
 

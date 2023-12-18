@@ -136,7 +136,7 @@ typedef struct
 	pixel_t pixels[];
 }qpic_t;
 
-void pixels_resize(pixel_t *in, pixel_t *out, int iw, int ih, int ow, int oh, bool premulalpha);
+void pixels_resize(pixel_t *in, pixel_t *out, int iw, int ih, int ow, int oh, bool premulalpha, bool fence);
 
 #include "i_tga.h"
 #include "i_wad.h"

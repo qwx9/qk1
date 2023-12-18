@@ -215,8 +215,24 @@ W_ReadMipTex(Wad *wad, char *name, texture_t *t)
 	for(i = 0; i < nelem(t->offsets); i++)
 		t->offsets[i] = le32(p) - (16+2*4+4*4);
 	off = p - wad->in;
-	if((n = W_ReadPixelsAt(wad, name, off, lmp->off+lmp->sz-off, (pixel_t*)(t+1), n)) < 0)
+	if((n = W_ReadPixelsAt(wad, name, off, lmp->off+lmp->sz-off, t->pixels, n)) < 0)
 		werrstr("%s: %s", name, lerr());
+
+	// looks shit either way on cs_italy
+	if(0 && name[0] == '{'){
+		for(i = 1; i < MIPLEVELS; i++){
+			w /= 2;
+			h /= 2;
+			pixels_resize(
+				t->pixels+t->offsets[0],
+				t->pixels+t->offsets[i],
+				t->width, t->height,
+				w, h,
+				false,
+				true
+			);
+		}
+	}
 	return n;
 }
 
