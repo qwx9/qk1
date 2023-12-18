@@ -129,7 +129,15 @@ typedef struct
 	byte	alpha;
 } entity_state_t;
 
-#include "wad.h"
+typedef struct
+{
+	int width;
+	int height;
+	pixel_t pixels[];
+}qpic_t;
+
+#include "i_tga.h"
+#include "i_wad.h"
 #include "draw.h"
 #include "screen.h"
 #include "net.h"

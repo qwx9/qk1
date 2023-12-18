@@ -5,7 +5,7 @@ BIN=${DESTDIR}${PREFIX}/bin
 SDL2_CFLAGS=$$(pkg-config --cflags sdl2)
 SDL2_LDFLAGS=$$(pkg-config --libs sdl2)
 CFLAGS?=-O2 -g
-CFLAGS+=-Wall -Wextra -Wno-unknown-pragmas -Wno-missing-field-initializers -Wno-implicit-fallthrough
+CFLAGS+=-Wall -Wextra -Wno-unknown-pragmas -Wno-missing-field-initializers -Wno-implicit-fallthrough -Wno-microsoft-anon-tag
 CFLAGS+=-ffast-math -fms-extensions
 CFLAGS+=-I3rd/parg -Iunix -I. ${SDL2_CFLAGS}
 LDFLAGS?=
@@ -38,6 +38,9 @@ OBJS=\
 	fs.o\
 	host.o\
 	host_cmd.o\
+	i_external.o\
+	i_tga.o\
+	i_wad.o\
 	keys.o\
 	m_dotproduct.o\
 	mathlib.o\
@@ -88,7 +91,6 @@ OBJS=\
 	unix/snd_sdl.o\
 	unix/vid.o\
 	view.o\
-	wad.o\
 	world.o\
 	zone.o\
 
@@ -106,6 +108,8 @@ HDRS=\
 	dat.h\
 	draw.h\
 	fns.h\
+	i_tga.h\
+	i_wad.h\
 	input.h\
 	keys.h\
 	mathlib.h\
@@ -129,7 +133,6 @@ HDRS=\
 	unix/platform.h\
 	vid.h\
 	view.h\
-	wad.h\
 	world.h\
 	zone.h\
 
@@ -154,6 +157,8 @@ ${TARG}: ${OBJS}
 	${CC} -o $@ -c $< ${CFLAGS}
 
 ${OBJS}: ${HDRS}
+
+i_external.o: stb_image_resize2.h
 
 clean:
 	rm -f ${TARG} ${OBJS}

@@ -16,6 +16,8 @@
 #define sqrtf sqrt
 #define tanf tan
 
+#define __inline__ inline
+
 #ifdef __mips__
 #define QUAKE_BIG_ENDIAN
 #else

@@ -118,20 +118,22 @@ BSP_LoadTextures(model_t *mod, byte *in, int sz)
 			werrstr("bad offset %d (sz %d)", off, sz);
 			goto err;
 		}
-		p = in0+off+16;
-		w = le32(p);
-		h = le32(p);
-		pixels = w*h*85/64;
-		tx = Hunk_Alloc(sizeof(*tx) + pixels*sizeof(pixel_t));
-		strncpy(tx->name, (char*)in0+off, sizeof(tx->name)-1);
-		tx->name[sizeof(tx->name)-1] = 0;
-		for(j = 0; j < MIPLEVELS; j++)
-			tx->offsets[j] = le32(p) - (16+2*4+4*4);
-		mod->textures[i] = tx;
-		tx->width = w;
-		tx->height = h;
-		// the pixels immediately follow the structures
-		torgbx(p, tx->pixels, pixels);
+		if((mod->textures[i] = tx = Load_ExternalTexture(mod->name, (char*)in0+off)) == nil){
+			p = in0+off+16;
+			w = le32(p);
+			h = le32(p);
+			pixels = w*h*85/64;
+			tx = Hunk_Alloc(sizeof(*tx) + pixels*sizeof(pixel_t));
+			strncpy(tx->name, (char*)in0+off, sizeof(tx->name)-1);
+			tx->name[sizeof(tx->name)-1] = 0;
+			for(j = 0; j < MIPLEVELS; j++)
+				tx->offsets[j] = le32(p) - (16+2*4+4*4);
+			mod->textures[i] = tx;
+			tx->width = w;
+			tx->height = h;
+			// the pixels immediately follow the structures
+			torgbx(p, tx->pixels, pixels);
+		}
 		if(strncmp(tx->name, "sky", 3) == 0)
 			R_InitSky(tx);
 	}

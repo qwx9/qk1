@@ -33,6 +33,9 @@ OFILES=\
 	fs.$O\
 	host.$O\
 	host_cmd.$O\
+	i_external.$O\
+	i_tga.$O\
+	i_wad.$O\
 	in.$O\
 	isnanf.$O\
 	keys.$O\
@@ -81,7 +84,6 @@ OFILES=\
 	sv_user.$O\
 	vid.$O\
 	view.$O\
-	wad.$O\
 	world.$O\
 	zone.$O\
 
@@ -99,6 +101,8 @@ HFILES=\
 	dat.h\
 	draw.h\
 	fns.h\
+	i_tga.h\
+	i_wad.h\
 	input.h\
 	keys.h\
 	mathlib.h\
@@ -122,8 +126,12 @@ HFILES=\
 	spritegn.h\
 	vid.h\
 	view.h\
-	wad.h\
 	world.h\
 	zone.h\
 
 </sys/src/cmd/mkone
+
+i_external.$O: stb_image_resize2.h
+
+i_external.$O: i_external.c
+	$CC $CFLAGS -p i_external.c
