@@ -1,11 +1,4 @@
 #include "quakedef.h"
-#define STB_IMAGE_RESIZE_IMPLEMENTATION
-#define STBIR_ASSERT(x) assert(x)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-function"
-#pragma GCC diagnostic ignored "-Warray-bounds"
-#include "stb_image_resize2.h"
-#pragma GCC diagnostic pop
 
 texture_t *
 Load_ExternalTexture(char *map, char *name)
@@ -53,10 +46,12 @@ Load_ExternalTexture(char *map, char *name)
 		w /= 2;
 		h /= 2;
 		n = w*h;
-		stbir_resize_uint8_srgb(
-			(byte*)(tx->pixels+tx->offsets[0]), tx->width, tx->height, tx->width*sizeof(pixel_t),
-			(byte*)(tx->pixels+tx->offsets[i]), w, h, w*sizeof(pixel_t),
-			premult ? STBIR_RGBA_PM : STBIR_RGBA
+		pixels_resize(
+			tx->pixels+tx->offsets[0],
+			tx->pixels+tx->offsets[i],
+			tx->width, tx->height,
+			w, h,
+			premult
 		);
 	}
 

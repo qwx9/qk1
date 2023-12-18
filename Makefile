@@ -39,6 +39,7 @@ OBJS=\
 	host.o\
 	host_cmd.o\
 	i_external.o\
+	i_resize.o\
 	i_tga.o\
 	i_wad.o\
 	keys.o\
@@ -158,7 +159,7 @@ ${TARG}: ${OBJS}
 
 ${OBJS}: ${HDRS}
 
-i_external.o: stb_image_resize2.h
+i_resize.o: stb_image_resize2.h
 
 clean:
 	rm -f ${TARG} ${OBJS}

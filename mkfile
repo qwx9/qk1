@@ -34,6 +34,7 @@ OFILES=\
 	host.$O\
 	host_cmd.$O\
 	i_external.$O\
+	i_resize.$O\
 	i_tga.$O\
 	i_wad.$O\
 	in.$O\
@@ -131,7 +132,7 @@ HFILES=\
 
 </sys/src/cmd/mkone
 
-i_external.$O: stb_image_resize2.h
+i_resize.$O: stb_image_resize2.h
 
-i_external.$O: i_external.c
-	$CC $CFLAGS -p i_external.c
+i_resize.$O: i_resize.c
+	$CC $CFLAGS -p i_resize.c
