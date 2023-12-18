@@ -1,17 +1,13 @@
 // d_local.h:  private rasterization driver defs
 
-//
-// TODO: fine-tune this; it's based on providing some overage even if there
-// is a 2k-wide scan, with subdivision every 8, for 256 spans of 12 bytes each
-//
-#define SCANBUFFERPAD		0x1000
+enum {
+	R_SKY_SMASK = 0x007F0000,
+	R_SKY_TMASK	= 0x007F0000,
 
-#define R_SKY_SMASK	0x007F0000
-#define R_SKY_TMASK	0x007F0000
+	DS_SPAN_LIST_END = -128,
 
-#define DS_SPAN_LIST_END	-128
-
-#define SURFCACHE_SIZE_AT_320X200	600*1024
+	SURFCACHE_SIZE_AT_320X200 = 600*1024,
+};
 
 typedef struct surfcache_s
 {
@@ -71,26 +67,5 @@ extern uzint *zspantable[MAXHEIGHT];
 extern int d_minmip;
 extern float d_scalemip[3];
 
-static inline pixel_t
-blendalpha(pixel_t ca, pixel_t cb, int alpha, uzint izi)
-{
-	int a, b, c;
-
-	if(currententity != nil && currententity->effects & EF_ADDITIVE){
-		ca = R_BlendFog(ca, izi);
-		a = (alpha*((ca>> 0)&0xff) + 255*((cb>> 0)&0xff))>> 8;
-		b = (alpha*((ca>> 8)&0xff) + 255*((cb>> 8)&0xff))>> 8;
-		c = (alpha*((ca>>16)&0xff) + 255*((cb>>16)&0xff))>> 8;
-		return (cb & 0xff000000) | min(a, 255) | min(b, 255)<<8 | min(c, 255)<<16;
-	}
-
-	return R_BlendFog(
-		(cb & 0xff000000) |
-		((alpha*((ca>> 0)&0xff) + (255-alpha)*((cb>> 0)&0xff))>> 8) << 0 |
-		((alpha*((ca>> 8)&0xff) + (255-alpha)*((cb>> 8)&0xff))>> 8) << 8 |
-		((alpha*((ca>>16)&0xff) + (255-alpha)*((cb>>16)&0xff))>> 8) << 16,
-		izi
-	);
-}
-
+pixel_t blendalpha(pixel_t ca, pixel_t cb, int alpha, uzint izi);
 float alphafor(int flags);
