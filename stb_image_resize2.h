@@ -808,7 +808,9 @@ STBIRDEF void stbir_resize_split_profile_info( STBIR_PROFILE_INFO * out_info, ST
 #if defined(STB_IMAGE_RESIZE_IMPLEMENTATION) || defined(STB_IMAGE_RESIZE2_IMPLEMENTATION)
 
 #ifndef STBIR_ASSERT
+#ifndef __plan9__
 #include <assert.h>
+#endif
 #define STBIR_ASSERT(x) assert(x)
 #endif
 
