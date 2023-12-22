@@ -1091,6 +1091,7 @@ err:
 
 	pl = &lumps[PR_LUMP_GLOBALDEFS];
 	pr->globaldefs = Hunk_Alloc(pl->num * sizeof(*pr->globaldefs));
+	pr->numglobaldefs = pl->num;
 	for(i = 0, in = in0 + pl->off; i < pl->num; i++){
 		// FIXME(sigrid): verify all of these as well
 		pr->globaldefs[i].type = le16u(in);
