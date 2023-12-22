@@ -177,6 +177,8 @@ D_DrawSurfaces (void)
 
 			pface = s->data;
 			miplevel = D_MipLevelForScale(s->nearzi * scale_for_mip * pface->texinfo->mipadjust);
+			if(s->flags & SURF_FENCE)
+				miplevel = max(miplevel-1, 0);
 
 			// FIXME: make this passed in to D_CacheSurface
 			pcurrentcache = D_CacheSurface(pface, miplevel);

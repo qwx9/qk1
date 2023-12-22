@@ -218,8 +218,7 @@ W_ReadMipTex(Wad *wad, char *name, texture_t *t)
 	if((n = W_ReadPixelsAt(wad, name, off, lmp->off+lmp->sz-off, t->pixels, n)) < 0)
 		werrstr("%s: %s", name, lerr());
 
-	// looks shit either way on cs_italy
-	if(0 && name[0] == '{'){
+	if(name[0] == '{'){
 		for(i = 1; i < MIPLEVELS; i++){
 			w /= 2;
 			h /= 2;
