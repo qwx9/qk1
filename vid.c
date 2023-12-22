@@ -7,7 +7,6 @@ int resized;
 Point center;		/* of window */
 Rectangle grabr;
 
-s32int fbpal[256];
 pixel_t q1pal[256];
 static Image *fbi;
 static Rectangle fbr;
@@ -131,11 +130,8 @@ flipfb(void)
 void
 setpal(uchar *p0)
 {
-	int *fp, x;
+	int x;
 	uchar *p;
-
-	for(p = p0, fp=fbpal; fp<fbpal+nelem(fbpal); p+=3, fp++)
-		*fp = p[0] << 16 | p[1] << 8 | p[2];
 
 	for(p = p0, x = 0; x < 256; x++, p += 3)
 		q1pal[x] = (x < 256-32 ? 0xff : 0)<<24 | p[0]<<16 | p[1]<<8 | p[2];
