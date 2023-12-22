@@ -93,7 +93,6 @@ OBJS=\
 	unix/vid.o\
 	view.o\
 	world.o\
-	xbr.o\
 	zone.o\
 
 HDRS=\
