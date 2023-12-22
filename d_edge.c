@@ -187,8 +187,7 @@ D_DrawSurfaces (void)
 			D_CalcGradients(pface, transformed_modelorg);
 
 			D_DrawSpans16(s->spans, s->flags & SURF_FENCE, alpha);
-			if((r_drawflags & DRAW_BLEND) == 0)
-				D_DrawZSpans(s->spans);
+			D_DrawZSpans(s->spans);
 
 			if(s->insubmodel){
 				//
