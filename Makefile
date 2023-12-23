@@ -92,6 +92,7 @@ OBJS=\
 	unix/snd_sdl.o\
 	unix/vid.o\
 	view.o\
+	wav.o\
 	world.o\
 	zone.o\
 

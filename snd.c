@@ -51,16 +51,6 @@ typedef struct
 	byte	data[1];		// variable sized
 } sfxcache_t;
 
-typedef struct
-{
-	int		rate;
-	int		width;
-	int		channels;
-	int		loopofs;
-	int		samples;
-	int		dataofs;
-} wavinfo_t;
-
 static vec3_t		listener_origin;
 static vec3_t		listener_forward;
 static vec3_t		listener_right;
@@ -127,161 +117,6 @@ resample(sfxcache_t *sc, byte *data, float stepscale)
 	}
 }
 
-static short
-GetLittleShort(void)
-{
-	short val;
-
-	val = *data_p;
-	val = val + (*(data_p+1)<<8);
-	data_p += 2;
-	return val;
-}
-
-static int
-GetLittleLong(void)
-{
-	int val;
-
-	val = *data_p;
-	val = val + (*(data_p+1)<<8);
-	val = val + (*(data_p+2)<<16);
-	val = val + (*(data_p+3)<<24);
-	data_p += 4;
-	return val;
-}
-
-static void
-FindNextChunk(char *name)
-{
-	int iff_chunk_len;
-
-	while (1)
-	{
-		data_p=last_chunk;
-
-		if (data_p >= iff_end)
-		{	// didn't find the chunk
-			data_p = nil;
-			return;
-		}
-
-		data_p += 4;
-		iff_chunk_len = GetLittleLong();
-		if (iff_chunk_len < 0)
-		{
-			data_p = nil;
-			return;
-		}
-//		if (iff_chunk_len > 1024*1024)
-//			fatal ("FindNextChunk: %d length is past the 1 meg sanity limit", iff_chunk_len);
-		data_p -= 8;
-		last_chunk = data_p + 8 + ( (iff_chunk_len + 1) & ~1 );
-		if(strncmp((char *)data_p, name, 4) == 0)
-			return;
-	}
-}
-
-static void
-FindChunk(char *name)
-{
-	last_chunk = iff_data;
-	FindNextChunk (name);
-}
-
-static wavinfo_t
-GetWavinfo(char *name, byte *wav, vlong wavlength)
-{
-	wavinfo_t	info;
-	int     i;
-	int     format;
-	int		samples;
-
-	memset(&info, 0, sizeof info);
-
-	if (!wav)
-		return info;
-
-	iff_data = wav;
-	iff_end = wav + wavlength;
-
-// find "RIFF" chunk
-	FindChunk("RIFF");
-	if(!(data_p && strncmp((char *)data_p+8, "WAVE", 4) == 0))
-	{
-		Con_Printf("Missing RIFF/WAVE chunks\n");
-		return info;
-	}
-
-// get "fmt " chunk
-	iff_data = data_p + 12;
-
-	FindChunk("fmt ");
-	if (!data_p)
-	{
-		Con_Printf("Missing fmt chunk\n");
-		return info;
-	}
-	data_p += 8;
-	format = GetLittleShort();
-	if (format != 1)
-	{
-		Con_Printf("Microsoft PCM format only\n");
-		return info;
-	}
-
-	info.channels = GetLittleShort();
-	info.rate = GetLittleLong();
-	data_p += 4+2;
-	info.width = GetLittleShort() / 8;
-
-// get cue chunk
-	FindChunk("cue ");
-	if (data_p)
-	{
-		data_p += 32;
-		info.loopofs = GetLittleLong();
-
-	// if the next chunk is a LIST chunk, look for a cue length marker
-		FindNextChunk ("LIST");
-		if (data_p)
-		{
-			if(strncmp((char *)data_p+28, "mark", 4) == 0)
-			{	// this is not a proper parse, but it works with cooledit...
-				data_p += 24;
-				i = GetLittleLong ();	// samples in loop
-				info.samples = info.loopofs + i;
-//				Con_Printf("looped length: %d\n", i);
-			}
-		}
-	}
-	else
-		info.loopofs = -1;
-
-// find data chunk
-	FindChunk("data");
-	if (!data_p)
-	{
-		Con_Printf("Missing data chunk\n");
-		return info;
-	}
-
-	data_p += 4;
-	samples = GetLittleLong () / info.width;
-
-	if (info.samples)
-	{
-		if (samples < info.samples)
-			fatal ("Sound %s has a bad loop length", name);
-	}
-	else
-		info.samples = samples;
-
-	info.dataofs = data_p - wav;
-
-	return info;
-}
-
 static sfxcache_t *
 loadsfx(Sfx *sfx)
 {
@@ -298,7 +133,10 @@ loadsfx(Sfx *sfx)
 		Con_DPrintf("loadsfx: %r\n");
 		return nil;
 	}
-	info = GetWavinfo(sfx->s, u, len);
+	if(wavinfo(u, len, &info) != 0){
+		Con_Printf("loadsfx: %s: %s\n", sfx->s, lerr());
+		return nil;
+	}
 	if(info.channels != 1){
 		Con_DPrintf("loadsfx: non mono wave %s\n", sfx->s);
 		return nil;

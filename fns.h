@@ -64,3 +64,5 @@ void sndstop(void);
 void sndwrite(uchar *buf, long sz);
 void sndclose(void);
 int sndopen(void);
+
+int wavinfo(byte *in, int len, wavinfo_t *info);

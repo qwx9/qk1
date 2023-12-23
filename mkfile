@@ -85,6 +85,7 @@ OFILES=\
 	sv_user.$O\
 	vid.$O\
 	view.$O\
+	wav.$O\
 	world.$O\
 	zone.$O\
 

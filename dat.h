@@ -12,11 +12,22 @@ enum{
 };
 
 typedef struct Sfx Sfx;
+typedef struct wavinfo_t wavinfo_t;
 
 struct Sfx {
 	char s[Npath];
 	int map;
 	mem_user_t cu;
+};
+
+struct wavinfo_t
+{
+	int		rate;
+	int		width;
+	int		channels;
+	int		loopofs;
+	int		samples;
+	int		dataofs;
 };
 
 extern char *game;
