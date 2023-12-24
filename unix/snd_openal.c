@@ -147,6 +147,7 @@ static Sfx *
 findsfx(char *s)
 {
 	Sfx *sfx, *e;
+	alsfx_t *b;
 
 	if(strlen(s) >= Npath)
 		Host_Error("findsfx: path too long %s", s);
@@ -166,8 +167,10 @@ findsfx(char *s)
 		}
 		if(sfx == e)
 			Host_Error("findsfx: sfx list overflow: %s", s);
-		if(Cache_Check(&sfx->cu))
+		if((b = Cache_Check(&sfx->cu)) != nil){
+			alDeleteBuffers(1, &b->buf); ALERR();
 			Cache_Free(&sfx->cu);
+		}
 	}else
 		num_sfx++;
 	strcpy(sfx->s, s);
@@ -515,6 +518,7 @@ alvarcb(cvar_t *var)
 void
 sfxbegin(void)
 {
+	map++;
 }
 
 int
