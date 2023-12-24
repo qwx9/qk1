@@ -86,9 +86,8 @@ static void CL_ParseStartSoundPacket(void)
 	vec3_t  pos;
 	int 	channel, ent;
 	int 	sound_num;
-	int 	volume;
 	int 	field_mask;
-	float 	attenuation;
+	float 	volume, attenuation;
 
 	field_mask = MSG_ReadByte();
 	volume = (field_mask & SND_VOLUME) ? MSG_ReadByte() : Spktvol;
@@ -597,12 +596,13 @@ CL_ParseStaticSound
 static void CL_ParseStaticSound (int large_sound)
 {
 	vec3_t		org;
-	int			sound_num, vol, atten;
+	int			sound_num;
+	float vol, atten;
 
 	MSG_ReadVec(cl.protocol, org);
 	sound_num = large_sound ? MSG_ReadShort() : MSG_ReadByte();
-	vol = MSG_ReadByte();
-	atten = MSG_ReadByte();
+	vol = MSG_ReadByte() / 255.0;
+	atten = MSG_ReadByte() / 64.0;
 
 	staticsfx(cl.sound_precache[sound_num], org, vol, atten);
 }

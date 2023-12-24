@@ -54,9 +54,7 @@ enum{
 	Namb
 };
 
-enum{
-	Spktvol = 255
-};
+#define Spktvol 255.0
 #define Spktatt 1.0
 
 extern int debug;

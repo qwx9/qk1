@@ -2,14 +2,14 @@ TARG=qk1
 DESTDIR?=
 PREFIX?=/usr/local
 BIN=${DESTDIR}${PREFIX}/bin
-SDL2_CFLAGS=$$(pkg-config --cflags sdl2)
-SDL2_LDFLAGS=$$(pkg-config --libs sdl2)
+EXTRA_CFLAGS=$$(pkg-config --cflags sdl2 openal)
+EXTRA_LDFLAGS=$$(pkg-config --libs sdl2 openal)
 CFLAGS?=-O2 -g
 CFLAGS+=-Wall -Wextra -Wno-unknown-pragmas -Wno-missing-field-initializers -Wno-implicit-fallthrough -Wno-microsoft-anon-tag
 CFLAGS+=-fms-extensions
-CFLAGS+=-I3rd/parg -Iunix -I. ${SDL2_CFLAGS}
+CFLAGS+=-I3rd/parg -Iunix -I. ${EXTRA_CFLAGS}
 LDFLAGS?=
-LDFLAGS+=-lm ${SDL2_LDFLAGS}
+LDFLAGS+=-lm ${EXTRA_LDFLAGS}
 
 OBJS=\
 	3rd/parg/parg.o\
@@ -76,7 +76,6 @@ OBJS=\
 	r_surf.o\
 	sbar.o\
 	screen.o\
-	snd.o\
 	softfloat.o\
 	span.o\
 	span_alpha.o\
@@ -89,7 +88,7 @@ OBJS=\
 	unix/net_udp.o\
 	unix/qk1.o\
 	unix/seprint.o\
-	unix/snd_sdl.o\
+	unix/snd_openal.o\
 	unix/vid.o\
 	view.o\
 	wav.o\

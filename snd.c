@@ -505,8 +505,8 @@ staticsfx(Sfx *sfx, vec3_t zp, float vol, float att)
 	}
 	c->sfx = sfx;
 	VectorCopy(zp, c->zp);
-	c->chvol = vol;
-	c->attf = (att / 64) / Clipdist;
+	c->chvol = vol * 255;
+	c->attf = att / Clipdist;
 	c->n = sc->length;
 	spatialize(c);
 }
