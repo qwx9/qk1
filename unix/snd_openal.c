@@ -28,7 +28,7 @@ cvar_t volume = {"volume", "0.7", 1};
 static cvar_t s_al_dev = {"s_al_device", "", true};
 static cvar_t s_al_resampler_default = {"s_al_resampler_default", "6", true}; // 23rd order Sinc
 static cvar_t s_al_resampler_up = {"s_al_resampler_up", "1", true}; // Linear
-static cvar_t s_al_hrtf = {"s_al_hrtf", "1", true};
+static cvar_t s_al_hrtf = {"s_al_hrtf", "0", true};
 static cvar_t ambient_level = {"ambient_level", "0.3"};
 static cvar_t ambient_fade = {"ambient_fade", "100"};
 
