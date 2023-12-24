@@ -515,6 +515,26 @@ alvarcb(cvar_t *var)
 	}
 }
 
+static void
+sfxlist(void)
+{
+	int sz, sum, w, ch;
+	Sfx *sfx, *e;
+	alsfx_t *s;
+
+	sum = 0;
+	for(sfx = known_sfx, e = known_sfx+num_sfx; sfx < e; sfx++){
+		if((s = Cache_Check(&sfx->cu)) == nil)
+			continue;
+		alGetBufferi(s->buf, AL_SIZE, &sz); ALERR();
+		alGetBufferi(s->buf, AL_CHANNELS, &ch); ALERR();
+		alGetBufferi(s->buf, AL_BITS, &w); ALERR();
+		sum += sz * ch * w/8;
+		Con_Printf("%c(%2db) %6d : %s\n", s->loop ? 'L' : ' ', w, sz, sfx->s);
+	}
+	Con_Printf("Total resident: %d\n", sum);
+}
+
 void
 sfxbegin(void)
 {
@@ -534,6 +554,7 @@ initsnd(void)
 	Cvar_RegisterVariable(&s_al_resampler_up);
 	Cvar_RegisterVariable(&s_al_hrtf);
 	Cmd_AddCommand("stopsound", stopallsfx);
+	Cmd_AddCommand("soundlist", sfxlist);
 
 	alinit(nil);
 	known_sfx = Hunk_Alloc(MAX_SOUNDS * sizeof *known_sfx);
