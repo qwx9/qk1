@@ -47,7 +47,7 @@ enum{
 };
 
 enum{
-	Ambwater = 0,
+	Ambwater,
 	Ambsky,
 	Ambslime,
 	Amblava,

@@ -22,6 +22,7 @@ struct alchan_t {
 
 enum {
 	Srcstatic = -666,
+	Srcamb,
 };
 
 cvar_t volume = {"volume", "0.7", 1};
@@ -32,8 +33,6 @@ static int s_al_dev_prev = -2;
 static cvar_t s_al_hrtf = {"s_al_hrtf", "0", true};
 static cvar_t s_al_resampler_default = {"s_al_resampler_default", "6", true}; // 23rd order Sinc
 static cvar_t s_al_resampler_up = {"s_al_resampler_up", "1", true}; // Linear
-static cvar_t ambient_level = {"ambient_level", "0.3"};
-static cvar_t ambient_fade = {"ambient_fade", "100"};
 
 static ALCcontext *ctx;
 static ALCdevice *dev;
@@ -42,6 +41,11 @@ static Sfx *known_sfx;
 static int num_sfx;
 static int map;
 static alchan_t *chans;
+
+static cvar_t ambient_level = {"ambient_level", "0.3"};
+static cvar_t ambient_fade = {"ambient_fade", "100"};
+static Sfx *ambsfx[Namb];
+static float ambvol[Namb];
 
 static int al_default_resampler, al_num_resamplers;
 static ALchar *(*qk1alGetStringiSOFT)(ALenum, ALsizei);
@@ -101,10 +105,8 @@ getchan(int ent, int ch)
 
 	stopped = nil;
 	for(c = chans; c != nil; c = c->next){
-		if(c->ent == ent && c->ch == ch){
-			alSourceStop(c->src); ALERR();
+		if(c->ent == ent && c->ch == ch)
 			return c;
-		}
 		if(stopped == nil){
 			alGetSourcei(c->src, AL_SOURCE_STATE, &state);
 			if(!ALERR() && state == AL_STOPPED)
@@ -154,8 +156,10 @@ findsfx(char *s)
 	sfx = known_sfx;
 	e = known_sfx + num_sfx;
 	while(sfx < e){
-		if(strcmp(sfx->s, s) == 0)
+		if(strcmp(sfx->s, s) == 0){
+			sfx->map = map;
 			return sfx;
+		}
 		sfx++;
 	}
 	if(num_sfx == MAX_SOUNDS){
@@ -224,6 +228,80 @@ loadsfx(Sfx *sfx)
 	return s;
 }
 
+static void
+alplay(alchan_t *c, alsfx_t *s, vec3_t zp, float vol, float att, bool rel, bool loop)
+{
+	float x;
+	int n;
+
+	x = att * 0.001f;
+	if(rel){
+		alSourcefv(c->src, AL_POSITION, vec3_origin); ALERR();
+		alSourcei(c->src, AL_SOURCE_RELATIVE, AL_TRUE); ALERR();
+		alSourcef(c->src, AL_ROLLOFF_FACTOR, 0.0f); ALERR();
+		alSourcef(c->src, AL_REFERENCE_DISTANCE, 0.0f); ALERR();
+	}else{
+		alSourcefv(c->src, AL_POSITION, zp); ALERR();
+		alSourcei(c->src, AL_SOURCE_RELATIVE, AL_FALSE); ALERR();
+		alSourcef(c->src, AL_ROLLOFF_FACTOR, x * (8192.0f - 1.0f)); ALERR();
+		alSourcef(c->src, AL_REFERENCE_DISTANCE, 1.0f); ALERR();
+		alSourcef(c->src, AL_MAX_DISTANCE, 8192.0f); ALERR();
+	}
+	alSourcef(c->src, AL_GAIN, vol); ALERR();
+	if(al_num_resamplers > 0){
+		n = s->upsample ? s_al_resampler_up.value : s_al_resampler_default.value;
+		if(n >= 0){
+			alSourcei(c->src, AL_SOURCE_RESAMPLER_SOFT, n);
+			ALERR();
+		}
+	}
+	alSourcei(c->src, AL_BUFFER, s->buf); ALERR();
+	alSourcei(c->src, AL_LOOPING, (s->loop || loop) ? AL_TRUE : AL_FALSE); ALERR();
+	alSourcePlay(c->src); ALERR();
+}
+
+
+static void
+ambs(vec3_t org)
+{
+	uchar *asl;
+	float vol, *av;
+	alchan_t *ch;
+	mleaf_t *l;
+	alsfx_t *b;
+	Sfx *sfx;
+	ALint state;
+	int i;
+
+	if(cl.worldmodel == nil)
+		return;
+	l = Mod_PointInLeaf(org, cl.worldmodel);
+	asl = l->ambient_sound_level;
+	for(i = 0; i < Namb; i++){
+		if((sfx = ambsfx[i]) == nil || (b = loadsfx(sfx)) == nil)
+			continue;
+		vol = ambient_level.value * asl[i];
+		av = &ambvol[i];
+		if(vol < 8)
+			vol = 0;
+		if(*av < vol){
+			*av += host_frametime * ambient_fade.value;
+			if(*av > vol)
+				*av = vol;
+		}else if(*av > vol){
+			*av -= host_frametime * ambient_fade.value;
+			if(*av < vol)
+				*av = vol;
+		}
+		if((ch = getchan(Srcamb, i)) != nil){
+			alSourcef(ch->src, AL_GAIN, *av / 255.0f); ALERR();
+			alGetSourcei(ch->src, AL_SOURCE_STATE, &state);
+			if(!ALERR() && state != AL_PLAYING)
+				alplay(ch, b, vec3_origin, *av, 0.0f, true, true);
+		}
+	}
+}
+
 void
 stepsnd(vec3_t zp, vec3_t fw, vec3_t rt, vec3_t up)
 {
@@ -231,15 +309,17 @@ stepsnd(vec3_t zp, vec3_t fw, vec3_t rt, vec3_t up)
 
 	if(dev == nil)
 		return;
-
 	if(zp == vec3_origin && fw == vec3_origin && rt == vec3_origin){
 		alListenerf(AL_GAIN, 0);
 		ALERR();
-	}else{
-		alListenerfv(AL_POSITION, zp); ALERR();
-		alListenerfv(AL_ORIENTATION, fwup); ALERR();
-		alListenerf(AL_GAIN, volume.value); ALERR();
+		return;
 	}
+
+	alListenerfv(AL_POSITION, zp); ALERR();
+	alListenerfv(AL_ORIENTATION, fwup); ALERR();
+	alListenerf(AL_GAIN, volume.value); ALERR();
+
+	ambs(zp);
 }
 
 void
@@ -255,6 +335,7 @@ stopallsfx(void)
 		delchan(c);
 	}
 	chans = nil;
+	memset(ambvol, 0, sizeof(ambvol));
 }
 
 void
@@ -277,6 +358,8 @@ stopsfx(int ent, int ch)
 	if(chans == c)
 		chans = c->next;
 	delchan(c);
+	if(ent == Srcamb)
+		ambvol[ch] = 0;
 }
 
 void
@@ -284,37 +367,11 @@ startsfx(int ent, int ch, Sfx *sfx, vec3_t zp, float vol, float att)
 {
 	alchan_t *c;
 	alsfx_t *s;
-	float x;
-	int n;
 
-	if(dev == nil || (s = loadsfx(sfx)) == nil)
+	if(dev == nil || (s = loadsfx(sfx)) == nil || (c = getchan(ent, ch)) == nil)
 		return;
-	if((c = getchan(ent, ch)) == nil)
-		return;
-	x = att * 0.001f;
-	if(ent == cl.viewentity){
-		alSourcefv(c->src, AL_POSITION, vec3_origin); ALERR();
-		alSourcei(c->src, AL_SOURCE_RELATIVE, AL_TRUE); ALERR();
-		alSourcef(c->src, AL_ROLLOFF_FACTOR, 0.0f); ALERR();
-		alSourcef(c->src, AL_REFERENCE_DISTANCE, 0.0f); ALERR();
-	}else{
-		alSourcefv(c->src, AL_POSITION, zp); ALERR();
-		alSourcei(c->src, AL_SOURCE_RELATIVE, AL_FALSE); ALERR();
-		alSourcef(c->src, AL_ROLLOFF_FACTOR, x * (8192.0f - 1.0f)); ALERR();
-		alSourcef(c->src, AL_REFERENCE_DISTANCE, 1.0f); ALERR();
-		alSourcef(c->src, AL_MAX_DISTANCE, 8192.0f); ALERR();
-	}
-	alSourcef(c->src, AL_GAIN, vol); ALERR();
-	if(al_num_resamplers > 0){
-		n = s->upsample ? s_al_resampler_up.value : s_al_resampler_default.value;
-		if(n >= 0){
-			alSourcei(c->src, AL_SOURCE_RESAMPLER_SOFT, n);
-			ALERR();
-		}
-	}
-	alSourcei(c->src, AL_BUFFER, s->buf); ALERR();
-	alSourcei(c->src, AL_LOOPING, (s->loop || ent == Srcstatic) ? AL_TRUE : AL_FALSE); ALERR();
-	alSourcePlay(c->src); ALERR();
+	alSourceStop(c->src); ALERR();
+	alplay(c, s, zp, vol, att, ent == cl.viewentity, ent == Srcstatic);
 }
 
 void
@@ -357,7 +414,6 @@ precachesfx(char *s)
 	if(dev == nil)
 		return nil;
 	sfx = findsfx(s);
-	assert(sfx != nil);
 	sfx->map = map;
 	loadsfx(sfx);
 	return sfx;
@@ -539,6 +595,8 @@ void
 sfxbegin(void)
 {
 	map++;
+	ambsfx[Ambwater] = precachesfx("ambience/water1.wav");
+	ambsfx[Ambsky] = precachesfx("ambience/wind2.wav");
 }
 
 int
@@ -560,13 +618,14 @@ initsnd(void)
 	known_sfx = Hunk_Alloc(MAX_SOUNDS * sizeof *known_sfx);
 	num_sfx = 0;
 
-	//ambsfx[Ambwater] = precachesfx("ambience/water1.wav");
-	//ambsfx[Ambsky] = precachesfx("ambience/wind2.wav");
-
 	return 0;
 }
 
 void
 sndclose(void)
 {
+	if(dev == nil)
+		return;
+	alcDestroyContext(ctx); ctx = nil; ALERR();
+	alcCloseDevice(dev); dev = nil; ALERR();
 }
