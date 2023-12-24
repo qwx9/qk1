@@ -222,10 +222,15 @@ stepsnd(vec3_t zp, vec3_t fw, vec3_t rt, vec3_t up)
 
 	if(dev == nil)
 		return;
-	USED(rt);
-	alListenerfv(AL_POSITION, zp); ALERR();
-	alListenerfv(AL_ORIENTATION, fwup); ALERR();
-	alListenerf(AL_GAIN, volume.value); ALERR();
+
+	if(zp == vec3_origin && fw == vec3_origin && rt == vec3_origin){
+		alListenerf(AL_GAIN, 0);
+		ALERR();
+	}else{
+		alListenerfv(AL_POSITION, zp); ALERR();
+		alListenerfv(AL_ORIENTATION, fwup); ALERR();
+		alListenerf(AL_GAIN, volume.value); ALERR();
+	}
 }
 
 void
