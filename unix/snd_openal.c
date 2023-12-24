@@ -25,10 +25,13 @@ enum {
 };
 
 cvar_t volume = {"volume", "0.7", 1};
-static cvar_t s_al_dev = {"s_al_device", "", true};
+
+static cvar_t s_al_dev = {"s_al_device", "-1", true};
+static int s_al_dev_prev = -2;
+
+static cvar_t s_al_hrtf = {"s_al_hrtf", "0", true};
 static cvar_t s_al_resampler_default = {"s_al_resampler_default", "6", true}; // 23rd order Sinc
 static cvar_t s_al_resampler_up = {"s_al_resampler_up", "1", true}; // Linear
-static cvar_t s_al_hrtf = {"s_al_hrtf", "0", true};
 static cvar_t ambient_level = {"ambient_level", "0.3"};
 static cvar_t ambient_fade = {"ambient_fade", "100"};
 
@@ -41,7 +44,10 @@ static int map;
 static alchan_t *chans;
 
 static int al_default_resampler, al_num_resamplers;
-static char *(*alGetStringiSOFT)(ALenum, ALsizei);
+static ALchar *(*qk1alGetStringiSOFT)(ALenum, ALsizei);
+static ALCchar *(*qk1alcGetStringiSOFT)(ALCdevice *, ALenum, ALsizei);
+static ALCboolean (*qk1alcResetDeviceSOFT)(ALCdevice *, const ALCint *attr);
+static ALCboolean *(*qk1alcReopenDeviceSOFT)(ALCdevice *, const ALCchar *devname, const ALCint *attr);
 
 #define ALERR() alcheckerr(__FILE__, __LINE__)
 
@@ -65,7 +71,7 @@ alcheckerr(const char *file, int line)
 			break;
 		}
 		ret |= e;
-		fprintf(stderr, "%s:%d: AL: %s\n", file, line, s);
+		fprintf(stderr, "AL: %s:%d: %s\n", file, line, s);
 	}
 	if(dev != nil && (e = alcGetError(dev)) != ALC_NO_ERROR){
 		switch(e){
@@ -80,7 +86,7 @@ alcheckerr(const char *file, int line)
 			break;
 		}
 		ret |= e;
-		fprintf(stderr, "%s:%d: ALC: %s\n", file, line, s);
+		fprintf(stderr, "ALC: %s:%d: %s\n", file, line, s);
 	}
 
 	return ret;
@@ -354,27 +360,37 @@ precachesfx(char *s)
 	return sfx;
 }
 
-static int
-alinit(void)
+static ALCint *
+alcattr(bool hrtf)
 {
-	const char *devname;
-	ALCcontext *c;
-	int e;
-	ALCint attr[] = {
-		0, 0, 0
+	static ALCint attr[] = {
+		0, 0, 0, 0, 0,
 	};
 
-	if(*(devname = s_al_dev.string) == 0)
-		devname = alcGetString(nil, ALC_DEFAULT_DEVICE_SPECIFIER);
-	if(devname == nil)
-		return -1;
+	attr[0] = 0;
+	if(hrtf){
+		attr[0] = s_al_hrtf.value != 0 ? ALC_HRTF_SOFT : 0;
+		attr[1] = s_al_hrtf.value != 0 ? (s_al_hrtf.value > 0 ? ALC_TRUE : ALC_FALSE) : ALC_DONT_CARE_SOFT;
+		if(attr[1] == ALC_TRUE){
+			attr[2] = ALC_HRTF_ID_SOFT;
+			attr[3] = s_al_hrtf.value - 1;
+		}
+	}
+
+	return attr;
+}
+
+static int
+alinit(const char *devname)
+{
+	ALCcontext *c;
+	int e;
+
 	dev = alcOpenDevice(devname); ALERR();
 	if(dev == nil)
 		return -1;
 
-	attr[0] = s_al_hrtf.value != 0 ? ALC_HRTF_SOFT : 0;
-	attr[1] = s_al_hrtf.value > 0 ? ALC_TRUE : ALC_FALSE;
-	c = alcCreateContext(dev, attr); ALERR();
+	c = alcCreateContext(dev, nil); ALERR();
 	if(c == nil){
 closedev:
 		alcCloseDevice(dev); ALERR();
@@ -403,10 +419,97 @@ closedev:
 		al_num_resamplers = alGetInteger(AL_NUM_RESAMPLERS_SOFT);
 		if(ALERR())
 			al_num_resamplers = 0;
-		alGetStringiSOFT = alGetProcAddress("alGetStringiSOFT");
+		qk1alGetStringiSOFT = alGetProcAddress("alGetStringiSOFT");
+	}
+	return 0;
+}
+
+static void
+alreinit(const char *def, const char *all)
+{
+	const char *s;
+	int i, n;
+
+	n = s_al_dev.value;
+	if(n == s_al_dev_prev)
+		return;
+	if(qk1alcReopenDeviceSOFT == nil && alcIsExtensionPresent(nil, "ALC_SOFT_reopen_device"))
+		qk1alcReopenDeviceSOFT = alGetProcAddress("alcReopenDeviceSOFT");
+	if(qk1alcReopenDeviceSOFT == nil){
+		Con_Printf("AL: can't change device settings on the fly\n");
+		return;
+	}
+	for(i = 1, s = all; s != nil && *s; i++){
+		if((n == 0 && def != nil && strcmp(s, def) == 0) || n == i){
+			if(dev == nil)
+				n = alinit(all);
+			else{
+				n = qk1alcReopenDeviceSOFT(dev, s, alcattr(false)) ? 0 : -1;
+				ALERR();
+			}
+			if(n != 0)
+				Con_Printf("AL: failed to switch to %s\n", s);
+			else
+				s_al_dev_prev = n;
+			return;
+		}
+		s += strlen(s)+1;
+	}
+	Con_Printf("AL: no such device: %d\n", n);
+}
+
+static void
+alvarcb(cvar_t *var)
+{
+	const char *all, *def, *s;
+	bool hrtf;
+	int i, n;
+
+	def = alcGetString(nil, ALC_DEFAULT_ALL_DEVICES_SPECIFIER);
+	if(ALERR())
+		def = nil;
+	all = alcGetString(nil, ALC_ALL_DEVICES_SPECIFIER);
+	if(ALERR())
+		all = nil;
+
+	if(var == &s_al_dev && Cmd_Argc() == 1){
+		Con_Printf("%-2d: default (%s)\n", 0, def ? def : "<invalid>");
+		for(i = 1, s = all; s != nil && *s; i++){
+			Con_Printf("%-2d: %s%s\n", i, s, strcmp(s, def) == 0 ? " (default)" : "");
+			s += strlen(s)+1;
+		}
+		return;
 	}
 
-	return 0;
+	alreinit(def, all);
+
+	if(alcIsExtensionPresent(dev, "ALC_SOFT_HRTF")){
+		qk1alcGetStringiSOFT = alcGetProcAddress(dev, "alcGetStringiSOFT");
+		qk1alcResetDeviceSOFT = alcGetProcAddress(dev, "alcResetDeviceSOFT");
+		hrtf = true;
+	}else{
+		qk1alcGetStringiSOFT = nil;
+		qk1alcResetDeviceSOFT = nil;
+		hrtf = false;
+	}
+	if(var == &s_al_hrtf && Cmd_Argc() == 1){
+		Con_Printf("%-2d: disabled\n", -1);
+		Con_Printf("%-2d: don't care (default)\n", 0);
+		if(qk1alcGetStringiSOFT == nil)
+			return;
+		alcGetIntegerv(dev, ALC_NUM_HRTF_SPECIFIERS_SOFT, 1, &n); ALERR();
+		for(i = 0; i < n; i++){
+			s = qk1alcGetStringiSOFT(dev, ALC_HRTF_SPECIFIER_SOFT, i);
+			if(!ALERR() && s != nil)
+				Con_Printf("%-2d: %s\n", i+1, s);
+		}
+		return;
+	}
+
+	if(qk1alcResetDeviceSOFT != nil){
+		qk1alcResetDeviceSOFT(dev, alcattr(hrtf));
+		ALERR();
+	}
 }
 
 void
@@ -417,6 +520,8 @@ sfxbegin(void)
 int
 initsnd(void)
 {
+	s_al_dev.cb = s_al_hrtf.cb = alvarcb;
+
 	Cvar_RegisterVariable(&volume);
 	Cvar_RegisterVariable(&ambient_level);
 	Cvar_RegisterVariable(&ambient_fade);
@@ -426,7 +531,7 @@ initsnd(void)
 	Cvar_RegisterVariable(&s_al_hrtf);
 	Cmd_AddCommand("stopsound", stopallsfx);
 
-	alinit();
+	alinit(nil);
 	known_sfx = Hunk_Alloc(MAX_SOUNDS * sizeof *known_sfx);
 	num_sfx = 0;
 

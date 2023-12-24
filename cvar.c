@@ -125,10 +125,14 @@ bool	Cvar_Command (void)
 	if (Cmd_Argc() == 1)
 	{
 		Con_Printf ("\"%s\" is \"%s\"\n", v->name, v->string);
+		if(v->cb != nil)
+			v->cb(v);
 		return true;
 	}
 
 	setcvar (v->name, Cmd_Argv(1));
+	if(v->cb != nil)
+		v->cb(v);
 	return true;
 }
 

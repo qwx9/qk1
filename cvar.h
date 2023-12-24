@@ -32,15 +32,18 @@ Cvars are restricted from having the same names as commands to keep this
 interface from being ambiguous.
 */
 
-typedef struct cvar_s
+typedef struct cvar_s cvar_t;
+
+struct cvar_s
 {
-	char	*name;
-	char	*string;
+	char *name;
+	char *string;
 	bool archive;		// set to true to cause it to be saved to vars.rc
 	bool server;		// notifies players when changed
-	float	value;
+	float value;
+	void (*cb) (cvar_t *);
 	struct cvar_s *next;
-} cvar_t;
+};
 
 void 	Cvar_RegisterVariable (cvar_t *variable);
 // registers a cvar that already has the name, string, and optionally the
