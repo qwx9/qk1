@@ -31,6 +31,7 @@ static cvar_t s_al_dev = {"s_al_device", "-1", true};
 static int s_al_dev_prev = -2;
 
 static cvar_t s_al_hrtf = {"s_al_hrtf", "0", true};
+static cvar_t s_al_doppler_factor = {"s_al_doppler_factor", "2", true};
 static cvar_t s_al_resampler_default = {"s_al_resampler_default", "6", true}; // 23rd order Sinc
 static cvar_t s_al_resampler_up = {"s_al_resampler_up", "1", true}; // Linear
 
@@ -478,7 +479,7 @@ closedev:
 
 	// assuming 64 Quake units is ~1.7m
 	alSpeedOfSound(343.3 * 64.0 / 1.7); ALERR();
-	alDopplerFactor(2); ALERR();
+	alDopplerFactor(s_al_doppler_factor.value); ALERR();
 
 	if(alIsExtensionPresent("AL_SOFT_source_resampler")){
 		al_default_resampler = alGetInteger(AL_DEFAULT_RESAMPLER_SOFT);
@@ -581,6 +582,12 @@ alvarcb(cvar_t *var)
 }
 
 static void
+aldopplercb(cvar_t *var)
+{
+	alDopplerFactor(var->value); ALERR();
+}
+
+static void
 sfxlist(void)
 {
 	int sz, sum, w, ch;
@@ -629,6 +636,7 @@ int
 initsnd(void)
 {
 	s_al_dev.cb = s_al_hrtf.cb = alvarcb;
+	s_al_doppler_factor.cb = aldopplercb;
 
 	Cvar_RegisterVariable(&volume);
 	Cvar_RegisterVariable(&ambient_level);
@@ -637,6 +645,7 @@ initsnd(void)
 	Cvar_RegisterVariable(&s_al_resampler_default);
 	Cvar_RegisterVariable(&s_al_resampler_up);
 	Cvar_RegisterVariable(&s_al_hrtf);
+	Cvar_RegisterVariable(&s_al_doppler_factor);
 	Cmd_AddCommand("stopsound", stopallsfx);
 	Cmd_AddCommand("soundlist", sfxlist);
 
