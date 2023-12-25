@@ -478,6 +478,7 @@ closedev:
 
 	// assuming 64 Quake units is ~1.7m
 	alSpeedOfSound(343.3 * 64.0 / 1.7); ALERR();
+	alDopplerFactor(2); ALERR();
 
 	if(alIsExtensionPresent("AL_SOFT_source_resampler")){
 		al_default_resampler = alGetInteger(AL_DEFAULT_RESAMPLER_SOFT);
