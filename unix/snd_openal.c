@@ -306,6 +306,8 @@ void
 stepsnd(vec3_t zp, vec3_t fw, vec3_t rt, vec3_t up)
 {
 	vec_t fwup[6] = {fw[0], fw[1], fw[2], up[0], up[1], up[2]};
+	static vec3_t ozp;
+	vec3_t vel;
 
 	if(dev == nil)
 		return;
@@ -317,6 +319,9 @@ stepsnd(vec3_t zp, vec3_t fw, vec3_t rt, vec3_t up)
 
 	alListenerfv(AL_POSITION, zp); ALERR();
 	alListenerfv(AL_ORIENTATION, fwup); ALERR();
+	VectorSubtract(zp, ozp, vel);
+	VectorCopy(zp, ozp);
+	alListenerfv(AL_VELOCITY, vel); ALERR();
 	alListenerf(AL_GAIN, volume.value); ALERR();
 
 	ambs(zp);
@@ -469,7 +474,10 @@ closedev:
 		ALERR();
 	}
 	alListenerf(AL_GAIN, volume.value); ALERR();
-	alDistanceModel(AL_LINEAR_DISTANCE_CLAMPED);
+	alDistanceModel(AL_LINEAR_DISTANCE_CLAMPED); ALERR();
+
+	// assuming 64 Quake units is ~1.7m
+	alSpeedOfSound(343.3 * 64.0 / 1.7); ALERR();
 
 	if(alIsExtensionPresent("AL_SOFT_source_resampler")){
 		al_default_resampler = alGetInteger(AL_DEFAULT_RESAMPLER_SOFT);
