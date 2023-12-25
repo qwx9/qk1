@@ -109,7 +109,7 @@ getchan(int ent, int ch)
 			return c;
 		if(stopped == nil){
 			alGetSourcei(c->src, AL_SOURCE_STATE, &state);
-			if(!ALERR() && state == AL_STOPPED)
+			if(!ALERR() && state != AL_PLAYING)
 				stopped = c;
 		}
 	}
@@ -140,7 +140,6 @@ getchan(int ent, int ch)
 static void
 delchan(alchan_t *c)
 {
-	alSourceStop(c->src); ALERR();
 	alDeleteSources(1, &c->src); ALERR();
 	free(c);
 }
@@ -174,6 +173,7 @@ findsfx(char *s)
 		if((b = Cache_Check(&sfx->cu)) != nil){
 			alDeleteBuffers(1, &b->buf); ALERR();
 			Cache_Free(&sfx->cu);
+			sfx->map = map;
 		}
 	}else
 		num_sfx++;
@@ -595,8 +595,25 @@ void
 sfxbegin(void)
 {
 	map++;
+}
+
+void
+sfxend(void)
+{
+	Sfx *sfx;
+	alsfx_t *b;
+	int i;
+
 	ambsfx[Ambwater] = precachesfx("ambience/water1.wav");
 	ambsfx[Ambsky] = precachesfx("ambience/wind2.wav");
+	for(i = 0, sfx = known_sfx; i < num_sfx; i++, sfx++){
+		if(sfx->map >= map || sfx == ambsfx[Ambsky] || sfx == ambsfx[Ambwater])
+			continue;
+		if((b = Cache_Check(&sfx->cu)) != nil){
+			alDeleteBuffers(1, &b->buf); ALERR();
+			Cache_Free(&sfx->cu);
+		}
+	}
 }
 
 int

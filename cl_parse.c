@@ -259,6 +259,7 @@ static void CL_ParseServerInfo (void)
 		strcpy (sound_precache[numsounds], str);
 		touchsfx (str);
 	}
+	sfxend();
 
 	// now we try to load everything else until a cache allocation fails
 	for (i=1 ; i<nummodels ; i++)
@@ -277,7 +278,6 @@ static void CL_ParseServerInfo (void)
 		cl.sound_precache[i] = precachesfx (sound_precache[i]);
 		CL_KeepaliveMessage ();
 	}
-
 
 	// local state
 	cl_entities[0].model = cl.worldmodel = cl.model_precache[1];

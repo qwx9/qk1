@@ -643,6 +643,20 @@ sfxbegin(void)
 	map++;
 }
 
+void
+sfxend(void)
+{
+	Sfx *sfx;
+	int i;
+
+	for(i = 0, sfx = known_sfx; i < num_sfx; i++, sfx++){
+		if(sfx->map >= map || sfx == ambsfx[Ambsky] || sfx == ambsfx[Ambwater])
+			continue;
+		if(Cache_Check(&sfx->cu) != nil)
+			Cache_Free(&sfx->cu);
+	}
+}
+
 int
 initsnd(void)
 {
