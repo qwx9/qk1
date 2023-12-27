@@ -115,6 +115,25 @@ Hunk_FreeToMark(void *mark)
 	}
 }
 
+void
+Hunk_Free(void *p)
+{
+	mem_t *m;
+
+	if(p == nil)
+		return;
+	m = p;
+	m--;
+
+	if(m->prev != nil)
+		m->prev->next = m->next;
+	if(m->next != nil)
+		m->next->prev = m->prev;
+	if(m == hunk_head)
+		hunk_head = m->next;
+	free(m);
+}
+
 void *
 Hunk_TempAlloc(int size)
 {
