@@ -83,7 +83,6 @@ OBJS=\
 	sv_move.o\
 	sv_phys.o\
 	sv_user.o\
-	unix/cd.o\
 	unix/in.o\
 	unix/net_udp.o\
 	unix/qk1.o\

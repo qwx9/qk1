@@ -25,7 +25,8 @@ enum {
 	Srcamb,
 };
 
-cvar_t volume = {"volume", "0.7", 1};
+cvar_t volume = {"volume", "0.7", true};
+cvar_t bgmvolume = {"bgmvolume", "0.5", true};
 
 static cvar_t s_al_dev = {"s_al_device", "-1", true};
 static int s_al_dev_prev = -2;
@@ -636,6 +637,43 @@ sfxend(void)
 	}
 }
 
+void
+stepcd(void)
+{
+}
+
+void
+playcd(int nt, int loop)
+{
+	USED(nt); USED(loop);
+}
+
+static void
+cdcmd(void)
+{
+}
+
+void
+resumecd(void)
+{
+}
+
+void
+pausecd(void)
+{
+}
+
+int
+initcd(void)
+{
+	return 0;
+}
+
+void
+shutcd(void)
+{
+}
+
 int
 initsnd(void)
 {
@@ -643,6 +681,7 @@ initsnd(void)
 	s_al_doppler_factor.cb = aldopplercb;
 
 	Cvar_RegisterVariable(&volume);
+	Cvar_RegisterVariable(&bgmvolume);
 	Cvar_RegisterVariable(&ambient_level);
 	Cvar_RegisterVariable(&ambient_fade);
 	Cvar_RegisterVariable(&s_al_dev);
@@ -652,6 +691,7 @@ initsnd(void)
 	Cvar_RegisterVariable(&s_al_doppler_factor);
 	Cmd_AddCommand("stopsound", stopallsfx);
 	Cmd_AddCommand("soundlist", sfxlist);
+	Cmd_AddCommand("cd", cdcmd);
 
 	alinit(nil);
 	known_sfx = Hunk_Alloc(MAX_SOUNDS * sizeof *known_sfx);
