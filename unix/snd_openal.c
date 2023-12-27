@@ -49,10 +49,10 @@ static Sfx *ambsfx[Namb];
 static float ambvol[Namb];
 
 static int al_default_resampler, al_num_resamplers;
-static ALchar *(*qk1alGetStringiSOFT)(ALenum, ALsizei);
-static ALCchar *(*qk1alcGetStringiSOFT)(ALCdevice *, ALenum, ALsizei);
-static ALCboolean (*qk1alcResetDeviceSOFT)(ALCdevice *, const ALCint *attr);
-static ALCboolean *(*qk1alcReopenDeviceSOFT)(ALCdevice *, const ALCchar *devname, const ALCint *attr);
+static ALchar *(*qalGetStringiSOFT)(ALenum, ALsizei);
+static ALCchar *(*qalcGetStringiSOFT)(ALCdevice *, ALenum, ALsizei);
+static ALCboolean (*qalcResetDeviceSOFT)(ALCdevice *, const ALCint *attr);
+static ALCboolean *(*qalcReopenDeviceSOFT)(ALCdevice *, const ALCchar *devname, const ALCint *attr);
 
 #define ALERR() alcheckerr(__FILE__, __LINE__)
 
@@ -488,7 +488,7 @@ closedev:
 		al_num_resamplers = alGetInteger(AL_NUM_RESAMPLERS_SOFT);
 		if(ALERR())
 			al_num_resamplers = 0;
-		qk1alGetStringiSOFT = alGetProcAddress("alGetStringiSOFT");
+		qalGetStringiSOFT = alGetProcAddress("alGetStringiSOFT");
 	}
 	return 0;
 }
@@ -502,9 +502,9 @@ alreinit(const char *def, const char *all)
 	n = s_al_dev.value;
 	if(n == s_al_dev_prev)
 		return;
-	if(qk1alcReopenDeviceSOFT == nil && alcIsExtensionPresent(nil, "ALC_SOFT_reopen_device"))
-		qk1alcReopenDeviceSOFT = alGetProcAddress("alcReopenDeviceSOFT");
-	if(qk1alcReopenDeviceSOFT == nil){
+	if(qalcReopenDeviceSOFT == nil && alcIsExtensionPresent(nil, "ALC_SOFT_reopen_device"))
+		qalcReopenDeviceSOFT = alGetProcAddress("alcReopenDeviceSOFT");
+	if(qalcReopenDeviceSOFT == nil){
 		Con_Printf("AL: can't change device settings on the fly\n");
 		return;
 	}
@@ -513,7 +513,7 @@ alreinit(const char *def, const char *all)
 			if(dev == nil)
 				n = alinit(all);
 			else{
-				n = qk1alcReopenDeviceSOFT(dev, s, alcattr(false)) ? 0 : -1;
+				n = qalcReopenDeviceSOFT(dev, s, alcattr(false)) ? 0 : -1;
 				ALERR();
 			}
 			if(n != 0)
@@ -553,30 +553,30 @@ alvarcb(cvar_t *var)
 	alreinit(def, all);
 
 	if(alcIsExtensionPresent(dev, "ALC_SOFT_HRTF")){
-		qk1alcGetStringiSOFT = alcGetProcAddress(dev, "alcGetStringiSOFT");
-		qk1alcResetDeviceSOFT = alcGetProcAddress(dev, "alcResetDeviceSOFT");
+		qalcGetStringiSOFT = alcGetProcAddress(dev, "alcGetStringiSOFT");
+		qalcResetDeviceSOFT = alcGetProcAddress(dev, "alcResetDeviceSOFT");
 		hrtf = true;
 	}else{
-		qk1alcGetStringiSOFT = nil;
-		qk1alcResetDeviceSOFT = nil;
+		qalcGetStringiSOFT = nil;
+		qalcResetDeviceSOFT = nil;
 		hrtf = false;
 	}
 	if(var == &s_al_hrtf && Cmd_Argc() == 1){
 		Con_Printf("%-2d: disabled\n", -1);
 		Con_Printf("%-2d: don't care (default)\n", 0);
-		if(qk1alcGetStringiSOFT == nil)
+		if(qalcGetStringiSOFT == nil)
 			return;
 		alcGetIntegerv(dev, ALC_NUM_HRTF_SPECIFIERS_SOFT, 1, &n); ALERR();
 		for(i = 0; i < n; i++){
-			s = qk1alcGetStringiSOFT(dev, ALC_HRTF_SPECIFIER_SOFT, i);
+			s = qalcGetStringiSOFT(dev, ALC_HRTF_SPECIFIER_SOFT, i);
 			if(!ALERR() && s != nil)
 				Con_Printf("%-2d: %s\n", i+1, s);
 		}
 		return;
 	}
 
-	if(qk1alcResetDeviceSOFT != nil){
-		qk1alcResetDeviceSOFT(dev, alcattr(hrtf));
+	if(qalcResetDeviceSOFT != nil){
+		qalcResetDeviceSOFT(dev, alcattr(hrtf));
 		ALERR();
 	}
 }
