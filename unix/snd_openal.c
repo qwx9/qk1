@@ -202,7 +202,12 @@ loadsfx(Sfx *sfx)
 	}
 	if(wavinfo(in, len, &info) != 0){
 		Con_Printf("loadsfx: %s: %s\n", sfx->s, lerr());
-		return nil;
+		// complain but get some silence in place so it looks like it got loaded
+		memset(&info, 0, sizeof(info));
+		info.width = 8;
+		info.channels = 1;
+		info.rate = 11025;
+		info.loopofs = -1;
 	}
 	if(info.channels < 2)
 		fmt = info.width == 1 ? AL_FORMAT_MONO8 : AL_FORMAT_MONO16;
