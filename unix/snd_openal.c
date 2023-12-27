@@ -3,10 +3,10 @@
 #include <AL/alc.h>
 #include <AL/alext.h>
 
-typedef struct alsfx_t alsfx_t;
+typedef struct albuf_t albuf_t;
 typedef struct alchan_t alchan_t;
 
-struct alsfx_t {
+struct albuf_t {
 	ALuint buf;
 	bool loop;
 	bool upsample;
@@ -149,7 +149,7 @@ static Sfx *
 findsfx(char *s)
 {
 	Sfx *sfx, *e;
-	alsfx_t *b;
+	albuf_t *b;
 
 	if(strlen(s) >= Npath)
 		Host_Error("findsfx: path too long %s", s);
@@ -182,19 +182,19 @@ findsfx(char *s)
 	return sfx;
 }
 
-static alsfx_t *
+static albuf_t *
 loadsfx(Sfx *sfx)
 {
-	alsfx_t *s;
+	ALint loop[2];
 	wavinfo_t info;
-	byte *in;
 	ALuint buf;
 	ALenum fmt;
-	ALint loop[2];
+	albuf_t *b;
+	byte *in;
 	int len;
 
-	if((s = Cache_Check(&sfx->cu)) != nil)
-		return s;
+	if((b = Cache_Check(&sfx->cu)) != nil)
+		return b;
 	in = loadstklmp(va("sound/%s", sfx->s), nil, 0, &len);
 	if(in == nil){
 		Con_DPrintf("loadsfx: %s\n", lerr());
@@ -221,62 +221,64 @@ loadsfx(Sfx *sfx)
 		alDeleteBuffers(1, &buf); ALERR();
 		return nil;
 	}
-	s = Cache_Alloc(&sfx->cu, sizeof(*s));
-	s->buf = buf;
+	b = Cache_Alloc(&sfx->cu, sizeof(*b));
+	b->buf = buf;
 	if(info.loopofs >= 0){
 		loop[0] = info.loopofs;
 		loop[1] = info.samples;
-		alBufferiv(s->buf, AL_LOOP_POINTS_SOFT, loop); ALERR();
-		s->loop = true;
+		alBufferiv(b->buf, AL_LOOP_POINTS_SOFT, loop); ALERR();
+		b->loop = true;
 	}
-	s->upsample = info.rate < 22050;
+	b->upsample = info.rate < 22050;
 
-	return s;
+	return b;
 }
 
 static void
-alplay(alchan_t *c, alsfx_t *s, vec3_t zp, float vol, float att, bool rel, bool loop)
+alplay(alchan_t *c, albuf_t *b, vec3_t zp, float vol, float att, bool rel, bool loop)
 {
+	ALint src;
 	float x;
 	int n;
 
 	x = att * 0.001f;
+	src = c->src;
 	if(rel){
-		alSourcefv(c->src, AL_POSITION, vec3_origin); ALERR();
-		alSourcei(c->src, AL_SOURCE_RELATIVE, AL_TRUE); ALERR();
-		alSourcef(c->src, AL_ROLLOFF_FACTOR, 0.0f); ALERR();
-		alSourcef(c->src, AL_REFERENCE_DISTANCE, 0.0f); ALERR();
+		alSourcefv(src, AL_POSITION, vec3_origin); ALERR();
+		alSourcei(src, AL_SOURCE_RELATIVE, AL_TRUE); ALERR();
+		alSourcef(src, AL_ROLLOFF_FACTOR, 0.0f); ALERR();
+		alSourcef(src, AL_REFERENCE_DISTANCE, 0.0f); ALERR();
 	}else{
-		alSourcefv(c->src, AL_POSITION, zp); ALERR();
-		alSourcei(c->src, AL_SOURCE_RELATIVE, AL_FALSE); ALERR();
-		alSourcef(c->src, AL_ROLLOFF_FACTOR, x * (8192.0f - 1.0f)); ALERR();
-		alSourcef(c->src, AL_REFERENCE_DISTANCE, 1.0f); ALERR();
-		alSourcef(c->src, AL_MAX_DISTANCE, 8192.0f); ALERR();
+		alSourcefv(src, AL_POSITION, zp); ALERR();
+		alSourcei(src, AL_SOURCE_RELATIVE, AL_FALSE); ALERR();
+		alSourcef(src, AL_ROLLOFF_FACTOR, x * (8192.0f - 1.0f)); ALERR();
+		alSourcef(src, AL_REFERENCE_DISTANCE, 1.0f); ALERR();
+		alSourcef(src, AL_MAX_DISTANCE, 8192.0f); ALERR();
 	}
-	alSourcef(c->src, AL_GAIN, vol); ALERR();
+	alSourcef(src, AL_GAIN, vol); ALERR();
 	if(al_num_resamplers > 0){
-		n = s->upsample ? s_al_resampler_up.value : s_al_resampler_default.value;
+		n = b->upsample ? s_al_resampler_up.value : s_al_resampler_default.value;
 		if(n >= 0){
-			alSourcei(c->src, AL_SOURCE_RESAMPLER_SOFT, n);
+			alSourcei(src, AL_SOURCE_RESAMPLER_SOFT, n);
 			ALERR();
 		}
 	}
-	alSourcei(c->src, AL_BUFFER, s->buf); ALERR();
-	alSourcei(c->src, AL_LOOPING, (s->loop || loop) ? AL_TRUE : AL_FALSE); ALERR();
-	alSourcePlay(c->src); ALERR();
+	alSourcei(src, AL_BUFFER, b->buf); ALERR();
+	alSourcei(src, AL_LOOPING, (b->loop || loop) ? AL_TRUE : AL_FALSE); ALERR();
+	alSourcePlay(src); ALERR();
 }
 
 
 static void
 ambs(vec3_t org)
 {
-	uchar *asl;
 	float vol, *av;
-	alchan_t *ch;
-	mleaf_t *l;
-	alsfx_t *b;
-	Sfx *sfx;
 	ALint state;
+	alchan_t *ch;
+	uchar *asl;
+	mleaf_t *l;
+	albuf_t *b;
+	Sfx *sfx;
 	int i;
 
 	if(cl.worldmodel == nil)
@@ -377,12 +379,12 @@ void
 startsfx(int ent, int ch, Sfx *sfx, vec3_t zp, float vol, float att)
 {
 	alchan_t *c;
-	alsfx_t *s;
+	albuf_t *b;
 
-	if(dev == nil || (s = loadsfx(sfx)) == nil || (c = getchan(ent, ch)) == nil)
+	if(dev == nil || (b = loadsfx(sfx)) == nil || (c = getchan(ent, ch)) == nil)
 		return;
 	alSourceStop(c->src); ALERR();
-	alplay(c, s, zp, vol, att, ent == cl.viewentity, ent == Srcstatic);
+	alplay(c, b, zp, vol, att, ent == cl.viewentity, ent == Srcstatic);
 }
 
 void
@@ -398,9 +400,8 @@ void
 staticsfx(Sfx *sfx, vec3_t zp, float vol, float att)
 {
 	static int numst = 0;
-	alsfx_t *s;
 
-	if(dev == nil || (s = loadsfx(sfx)) == nil)
+	if(dev == nil)
 		return;
 
 	startsfx(Srcstatic, numst++, sfx, zp, vol, att/1.5f);
@@ -597,17 +598,17 @@ sfxlist(void)
 {
 	int sz, sum, w, ch;
 	Sfx *sfx, *e;
-	alsfx_t *s;
+	albuf_t *b;
 
 	sum = 0;
 	for(sfx = known_sfx, e = known_sfx+num_sfx; sfx < e; sfx++){
-		if((s = Cache_Check(&sfx->cu)) == nil)
+		if((b = Cache_Check(&sfx->cu)) == nil)
 			continue;
-		alGetBufferi(s->buf, AL_SIZE, &sz); ALERR();
-		alGetBufferi(s->buf, AL_CHANNELS, &ch); ALERR();
-		alGetBufferi(s->buf, AL_BITS, &w); ALERR();
+		alGetBufferi(b->buf, AL_SIZE, &sz); ALERR();
+		alGetBufferi(b->buf, AL_CHANNELS, &ch); ALERR();
+		alGetBufferi(b->buf, AL_BITS, &w); ALERR();
 		sum += sz * ch * w/8;
-		Con_Printf("%c(%2db) %6d : %s\n", s->loop ? 'L' : ' ', w, sz, sfx->s);
+		Con_Printf("%c(%2db) %6d : %s\n", b->loop ? 'L' : ' ', w, sz, sfx->s);
 	}
 	Con_Printf("Total resident: %d\n", sum);
 }
@@ -621,8 +622,8 @@ sfxbegin(void)
 void
 sfxend(void)
 {
+	albuf_t *b;
 	Sfx *sfx;
-	alsfx_t *b;
 	int i;
 
 	ambsfx[Ambwater] = precachesfx("ambience/water1.wav");
