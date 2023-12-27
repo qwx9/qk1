@@ -254,7 +254,6 @@ BSP_LoadLighting(model_t *mod, byte *in, int sz)
 	}
 
 	strcpy(s, mod->name);
-	lit = nil;
 	if((t = strrchr(s, '.')) != nil){
 		strcpy(t, ".lit");
 		if((lit = loadhunklmp(s, &litsz)) != nil && litsz >= 4+4+sz*3){
@@ -264,12 +263,12 @@ BSP_LoadLighting(model_t *mod, byte *in, int sz)
 			}else{
 				Con_Printf("%s: invalid/unsupported LIT file\n", s);
 			}
-		}else{
-			lit = nil;
 		}
+		Hunk_Free(lit);
+		lit = nil;
 	}
 
-	mod->lightdata = lit ? lit : Hunk_Alloc(sz*3);
+	mod->lightdata = Hunk_Alloc(sz*3);
 	for(i = 0; i < sz; i++){
 		mod->lightdata[i*3+0] = in[i];
 		mod->lightdata[i*3+1] = in[i];
