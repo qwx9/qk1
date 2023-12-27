@@ -238,10 +238,8 @@ static void
 alplay(alchan_t *c, albuf_t *b, vec3_t zp, float vol, float att, bool rel, bool loop)
 {
 	ALint src;
-	float x;
 	int n;
 
-	x = att * 0.001f;
 	src = c->src;
 	if(rel){
 		alSourcefv(src, AL_POSITION, vec3_origin); ALERR();
@@ -251,7 +249,7 @@ alplay(alchan_t *c, albuf_t *b, vec3_t zp, float vol, float att, bool rel, bool 
 	}else{
 		alSourcefv(src, AL_POSITION, zp); ALERR();
 		alSourcei(src, AL_SOURCE_RELATIVE, AL_FALSE); ALERR();
-		alSourcef(src, AL_ROLLOFF_FACTOR, x * (8192.0f - 1.0f)); ALERR();
+		alSourcef(src, AL_ROLLOFF_FACTOR, att * 8.191); ALERR();
 		alSourcef(src, AL_REFERENCE_DISTANCE, 1.0f); ALERR();
 		alSourcef(src, AL_MAX_DISTANCE, 8192.0f); ALERR();
 	}
