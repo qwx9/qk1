@@ -265,7 +265,6 @@ BSP_LoadLighting(model_t *mod, byte *in, int sz)
 			}
 		}
 		Hunk_Free(lit);
-		lit = nil;
 	}
 
 	mod->lightdata = Hunk_Alloc(sz*3);
