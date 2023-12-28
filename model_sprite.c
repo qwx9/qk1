@@ -1,9 +1,9 @@
 #include "quakedef.h"
 
 static byte *
-Mod_LoadSpriteFrame(byte *in, byte *e, mspriteframe_t **ppframe)
+Mod_LoadSpriteFrame(model_t *mod, byte *in, byte *e, mspriteframe_t **ppframe)
 {
-	int w, h, size, origin[2];
+	int i, w, h, size, origin[2];
 	mspriteframe_t *pspriteframe;
 
 	if(e-in < 4*4){
@@ -20,7 +20,7 @@ toosmall:
 		werrstr("invalid dimensions: %dx%d", w, h);
 		return nil;
 	}
-	if(e-in < (size = w*h))
+	if(e-in < (size = w*h)*(mod->ver == SPRITE32_VERSION ? (int)sizeof(pixel_t) : 1))
 		goto toosmall;
 
 	*ppframe = pspriteframe = Hunk_Alloc(sizeof(*pspriteframe) + size*sizeof(pixel_t));
@@ -30,14 +30,19 @@ toosmall:
 	pspriteframe->down = origin[1] - h;
 	pspriteframe->left = origin[0];
 	pspriteframe->right = w + origin[0];
-	torgbx(in, pspriteframe->pixels, size);
-	in += size;
+	if(mod->ver == SPRITE_VERSION){
+		torgbx(in, pspriteframe->pixels, size);
+		in += size;
+	}else if(mod->ver == SPRITE32_VERSION){
+		for(i = 0; i < size; i++, in += sizeof(pixel_t))
+			pspriteframe->pixels[i] = in[0]<<24 | in[3]<<16 | in[1]<<8 | in[2];
+	}
 
 	return in;
 }
 
 static byte *
-Mod_LoadSpriteGroup(byte *in, byte *e, mspritegroup_t **ppgroup)
+Mod_LoadSpriteGroup(model_t *mod, byte *in, byte *e, mspritegroup_t **ppgroup)
 {
 	mspritegroup_t *spgrp;
 	float *poutintervals;
@@ -69,7 +74,7 @@ toosmall:
 	}
 
 	for(i = 0; i < numframes; i++){
-		in = Mod_LoadSpriteFrame(in, e, &spgrp->frames[i]);
+		in = Mod_LoadSpriteFrame(mod, in, e, &spgrp->frames[i]);
 		if(in == nil)
 			break;
 	}
@@ -80,8 +85,8 @@ toosmall:
 void
 Mod_LoadSpriteModel(model_t *mod, byte *in0, int total)
 {
-	int version, numframes, i;
 	msprite_t *psprite;
+	int numframes, i;
 	byte *in, *e;
 
 	if(total < 9*4){
@@ -92,8 +97,8 @@ toosmall:
 
 	in = in0 + 4;
 	e = in0 + total;
-	if((version = le32(in)) != SPRITE_VERSION){
-		werrstr("wrong version number (%d should be %d)", version, SPRITE_VERSION);
+	if((mod->ver = le32(in)) != SPRITE_VERSION && mod->ver != SPRITE32_VERSION){
+		werrstr("invalid/unsupported version number: %d", mod->ver);
 		goto err;
 	}
 
@@ -128,9 +133,9 @@ toosmall:
 		if(e-in < 4)
 			goto toosmall;
 		if((psprite->frames[i].type = le32(in)) == SPR_SINGLE)
-			in = Mod_LoadSpriteFrame(in, e, &psprite->frames[i].frameptr);
+			in = Mod_LoadSpriteFrame(mod, in, e, &psprite->frames[i].frameptr);
 		else
-			in = Mod_LoadSpriteGroup(in, e, &psprite->frames[i].framegrp);
+			in = Mod_LoadSpriteGroup(mod, in, e, &psprite->frames[i].framegrp);
 		if(in == nil){
 			werrstr("frame(group) %d: %s", i, lerr());
 			goto err;
