@@ -8,6 +8,7 @@ OFILES=\
 	span`{test -f span_$objtype.s && echo -n _$objtype}.$O\
 	span_alpha.$O\
 	cd.$O\
+	cd_plan9.$O\
 	cl_demo.$O\
 	cl_input.$O\
 	cl_main.$O\

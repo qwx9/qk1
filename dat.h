@@ -57,4 +57,9 @@ enum{
 #define Spktvol 255.0
 #define Spktatt 1.0
 
+extern cvar_t bgmvolume;
+extern int cdtrk, cdntrk;
+extern bool cdloop;
+
+
 extern int debug;

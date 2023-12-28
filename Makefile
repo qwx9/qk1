@@ -13,6 +13,7 @@ LDFLAGS+=-lm ${EXTRA_LDFLAGS}
 
 OBJS=\
 	3rd/parg/parg.o\
+	cd.o\
 	chase.o\
 	cl_demo.o\
 	cl_input.o\

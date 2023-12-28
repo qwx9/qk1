@@ -28,7 +28,6 @@ enum {
 };
 
 cvar_t volume = {"volume", "0.7", true};
-cvar_t bgmvolume = {"bgmvolume", "0.5", true};
 
 static struct {
 	ALuint src, buf;
@@ -693,14 +692,14 @@ trackcb(ALvoid *aux, ALvoid *sampledata, ALsizei numbytes)
 }
 
 void
-playcd(int nt, int loop)
+playcd(int nt, bool loop)
 {
 	pid_t pid;
 	FILE *f;
 	fpos_t off;
 	int len, left, s[2], in[2];
 
-	shutcd();
+	stopcd();
 	if(qalBufferCallbackSOFT == nil)
 		return;
 
@@ -756,6 +755,8 @@ err:
 	close(s[0]);
 	close(in[1]);
 	track.pcm = in[0];
+	cdloop = loop;
+	cdtrk = nt;
 
 	switch((pid = fork())){
 	case 0:
@@ -801,11 +802,6 @@ err:
 	track.playing = true;
 }
 
-static void
-cdcmd(void)
-{
-}
-
 void
 resumecd(void)
 {
@@ -821,11 +817,13 @@ pausecd(void)
 int
 initcd(void)
 {
+	cdntrk = cdtrk = 0;
+	cdloop = false;
 	return 0;
 }
 
 void
-shutcd(void)
+stopcd(void)
 {
 	if(track.playing){
 		alSourceStop(track.src); ALERR();
@@ -838,6 +836,12 @@ shutcd(void)
 	track.playing = false;
 	track.pcm = -1;
 	track.decoder = track.reader = -1;
+}
+
+void
+shutcd(void)
+{
+	stopcd();
 }
 
 int
