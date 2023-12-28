@@ -135,15 +135,12 @@ void D_SpriteDrawSpans (sspan_t *pspan, byte alpha)
 			do
 			{
 				btemp = *(pbase + (s >> 16) + (t >> 16) * cachewidth);
-				if (opaque(btemp))
-				{
-					if (*pz <= izi){
-						if(r_drawflags & DRAW_BLEND){
-							*pdest = blendalpha(btemp, *pdest, alpha, izi);
-						}else{
-							*pz = izi;
-							*pdest = btemp;
-						}
+				if(opaque(btemp) && *pz <= izi){
+					if(r_drawflags & DRAW_BLEND){
+						*pdest = blendalpha(btemp, *pdest, alpha, izi);
+					}else{
+						*pz = izi;
+						*pdest = btemp;
 					}
 				}
 
