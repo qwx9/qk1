@@ -472,6 +472,8 @@ R_DrawEntity(entity_t *e)
 		return 1;
 	if((entdrawflags(e) ^ r_drawflags) != 0)
 		return 0;
+	if(e->alpha == DEFAULT_ALPHA)
+		e->alpha = 0xff;
 
 	currententity = e;
 	VectorCopy(modelorg, oldorigin);

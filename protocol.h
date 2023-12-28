@@ -17,7 +17,7 @@ enum {
 	ZERO_ALPHA,
 };
 
-#define defalpha(a) ((a) == DEFAULT_ALPHA)
+#define defalpha(a) ((a) == DEFAULT_ALPHA || (a) == 0xff)
 #define zeroalpha(a) (!defalpha(a) && (a) <= ZERO_ALPHA)
 #define f2alpha(f) ((f) == 0.0 ? DEFAULT_ALPHA : clamp((f)*254+1, 1, 255))
 #define alpha2f(a) (zeroalpha(a) ? 0.0 : (float)(a)/255.0)
