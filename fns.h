@@ -39,6 +39,7 @@ void*	loadhunklmp(char *, int *);
 void*	loadcachelmp(char *, mem_user_t *);
 void*	loadstklmp(char *, void *, int, int *);
 void	loadpoints(void);
+FILE*	openlmp(char *f, int *len);
 void	dumpcfg(void);
 void	savnames(void);
 int	dumpsav(char*, char*);

@@ -314,7 +314,7 @@ closelmp(FILE *bf)
 	fclose(bf);
 }
 
-static FILE *
+FILE *
 openlmp(char *f, int *len)
 {
 	char d[Nfspath+1];
