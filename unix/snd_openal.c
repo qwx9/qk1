@@ -771,19 +771,19 @@ err:
 					perror("fread");
 					break;
 				}
-				left -= n;
-				if(left < 1){
-					if(!loop)
-						break;
-					if(fsetpos(f, &off) != 0){
-						perror("fsetpos");
-						break;
-					}
-					left = len;
-				}
 			}
 			if(write(s[1], tmp, n) != n)
 				break;
+			left -= n;
+			if(left < 1){
+				if(!loop)
+					break;
+				if(fsetpos(f, &off) != 0){
+					perror("fsetpos");
+					break;
+				}
+				left = len;
+			}
 		}
 		close(s[1]);
 		fclose(f);
