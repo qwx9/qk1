@@ -5,8 +5,15 @@ static cvar_t r_skyfog = {"r_skyfog", "0.5"};
 
 static struct {
 	float density;
-	byte c0, c1, c2;
+	byte c0, c1, c2, sky;
+	bool allowed;
+	int enabled;
 }r_fog_data;
+
+enum {
+	Enfog = 1<<0,
+	Enskyfog = 1<<1,
+};
 
 static void
 fog(void)
@@ -29,9 +36,11 @@ fog(void)
 				r_fog_data.c1 = x;
 			else if(s[6] == 'b')
 				r_fog_data.c0 = x;
-			else if(s[6] == 'e')
-				setcvar("r_fog", Cmd_Argv(i-1));
-			break;
+			else if(s[6] == 'e'){
+				r_fog_data.enabled = x > 0 ? (Enfog | Enskyfog) : 0;
+				setcvar("r_skyfog", x > 0 ? "1" : "0");
+			}
+			return;
 		}
 		r_fog_data.density = clamp(x, 0.0, 1.0) * 0.016;
 		r_fog_data.density *= r_fog_data.density;
@@ -46,6 +55,10 @@ fog(void)
 		r_fog_data.c0 = 0xff * clamp(x, 0.0, 1.0);
 		break;
 	}
+	if(r_fog_data.density > 0.0)
+		r_fog_data.enabled |= Enfog;
+	else
+		r_fog_data.enabled &= ~Enfog;
 }
 
 void
@@ -53,17 +66,16 @@ R_ResetFog(void)
 {
 	r_fog_data.density = 0;
 	r_fog_data.c0 = r_fog_data.c1 = r_fog_data.c2 = 0x80;
+	r_fog_data.enabled = 0;
+	r_fog_data.allowed = r_fog.value > 0.0;
 	setcvar("r_skyfog", "0");
 }
 
-pixel_t
-R_BlendFog(pixel_t pix, uzint z)
+static inline pixel_t
+blend_fog(pixel_t pix, uzint z)
 {
 	byte a;
 	float d;
-
-	if(r_fog.value <= 0 || r_fog_data.density <= 0.0)
-		return pix;
 
 	if(z > 65536){
 		d = 65536ULL*65536ULL / (u64int)z;
@@ -72,9 +84,10 @@ R_BlendFog(pixel_t pix, uzint z)
 		d = 1.0 - exp2(-r_fog_data.density * d*d);
 		a = 255*d;
 	}else if(z < 0){
-		a = 255 * clamp(r_skyfog.value, 0, 1.0);
-	}else
+		a = r_fog_data.sky;
+	}else{
 		a = 0;
+	}
 
 	if(a == 0)
 		return pix;
@@ -85,6 +98,14 @@ R_BlendFog(pixel_t pix, uzint z)
 		((a*r_fog_data.c2 + (255-a)*((pix>>16)&0xff)) >> 8) << 16;
 }
 
+pixel_t
+R_BlendFog(pixel_t pix, uzint z)
+{
+	if(r_fog_data.enabled && r_fog_data.allowed)
+		pix = blend_fog(pix, z);
+	return pix;
+}
+
 void
 R_DrawFog(void)
 {
@@ -92,7 +113,7 @@ R_DrawFog(void)
 	int i, x, y;
 	uzint *z;
 
-	if(r_fog.value <= 0 || r_fog_data.density <= 0.0)
+	if(!r_fog_data.enabled || !r_fog_data.allowed)
 		return;
 
 	/* FIXME(sigrid): this is super slow */
