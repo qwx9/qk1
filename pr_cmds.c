@@ -943,18 +943,24 @@ PF_Remove(pr_t *pr)
 
 // entity (entity start, .string field, string match) find = #5;
 static void
-PF_Find(pr_t *pr)
+PF_find(pr_t *pr)
 {
 	int		e;
 	int		f;
 	char	*s, *t;
 	edict_t	*ed;
+	ddef_t *def;
 
 	e = G_EDICTNUM(pr, OFS_PARM0);
 	f = G_INT(pr, OFS_PARM1);
 	s = G_STRING(pr, OFS_PARM2);
 	if (!s)
-		PR_RunError (pr, "PF_Find: bad search string");
+		PR_RunError(pr, "PF_find: bad search string");
+	if((def = ED_FieldAtOfs(pr, f)) == nil)
+		PR_RunError(pr, "PF_find: invalid field offset %d", f);
+	// FIXME(sigrid): apparently this is common
+	//if(def->type != ev_string)
+	//	Con_DPrintf("PF_find: not a string field: %s", PR_Str(pr, def->s_name));
 
 	for (e++ ; e < pr->num_edicts ; e++)
 	{
@@ -962,10 +968,9 @@ PF_Find(pr_t *pr)
 		if (ed->free)
 			continue;
 		t = E_STRING(pr, ed, f);
-		if (!t)
-			continue;
-		if (!strcmp(t, s))
-		{
+		if (t == nil)
+			t = "";
+		if(!strcmp(t, s)){
 			RETURN_EDICT(pr, ed);
 			return;
 		}
@@ -1830,7 +1835,7 @@ PF_Spawn,	// entity() spawn						= #14;
 PF_Remove,	// void(entity e) remove				= #15;
 PF_traceline,	// float(vector v1, vector v2, float tryents) traceline = #16;
 PF_checkclient,	// entity() clientlist					= #17;
-PF_Find,	// entity(entity start, .string fld, string match) find = #18;
+PF_find,	// entity(entity start, .string fld, string match) find = #18;
 PF_precache_sound,	// void(string s) precache_sound		= #19;
 PF_precache_model,	// void(string s) precache_model		= #20;
 PF_stuffcmd,	// void(entity client, string s)stuffcmd = #21;

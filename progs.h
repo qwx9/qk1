@@ -144,6 +144,7 @@ extern const int type_size[8];
 #pragma varargck	argpos	PR_RunError	2
 void PR_RunError (pr_t *pr, char *error, ...);
 
+ddef_t *ED_FieldAtOfs (pr_t *pr, int ofs);
 void ED_PrintEdicts(void);
 void ED_PrintNum(pr_t *pr, int ent);
 

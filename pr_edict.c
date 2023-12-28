@@ -11,7 +11,6 @@ const int type_size[8] = {
 	[ev_pointer] = sizeof(void *)/4,
 };
 
-ddef_t *ED_FieldAtOfs (pr_t *pr, int ofs);
 bool	ED_ParseEpair (pr_t *pr, void *base, ddef_t *key, char *s);
 
 void PR_InitSV(pr_t *pr);
