@@ -44,7 +44,7 @@ wavinfo(byte *in, int len, wavinfo_t *info)
 			info->rate = le32(p); sz -= 4; n -= 4;
 			p += 4+2; sz -= 4+2; n -= 4+2; /* skip ByteRate + BlockAlign */
 			info->width = le16(p); sz -= 2; n -= 2;
-			if((info->width % 8) != 0){
+			if(info->width < 1 || (info->width % 8) != 0){
 				werrstr("invalid width: %d", info->width);
 				return -1;
 			}
@@ -56,8 +56,14 @@ wavinfo(byte *in, int len, wavinfo_t *info)
 				info->loopofs = le32(p); sz -= 4; n -= 4;
 				/* FIXME(sigrid): check if this is needed and whether it works at all */
 				if(i > 1){
+					if(info->width < 1){
+						werrstr("cue chunk before fmt");
+						return -1;
+					}
 					p += 5*4; sz -= 5*4; n -= 5*4; /* Name+Position+Chunk+ChunkStart+BlockStart */
 					loopsamples = info->loopofs + le32(p); sz -= 4; n -= 4;
+					if(loopsamples > info->samples) /* eg "nehahra/sounds/vondur/fan1.wav" */
+						loopsamples = info->samples;
 				}
 			}
 		}else if(memcmp(p-8, "data", 4) == 0 && info->dataofs == 0){
