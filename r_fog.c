@@ -5,15 +5,15 @@ static cvar_t r_skyfog = {"r_skyfog", "0.5"};
 
 static struct {
 	float density;
-	pixel_t color;
 	byte c0, c1, c2;
 }r_fog_data;
 
 static void
 fog(void)
 {
-	int i, j, n;
+	int i, n;
 	float x;
+	char *s;
 
 	i = 1;
 	n = Cmd_Argc();
@@ -21,19 +21,29 @@ fog(void)
 	case 5:
 	case 2:
 		x = atof(Cmd_Argv(i++));
+		if(n == 2 && strncmp(s = Cmd_Argv(0), "gl_fog", 6) == 0 && s[6] != 'd'){ // Nehahra
+			x = 255 * clamp(x, 0.0, 1.0);
+			if(s[6] == 'r')
+				r_fog_data.c2 = x;
+			else if(s[6] == 'g')
+				r_fog_data.c1 = x;
+			else if(s[6] == 'b')
+				r_fog_data.c0 = x;
+			else if(s[6] == 'e')
+				setcvar("r_fog", Cmd_Argv(i-1));
+			break;
+		}
 		r_fog_data.density = clamp(x, 0.0, 1.0) * 0.016;
 		r_fog_data.density *= r_fog_data.density;
 		if(n == 2)
 			break;
 	case 4:
-		r_fog_data.color = 0;
-		for(j = 0; j < 3; j++, i++){
-			x = atof(Cmd_Argv(i));
-			r_fog_data.color = r_fog_data.color << 8 | (int)(0xff * clamp(x, 0.0, 1.0));
-		}
-		r_fog_data.c0 = r_fog_data.color>> 0;
-		r_fog_data.c1 = r_fog_data.color>> 8;
-		r_fog_data.c2 = r_fog_data.color>>16;
+		x = atof(Cmd_Argv(i++));
+		r_fog_data.c2 = 0xff * clamp(x, 0.0, 1.0);
+		x = atof(Cmd_Argv(i++));
+		r_fog_data.c1 = 0xff * clamp(x, 0.0, 1.0);
+		x = atof(Cmd_Argv(i++));
+		r_fog_data.c0 = 0xff * clamp(x, 0.0, 1.0);
 		break;
 	}
 }
@@ -42,7 +52,6 @@ void
 R_ResetFog(void)
 {
 	r_fog_data.density = 0;
-	r_fog_data.color = 0x808080;
 	r_fog_data.c0 = r_fog_data.c1 = r_fog_data.c2 = 0x80;
 	setcvar("r_skyfog", "0");
 }
@@ -102,4 +111,11 @@ R_InitFog(void)
 	Cmd_AddCommand("fog", fog);
 	Cvar_RegisterVariable(&r_fog);
 	Cvar_RegisterVariable(&r_skyfog);
+
+	// Nehahra
+	Cmd_AddCommand("gl_fogenable", fog);
+	Cmd_AddCommand("gl_fogdensity", fog);
+	Cmd_AddCommand("gl_fogred", fog);
+	Cmd_AddCommand("gl_foggreen", fog);
+	Cmd_AddCommand("gl_fogblue", fog);
 }
