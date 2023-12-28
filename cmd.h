@@ -48,6 +48,14 @@ not apropriate.
 
 typedef void (*xcommand_t) (void);
 
+typedef struct cmd_function_s
+{
+	struct cmd_function_s	*next;
+	char					*name;
+	xcommand_t				function;
+	bool hidden;
+} cmd_function_t;
+
 typedef enum
 {
 	src_client,		// came in over a net connection as a clc_stringcmd
@@ -59,7 +67,7 @@ extern	cmd_source_t	cmd_source;
 
 void	Cmd_Init (void);
 
-void	Cmd_AddCommand (char *cmd_name, xcommand_t function);
+cmd_function_t *Cmd_AddCommand (char *cmd_name, xcommand_t function);
 // called by the init functions of other parts of the program to
 // register commands and functions to call for them.
 // The cmd_name is referenced later, so it should not be in temp memory

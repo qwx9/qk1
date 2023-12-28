@@ -101,21 +101,39 @@ R_DrawFog(void)
 		pix = vid.buffer + i;
 		z = d_pzbuffer + i;
 		for(x = r_refdef.vrect.x; x < r_refdef.vrectright; x++, i++, pix++, z++)
-			*pix = R_BlendFog(*pix, *z);
+			*pix = blend_fog(*pix, *z);
 	}
+}
+
+static void
+r_fog_cb(cvar_t *var)
+{
+	r_fog_data.allowed = var->value > 0.0;
+}
+
+static void
+r_skyfog_cb(cvar_t *var)
+{
+	if(var->value > 0.0)
+		r_fog_data.enabled |= Enskyfog;
+	else
+		r_fog_data.enabled &= ~Enskyfog;
+	r_fog_data.sky = 255 * clamp(var->value, 0.0, 1.0);
 }
 
 void
 R_InitFog(void)
 {
+	r_fog.cb = r_fog_cb;
+	r_skyfog.cb = r_skyfog_cb;
 	Cmd_AddCommand("fog", fog);
 	Cvar_RegisterVariable(&r_fog);
 	Cvar_RegisterVariable(&r_skyfog);
 
 	// Nehahra
-	Cmd_AddCommand("gl_fogenable", fog);
-	Cmd_AddCommand("gl_fogdensity", fog);
-	Cmd_AddCommand("gl_fogred", fog);
-	Cmd_AddCommand("gl_foggreen", fog);
-	Cmd_AddCommand("gl_fogblue", fog);
+	Cmd_AddCommand("gl_fogenable", fog)->hidden = true;
+	Cmd_AddCommand("gl_fogdensity", fog)->hidden = true;
+	Cmd_AddCommand("gl_fogred", fog)->hidden = true;
+	Cmd_AddCommand("gl_foggreen", fog)->hidden = true;
+	Cmd_AddCommand("gl_fogblue", fog)->hidden = true;
 }

@@ -298,14 +298,6 @@ void Cmd_Alias_f (void)
 =============================================================================
 */
 
-typedef struct cmd_function_s
-{
-	struct cmd_function_s	*next;
-	char					*name;
-	xcommand_t				function;
-} cmd_function_t;
-
-
 #define	MAX_ARGS		80
 
 static	int			cmd_argc;
@@ -419,18 +411,19 @@ void Cmd_TokenizeString (char *text)
 Cmd_AddCommand
 ============
 */
-void	Cmd_AddCommand (char *cmd_name, xcommand_t function)
+cmd_function_t *
+Cmd_AddCommand (char *cmd_name, xcommand_t function)
 {
 	cmd_function_t	*cmd;
 
 	if (host_initialized)	// because hunk allocation would get stomped
-		fatal ("Cmd_AddCommand after host_initialized");
+		fatal("Cmd_AddCommand after host_initialized");
 
 	// fail if the command is a variable name
 	if (Cvar_VariableString(cmd_name)[0])
 	{
 		Con_Printf ("Cmd_AddCommand: %s already defined as a var\n", cmd_name);
-		return;
+		return nil;
 	}
 
 	// fail if the command already exists
@@ -439,7 +432,7 @@ void	Cmd_AddCommand (char *cmd_name, xcommand_t function)
 		if(strcmp(cmd_name, cmd->name) == 0)
 		{
 			Con_Printf ("Cmd_AddCommand: %s already defined\n", cmd_name);
-			return;
+			return cmd;
 		}
 	}
 
@@ -448,6 +441,7 @@ void	Cmd_AddCommand (char *cmd_name, xcommand_t function)
 	cmd->function = function;
 	cmd->next = cmd_functions;
 	cmd_functions = cmd;
+	return cmd;
 }
 
 /*
@@ -487,7 +481,7 @@ char *Cmd_CompleteCommand (char *partial)
 
 	// check functions
 	for (cmd=cmd_functions ; cmd ; cmd=cmd->next)
-		if(strncmp(partial, cmd->name, len) == 0)
+		if(strncmp(partial, cmd->name, len) == 0 && !cmd->hidden)
 			return cmd->name;
 
 	return nil;
