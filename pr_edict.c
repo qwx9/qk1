@@ -95,7 +95,8 @@ PR_Str(pr_t *pr, int i)
 		return pr->strings+i;
 	if(i < 0 && i >= -pr->num_str && pr->str[-1-i] != nil)
 		return pr->str[-1-i];
-	Host_Error("PR_Str: invalid offset %d", i);
+	Con_Printf("PR_Str: invalid offset (strings=%d num_str=%d): %d", pr->strings_size, pr->num_str, i);
+	return nil;
 }
 
 /*
