@@ -43,6 +43,7 @@ R_ResetFog(void)
 {
 	r_fog_data.density = 0;
 	r_fog_data.color = 0x808080;
+	r_fog_data.c0 = r_fog_data.c1 = r_fog_data.c2 = 0x80;
 	setcvar("r_skyfog", "0");
 }
 
