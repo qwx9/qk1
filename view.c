@@ -41,8 +41,6 @@ static cvar_t crosshair = {"crosshair", "1", true};
 static cvar_t cl_crossx = {"cl_crossx", "0", false};
 static cvar_t cl_crossy = {"cl_crossy", "0", false};
 
-static cvar_t gl_cshiftpercent = {"gl_cshiftpercent", "100", false};
-
 static double v_dmg_time, v_dmg_roll, v_dmg_pitch;
 static double v_step_time, v_step_z, v_step_oldz;
 
@@ -921,7 +919,6 @@ void V_Init (void)
 	Cvar_RegisterVariable (&crosshair);
 	Cvar_RegisterVariable (&cl_crossx);
 	Cvar_RegisterVariable (&cl_crossy);
-	Cvar_RegisterVariable (&gl_cshiftpercent);
 
 	Cvar_RegisterVariable (&scr_ofsx);
 	Cvar_RegisterVariable (&scr_ofsy);
