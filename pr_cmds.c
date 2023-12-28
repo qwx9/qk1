@@ -902,7 +902,7 @@ PF_ftos(pr_t *pr)
 	if (v == (int)v)
 		sprint (s, "%d",(int)v);
 	else
-		sprint (s, "%5.1f",v);
+		sprint (s, "%f",v);
 	G_INT(pr, OFS_RETURN) = PR_SetStr(pr, s);
 }
 
