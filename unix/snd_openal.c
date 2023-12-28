@@ -2,6 +2,8 @@
 #include <AL/al.h>
 #include <AL/alc.h>
 #include <AL/alext.h>
+#include <sys/wait.h>
+#include <unistd.h>
 
 typedef struct albuf_t albuf_t;
 typedef struct alchan_t alchan_t;
@@ -28,8 +30,15 @@ enum {
 cvar_t volume = {"volume", "0.7", true};
 cvar_t bgmvolume = {"bgmvolume", "0.5", true};
 
-static cvar_t s_al_dev = {"s_al_device", "-1", true};
-static int s_al_dev_prev = -2;
+static struct {
+	ALuint src, buf;
+	int pcm;
+	bool playing;
+	pid_t decoder, reader;
+}track;
+
+static cvar_t s_al_dev = {"s_al_device", "0", true};
+static int s_al_dev_prev = -1;
 
 static cvar_t s_al_hrtf = {"s_al_hrtf", "0", true};
 static cvar_t s_al_doppler_factor = {"s_al_doppler_factor", "2", true};
@@ -38,7 +47,6 @@ static cvar_t s_al_resampler_up = {"s_al_resampler_up", "1", true}; // Linear
 
 static ALCcontext *ctx;
 static ALCdevice *dev;
-static ALuint localsrc;
 static Sfx *known_sfx;
 static int num_sfx;
 static int map;
@@ -54,6 +62,7 @@ static ALchar *(*qalGetStringiSOFT)(ALenum, ALsizei);
 static ALCchar *(*qalcGetStringiSOFT)(ALCdevice *, ALenum, ALsizei);
 static ALCboolean (*qalcResetDeviceSOFT)(ALCdevice *, const ALCint *attr);
 static ALCboolean *(*qalcReopenDeviceSOFT)(ALCdevice *, const ALCchar *devname, const ALCint *attr);
+static void (*qalBufferCallbackSOFT)(ALuint buf, ALenum fmt, ALsizei freq, ALBUFFERCALLBACKTYPESOFT cb, ALvoid *aux);
 
 #define ALERR() alcheckerr(__FILE__, __LINE__)
 
@@ -142,6 +151,14 @@ getchan(int ent, int ch)
 static void
 delchan(alchan_t *c)
 {
+	if(c->prev != nil)
+		c->prev->next = c->next;
+	if(c->next != nil)
+		c->next->prev = c->prev;
+	if(chans == c)
+		chans = c->next;
+	alSourceStop(c->src); ALERR();
+	alSourcei(c->src, AL_BUFFER, 0); ALERR();
 	alDeleteSources(1, &c->src); ALERR();
 	free(c);
 }
@@ -313,7 +330,9 @@ void
 stepsnd(vec3_t zp, vec3_t fw, vec3_t rt, vec3_t up)
 {
 	vec_t fwup[6] = {fw[0], fw[1], fw[2], up[0], up[1], up[2]};
+	alchan_t *c, *next;
 	static vec3_t ozp;
+	ALint state;
 	vec3_t vel;
 
 	if(dev == nil)
@@ -332,6 +351,13 @@ stepsnd(vec3_t zp, vec3_t fw, vec3_t rt, vec3_t up)
 	alListenerf(AL_GAIN, volume.value); ALERR();
 
 	ambs(zp);
+
+	for(c = chans; c != nil; c = next){
+		next = c->next;
+		alGetSourcei(c->src, AL_SOURCE_STATE, &state);
+		if(!ALERR() && state != AL_PLAYING)
+			delchan(c);
+	}
 }
 
 void
@@ -474,11 +500,6 @@ closedev:
 		alcDestroyContext(c); ALERR();
 		goto closedev;
 	}
-	alGenSources(1, &localsrc);
-	if(!ALERR()){
-		alSourcei(localsrc, AL_SOURCE_SPATIALIZE_SOFT, AL_FALSE);
-		ALERR();
-	}
 	alListenerf(AL_GAIN, volume.value); ALERR();
 	alDistanceModel(AL_LINEAR_DISTANCE_CLAMPED); ALERR();
 
@@ -494,7 +515,17 @@ closedev:
 		if(ALERR())
 			al_num_resamplers = 0;
 		qalGetStringiSOFT = alGetProcAddress("alGetStringiSOFT");
+	}else{
+		qalGetStringiSOFT = nil;
 	}
+
+	qalBufferCallbackSOFT = nil;
+	if(alIsExtensionPresent("AL_SOFT_callback_buffer") && (alGenSources(1, &track.src), !ALERR())){
+		alSourcei(track.src, AL_SOURCE_SPATIALIZE_SOFT, AL_FALSE); ALERR();
+		qalBufferCallbackSOFT = alGetProcAddress("alBufferCallbackSOFT");
+		alGenBuffers(1, &track.buf); ALERR();
+	}
+
 	return 0;
 }
 
@@ -640,12 +671,134 @@ sfxend(void)
 void
 stepcd(void)
 {
+	alSourcef(track.src, AL_GAIN, bgmvolume.value); ALERR();
+}
+
+static ALsizei
+trackcb(ALvoid *aux, ALvoid *sampledata, ALsizei numbytes)
+{
+	ssize_t n;
+	byte *b;
+
+	USED(aux);
+	for(b = sampledata; numbytes > 0; b += n, numbytes -= n){
+		if((n = read(track.pcm, b, numbytes)) <= 0){
+			close(track.pcm);
+			track.pcm = -1;
+			break;
+		}
+	}
+
+	return b - (byte*)sampledata;
 }
 
 void
 playcd(int nt, int loop)
 {
-	USED(nt); USED(loop);
+	pid_t pid;
+	FILE *f;
+	fpos_t off;
+	int len, left, s[2], in[2];
+
+	shutcd();
+	if(qalBufferCallbackSOFT == nil)
+		return;
+
+	if((f = openlmp(va("music/track%02d.ogg", nt), &len)) == nil){
+		if((f = openlmp(va("music/track%02d.mp3", nt), &len)) == nil)
+			f = openlmp(va("music/track%02d.wav", nt), &len);
+	}
+	if(f == nil)
+		return;
+	if(fgetpos(f, &off) != 0){
+err:
+		close(track.pcm);
+		fclose(f);
+		if(track.decoder > 0)
+			waitpid(track.decoder, nil, 0);
+		if(track.reader > 0)
+			waitpid(track.reader, nil, 0);
+		return;
+	}
+
+	if(pipe(s) != 0)
+		goto err;
+	if(pipe(in) != 0){
+		close(s[0]);
+		close(s[1]);
+		goto err;
+	}
+
+	switch((pid = fork())){
+	case 0:
+		close(s[1]); dup2(s[0], 0);
+		close(in[0]); dup2(in[1], 1);
+		close(s[0]);
+		execl(
+			"/usr/bin/env", "/usr/bin/env",
+			"ffmpeg",
+				"-loglevel", "fatal",
+				"-i", "-",
+				"-acodec", "pcm_s16le",
+				"-f", "s16le",
+				"-ac", "2",
+				"-ar", "44100",
+				"-",
+			nil
+		);
+		perror("execl ffmpeg"); // FIXME(sigrid): add and use Con_Errorf?
+		exit(1);
+	case -1:
+		goto err;
+	}
+	track.decoder = pid;
+
+	close(s[0]);
+	close(in[1]);
+	track.pcm = in[0];
+
+	switch((pid = fork())){
+	case 0:
+		close(in[0]);
+		close(0);
+		close(1);
+		left = len;
+		for(;;){
+			byte tmp[32768];
+			ssize_t n;
+			if((n = fread(tmp, 1, min(left, (int)sizeof(tmp)), f)) < 1){
+				if(ferror(f)){
+					perror("fread");
+					break;
+				}
+				left -= n;
+				if(left < 1){
+					if(!loop)
+						break;
+					if(fsetpos(f, &off) != 0){
+						perror("fsetpos");
+						break;
+					}
+					left = len;
+				}
+			}
+			if(write(s[1], tmp, n) != n)
+				break;
+		}
+		close(s[1]);
+		fclose(f);
+		exit(1);
+	case -1:
+		goto err;
+	}
+	track.reader = pid;
+
+	qalBufferCallbackSOFT(track.buf, AL_FORMAT_STEREO16, 44100, trackcb, nil);
+	if(ALERR())
+		goto err;
+	alSourcei(track.src, AL_BUFFER, track.buf); ALERR();
+	alSourcePlay(track.src); ALERR();
+	track.playing = true;
 }
 
 static void
@@ -656,11 +809,13 @@ cdcmd(void)
 void
 resumecd(void)
 {
+	alSourcePlay(track.src); ALERR();
 }
 
 void
 pausecd(void)
 {
+	alSourcePause(track.src); ALERR();
 }
 
 int
@@ -672,6 +827,17 @@ initcd(void)
 void
 shutcd(void)
 {
+	if(track.playing){
+		alSourceStop(track.src); ALERR();
+		alSourcei(track.src, AL_BUFFER, 0); ALERR();
+		if(track.pcm >= 0)
+			close(track.pcm);
+		waitpid(track.decoder, nil, 0);
+		waitpid(track.reader, nil, 0);
+	}
+	track.playing = false;
+	track.pcm = -1;
+	track.decoder = track.reader = -1;
 }
 
 int
