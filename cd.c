@@ -9,6 +9,7 @@ void
 cdcmd(void)
 {
 	char *c;
+	bool loop;
 
 	if(Cmd_Argc() < 2){
 usage:
@@ -16,14 +17,10 @@ usage:
 		return;
 	}
 	c = Cmd_Argv(1);
-	if(cistrcmp(c, "play") == 0){
+	if((loop = cistrcmp(c, "loop") == 0) || cistrcmp(c, "play") == 0){
 		if(Cmd_Argc() < 3)
 			goto usage;
-		playcd(atoi(Cmd_Argv(2)), 0);
-	}else if(cistrcmp(c, "loop") == 0){
-		if(Cmd_Argc() < 3)
-			goto usage;
-		playcd(atoi(Cmd_Argv(2)), 1);
+		playcd(atoi(Cmd_Argv(2)), loop);
 	}else if(cistrcmp(c, "stop") == 0)
 		stopcd();
 	else if(cistrcmp(c, "pause") == 0)
