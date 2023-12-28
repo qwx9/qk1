@@ -169,6 +169,13 @@ enum {
 	svc_spawnstatic2,
 	svc_spawnstaticsound2,
 
+	// Nehahra
+	svc_showlmp = 35, // [string] iconlabel [string] lmpfile [byte] x [byte] y
+	svc_hidelmp, // [string] iconlabel
+	svc_skybox, // [string] skyname
+	svc_skyboxsize = 50, // [coord] size
+	svc_fog, // [byte] enabled; if enabled: [float] density [byte] R [byte] G [byte] B
+
 	// client to server
 	clc_bad = 0,
 	clc_nop,

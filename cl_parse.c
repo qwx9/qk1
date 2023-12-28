@@ -2,52 +2,58 @@
 
 static const char *svc_strings[] =
 {
-	"svc_bad",
-	"svc_nop",
-	"svc_disconnect",
-	"svc_updatestat",
-	"svc_version",		// [long] server version
-	"svc_setview",		// [short] entity number
-	"svc_sound",			// <see code>
-	"svc_time",			// [float] server time
-	"svc_print",			// [string] null terminated string
-	"svc_stufftext",		// [string] stuffed into client's console buffer
+	[svc_bad] = "svc_bad",
+	[svc_nop] = "svc_nop",
+	[svc_disconnect] = "svc_disconnect",
+	[svc_updatestat] = "svc_updatestat",
+	[svc_version] = "svc_version",		// [long] server version
+	[svc_setview] = "svc_setview",		// [short] entity number
+	[svc_sound] = "svc_sound",			// <see code>
+	[svc_time] = "svc_time",			// [float] server time
+	[svc_print] = "svc_print",			// [string] null terminated string
+	[svc_stufftext] = "svc_stufftext",		// [string] stuffed into client's console buffer
 						// the string should be \n terminated
-	"svc_setangle",		// [vec3] set the view angle to this absolute value
+	[svc_setangle] = "svc_setangle",		// [vec3] set the view angle to this absolute value
 
-	"svc_serverinfo",		// [long] version
+	[svc_serverinfo] = "svc_serverinfo",		// [long] version
 						// [string] signon string
 						// [string]..[0]model cache [string]...[0]sounds cache
 						// [string]..[0]item cache
-	"svc_lightstyle",		// [byte] [string]
-	"svc_updatename",		// [byte] [string]
-	"svc_updatefrags",	// [byte] [short]
-	"svc_clientdata",		// <shortbits + data>
-	"svc_stopsound",		// <see code>
-	"svc_updatecolors",	// [byte] [byte]
-	"svc_particle",		// [vec3] <variable>
-	"svc_damage",			// [byte] impact [byte] blood [vec3] from
+	[svc_lightstyle] = "svc_lightstyle",		// [byte] [string]
+	[svc_updatename] = "svc_updatename",		// [byte] [string]
+	[svc_updatefrags] = "svc_updatefrags",	// [byte] [short]
+	[svc_clientdata] = "svc_clientdata",		// <shortbits + data>
+	[svc_stopsound] = "svc_stopsound",		// <see code>
+	[svc_updatecolors] = "svc_updatecolors",	// [byte] [byte]
+	[svc_particle] = "svc_particle",		// [vec3] <variable>
+	[svc_damage] = "svc_damage",			// [byte] impact [byte] blood [vec3] from
 
-	"svc_spawnstatic",
-	"OBSOLETE svc_spawnbinary",
-	"svc_spawnbaseline",
+	[svc_spawnstatic] = "svc_spawnstatic",
+	[svc_spawnbinary] = "OBSOLETE svc_spawnbinary",
+	[svc_spawnbaseline] = "svc_spawnbaseline",
 
-	"svc_temp_entity",		// <variable>
-	"svc_setpause",
-	"svc_signonnum",
-	"svc_centerprint",
-	"svc_killedmonster",
-	"svc_foundsecret",
-	"svc_spawnstaticsound",
-	"svc_intermission",
-	"svc_finale",			// [string] music [string] text
-	"svc_cdtrack",			// [byte] track [byte] looptrack
-	"svc_sellscreen",
-	"svc_cutscene",
+	[svc_temp_entity] = "svc_temp_entity",		// <variable>
+	[svc_setpause] = "svc_setpause",
+	[svc_signonnum] = "svc_signonnum",
+	[svc_centerprint] = "svc_centerprint",
+	[svc_killedmonster] = "svc_killedmonster",
+	[svc_foundsecret] = "svc_foundsecret",
+	[svc_spawnstaticsound] = "svc_spawnstaticsound",
+	[svc_intermission] = "svc_intermission",
+	[svc_finale] = "svc_finale",			// [string] music [string] text
+	[svc_cdtrack] = "svc_cdtrack",			// [byte] track [byte] looptrack
+	[svc_sellscreen] = "svc_sellscreen",
+	[svc_cutscene] = "svc_cutscene",
 
-	"svc_spawnbaseline2",
-	"svc_spawnstatic2",
-	"svc_spawnstaticsound2",
+	[svc_spawnbaseline2] = "svc_spawnbaseline2",
+	[svc_spawnstatic2] = "svc_spawnstatic2",
+	[svc_spawnstaticsound2] = "svc_spawnstaticsound2",
+
+	[svc_showlmp] = "svc_showlmp",
+	[svc_hidelmp] = "svc_hidelmp",
+	[svc_skybox] = "svc_skybox",
+	[svc_skyboxsize] = "svc_skyboxsize",
+	[svc_fog] = "svc_fog",
 };
 
 //=============================================================================
@@ -823,9 +829,9 @@ void CL_ParseServerMessage (void)
 			cl.cdtrack = MSG_ReadByte ();
 			MSG_ReadByte();	/* looptrack */
 			if((cls.demoplayback || cls.demorecording) && cls.forcetrack > 0)
-				playcd(cls.forcetrack, 1);
+				playcd(cls.forcetrack, true);
 			else
-				playcd(cl.cdtrack, 1);
+				playcd(cl.cdtrack, true);
 			break;
 
 		case svc_intermission:
@@ -846,6 +852,40 @@ void CL_ParseServerMessage (void)
 			cl.completed_time = cl.time;
 			vid.recalc_refdef = true;	// go to full screen
 			SCR_CenterPrint (MSG_ReadString ());
+			break;
+
+		case svc_showlmp:
+			MSG_ReadString(); // iconlabel
+			MSG_ReadString(); // lmpfile
+			MSG_ReadByte(); // x
+			MSG_ReadByte(); // y
+			break;
+
+		case svc_hidelmp:
+			MSG_ReadString(); // iconlabel
+			break;
+
+		case svc_skybox:
+			/* FIXME(sigrid): skyboxes */
+			MSG_ReadString();
+			break;
+
+		case svc_skyboxsize:
+			MSG_ReadCoord();
+			break;
+
+		case svc_fog:
+			if(MSG_ReadByte() != 0){
+				Cbuf_InsertText(va(
+					"fog %.5f %f %f %f\n",
+					MSG_ReadFloat(),
+					MSG_ReadByte() / 255.0,
+					MSG_ReadByte() / 255.0,
+					MSG_ReadByte() / 255.0
+				));
+			}else{
+				Cbuf_InsertText("fog 0");
+			}
 			break;
 
 		case svc_sellscreen:
