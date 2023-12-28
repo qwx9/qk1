@@ -130,9 +130,7 @@ bool	Cvar_Command (void)
 		return true;
 	}
 
-	setcvar (v->name, Cmd_Argv(1));
-	if(v->cb != nil)
-		v->cb(v);
+	setcvar(v->name, Cmd_Argv(1));
 	return true;
 }
 
@@ -154,6 +152,8 @@ setcvar(char *k, char *v)
 	cv->value = atof(v);
 	if(n && cv->server && sv.active)
 		SV_BroadcastPrintf("\"%s\" changed to \"%s\"\n", cv->name, cv->string);
+	if(cv->cb != nil)
+		cv->cb(cv);
 }
 
 void
