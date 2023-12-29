@@ -69,9 +69,7 @@ void Host_EndGame (char *fmt, ...)
 		Host_ShutdownServer(false);
 	if(cls.state == ca_dedicated)
 		fatal("Host_EndGame: %s\n", s);	// dedicated servers exit
-	if(cls.demonum != -1)
-		CL_NextDemo();
-	else
+	if(!CL_NextDemo())
 		CL_Disconnect();
 
 	longjmp(host_abortserver, 1);

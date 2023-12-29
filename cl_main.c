@@ -112,10 +112,9 @@ void CL_Disconnect (void)
 	SCR_BringDownConsole ();
 
 	// if running a local server, shut it down
-	if (cls.demoplayback)
-		abortdemo ();
-	else if (cls.state == ca_connected)
-	{
+	if(cls.demoplayback)
+		abortdemo();
+	else if (cls.state == ca_connected){
 		if (cls.demorecording)
 			stopdemo();
 
@@ -219,29 +218,28 @@ CL_NextDemo
 Called to play the next demo in the demo loop
 =====================
 */
-void CL_NextDemo (void)
+bool
+CL_NextDemo (void)
 {
-	char	str[1024];
+	char str[1024];
 
-	if (cls.demonum == -1)
-		return;		// don't play demos
+	if(cls.demonum < 0)
+		return false; // don't play demos
 
-	SCR_BeginLoadingPlaque ();
-
-	if (!cls.demos[cls.demonum][0] || cls.demonum == MAX_DEMOS)
-	{
+	if(!cls.demos[cls.demonum][0] || cls.demonum == MAX_DEMOS){
 		cls.demonum = 0;
-		if (!cls.demos[cls.demonum][0])
-		{
-			Con_Printf ("No demos listed with startdemos\n");
+		if(!cls.demos[cls.demonum][0]){
+			Con_Printf("No demos listed with startdemos\n");
 			cls.demonum = -1;
-			return;
+			return false;
 		}
 	}
 
-	sprint (str,"playdemo %s\n", cls.demos[cls.demonum]);
-	Cbuf_InsertText (str);
+	SCR_BeginLoadingPlaque();
+	sprint(str, "playdemo %s\n", cls.demos[cls.demonum]);
+	Cbuf_InsertText(str);
 	cls.demonum++;
+	return true;
 }
 
 /*

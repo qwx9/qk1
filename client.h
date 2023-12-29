@@ -262,7 +262,7 @@ void CL_Signon4 (void);
 
 void CL_Disconnect (void);
 void CL_Disconnect_f (void);
-void CL_NextDemo (void);
+bool CL_NextDemo (void);
 
 #define			MAX_VISEDICTS	65536
 extern	int				cl_numvisedicts;
