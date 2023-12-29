@@ -129,16 +129,12 @@ loadsfx(Sfx *sfx)
 	if(sc = Cache_Check(&sfx->cu), sc != nil)
 		return sc;
 	u = loadstklmp(va("sound/%s", sfx->s), buf, sizeof buf, &len);
-	if(u == nil){
-		Con_DPrintf("loadsfx: %r\n");
-		return nil;
-	}
-	if(wavinfo(u, len, &info) != 0){
+	if(u == nil || wavinfo(u, len, &info) != 0){
 		Con_Printf("loadsfx: %s: %s\n", sfx->s, lerr());
 		return nil;
 	}
 	if(info.channels != 1){
-		Con_DPrintf("loadsfx: non mono wave %s\n", sfx->s);
+		Con_DPrintf("loadsfx: %s: non mono wave\n", sfx->s);
 		return nil;
 	}
 	stepscale = (float)info.rate / Srate;

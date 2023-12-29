@@ -186,7 +186,7 @@ static long
 eread(FILE *bf, void *u, long n)
 {
 	if((long)fread(u, 1, n, bf) != n)
-		fatal("eread: short read: %s", lerr());
+		fatal("eread: short read: eof=%d error=%d", feof(bf), ferror(bf));
 	return n;
 }
 
@@ -242,7 +242,7 @@ static void
 ewrite(FILE *bf, void *u, long n)
 {
 	if((long)fwrite(u, 1, n, bf) != n)
-		fatal("eread: short write: %r");
+		fatal("ewrite: short write: %s", lerr());
 }
 
 static void
@@ -444,7 +444,7 @@ loadpoints(void)
 
 	bf = openlmp(va("maps/%s.pts", sv.name), &n);
 	if(bf == nil){
-		Con_Printf(va("loadpoints: %r\n"));
+		Con_Printf(va("loadpoints: %s\n", lerr()));
 		return;
 	}
 	nv = 0;
@@ -782,9 +782,9 @@ readdm(void)
 	n = fread(net_message.data, 1, net_message.cursize, demobf);
 	demoofs = ftell(demobf);
 	if(n < 0)
-		Con_DPrintf("readdm: bad read: %r\n");
+		Con_DPrintf("readdm: bad read: %s\n", lerr());
 	if(n != net_message.cursize){
-		Con_DPrintf("readdm: short read: %r\n");
+		Con_DPrintf("readdm: short read: %s\n", lerr());
 		n = -1;
 	}
 	return n;
@@ -889,7 +889,7 @@ pakdir(char *d)
 		snprint(f, sizeof f, "%s/pak%d.pak", d, n);
 		p = pak(f);
 		if(p == nil){
-			Con_DPrintf("pakdir: %r\n");
+			Con_DPrintf("pakdir: %s\n", lerr());
 			break;
 		}
 		pl = Hunk_Alloc(sizeof *pl);
@@ -935,7 +935,7 @@ chkreg(void)
 	if(bf == nil){
 		Con_DPrintf("chkreg: shareware version\n");
 		if(notid1)
-			fatal("chkreg: phase error -- %r");
+			fatal("chkreg: phase error -- %s", lerr());
 		return;
 	}
 	p = pop;
