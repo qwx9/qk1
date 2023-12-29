@@ -38,6 +38,7 @@ static cvar_t v_ipitch_level = {"v_ipitch_level", "0.3", false};
 static cvar_t v_idlescale = {"v_idlescale", "0", false};
 
 static cvar_t crosshair = {"crosshair", "1", true};
+static cvar_t crosshair_shape = {"crosshair_shape", "0", true};
 static cvar_t cl_crossx = {"cl_crossx", "0", false};
 static cvar_t cl_crossy = {"cl_crossy", "0", false};
 
@@ -885,8 +886,10 @@ void V_RenderView (void)
 	}
 
 	if (crosshair.value)
-		Draw_Character (scr_vrect.x + scr_vrect.width/2 + cl_crossx.value,
-			scr_vrect.y + scr_vrect.height/2 + cl_crossy.value, '+');
+		Draw_Character(
+			scr_vrect.x + scr_vrect.width/2 + cl_crossx.value,
+			scr_vrect.y + scr_vrect.height/2 + cl_crossy.value,
+			crosshair_shape.value < 1 ? '+' : '\xf');
 }
 
 //============================================================================
@@ -917,6 +920,7 @@ void V_Init (void)
 
 	Cvar_RegisterVariable (&v_idlescale);
 	Cvar_RegisterVariable (&crosshair);
+	Cvar_RegisterVariable (&crosshair_shape);
 	Cvar_RegisterVariable (&cl_crossx);
 	Cvar_RegisterVariable (&cl_crossy);
 
