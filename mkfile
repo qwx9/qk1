@@ -5,21 +5,18 @@ TARG=quake
 CFLAGS=$CFLAGS -D__plan9__ -D__${objtype}__ -Iplan9
 
 OFILES=\
-	span`{test -f span_$objtype.s && echo -n _$objtype}.$O\
-	span_alpha.$O\
 	cd.$O\
 	cd_plan9.$O\
+	chase.$O\
 	cl_demo.$O\
 	cl_input.$O\
 	cl_main.$O\
 	cl_parse.$O\
 	cl_tent.$O\
-	chase.$O\
 	cmd.$O\
 	common.$O\
 	console.$O\
 	cvar.$O\
-	draw.$O\
 	d_alpha.$O\
 	d_edge.$O\
 	d_init.$O\
@@ -31,6 +28,7 @@ OFILES=\
 	d_sprite.$O\
 	d_surf.$O\
 	d_vars.$O\
+	draw.$O\
 	fs.$O\
 	host.$O\
 	host_cmd.$O\
@@ -38,7 +36,7 @@ OFILES=\
 	i_resize.$O\
 	i_tga.$O\
 	i_wad.$O\
-	in.$O\
+	in_plan9.$O\
 	isnanf.$O\
 	keys.$O\
 	m_dotproduct`{test -f span_$objtype.s && echo -n _$objtype}.$O\
@@ -52,21 +50,20 @@ OFILES=\
 	model_bsp30.$O\
 	model_sprite.$O\
 	nanosec.$O\
-	net_dgrm.$O\
+	net_dgrm_plan9.$O\
 	net_loop.$O\
 	net_main.$O\
-	net_udp.$O\
+	net_udp_plan9.$O\
 	pr_cmds.$O\
 	pr_edict.$O\
 	pr_exec.$O\
 	protocol.$O\
-	qk1.$O\
 	r_aclip.$O\
 	r_alias.$O\
 	r_bsp.$O\
 	r_draw.$O\
-	r_efrag.$O\
 	r_edge.$O\
+	r_efrag.$O\
 	r_fog.$O\
 	r_light.$O\
 	r_main.$O\
@@ -75,16 +72,19 @@ OFILES=\
 	r_sky.$O\
 	r_sprite.$O\
 	r_surf.$O\
-	screen.$O\
 	sbar.$O\
-	snd.$O\
+	screen.$O\
+	snd_mix.$O\
 	snd_plan9.$O\
 	softfloat.$O\
+	span_alpha.$O\
+	span`{test -f span_$objtype.s && echo -n _$objtype}.$O\
 	sv_main.$O\
 	sv_move.$O\
 	sv_phys.$O\
 	sv_user.$O\
-	vid.$O\
+	sys_plan9.$O\
+	vid_plan9.$O\
 	view.$O\
 	wav.$O\
 	world.$O\

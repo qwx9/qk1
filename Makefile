@@ -43,6 +43,7 @@ OBJS=\
 	i_resize.o\
 	i_tga.o\
 	i_wad.o\
+	in_sdl.o\
 	keys.o\
 	m_dotproduct.o\
 	mathlib.o\
@@ -56,6 +57,7 @@ OBJS=\
 	model_sprite.o\
 	net_loop.o\
 	net_main.o\
+	net_udp_unix.o\
 	pal.o\
 	pr_cmds.o\
 	pr_edict.o\
@@ -77,6 +79,8 @@ OBJS=\
 	r_surf.o\
 	sbar.o\
 	screen.o\
+	seprint.o\
+	snd_openal.o\
 	softfloat.o\
 	span.o\
 	span_alpha.o\
@@ -84,12 +88,8 @@ OBJS=\
 	sv_move.o\
 	sv_phys.o\
 	sv_user.o\
-	unix/in.o\
-	unix/net_udp.o\
-	unix/qk1.o\
-	unix/seprint.o\
-	unix/snd_openal.o\
-	unix/vid.o\
+	sys_unix.o\
+	vid_sdl.o\
 	view.o\
 	wav.o\
 	world.o\
