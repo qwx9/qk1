@@ -461,8 +461,8 @@ PF_random(pr_t *pr)
 	static long xand;
 
 	if(xand == 0){
-		if((RAND_MAX & ((ulong)RAND_MAX+1)) == 0){
-			xmax = (ulong)RAND_MAX+1;
+		if((RAND_MAX & ((unsigned)RAND_MAX+1)) == 0){
+			xmax = (unsigned)RAND_MAX+1;
 			xand = RAND_MAX;
 		}else{
 			xmax = 0x8000;

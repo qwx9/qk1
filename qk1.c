@@ -60,7 +60,7 @@ fatal(char *fmt, ...)
 }
 
 void *
-emalloc(ulong n)
+emalloc(long n)
 {
 	void *p;
 

@@ -55,7 +55,7 @@ int	opendm(char*, int);
 void	initfs(char **paths);
 #pragma varargck	argpos	fatal	1
 _Noreturn void	fatal(char*, ...);
-void*	emalloc(ulong);
+void*	emalloc(long);
 vlong	flen(int);
 double	dtime(void);
 void	game_shutdown(void);

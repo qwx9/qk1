@@ -100,8 +100,8 @@ struct Landrv{
 	char*	(*AddrToString)(Addr *);
 	int	(*getip)(char *, Addr *);
 	int	(*AddrCompare)(Addr *, Addr *);
-	ushort	(*GetSocketPort)(Addr *);
-	void	(*SetSocketPort)(Addr *, ushort);
+	u16int	(*GetSocketPort)(Addr *);
+	void	(*SetSocketPort)(Addr *, u16int);
 };
 extern int net_numlandrivers;
 extern Landrv landrv[MAX_NET_DRIVERS];
@@ -219,5 +219,5 @@ int	getnewcon(Addr*);
 char*	UDP_AddrToString(Addr *);
 int	getip(char *, Addr *);
 int	UDP_AddrCompare(Addr *, Addr *);
-ushort	UDP_GetSocketPort(Addr *);
-void	UDP_SetSocketPort(Addr *, ushort);
+u16int	UDP_GetSocketPort(Addr *);
+void	UDP_SetSocketPort(Addr *, u16int);

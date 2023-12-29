@@ -676,7 +676,7 @@ void CL_ParseServerMessage (void)
 			break;
 
 		case svc_clientdata:
-			CL_ParseClientdata((ushort)MSG_ReadShort());
+			CL_ParseClientdata((u16int)MSG_ReadShort());
 			break;
 
 		case svc_version:

@@ -583,7 +583,7 @@ end:
 static void
 dumpdefs(FILE *bf, pr_t *pr)
 {
-	ushort t;
+	int t;
 	ddef_t *d, *de;
 
 	fprintf(bf, "{\n");

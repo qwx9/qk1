@@ -348,12 +348,12 @@ int UDP_AddrCompare (Addr *addr1, Addr *addr2)
 
 //=============================================================================
 
-ushort UDP_GetSocketPort (Addr *addr)
+u16int UDP_GetSocketPort (Addr *addr)
 {
 	return ntohs(((struct sockaddr_in *)addr)->sin_port);
 }
 
-void UDP_SetSocketPort (Addr *addr, ushort port)
+void UDP_SetSocketPort (Addr *addr, u16int port)
 {
 	((struct sockaddr_in *)addr)->sin_port = htons(port);
 }
