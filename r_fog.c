@@ -51,7 +51,7 @@ fog(void)
 		r_fog_data.c2 = 0xff * clamp(x, 0.0, 1.0);
 		x = atof(Cmd_Argv(i++));
 		r_fog_data.c1 = 0xff * clamp(x, 0.0, 1.0);
-		x = atof(Cmd_Argv(i++));
+		x = atof(Cmd_Argv(i));
 		r_fog_data.c0 = 0xff * clamp(x, 0.0, 1.0);
 		break;
 	}
