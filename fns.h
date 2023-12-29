@@ -41,6 +41,8 @@ void*	loadcachelmp(char *, mem_user_t *);
 void*	loadstklmp(char *, void *, int, int *);
 void	loadpoints(void);
 FILE*	openlmp(char *f, int *len);
+FILE*	createfile(char *path);
+void	removefile(char *path);
 void	dumpcfg(void);
 void	savnames(void);
 int	dumpsav(char*, char*);
@@ -61,6 +63,7 @@ uvlong	nanosec(void);
 
 char *lerr(void);
 int	sys_mkdir(char *path);
+char *sys_timestamp(void);
 
 long sndqueued(void);
 void sndstop(void);

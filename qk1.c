@@ -22,6 +22,23 @@ sys_mkdir(char *path)
 }
 
 char *
+sys_timestamp(void)
+{
+	static char ts[32];
+	Tm *tm;
+	long t;
+
+	if((t = time(nil)) < 0 || (tm = localtime(t)) == nil)
+		return nil;
+	snprint(ts, sizeof(ts),
+		"%04d%02d%02d-%02d%02d%02d",
+		tm->year + 1900, tm->mon + 1, tm->mday, tm->hour, tm->min, tm->sec
+	);
+
+	return ts;
+}
+
+char *
 lerr(void)
 {
 	static char err[ERRMAX];

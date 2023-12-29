@@ -958,6 +958,7 @@ PF_find(pr_t *pr)
 		PR_RunError(pr, "PF_find: bad search string");
 	if((def = ED_FieldAtOfs(pr, f)) == nil)
 		PR_RunError(pr, "PF_find: invalid field offset %d", f);
+	USED(def);
 	// FIXME(sigrid): apparently this is common
 	//if(def->type != ev_string)
 	//	Con_DPrintf("PF_find: not a string field: %s", PR_Str(pr, def->s_name));

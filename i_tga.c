@@ -137,6 +137,38 @@ getpixel(Tga *h, pixel_t *out, byte *p, int *sz)
 	return p + h->pxsz;
 }
 
+int
+TGA_Encode(byte **out, char *id, pixel_t *pix, int w, int h)
+{
+	int sz, n, i;
+	byte *p;
+
+	n = id == nil ? 0 : strlen(id);
+	sz = HeaderSize + n + w*h*3;
+	*out = p = emalloc(sz);
+	*p++ = n; /* idlen */
+	*p++ = 0; /* paltype */
+	*p++ = ImgTypeTrueColor; /* imgtype */
+	*p++ = 0; *p++ = 0; /* palfirst */
+	*p++ = 0; *p++ = 0; /* pallen */
+	*p++ = 0; /* palbpp */
+	*p++ = 0; *p++ = 0; /* ox */
+	*p++ = 0; *p++ = 0; /* oy */
+	*p++ = w & 0xff; *p++ = w>>8; /* w */
+	*p++ = h & 0xff; *p++ = h>>8; /* h */
+	*p++ = 24; /* bpp */
+	*p++ = FlagOriginTop; /* flags */
+	memmove(p, id, n); p += n; /* id */
+	n = w * h;
+	for(i = 0; i < n; i++){
+		*p++ = pix[i] >> 0;
+		*p++ = pix[i] >> 8;
+		*p++ = pix[i] >> 16;
+	}
+
+	return sz;
+}
+
 qpic_t *
 TGA_Decode(byte *in, int sz, bool *premult)
 {

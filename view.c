@@ -894,6 +894,39 @@ void V_RenderView (void)
 
 //============================================================================
 
+static void
+screenshot(void)
+{
+	static char opath[48];
+	static int pathcnt = 2;
+	char path[48], *t;
+	FILE *f;
+	byte *b;
+	int n;
+
+	if((t = sys_timestamp()) == nil){
+err:
+		Con_Printf("screenshot: %s\n", lerr());
+		return;
+	}
+	n = snprint(path, sizeof(path), "screenshots/%s.tga", t);
+	if(strncmp(opath, path, n-4) == 0)
+		snprint(path+n-4, sizeof(path)-(n-4), "x%d.tga", pathcnt++);
+	else
+		pathcnt = 2;
+	if((f = createfile(path)) == nil)
+		goto err;
+	if((n = TGA_Encode(&b, "qk1", vid.buffer, vid.width, vid.height)) > 0)
+		n = fwrite(b, n, 1, f);
+	free(b);
+	fclose(f);
+	if(n != 1){
+		removefile(path);
+		goto err;
+	}
+	strcpy(opath, path);
+}
+
 /*
 =============
 V_Init
@@ -901,9 +934,10 @@ V_Init
 */
 void V_Init (void)
 {
-	Cmd_AddCommand ("v_cshift", V_cshift_f);
-	Cmd_AddCommand ("bf", V_BonusFlash_f);
-	Cmd_AddCommand ("centerview", V_StartPitchDrift);
+	Cmd_AddCommand("v_cshift", V_cshift_f);
+	Cmd_AddCommand("bf", V_BonusFlash_f);
+	Cmd_AddCommand("centerview", V_StartPitchDrift);
+	Cmd_AddCommand("screenshot", screenshot);
 
 	Cvar_RegisterVariable (&lcd_x);
 	Cvar_RegisterVariable (&lcd_yaw);
@@ -940,5 +974,3 @@ void V_Init (void)
 	BuildGammaTable (1.0);	// no gamma yet
 	Cvar_RegisterVariable (&v_gamma);
 }
-
-

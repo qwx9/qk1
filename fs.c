@@ -286,21 +286,52 @@ mkpath(char *path)
 	int r;
 
 	d = path;
-	if(d == nil || *d == 0)
+	if(d == nil || *d == 0){
+		werrstr("mkpath: invalid path");
 		return -1;
+	}
 	if(*d == '/')
 		d++;
 	while(*d != 0){
 		if(*d == '/'){
 			*d = 0;
-			r = sys_mkdir(path);
+			if((r = sys_mkdir(path)) != 0)
+				werrstr("mkpath: %s: %s", path, lerr());
 			*d = '/';
 			if(r < 0)
 				return -1;
 		}
 		d++;
 	}
-	return sys_mkdir(path);
+	if(sys_mkdir(path) < 0){
+		werrstr("mkpath: %s: %s", path, lerr());
+		return -1;
+	}
+	return 0;
+}
+
+FILE *
+createfile(char *path)
+{
+	char *s;
+	int r;
+
+	path = va("%s/%s", fsdir, path);
+	if((s = strrchr(path, '/')) != nil){
+		*s = 0;
+		r = mkpath(path);
+		*s = '/';
+		if(r != 0)
+			return nil;
+	}
+
+	return fopen(path, "wb");
+}
+
+void
+removefile(char *path)
+{
+	remove(va("%s/%s", fsdir, path));
 }
 
 static void

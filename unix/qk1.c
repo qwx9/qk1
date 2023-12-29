@@ -12,7 +12,6 @@ char *
 lerr(void)
 {
 	static char lasterrcopy[256];
-
 	if(*lasterr == 0 && errno != 0)
 		return strerror(errno);
 	strcpy(lasterrcopy, lasterr);
@@ -22,7 +21,24 @@ lerr(void)
 int
 sys_mkdir(char *path)
 {
-	return mkdir(path, 0770);
+	return (mkdir(path, 0770) == 0 || errno == EEXIST) ? 0 : -1;
+}
+
+char *
+sys_timestamp(void)
+{
+	static char ts[32];
+	struct tm *tm;
+	time_t t;
+
+	if((t = time(nil)) == (time_t)-1 || (tm = localtime(&t)) == nil)
+		return nil;
+	snprint(ts, sizeof(ts),
+		"%04d%02d%02d-%02d%02d%02d",
+		tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday, tm->tm_hour, tm->tm_min, tm->tm_sec
+	);
+
+	return ts;
 }
 
 int
