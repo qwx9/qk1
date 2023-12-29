@@ -33,7 +33,7 @@ struct Chan{
 static Chan *chans, *che;
 
 static int ainit, mixbufi;
-static uchar mixbufs[2][Ssamp*Sblk], *mixbuf;
+static byte mixbufs[2][Ssamp*Sblk], *mixbuf;
 static vlong sndt, sampt;
 static int nsamp;
 static int sampbuf[Ssamp*2];
@@ -93,8 +93,7 @@ resample(sfxcache_t *sc, byte *data, float stepscale)
 	{
 // fast special case
 		for (i=0 ; i<outcount ; i++)
-			((signed char *)sc->data)[i]
-			= (int)( (unsigned char)(data[i]) - 128);
+			((s8int*)sc->data)[i] = (int)((u8int)(data[i]) - 128);
 	}
 	else
 	{
@@ -106,13 +105,13 @@ resample(sfxcache_t *sc, byte *data, float stepscale)
 			srcsample = samplefrac >> 8;
 			samplefrac += fracstep;
 			if (inwidth == 2)
-				sample = LittleShort ( ((short *)data)[srcsample] );
+				sample = LittleShort ( ((short*)data)[srcsample] );
 			else
-				sample = (int)( (unsigned char)(data[srcsample]) - 128) << 8;
+				sample = (int)( (u8int)(data[srcsample]) - 128) << 8;
 			if (sc->width == 2)
-				((short *)sc->data)[i] = sample;
+				((short*)sc->data)[i] = sample;
 			else
-				((signed char *)sc->data)[i] = sample >> 8;
+				((s8int*)sc->data)[i] = sample >> 8;
 		}
 	}
 }
@@ -124,7 +123,7 @@ loadsfx(Sfx *sfx)
 	int len;
 	float stepscale;
 	sfxcache_t *sc;
-	uchar *u, buf[1024];	/* avoid dirtying the cache heap */
+	byte *u, buf[1024];	/* avoid dirtying the cache heap */
 
 	if(sc = Cache_Check(&sfx->cu), sc != nil)
 		return sc;
@@ -157,7 +156,7 @@ static void
 sndout(void)
 {
 	int v, *pb, *pe;
-	uchar *p;
+	byte *p;
 	double vol;
 
 	vol = volume.value;
@@ -180,7 +179,7 @@ static void
 sample8(Chan *c, void *d, int n)
 {
 	int v, *pb, *pe, *ls, *rs;
-	uchar *p;
+	byte *p;
 
 	if(c->lvol > 255)
 		c->lvol = 255;
@@ -188,7 +187,7 @@ sample8(Chan *c, void *d, int n)
 		c->rvol = 255;
 	ls = scalt[c->lvol >> 3];
 	rs = scalt[c->rvol >> 3];
-	p = (uchar *)d + c->p;
+	p = (byte *)d + c->p;
 	pb = sampbuf;
 	pe = sampbuf + n * 2;
 	while(pb < pe){
@@ -280,7 +279,7 @@ spatialize(Chan *c)
 static void
 ambs(void)
 {
-	uchar *av;
+	byte *av;
 	float vol;
 	Chan *c, *e;
 	mleaf_t *l;

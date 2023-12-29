@@ -1,4 +1,4 @@
-void	setpal(uchar*);
+void	setpal(byte *);
 void	stopfb(void);
 void	flipfb(void);
 void	initfb(void);
@@ -67,7 +67,7 @@ char *sys_timestamp(void);
 
 long sndqueued(void);
 void sndstop(void);
-void sndwrite(uchar *buf, long sz);
+void sndwrite(byte *buf, long sz);
 void sndclose(void);
 int sndopen(void);
 

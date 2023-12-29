@@ -3,7 +3,7 @@
 
 static int afd;
 static QLock alock;
-static uchar *mixbuf;
+static byte *mixbuf;
 static Channel *ach;
 
 long
@@ -42,7 +42,7 @@ sndstop(void)
 }
 
 void
-sndwrite(uchar *buf, long sz)
+sndwrite(byte *buf, long sz)
 {
 	if(ach == nil)
 		return;

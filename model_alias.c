@@ -105,12 +105,12 @@ Mod_LoadAliasGroup(
 static void *
 Mod_LoadAliasSkin(void * pin, int *pskinindex, int skinsize, aliashdr_t *pheader)
 {
-	uchar *pinskin;
+	byte *pinskin;
 	pixel_t *pskin;
 
 	*pskinindex = Hunk_From(pheader);
 	pskin = Hunk_Alloc(skinsize*4);
-	pinskin = (uchar *)pin;
+	pinskin = (byte *)pin;
 	torgbx(pinskin, pskin, skinsize);
 	pinskin += skinsize;
 	return (void *)pinskin;

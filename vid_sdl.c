@@ -94,10 +94,10 @@ flipfb(void)
 }
 
 void
-setpal(uchar *p0)
+setpal(byte *p0)
 {
 	int x;
-	uchar *p;
+	byte *p;
 
 	for(p = p0, x = 0; x < 256; x++, p += 3)
 		q1pal[x] = (x < 256-32 ? 0xff : 0)<<24 | p[0]<<16 | p[1]<<8 | p[2];

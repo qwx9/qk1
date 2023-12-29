@@ -1105,7 +1105,7 @@ Tell all the clients that the server is changing levels
 */
 void SV_SendReconnect (void)
 {
-	uchar	data[128];
+	byte data[128];
 	sizebuf_t	msg;
 
 	msg.data = data;

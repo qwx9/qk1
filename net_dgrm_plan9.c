@@ -19,7 +19,7 @@ static int droppedDatagrams;
 
 static int myDriverLevel;
 
-static uchar netbuf[4+4+NET_MAXMESSAGE];
+static byte netbuf[4+4+NET_MAXMESSAGE];
 
 extern int m_return_state;
 extern int m_state;
@@ -27,7 +27,7 @@ extern bool m_return_onerror;
 extern char m_return_reason[32];
 
 static int
-netpack(Addr *a, int f, uint seq, uchar *buf, int n)
+netpack(Addr *a, int f, uint seq, byte *buf, int n)
 {
 	hnputl(netbuf, NET_HEADERSIZE + n | f);
 	hnputl(netbuf+4, seq);

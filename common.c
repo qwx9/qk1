@@ -243,7 +243,7 @@ int MSG_ReadByte (void)
 		return -1;
 	}
 
-	c = (unsigned char)net_message.data[msg_readcount];
+	c = (byte)net_message.data[msg_readcount];
 	msg_readcount++;
 
 	return c;
@@ -417,7 +417,7 @@ SZ_Print(sizebuf_t *buf, char *data)
 	if(buf->data[buf->cursize-1])
 		memcpy(SZ_GetSpace(buf, len), data, len);	// no trailing 0
 	else
-		memcpy((uchar *)SZ_GetSpace(buf, len-1)-1, data, len);	// write over trailing 0
+		memcpy((byte *)SZ_GetSpace(buf, len-1)-1, data, len);	// write over trailing 0
 }
 
 /*

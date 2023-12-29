@@ -11,7 +11,7 @@ int
 UDP_Init(void)
 {
 	char *s;
-	uchar ip[IPaddrlen];
+	byte ip[IPaddrlen];
 
 	fmtinstall('I', eipfmt);
 	if(strcmp(hostname.string, "UNNAMED") == 0)
@@ -126,7 +126,7 @@ udpread(byte *buf, int len, Addr *a)
 }
 
 int
-udpwrite(uchar *buf, int len, Addr *a)
+udpwrite(byte *buf, int len, Addr *a)
 {
 	if(write(a->fd, buf, len) != len){
 		Con_DPrintf("udpwrite: %r\n");
@@ -148,7 +148,7 @@ UDP_AddrToString(Addr *a)
 }
 
 int
-UDP_Broadcast(uchar *buf, int len)
+UDP_Broadcast(byte *buf, int len)
 {
 	int fd;
 	char ip[46];
@@ -214,17 +214,14 @@ UDP_AddrCompare(Addr *a1, Addr *a2)
 	return 0;
 }
 
-ushort
+u16int
 UDP_GetSocketPort(Addr *a)
 {
-	ushort p;
-
-	p = atoi(a->srv);
-	return p;
+	return atoi(a->srv);
 }
 
 void
-UDP_SetSocketPort(Addr *a, ushort port)
+UDP_SetSocketPort(Addr *a, u16int port)
 {
 	snprint(a->srv, sizeof a->srv, "%hud", port);	/* was htons'ed */
 }

@@ -290,7 +290,7 @@ ambs(vec3_t org)
 	float vol, *av;
 	ALint state;
 	alchan_t *ch;
-	uchar *asl;
+	byte *asl;
 	mleaf_t *l;
 	albuf_t *b;
 	Sfx *sfx;

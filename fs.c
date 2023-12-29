@@ -99,7 +99,7 @@ static u16int crct[] ={
 
 static int notid1;
 static int loadsize;
-static uchar *loadbuf;
+static byte *loadbuf;
 static mem_user_t *loadcache;
 static FILE *demobf;
 static vlong demoofs;
@@ -248,7 +248,7 @@ ewrite(FILE *bf, void *u, long n)
 static void
 put32(FILE *bf, u32int v)
 {
-	uchar u[4];
+	byte u[4];
 
 	PBIT32(u, v);
 	ewrite(bf, u, 4);
@@ -383,12 +383,12 @@ openlmp(char *f, int *len)
 	return nil;
 }
 
-static uchar *
+static byte *
 loadlmp(char *f, int mth, int *n)
 {
 	int m;
 	char r[32];
-	uchar *buf;
+	byte *buf;
 	FILE *bf;
 
 	bf = openlmp(f, &m);
@@ -551,14 +551,14 @@ dumpedict(FILE *bf, pr_t *pr, edict_t *ed)
 {
 	int *vp, *ve;
 	char *s;
-	uchar *ev;
+	byte *ev;
 	ddef_t *d, *de;
 	eval_t *v;
 
 	fprintf(bf, "{\n");
 	if(ed->free)
 		goto end;
-	ev = (uchar *)&ed->v;
+	ev = (byte *)&ed->v;
 	de = pr->fielddefs + pr->numfielddefs;
 	for(d=pr->fielddefs+1; d<de; d++){
 		s = PR_Str(pr, d->s_name);
@@ -829,7 +829,7 @@ static Pak *
 pak(char *f)
 {
 	int n, ofs, len, nlmp;
-	uchar u[8];
+	byte u[8];
 	FILE *bf;
 	Lump *l;
 	Pak *p;
