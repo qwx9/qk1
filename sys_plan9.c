@@ -5,6 +5,20 @@ int mainstacksize = 1*1024*1024;
 char *netmtpt = "/net";
 char *game;
 int debug;
+static const char *disabled[32];
+static int ndisabled;
+
+bool
+isdisabled(char *s)
+{
+	int i;
+
+	for(i = 0; i < ndisabled; i++){
+		if(strcmp(disabled[i], s) == 0)
+			return true;
+	}
+	return false;
+}
 
 int
 sys_mkdir(char *path)
@@ -110,7 +124,7 @@ croak(void *, char *note)
 static void
 usage(void)
 {
-	fprint(2, "usage: %s [-d] [-g game] [-m kB] [-x netmtpt]\n", argv0);
+	fprint(2, "usage: %s [-d] [-g game] [-m kB] [-x netmtpt] [-N cd|snd]\n", argv0);
 	exits("usage");
 }
 
@@ -137,6 +151,10 @@ threadmain(int argc, char **argv)
 		break;
 	case 'x':
 		netmtpt = EARGF(usage());
+		break;
+	case 'N':
+		if(ndisabled < nelem(disabled))
+			disabled[ndisabled++] = EARGF(usage());
 		break;
 	default: usage();
 	}ARGEND

@@ -8,6 +8,20 @@
 char *game;
 int debug;
 char lasterr[256] = {0};
+static const char *disabled[32];
+static int ndisabled;
+
+bool
+isdisabled(char *s)
+{
+	int i;
+
+	for(i = 0; i < ndisabled; i++){
+		if(strcmp(disabled[i], s) == 0)
+			return true;
+	}
+	return false;
+}
 
 char *
 lerr(void)
@@ -113,10 +127,14 @@ main(int argc, char **argv)
 
 	parg_init(&ps);
 	nargs = 0;
-	while((c = parg_getopt(&ps, argc, argv, "Ddg:")) >= 0){
+	while((c = parg_getopt(&ps, argc, argv, "Ddg:N:")) >= 0){
 		switch(c){
 		case 1:
 			argv[nargs++] = (char*)ps.optarg;
+			break;
+		case 'N':
+			if(ndisabled < nelem(disabled))
+				disabled[ndisabled++] = ps.optarg;
 			break;
 		case 'D':
 			debug++;

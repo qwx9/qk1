@@ -663,6 +663,9 @@ sfxend(void)
 	Sfx *sfx;
 	int i;
 
+	if(dev == nil)
+		return;
+
 	ambsfx[Ambwater] = precachesfx("ambience/water1.wav");
 	ambsfx[Ambsky] = precachesfx("ambience/wind2.wav");
 	for(i = 0, sfx = known_sfx; i < num_sfx; i++, sfx++){
@@ -678,6 +681,9 @@ sfxend(void)
 void
 stepcd(void)
 {
+	if(dev == nil || !cdenabled)
+		return;
+
 	if(track.stop)
 		stopcd();
 	else if(track.playing){
@@ -747,6 +753,9 @@ playcd(int nt, bool loop)
 	int s[2], in[2];
 	pid_t pid;
 	FILE *f;
+
+	if(dev == nil || !cdenabled)
+		return;
 
 	stopcd();
 	if(qalBufferCallbackSOFT == nil)
@@ -823,13 +832,19 @@ err:
 void
 resumecd(void)
 {
-	alSourcePlay(track.src); ALERR();
+	if(track.playing){
+		alSourcePlay(track.src);
+		ALERR();
+	}
 }
 
 void
 pausecd(void)
 {
-	alSourcePause(track.src); ALERR();
+	if(track.playing){
+		alSourcePause(track.src);
+		ALERR();
+	}
 }
 
 int
@@ -865,9 +880,6 @@ shutcd(void)
 int
 initsnd(void)
 {
-	s_al_dev.cb = s_al_hrtf.cb = alvarcb;
-	s_al_doppler_factor.cb = aldopplercb;
-
 	Cvar_RegisterVariable(&volume);
 	Cvar_RegisterVariable(&bgmvolume);
 	Cvar_RegisterVariable(&ambient_level);
@@ -881,9 +893,14 @@ initsnd(void)
 	Cmd_AddCommand("soundlist", sfxlist);
 	Cmd_AddCommand("cd", cdcmd);
 
-	alinit(nil);
-	known_sfx = Hunk_Alloc(MAX_SOUNDS * sizeof *known_sfx);
-	num_sfx = 0;
+	if(!isdisabled("snd")){
+		s_al_dev.cb = s_al_hrtf.cb = alvarcb;
+		s_al_doppler_factor.cb = aldopplercb;
+		alinit(nil);
+		known_sfx = Hunk_Alloc(MAX_SOUNDS * sizeof *known_sfx);
+		num_sfx = 0;
+		cdenabled = !isdisabled("cd");
+	}
 
 	return 0;
 }

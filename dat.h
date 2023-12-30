@@ -59,7 +59,6 @@ enum{
 
 extern cvar_t bgmvolume;
 extern int cdtrk, cdntrk;
-extern bool cdloop;
-
+extern bool cdloop, cdenabled;
 
 extern int debug;

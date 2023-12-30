@@ -657,12 +657,6 @@ initsnd(void)
 {
 	int i, j, *p;
 
-	if(sndopen() != 0)
-		return -1;
-	ainit = 1;
-	for(p=scalt[1], i=8; i<8*nelem(scalt); i+=8)
-		for(j=0; j<256; j++)
-			*p++ = (char)j * i;
 	Cmd_AddCommand("play", playsfx);
 	Cmd_AddCommand("playvol", playvolsfx);
 	Cmd_AddCommand("stopsound", stopallsfx);
@@ -673,12 +667,23 @@ initsnd(void)
 	Cvar_RegisterVariable(&ambient_level);
 	Cvar_RegisterVariable(&ambient_fade);
 
-	chans = calloc(Nchan, sizeof(*chans));
-	known_sfx = Hunk_Alloc(MAX_SOUNDS * sizeof *known_sfx);
-	num_sfx = 0;
+	if(!isdisabled("snd")){
+		if(sndopen() != 0)
+			return -1;
+		ainit = 1;
 
-	ambsfx[Ambwater] = precachesfx("ambience/water1.wav");
-	ambsfx[Ambsky] = precachesfx("ambience/wind2.wav");
-	stopallsfx();
+		for(p=scalt[1], i=8; i<8*nelem(scalt); i+=8){
+			for(j=0; j<256; j++)
+				*p++ = (char)j * i;
+		}
+
+		chans = calloc(Nchan, sizeof(*chans));
+		known_sfx = Hunk_Alloc(MAX_SOUNDS * sizeof *known_sfx);
+		num_sfx = 0;
+
+		ambsfx[Ambwater] = precachesfx("ambience/water1.wav");
+		ambsfx[Ambsky] = precachesfx("ambience/wind2.wav");
+		stopallsfx();
+	}
 	return 0;
 }

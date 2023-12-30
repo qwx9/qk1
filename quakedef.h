@@ -181,6 +181,8 @@ extern	int		host_framecount;	// incremented every frame, never reset
 extern	double		realtime;		// not bounded in any way, changed at
 						// start of every frame, never reset
 
+bool isdisabled(char *s);
+
 #define opaque(p) ((p) != 0)
 
 extern pixel_t q1pal[256];

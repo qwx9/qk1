@@ -85,7 +85,7 @@ shutcd(void)
 void
 stepcd(void)
 {
-	if(bgmvolume.value <= 0.0 || cdread == 0)
+	if(!cdenabled || bgmvolume.value <= 0.0 || cdread == 0)
 		return;
 	cdread = bgmvolume.value > 0.0;
 }
@@ -138,13 +138,17 @@ cdinfo(void)
 int
 initcd(void)
 {
+	Cvar_RegisterVariable(&bgmvolume);
+	Cmd_AddCommand("cd", cdcmd);
+
+	if(!(cdenabled = !isdisabled("cd")))
+		return 0;
+
 	if(cdinfo() < 0){
 		Con_DPrintf("cdinfo: %r\n");
 		return -1;
 	}
 	if(proccreate(cproc, nil, 16384) < 0)
 		sysfatal("proccreate: %r");
-	Cvar_RegisterVariable(&bgmvolume);
-	Cmd_AddCommand("cd", cdcmd);
 	return 0;
 }

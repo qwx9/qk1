@@ -3,13 +3,18 @@
 cvar_t bgmvolume = {"bgmvolume", "0.5", true};
 
 int cdtrk = 0, cdntrk = 0;
-bool cdloop = false;
+bool cdloop = false, cdenabled;
 
 void
 cdcmd(void)
 {
 	char *c;
 	bool loop;
+
+	if(!cdenabled){
+		Con_Printf("cd disabled\n");
+		return;
+	}
 
 	if(Cmd_Argc() < 2){
 usage:
