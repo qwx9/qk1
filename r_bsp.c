@@ -64,7 +64,7 @@ void R_EntityRotate (vec3_t vec)
 R_RotateBmodel
 ================
 */
-void R_RotateBmodel (void)
+void R_RotateBmodel (entity_t *e)
 {
 	float	angle, s, c, temp1[3][3], temp2[3][3], temp3[3][3];
 
@@ -74,7 +74,7 @@ void R_RotateBmodel (void)
 	// TODO: share work with R_SetUpAliasTransform
 
 	// yaw
-	angle = currententity->angles[YAW];
+	angle = e->angles[YAW];
 	angle = angle * M_PI*2 / 360;
 	s = sinf(angle);
 	c = cosf(angle);
@@ -91,7 +91,7 @@ void R_RotateBmodel (void)
 
 
 	// pitch
-	angle = currententity->angles[PITCH];
+	angle = e->angles[PITCH];
 	angle = angle * M_PI*2 / 360;
 	s = sinf(angle);
 	c = cosf(angle);
@@ -109,7 +109,7 @@ void R_RotateBmodel (void)
 	R_ConcatRotations (temp2, temp1, temp3);
 
 	// roll
-	angle = currententity->angles[ROLL];
+	angle = e->angles[ROLL];
 	angle = angle * M_PI*2 / 360;
 	s = sinf(angle);
 	c = cosf(angle);

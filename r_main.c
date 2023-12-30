@@ -541,7 +541,7 @@ R_DrawEntity(entity_t *e)
 		VectorCopy(e->origin, r_entorigin);
 		VectorSubtract(r_origin, r_entorigin, modelorg);
 		r_pcurrentvertbase = clmodel->vertexes;
-		R_RotateBmodel(); // FIXME: stop transforming twice
+		R_RotateBmodel(e); // FIXME: stop transforming twice
 
 		// calculate dynamic lighting for bmodel if it's not an
 		// instanced model

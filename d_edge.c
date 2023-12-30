@@ -5,7 +5,7 @@ static int	miplevel;
 float scale_for_mip;
 
 // FIXME: should go away
-extern void R_RotateBmodel (void);
+extern void R_RotateBmodel (entity_t *entity);
 extern void R_TransformFrustum (void);
 
 static int
@@ -114,6 +114,18 @@ D_DrawSurfaces (void)
 		d_zistepv = s->d_zistepv;
 		d_ziorigin = s->d_ziorigin;
 
+		if(s->insubmodel){
+			// FIXME: we don't want to do all this for every polygon!
+			// TODO: store once at start of frame
+			currententity = s->entity;	//FIXME: make this passed in to
+										// R_RotateBmodel()
+			VectorSubtract(r_origin, currententity->origin, local_modelorg);
+			TransformVector(local_modelorg, transformed_modelorg);
+
+			R_RotateBmodel(s->entity);	// FIXME: don't mess with the frustum,
+								// make entity passed in
+		}
+
 		if(s->flags & SURF_DRAWSKY){
 			D_DrawSkyScans8(s->spans);
 			d_ziorigin = -0.8;
@@ -133,48 +145,10 @@ D_DrawSurfaces (void)
 			cacheblock = pface->texinfo->texture->pixels + pface->texinfo->texture->offsets[0];
 			cachewidth = 64;
 
-			if(s->insubmodel){
-				// FIXME: we don't want to do all this for every polygon!
-				// TODO: store once at start of frame
-				currententity = s->entity;	//FIXME: make this passed in to
-											// R_RotateBmodel()
-				VectorSubtract(r_origin, currententity->origin, local_modelorg);
-				TransformVector(local_modelorg, transformed_modelorg);
-
-				R_RotateBmodel();	// FIXME: don't mess with the frustum,
-									// make entity passed in
-			}
-
 			D_CalcGradients (pface, transformed_modelorg);
 			Turbulent8 (s->spans, alpha);
 			D_DrawZSpans (s->spans);
-
-			if(s->insubmodel){
-				// restore the old drawing state
-				// FIXME: we don't want to do this every time!
-				// TODO: speed up
-				currententity = &cl_entities[0];
-				VectorCopy(world_transformed_modelorg, transformed_modelorg);
-				VectorCopy(base_vpn, vpn);
-				VectorCopy(base_vup, vup);
-				VectorCopy(base_vright, vright);
-				VectorCopy(base_modelorg, modelorg);
-				R_TransformFrustum();
-			}
-		}
-		else
-		{
-			if(s->insubmodel){
-				// FIXME: we don't want to do all this for every polygon!
-				// TODO: store once at start of frame
-				currententity = s->entity;	//FIXME: make this passed in to
-											// R_RotateBmodel()
-				VectorSubtract(r_origin, currententity->origin, local_modelorg);
-				TransformVector(local_modelorg, transformed_modelorg);
-				R_RotateBmodel();	// FIXME: don't mess with the frustum,
-									// make entity passed in
-			}
-
+		}else{
 			pface = s->data;
 			miplevel = D_MipLevelForScale(s->nearzi * scale_for_mip * pface->texinfo->mipadjust);
 			if(s->flags & SURF_FENCE)
@@ -190,21 +164,19 @@ D_DrawSurfaces (void)
 
 			D_DrawSpans16(s->spans, s->flags & SURF_FENCE, alpha);
 			D_DrawZSpans(s->spans);
+		}
 
-			if(s->insubmodel){
-				//
-				// restore the old drawing state
-				// FIXME: we don't want to do this every time!
-				// TODO: speed up
-				//
-				currententity = &cl_entities[0];
-				VectorCopy(world_transformed_modelorg, transformed_modelorg);
-				VectorCopy(base_vpn, vpn);
-				VectorCopy(base_vup, vup);
-				VectorCopy(base_vright, vright);
-				VectorCopy(base_modelorg, modelorg);
-				R_TransformFrustum();
-			}
+		if(s->insubmodel){
+			// restore the old drawing state
+			// FIXME: we don't want to do this every time!
+			// TODO: speed up
+			currententity = &cl_entities[0];
+			VectorCopy(world_transformed_modelorg, transformed_modelorg);
+			VectorCopy(base_vpn, vpn);
+			VectorCopy(base_vup, vup);
+			VectorCopy(base_vright, vright);
+			VectorCopy(base_modelorg, modelorg);
+			R_TransformFrustum();
 		}
 	}
 }
