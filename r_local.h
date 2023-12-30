@@ -82,7 +82,7 @@ extern	clipplane_t	view_clipplanes[4];
 //=============================================================================
 
 void R_RenderWorld (void);
-void R_RenderWorldRejects(void);
+void R_RenderBlendedBrushes(void);
 
 //=============================================================================
 

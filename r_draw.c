@@ -418,7 +418,6 @@ int R_RenderFace (msurface_t *fa, int clipflags)
 						&r_pcurrentvertbase[r_pedge->v[1]],
 						pclip);
 			r_pedge->cachededgeoffset = cacheoffset;
-
 			if (r_leftclipped)
 				makeleftedge = true;
 			if (r_rightclipped)

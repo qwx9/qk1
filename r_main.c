@@ -667,27 +667,19 @@ void R_DrawViewModel (void)
 	R_AliasDrawModel(&r_viewlighting);
 }
 
-/*
-================
-R_EdgeDrawing
-================
-*/
-void R_EdgeDrawing (void)
+void
+R_RenderSolidBrushes(void)
 {
 	entity_t *e;
 	int i;
 
 	R_BeginEdgeFrame();
-	if(r_drawflags & DRAW_BLEND)
-		R_RenderWorldRejects();
-	else{
-		R_RenderWorld();
-		for(i = 0; i < cl_numvisedicts; i++){
-			e = cl_visedicts[i];
-			if(e->model != nil && e->model->type == mod_brush && !R_DrawEntity(e)){
-				e->last_reject = ent_reject;
-				ent_reject = e;
-			}
+	R_RenderWorld();
+	for(i = 0; i < cl_numvisedicts; i++){
+		e = cl_visedicts[i];
+		if(e->model != nil && e->model->type == mod_brush && !R_DrawEntity(e)){
+			e->last_reject = ent_reject;
+			ent_reject = e;
 		}
 	}
 	R_ScanEdges();
@@ -711,7 +703,7 @@ void R_RenderView (void)
 	if (!cl_entities[0].model || !cl.worldmodel)
 		fatal ("R_RenderView: NULL worldmodel");
 	ent_reject = nil;
-	R_EdgeDrawing ();
+	R_RenderSolidBrushes();
 
 	for(i = 0; i < cl_numvisedicts; i++){
 		e = cl_visedicts[i];
@@ -723,9 +715,10 @@ void R_RenderView (void)
 
 	R_DrawViewModel ();
 	R_DrawParticles ();
+
 	r_drawflags = DRAW_BLEND;
-	R_EdgeDrawing();
-	// FIXME(sigrid): these need to be sorted and drawn back to front
+	R_RenderBlendedBrushes();
+	// FIXME(sigrid): these need to be sorted with blended brushes and *all* drawn back to front
 	if(cl_numvisedicts > 0){
 		for(i = cl_numvisedicts, e = ent_reject; e != nil && i > 0; e = e->last_reject)
 			cl_visedicts[--i] = e;

@@ -573,7 +573,7 @@ void R_RenderWorld (void)
 }
 
 void
-R_RenderWorldRejects(void)
+R_RenderBlendedBrushes(void)
 {
 	model_t *clmodel;
 	nodereject_t *rej;
@@ -585,9 +585,17 @@ R_RenderWorldRejects(void)
 	clmodel = currententity->model;
 	r_pcurrentvertbase = clmodel->vertexes;
 
-	for(rej = node_rejects; rej < node_rejects+num_node_rejects; rej++){
+	if(num_node_rejects < 1)
+		return;
+
+	/* back to front, no clipping */
+	/* FIXME(sigrid): this could still be clipped against solid world */
+	/* FIXME(sigrid): needs to be drawn sorted with non-brush entities */
+	for(rej = node_rejects+num_node_rejects-1; rej >= node_rejects; rej--){
 		surf = cl.worldmodel->surfaces + rej->node->firstsurface;
+		R_BeginEdgeFrame();
 		for(i = 0; i < rej->node->numsurfaces; i++, surf++)
 			R_RenderFace(surf, rej->clipflags);
+		R_ScanEdges();
 	}
 }
