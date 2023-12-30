@@ -4,6 +4,7 @@
 #include <AL/alext.h>
 #include <sys/wait.h>
 #include <unistd.h>
+#include <pthread.h>
 
 typedef struct albuf_t albuf_t;
 typedef struct alchan_t alchan_t;
@@ -31,9 +32,12 @@ cvar_t volume = {"volume", "0.7", true};
 
 static struct {
 	ALuint src, buf;
-	int pcm;
+	int pcm, dec;
+	int len;
 	bool playing;
-	pid_t decoder, reader;
+	bool stop;
+	pid_t decoder;
+	pthread_t reader;
 }track;
 
 static cvar_t s_al_dev = {"s_al_device", "0", true};
@@ -670,7 +674,12 @@ sfxend(void)
 void
 stepcd(void)
 {
-	alSourcef(track.src, AL_GAIN, bgmvolume.value); ALERR();
+	if(track.stop)
+		stopcd();
+	else if(track.playing){
+		alSourcef(track.src, AL_GAIN, bgmvolume.value);
+		ALERR();
+	}
 }
 
 static ALsizei
@@ -682,46 +691,84 @@ trackcb(ALvoid *aux, ALvoid *sampledata, ALsizei numbytes)
 	USED(aux);
 	for(b = sampledata; numbytes > 0; b += n, numbytes -= n){
 		if((n = read(track.pcm, b, numbytes)) <= 0){
-			close(track.pcm);
-			track.pcm = -1;
-			break;
+			track.stop = true;
+			return 0;
 		}
 	}
 
 	return b - (byte*)sampledata;
 }
 
+static void *
+trackdecoder(void *f)
+{
+	byte b[65536];
+	ssize_t n;
+	fpos_t off;
+	int left;
+
+	if(fgetpos(f, &off) == 0){
+		left = track.len;
+		for(;;){
+			if((n = fread(b, 1, min(left, (int)sizeof(b)), f)) < 1){
+				if(ferror(f)){
+					perror("fread");
+					break;
+				}
+			}
+			if(write(track.dec, b, n) != n)
+				break;
+			left -= n;
+			if(left < 1){
+				if(!cdloop)
+					break;
+				if(fsetpos(f, &off) != 0){
+					perror("fsetpos");
+					break;
+				}
+				left = track.len;
+			}
+		}
+	}
+	fclose(f);
+	track.stop = true;
+	waitpid(track.decoder, nil, 0);
+
+	return nil;
+}
+
 void
 playcd(int nt, bool loop)
 {
+	int s[2], in[2];
 	pid_t pid;
 	FILE *f;
-	fpos_t off;
-	int len, left, s[2], in[2];
 
 	stopcd();
 	if(qalBufferCallbackSOFT == nil)
 		return;
 
-	if((f = openlmp(va("music/track%02d.ogg", nt), &len)) == nil){
-		if((f = openlmp(va("music/track%02d.mp3", nt), &len)) == nil)
-			f = openlmp(va("music/track%02d.wav", nt), &len);
+	if((f = openlmp(va("music/track%02d.ogg", nt), &track.len)) == nil){
+		if((f = openlmp(va("music/track%02d.mp3", nt), &track.len)) == nil)
+			f = openlmp(va("music/track%02d.wav", nt), &track.len);
 	}
 	if(f == nil)
 		return;
-	if(fgetpos(f, &off) != 0){
+
+	track.decoder = -1;
+	track.reader = -1;
+	if(pipe(s) != 0){
 err:
 		close(track.pcm);
-		fclose(f);
+		close(track.dec);
 		if(track.decoder > 0)
 			waitpid(track.decoder, nil, 0);
 		if(track.reader > 0)
-			waitpid(track.reader, nil, 0);
+			pthread_join(track.reader, nil);
+		else
+			fclose(f);
 		return;
 	}
-
-	if(pipe(s) != 0)
-		goto err;
 	if(pipe(in) != 0){
 		close(s[0]);
 		close(s[1]);
@@ -752,54 +799,21 @@ err:
 	}
 	track.decoder = pid;
 
-	close(s[0]);
-	close(in[1]);
-	track.pcm = in[0];
+	track.dec = s[1]; close(s[0]);
+	track.pcm = in[0]; close(in[1]);
 	cdloop = loop;
 	cdtrk = nt;
 
-	switch((pid = fork())){
-	case 0:
-		close(in[0]);
-		close(0);
-		close(1);
-		left = len;
-		for(;;){
-			byte tmp[32768];
-			ssize_t n;
-			if((n = fread(tmp, 1, min(left, (int)sizeof(tmp)), f)) < 1){
-				if(ferror(f)){
-					perror("fread");
-					break;
-				}
-			}
-			if(write(s[1], tmp, n) != n)
-				break;
-			left -= n;
-			if(left < 1){
-				if(!loop)
-					break;
-				if(fsetpos(f, &off) != 0){
-					perror("fsetpos");
-					break;
-				}
-				left = len;
-			}
-		}
-		close(s[1]);
-		fclose(f);
-		exit(1);
-	case -1:
+	if(pthread_create(&track.reader, nil, trackdecoder, f) != 0)
 		goto err;
-	}
-	track.reader = pid;
 
 	qalBufferCallbackSOFT(track.buf, AL_FORMAT_STEREO16, 44100, trackcb, nil);
 	if(ALERR())
 		goto err;
+	track.playing = true;
+	track.stop = false;
 	alSourcei(track.src, AL_BUFFER, track.buf); ALERR();
 	alSourcePlay(track.src); ALERR();
-	track.playing = true;
 }
 
 void
@@ -828,14 +842,14 @@ stopcd(void)
 	if(track.playing){
 		alSourceStop(track.src); ALERR();
 		alSourcei(track.src, AL_BUFFER, 0); ALERR();
-		if(track.pcm >= 0)
-			close(track.pcm);
-		waitpid(track.decoder, nil, 0);
-		waitpid(track.reader, nil, 0);
+		close(track.dec);
+		close(track.pcm);
+		pthread_join(track.reader, nil);
 	}
-	track.playing = false;
+	track.dec = -1;
 	track.pcm = -1;
-	track.decoder = track.reader = -1;
+	track.playing = false;
+	track.stop = false;
 }
 
 void
