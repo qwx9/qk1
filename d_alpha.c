@@ -5,7 +5,8 @@ blendalpha(pixel_t ca, pixel_t cb, int alpha, uzint izi)
 {
 	int a, b, c;
 
-	alpha = (ca >> 24)*alpha >> 8;
+	if(ca == 0 || (ca >> 24) != 0)
+		alpha = (ca >> 24)*alpha >> 8;
 
 	if(currententity != nil && currententity->effects & EF_ADDITIVE){
 		ca = R_BlendFog(ca, izi);

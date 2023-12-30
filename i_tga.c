@@ -129,10 +129,7 @@ getpixel(Tga *h, pixel_t *out, byte *p, int *sz)
 		break;
 	}
 
-	if(a == 0)
-		*out = 0;
-	else
-		*out = a<<24 | r<<16 | g<<8 | b<<0;
+	*out = a == 0 ? 0 : (a<<24 | r<<16 | g<<8 | b<<0);
 	*sz -= h->pxsz;
 	return p + h->pxsz;
 }

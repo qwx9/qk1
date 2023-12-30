@@ -35,7 +35,7 @@ toosmall:
 		in += size;
 	}else if(mod->ver == SPRITE32_VERSION){
 		for(i = 0; i < size; i++, in += sizeof(pixel_t))
-			pspriteframe->pixels[i] = in[3]<<24 | in[0]<<16 | in[1]<<8 | in[2];
+			pspriteframe->pixels[i] = in[3] == 0 ? 0 : (in[3]<<24 | in[0]<<16 | in[1]<<8 | in[2]);
 		mod->blend = true;
 	}
 
