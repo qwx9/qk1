@@ -537,6 +537,7 @@ alreinit(const char *def, const char *all)
 {
 	const char *s;
 	int i, n;
+	bool hrtf;
 
 	n = s_al_dev.value;
 	if(n == s_al_dev_prev)
@@ -555,22 +556,40 @@ alreinit(const char *def, const char *all)
 				n = qalcReopenDeviceSOFT(dev, s, alcattr(false)) ? 0 : -1;
 				ALERR();
 			}
-			if(n != 0)
+			if(n != 0){
 				Con_Printf("AL: failed to switch to %s\n", s);
-			else
-				s_al_dev_prev = n;
-			return;
+				return;
+			}
+			s_al_dev_prev = n;
+			break;
 		}
 		s += strlen(s)+1;
 	}
-	Con_Printf("AL: no such device: %d\n", n);
+	if(s == nil || !*s){
+		Con_Printf("AL: no such device: %d\n", n);
+		return;
+	}
+
+	if(alcIsExtensionPresent(dev, "ALC_SOFT_HRTF")){
+		qalcGetStringiSOFT = alcGetProcAddress(dev, "alcGetStringiSOFT");
+		qalcResetDeviceSOFT = alcGetProcAddress(dev, "alcResetDeviceSOFT");
+		hrtf = true;
+	}else{
+		qalcGetStringiSOFT = nil;
+		qalcResetDeviceSOFT = nil;
+		hrtf = false;
+	}
+
+	if(qalcResetDeviceSOFT != nil){
+		qalcResetDeviceSOFT(dev, alcattr(hrtf));
+		ALERR();
+	}
 }
 
 static void
 alvarcb(cvar_t *var)
 {
 	const char *all, *def, *s;
-	bool hrtf;
 	int i, n;
 
 	def = alcGetString(nil, ALC_DEFAULT_ALL_DEVICES_SPECIFIER);
@@ -591,15 +610,6 @@ alvarcb(cvar_t *var)
 
 	alreinit(def, all);
 
-	if(alcIsExtensionPresent(dev, "ALC_SOFT_HRTF")){
-		qalcGetStringiSOFT = alcGetProcAddress(dev, "alcGetStringiSOFT");
-		qalcResetDeviceSOFT = alcGetProcAddress(dev, "alcResetDeviceSOFT");
-		hrtf = true;
-	}else{
-		qalcGetStringiSOFT = nil;
-		qalcResetDeviceSOFT = nil;
-		hrtf = false;
-	}
 	if(var == &s_al_hrtf && Cmd_Argc() == 1){
 		Con_Printf("%-2d: disabled\n", -1);
 		Con_Printf("%-2d: don't care (default)\n", 0);
@@ -611,12 +621,6 @@ alvarcb(cvar_t *var)
 			if(!ALERR() && s != nil)
 				Con_Printf("%-2d: %s\n", i+1, s);
 		}
-		return;
-	}
-
-	if(qalcResetDeviceSOFT != nil){
-		qalcResetDeviceSOFT(dev, alcattr(hrtf));
-		ALERR();
 	}
 }
 
