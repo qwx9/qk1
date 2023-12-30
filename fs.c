@@ -325,7 +325,7 @@ createfile(char *path)
 			return nil;
 	}
 
-	return fopen(path, "wb");
+	return fopen(path, "wbe");
 }
 
 void
@@ -372,7 +372,7 @@ openlmp(char *f, int *len)
 			continue;
 		}
 		snprint(d, sizeof d, "%s/%s", pl->f, f);
-		if(bf = fopen(d, "rb"), bf == nil)
+		if(bf = fopen(d, "rbe"), bf == nil)
 			continue;
 		if(len != nil)
 			*len = bsize(bf);
@@ -504,7 +504,7 @@ dumpcfg(void)
 
 	if(!host_initialized)
 		return;
-	bf = fopen(va("%s/config.cfg", fsdir), "wb");
+	bf = fopen(va("%s/config.cfg", fsdir), "wbe");
 	if(bf == nil){
 		Con_DPrintf("dumpcfg: %s\n", lerr());
 		return;
@@ -527,7 +527,7 @@ savnames(void)
 		*canld = 0;
 		memset(*s, 0, sizeof *s);
 		strcpy(*s, "--- UNUSED SLOT ---");
-		bf = fopen(va("%s/s%d.sav", fsdir, n), "rb");
+		bf = fopen(va("%s/s%d.sav", fsdir, n), "rbe");
 		if(bf == nil){
 			Con_DPrintf("savnames: %s\n", lerr());
 			continue;
@@ -609,7 +609,7 @@ dumpsav(char *f, char *cm)
 	float *fs, *fe;
 	FILE *bf;
 
-	bf = fopen(f, "wb");
+	bf = fopen(f, "wbe");
 	if(bf == nil)
 		return -1;
 	fprintf(bf, "%d\n%s\n", Nsavver, cm);
@@ -728,7 +728,7 @@ loadsav(char *f)
 	char *s;
 	FILE *bf;
 
-	bf = fopen(f, "rb");
+	bf = fopen(f, "rbe");
 	if(bf == nil)
 		return -1;
 	r = -1;
@@ -817,7 +817,7 @@ opendm(char *f, int trk)
 {
 	char s[16];
 
-	demobf = fopen(f, "wb");
+	demobf = fopen(f, "wbe");
 	if(demobf == nil)
 		return -1;
 	sprint(s, "%d\n", trk);
@@ -834,7 +834,7 @@ pak(char *f)
 	Lump *l;
 	Pak *p;
 
-	bf = fopen(f, "rb");
+	bf = fopen(f, "rbe");
 	if(bf == nil)
 		return nil;
 	memset(u, 0, sizeof u);
