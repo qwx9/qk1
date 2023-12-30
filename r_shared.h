@@ -17,8 +17,6 @@ typedef s32int uzint;
 
 //===================================================================
 
-extern int		cachewidth;
-extern pixel_t	*cacheblock;
 extern int		screenwidth;
 
 extern	float	pixelAspect;

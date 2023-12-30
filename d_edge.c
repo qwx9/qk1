@@ -34,7 +34,7 @@ D_DrawSolidSurface(surf_t *surf, pixel_t color)
 	int u, u2;
 
 	for(span = surf->spans; span; span=span->pnext){
-		pdest = d_viewbuffer + screenwidth*span->v;
+		pdest = dvars.viewbuffer + screenwidth*span->v;
 		u2 = span->u + span->count - 1;
 		for(u = span->u; u <= u2; u++)
 			pdest[u] = color;
@@ -55,31 +55,30 @@ D_CalcGradients(msurface_t *pface, vec3_t transformed_modelorg)
 	TransformVector (pface->texinfo->vecs[1], p_taxis);
 
 	t = xscaleinv * mipscale;
-	d_sdivzstepu = p_saxis[0] * t;
-	d_tdivzstepu = p_taxis[0] * t;
+
+	dvars.sdivzstepu = p_saxis[0] * t;
+	dvars.tdivzstepu = p_taxis[0] * t;
 
 	t = yscaleinv * mipscale;
-	d_sdivzstepv = -p_saxis[1] * t;
-	d_tdivzstepv = -p_taxis[1] * t;
+	dvars.sdivzstepv = -p_saxis[1] * t;
+	dvars.tdivzstepv = -p_taxis[1] * t;
 
-	d_sdivzorigin = p_saxis[2] * mipscale - xcenter * d_sdivzstepu -
-			ycenter * d_sdivzstepv;
-	d_tdivzorigin = p_taxis[2] * mipscale - xcenter * d_tdivzstepu -
-			ycenter * d_tdivzstepv;
+	dvars.sdivzorigin = p_saxis[2] * mipscale - xcenter * dvars.sdivzstepu - ycenter * dvars.sdivzstepv;
+	dvars.tdivzorigin = p_taxis[2] * mipscale - xcenter * dvars.tdivzstepu - ycenter * dvars.tdivzstepv;
 
 	VectorScale (transformed_modelorg, mipscale, p_temp1);
 
 	t = 0x10000*mipscale;
-	sadjust = ((fixed16_t)(DotProduct (p_temp1, p_saxis) * 0x10000 + 0.5)) -
+	dvars.sadjust = ((fixed16_t)(DotProduct (p_temp1, p_saxis) * 0x10000 + 0.5)) -
 			((pface->texturemins[0] << 16) >> miplevel)
 			+ pface->texinfo->vecs[0][3]*t;
-	tadjust = ((fixed16_t)(DotProduct (p_temp1, p_taxis) * 0x10000 + 0.5)) -
+	dvars.tadjust = ((fixed16_t)(DotProduct (p_temp1, p_taxis) * 0x10000 + 0.5)) -
 			((pface->texturemins[1] << 16) >> miplevel)
 			+ pface->texinfo->vecs[1][3]*t;
 
 	// -1 (-epsilon) so we never wander off the edge of the texture
-	bbextents = ((pface->extents[0] << 16) >> miplevel) - 1;
-	bbextentt = ((pface->extents[1] << 16) >> miplevel) - 1;
+	dvars.bbextents = ((pface->extents[0] << 16) >> miplevel) - 1;
+	dvars.bbextentt = ((pface->extents[1] << 16) >> miplevel) - 1;
 }
 
 void
@@ -90,6 +89,7 @@ D_DrawSurfaces (void)
 	surfcache_t *pcurrentcache;
 	vec3_t world_transformed_modelorg, local_modelorg, transformed_modelorg;
 	byte alpha;
+	bool blend;
 
 	currententity = &cl_entities[0];
 	TransformVector(modelorg, transformed_modelorg);
@@ -110,9 +110,11 @@ D_DrawSurfaces (void)
 		if(alpha < 1)
 			alpha = 255;
 
-		d_zistepu = s->d_zistepu;
-		d_zistepv = s->d_zistepv;
-		d_ziorigin = s->d_ziorigin;
+		blend = (s->flags & SURF_TRANS) || (r_drawflags & DRAW_BLEND);
+
+		dvars.zistepu = s->d_zistepu;
+		dvars.zistepv = s->d_zistepv;
+		dvars.ziorigin = s->d_ziorigin;
 
 		if(s->insubmodel){
 			// FIXME: we don't want to do all this for every polygon!
@@ -128,26 +130,27 @@ D_DrawSurfaces (void)
 
 		if(s->flags & SURF_DRAWSKY){
 			D_DrawSkyScans8(s->spans);
-			d_ziorigin = -0.8;
+			dvars.ziorigin = -0.8;
 			D_DrawZSpans(s->spans);
 		}else if(s->flags & SURF_DRAWBACKGROUND){
 			// set up a gradient for the background surface that places it
 			// effectively at infinity distance from the viewpoint
-			d_zistepu = 0;
-			d_zistepv = 0;
-			d_ziorigin = -0.9;
+			dvars.zistepu = 0;
+			dvars.zistepv = 0;
+			dvars.ziorigin = -0.9;
 
 			D_DrawSolidSurface(s, q1pal[(int)r_clearcolor.value & 0xFF]);
 			D_DrawZSpans(s->spans);
 		}else if(s->flags & SURF_DRAWTURB){
 			pface = s->data;
 			miplevel = 0;
-			cacheblock = pface->texinfo->texture->pixels + pface->texinfo->texture->offsets[0];
-			cachewidth = 64;
+			dvars.cacheblock = pface->texinfo->texture->pixels + pface->texinfo->texture->offsets[0];
+			dvars.cachewidth = 64;
 
 			D_CalcGradients (pface, transformed_modelorg);
 			Turbulent8 (s->spans, alpha);
-			D_DrawZSpans (s->spans);
+			if(!blend)
+				D_DrawZSpans (s->spans);
 		}else{
 			pface = s->data;
 			miplevel = D_MipLevelForScale(s->nearzi * scale_for_mip * pface->texinfo->mipadjust);
@@ -157,13 +160,14 @@ D_DrawSurfaces (void)
 			// FIXME: make this passed in to D_CacheSurface
 			pcurrentcache = D_CacheSurface(pface, miplevel);
 
-			cacheblock = pcurrentcache->pixels;
-			cachewidth = pcurrentcache->width;
+			dvars.cacheblock = pcurrentcache->pixels;
+			dvars.cachewidth = pcurrentcache->width;
 
 			D_CalcGradients(pface, transformed_modelorg);
 
-			D_DrawSpans16(s->spans, s->flags & SURF_FENCE, alpha);
-			D_DrawZSpans(s->spans);
+			D_DrawSpans16(s->spans, blend, alpha);
+			if(!blend)
+				D_DrawZSpans(s->spans);
 		}
 
 		if(s->insubmodel){

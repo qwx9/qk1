@@ -35,8 +35,8 @@ D_DrawParticle (particle_t *pparticle)
 		return;
 	}
 
-	pz = d_pzbuffer + d_zwidth*v + u;
-	pdest = d_viewbuffer + d_scantable[v] + u;
+	pz = dvars.zbuffer + dvars.zwidth*v + u;
+	pdest = dvars.viewbuffer + d_scantable[v] + u;
 	izi = zi * 0x8000 * 0x10000;
 
 	zi = 1024.0 * d_pix_scale / Length(local);
@@ -45,7 +45,7 @@ D_DrawParticle (particle_t *pparticle)
 		pix = 1;
 	color = pparticle->color;
 
-	for(count = pix; count; count--, pz += d_zwidth, pdest += screenwidth){
+	for(count = pix; count; count--, pz += dvars.zwidth, pdest += screenwidth){
 		for(i = 0; i < pix; i++){
 			if(pz[i] <= izi){
 				pz[i] = izi;

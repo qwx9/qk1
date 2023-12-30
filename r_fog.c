@@ -120,7 +120,7 @@ R_DrawFog(void)
 	for(y = r_refdef.vrect.y; y < r_refdef.vrectbottom; y++){
 		i = y * vid.width + r_refdef.vrect.x;
 		pix = vid.buffer + i;
-		z = d_pzbuffer + i;
+		z = dvars.zbuffer + i;
 		for(x = r_refdef.vrect.x; x < r_refdef.vrectright; x++, i++, pix++, z++)
 			*pix = blend_fog(*pix, *z);
 	}

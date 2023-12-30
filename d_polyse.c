@@ -123,9 +123,9 @@ void D_PolysetDrawFinalVerts (finalvert_t *fv, int numverts, pixel_t *colormap, 
 				pixel_t p = addlight(skintable[fv->t >> 16][fv->s >> 16], fv->l[0], fv->l[1], fv->l[2]);
 				int n = d_scantable[fv->v] + fv->u;
 				if(r_drawflags & DRAW_BLEND){
-					d_viewbuffer[n] = blendalpha(p, d_viewbuffer[n], alpha, z);
+					dvars.viewbuffer[n] = blendalpha(p, dvars.viewbuffer[n], alpha, z);
 				}else{
-					d_viewbuffer[n] = p;
+					dvars.viewbuffer[n] = p;
 					*zbuf = z;
 				}
 			}
@@ -311,9 +311,9 @@ split:
 		pixel_t p = addlight(skintable[new.t >> 16][new.s >> 16], l[0], l[1], l[2]);
 		int n = d_scantable[new.v] + new.u;
 		if(r_drawflags & DRAW_BLEND){
-			d_viewbuffer[n] = blendalpha(p, d_viewbuffer[n], alpha, z);
+			dvars.viewbuffer[n] = blendalpha(p, dvars.viewbuffer[n], alpha, z);
 		}else{
-			d_viewbuffer[n] = p;
+			dvars.viewbuffer[n] = p;
 			*zbuf = z;
 		}
 	}
@@ -628,8 +628,8 @@ void D_RasterizeAliasPolySmooth (void)
 	d_light[1] = plefttop->l[1];
 	d_light[2] = plefttop->l[2];
 
-	d_pdest = d_viewbuffer + ystart * screenwidth + plefttop->u;
-	d_pz = d_pzbuffer + ystart * d_zwidth + plefttop->u;
+	d_pdest = dvars.viewbuffer + ystart * screenwidth + plefttop->u;
+	d_pz = dvars.zbuffer + ystart * dvars.zwidth + plefttop->u;
 
 	if (initialleftheight == 1)
 	{
@@ -654,7 +654,7 @@ void D_RasterizeAliasPolySmooth (void)
 		D_PolysetSetUpForLineScan(plefttop->u, plefttop->v,
 							  pleftbottom->u, pleftbottom->v);
 
-		d_pzbasestep = d_zwidth + ubasestep;
+		d_pzbasestep = dvars.zwidth + ubasestep;
 		d_pzextrastep = d_pzbasestep + 1;
 		d_pdestbasestep = screenwidth + ubasestep;
 		d_pdestextrastep = d_pdestbasestep + 1;
@@ -720,8 +720,8 @@ void D_RasterizeAliasPolySmooth (void)
 		d_light[1] = plefttop->l[1];
 		d_light[2] = plefttop->l[2];
 
-		d_pdest = d_viewbuffer + ystart * screenwidth + plefttop->u;
-		d_pz = d_pzbuffer + ystart * d_zwidth + plefttop->u;
+		d_pdest = dvars.viewbuffer + ystart * screenwidth + plefttop->u;
+		d_pz = dvars.zbuffer + ystart * dvars.zwidth + plefttop->u;
 
 		if (height == 1)
 		{
@@ -746,7 +746,7 @@ void D_RasterizeAliasPolySmooth (void)
 
 			d_pdestbasestep = screenwidth + ubasestep;
 			d_pdestextrastep = d_pdestbasestep + 1;
-			d_pzbasestep = d_zwidth + ubasestep;
+			d_pzbasestep = dvars.zwidth + ubasestep;
 			d_pzextrastep = d_pzbasestep + 1;
 
 			if (ubasestep < 0){

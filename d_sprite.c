@@ -22,19 +22,19 @@ void D_SpriteDrawSpans (sspan_t *pspan, byte alpha)
 	sstep = 0;	// keep compiler happy
 	tstep = 0;	// ditto
 
-	pbase = cacheblock;
+	pbase = dvars.cacheblock;
 
-	sdivz8stepu = d_sdivzstepu * 8;
-	tdivz8stepu = d_tdivzstepu * 8;
-	zi8stepu = d_zistepu * 8;
+	sdivz8stepu = dvars.sdivzstepu * 8;
+	tdivz8stepu = dvars.tdivzstepu * 8;
+	zi8stepu = dvars.zistepu * 8;
 
 	// we count on FP exceptions being turned off to avoid range problems
-	izistep = (int)(d_zistepu * 0x8000 * 0x10000);
+	izistep = (int)(dvars.zistepu * 0x8000 * 0x10000);
 
 	do
 	{
-		pdest = d_viewbuffer + (screenwidth * pspan->v) + pspan->u;
-		pz = d_pzbuffer + (d_zwidth * pspan->v) + pspan->u;
+		pdest = dvars.viewbuffer + screenwidth * pspan->v + pspan->u;
+		pz = dvars.zbuffer + dvars.zwidth * pspan->v + pspan->u;
 
 		count = pspan->count;
 
@@ -45,37 +45,26 @@ void D_SpriteDrawSpans (sspan_t *pspan, byte alpha)
 		du = (float)pspan->u;
 		dv = (float)pspan->v;
 
-		sdivz = d_sdivzorigin + dv*d_sdivzstepv + du*d_sdivzstepu;
-		tdivz = d_tdivzorigin + dv*d_tdivzstepv + du*d_tdivzstepu;
-		zi = d_ziorigin + dv*d_zistepv + du*d_zistepu;
+		sdivz = dvars.sdivzorigin + dv*dvars.sdivzstepv + du*dvars.sdivzstepu;
+		tdivz = dvars.tdivzorigin + dv*dvars.tdivzstepv + du*dvars.tdivzstepu;
+		zi = dvars.ziorigin + dv*dvars.zistepv + du*dvars.zistepu;
 		z = (float)0x10000 / zi;	// prescale to 16.16 fixed-point
 		// we count on FP exceptions being turned off to avoid range problems
 		izi = (int)(zi * 0x8000 * 0x10000);
 
-		s = (int)(sdivz * z) + sadjust;
-		if (s > bbextents)
-			s = bbextents;
-		else if (s < 0)
-			s = 0;
+		s = (int)(sdivz * z) + dvars.sadjust;
+		s = clamp(s, 0, dvars.bbextents);
 
-		t = (int)(tdivz * z) + tadjust;
-		if (t > bbextentt)
-			t = bbextentt;
-		else if (t < 0)
-			t = 0;
+		t = (int)(tdivz * z) + dvars.tadjust;
+		t = clamp(t, 0, dvars.bbextentt);
 
 		do
 		{
 			// calculate s and t at the far end of the span
-			if (count >= 8)
-				spancount = 8;
-			else
-				spancount = count;
-
+			spancount = min(count, 8);
 			count -= spancount;
 
-			if (count)
-			{
+			if(count){
 				// calculate s/z, t/z, zi->fixed s and t at far end of span,
 				// calculate s and t steps across span by shifting
 				sdivz += sdivz8stepu;
@@ -83,19 +72,14 @@ void D_SpriteDrawSpans (sspan_t *pspan, byte alpha)
 				zi += zi8stepu;
 				z = (float)0x10000 / zi;	// prescale to 16.16 fixed-point
 
-				snext = (int)(sdivz * z) + sadjust;
-				if (snext > bbextents)
-					snext = bbextents;
-				else if (snext < 8)
-					snext = 8;	// prevent round-off error on <0 steps from
-								//  from causing overstepping & running off the
-								//  edge of the texture
+				snext = (int)(sdivz * z) + dvars.sadjust;
+				snext = clamp(snext, 8, dvars.bbextents);
+				// prevent round-off error on <0 steps from
+				//  from causing overstepping & running off the
+				//  edge of the texture
 
-				tnext = (int)(tdivz * z) + tadjust;
-				if (tnext > bbextentt)
-					tnext = bbextentt;
-				else if (tnext < 8)
-					tnext = 8;	// guard against round-off error on <0 steps
+				tnext = (int)(tdivz * z) + dvars.tadjust;
+				tnext = clamp(tnext, 8, dvars.bbextentt); // guard against round-off error on <0 steps
 
 				sstep = (snext - s) >> 3;
 				tstep = (tnext - t) >> 3;
@@ -107,26 +91,20 @@ void D_SpriteDrawSpans (sspan_t *pspan, byte alpha)
 				// span by division, biasing steps low so we don't run off the
 				// texture
 				spancountminus1 = (float)(spancount - 1);
-				sdivz += d_sdivzstepu * spancountminus1;
-				tdivz += d_tdivzstepu * spancountminus1;
-				zi += d_zistepu * spancountminus1;
+				sdivz += dvars.sdivzstepu * spancountminus1;
+				tdivz += dvars.tdivzstepu * spancountminus1;
+				zi += dvars.zistepu * spancountminus1;
 				z = (float)0x10000 / zi;	// prescale to 16.16 fixed-point
-				snext = (int)(sdivz * z) + sadjust;
-				if (snext > bbextents)
-					snext = bbextents;
-				else if (snext < 8)
-					snext = 8;	// prevent round-off error on <0 steps from
-								//  from causing overstepping & running off the
-								//  edge of the texture
+				snext = (int)(sdivz * z) + dvars.sadjust;
+				snext = clamp(snext, 8, dvars.bbextents);
+				// prevent round-off error on <0 steps from
+				//  from causing overstepping & running off the
+				//  edge of the texture
 
-				tnext = (int)(tdivz * z) + tadjust;
-				if (tnext > bbextentt)
-					tnext = bbextentt;
-				else if (tnext < 8)
-					tnext = 8;	// guard against round-off error on <0 steps
+				tnext = (int)(tdivz * z) + dvars.tadjust;
+				tnext = clamp(tnext, 8, dvars.bbextentt); // guard against round-off error on <0 steps
 
-				if (spancount > 1)
-				{
+				if(spancount > 1){
 					sstep = (snext - s) / (spancount - 1);
 					tstep = (tnext - t) / (spancount - 1);
 				}
@@ -134,7 +112,7 @@ void D_SpriteDrawSpans (sspan_t *pspan, byte alpha)
 
 			do
 			{
-				btemp = *(pbase + (s >> 16) + (t >> 16) * cachewidth);
+				btemp = *(pbase + (s >> 16) + (t >> 16) * dvars.cachewidth);
 				if(opaque(btemp) && *pz <= izi){
 					if(r_drawflags & DRAW_BLEND){
 						*pdest = blendalpha(btemp, *pdest, alpha, izi);
@@ -201,8 +179,7 @@ void D_SpriteScanLeftEdge (void)
 			slope = du / dv;
 			u_step = (int)(slope * 0x10000);
 			// adjust u to ceil the integer portion
-			u = (int)((pvert->u + (slope * (vtop - pvert->v))) * 0x10000) +
-					(0x10000 - 1);
+			u = (int)((pvert->u + (slope * (vtop - pvert->v))) * 0x10000) + (0x10000 - 1);
 			itop = (int)vtop;
 			ibottom = (int)vbottom;
 
@@ -281,8 +258,7 @@ void D_SpriteScanRightEdge (void)
 			slope = du / dv;
 			u_step = (int)(slope * 0x10000);
 			// adjust u to ceil the integer portion
-			u = (int)((uvert + (slope * (vtop - vvert))) * 0x10000) +
-					(0x10000 - 1);
+			u = (int)((uvert + (slope * (vtop - vvert))) * 0x10000) + (0x10000 - 1);
 			itop = (int)vtop;
 			ibottom = (int)vbottom;
 
@@ -324,32 +300,27 @@ void D_SpriteCalculateGradients (void)
 
 	distinv = 1.0 / (-DotProduct (modelorg, r_spritedesc.vpn));
 
-	d_sdivzstepu = p_saxis[0] * xscaleinv;
-	d_tdivzstepu = p_taxis[0] * xscaleinv;
+	dvars.sdivzstepu = p_saxis[0] * xscaleinv;
+	dvars.tdivzstepu = p_taxis[0] * xscaleinv;
 
-	d_sdivzstepv = -p_saxis[1] * yscaleinv;
-	d_tdivzstepv = -p_taxis[1] * yscaleinv;
+	dvars.sdivzstepv = -p_saxis[1] * yscaleinv;
+	dvars.tdivzstepv = -p_taxis[1] * yscaleinv;
 
-	d_zistepu = p_normal[0] * xscaleinv * distinv;
-	d_zistepv = -p_normal[1] * yscaleinv * distinv;
+	dvars.zistepu = p_normal[0] * xscaleinv * distinv;
+	dvars.zistepv = -p_normal[1] * yscaleinv * distinv;
 
-	d_sdivzorigin = p_saxis[2] - xcenter * d_sdivzstepu -
-			ycenter * d_sdivzstepv;
-	d_tdivzorigin = p_taxis[2] - xcenter * d_tdivzstepu -
-			ycenter * d_tdivzstepv;
-	d_ziorigin = p_normal[2] * distinv - xcenter * d_zistepu -
-			ycenter * d_zistepv;
+	dvars.sdivzorigin = p_saxis[2] - xcenter*dvars.sdivzstepu - ycenter*dvars.sdivzstepv;
+	dvars.tdivzorigin = p_taxis[2] - xcenter*dvars.tdivzstepu - ycenter*dvars.tdivzstepv;
+	dvars.ziorigin = p_normal[2]*distinv - xcenter*dvars.zistepu - ycenter*dvars.zistepv;
 
 	TransformVector (modelorg, p_temp1);
 
-	sadjust = ((fixed16_t)(DotProduct (p_temp1, p_saxis) * 0x10000 + 0.5)) -
-			(-(cachewidth >> 1) << 16);
-	tadjust = ((fixed16_t)(DotProduct (p_temp1, p_taxis) * 0x10000 + 0.5)) -
-			(-(sprite_height >> 1) << 16);
+	dvars.sadjust = ((fixed16_t)(DotProduct (p_temp1, p_saxis) * 0x10000 + 0.5)) - (-(dvars.cachewidth >> 1) << 16);
+	dvars.tadjust = ((fixed16_t)(DotProduct (p_temp1, p_taxis) * 0x10000 + 0.5)) - (-(sprite_height >> 1) << 16);
 
 	// -1 (-epsilon) so we never wander off the edge of the texture
-	bbextents = (cachewidth << 16) - 1;
-	bbextentt = (sprite_height << 16) - 1;
+	dvars.bbextents = (dvars.cachewidth << 16) - 1;
+	dvars.bbextentt = (sprite_height << 16) - 1;
 }
 
 
@@ -396,9 +367,9 @@ void D_DrawSprite (void)
 	if (ymin >= ymax)
 		return;		// doesn't cross any scans at all
 
-	cachewidth = r_spritedesc.pspriteframe->width;
+	dvars.cachewidth = r_spritedesc.pspriteframe->width;
 	sprite_height = r_spritedesc.pspriteframe->height;
-	cacheblock = &r_spritedesc.pspriteframe->pixels[0];
+	dvars.cacheblock = &r_spritedesc.pspriteframe->pixels[0];
 
 	// copy the first vertex to the last vertex, so we don't have to deal with
 	// wrapping
@@ -411,4 +382,3 @@ void D_DrawSprite (void)
 	D_SpriteScanRightEdge ();
 	D_SpriteDrawSpans (sprite_spans, currententity->alpha);
 }
-

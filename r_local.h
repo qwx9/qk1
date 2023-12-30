@@ -152,9 +152,6 @@ extern int		*pfrustum_indexes[4];
 // !!! if this is changed, it must be changed in asm_draw.h too !!!
 #define	NEAR_CLIP	0.01
 
-extern fixed16_t	sadjust, tadjust;
-extern fixed16_t	bbextents, bbextentt;
-
 #define MAXBVERTINDEXES	1000	// new clipped vertices when clipping bmodels
 								//  to the world BSP
 extern mvertex_t	*r_ptverts, *r_ptvertsmax;

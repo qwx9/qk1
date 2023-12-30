@@ -11,7 +11,7 @@ D_ViewChanged (void)
 {
 	int rowbytes, i;
 
-	d_zwidth = vid.width;
+	dvars.zwidth = vid.width;
 	rowbytes = vid.rowbytes;
 	scale_for_mip = max(xscale, yscale);
 
@@ -27,7 +27,7 @@ D_ViewChanged (void)
 
 	for(i = 0; i < vid.height; i++){
 		d_scantable[i] = i*rowbytes;
-		zspantable[i] = d_pzbuffer + i*d_zwidth;
+		zspantable[i] = dvars.zbuffer + i*dvars.zwidth;
 	}
 }
 

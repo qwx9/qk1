@@ -9,6 +9,19 @@ enum {
 	SURFCACHE_SIZE_AT_320X200 = 600*1024,
 };
 
+typedef struct {
+	pixel_t *cacheblock;
+	pixel_t *viewbuffer;
+	uzint *zbuffer;
+	unsigned cachewidth;
+	unsigned zwidth;
+	fixed16_t sadjust, tadjust;
+	fixed16_t bbextents, bbextentt;
+	float sdivzstepu, tdivzstepu, zistepu;
+	float sdivzstepv, tdivzstepv, zistepv;
+	float sdivzorigin, tdivzorigin, ziorigin;
+}dvars_t;
+
 typedef struct surfcache_s
 {
 	struct surfcache_s	*next;
@@ -37,14 +50,9 @@ extern bool		d_roverwrapped;
 extern surfcache_t	*sc_rover;
 extern surfcache_t	*d_initial_rover;
 
-extern float	d_sdivzstepu, d_tdivzstepu, d_zistepu;
-extern float	d_sdivzstepv, d_tdivzstepv, d_zistepv;
-extern float	d_sdivzorigin, d_tdivzorigin, d_ziorigin;
+extern dvars_t dvars;
 
-extern fixed16_t	sadjust, tadjust;
-extern fixed16_t	bbextents, bbextentt;
-
-void D_DrawSpans16 (espan_t *pspans, int forceblend, byte alpha);
+void D_DrawSpans16 (espan_t *pspans, bool blend, byte alpha);
 void D_DrawZSpans (espan_t *pspans);
 void Turbulent8 (espan_t *pspan, byte alpha);
 
@@ -53,16 +61,12 @@ void D_DrawSkyScans8 (espan_t *pspan);
 void R_ShowSubDiv (void);
 surfcache_t	*D_CacheSurface (msurface_t *surface, int miplevel);
 
-extern uzint *d_pzbuffer;
-extern unsigned int d_zrowbytes, d_zwidth;
-
 extern int	*d_pscantable;
 extern int	d_scantable[MAXHEIGHT];
 
 extern int	d_vrectx, d_vrecty, d_vrectright_particle, d_vrectbottom_particle;
 
 extern int d_pix_min, d_pix_max;
-extern pixel_t *d_viewbuffer;
 extern uzint *zspantable[MAXHEIGHT];
 extern int d_minmip;
 extern float d_scalemip[3];
