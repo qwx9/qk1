@@ -3,6 +3,7 @@
 #include <time.h>
 #include <errno.h>
 #include <fenv.h>
+#include <signal.h>
 
 char *game;
 int debug;
@@ -142,6 +143,8 @@ main(int argc, char **argv)
 	}
 
 	srand(nanosec() + time(nil));
+
+	signal(SIGPIPE, SIG_IGN);
 
 	paths[1] = strdup(va("%s/.quake", getenv("HOME")));
 	Host_Init(nargs, argv, paths);
