@@ -1,9 +1,6 @@
 // d_local.h:  private rasterization driver defs
 
 enum {
-	R_SKY_SMASK = 0x007F0000,
-	R_SKY_TMASK	= 0x007F0000,
-
 	DS_SPAN_LIST_END = -128,
 
 	SURFCACHE_SIZE_AT_320X200 = 600*1024,
@@ -21,6 +18,14 @@ typedef struct {
 	float sdivzstepv, tdivzstepv, zistepv;
 	float sdivzorigin, tdivzorigin, ziorigin;
 }dvars_t;
+
+typedef struct {
+	pixel_t *source[2];
+	int w, h;
+	int smask, tmask;
+	int tshift;
+	float speed, time;
+}skyvars_t;
 
 typedef struct surfcache_s
 {
@@ -51,6 +56,7 @@ extern surfcache_t	*sc_rover;
 extern surfcache_t	*d_initial_rover;
 
 extern dvars_t dvars;
+extern skyvars_t skyvars;
 
 void D_DrawSpans16 (espan_t *pspans, bool blend, byte alpha);
 void D_DrawZSpans (espan_t *pspans);

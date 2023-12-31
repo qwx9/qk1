@@ -42,6 +42,8 @@ typedef uintptr_t uintptr;
 #define setmalloctag(p, t) do{USED(p); USED(t);}while(0)
 #define setrealloctag(p, t) do{USED(p); USED(t);}while(0)
 
+#define qctz(x) __builtin_ctz(x)
+
 #ifndef BYTE_ORDER
 #define LITTLE_ENDIAN __LITTLE_ENDIAN
 #define BIG_ENDIAN __BIG_ENDIAN

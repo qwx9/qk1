@@ -3,7 +3,7 @@
 #define SKY_SPAN_SHIFT	5
 #define SKY_SPAN_MAX	(1 << SKY_SPAN_SHIFT)
 
-extern int skyw, skyh;
+skyvars_t skyvars;
 
 /*
 =================
@@ -24,10 +24,10 @@ void D_Sky_uv_To_st (int u, int v, fixed16_t *s, fixed16_t *t, float skydist)
 	end[2] *= 3;
 	VectorNormalize(end);
 
-	s[0] = (int)((skydist + 4*(skyw-1)*end[0]) * 0x10000);
-	t[0] = (int)((skydist + 4*(skyh-1)*end[1]) * 0x10000);
-	s[1] = (int)((skydist*2.0 + 4*(skyw-1)*end[0]) * 0x10000);
-	t[1] = (int)((skydist*2.0 + 4*(skyh-1)*end[1]) * 0x10000);
+	s[0] = (int)((skydist + 4*(skyvars.w-1)*end[0]) * 0x10000);
+	t[0] = (int)((skydist + 4*(skyvars.h-1)*end[1]) * 0x10000);
+	s[1] = (int)((skydist*2.0 + 4*(skyvars.w-1)*end[0]) * 0x10000);
+	t[1] = (int)((skydist*2.0 + 4*(skyvars.h-1)*end[1]) * 0x10000);
 }
 
 
@@ -43,16 +43,16 @@ void D_DrawSkyScans8 (espan_t *pspan)
 	fixed16_t s[2], t[2], snext[2], tnext[2], sstep[2], tstep[2];
 	float skydist;
 
-	if(r_skysource[0] == nil || r_skysource[1] == nil)
+	if(skyvars.source[0] == nil || skyvars.source[1] == nil)
 		return;
 
 	sstep[0] = sstep[1] = 0;	// keep compiler happy
 	tstep[0] = tstep[1] = 0;	// ditto
-	skydist = skytime*skyspeed;	// TODO: add D_SetupFrame & set this there
+	skydist = skyvars.time*skyvars.speed;	// TODO: add D_SetupFrame & set this there
 
 	do
 	{
-		pdest = dvars.viewbuffer + pspan->v*dvars.width + pspan->u;
+		pdest = dvars.viewbuffer + (dvars.width * pspan->v) + pspan->u;
 		count = pspan->count;
 
 		// calculate the initial s & t
@@ -102,13 +102,11 @@ void D_DrawSkyScans8 (espan_t *pspan)
 
 			do
 			{
-				m = r_skysource[1][((t[1] & R_SKY_TMASK) >> 9) +
-						((s[1] & R_SKY_SMASK) >> 16)];
-				if((m & 0xffffff) == 0)
-					*pdest = r_skysource[0][((t[0] & R_SKY_TMASK) >> 9) +
-							((s[0] & R_SKY_SMASK) >> 16)];
-				else
+				m = skyvars.source[1][((t[1] & skyvars.tmask) >> skyvars.tshift) + ((s[1] & skyvars.smask) >> 16)];
+				if(opaque(m))
 					*pdest = m;
+				else
+					*pdest = skyvars.source[0][((t[0] & skyvars.tmask) >> skyvars.tshift) + ((s[0] & skyvars.smask) >> 16)];
 				pdest++;
 				s[0] += sstep[0];
 				t[0] += tstep[0];

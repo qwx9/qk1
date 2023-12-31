@@ -8,6 +8,19 @@ int debug;
 static const char *disabled[32];
 static int ndisabled;
 
+int
+qctz(unsigned x)
+{
+	unsigned r;
+
+	if(x == 0)
+		r = 32;
+	else
+		for(r = 0; (x & 1) == 0; x >>= 1, r++);
+
+	return r;
+}
+
 bool
 isdisabled(char *s)
 {
