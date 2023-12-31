@@ -279,7 +279,7 @@ D_DrawSpans16(espan_t *pspan, bool blend, byte alpha) //qbism- up it from 8 to 1
 void
 D_DrawZSpans(espan_t *pspan)
 {
-	int			count, spancount, spancountminus1, izi, izistep;
+	int			count, spancount, izi, izistep;
 	uzint		*pz;
 	float		zi;
 	float		zistepu;
@@ -294,7 +294,6 @@ D_DrawZSpans(espan_t *pspan)
 
 		do{
 			spancount = min(count, 16);
-			spancountminus1 = spancount - 1;
 			count -= spancount;
 
 			izi = (int)(zi * 0x8000 * 0x10000);
@@ -302,7 +301,7 @@ D_DrawZSpans(espan_t *pspan)
 				*pz++ = izi;
 				izi += izistep;
 			}
-			zi += count ? zistepu : dvars.zistepu*spancountminus1;
+			zi += zistepu;
 		}while(count > 0);
 	}while((pspan = pspan->pnext) != nil);
 }
