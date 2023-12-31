@@ -110,7 +110,7 @@ D_DrawSurfaces (void)
 		if(alpha < 1)
 			alpha = 255;
 
-		blend = (s->flags & SURF_TRANS) || (r_drawflags & DRAW_BLEND);
+		blend = (s->flags & SURF_FENCE) || (r_drawflags & DRAW_BLEND);
 
 		dvars.zistepu = s->d_zistepu;
 		dvars.zistepv = s->d_zistepv;
