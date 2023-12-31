@@ -22,6 +22,7 @@ D_ViewChanged (void)
 	d_vrecty = r_refdef.vrect.y;
 	d_vrectright_particle = r_refdef.vrectright - d_pix_max;
 	d_vrectbottom_particle = r_refdef.vrectbottom - d_pix_max;
+	dvars.width = vid.width;
 
 	for(i = 0; i < vid.height; i++){
 		d_scantable[i] = i * dvars.width;

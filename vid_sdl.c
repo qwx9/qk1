@@ -71,7 +71,6 @@ void
 flipfb(void)
 {
 	if(resized){		/* skip this frame if window resize */
-		stopfb();
 		resized = 0;
 		resetfb();
 		vid.recalc_refdef = true;	/* force a surface cache flush */
