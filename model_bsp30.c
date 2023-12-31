@@ -156,16 +156,28 @@ BSP30_LoadTextures(model_t *mod, byte *in, int sz)
 			if((palsz = le16(x)) > 0){
 				pal3torgbx(p, tx->pixels, pixels, x, palsz);
 				if(tx->name[0] == '{'){
-					/* last color is transparent */
+					pixels = w*h;
 					for(j = 0; j < pixels; j++){
-						if(p[j] == palsz-1)
+						if(p[j] >= palsz-1) /* last color is transparent */
 							tx->pixels[j] = 0;
+					}
+					for(j = 1; j < MIPLEVELS; j++){
+						w /= 2;
+						h /= 2;
+						pixels_resize(
+							tx->pixels+tx->offsets[0],
+							tx->pixels+tx->offsets[j],
+							tx->width, tx->height,
+							w, h,
+							false,
+							true
+						);
 					}
 				}
 				if(strchr(tx->name, '~') != nil){
 					/* last 32 colors are fullbright */
 					for(j = 0; j < pixels; j++){
-						if(p[j] >= 256-32)
+						if(p[j] >= palsz-32)
 							tx->pixels[j] &= 0xffffff;
 					}
 				}
