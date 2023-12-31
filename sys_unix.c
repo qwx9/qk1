@@ -4,6 +4,7 @@
 #include <errno.h>
 #include <fenv.h>
 #include <signal.h>
+#include <pthread.h>
 
 char *game;
 int debug;
@@ -113,6 +114,18 @@ game_shutdown(void)
 	exit(0);
 }
 
+static void *
+sighandler(void *ss)
+{
+	int s;
+
+	for(;;){
+		if(sigwait(ss, &s) != 0)
+			break;
+	}
+	return nil;
+}
+
 int
 main(int argc, char **argv)
 {
@@ -124,6 +137,13 @@ main(int argc, char **argv)
 		nil,
 		nil,
 	};
+	sigset_t ss;
+	pthread_t tid;
+
+	sigemptyset(&ss);
+	sigaddset(&ss, SIGPIPE);
+	pthread_sigmask(SIG_BLOCK, &ss, NULL);
+	pthread_create(&tid, nil, sighandler, &ss);
 
 	parg_init(&ps);
 	nargs = 0;
@@ -161,8 +181,6 @@ main(int argc, char **argv)
 	}
 
 	srand(nanosec() + time(nil));
-
-	signal(SIGPIPE, SIG_IGN);
 
 	paths[1] = strdup(va("%s/.quake", getenv("HOME")));
 	Host_Init(nargs, argv, paths);
