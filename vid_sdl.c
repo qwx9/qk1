@@ -39,7 +39,7 @@ resetfb(void)
 
 	if(fbi != nil)
 		SDL_DestroyTexture(fbi);
-	fbi = SDL_CreateTexture(rend, SDL_PIXELFORMAT_RGB888, SDL_TEXTUREACCESS_STREAMING, vid.width, vid.height);
+	fbi = SDL_CreateTexture(rend, SDL_PIXELFORMAT_RGB888, SDL_TEXTUREACCESS_STATIC, vid.width, vid.height);
 	if(fbi == NULL)
 		fatal("SDL_CreateTexture: %s", SDL_GetError());
 	SDL_SetTextureBlendMode(fbi, SDL_BLENDMODE_NONE);
@@ -70,9 +70,6 @@ stopfb(void)
 void
 flipfb(void)
 {
-	int pitch;
-	void *p;
-
 	if(resized){		/* skip this frame if window resize */
 		stopfb();
 		resized = 0;
@@ -83,10 +80,8 @@ flipfb(void)
 		return;
 	}
 
-	SDL_LockTexture(fbi, NULL, &p, &pitch);
-	memmove(p, vidbuffer, vid.width*vid.height*4);
-	SDL_UnlockTexture(fbi);
-	SDL_RenderCopy(rend, fbi, NULL, NULL);
+	SDL_UpdateTexture(fbi, nil, vidbuffer, vid.width*4);
+	SDL_RenderCopy(rend, fbi, nil, nil);
 	SDL_RenderPresent(rend);
 }
 
