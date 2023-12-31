@@ -33,8 +33,8 @@ void D_SpriteDrawSpans (sspan_t *pspan, byte alpha)
 
 	do
 	{
-		pdest = dvars.viewbuffer + screenwidth * pspan->v + pspan->u;
-		pz = dvars.zbuffer + dvars.zwidth * pspan->v + pspan->u;
+		pdest = dvars.viewbuffer + dvars.width * pspan->v + pspan->u;
+		pz = dvars.zbuffer + dvars.width * pspan->v + pspan->u;
 
 		count = pspan->count;
 

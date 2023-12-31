@@ -26,9 +26,7 @@ resetfb(void)
 	if(vid.height < 160)
 		vid.height = 160;
 
-	vid.rowbytes = vid.width;
 	vid.aspect = (float)vid.height / (float)vid.width * (320.0/240.0);
-	vid.conrowbytes = vid.rowbytes;
 	vid.conwidth = vid.width;
 	vid.conheight = vid.height;
 

@@ -25,8 +25,6 @@ static espan_t *span_p, *max_span_p;
 
 int		r_currentkey;
 
-extern	int	screenwidth;
-
 static int current_iv, edge_head_u_shift20, edge_tail_u_shift20;
 static edge_t edge_head, edge_tail, edge_aftertail, edge_sentinel;
 static float fv;

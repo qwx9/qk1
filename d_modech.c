@@ -9,10 +9,8 @@ uzint *zspantable[MAXHEIGHT];
 void
 D_ViewChanged (void)
 {
-	int rowbytes, i;
+	int i;
 
-	dvars.zwidth = vid.width;
-	rowbytes = vid.rowbytes;
 	scale_for_mip = max(xscale, yscale);
 
 	d_pix_scale = 90.0 / max(r_refdef.fov_x, r_refdef.fov_y);
@@ -26,8 +24,8 @@ D_ViewChanged (void)
 	d_vrectbottom_particle = r_refdef.vrectbottom - d_pix_max;
 
 	for(i = 0; i < vid.height; i++){
-		d_scantable[i] = i*rowbytes;
-		zspantable[i] = dvars.zbuffer + i*dvars.zwidth;
+		d_scantable[i] = i * dvars.width;
+		zspantable[i] = dvars.zbuffer + i*dvars.width;
 	}
 }
 

@@ -138,7 +138,7 @@ void Draw_Character (int x, int y, int num)
 	}
 	else
 		drawline = 8;
-	dest = vid.conbuffer + y*vid.conrowbytes + x;
+	dest = vid.conbuffer + y*vid.conwidth + x;
 	while(drawline--){
 		if(source[0]) dest[0] = source[0];
 		if(source[1]) dest[1] = source[1];
@@ -149,7 +149,7 @@ void Draw_Character (int x, int y, int num)
 		if(source[6]) dest[6] = source[6];
 		if(source[7]) dest[7] = source[7];
 		source += 128;
-		dest += vid.conrowbytes;
+		dest += vid.conwidth;
 	}
 }
 
@@ -186,13 +186,13 @@ void Draw_Pic (int x, int y, qpic_t *pic)
 		fatal ("Draw_Pic: bad coordinates");
 	}
 	source = pic->pixels;
-	dest = vid.buffer + y * vid.rowbytes + x;
+	dest = vid.buffer + y * vid.width + x;
 	for(py = 0; py < pic->height; py++){
 		for(px = 0; px < pic->width; px++){
 			if(opaque(source[px]))
 				dest[px] = source[px];
 		}
-		dest += vid.rowbytes;
+		dest += vid.width;
 		source += pic->width;
 	}
 }
@@ -212,13 +212,13 @@ void Draw_TransPic (int x, int y, qpic_t *pic)
 		fatal ("Draw_TransPic: bad coordinates");
 
 	source = pic->pixels;
-	dest = vid.buffer + y * vid.rowbytes + x;
+	dest = vid.buffer + y * vid.width + x;
 	if(pic->width & 7){	// general
 		for(v=0; v<pic->height; v++){
 			for(u=0; u<pic->width; u++)
 				if(opaque(tpix = source[u]))
 					dest[u] = tpix;
-			dest += vid.rowbytes;
+			dest += vid.width;
 			source += pic->width;
 		}
 	}else{	// unwound
@@ -241,7 +241,7 @@ void Draw_TransPic (int x, int y, qpic_t *pic)
 				if(opaque(tpix = source[u+7]))
 					dest[u+7] = tpix;
 			}
-			dest += vid.rowbytes;
+			dest += vid.width;
 			source += pic->width;
 		}
 	}
@@ -262,13 +262,13 @@ void Draw_TransPicTranslate (int x, int y, qpic_t *pic, byte *translation)
 		fatal ("Draw_TransPic: bad coordinates");
 
 	source = pic->pixels;
-	dest = vid.buffer + y * vid.rowbytes + x;
+	dest = vid.buffer + y * vid.width + x;
 	if (pic->width & 7){	// general
 		for(v=0; v<pic->height; v++){
 			for(u=0; u<pic->width; u++)
 				if(opaque(tpix = source[u]))
 					dest[u] = tpix;
-			dest += vid.rowbytes;
+			dest += vid.width;
 			source += pic->width;
 		}
 	}else{	// unwound
@@ -291,7 +291,7 @@ void Draw_TransPicTranslate (int x, int y, qpic_t *pic, byte *translation)
 				if(opaque(tpix = source[u+7]))
 					dest[u+7] = tpix;
 			}
-			dest += vid.rowbytes;
+			dest += vid.width;
 			source += pic->width;
 		}
 	}
@@ -344,7 +344,7 @@ void Draw_ConsoleBackground (int lines)
 	for (x=0 ; x<n ; x++)
 		Draw_CharToConback (ver[x], dest+(x<<3));
 	dest = vid.conbuffer;
-	for(y=0; y<lines; y++, dest+=vid.conrowbytes){
+	for(y=0; y<lines; y++, dest+=vid.conwidth){
 		v = (vid.conheight - lines + y) * 200 / vid.conheight;
 		src = conback->pixels + v * 320;
 		if(vid.conwidth == 320)
@@ -373,10 +373,10 @@ void R_DrawRect8 (vrect_t *prect, int rowbytes, pixel_t *psrc, int transparent)
 	pixel_t	t, *pdest;
 	int		i, j, srcdelta, destdelta;
 
-	pdest = vid.buffer + (prect->y * vid.rowbytes) + prect->x;
+	pdest = vid.buffer + (prect->y * vid.width) + prect->x;
 
 	srcdelta = rowbytes - prect->width;
-	destdelta = vid.rowbytes - prect->width;
+	destdelta = vid.width - prect->width;
 
 	if (transparent)
 	{
@@ -395,7 +395,7 @@ void R_DrawRect8 (vrect_t *prect, int rowbytes, pixel_t *psrc, int transparent)
 		for (i=0 ; i<prect->height ; i++){
 			memcpy (pdest, psrc, prect->width*sizeof(pixel_t));
 			psrc += rowbytes;
-			pdest += vid.rowbytes;
+			pdest += vid.width;
 		}
 	}
 }
@@ -476,8 +476,8 @@ void Draw_Fill (int x, int y, int w, int h, pixel_t c)
 	pixel_t			*dest;
 	int				u, v;
 
-	dest = vid.buffer + y*vid.rowbytes + x;
-	for(v=0; v<h; v++, dest+=vid.rowbytes)
+	dest = vid.buffer + y*vid.width + x;
+	for(v=0; v<h; v++, dest+=vid.width)
 		for(u=0; u<w; u++)
 			dest[u] = c;
 }
@@ -497,7 +497,7 @@ void Draw_FadeScreen (void)
 	{
 		int	t;
 
-		pbuf = vid.buffer + vid.rowbytes*y;
+		pbuf = vid.buffer + vid.width*y;
 		t = (y & 1) << 1;
 
 		for (x=0 ; x<vid.width ; x++)

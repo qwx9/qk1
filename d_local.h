@@ -13,8 +13,8 @@ typedef struct {
 	pixel_t *cacheblock;
 	pixel_t *viewbuffer;
 	uzint *zbuffer;
+	unsigned width;
 	unsigned cachewidth;
-	unsigned zwidth;
 	fixed16_t sadjust, tadjust;
 	fixed16_t bbextents, bbextentt;
 	float sdivzstepu, tdivzstepu, zistepu;

@@ -52,7 +52,7 @@ void D_DrawSkyScans8 (espan_t *pspan)
 
 	do
 	{
-		pdest = dvars.viewbuffer + (screenwidth * pspan->v) + pspan->u;
+		pdest = dvars.viewbuffer + pspan->v*dvars.width + pspan->u;
 		count = pspan->count;
 
 		// calculate the initial s & t

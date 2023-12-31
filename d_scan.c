@@ -30,15 +30,15 @@ void D_WarpScreen (void)
 	hratio = h / (float)scr_vrect.height;
 
 	for(v = 0; v < scr_vrect.height+AMP2*2; v++)
-		rowptr[v] = dvars.viewbuffer + (r_refdef.vrect.y * screenwidth) + (screenwidth * (int)((float)v * hratio * h / (h + AMP2 * 2)));
+		rowptr[v] = dvars.viewbuffer + (r_refdef.vrect.y * dvars.width) + (dvars.width * (int)((float)v * hratio * h / (h + AMP2 * 2)));
 
 	for(u = 0; u < scr_vrect.width+AMP2*2; u++)
 		column[u] = r_refdef.vrect.x + (int)((float)u * wratio * w / (w + AMP2 * 2));
 
 	turb = intsintable + ((int)(cl.time*SPEED)&(CYCLE-1));
-	dest = vid.buffer + scr_vrect.y * vid.rowbytes + scr_vrect.x;
+	dest = vid.buffer + scr_vrect.y * vid.width + scr_vrect.x;
 
-	for(v = 0; v < scr_vrect.height; v++, dest += vid.rowbytes){
+	for(v = 0; v < scr_vrect.height; v++, dest += vid.width){
 		col = &column[turb[v]];
 		row = &rowptr[v];
 
@@ -56,7 +56,8 @@ void D_WarpScreen (void)
 D_DrawTurbulent8Span
 =============
 */
-void D_DrawTurbulent8Span (int izi, byte alpha)
+static inline void
+D_DrawTurbulent8Span (int izi, byte alpha)
 {
 	int sturb, tturb;
 
@@ -93,8 +94,9 @@ Turbulent8(espan_t *pspan, byte alpha)
 	zi16stepu = dvars.zistepu * 16;
 
 	do{
-		r_turb_pdest = dvars.viewbuffer + screenwidth*pspan->v + pspan->u;
-		r_turb_z = dvars.zbuffer + dvars.zwidth*pspan->v + pspan->u;
+		r_turb_pdest = dvars.viewbuffer + pspan->v*dvars.width + pspan->u;
+		r_turb_z = dvars.zbuffer + pspan->v*dvars.width + pspan->u;
+		zi = dvars.ziorigin + pspan->v*dvars.zistepv + pspan->u*dvars.zistepu;
 
 		count = pspan->count;
 
@@ -104,7 +106,6 @@ Turbulent8(espan_t *pspan, byte alpha)
 
 		sdivz = dvars.sdivzorigin + dv*dvars.sdivzstepv + du*dvars.sdivzstepu;
 		tdivz = dvars.tdivzorigin + dv*dvars.tdivzstepv + du*dvars.tdivzstepu;
-		zi = dvars.ziorigin + dv*dvars.zistepv + du*dvars.zistepu;
 		z = (float)0x10000 / zi;	// prescale to 16.16 fixed-point
 
 		r_turb_s = (int)(sdivz * z) + dvars.sadjust;
@@ -192,8 +193,9 @@ D_DrawSpans16(espan_t *pspan, bool blend, byte alpha) //qbism- up it from 8 to 1
 	izistep = (int)(dvars.zistepu * 0x8000 * 0x10000);
 
 	do{
-		pdest = dvars.viewbuffer + screenwidth*pspan->v + pspan->u;
-		pz = dvars.zbuffer + dvars.zwidth*pspan->v + pspan->u;
+		pdest = dvars.viewbuffer + pspan->v*dvars.width + pspan->u;
+		pz = dvars.zbuffer + pspan->v*dvars.width + pspan->u;
+		zi = dvars.ziorigin + pspan->v*dvars.zistepv + pspan->u*dvars.zistepu;
 
 		count = pspan->count;
 
@@ -203,7 +205,6 @@ D_DrawSpans16(espan_t *pspan, bool blend, byte alpha) //qbism- up it from 8 to 1
 
 		sdivz = dvars.sdivzorigin + dv*dvars.sdivzstepv + du*dvars.sdivzstepu;
 		tdivz = dvars.tdivzorigin + dv*dvars.tdivzstepv + du*dvars.tdivzstepu;
-		zi = dvars.ziorigin + dv*dvars.zistepv + du*dvars.zistepu;
 		z = (float)0x10000 / zi;	// prescale to 16.16 fixed-point
 
 		s = (int)(sdivz * z) + dvars.sadjust;
@@ -288,7 +289,7 @@ D_DrawZSpans(espan_t *pspan)
 	izistep = dvars.zistepu * 0x8000 * 0x10000;
 
 	do{
-		pz = dvars.zbuffer + pspan->v*dvars.zwidth + pspan->u;
+		pz = dvars.zbuffer + pspan->v*dvars.width + pspan->u;
 		zi = dvars.ziorigin + pspan->v*dvars.zistepv + pspan->u*dvars.zistepu;
 		count = pspan->count;
 

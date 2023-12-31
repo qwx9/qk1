@@ -17,8 +17,6 @@ typedef s32int uzint;
 
 //===================================================================
 
-extern int		screenwidth;
-
 extern	float	pixelAspect;
 
 extern int		r_drawnpolycount;

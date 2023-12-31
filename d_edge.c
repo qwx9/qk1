@@ -34,7 +34,7 @@ D_DrawSolidSurface(surf_t *surf, pixel_t color)
 	int u, u2;
 
 	for(span = surf->spans; span; span=span->pnext){
-		pdest = dvars.viewbuffer + screenwidth*span->v;
+		pdest = dvars.viewbuffer + dvars.width*span->v;
 		u2 = span->u + span->count - 1;
 		for(u = span->u; u <= u2; u++)
 			pdest[u] = color;

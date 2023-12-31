@@ -16,14 +16,12 @@ typedef struct
 	pixel_t			*buffer;		// invisible buffer
 	pixel_t			*colormap;		// 256 * VID_GRADES size
 	int				fullbright;		// index of first fullbright color
-	unsigned		rowbytes;	// may be > width if displayed in a window
 	int				width;
 	int				height;
 	float			aspect;		// width / height -- < 0 is taller than wide
 	int				numpages;
 	int				recalc_refdef;	// if true, recalc vid-based stuff
 	pixel_t			*conbuffer;
-	int				conrowbytes;
 	unsigned		conwidth;
 	unsigned		conheight;
 	int				maxwarpwidth;
