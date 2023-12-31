@@ -740,7 +740,6 @@ trackdecoder(void *f)
 			}
 		}
 	}
-	fclose(f);
 	track.stop = true;
 	waitpid(track.decoder, nil, 0);
 
@@ -778,8 +777,6 @@ err:
 			waitpid(track.decoder, nil, 0);
 		if(track.reader > 0)
 			pthread_join(track.reader, nil);
-		else
-			fclose(f);
 		return;
 	}
 	if(pipe(in) != 0){
