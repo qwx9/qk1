@@ -1,9 +1,6 @@
 #include "quakedef.h"
 #include <SDL.h>
 
-/* vid.c */
-extern int resized;
-
 static cvar_t m_windowed = {"m_windowed", "1", true};
 static cvar_t m_filter = {"m_filter", "0", true};
 static cvar_t m_raw = {"m_raw", "1", true};
@@ -42,7 +39,7 @@ Sys_SendKeyEvents(void)
 		case SDL_WINDOWEVENT:
 			switch(event.window.event){
 			case SDL_WINDOWEVENT_RESIZED:
-				resized = 1;
+				vid.resized = true;
 				break;
 			case SDL_WINDOWEVENT_CLOSE:
 				Cbuf_AddText("menu_quit\n");

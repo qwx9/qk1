@@ -11,6 +11,8 @@ when crossing a water boudnary.
 
 cvar_t lcd_x = {"lcd_x","0"};
 
+cvar_t v_scale = {"v_scale", "1", true};
+
 static cvar_t lcd_yaw = {"lcd_yaw","0"};
 
 static cvar_t scr_ofsx = {"scr_ofsx","0", false};
@@ -927,6 +929,18 @@ err:
 	strcpy(opath, path);
 }
 
+static void
+v_scale_cb(cvar_t *var)
+{
+	static float scale = 1.0;
+
+	var->value = clamp(var->value, 1, 16);
+	if(scale != var->value){
+		scale = var->value;
+		vid.resized = true;
+	}
+}
+
 /*
 =============
 V_Init
@@ -938,6 +952,9 @@ void V_Init (void)
 	Cmd_AddCommand("bf", V_BonusFlash_f);
 	Cmd_AddCommand("centerview", V_StartPitchDrift);
 	Cmd_AddCommand("screenshot", screenshot);
+
+	Cvar_RegisterVariable(&v_scale);
+	v_scale.cb = v_scale_cb;
 
 	Cvar_RegisterVariable (&lcd_x);
 	Cvar_RegisterVariable (&lcd_yaw);

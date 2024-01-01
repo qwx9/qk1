@@ -1,8 +1,6 @@
 #include "quakedef.h"
 #include <SDL.h>
 
-int resized;
-
 pixel_t q1pal[256];
 
 static SDL_Renderer *rend;
@@ -21,10 +19,10 @@ resetfb(void)
 	 * but at least this prevents a crash, beyond that
 	 * it's your funeral */
 	SDL_GetWindowSize(win, &vid.width, &vid.height);
-	if(vid.width < 320)
-		vid.width = 320;
-	if(vid.height < 160)
-		vid.height = 160;
+	vid.width /= v_scale.value;
+	vid.height /= v_scale.value;
+	vid.width = clamp(vid.width, 320, MAXWIDTH);
+	vid.height = clamp(vid.height, 240, MAXHEIGHT);
 
 	vid.aspect = (float)vid.height / (float)vid.width * (320.0/240.0);
 	vid.conwidth = vid.width;
@@ -48,16 +46,14 @@ resetfb(void)
 	vid.buffer = vidbuffer;
 	vid.conbuffer = vid.buffer;
 
-	if(dvars.zbuffer != nil){
+	if(dvars.zbuffer != nil)
 		D_FlushCaches();
-		free(dvars.zbuffer);
-	}
 
 	// alloc an extra line in case we want to wrap, and allocate the z-buffer
 	hunkvbuf = vid.width * vid.height * sizeof(*dvars.zbuffer);
 	scachesz = D_SurfaceCacheForRes(vid.width, vid.height);
 	hunkvbuf += scachesz;
-	dvars.zbuffer = emalloc(hunkvbuf);
+	dvars.zbuffer = realloc(dvars.zbuffer, hunkvbuf);
 	surfcache = (byte *)(dvars.zbuffer + vid.width * vid.height);
 	D_InitCaches(surfcache, scachesz);
 }
@@ -70,8 +66,8 @@ stopfb(void)
 void
 flipfb(void)
 {
-	if(resized){		/* skip this frame if window resize */
-		resized = 0;
+	if(vid.resized){		/* skip this frame if window resize */
+		vid.resized = false;
 		resetfb();
 		vid.recalc_refdef = true;	/* force a surface cache flush */
 		Con_CheckResize();

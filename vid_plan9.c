@@ -3,12 +3,13 @@
 #include <thread.h>
 
 viddef_t vid;		/* global video state */
-int resized;
 Point center;		/* of window */
 Rectangle grabr;
 
 pixel_t q1pal[256];
 static Image *fbi;
+static u32int *scibuf;
+static int scifactor;
 static Rectangle fbr;
 static pixel_t *vidbuffers[2];
 static int bufi = 0;
@@ -28,11 +29,13 @@ resetfb(void)
 	 * but at least this prevents a crash, beyond that
 	 * it's your funeral */
 	vid.width = Dx(screen->r);
-	if(vid.width < 320)
-		vid.width = 320;
 	vid.height = Dy(screen->r);
-	if(vid.height < 160)
-		vid.height = 160;
+	scifactor = v_scale.value;
+	vid.width /= scifactor;
+	vid.height /= scifactor;
+	vid.width = clamp(vid.width, 320, MAXWIDTH);
+	vid.height = clamp(vid.height, 240, MAXHEIGHT);
+
 	if(dvars.zbuffer != nil)
 		D_FlushCaches();
 
@@ -60,30 +63,66 @@ resetfb(void)
 	r_warpbuffer = emalloc((vid.width*vid.height+16)*sizeof(pixel_t));
 	vid.maxwarpwidth = vid.width;
 	vid.maxwarpheight = vid.height;
-	freeimage(fbi);
-	fbi = allocimage(display, Rect(0, 0, vid.width, vid.height), XRGB32, 0, 0);
-	if(fbi == nil)
-		sysfatal("resetfb: %r (%d %d)", vid.width, vid.height);
 	vid.buffer = vidbuffers[bufi = 0];
 	vid.conbuffer = vid.buffer;
 	draw(screen, screen->r, display->black, nil, ZP);
+
+	freeimage(fbi);
+	if(scifactor != 1){
+		fbi = allocimage(display, Rect(0, 0, vid.width*scifactor, 1), XRGB32, 1, DNofill);
+		scibuf = realloc(scibuf, vid.width*scifactor*sizeof(*scibuf));
+	}else{
+		fbi = allocimage(display, Rect(0, 0, vid.width, vid.height), XRGB32, 0, 0);
+		free(scibuf);
+		scibuf = nil;
+	}
+	if(fbi == nil)
+		sysfatal("resetfb: %r (%d %d)", vid.width, vid.height);
 }
 
 static void
 loader(void *)
 {
-	byte *f;
+	u32int *in, *out;
+	int n, x, y, j;
+	Point center;
 	Rectangle r;
-	int n;
+	byte *f;
 
+	center = addpt(screen->r.min, Pt(Dx(screen->r)/2, Dy(screen->r)/2));
 	r = Rect(0, 0, vid.width, vid.height);
-	n = vid.width * vid.height;
+	if(scibuf == nil)
+		n = vid.width * vid.height;
+	else
+		n = vid.width * scifactor * sizeof(*scibuf);
+
 	for(;;){
 		if((f = recvp(frame)) == nil)
 			break;
-		if(loadimage(fbi, r, f, n*4) != n*4)
-			sysfatal("%r");
-		draw(screen, fbr, fbi, nil, ZP);
+		if(scibuf != nil){
+			in = (u32int*)f;
+
+			r = rectsubpt(
+				rectaddpt(Rect(0, 0, scifactor*vid.width, scifactor), center),
+				Pt(scifactor*vid.width/2, scifactor*vid.height/2)
+			);
+
+			for(y = 0; y < vid.height; y++){
+				for(x = 0, out = scibuf; x < vid.width; x++, in++){
+					for(j = 0; j < scifactor; j++, out++)
+						*out = *in;
+				}
+				if(loadimage(fbi, fbi->r, (byte*)scibuf, n) != n)
+					sysfatal("%r");
+				draw(screen, r, fbi, nil, ZP);
+				r.min.y += scifactor;
+				r.max.y += scifactor;
+			}
+		}else{
+			if(loadimage(fbi, r, f, n*4) != n*4)
+				sysfatal("%r");
+			draw(screen, fbr, fbi, nil, ZP);
+		}
 		if(flushimage(display, 1) < 0)
 			sysfatal("%r");
 	}
@@ -103,11 +142,11 @@ stopfb(void)
 void
 flipfb(void)
 {
-	if(resized){		/* skip this frame if window resize */
+	if(vid.resized){		/* skip this frame if window resize */
+		vid.resized = false;
 		stopfb();
 		if(getwindow(display, Refnone) < 0)
 			sysfatal("%r");
-		resized = 0;
 		resetfb();
 		vid.recalc_refdef = true;	/* force a surface cache flush */
 		Con_CheckResize();

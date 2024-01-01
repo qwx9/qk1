@@ -5,8 +5,6 @@
 #include <mouse.h>
 #include <keyboard.h>
 
-/* vid.c */
-extern int resized;
 extern Point center;
 extern Rectangle grabr;
 
@@ -269,7 +267,7 @@ mproc(void *)
 		nerr = 0;
 		switch(*buf){
 		case 'r':
-			resized = 1;
+			vid.resized = true;
 			/* fall through */
 		case 'm':
 			if(!mouseon)

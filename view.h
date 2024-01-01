@@ -4,6 +4,7 @@ extern	byte		ramps[3][256];
 extern float v_blend[4];
 
 extern cvar_t lcd_x;
+extern cvar_t v_scale;
 
 void V_Init (void);
 void V_RenderView (void);
