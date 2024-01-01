@@ -28,10 +28,11 @@ typedef struct
 	vec3_t		position;
 } mvertex_t;
 
-#define	SIDE_FRONT	0
-#define	SIDE_BACK	1
-#define	SIDE_ON		2
-
+enum {
+	SIDE_FRONT,
+	SIDE_BACK,
+	SIDE_ON,
+};
 
 // plane_t structure
 // !!! if this is changed, it must be changed in asm_i386.h too !!!
@@ -44,9 +45,14 @@ typedef struct mplane_s
 	byte	pad[2];
 } mplane_t;
 
+enum {
+	DRAWSURF_FULLBRIGHT = 1<<0,
+};
+
 typedef struct texture_s
 {
 	char name[16];
+	int drawsurf;
 	int width, height;
 	int anim_total;				// total tenths in sequence ( 0 = no)
 	int anim_min, anim_max;		// time for this frame min <=time< max

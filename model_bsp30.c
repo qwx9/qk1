@@ -175,6 +175,7 @@ BSP30_LoadTextures(model_t *mod, byte *in, int sz)
 					}
 				}
 				if(strchr(tx->name, '~') != nil){
+					tx->drawsurf |= DRAWSURF_FULLBRIGHT;
 					/* last 32 colors are fullbright */
 					for(j = 0; j < pixels; j++){
 						if(p[j] >= palsz-32)

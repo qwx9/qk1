@@ -5,14 +5,9 @@ drawsurf_t	r_drawsurf;
 static int sourcetstep;
 static int surfrowbytes;	// used by ASM files
 static int r_stepback;
-static int r_numhblocks, r_numvblocks;
 static pixel_t *r_source, *r_sourcemax;
-static unsigned *r_lightptr[3];
-static int r_lightwidth;
 static pixel_t *pbasesource;
 static void *prowdestbase;
-
-static void R_DrawSurfaceBlock8(int mip);
 
 static unsigned blocklights[3][18*18];
 
@@ -193,88 +188,6 @@ texture_t *R_TextureAnimation (texture_t *base)
 	return base;
 }
 
-
-/*
-===============
-R_DrawSurface
-===============
-*/
-void R_DrawSurface (void)
-{
-	pixel_t	*basetptr;
-	int				smax, tmax, twidth;
-	int				u, blockdivshift, blocksize;
-	int				soffset, basetoffset, texwidth;
-	int				horzblockstep;
-	pixel_t	*pcolumndest;
-	texture_t		*mt;
-
-	// calculate the lightings
-	R_BuildLightMap ();
-
-	surfrowbytes = r_drawsurf.rowbytes;
-
-	mt = r_drawsurf.texture;
-
-	r_source = mt->pixels + mt->offsets[r_drawsurf.surfmip];
-
-	// the fractional light values should range from 0 to (VID_GRADES - 1) << 16
-	// from a source range of 0 - 255
-
-	texwidth = mt->width >> r_drawsurf.surfmip;
-
-	blocksize = 16 >> r_drawsurf.surfmip;
-	blockdivshift = 4 - r_drawsurf.surfmip;
-
-	r_lightwidth = (r_drawsurf.surf->extents[0]>>4)+1;
-
-	r_numhblocks = r_drawsurf.surfwidth >> blockdivshift;
-	r_numvblocks = r_drawsurf.surfheight >> blockdivshift;
-
-	// TODO: only needs to be set when there is a display settings change
-	horzblockstep = blocksize;
-
-	smax = mt->width >> r_drawsurf.surfmip;
-	twidth = texwidth;
-	tmax = mt->height >> r_drawsurf.surfmip;
-	sourcetstep = texwidth;
-	r_stepback = tmax * twidth;
-
-	r_sourcemax = r_source + (tmax * smax);
-
-	soffset = r_drawsurf.surf->texturemins[0];
-	basetoffset = r_drawsurf.surf->texturemins[1];
-
-	// << 16 components are to guarantee positive values for %
-	soffset = ((soffset >> r_drawsurf.surfmip) + (smax << 16)) % smax;
-	basetptr = &r_source[((((basetoffset >> r_drawsurf.surfmip)
-		+ (tmax << 16)) % tmax) * twidth)];
-
-	pcolumndest = r_drawsurf.surfdat;
-
-	for (u=0 ; u<r_numhblocks; u++)
-	{
-		r_lightptr[0] = blocklights[0] + u;
-		r_lightptr[1] = blocklights[1] + u;
-		r_lightptr[2] = blocklights[2] + u;
-
-		prowdestbase = pcolumndest;
-
-		pbasesource = basetptr + soffset;
-
-		R_DrawSurfaceBlock8(r_drawsurf.surfmip);
-
-		soffset = soffset + blocksize;
-		if (soffset >= smax)
-			soffset = 0;
-
-		pcolumndest += horzblockstep;
-	}
-}
-
-
-//=============================================================================
-
 inline pixel_t
 addlight(pixel_t x, int lr, int lg, int lb)
 {
@@ -298,49 +211,171 @@ addlight(pixel_t x, int lr, int lg, int lb)
 	return x;
 }
 
-static void
-R_DrawSurfaceBlock8(int mip)
-{
-	int b, v, i, j, lightstep[3], light[3], lightleft[3], lightright[3];
-	int lightleftstep[3], lightrightstep[3];
-	pixel_t	*psource, *prowdest;
+#define fullbright 1
+#define additive 1
+#define addlight addlight_f1_a1
+#define DrawSurfaceBlock_m0 DrawSurfaceBlock_f1_a1_m0
+#define DrawSurfaceBlock_m1 DrawSurfaceBlock_f1_a1_m1
+#define DrawSurfaceBlock_m2 DrawSurfaceBlock_f1_a1_m2
+#define DrawSurfaceBlock_m3 DrawSurfaceBlock_f1_a1_m3
+#include "r_surf_x.h"
+#undef fullbright
+#undef additive
+#undef addlight
+#undef DrawSurfaceBlock_m0
+#undef DrawSurfaceBlock_m1
+#undef DrawSurfaceBlock_m2
+#undef DrawSurfaceBlock_m3
 
-	psource = pbasesource;
-	prowdest = prowdestbase;
+#define fullbright 0
+#define additive 1
+#define addlight addlight_f0_a1
+#define DrawSurfaceBlock_m0 DrawSurfaceBlock_f0_a1_m0
+#define DrawSurfaceBlock_m1 DrawSurfaceBlock_f0_a1_m1
+#define DrawSurfaceBlock_m2 DrawSurfaceBlock_f0_a1_m2
+#define DrawSurfaceBlock_m3 DrawSurfaceBlock_f0_a1_m3
+#include "r_surf_x.h"
+#undef fullbright
+#undef additive
+#undef addlight
+#undef DrawSurfaceBlock_m0
+#undef DrawSurfaceBlock_m1
+#undef DrawSurfaceBlock_m2
+#undef DrawSurfaceBlock_m3
 
-	for (v=0 ; v<r_numvblocks ; v++)
+#define fullbright 1
+#define additive 0
+#define addlight addlight_f1_a0
+#define DrawSurfaceBlock_m0 DrawSurfaceBlock_f1_a0_m0
+#define DrawSurfaceBlock_m1 DrawSurfaceBlock_f1_a0_m1
+#define DrawSurfaceBlock_m2 DrawSurfaceBlock_f1_a0_m2
+#define DrawSurfaceBlock_m3 DrawSurfaceBlock_f1_a0_m3
+#include "r_surf_x.h"
+#undef fullbright
+#undef additive
+#undef addlight
+#undef DrawSurfaceBlock_m0
+#undef DrawSurfaceBlock_m1
+#undef DrawSurfaceBlock_m2
+#undef DrawSurfaceBlock_m3
+
+#define fullbright 0
+#define additive 0
+#define addlight addlight_f0_a0
+#define DrawSurfaceBlock_m0 DrawSurfaceBlock_f0_a0_m0
+#define DrawSurfaceBlock_m1 DrawSurfaceBlock_f0_a0_m1
+#define DrawSurfaceBlock_m2 DrawSurfaceBlock_f0_a0_m2
+#define DrawSurfaceBlock_m3 DrawSurfaceBlock_f0_a0_m3
+#include "r_surf_x.h"
+#undef fullbright
+#undef additive
+#undef addlight
+#undef DrawSurfaceBlock_m0
+#undef DrawSurfaceBlock_m1
+#undef DrawSurfaceBlock_m2
+#undef DrawSurfaceBlock_m3
+
+typedef void (*drawfunc)(unsigned *lp[4], unsigned lw, int nb);
+
+static const drawfunc drawsurf[2/*fullbright*/][2/*additive*/][4/*mipmap*/] = {
 	{
-		for(j = 0; j < 3; j++){
-			lightleft[j] = r_lightptr[j][0];
-			lightright[j] = r_lightptr[j][1];
-			r_lightptr[j] += r_lightwidth;
-			lightleftstep[j] = (r_lightptr[j][0] - lightleft[j]) >> (4-mip);
-			lightrightstep[j] = (r_lightptr[j][1] - lightright[j]) >> (4-mip);
-		}
-
-		for (i=0 ; i<16>>mip ; i++)
 		{
-			for(j = 0; j < 3; j++){
-				lightstep[j] = (lightleft[j] - lightright[j]) >> (4-mip);
-				light[j] = lightright[j];
-			}
+			DrawSurfaceBlock_f0_a0_m0, DrawSurfaceBlock_f0_a0_m1,
+			DrawSurfaceBlock_f0_a0_m2, DrawSurfaceBlock_f0_a0_m3,
+		},
+		{
+			DrawSurfaceBlock_f0_a1_m0, DrawSurfaceBlock_f0_a1_m1,
+			DrawSurfaceBlock_f0_a1_m2, DrawSurfaceBlock_f0_a1_m3,
+		},
+	},
+	{
+		{
+			DrawSurfaceBlock_f1_a0_m0, DrawSurfaceBlock_f1_a0_m1,
+			DrawSurfaceBlock_f1_a0_m2, DrawSurfaceBlock_f1_a0_m3,
+		},
+		{
+			DrawSurfaceBlock_f1_a1_m0, DrawSurfaceBlock_f1_a1_m1,
+			DrawSurfaceBlock_f1_a1_m2, DrawSurfaceBlock_f1_a1_m3,
+		},
+	},
+};
 
-			for(b = (16>>mip)-1; b >= 0; b--){
-				prowdest[b] = addlight(psource[b], light[0], light[1], light[2]);
-				light[0] += lightstep[0];
-				light[1] += lightstep[1];
-				light[2] += lightstep[2];
-			}
+/*
+===============
+R_DrawSurface
+===============
+*/
+void R_DrawSurface (void)
+{
+	pixel_t	*basetptr;
+	int				smax, tmax, twidth, lightwidth;
+	int				u, blockdivshift, blocksize;
+	int				soffset, basetoffset, texwidth;
+	int				horzblockstep;
+	int				r_numhblocks, r_numvblocks;
+	pixel_t	*pcolumndest;
+	texture_t		*mt;
+	drawfunc draw;
+	unsigned *lp[3];
 
-			psource += sourcetstep;
-			prowdest += surfrowbytes;
-			for(j = 0; j < 3; j++){
-				lightright[j] += lightrightstep[j];
-				lightleft[j] += lightleftstep[j];
-			}
-		}
+	// calculate the lightings
+	R_BuildLightMap ();
 
-		if (psource >= r_sourcemax)
-			psource -= r_stepback;
+	surfrowbytes = r_drawsurf.rowbytes;
+
+	mt = r_drawsurf.texture;
+
+	draw = drawsurf[mt->drawsurf][currententity != nil && (currententity->effects & EF_ADDITIVE) != 0][r_drawsurf.surfmip];
+
+	r_source = mt->pixels + mt->offsets[r_drawsurf.surfmip];
+
+	// the fractional light values should range from 0 to (VID_GRADES - 1) << 16
+	// from a source range of 0 - 255
+
+	texwidth = mt->width >> r_drawsurf.surfmip;
+
+	blocksize = 16 >> r_drawsurf.surfmip;
+	blockdivshift = 4 - r_drawsurf.surfmip;
+
+	lightwidth = (r_drawsurf.surf->extents[0]>>4)+1;
+
+	r_numhblocks = r_drawsurf.surfwidth >> blockdivshift;
+	r_numvblocks = r_drawsurf.surfheight >> blockdivshift;
+
+	// TODO: only needs to be set when there is a display settings change
+	horzblockstep = blocksize;
+
+	smax = mt->width >> r_drawsurf.surfmip;
+	twidth = texwidth;
+	tmax = mt->height >> r_drawsurf.surfmip;
+	sourcetstep = texwidth;
+	r_stepback = tmax * twidth;
+
+	r_sourcemax = r_source + (tmax * smax);
+
+	soffset = r_drawsurf.surf->texturemins[0];
+	basetoffset = r_drawsurf.surf->texturemins[1];
+
+	// << 16 components are to guarantee positive values for %
+	soffset = ((soffset >> r_drawsurf.surfmip) + (smax << 16)) % smax;
+	basetptr = &r_source[((((basetoffset >> r_drawsurf.surfmip) + (tmax << 16)) % tmax) * twidth)];
+
+	pcolumndest = r_drawsurf.surfdat;
+
+	for (u=0 ; u<r_numhblocks; u++){
+		prowdestbase = pcolumndest;
+
+		pbasesource = basetptr + soffset;
+		lp[0] = blocklights[0]+u;
+		lp[1] = blocklights[1]+u;
+		lp[2] = blocklights[2]+u;
+
+		draw(lp, lightwidth, r_numvblocks);
+
+		soffset = soffset + blocksize;
+		if (soffset >= smax)
+			soffset = 0;
+
+		pcolumndest += horzblockstep;
 	}
 }
