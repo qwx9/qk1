@@ -41,7 +41,6 @@ static struct {
 }track;
 
 static cvar_t s_al_dev = {"s_al_device", "0", true};
-static int s_al_dev_prev = -1;
 
 static cvar_t s_al_hrtf = {"s_al_hrtf", "0", true};
 static cvar_t s_al_doppler_factor = {"s_al_doppler_factor", "2", true};
@@ -540,8 +539,7 @@ alreinit(const char *def, const char *all)
 	bool hrtf;
 
 	n = s_al_dev.value;
-	if(n == s_al_dev_prev)
-		return;
+
 	if(qalcReopenDeviceSOFT == nil && alcIsExtensionPresent(nil, "ALC_SOFT_reopen_device"))
 		qalcReopenDeviceSOFT = alGetProcAddress("alcReopenDeviceSOFT");
 	if(qalcReopenDeviceSOFT == nil){
@@ -560,7 +558,6 @@ alreinit(const char *def, const char *all)
 				Con_Printf("AL: failed to switch to %s\n", s);
 				return;
 			}
-			s_al_dev_prev = n;
 			break;
 		}
 		s += strlen(s)+1;
