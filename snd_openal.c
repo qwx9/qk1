@@ -462,19 +462,22 @@ precachesfx(char *s)
 static ALCint *
 alcattr(bool hrtf)
 {
-	static ALCint attr[] = {
-		0, 0, 0, 0, 0,
-	};
+	static ALCint attr[16] = {0};
+	int i;
 
-	attr[0] = 0;
+	attr[i = 0] = 0;
 	if(hrtf){
-		attr[0] = s_al_hrtf.value != 0 ? ALC_HRTF_SOFT : 0;
-		attr[1] = s_al_hrtf.value != 0 ? (s_al_hrtf.value > 0 ? ALC_TRUE : ALC_FALSE) : ALC_DONT_CARE_SOFT;
-		if(attr[1] == ALC_TRUE){
-			attr[2] = ALC_HRTF_ID_SOFT;
-			attr[3] = s_al_hrtf.value - 1;
+		attr[i++] = s_al_hrtf.value != 0 ? ALC_HRTF_SOFT : 0;
+		attr[i++] = s_al_hrtf.value != 0 ? (s_al_hrtf.value > 0 ? ALC_TRUE : ALC_FALSE) : ALC_DONT_CARE_SOFT;
+		if(attr[i-1] == ALC_TRUE){
+			attr[i++] = ALC_HRTF_ID_SOFT;
+			attr[i++] = s_al_hrtf.value - 1;
 		}
 	}
+	/* get more sources, those get depleated fast with AD */
+	attr[i++] = ALC_MONO_SOURCES;
+	attr[i++] = 512;
+	attr[i++] = 0;
 
 	return attr;
 }
