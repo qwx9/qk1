@@ -140,14 +140,10 @@ main(int argc, char **argv)
 	sigset_t ss;
 	pthread_t tid;
 
-	sigemptyset(&ss);
-	sigaddset(&ss, SIGPIPE);
-	pthread_sigmask(SIG_BLOCK, &ss, NULL);
-	pthread_create(&tid, nil, sighandler, &ss);
-
 	parg_init(&ps);
 	nargs = 0;
-	while((c = parg_getopt(&ps, argc, argv, "Ddg:N:")) >= 0){
+	snailenabled = false;
+	while((c = parg_getopt(&ps, argc, argv, "Ddg:N:S")) >= 0){
 		switch(c){
 		case 1:
 			argv[nargs++] = (char*)ps.optarg;
@@ -169,6 +165,9 @@ main(int argc, char **argv)
 			fprintf(stderr, "usage: qk1 [-g game]\n");
 			return 0;
 			break;
+		case 'S':
+			snailenabled = true;
+			break;
 		case '?':
 			fprintf(stderr, "unknown option -%c\n", ps.optopt);
 			return 1;
@@ -179,6 +178,14 @@ main(int argc, char **argv)
 			break;
 		}
 	}
+
+	sigemptyset(&ss);
+	sigaddset(&ss, SIGPIPE);
+	pthread_sigmask(SIG_BLOCK, &ss, NULL);
+	pthread_create(&tid, nil, sighandler, &ss);
+
+	if(snailenabled)
+		initsnail();
 
 	srand(nanosec() + time(nil));
 

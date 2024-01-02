@@ -65,6 +65,11 @@ sys_timestamp(void)
 	return ts;
 }
 
+void
+sys_snail(bool)
+{
+}
+
 char *
 lerr(void)
 {

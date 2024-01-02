@@ -65,6 +65,10 @@ char *lerr(void);
 int	sys_mkdir(char *path);
 char *sys_timestamp(void);
 
+extern bool snailenabled;
+void sys_snail(bool);
+void initsnail(void);
+
 long sndqueued(void);
 void sndstop(void);
 void sndwrite(byte *buf, long sz);

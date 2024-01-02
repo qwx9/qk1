@@ -530,6 +530,8 @@ void _Host_Frame (float time)
 					pass1+pass2+pass3, pass1, pass2, pass3);
 	}
 
+	sys_snail(false);
+
 	host_framecount++;
 }
 

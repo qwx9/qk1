@@ -1,5 +1,6 @@
 #include "quakedef.h"
 #include <SDL.h>
+#include <sys/mman.h>
 
 pixel_t q1pal[256];
 
@@ -9,11 +10,14 @@ static SDL_Window *win;
 static pixel_t *vidbuffer;
 extern pixel_t *r_warpbuffer;
 
+static cvar_t v_snail = {"v_snail", "0"};
+static int oldvidbuffersz;
+
 static void
 resetfb(void)
 {
 	void *surfcache;
-	int hunkvbuf, scachesz;
+	int hunkvbuf, scachesz, n;
 
 	/* lower than 320x240 doesn't really make sense,
 	 * but at least this prevents a crash, beyond that
@@ -28,10 +32,18 @@ resetfb(void)
 	vid.conwidth = vid.width;
 	vid.conheight = vid.height;
 
-	free(vidbuffer);
-	vidbuffer = emalloc((vid.width*vid.height+16)*sizeof(pixel_t));
+	n = (vid.width*vid.height+16)*sizeof(pixel_t);
+	if(snailenabled){
+		if(oldvidbuffersz != 0)
+			munmap(vidbuffer, oldvidbuffersz);
+		vidbuffer = mmap(nil, n, PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
+		oldvidbuffersz = n;
+	}else{
+		free(vidbuffer);
+		vidbuffer = emalloc(n);
+	}
 	free(r_warpbuffer);
-	r_warpbuffer = emalloc((vid.width*vid.height+16)*sizeof(pixel_t));
+	r_warpbuffer = emalloc(n);
 	vid.maxwarpwidth = vid.width;
 	vid.maxwarpheight = vid.height;
 
@@ -93,6 +105,12 @@ setpal(byte *p0)
 	scr_fullupdate = 0;
 }
 
+static void
+v_snail_cb(cvar_t *var)
+{
+	sys_snail(var->value != 0);
+}
+
 void
 initfb(void)
 {
@@ -117,4 +135,7 @@ initfb(void)
 	SDL_SetWindowResizable(win, SDL_TRUE);
 	SDL_SetWindowMinimumSize(win, 320, 240);
 	IN_Grabm(1);
+
+	Cvar_RegisterVariable(&v_snail);
+	v_snail.cb = v_snail_cb;
 }
