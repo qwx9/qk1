@@ -1,7 +1,5 @@
 #include "quakedef.h"
 
-static int	miplevel;
-
 float scale_for_mip;
 
 // FIXME: should go away
@@ -25,16 +23,18 @@ D_MipLevelForScale(float scale)
 	return max(d_minmip, lmiplevel);
 }
 
-// FIXME: clean this up
 static void
 D_DrawSolidSurface(surf_t *surf, pixel_t color)
 {
 	espan_t *span;
 	pixel_t *pdest;
+	uzint *pz;
 	int u, u2;
 
 	for(span = surf->spans; span; span=span->pnext){
-		pdest = dvars.viewbuffer + dvars.width*span->v;
+		pdest = dvars.viewbuffer + span->v*dvars.width;
+		pz = dvars.zbuffer + span->v*dvars.width;
+		memset(pz, 0xfe, span->count*sizeof(*pz));
 		u2 = span->u + span->count - 1;
 		for(u = span->u; u <= u2; u++)
 			pdest[u] = color;
@@ -43,7 +43,7 @@ D_DrawSolidSurface(surf_t *surf, pixel_t color)
 
 
 static void
-D_CalcGradients(msurface_t *pface, vec3_t transformed_modelorg)
+D_CalcGradients(int miplevel, msurface_t *pface, vec3_t transformed_modelorg)
 {
 	float mipscale;
 	vec3_t p_temp1, p_saxis, p_taxis;
@@ -81,17 +81,22 @@ D_CalcGradients(msurface_t *pface, vec3_t transformed_modelorg)
 	dvars.bbextentt = ((pface->extents[1] << 16) >> miplevel) - 1;
 }
 
+void dospan_turb(pixel_t *pdest, pixel_t *pbase, int s, int t, int sstep, int tstep, int spancount, int width, byte alpha, uzint *pz, int izi, int izistep);
+void dospan_alpha(pixel_t *pdest, pixel_t *pbase, int s, int t, int sstep, int tstep, int spancount, int width, byte alpha, uzint *pz, int izi, int izistep);
+void dospan(pixel_t *pdest, pixel_t *pbase, int s, int t, int sstep, int tstep, int spancount, int width, byte alpha, uzint *pz, int izi, int izistep);
+
 void
 D_DrawSurfaces (void)
 {
 	surf_t *s;
 	msurface_t *pface;
 	surfcache_t *pcurrentcache;
-	vec3_t world_transformed_modelorg, local_modelorg, transformed_modelorg;
+	vec3_t local_modelorg, transformed_modelorg, world_transformed_modelorg;
+	int miplevel;
 	byte alpha;
 	bool blend;
 
-	currententity = &cl_entities[0];
+	currententity = cl_entities;
 	TransformVector(modelorg, transformed_modelorg);
 	VectorCopy(transformed_modelorg, world_transformed_modelorg);
 
@@ -116,72 +121,39 @@ D_DrawSurfaces (void)
 		dvars.zistepv = s->d_zistepv;
 		dvars.ziorigin = s->d_ziorigin;
 
-		if(s->insubmodel){
-			// FIXME: we don't want to do all this for every polygon!
-			// TODO: store once at start of frame
-			currententity = s->entity;	//FIXME: make this passed in to
-										// R_RotateBmodel()
+		if(s->insubmodel && s->entity != currententity){
+			currententity = s->entity;
 			VectorSubtract(r_origin, currententity->origin, local_modelorg);
 			TransformVector(local_modelorg, transformed_modelorg);
-
-			R_RotateBmodel(s->entity);	// FIXME: don't mess with the frustum,
-								// make entity passed in
+			R_RotateBmodel(currententity);
 		}
 
+		pface = s->data;
 		if(s->flags & SURF_DRAWSKY){
 			D_DrawSkyScans8(s->spans);
-			dvars.ziorigin = -0.8;
-			D_DrawZSpans(s->spans);
 		}else if(s->flags & SURF_DRAWBACKGROUND){
-			// set up a gradient for the background surface that places it
-			// effectively at infinity distance from the viewpoint
-			dvars.zistepu = 0;
-			dvars.zistepv = 0;
-			dvars.ziorigin = -0.9;
-
 			D_DrawSolidSurface(s, q1pal[(int)r_clearcolor.value & 0xFF]);
-			D_DrawZSpans(s->spans);
 		}else if(s->flags & SURF_DRAWTURB){
-			pface = s->data;
-			miplevel = 0;
-			dvars.cacheblock = pface->texinfo->texture->pixels + pface->texinfo->texture->offsets[0];
-			dvars.cachewidth = 64;
-
-			D_CalcGradients (pface, transformed_modelorg);
-			Turbulent8 (s->spans, alpha);
-			if(!blend)
-				D_DrawZSpans (s->spans);
+			D_CalcGradients(0, pface, transformed_modelorg);
+			D_DrawSpans16(s->spans, pface->texinfo->texture->pixels, 64, alpha, SPAN_TURB);
 		}else{
-			pface = s->data;
 			miplevel = D_MipLevelForScale(s->nearzi * scale_for_mip * pface->texinfo->mipadjust);
 			if(s->flags & SURF_FENCE)
 				miplevel = max(miplevel-1, 0);
 
-			// FIXME: make this passed in to D_CacheSurface
 			pcurrentcache = D_CacheSurface(pface, miplevel);
-
-			dvars.cacheblock = pcurrentcache->pixels;
-			dvars.cachewidth = pcurrentcache->width;
-
-			D_CalcGradients(pface, transformed_modelorg);
-
-			D_DrawSpans16(s->spans, blend, alpha);
-			if(!blend)
-				D_DrawZSpans(s->spans);
-		}
-
-		if(s->insubmodel){
-			// restore the old drawing state
-			// FIXME: we don't want to do this every time!
-			// TODO: speed up
-			currententity = &cl_entities[0];
-			VectorCopy(world_transformed_modelorg, transformed_modelorg);
-			VectorCopy(base_vpn, vpn);
-			VectorCopy(base_vup, vup);
-			VectorCopy(base_vright, vright);
-			VectorCopy(base_modelorg, modelorg);
-			R_TransformFrustum();
+			D_CalcGradients(miplevel, pface, transformed_modelorg);
+			D_DrawSpans16(s->spans, pcurrentcache->pixels, pcurrentcache->width, alpha,
+				(alpha == 255 && s->flags & SURF_FENCE) ? SPAN_FENCE : (blend ? SPAN_BLEND : SPAN_SOLID)
+			);
 		}
 	}
-}
 
+	currententity = cl_entities;
+	VectorCopy(world_transformed_modelorg, transformed_modelorg);
+	VectorCopy(base_vpn, vpn);
+	VectorCopy(base_vup, vup);
+	VectorCopy(base_vright, vright);
+	VectorCopy(base_modelorg, modelorg);
+	R_TransformFrustum();
+}

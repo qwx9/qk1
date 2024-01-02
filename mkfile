@@ -77,8 +77,6 @@ OFILES=\
 	snd_mix.$O\
 	snd_plan9.$O\
 	softfloat.$O\
-	span_alpha.$O\
-	span`{test -f span_$objtype.s && echo -n _$objtype}.$O\
 	sv_main.$O\
 	sv_move.$O\
 	sv_phys.$O\

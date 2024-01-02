@@ -1,10 +1,7 @@
 #include "quakedef.h"
+#include "r_fog.h"
 
-static pixel_t *r_turb_pbase, *r_turb_pdest;
-static fixed16_t r_turb_s, r_turb_t, r_turb_sstep, r_turb_tstep;
-static int *r_turb_turb;
-static int r_turb_spancount;
-static uzint *r_turb_z;
+int *r_turb_turb;
 
 /*
 =============
@@ -16,12 +13,11 @@ D_WarpScreen
 */
 void D_WarpScreen (void)
 {
-	int		w, h, u, v, *turb, *col;
-	pixel_t	*dest;
-	pixel_t	**row;
-	float	wratio, hratio;
-	static pixel_t	*rowptr[MAXHEIGHT+(AMP2*2)];
-	static int	column[MAXWIDTH+(AMP2*2)];
+	static pixel_t *rowptr[MAXHEIGHT+(AMP2*2)];
+	static int column[MAXWIDTH+(AMP2*2)];
+	int w, h, u, v, *turb, *col;
+	pixel_t	*dest, **row;
+	float wratio, hratio;
 
 	w = r_refdef.vrect.width;
 	h = r_refdef.vrect.height;
@@ -51,141 +47,177 @@ void D_WarpScreen (void)
 	}
 }
 
-/*
-=============
-D_DrawTurbulent8Span
-=============
-*/
 static inline void
-D_DrawTurbulent8Span (int izi, byte alpha)
+dospan_solid(pixel_t *pdest, pixel_t *pbase, int s, int t, int sstep, int tstep, int spancount, int width, uzint *pz, uzint izi, int izistep)
+{
+	pixel_t pix;
+	do{
+		*pz++ = izi;
+		pix = pbase[(s >> 16) + (t >> 16) * width];
+		s += sstep;
+		t += tstep;
+		izi += izistep;
+		*pdest++ = pix;
+	}while(--spancount);
+}
+
+static inline void
+dospan_solid_f1(pixel_t *pdest, pixel_t *pbase, int s, int t, int sstep, int tstep, int spancount, int width, uzint *pz, uzint izi, int izistep, fog_t *fog)
+{
+	pixel_t pix;
+	do{
+		*pz++ = izi;
+		izi += izistep;
+		pix = pbase[(s >> 16) + (t >> 16) * width];
+		s += sstep;
+		t += tstep;
+		*pdest++ = blendfog(pix, *fog);
+		fogstep(*fog);
+	}while(--spancount);
+}
+
+static inline void
+dospan_blend(pixel_t *pdest, pixel_t *pbase, int s, int t, int sstep, int tstep, int spancount, int width, byte alpha, uzint *pz, uzint izi, int izistep)
+{
+	pixel_t pix;
+
+	do{
+		pix = pbase[(s >> 16) + (t >> 16) * width];
+		s += sstep;
+		t += tstep;
+		if(opaque(pix) && *pz <= izi)
+			*pdest = blendalpha(pix, *pdest, alpha);
+		izi += izistep;
+		pdest++;
+		pz++;
+	}while(--spancount);
+}
+
+static inline void
+dospan_blend_f1(pixel_t *pdest, pixel_t *pbase, int s, int t, int sstep, int tstep, int spancount, int width, byte alpha, uzint *pz, uzint izi, int izistep, fog_t *fog)
+{
+	pixel_t pix;
+
+	do{
+		pix = pbase[(s >> 16) + (t >> 16) * width];
+		s += sstep;
+		t += tstep;
+		if(opaque(pix) && *pz <= izi)
+			*pdest = blendalpha(blendfog(pix, *fog), *pdest, alpha);
+		izi += izistep;
+		pdest++;
+		pz++;
+		fogstep(*fog);
+	}while(--spancount);
+}
+
+static inline void
+dospan_fence(pixel_t *pdest, pixel_t *pbase, int s, int t, int sstep, int tstep, int spancount, int width, uzint *pz, uzint izi, int izistep)
+{
+	pixel_t pix;
+
+	do{
+		pix = pbase[(s >> 16) + (t >> 16) * width];
+		s += sstep;
+		t += tstep;
+		if(opaque(pix) && *pz <= izi){
+			*pdest = pix;
+			*pz = izi;
+		}
+		izi += izistep;
+		pdest++;
+		pz++;
+	}while(--spancount);
+}
+
+static inline void
+dospan_fence_f1(pixel_t *pdest, pixel_t *pbase, int s, int t, int sstep, int tstep, int spancount, int width, uzint *pz, uzint izi, int izistep, fog_t *fog)
+{
+	pixel_t pix;
+
+	do{
+		pix = pbase[(s >> 16) + (t >> 16) * width];
+		s += sstep;
+		t += tstep;
+		if(opaque(pix) && *pz <= izi){
+			*pdest = blendfog(pix, *fog);
+			*pz = izi;
+		}
+		izi += izistep;
+		pdest++;
+		pz++;
+		fogstep(*fog);
+	}while(--spancount);
+}
+
+static void
+dospan_turb(pixel_t *pdest, pixel_t *pbase, int s, int t, int sstep, int tstep, int spancount, byte alpha, uzint *pz, uzint izi, int izistep)
 {
 	int sturb, tturb;
+	bool noblend;
+
+	noblend = (r_drawflags & DRAW_BLEND) == 0;
+	s &= (CYCLE<<16)-1;
+	t &= (CYCLE<<16)-1;
 
 	do{
-		sturb = ((r_turb_s + r_turb_turb[(r_turb_t>>16)&(CYCLE-1)])>>16)&63;
-		tturb = ((r_turb_t + r_turb_turb[(r_turb_s>>16)&(CYCLE-1)])>>16)&63;
-		if(*r_turb_z <= izi || (r_drawflags & DRAW_BLEND) == 0)
-			*r_turb_pdest = blendalpha(*(r_turb_pbase + (tturb<<6) + sturb), *r_turb_pdest, alpha, izi);
-		r_turb_s += r_turb_sstep;
-		r_turb_t += r_turb_tstep;
-		r_turb_pdest++;
-		r_turb_z++;
-	}while(--r_turb_spancount > 0);
+		if(noblend || *pz <= izi){
+			sturb = ((s + r_turb_turb[(t>>16)&(CYCLE-1)])>>16)&63;
+			tturb = ((t + r_turb_turb[(s>>16)&(CYCLE-1)])>>16)&63;
+			*pdest = blendalpha(*(pbase + (tturb<<6) + sturb), *pdest, alpha);
+			*pz = izi; // FIXME(sigrid): can always update this one?
+		}
+		s += sstep;
+		t += tstep;
+		izi += izistep;
+		pdest++;
+		pz++;
+	}while(--spancount > 0);
+
 }
 
-
-void
-Turbulent8(espan_t *pspan, byte alpha)
+static void
+dospan_turb_f1(pixel_t *pdest, pixel_t *pbase, int s, int t, int sstep, int tstep, int spancount, byte alpha, uzint *pz, uzint izi, int izistep, fog_t *fog)
 {
-	int			count, spancountminus1;
-	fixed16_t	snext, tnext;
-	float		sdivz, tdivz, zi, z, du, dv;
-	float		sdivz16stepu, tdivz16stepu, zi16stepu;
+	int sturb, tturb;
+	bool noblend;
 
-	r_turb_turb = sintable + ((int)(cl.time*SPEED)&(CYCLE-1));
-
-	r_turb_sstep = 0;	// keep compiler happy
-	r_turb_tstep = 0;	// ditto
-
-	r_turb_pbase = dvars.cacheblock;
-
-	sdivz16stepu = dvars.sdivzstepu * 16;
-	tdivz16stepu = dvars.tdivzstepu * 16;
-	zi16stepu = dvars.zistepu * 16;
+	noblend = (r_drawflags & DRAW_BLEND) == 0;
+	s &= (CYCLE<<16)-1;
+	t &= (CYCLE<<16)-1;
 
 	do{
-		r_turb_pdest = dvars.viewbuffer + pspan->v*dvars.width + pspan->u;
-		r_turb_z = dvars.zbuffer + pspan->v*dvars.width + pspan->u;
-		zi = dvars.ziorigin + pspan->v*dvars.zistepv + pspan->u*dvars.zistepu;
+		if(noblend || *pz <= izi){
+			sturb = ((s + r_turb_turb[(t>>16)&(CYCLE-1)])>>16)&63;
+			tturb = ((t + r_turb_turb[(s>>16)&(CYCLE-1)])>>16)&63;
+			*pdest = blendalpha(blendfog(*(pbase + (tturb<<6) + sturb), *fog), *pdest, alpha);
+			*pz = izi; // FIXME(sigrid): can always update this one?
+		}
+		s += sstep;
+		t += tstep;
+		izi += izistep;
+		pdest++;
+		pz++;
+		fogstep(*fog);
+	}while(--spancount > 0);
 
-		count = pspan->count;
-
-		// calculate the initial s/z, t/z, 1/z, s, and t and clamp
-		du = pspan->u;
-		dv = pspan->v;
-
-		sdivz = dvars.sdivzorigin + dv*dvars.sdivzstepv + du*dvars.sdivzstepu;
-		tdivz = dvars.tdivzorigin + dv*dvars.tdivzstepv + du*dvars.tdivzstepu;
-		z = (float)0x10000 / zi;	// prescale to 16.16 fixed-point
-
-		r_turb_s = (int)(sdivz * z) + dvars.sadjust;
-		r_turb_s = clamp(r_turb_s, 0, dvars.bbextents);
-
-		r_turb_t = (int)(tdivz * z) + dvars.tadjust;
-		r_turb_t = clamp(r_turb_t, 0, dvars.bbextentt);
-
-		do{
-			// calculate s and t at the far end of the span
-			r_turb_spancount = min(count, 16);
-			count -= r_turb_spancount;
-
-			if(count){
-				// calculate s/z, t/z, zi->fixed s and t at far end of span,
-				// calculate s and t steps across span by shifting
-				sdivz += sdivz16stepu;
-				tdivz += tdivz16stepu;
-				zi += zi16stepu;
-				z = (float)0x10000 / zi;	// prescale to 16.16 fixed-point
-
-				snext = (int)(sdivz * z) + dvars.sadjust;
-				// prevent round-off error on <0 steps from causing overstepping & running off the edge of the texture
-				snext = clamp(snext, 16, dvars.bbextents);
-
-				tnext = (int)(tdivz * z) + dvars.tadjust;
-				tnext = clamp(tnext, 16, dvars.bbextentt); // guard against round-off error on <0 steps
-
-				r_turb_sstep = (snext - r_turb_s) >> 4;
-				r_turb_tstep = (tnext - r_turb_t) >> 4;
-			}else{
-				// calculate s/z, t/z, zi->fixed s and t at last pixel in span (so
-				// can't step off polygon), clamp, calculate s and t steps across
-				// span by division, biasing steps low so we don't run off the
-				// texture
-				spancountminus1 = r_turb_spancount - 1;
-				sdivz += dvars.sdivzstepu * spancountminus1;
-				tdivz += dvars.tdivzstepu * spancountminus1;
-				zi += dvars.zistepu * spancountminus1;
-				z = (float)0x10000 / zi;	// prescale to 16.16 fixed-point
-				snext = (int)(sdivz * z) + dvars.sadjust;
-				// prevent round-off error on <0 steps from causing overstepping & running off the edge of the texture
-				snext = clamp(snext, 16, dvars.bbextents);
-
-				tnext = (int)(tdivz * z) + dvars.tadjust;
-				tnext = clamp(tnext, 16, dvars.bbextentt); // guard against round-off error on <0 steps
-
-				if(r_turb_spancount > 1){
-					r_turb_sstep = (snext - r_turb_s) / spancountminus1;
-					r_turb_tstep = (tnext - r_turb_t) / spancountminus1;
-				}
-			}
-
-			r_turb_s = r_turb_s & ((CYCLE<<16)-1);
-			r_turb_t = r_turb_t & ((CYCLE<<16)-1);
-
-			D_DrawTurbulent8Span((int)(zi * 0x8000 * 0x10000), alpha);
-
-			r_turb_s = snext;
-			r_turb_t = tnext;
-
-		}while(count > 0);
-
-	}while((pspan = pspan->pnext) != nil);
 }
 
 void
-D_DrawSpans16(espan_t *pspan, bool blend, byte alpha) //qbism- up it from 8 to 16
+D_DrawSpans16(espan_t *pspan, pixel_t *pbase, int width, byte alpha, int spanfunc)
 {
 	int			count, spancount, izistep, spancountminus1;
-	pixel_t		*pbase, *pdest;
-	uzint		*pz;
+	pixel_t		*pdest;
+	uzint		*pz, izi;
 	fixed16_t	s, t, snext, tnext, sstep, tstep;
 	float		sdivz, tdivz, zi, z, du, dv;
 	float		sdivzstepu, tdivzstepu, zistepu;
+	fog_t fog;
+	bool fogged;
 
 	sstep = 0;	// keep compiler happy
 	tstep = 0;	// ditto
-
-	pbase = dvars.cacheblock;
+	memset(&fog, 0, sizeof(fog));
 
 	sdivzstepu = dvars.sdivzstepu * 16;
 	tdivzstepu = dvars.tdivzstepu * 16;
@@ -196,7 +228,7 @@ D_DrawSpans16(espan_t *pspan, bool blend, byte alpha) //qbism- up it from 8 to 1
 		pdest = dvars.viewbuffer + pspan->v*dvars.width + pspan->u;
 		pz = dvars.zbuffer + pspan->v*dvars.width + pspan->u;
 		zi = dvars.ziorigin + pspan->v*dvars.zistepv + pspan->u*dvars.zistepu;
-
+		izi = zi * 0x8000 * 0x10000;
 		count = pspan->count;
 
 		// calculate the initial s/z, t/z, 1/z, s, and t and clamp
@@ -223,7 +255,8 @@ D_DrawSpans16(espan_t *pspan, bool blend, byte alpha) //qbism- up it from 8 to 1
 				// calculate s and t steps across span by shifting
 				sdivz += sdivzstepu;
 				tdivz += tdivzstepu;
-				z = (float)0x10000 / (zi + zistepu);	// prescale to 16.16 fixed-point
+				// prescale to 16.16 fixed-point
+				z = (float)0x10000 / (zi + zistepu);
 
 				snext = (int)(sdivz * z) + dvars.sadjust;
 				// prevent round-off error on <0 steps from
@@ -245,7 +278,8 @@ D_DrawSpans16(espan_t *pspan, bool blend, byte alpha) //qbism- up it from 8 to 1
 				spancountminus1 = spancount - 1;
 				sdivz += dvars.sdivzstepu * spancountminus1;
 				tdivz += dvars.tdivzstepu * spancountminus1;
-				z = (float)0x10000 / (zi + dvars.zistepu * spancountminus1);	// prescale to 16.16 fixed-point
+				// prescale to 16.16 fixed-point
+				z = (float)0x10000 / (zi + dvars.zistepu * spancountminus1);
 				snext = (int)(sdivz * z) + dvars.sadjust;
 				// prevent round-off error on <0 steps from
 				//  from causing overstepping & running off the
@@ -262,38 +296,45 @@ D_DrawSpans16(espan_t *pspan, bool blend, byte alpha) //qbism- up it from 8 to 1
 				}
 			}
 
-			void dospan(pixel_t *, pixel_t *, int, int, int, int, int, int);
-			void dospan_alpha(pixel_t *, pixel_t *, int, int, int, int, int, int, byte, uzint *, int, int);
-			if(blend)
-				dospan_alpha(pdest, pbase, s, t, sstep, tstep, spancount, dvars.cachewidth, alpha, pz, (int)(zi * 0x8000 * 0x10000), izistep);
-			else
-				dospan(pdest, pbase, s, t, sstep, tstep, spancount, dvars.cachewidth);
+			fogged = isfogged() ? fogcalc(izi, izi + izistep*spancount, spancount, &fog) : false;
+			if(fogged){
+				switch(spanfunc){
+				case SPAN_SOLID:
+					dospan_solid_f1(pdest, pbase, s, t, sstep, tstep, spancount, width, pz, izi, izistep, &fog);
+					break;
+				case SPAN_TURB:
+					dospan_turb_f1(pdest, pbase, s, t, sstep, tstep, spancount, alpha, pz, izi, izistep, &fog);
+					break;
+				case SPAN_BLEND:
+					dospan_blend_f1(pdest, pbase, s, t, sstep, tstep, spancount, width, alpha, pz, izi, izistep, &fog);
+					break;
+				case SPAN_FENCE:
+					dospan_fence_f1(pdest, pbase, s, t, sstep, tstep, spancount, width, pz, izi, izistep, &fog);
+					break;
+				}
+			}else{
+				switch(spanfunc){
+				case SPAN_SOLID:
+					dospan_solid(pdest, pbase, s, t, sstep, tstep, spancount, width, pz, izi, izistep);
+					break;
+				case SPAN_TURB:
+					dospan_turb(pdest, pbase, s, t, sstep, tstep, spancount, alpha, pz, izi, izistep);
+					break;
+				case SPAN_BLEND:
+					dospan_blend(pdest, pbase, s, t, sstep, tstep, spancount, width, alpha, pz, izi, izistep);
+					break;
+				case SPAN_FENCE:
+					dospan_fence(pdest, pbase, s, t, sstep, tstep, spancount, width, pz, izi, izistep);
+					break;
+				}
+			}
+
 			pdest += spancount;
 			pz += spancount;
+			izi += izistep*spancount;
 			zi += zistepu;
 			s = snext;
 			t = tnext;
 		}while(count > 0);
-	}while((pspan = pspan->pnext) != nil);
-}
-
-void
-D_DrawZSpans(espan_t *pspan)
-{
-	int			count, izi, izistep;
-	uzint		*pz;
-	float		zi;
-
-	izistep = dvars.zistepu * 0x8000 * 0x10000;
-
-	do{
-		pz = dvars.zbuffer + pspan->v*dvars.width + pspan->u;
-		zi = dvars.ziorigin + pspan->v*dvars.zistepv + pspan->u*dvars.zistepu;
-		count = pspan->count;
-		izi = (int)(zi * 0x8000 * 0x10000);
-		do{
-			*pz++ = izi;
-			izi += izistep;
-		}while(--count > 0);
 	}while((pspan = pspan->pnext) != nil);
 }

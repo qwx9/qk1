@@ -123,7 +123,7 @@ void D_PolysetDrawFinalVerts (finalvert_t *fv, int numverts, pixel_t *colormap, 
 				pixel_t p = addlight(skintable[fv->t >> 16][fv->s >> 16], fv->l[0], fv->l[1], fv->l[2]);
 				int n = d_scantable[fv->v] + fv->u;
 				if(r_drawflags & DRAW_BLEND){
-					dvars.viewbuffer[n] = blendalpha(p, dvars.viewbuffer[n], alpha, z);
+					dvars.viewbuffer[n] = blendalpha(p, dvars.viewbuffer[n], alpha);
 				}else{
 					dvars.viewbuffer[n] = p;
 					*zbuf = z;
@@ -311,7 +311,7 @@ split:
 		pixel_t p = addlight(skintable[new.t >> 16][new.s >> 16], l[0], l[1], l[2]);
 		int n = d_scantable[new.v] + new.u;
 		if(r_drawflags & DRAW_BLEND){
-			dvars.viewbuffer[n] = blendalpha(p, dvars.viewbuffer[n], alpha, z);
+			dvars.viewbuffer[n] = blendalpha(p, dvars.viewbuffer[n], alpha);
 		}else{
 			dvars.viewbuffer[n] = p;
 			*zbuf = z;
@@ -555,8 +555,7 @@ void D_PolysetDrawSpans8 (spanpackage_t *pspanpackage, pixel_t *colormap, byte a
 						*lpdest = blendalpha(
 							p,
 							*lpdest,
-							alpha,
-							lzi
+							alpha
 						);
 					}else{
 						*lpdest = p;

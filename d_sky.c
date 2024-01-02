@@ -39,9 +39,12 @@ D_DrawSkyScans8
 void D_DrawSkyScans8 (espan_t *pspan)
 {
 	int count, spancount, u, v, spancountminus1;
-	pixel_t *pdest, m;
+	pixel_t *pdest, pix;
+	uzint *pz;
 	fixed16_t s[2], t[2], snext[2], tnext[2], sstep[2], tstep[2];
 	float skydist;
+	bool fog;
+	int c0, c1, c2, inva;
 
 	if(skyvars.source[0] == nil || skyvars.source[1] == nil)
 		return;
@@ -49,11 +52,19 @@ void D_DrawSkyScans8 (espan_t *pspan)
 	sstep[0] = sstep[1] = 0;	// keep compiler happy
 	tstep[0] = tstep[1] = 0;	// ditto
 	skydist = skyvars.time*skyvars.speed;	// TODO: add D_SetupFrame & set this there
+	if((fog = isskyfogged())){
+		c0 = fogvars.skyc0;
+		c1 = fogvars.skyc1;
+		c2 = fogvars.skyc1;
+		inva = 255 - fogvars.sky;
+	}
 
 	do
 	{
-		pdest = dvars.viewbuffer + (dvars.width * pspan->v) + pspan->u;
+		pdest = dvars.viewbuffer + pspan->v*dvars.width + pspan->u;
 		count = pspan->count;
+		pz = dvars.zbuffer + pspan->v*dvars.width + pspan->u;
+		memset(pz, 0xff, count*sizeof(*pz));
 
 		// calculate the initial s & t
 		u = pspan->u;
@@ -62,15 +73,10 @@ void D_DrawSkyScans8 (espan_t *pspan)
 
 		do
 		{
-			if (count >= SKY_SPAN_MAX)
-				spancount = SKY_SPAN_MAX;
-			else
-				spancount = count;
-
+			spancount = min(count, SKY_SPAN_MAX);
 			count -= spancount;
 
-			if (count)
-			{
+			if(count){
 				u += spancount;
 
 				// calculate s and t at far end of span,
@@ -81,9 +87,7 @@ void D_DrawSkyScans8 (espan_t *pspan)
 				tstep[0] = (tnext[0] - t[0]) >> SKY_SPAN_SHIFT;
 				sstep[1] = (snext[1] - s[1]) >> SKY_SPAN_SHIFT;
 				tstep[1] = (tnext[1] - t[1]) >> SKY_SPAN_SHIFT;
-			}
-			else
-			{
+			}else{
 				// calculate s and t at last pixel in span,
 				// calculate s and t steps across span by division
 				spancountminus1 = (float)(spancount - 1);
@@ -100,14 +104,17 @@ void D_DrawSkyScans8 (espan_t *pspan)
 				}
 			}
 
-			do
-			{
-				m = skyvars.source[1][((t[1] & skyvars.tmask) >> skyvars.tshift) + ((s[1] & skyvars.smask) >> 16)];
-				if(opaque(m))
-					*pdest = m;
-				else
-					*pdest = skyvars.source[0][((t[0] & skyvars.tmask) >> skyvars.tshift) + ((s[0] & skyvars.smask) >> 16)];
-				pdest++;
+			do{
+				pix = skyvars.source[1][((t[1] & skyvars.tmask) >> skyvars.tshift) + ((s[1] & skyvars.smask) >> 16)];
+				if(!opaque(pix))
+					pix = skyvars.source[0][((t[0] & skyvars.tmask) >> skyvars.tshift) + ((s[0] & skyvars.smask) >> 16)];
+				if(fog){
+					pix =
+						((c0 + inva*((pix>> 0)&0xff)) >> 8) << 0 |
+						((c1 + inva*((pix>> 8)&0xff)) >> 8) << 8 |
+						((c2 + inva*((pix>>16)&0xff)) >> 8) << 16;
+				}
+				*pdest++ = pix;
 				s[0] += sstep[0];
 				t[0] += tstep[0];
 				s[1] += sstep[1];

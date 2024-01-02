@@ -58,8 +58,14 @@ extern surfcache_t	*d_initial_rover;
 extern dvars_t dvars;
 extern skyvars_t skyvars;
 
-void D_DrawSpans16 (espan_t *pspans, bool blend, byte alpha);
-void D_DrawZSpans (espan_t *pspans);
+enum {
+	SPAN_BLEND,
+	SPAN_FENCE,
+	SPAN_SOLID,
+	SPAN_TURB,
+};
+
+void D_DrawSpans16(espan_t *pspan, pixel_t *pbase, int width, byte alpha, int spanfunc);
 void Turbulent8 (espan_t *pspan, byte alpha);
 
 void D_DrawSkyScans8 (espan_t *pspan);
@@ -77,5 +83,5 @@ extern uzint *zspantable[MAXHEIGHT];
 extern int d_minmip;
 extern float d_scalemip[3];
 
-pixel_t blendalpha(pixel_t ca, pixel_t cb, int alpha, uzint izi);
+pixel_t blendalpha(pixel_t ca, pixel_t cb, int alpha);
 float alphafor(int flags);

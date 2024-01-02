@@ -31,6 +31,11 @@ void D_SpriteDrawSpans (sspan_t *pspan, byte alpha)
 	// we count on FP exceptions being turned off to avoid range problems
 	izistep = (int)(dvars.zistepu * 0x8000 * 0x10000);
 
+	if(pspan->v < 0){
+		fprintf(stderr, "%d %d %d %p\n", dvars.width, pspan->v, pspan->u, dvars.zbuffer + dvars.width * pspan->v + pspan->u);
+		return;
+	}
+
 	do
 	{
 		pdest = dvars.viewbuffer + dvars.width * pspan->v + pspan->u;
@@ -115,7 +120,7 @@ void D_SpriteDrawSpans (sspan_t *pspan, byte alpha)
 				btemp = *(pbase + (s >> 16) + (t >> 16) * dvars.cachewidth);
 				if(opaque(btemp) && *pz <= izi){
 					if(r_drawflags & DRAW_BLEND){
-						*pdest = blendalpha(btemp, *pdest, alpha, izi);
+						*pdest = blendalpha(btemp, *pdest, alpha);
 					}else{
 						*pz = izi;
 						*pdest = btemp;

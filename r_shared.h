@@ -1,6 +1,34 @@
 // r_shared.h: general refresh-related stuff shared between the refresh and the
 // driver
 
+typedef s32int uzint;
+
+enum {
+	Enfog = 1<<0,
+	Enskyfog = 1<<1,
+};
+
+typedef struct fog_t fog_t;
+typedef struct fogvars_t fogvars_t;
+
+struct fog_t {
+	int v[4];
+	int d[4];
+};
+
+struct fogvars_t {
+	float density;
+	byte c0, c1, c2, sky;
+	bool allowed;
+	int enabled;
+	int skyc0, skyc1, skyc2;
+};
+
+extern fogvars_t fogvars;
+
+#define isfogged() (fogvars.allowed && (fogvars.enabled & Enfog) != 0)
+#define isskyfogged() (fogvars.sky != 0 && fogvars.allowed && (fogvars.enabled & Enskyfog) != 0)
+
 // FIXME: clean up and move into d_iface.h
 
 #define	MAXVERTS	16					// max points in a surface polygon
@@ -12,8 +40,6 @@
 #define MAXDIMENSION	((MAXHEIGHT > MAXWIDTH) ? MAXHEIGHT : MAXWIDTH)
 
 #define SIN_BUFFER_SIZE	(MAXDIMENSION+CYCLE)
-
-typedef s32int uzint;
 
 //===================================================================
 

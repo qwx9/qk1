@@ -8,6 +8,8 @@ bool d_roverwrapped;
 int d_minmip;
 float d_scalemip[MIPLEVELS-1];
 
+extern int *r_turb_turb;
+
 static float basemip[MIPLEVELS-1] = {1.0, 0.5*0.8, 0.25*0.8};
 
 void
@@ -24,6 +26,8 @@ void
 D_SetupFrame(void)
 {
 	int i;
+
+	r_turb_turb = sintable + ((int)(cl.time*SPEED)&(CYCLE-1));
 
 	dvars.viewbuffer = r_dowarp ? r_warpbuffer : vid.buffer;
 	dvars.width = vid.width;

@@ -728,8 +728,6 @@ void R_RenderView (void)
 	if (r_dowarp)
 		D_WarpScreen ();
 
-	R_DrawFog();
-
 	V_SetContentsColor (r_viewleaf->contents);
 
 	if (r_reportsurfout.value && r_outofsurfaces)

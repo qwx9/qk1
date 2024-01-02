@@ -82,8 +82,6 @@ OBJS=\
 	seprint.o\
 	snd_openal.o\
 	softfloat.o\
-	span.o\
-	span_alpha.o\
 	sv_main.o\
 	sv_move.o\
 	sv_phys.o\
