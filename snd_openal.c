@@ -64,7 +64,8 @@ static ALchar *(*qalGetStringiSOFT)(ALenum, ALsizei);
 static ALCchar *(*qalcGetStringiSOFT)(ALCdevice *, ALenum, ALsizei);
 static ALCboolean (*qalcResetDeviceSOFT)(ALCdevice *, const ALCint *attr);
 static ALCboolean *(*qalcReopenDeviceSOFT)(ALCdevice *, const ALCchar *devname, const ALCint *attr);
-static void (*qalBufferCallbackSOFT)(ALuint buf, ALenum fmt, ALsizei freq, ALBUFFERCALLBACKTYPESOFT cb, ALvoid *aux);
+typedef ALsizei (*qalBufferCallbackTypeSOFT)(ALvoid *, ALvoid *, ALsizei);
+static void (*qalBufferCallbackSOFT)(ALuint buf, ALenum fmt, ALsizei freq, qalBufferCallbackTypeSOFT cb, ALvoid *aux);
 
 #define ALERR() alcheckerr(__FILE__, __LINE__)
 
