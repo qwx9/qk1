@@ -27,7 +27,8 @@ blendfog(pixel_t pix, fog_t fog)
 	return
 		((fog.v[0] + ((inva*((pix>> 0)&0xff))<<fogshift)) >> (8 + fogshift)) << 0 |
 		((fog.v[1] + ((inva*((pix>> 8)&0xff))<<fogshift)) >> (8 + fogshift)) << 8 |
-		((fog.v[2] + ((inva*((pix>>16)&0xff))<<fogshift)) >> (8 + fogshift)) << 16;
+		((fog.v[2] + ((inva*((pix>>16)&0xff))<<fogshift)) >> (8 + fogshift)) << 16|
+		(pix & (0xff<<24));
 }
 
 static inline bool
