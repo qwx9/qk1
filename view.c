@@ -512,7 +512,7 @@ void V_UpdatePalette (void)
 		newpal[2] = gammatable[b];
 		newpal += 3;
 	}
-	setpal(pal);
+	//setpal(pal); // FIXME(sigrid): 24-bit
 }
 
 
