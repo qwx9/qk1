@@ -158,7 +158,11 @@ ${TARG}: ${OBJS}
 
 ${OBJS}: ${HDRS}
 
+d_scan.o: r_fog.h
+
 i_resize.o: stb_image_resize2.h
+
+r_surf.o: r_surf_block.h r_surf_light.h r_surf_x.h
 
 clean:
 	rm -f ${TARG} ${OBJS}
