@@ -83,5 +83,21 @@ extern uzint *zspantable[MAXHEIGHT];
 extern int d_minmip;
 extern float d_scalemip[3];
 
+static inline pixel_t
+mulalpha(pixel_t ca, int alpha)
+{
+	pixel_t a, b;
+
+	a = ((ca >> 0) & 0xff00ff)*alpha + 0x800080;
+	a = (a + ((a >> 8) & 0xff00ff)) >> 8;
+	a &= 0x00ff00ff;
+
+	b = ((ca >> 8) & 0xff00ff)*alpha + 0x800080;
+	b = (b + ((b >> 8) & 0xff00ff)) >> 0;
+	b &= 0xff00ff00;
+
+	return a | b;
+}
+
 pixel_t blendalpha(pixel_t ca, pixel_t cb, int alpha);
 float alphafor(int flags);

@@ -4,6 +4,7 @@
 #define VID_GRADES	(1 << VID_CBITS)
 
 typedef u32int pixel_t;
+typedef u64int pixel64_t;
 
 typedef struct vrect_s
 {

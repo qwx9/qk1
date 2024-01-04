@@ -165,7 +165,8 @@ dospan_turb(pixel_t *pdest, pixel_t *pbase, int s, int t, int sstep, int tstep, 
 			sturb = ((s + r_turb_turb[(t>>16)&(CYCLE-1)])>>16)&63;
 			tturb = ((t + r_turb_turb[(s>>16)&(CYCLE-1)])>>16)&63;
 			*pdest = blendalpha(*(pbase + (tturb<<6) + sturb), *pdest, alpha);
-			*pz = izi; // FIXME(sigrid): can always update this one?
+			if(noblend)
+				*pz = izi;
 		}
 		s += sstep;
 		t += tstep;
@@ -191,7 +192,8 @@ dospan_turb_f1(pixel_t *pdest, pixel_t *pbase, int s, int t, int sstep, int tste
 			sturb = ((s + r_turb_turb[(t>>16)&(CYCLE-1)])>>16)&63;
 			tturb = ((t + r_turb_turb[(s>>16)&(CYCLE-1)])>>16)&63;
 			*pdest = blendalpha(blendfog(*(pbase + (tturb<<6) + sturb), *fog), *pdest, alpha);
-			*pz = izi; // FIXME(sigrid): can always update this one?
+			if(noblend)
+				*pz = izi;
 		}
 		s += sstep;
 		t += tstep;
@@ -213,7 +215,7 @@ D_DrawSpans16(espan_t *pspan, pixel_t *pbase, int width, byte alpha, int spanfun
 	float		sdivz, tdivz, zi, z, du, dv;
 	float		sdivzstepu, tdivzstepu, zistepu;
 	fog_t fog;
-	bool fogged;
+	bool fogged, fogenabled;
 
 	sstep = 0;	// keep compiler happy
 	tstep = 0;	// ditto
@@ -223,6 +225,8 @@ D_DrawSpans16(espan_t *pspan, pixel_t *pbase, int width, byte alpha, int spanfun
 	tdivzstepu = dvars.tdivzstepu * 16;
 	zistepu = dvars.zistepu * 16;
 	izistep = (int)(dvars.zistepu * 0x8000 * 0x10000);
+
+	fogenabled = isfogged();
 
 	do{
 		pdest = dvars.viewbuffer + pspan->v*dvars.width + pspan->u;
@@ -249,6 +253,7 @@ D_DrawSpans16(espan_t *pspan, pixel_t *pbase, int width, byte alpha, int spanfun
 			// calculate s and t at the far end of the span
 			spancount = min(count, 16);
 			count -= spancount;
+			fogged = fogenabled && fogcalc(izi, izi + izistep*spancount, spancount, &fog);
 
 			if(count){
 				// calculate s/z, t/z, zi->fixed s and t at far end of span,
@@ -296,7 +301,6 @@ D_DrawSpans16(espan_t *pspan, pixel_t *pbase, int width, byte alpha, int spanfun
 				}
 			}
 
-			fogged = isfogged() ? fogcalc(izi, izi + izistep*spancount, spancount, &fog) : false;
 			if(fogged){
 				switch(spanfunc){
 				case SPAN_SOLID:

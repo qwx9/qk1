@@ -43,6 +43,7 @@ fog(void)
 				fogvars.enabled = x > 0 ? (Enfog | Enskyfog) : 0;
 				setcvar("r_skyfog", x > 0 ? "1" : "0");
 			}
+			fogvars.pix = 0xff<<24 | fogvars.c2<<16 | fogvars.c1<<8 | fogvars.c0;
 			return;
 		}
 		fogvars.density = clamp(x, 0.0, 1.0) * 0.016;
@@ -57,6 +58,7 @@ fog(void)
 		x = atof(Cmd_Argv(i));
 		fogvars.c0 = 0xff * clamp(x, 0.0, 1.0);
 		r_skyfog_cb(&r_skyfog); /* recalculate sky fog */
+		fogvars.pix = 0xff<<24 | fogvars.c2<<16 | fogvars.c1<<8 | fogvars.c0;
 		break;
 	}
 	if(fogvars.density > 0.0)
@@ -70,6 +72,7 @@ R_ResetFog(void)
 {
 	memset(&fogvars, 0, sizeof(fogvars));
 	fogvars.c0 = fogvars.c1 = fogvars.c2 = 0x80;
+	fogvars.pix = 0xff808080;
 	fogvars.allowed = r_fog.value > 0.0;
 	setcvar("r_skyfog", "0");
 }

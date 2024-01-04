@@ -8,20 +8,15 @@ enum {
 	Enskyfog = 1<<1,
 };
 
-typedef struct fog_t fog_t;
 typedef struct fogvars_t fogvars_t;
 
-struct fog_t {
-	int v[4];
-	int d[4];
-};
-
 struct fogvars_t {
+	pixel_t pix;
 	float density;
-	byte c0, c1, c2, sky;
-	bool allowed;
-	int enabled;
 	int skyc0, skyc1, skyc2;
+	int enabled;
+	byte sky, c0, c1, c2;
+	bool allowed;
 };
 
 extern fogvars_t fogvars;

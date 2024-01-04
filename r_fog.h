@@ -1,12 +1,13 @@
-#define fogstep(f) \
-	do{ \
-		(f).v[0] += (f).d[0]; \
-		(f).v[1] += (f).d[1]; \
-		(f).v[2] += (f).d[2]; \
-		(f).v[3] += (f).d[3]; \
-	}while(0)
+typedef struct fog_t fog_t;
 
-#define fogshift 8
+struct fog_t {
+	pixel64_t v;
+	pixel64_t d;
+};
+
+#define fogstep(f) do{ \
+		(f).v += (f).d; \
+	}while(0)
 
 static inline byte
 z2foga(uzint z)
@@ -20,39 +21,48 @@ z2foga(uzint z)
 	return 255*d;
 }
 
+static inline pixel64_t
+pixto64(pixel_t p)
+{
+	return
+		(pixel64_t)((p>>24)&0xff)<<56 |
+		(pixel64_t)((p>>16)&0xff)<<40 |
+		(pixel64_t)((p>> 8)&0xff)<<24 |
+		(pixel64_t)((p>> 0)&0xff)<< 8;
+}
+
+static inline pixel_t
+pixfrom64(pixel64_t p)
+{
+	return ((p>>56)&0xff)<<24 | ((p>>40)&0xff)<<16 | ((p>>24)&0xff)<<8 | ((p>>8)&0xff)<<0;
+}
+
 static inline pixel_t
 blendfog(pixel_t pix, fog_t fog)
 {
-	byte inva = 0xff - (fog.v[3]>>fogshift);
-	return
-		((fog.v[0] + ((inva*((pix>> 0)&0xff))<<fogshift)) >> (8 + fogshift)) << 0 |
-		((fog.v[1] + ((inva*((pix>> 8)&0xff))<<fogshift)) >> (8 + fogshift)) << 8 |
-		((fog.v[2] + ((inva*((pix>>16)&0xff))<<fogshift)) >> (8 + fogshift)) << 16|
-		(pix & (0xff<<24));
+	pixel_t a = pixfrom64(fog.v);
+	pixel_t b = mulalpha(pix, 0xff - (fog.v>>56));
+	return a + b;
 }
 
 static inline bool
 fogcalc(uzint zi0, uzint zi1, int cnt, fog_t *f)
 {
-	int end[3], v, e;
+	int v, e;
+	pixel64_t x;
 
 	if((v = z2foga(zi0)) == 0 || (e = z2foga(zi1)) == 0)
 		return false;
 
-	v <<= fogshift;
-	e <<= fogshift;
-
-	end[0] = e * fogvars.c0;
-	end[1] = e * fogvars.c1;
-	end[2] = e * fogvars.c2;
-	f->v[0] = v * fogvars.c0;
-	f->v[1] = v * fogvars.c1;
-	f->v[2] = v * fogvars.c2;
-	f->v[3] = v;
-	f->d[0] = (end[0] - f->v[0])/cnt;
-	f->d[1] = (end[1] - f->v[1])/cnt;
-	f->d[2] = (end[2] - f->v[2])/cnt;
-	f->d[3] = (e - v)/cnt;
+	f->v = pixto64(mulalpha(fogvars.pix, v));
+	x = pixto64(mulalpha(fogvars.pix, (e<v ? v-e : e-v)));
+	f->d =
+		(((x & (0xffffULL<<48))/cnt) & (0xffffULL<<48)) |
+		(((x & (0xffffULL<<32))/cnt) & (0xffffULL<<32)) |
+		(((x & (0xffffULL<<16))/cnt) & (0xffffULL<<16)) |
+		(((x & (0xffffULL<< 0))/cnt) & (0xffffULL<< 0));
+	if(e < v)
+		f->d = -f->d;
 
 	return true;
 }
