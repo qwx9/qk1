@@ -102,7 +102,7 @@ D_DrawSurfaces (void)
 
 	// TODO: could preset a lot of this at mode set time
 	for(s = &surfaces[1]; s < surface_p; s++){
-		if (!s->spans)
+		if(!s->spans)
 			continue;
 
 		if((surfdrawflags(s->flags) | entdrawflags(s->entity)) ^ r_drawflags)
@@ -121,7 +121,7 @@ D_DrawSurfaces (void)
 		dvars.zistepv = s->d_zistepv;
 		dvars.ziorigin = s->d_ziorigin;
 
-		if(s->insubmodel && s->entity != currententity){
+		if(s->insubmodel){
 			currententity = s->entity;
 			VectorSubtract(r_origin, currententity->origin, local_modelorg);
 			TransformVector(local_modelorg, transformed_modelorg);
@@ -147,13 +147,15 @@ D_DrawSurfaces (void)
 				(alpha == 255 && s->flags & SURF_FENCE) ? SPAN_FENCE : (blend ? SPAN_BLEND : SPAN_SOLID)
 			);
 		}
-	}
 
-	currententity = cl_entities;
-	VectorCopy(world_transformed_modelorg, transformed_modelorg);
-	VectorCopy(base_vpn, vpn);
-	VectorCopy(base_vup, vup);
-	VectorCopy(base_vright, vright);
-	VectorCopy(base_modelorg, modelorg);
-	R_TransformFrustum();
+		if(s->insubmodel){
+			currententity = cl_entities;
+			VectorCopy(world_transformed_modelorg, transformed_modelorg);
+			VectorCopy(base_vpn, vpn);
+			VectorCopy(base_vup, vup);
+			VectorCopy(base_vright, vright);
+			VectorCopy(base_modelorg, modelorg);
+			R_TransformFrustum();
+		}
+	}
 }
