@@ -13,12 +13,13 @@ static inline byte
 z2foga(uzint z)
 {
 	float d;
+	unsigned x;
 
-	if(z <= 65536)
+	if(z <= 0)
 		return 0;
-	d = 65536ULL*65536ULL / (u64int)z;
-	d = 1.0 - exp2(-fogvars.density * d*d);
-	return 255*d;
+	x = 0xffffffffU / z;
+	d = exp2f(-fogvars.density * x * x);
+	return 255 - 255*d;
 }
 
 static inline pixel64_t

@@ -103,7 +103,7 @@ dospan_blend_f1(pixel_t *pdest, pixel_t *pbase, int s, int t, int sstep, int tst
 		s += sstep;
 		t += tstep;
 		if(opaque(pix) && *pz <= izi)
-			*pdest = blendalpha(blendfog(pix, *fog), *pdest, alpha);
+			*pdest = blendalpha(0xff<<24 | blendfog(pix, *fog), *pdest, alpha);
 		izi += izistep;
 		pdest++;
 		pz++;
@@ -191,7 +191,7 @@ dospan_turb_f1(pixel_t *pdest, pixel_t *pbase, int s, int t, int sstep, int tste
 		if(noblend || *pz <= izi){
 			sturb = ((s + r_turb_turb[(t>>16)&(CYCLE-1)])>>16)&63;
 			tturb = ((t + r_turb_turb[(s>>16)&(CYCLE-1)])>>16)&63;
-			*pdest = blendalpha(blendfog(*(pbase + (tturb<<6) + sturb), *fog), *pdest, alpha);
+			*pdest = blendalpha(0xff<<24 | blendfog(*(pbase + (tturb<<6) + sturb), *fog), *pdest, alpha);
 			if(noblend)
 				*pz = izi;
 		}

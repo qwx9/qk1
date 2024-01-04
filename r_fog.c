@@ -6,16 +6,19 @@ static cvar_t r_skyfog = {"r_skyfog", "0.5"};
 fogvars_t fogvars;
 
 static void
+fogrecalc(void)
+{
+	fogvars.pix = (fogvars.allowed && fogvars.enabled)
+		? 0xff<<24 | fogvars.c2<<16 | fogvars.c1<<8 | fogvars.c0
+		: 0;
+	fogvars.skypix = mulalpha(fogvars.pix, 255 * clamp(r_skyfog.value, 0.0, 1.0));
+}
+
+static void
 r_skyfog_cb(cvar_t *var)
 {
-	if(var->value > 0.0)
-		fogvars.enabled |= Enskyfog;
-	else
-		fogvars.enabled &= ~Enskyfog;
-	fogvars.sky = 255 * clamp(var->value, 0.0, 1.0);
-	fogvars.skyc0 = fogvars.sky * fogvars.c0;
-	fogvars.skyc1 = fogvars.sky * fogvars.c1;
-	fogvars.skyc2 = fogvars.sky * fogvars.c2;
+	USED(var);
+	fogrecalc();
 }
 
 static void
@@ -40,14 +43,14 @@ fog(void)
 			else if(s[6] == 'b')
 				fogvars.c0 = x;
 			else if(s[6] == 'e'){
-				fogvars.enabled = x > 0 ? (Enfog | Enskyfog) : 0;
+				fogvars.enabled = x > 0;
 				setcvar("r_skyfog", x > 0 ? "1" : "0");
 			}
-			fogvars.pix = 0xff<<24 | fogvars.c2<<16 | fogvars.c1<<8 | fogvars.c0;
-			return;
+			break;
 		}
 		fogvars.density = clamp(x, 0.0, 1.0) * 0.016;
 		fogvars.density *= fogvars.density;
+		fogvars.enabled = fogvars.density > 0.0;
 		if(n == 2)
 			break;
 	case 4:
@@ -58,29 +61,25 @@ fog(void)
 		x = atof(Cmd_Argv(i));
 		fogvars.c0 = 0xff * clamp(x, 0.0, 1.0);
 		r_skyfog_cb(&r_skyfog); /* recalculate sky fog */
-		fogvars.pix = 0xff<<24 | fogvars.c2<<16 | fogvars.c1<<8 | fogvars.c0;
 		break;
 	}
-	if(fogvars.density > 0.0)
-		fogvars.enabled |= Enfog;
-	else
-		fogvars.enabled &= ~Enfog;
+	fogrecalc();
 }
 
 void
 R_ResetFog(void)
 {
 	memset(&fogvars, 0, sizeof(fogvars));
-	fogvars.c0 = fogvars.c1 = fogvars.c2 = 0x80;
-	fogvars.pix = 0xff808080;
+	fogvars.c2 = fogvars.c1 = fogvars.c0 = 0x80;
 	fogvars.allowed = r_fog.value > 0.0;
-	setcvar("r_skyfog", "0");
+	setcvar("r_skyfog", "0"); // calls fogrecalc
 }
 
 static void
 r_fog_cb(cvar_t *var)
 {
 	fogvars.allowed = var->value > 0.0;
+	fogrecalc();
 }
 
 void

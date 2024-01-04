@@ -42,6 +42,6 @@
 typedef enum {false, true} bool;
 
 static double ln2c;
-#define exp2(x) (exp((x) * (ln2c ? ln2c : (ln2c = log(2.0)))))
+#define exp2f(x) (exp((x) * (ln2c ? ln2c : (ln2c = log(2.0)))))
 
 int qctz(unsigned);

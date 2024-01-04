@@ -43,8 +43,8 @@ void D_DrawSkyScans8 (espan_t *pspan)
 	uzint *pz;
 	fixed16_t s[2], t[2], snext[2], tnext[2], sstep[2], tstep[2];
 	float skydist;
-	bool fog;
-	int c0, c1, c2, inva;
+	pixel_t fog;
+	int inva;
 
 	if(skyvars.source[0] == nil || skyvars.source[1] == nil)
 		return;
@@ -52,12 +52,8 @@ void D_DrawSkyScans8 (espan_t *pspan)
 	sstep[0] = sstep[1] = 0;	// keep compiler happy
 	tstep[0] = tstep[1] = 0;	// ditto
 	skydist = skyvars.time*skyvars.speed;	// TODO: add D_SetupFrame & set this there
-	if((fog = isskyfogged())){
-		c0 = fogvars.skyc0;
-		c1 = fogvars.skyc1;
-		c2 = fogvars.skyc1;
-		inva = 255 - fogvars.sky;
-	}
+	fog = fogvars.skypix;
+	inva = 255 - (fog>>24);
 
 	do
 	{
@@ -108,12 +104,8 @@ void D_DrawSkyScans8 (espan_t *pspan)
 				pix = skyvars.source[1][((t[1] & skyvars.tmask) >> skyvars.tshift) + ((s[1] & skyvars.smask) >> 16)];
 				if(!opaque(pix))
 					pix = skyvars.source[0][((t[0] & skyvars.tmask) >> skyvars.tshift) + ((s[0] & skyvars.smask) >> 16)];
-				if(fog){
-					pix =
-						((c0 + inva*((pix>> 0)&0xff)) >> 8) << 0 |
-						((c1 + inva*((pix>> 8)&0xff)) >> 8) << 8 |
-						((c2 + inva*((pix>>16)&0xff)) >> 8) << 16;
-				}
+				if(fog != 0)
+					pix = fog + mulalpha(pix, inva);
 				*pdest++ = pix;
 				s[0] += sstep[0];
 				t[0] += tstep[0];

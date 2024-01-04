@@ -11,6 +11,7 @@ static pixel_t *vidbuffer;
 extern pixel_t *r_warpbuffer;
 
 static cvar_t v_snail = {"v_snail", "0"};
+static cvar_t v_fullscreen = {"v_fullscreen", "0", true};
 static int oldvidbuffersz;
 
 static void
@@ -111,6 +112,24 @@ v_snail_cb(cvar_t *var)
 	sys_snail(var->value != 0);
 }
 
+static void
+v_fullscreen_cb(cvar_t *var)
+{
+	static int oldmode = 0;
+	int mode;
+
+	if(var->value >= 2)
+		mode = SDL_WINDOW_FULLSCREEN_DESKTOP;
+	else if(var->value >= 1)
+		mode = SDL_WINDOW_FULLSCREEN;
+	else
+		mode = 0;
+	if(oldmode != mode && SDL_SetWindowFullscreen(win, mode) == 0){
+		vid.resized = true;
+		oldmode = mode;
+	}
+}
+
 void
 initfb(void)
 {
@@ -138,4 +157,6 @@ initfb(void)
 
 	Cvar_RegisterVariable(&v_snail);
 	v_snail.cb = v_snail_cb;
+	Cvar_RegisterVariable(&v_fullscreen);
+	v_fullscreen.cb = v_fullscreen_cb;
 }

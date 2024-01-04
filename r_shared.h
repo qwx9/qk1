@@ -11,18 +11,15 @@ enum {
 typedef struct fogvars_t fogvars_t;
 
 struct fogvars_t {
-	pixel_t pix;
+	pixel_t pix, skypix;
 	float density;
-	int skyc0, skyc1, skyc2;
-	int enabled;
-	byte sky, c0, c1, c2;
-	bool allowed;
+	byte c0, c1, c2;
+	bool allowed, enabled;
 };
 
 extern fogvars_t fogvars;
 
-#define isfogged() (fogvars.allowed && (fogvars.enabled & Enfog) != 0)
-#define isskyfogged() (fogvars.sky != 0 && fogvars.allowed && (fogvars.enabled & Enskyfog) != 0)
+#define isfogged() (fogvars.pix != 0)
 
 // FIXME: clean up and move into d_iface.h
 
