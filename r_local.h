@@ -104,11 +104,6 @@ extern int r_drawflags;
 void R_ResetFog(void);
 void R_InitFog(void);
 
-//
-// current entity info
-//
-extern	bool		insubmodel;
-
 void R_DrawSprite (void);
 int R_RenderFace (msurface_t *fa, int clipflags);
 void R_RenderBmodelFace (bedge_t *pedges, msurface_t *psurf);

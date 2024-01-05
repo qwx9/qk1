@@ -121,7 +121,7 @@ D_DrawSurfaces (void)
 		dvars.zistepv = s->d_zistepv;
 		dvars.ziorigin = s->d_ziorigin;
 
-		if(s->insubmodel){
+		if(insubmodel(s)){
 			currententity = s->entity;
 			VectorSubtract(r_origin, currententity->origin, local_modelorg);
 			TransformVector(local_modelorg, transformed_modelorg);
@@ -148,7 +148,7 @@ D_DrawSurfaces (void)
 			);
 		}
 
-		if(s->insubmodel){
+		if(insubmodel(s)){
 			currententity = cl_entities;
 			VectorCopy(world_transformed_modelorg, transformed_modelorg);
 			VectorCopy(base_vpn, vpn);

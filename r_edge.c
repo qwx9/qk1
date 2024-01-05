@@ -293,7 +293,7 @@ void R_LeadingEdge (edge_t *edge)
 
 			// if it's two surfaces on the same plane, the one that's already
 			// active is in front, so keep going unless it's a bmodel
-			if (surf->insubmodel && (surf->key == surf2->key))
+			if (insubmodel(surf) && (surf->key == surf2->key))
 			{
 				// must be two bmodels in the same leaf; sort on 1/z
 				fu = (float)(edge->u - 0xFFFFF) * (1.0 / 0x100000);
@@ -330,7 +330,7 @@ continue_search:
 			{
 				// if it's two surfaces on the same plane, the one that's already
 				// active is in front, so keep going unless it's a bmodel
-				if (!surf->insubmodel)
+				if (!insubmodel(surf))
 					goto continue_search;
 
 				// must be two bmodels in the same leaf; sort on 1/z

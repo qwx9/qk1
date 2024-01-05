@@ -74,7 +74,10 @@ enum {
 	SURF_LAVA = 1<<10,
 	SURF_SLIME = 1<<11,
 	SURF_TELE = 1<<12,
+	SURF_IN_SUBMODEL = 1<<31, /* makes surf->flags negative */
 };
+
+#define insubmodel(s) ((s)->flags < 0)
 
 // !!! if this is changed, it must be changed in asm_draw.h too !!!
 typedef struct

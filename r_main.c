@@ -521,7 +521,6 @@ R_DrawEntity(entity_t *e)
 		break;
 
 	case mod_brush:
-		insubmodel = true;
 		r_dlightframecount = r_framecount;
 		clmodel = e->model;
 

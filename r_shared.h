@@ -61,27 +61,22 @@ typedef struct espan_s
 	struct espan_s	*pnext;
 } espan_t;
 
-// FIXME: compress, make a union if that will help
-// insubmodel is only 1, flags is fewer than 32, spanstate could be a byte
 typedef struct surf_s
 {
-	struct surf_s	*next;			// active surface stack in r_edge.c
-	struct surf_s	*prev;			// used in r_edge.c for active surf stack
-	struct espan_s	*spans;			// pointer to linked list of spans to draw
 	int			key;				// sorting key (BSP order)
+	int			flags;
 	int			last_u;				// set during tracing
-	int			spanstate;			// 0 = not in span
+	byte		spanstate;			// 0 = not in span
 									// 1 = in span
 									// -1 = in inverted span (end before
 									//  start)
-	int			flags;				// currentface flags
+	float		nearzi;				// nearest 1/z on surface, for mipmapping
+	float		d_ziorigin, d_zistepu, d_zistepv;
+	struct surf_s	*next;			// active surface stack in r_edge.c
+	struct surf_s	*prev;			// used in r_edge.c for active surf stack
+	struct espan_s	*spans;			// pointer to linked list of spans to draw
 	void		*data;				// associated data like msurface_t
 	entity_t	*entity;
-	float		nearzi;				// nearest 1/z on surface, for mipmapping
-	bool	insubmodel;
-	float		d_ziorigin, d_zistepu, d_zistepv;
-
-	int			pad[2];				// to 64 bytes
 } surf_t;
 
 extern int r_numallocatedbasespans;

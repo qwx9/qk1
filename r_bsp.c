@@ -3,7 +3,7 @@
 //
 // current entity info
 //
-bool		insubmodel;
+
 entity_t		*currententity;
 vec3_t			modelorg, base_modelorg;
 								// modelorg is the viewpoint reletive to
