@@ -50,30 +50,64 @@ void D_WarpScreen (void)
 static inline void
 dospan_solid(pixel_t *pdest, pixel_t *pbase, int s, int t, int sstep, int tstep, int spancount, int width, uzint *pz, uzint izi, int izistep)
 {
-	pixel_t pix;
-	do{
-		*pz++ = izi;
-		pix = pbase[(s >> 16) + (t >> 16) * width];
-		s += sstep;
-		t += tstep;
-		izi += izistep;
-		*pdest++ = pix;
-	}while(--spancount);
+	if(((t + tstep*spancount) >> 16) == (t >> 16)){
+		pbase += (t >> 16) * width;
+		do{
+			*pdest++ = pbase[s >> 16];
+			*pz++ = izi;
+			s += sstep;
+			izi += izistep;
+		}while(--spancount);
+	}else if(((s + sstep*spancount) >> 16) == (s >> 16)){
+		pbase += s >> 16;
+		do{
+			*pdest++ = pbase[(t >> 16) * width];
+			*pz++ = izi;
+			t += tstep;
+			izi += izistep;
+		}while(--spancount);
+	}else{
+		do{
+			*pdest++ = pbase[(s >> 16) + (t >> 16) * width];
+			*pz++ = izi;
+			s += sstep;
+			t += tstep;
+			izi += izistep;
+		}while(--spancount);
+	}
 }
 
 static inline void
 dospan_solid_f1(pixel_t *pdest, pixel_t *pbase, int s, int t, int sstep, int tstep, int spancount, int width, uzint *pz, uzint izi, int izistep, fog_t *fog)
 {
-	pixel_t pix;
-	do{
-		*pz++ = izi;
-		izi += izistep;
-		pix = pbase[(s >> 16) + (t >> 16) * width];
-		s += sstep;
-		t += tstep;
-		*pdest++ = blendfog(pix, *fog);
-		fogstep(*fog);
-	}while(--spancount);
+	if(((t + tstep*spancount) >> 16) == (t >> 16)){
+		pbase += (t >> 16) * width;
+		do{
+			*pz++ = izi;
+			izi += izistep;
+			*pdest++ = blendfog(pbase[s >> 16], *fog);
+			fogstep(*fog);
+			s += sstep;
+		}while(--spancount);
+	}else if(((s + sstep*spancount) >> 16) == (s >> 16)){
+		pbase += s >> 16;
+		do{
+			*pz++ = izi;
+			izi += izistep;
+			*pdest++ = blendfog(pbase[(t >> 16) * width], *fog);
+			fogstep(*fog);
+			t += tstep;
+		}while(--spancount);
+	}else{
+		do{
+			*pz++ = izi;
+			izi += izistep;
+			*pdest++ = blendfog(pbase[(s >> 16) + (t >> 16) * width], *fog);
+			fogstep(*fog);
+			s += sstep;
+			t += tstep;
+		}while(--spancount);
+	}
 }
 
 static inline void
@@ -81,16 +115,40 @@ dospan_blend(pixel_t *pdest, pixel_t *pbase, int s, int t, int sstep, int tstep,
 {
 	pixel_t pix;
 
-	do{
-		pix = pbase[(s >> 16) + (t >> 16) * width];
-		s += sstep;
-		t += tstep;
-		if(opaque(pix) && *pz <= izi)
-			*pdest = blendalpha(pix, *pdest, alpha);
-		izi += izistep;
-		pdest++;
-		pz++;
-	}while(--spancount);
+	if(((t + tstep*spancount) >> 16) == (t >> 16)){
+		pbase += (t >> 16) * width;
+		do{
+			pix = pbase[s >> 16];
+			s += sstep;
+			if(opaque(pix) && *pz <= izi)
+				*pdest = blendalpha(pix, *pdest, alpha);
+			izi += izistep;
+			pdest++;
+			pz++;
+		}while(--spancount);
+	}else if(((s + sstep*spancount) >> 16) == (s >> 16)){
+		pbase += s >> 16;
+		do{
+			pix = pbase[(t >> 16) * width];
+			t += tstep;
+			if(opaque(pix) && *pz <= izi)
+				*pdest = blendalpha(pix, *pdest, alpha);
+			izi += izistep;
+			pdest++;
+			pz++;
+		}while(--spancount);
+	}else{
+		do{
+			pix = pbase[(s >> 16) + (t >> 16) * width];
+			s += sstep;
+			t += tstep;
+			if(opaque(pix) && *pz <= izi)
+				*pdest = blendalpha(pix, *pdest, alpha);
+			izi += izistep;
+			pdest++;
+			pz++;
+		}while(--spancount);
+	}
 }
 
 static inline void
@@ -98,17 +156,43 @@ dospan_blend_f1(pixel_t *pdest, pixel_t *pbase, int s, int t, int sstep, int tst
 {
 	pixel_t pix;
 
-	do{
-		pix = pbase[(s >> 16) + (t >> 16) * width];
-		s += sstep;
-		t += tstep;
-		if(opaque(pix) && *pz <= izi)
-			*pdest = blendalpha(0xff<<24 | blendfog(pix, *fog), *pdest, alpha);
-		izi += izistep;
-		pdest++;
-		pz++;
-		fogstep(*fog);
-	}while(--spancount);
+	if(((t + tstep*spancount) >> 16) == (t >> 16)){
+		pbase += (t >> 16) * width;
+		do{
+			pix = pbase[s >> 16];
+			s += sstep;
+			if(opaque(pix) && *pz <= izi)
+				*pdest = blendalpha(0xff<<24 | blendfog(pix, *fog), *pdest, alpha);
+			fogstep(*fog);
+			izi += izistep;
+			pdest++;
+			pz++;
+		}while(--spancount);
+	}else if(((s + sstep*spancount) >> 16) == (s >> 16)){
+		pbase += s >> 16;
+		do{
+			pix = pbase[(t >> 16) * width];
+			t += tstep;
+			if(opaque(pix) && *pz <= izi)
+				*pdest = blendalpha(0xff<<24 | blendfog(pix, *fog), *pdest, alpha);
+			fogstep(*fog);
+			izi += izistep;
+			pdest++;
+			pz++;
+		}while(--spancount);
+	}else{
+		do{
+			pix = pbase[(s >> 16) + (t >> 16) * width];
+			s += sstep;
+			t += tstep;
+			if(opaque(pix) && *pz <= izi)
+				*pdest = blendalpha(0xff<<24 | blendfog(pix, *fog), *pdest, alpha);
+			fogstep(*fog);
+			izi += izistep;
+			pdest++;
+			pz++;
+		}while(--spancount);
+	}
 }
 
 static inline void
@@ -116,18 +200,46 @@ dospan_fence(pixel_t *pdest, pixel_t *pbase, int s, int t, int sstep, int tstep,
 {
 	pixel_t pix;
 
-	do{
-		pix = pbase[(s >> 16) + (t >> 16) * width];
-		s += sstep;
-		t += tstep;
-		if(opaque(pix) && *pz <= izi){
-			*pdest = pix;
-			*pz = izi;
-		}
-		izi += izistep;
-		pdest++;
-		pz++;
-	}while(--spancount);
+	if(((t + tstep*spancount) >> 16) == (t >> 16)){
+		pbase += (t >> 16) * width;
+		do{
+			pix = pbase[s >> 16];
+			s += sstep;
+			if(opaque(pix) && *pz <= izi){
+				*pdest = pix;
+				*pz = izi;
+			}
+			izi += izistep;
+			pdest++;
+			pz++;
+		}while(--spancount);
+	}else if(((s + sstep*spancount) >> 16) == (s >> 16)){
+		pbase += s >> 16;
+		do{
+			pix = pbase[(t >> 16) * width];
+			t += tstep;
+			if(opaque(pix) && *pz <= izi){
+				*pdest = pix;
+				*pz = izi;
+			}
+			izi += izistep;
+			pdest++;
+			pz++;
+		}while(--spancount);
+	}else{
+		do{
+			pix = pbase[(s >> 16) + (t >> 16) * width];
+			s += sstep;
+			t += tstep;
+			if(opaque(pix) && *pz <= izi){
+				*pdest = pix;
+				*pz = izi;
+			}
+			izi += izistep;
+			pdest++;
+			pz++;
+		}while(--spancount);
+	}
 }
 
 static inline void
@@ -135,19 +247,49 @@ dospan_fence_f1(pixel_t *pdest, pixel_t *pbase, int s, int t, int sstep, int tst
 {
 	pixel_t pix;
 
-	do{
-		pix = pbase[(s >> 16) + (t >> 16) * width];
-		s += sstep;
-		t += tstep;
-		if(opaque(pix) && *pz <= izi){
-			*pdest = blendfog(pix, *fog);
-			*pz = izi;
-		}
-		izi += izistep;
-		pdest++;
-		pz++;
-		fogstep(*fog);
-	}while(--spancount);
+	if(((t + tstep*spancount) >> 16) == (t >> 16)){
+		pbase += (t >> 16) * width;
+		do{
+			pix = pbase[s >> 16];
+			s += sstep;
+			if(opaque(pix) && *pz <= izi){
+				*pdest = blendfog(pix, *fog);
+				*pz = izi;
+			}
+			fogstep(*fog);
+			izi += izistep;
+			pdest++;
+			pz++;
+		}while(--spancount);
+	}else if(((s + sstep*spancount) >> 16) == (s >> 16)){
+		pbase += s >> 16;
+		do{
+			pix = pbase[(t >> 16) * width];
+			t += tstep;
+			if(opaque(pix) && *pz <= izi){
+				*pdest = blendfog(pix, *fog);
+				*pz = izi;
+			}
+			fogstep(*fog);
+			izi += izistep;
+			pdest++;
+			pz++;
+		}while(--spancount);
+	}else{
+		do{
+			pix = pbase[(s >> 16) + (t >> 16) * width];
+			s += sstep;
+			t += tstep;
+			if(opaque(pix) && *pz <= izi){
+				*pdest = blendfog(pix, *fog);
+				*pz = izi;
+			}
+			fogstep(*fog);
+			izi += izistep;
+			pdest++;
+			pz++;
+		}while(--spancount);
+	}
 }
 
 static void
