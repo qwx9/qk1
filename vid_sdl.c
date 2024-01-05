@@ -67,6 +67,7 @@ resetfb(void)
 	scachesz = D_SurfaceCacheForRes(vid.width, vid.height);
 	hunkvbuf += scachesz;
 	dvars.zbuffer = realloc(dvars.zbuffer, hunkvbuf);
+	memset(dvars.zbuffer, 0, hunkvbuf);
 	surfcache = (byte *)(dvars.zbuffer + vid.width * vid.height);
 	D_InitCaches(surfcache, scachesz);
 }

@@ -45,6 +45,7 @@ resetfb(void)
 	hunkvbuf += scachesz;
 	if((dvars.zbuffer = realloc(dvars.zbuffer, hunkvbuf)) == nil)
 		sysfatal("%r");
+	memset(dvars.zbuffer, 0, hunkvbuf);
 	surfcache = (byte*)(dvars.zbuffer + vid.width * vid.height);
 	D_InitCaches(surfcache, scachesz);
 
