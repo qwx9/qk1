@@ -177,7 +177,7 @@ int SV_FlyMove (edict_t *ent, float time, trace_t *steptrace)
 	float		d;
 	int			numplanes;
 	vec3_t		planes[MAX_CLIP_PLANES];
-	vec3_t		primal_velocity, original_velocity, new_velocity;
+	vec3_t		primal_velocity, original_velocity, new_velocity = {0};
 	int			i, j;
 	trace_t		trace;
 	vec3_t		end;
