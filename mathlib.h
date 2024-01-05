@@ -28,8 +28,6 @@ extern vec3_t vec3_origin;
 
 void VectorMA (vec3_t veca, float scale, vec3_t vecb, vec3_t vecc);
 
-vec_t DotProduct (const vec3_t v1, const vec3_t v2);
-
 vec_t Length (vec3_t v);
 void CrossProduct (vec3_t v1, vec3_t v2, vec3_t cross);
 float VectorNormalize (vec3_t v);		// returns vector length

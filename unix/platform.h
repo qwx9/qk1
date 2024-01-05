@@ -61,3 +61,5 @@ extern char lasterr[256];
 
 char *seprint(char *, char *, char *, ...);
 int nrand(int);
+
+#define DotProduct(x,y) DotProduct_((x),(y))

@@ -45,7 +45,6 @@ OBJS=\
 	i_wad.o\
 	in_sdl.o\
 	keys.o\
-	m_dotproduct.o\
 	mathlib.o\
 	menu.o\
 	model.o\
