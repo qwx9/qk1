@@ -1,0 +1,14 @@
+#!/bin/rc
+
+awk '
+	/ inline / { inlining = 1; striptypes = 1; printf "#define "; next }
+	/^}$/ && inlining { inlining = 0; print; next }
+	inlining {
+		if(striptypes)
+			gsub(/[a-zA-Z_0-9]+ [*]?/, "")
+		striptypes = 0
+		printf "%s\\\n", $0
+		next
+	}
+	!inlining { print }
+' $*
