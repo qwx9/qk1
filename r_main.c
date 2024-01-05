@@ -718,8 +718,12 @@ void R_RenderView (void)
 	R_RenderBlendedBrushes();
 	// FIXME(sigrid): these need to be sorted with blended brushes and *all* drawn back to front
 	if(cl_numvisedicts > 0){
-		for(i = cl_numvisedicts, e = ent_reject; e != nil && i > 0; e = e->last_reject)
-			cl_visedicts[--i] = e;
+		for(i = cl_numvisedicts, e = ent_reject; e != nil && i > 0; e = e->last_reject){
+			if(!enthasalpha(e))
+				R_DrawEntity(e);
+			else
+				cl_visedicts[--i] = e;
+		}
 		for(; i < cl_numvisedicts; i++)
 			R_DrawEntity(cl_visedicts[i]);
 	}
