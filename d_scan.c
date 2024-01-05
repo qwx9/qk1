@@ -205,10 +205,29 @@ dospan_turb_f1(pixel_t *pdest, pixel_t *pbase, int s, int t, int sstep, int tste
 
 }
 
-void
-D_DrawSpans16(espan_t *pspan, pixel_t *pbase, int width, byte alpha, int spanfunc)
+static int
+D_DrawSpanGetMax(float u, float v)
 {
-	int			count, spancount, izistep, spancountminus1;
+	int s, m;
+	float us, vs;
+
+	s = 4;
+	us = u * (1<<16);
+	vs = v * (1<<16);
+	do{
+		m = 1 << (s+1);
+		if((int)(us*m) != 0 || (int)(vs*m) != 0)
+			return s;
+		s++;
+	}while(m < (int)dvars.width);
+
+	return s;
+}
+
+void
+D_DrawSpans(espan_t *pspan, pixel_t *pbase, int width, byte alpha, int spanfunc)
+{
+	int			count, spancount, izistep, spancountminus1, spanshift, spanmax;
 	pixel_t		*pdest;
 	uzint		*pz, izi;
 	fixed16_t	s, t, snext, tnext, sstep, tstep;
@@ -221,9 +240,12 @@ D_DrawSpans16(espan_t *pspan, pixel_t *pbase, int width, byte alpha, int spanfun
 	tstep = 0;	// ditto
 	memset(&fog, 0, sizeof(fog));
 
-	sdivzstepu = dvars.sdivzstepu * 16;
-	tdivzstepu = dvars.tdivzstepu * 16;
-	zistepu = dvars.zistepu * 16;
+	spanshift = D_DrawSpanGetMax(dvars.zistepu, dvars.zistepv);
+	spanmax = 1 << spanshift;
+
+	sdivzstepu = dvars.sdivzstepu * spanmax;
+	tdivzstepu = dvars.tdivzstepu * spanmax;
+	zistepu = dvars.zistepu * spanmax;
 	izistep = (int)(dvars.zistepu * 0x8000 * 0x10000);
 
 	fogenabled = isfogged();
@@ -241,7 +263,7 @@ D_DrawSpans16(espan_t *pspan, pixel_t *pbase, int width, byte alpha, int spanfun
 
 		sdivz = dvars.sdivzorigin + dv*dvars.sdivzstepv + du*dvars.sdivzstepu;
 		tdivz = dvars.tdivzorigin + dv*dvars.tdivzstepv + du*dvars.tdivzstepu;
-		z = (float)0x10000 / zi;	// prescale to 16.16 fixed-point
+		z = (float)(1<<16) / zi;	// prescale to 16.16 fixed-point
 
 		s = (int)(sdivz * z) + dvars.sadjust;
 		s = clamp(s, 0, dvars.bbextents);
@@ -251,7 +273,7 @@ D_DrawSpans16(espan_t *pspan, pixel_t *pbase, int width, byte alpha, int spanfun
 
 		do{
 			// calculate s and t at the far end of the span
-			spancount = min(count, 16);
+			spancount = min(count, spanmax);
 			count -= spancount;
 			fogged = fogenabled && fogcalc(izi, izi + izistep*spancount, spancount, &fog);
 
@@ -261,20 +283,20 @@ D_DrawSpans16(espan_t *pspan, pixel_t *pbase, int width, byte alpha, int spanfun
 				sdivz += sdivzstepu;
 				tdivz += tdivzstepu;
 				// prescale to 16.16 fixed-point
-				z = (float)0x10000 / (zi + zistepu);
+				z = (float)(1<<16) / (zi + zistepu);
 
 				snext = (int)(sdivz * z) + dvars.sadjust;
 				// prevent round-off error on <0 steps from
-				//  from causing overstepping & running off the
+				//  causing overstepping & running off the
 				//  edge of the texture
-				snext = clamp(snext, 16, dvars.bbextents);
+				snext = clamp(snext, spanmax, dvars.bbextents);
 
 				tnext = (int)(tdivz * z) + dvars.tadjust;
 				// guard against round-off error on <0 steps
-				tnext = clamp(tnext, 16, dvars.bbextentt);
+				tnext = clamp(tnext, spanmax, dvars.bbextentt);
 
-				sstep = (snext - s) >> 4;
-				tstep = (tnext - t) >> 4;
+				sstep = (snext - s) >> spanshift;
+				tstep = (tnext - t) >> spanshift;
 			}else{
 				// calculate s/z, t/z, zi->fixed s and t at last pixel in span (so
 				// can't step off polygon), clamp, calculate s and t steps across
@@ -284,16 +306,16 @@ D_DrawSpans16(espan_t *pspan, pixel_t *pbase, int width, byte alpha, int spanfun
 				sdivz += dvars.sdivzstepu * spancountminus1;
 				tdivz += dvars.tdivzstepu * spancountminus1;
 				// prescale to 16.16 fixed-point
-				z = (float)0x10000 / (zi + dvars.zistepu * spancountminus1);
+				z = (float)(1<<16) / (zi + dvars.zistepu * spancountminus1);
 				snext = (int)(sdivz * z) + dvars.sadjust;
 				// prevent round-off error on <0 steps from
 				//  from causing overstepping & running off the
 				//  edge of the texture
-				snext = clamp(snext, 16, dvars.bbextents);
+				snext = clamp(snext, spanmax, dvars.bbextents);
 
 				tnext = (int)(tdivz * z) + dvars.tadjust;
 				// guard against round-off error on <0 steps
-				tnext = clamp(tnext, 16, dvars.bbextentt);
+				tnext = clamp(tnext, spanmax, dvars.bbextentt);
 
 				if(spancount > 1){
 					sstep = (snext - s) / spancountminus1;

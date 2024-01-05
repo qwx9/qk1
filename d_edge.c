@@ -135,7 +135,7 @@ D_DrawSurfaces (void)
 			D_DrawSolidSurface(s, q1pal[(int)r_clearcolor.value & 0xFF]);
 		}else if(s->flags & SURF_DRAWTURB){
 			D_CalcGradients(0, pface, transformed_modelorg);
-			D_DrawSpans16(s->spans, pface->texinfo->texture->pixels, 64, alpha, SPAN_TURB);
+			D_DrawSpans(s->spans, pface->texinfo->texture->pixels, 64, alpha, SPAN_TURB);
 		}else{
 			miplevel = D_MipLevelForScale(s->nearzi * scale_for_mip * pface->texinfo->mipadjust);
 			if(s->flags & SURF_FENCE)
@@ -143,7 +143,7 @@ D_DrawSurfaces (void)
 
 			pcurrentcache = D_CacheSurface(pface, miplevel);
 			D_CalcGradients(miplevel, pface, transformed_modelorg);
-			D_DrawSpans16(s->spans, pcurrentcache->pixels, pcurrentcache->width, alpha,
+			D_DrawSpans(s->spans, pcurrentcache->pixels, pcurrentcache->width, alpha,
 				(alpha == 255 && s->flags & SURF_FENCE) ? SPAN_FENCE : (blend ? SPAN_BLEND : SPAN_SOLID)
 			);
 		}

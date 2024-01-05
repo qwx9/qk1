@@ -65,12 +65,10 @@ enum {
 	SPAN_TURB,
 };
 
-void D_DrawSpans16(espan_t *pspan, pixel_t *pbase, int width, byte alpha, int spanfunc);
-void Turbulent8 (espan_t *pspan, byte alpha);
+void D_DrawSpans(espan_t *pspan, pixel_t *pbase, int width, byte alpha, int spanfunc);
 
 void D_DrawSkyScans8 (espan_t *pspan);
 
-void R_ShowSubDiv (void);
 surfcache_t	*D_CacheSurface (msurface_t *surface, int miplevel);
 
 extern int	*d_pscantable;
