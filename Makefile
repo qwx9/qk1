@@ -4,7 +4,7 @@ PREFIX?=/usr/local
 BIN=${DESTDIR}${PREFIX}/bin
 EXTRA_CFLAGS=$$(pkg-config --cflags sdl2 openal)
 EXTRA_LDFLAGS=$$(pkg-config --libs sdl2 openal)
-CFLAGS?=-O3 -g -march=native -ffast-math
+CFLAGS?=-O3 -g -march=native # do NOT add -ffast-math
 CFLAGS+=-Wall -Wextra -Wno-unknown-pragmas -Wno-missing-field-initializers -Wno-implicit-fallthrough -Wno-microsoft-anon-tag
 CFLAGS+=-fms-extensions
 CFLAGS+=-I3rd/parg -Iunix -I. ${EXTRA_CFLAGS}
