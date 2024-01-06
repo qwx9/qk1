@@ -132,7 +132,7 @@ HFILES=\
 
 </sys/src/cmd/mkone
 
-d_scan.$O: r_fog.h
+d_scan.$O: r_fog.h plan9/d_scan.h
 
 i_resize.$O: stb_image_resize2.h
 

@@ -157,7 +157,7 @@ ${TARG}: ${OBJS}
 
 ${OBJS}: ${HDRS}
 
-d_scan.o: r_fog.h
+d_scan.o: r_fog.h unix/d_scan.h
 
 i_resize.o: stb_image_resize2.h
 
