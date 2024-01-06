@@ -167,6 +167,7 @@ IN_Shutdown(void)
 void
 IN_Init(void)
 {
+	SDL_SetHint(SDL_HINT_VIDEO_WAYLAND_EMULATE_MOUSE_WARP, "0");
 	m_raw.cb = m_raw_cb;
 	Cvar_RegisterVariable(&m_windowed);
 	Cvar_RegisterVariable(&m_filter);
