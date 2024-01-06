@@ -298,21 +298,23 @@ int SV_FindTouchedLeafs (edict_t *ent, mnode_t *node, byte *pvs)
 	int			sides;
 	int			leafnum;
 
+	if(node->contents == 0){
+		splitplane = node->plane;
+		sides = BOX_ON_PLANE_SIDE(ent->v.absmin, ent->v.absmax, splitplane);
+
+		return
+			((sides & 1) && SV_FindTouchedLeafs(ent, node->children[0], pvs)) ||
+			((sides & 2) && SV_FindTouchedLeafs(ent, node->children[1], pvs));
+	}
+
 	if(node->contents == CONTENTS_SOLID)
 		return 0;
 
-	if(node->contents < 0){
-		leafnum = (mleaf_t*)node - sv.worldmodel->leafs - 1;
-		return pvs[leafnum>>3] & (1<<(leafnum&7));
-	}
-
-	splitplane = node->plane;
-	sides = BOX_ON_PLANE_SIDE(ent->v.absmin, ent->v.absmax, splitplane);
-
-	return
-		((sides & 1) && SV_FindTouchedLeafs(ent, node->children[0], pvs)) ||
-		((sides & 2) && SV_FindTouchedLeafs(ent, node->children[1], pvs));
+	leafnum = (mleaf_t*)node - sv.worldmodel->leafs - 1;
+	return pvs[leafnum>>3] & (1<<(leafnum&7));
 }
+
+
 
 /*
 ===============
