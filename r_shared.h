@@ -65,8 +65,8 @@ typedef struct surf_s
 {
 	int			key;				// sorting key (BSP order)
 	int			flags;
-	int			last_u;				// set during tracing
-	byte		spanstate;			// 0 = not in span
+	s16int		last_u;				// set during tracing
+	s16int		spanstate;			// 0 = not in span
 									// 1 = in span
 									// -1 = in inverted span (end before
 									//  start)
