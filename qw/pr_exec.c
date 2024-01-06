@@ -1,6 +1,3 @@
-#include <u.h>
-#include <libc.h>
-#include <stdio.h>
 #include "quakedef.h"
 
 typedef struct
@@ -18,7 +15,7 @@ int			localstack[LOCALSTACK_SIZE];
 int			localstack_used;
 
 
-qboolean	pr_trace;
+bool	pr_trace;
 dfunction_t	*pr_xfunction;
 int			pr_xstatement;
 

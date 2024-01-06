@@ -1,8 +1,5 @@
 // r_alias.c: routines for setting up to draw alias models
 
-#include <u.h>
-#include <libc.h>
-#include <stdio.h>
 #include "quakedef.h"
 
 #define LIGHT_MIN	5		// lowest light value we'll allow, to avoid the
@@ -50,7 +47,7 @@ static aedge_t	aedges[12] = {
 #define NUMVERTEXNORMALS	162
 
 float	r_avertexnormals[NUMVERTEXNORMALS][3] = {
-#include "../anorms.h"
+#include "/anorms.h"
 };
 
 void R_AliasTransformAndProjectFinalVerts (finalvert_t *fv,
@@ -67,7 +64,7 @@ void R_AliasProjectFinalVert (finalvert_t *fv, auxvert_t *av);
 R_AliasCheckBBox
 ================
 */
-qboolean R_AliasCheckBBox (void)
+bool R_AliasCheckBBox (void)
 {
 	int					i, flags, frame, numv;
 	aliashdr_t			*pahdr;
@@ -75,7 +72,7 @@ qboolean R_AliasCheckBBox (void)
 	finalvert_t			*pv0, *pv1, viewpts[16];
 	auxvert_t			*pa0, *pa1, viewaux[16];
 	maliasframedesc_t	*pframedesc;
-	qboolean			zclipped, zfullyclipped;
+	bool			zclipped, zfullyclipped;
 	unsigned			anyclip, allclip;
 	int					minz;
 	
@@ -399,11 +396,11 @@ void R_AliasTransformFinalVert (finalvert_t *fv, auxvert_t *av,
 	int		temp;
 	float	lightcos, *plightnormal;
 
-	av->fv[0] = DotProduct(pverts->v, aliastransform[0]) +
+	av->fv[0] = DotProduct_(pverts->v, aliastransform[0]) +
 			aliastransform[0][3];
-	av->fv[1] = DotProduct(pverts->v, aliastransform[1]) +
+	av->fv[1] = DotProduct_(pverts->v, aliastransform[1]) +
 			aliastransform[1][3];
-	av->fv[2] = DotProduct(pverts->v, aliastransform[2]) +
+	av->fv[2] = DotProduct_(pverts->v, aliastransform[2]) +
 			aliastransform[2][3];
 
 	fv->v[2] = pstverts->s;
@@ -446,7 +443,7 @@ void R_AliasTransformAndProjectFinalVerts (finalvert_t *fv, stvert_t *pstverts)
 	for (i=0 ; i<r_anumverts ; i++, fv++, pverts++, pstverts++)
 	{
 	// transform and project
-		zi = 1.0 / (DotProduct(pverts->v, aliastransform[2]) +
+		zi = 1.0 / (DotProduct_(pverts->v, aliastransform[2]) +
 				aliastransform[2][3]);
 
 	// x, y, and z are scaled down by 1/2**31 in the transform, so 1/z is
@@ -454,9 +451,9 @@ void R_AliasTransformAndProjectFinalVerts (finalvert_t *fv, stvert_t *pstverts)
 	// projection
 		fv->v[5] = zi;
 
-		fv->v[0] = ((DotProduct(pverts->v, aliastransform[0]) +
+		fv->v[0] = ((DotProduct_(pverts->v, aliastransform[0]) +
 				aliastransform[0][3]) * zi) + aliasxcenter;
-		fv->v[1] = ((DotProduct(pverts->v, aliastransform[1]) +
+		fv->v[1] = ((DotProduct_(pverts->v, aliastransform[1]) +
 				aliastransform[1][3]) * zi) + aliasycenter;
 
 		fv->v[2] = pstverts->s;

@@ -1,8 +1,5 @@
 // draw.c -- this is the only file outside the refresh that touches the vid buffer
 
-#include <u.h>
-#include <libc.h>
-#include <stdio.h>
 #include "quakedef.h"
 
 typedef struct {
@@ -624,9 +621,9 @@ Draw_Fill
 Fills a box of pixels with a single color
 =============
 */
-void Draw_Fill (int x, int y, int w, int h, int c)
+void Draw_Fill (int x, int y, int w, int h, pixel_t c)
 {
-	byte			*dest;
+	pixel_t			*dest;
 	int				u, v;
 
 	if (x < 0 || x + w > vid.width ||
@@ -635,9 +632,8 @@ void Draw_Fill (int x, int y, int w, int h, int c)
 			x, y, w, h, c);
 		return;
 	}
-
-	dest = vid.buffer + y*vid.rowbytes + x;
-	for(v=0; v<h; v++, dest+=vid.rowbytes)
+	dest = vid.buffer + y*vid.width + x;
+	for(v=0; v<h; v++, dest+=vid.width)
 		for(u=0; u<w; u++)
 			dest[u] = c;
 }

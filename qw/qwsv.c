@@ -1,9 +1,6 @@
-#include <u.h>
-#include <libc.h>
-#include <stdio.h>
+#include "quakedef.h"
 #include <thread.h>
 #include <bio.h>
-#include "quakedef.h"
 
 mainstacksize = 256*1024;
 

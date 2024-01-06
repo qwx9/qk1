@@ -1,9 +1,6 @@
 // d_polyset.c: routines for drawing sets of polygons sharing the same
 // texture (used for Alias models)
 
-#include <u.h>
-#include <libc.h>
-#include <stdio.h>
 #include "quakedef.h"
 
 // TODO: put in span spilling to shrink list size
@@ -81,7 +78,7 @@ typedef struct {
 } adivtab_t;
 
 static adivtab_t	adivtab[32*32] = {
-#include "../adivtab.h"
+#include "/adivtab.h"
 };
 
 byte	*skintable[MAX_LBM_HEIGHT];

@@ -1,8 +1,5 @@
 // sv_nchan.c, user reliable data stream writes
 
-#include <u.h>
-#include <libc.h>
-#include <stdio.h>
 #include "quakedef.h"
 
 // check to see if client block will fit, if not, rotate buffers

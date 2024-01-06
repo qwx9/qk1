@@ -1,6 +1,3 @@
-#include <u.h>
-#include <libc.h>
-#include <stdio.h>
 #include "quakedef.h"
 
 cvar_t volume = {"volume", "0.7", 1};

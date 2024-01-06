@@ -1,8 +1,5 @@
 // d_init.c: rasterization driver initialization
 
-#include <u.h>
-#include <libc.h>
-#include <stdio.h>
 #include "quakedef.h"
 
 #define NUM_MIPS	4
@@ -11,7 +8,7 @@ cvar_t	d_mipcap = {"d_mipcap", "0"};
 cvar_t	d_mipscale = {"d_mipscale", "1"};
 
 surfcache_t		*d_initial_rover;
-qboolean		d_roverwrapped;
+bool		d_roverwrapped;
 int				d_minmip;
 float			d_scalemip[NUM_MIPS-1];
 

@@ -1,5 +1,9 @@
 // quakedef.h -- primary header for client
 
+#pragma once
+
+#include "platform.h"
+
 #define	QUAKE_GAME			// as opposed to utilities
 //#define PARANOID			// speed sapping error checking
 
@@ -134,7 +138,7 @@ typedef struct
 #include "vid.h"
 #include "sys.h"
 #include "zone.h"
-#include "../mathlib.h"
+#include "mathlib.h"
 #include "wad.h"
 #include "draw.h"
 #include "cvar.h"
@@ -172,7 +176,7 @@ typedef struct
 #define MAX_NUM_ARGVS	50
 
 
-extern qboolean noclip_anglehack;
+extern bool noclip_anglehack;
 
 
 //
@@ -186,7 +190,7 @@ extern	cvar_t		developer;
 
 extern	cvar_t	password;
 
-extern	qboolean	host_initialized;		// true if into command execution
+extern	bool	host_initialized;		// true if into command execution
 extern	double		host_frametime;
 extern	byte		*host_basepal;
 extern	byte		*host_colormap;
@@ -200,13 +204,13 @@ void Host_Init (quakeparms_t *parms);
 void Host_Shutdown(void);
 void Host_Error (char *error, ...);
 void Host_EndGame (char *message, ...);
-qboolean Host_SimulationTime(float time);
+bool Host_SimulationTime(float time);
 void Host_Frame (float time);
 void Host_Quit_f (void);
 void Host_ClientCommands (char *fmt, ...);
-void Host_ShutdownServer (qboolean crash);
+void Host_ShutdownServer (bool crash);
 
-extern qboolean		msg_suppress_1;		// suppresses resolution and cache size console output
+extern bool		msg_suppress_1;		// suppresses resolution and cache size console output
 										//  an fullscreen DIB focus gain/loss
 
 void SV_Error (char *error, ...);

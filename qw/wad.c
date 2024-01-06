@@ -1,6 +1,3 @@
-#include <u.h>
-#include <libc.h>
-#include <stdio.h>
 #include "quakedef.h"
 
 int			wad_numlumps;

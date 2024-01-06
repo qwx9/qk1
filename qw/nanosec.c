@@ -1,5 +1,4 @@
-#include <u.h>
-#include <libc.h>
+#include "quakedef.h"
 #include <tos.h>
 
 /*

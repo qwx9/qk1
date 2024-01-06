@@ -1,6 +1,3 @@
-#include <u.h>
-#include <libc.h>
-#include <stdio.h>
 #include "quakedef.h"
 
 void CL_FinishTimeDemo (void);
@@ -123,7 +120,7 @@ CL_GetDemoMessage
   FIXME...
 ====================
 */
-qboolean CL_GetDemoMessage (void)
+bool CL_GetDemoMessage (void)
 {
 	int		r, i, j;
 	float	f;
@@ -239,7 +236,7 @@ CL_GetMessage
 Handles recording and playback of demos, on top of NET_ code
 ====================
 */
-qboolean CL_GetMessage (void)
+bool CL_GetMessage (void)
 {
 	if	(cls.demoplayback)
 		return CL_GetDemoMessage ();

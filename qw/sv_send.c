@@ -1,8 +1,5 @@
 // sv_main.c -- server main program
 
-#include <u.h>
-#include <libc.h>
-#include <stdio.h>
 #include "quakedef.h"
 
 #define CHAN_AUTO   0
@@ -243,7 +240,7 @@ void SV_Multicast (vec3_t origin, int to)
 	mleaf_t		*leaf;
 	int			leafnum;
 	int			j;
-	qboolean	reliable;
+	bool	reliable;
 
 	leaf = Mod_PointInLeaf (origin, sv.worldmodel);
 	if (!leaf)
@@ -337,8 +334,8 @@ void SV_StartSound (edict_t *entity, int channel, char *sample, int volume,
     int			i;
 	int			ent;
 	vec3_t		origin;
-	qboolean	use_phs;
-	qboolean	reliable = false;
+	bool	use_phs;
+	bool	reliable = false;
 
 	if (volume < 0 || volume > 255)
 		SV_Error ("SV_StartSound: volume = %d", volume);
@@ -548,7 +545,7 @@ void SV_UpdateClientStats (client_t *client)
 SV_SendClientDatagram
 =======================
 */
-qboolean SV_SendClientDatagram (client_t *client)
+bool SV_SendClientDatagram (client_t *client)
 {
 	byte		buf[MAX_DATAGRAM];
 	sizebuf_t	msg;

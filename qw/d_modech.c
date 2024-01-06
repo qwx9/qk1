@@ -1,8 +1,5 @@
 // d_modech.c: called when mode has just changed
 
-#include <u.h>
-#include <libc.h>
-#include <stdio.h>
 #include "quakedef.h"
 
 int	d_vrectx, d_vrecty, d_vrectright_particle, d_vrectbottom_particle;

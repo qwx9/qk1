@@ -1,8 +1,5 @@
-#include <u.h>
-#include <libc.h>
-#include <stdio.h>
-#include <thread.h>
 #include "quakedef.h"
+#include <thread.h>
 
 int svonly, debug;
 

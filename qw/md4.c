@@ -1,7 +1,5 @@
 /* GLOBAL.H - RSAREF types and constants */
-
-#include <u.h>
-#include <libc.h>
+#include "quakedef.h"
 
 /* POINTER defines a generic pointer type */
 typedef uchar *POINTER;

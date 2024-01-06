@@ -1,6 +1,3 @@
-#include <u.h>
-#include <libc.h>
-#include <stdio.h>
 #include "quakedef.h"
 
 cvar_t	cl_nopred = {"cl_nopred","0"};
@@ -44,7 +41,7 @@ void CL_NudgePosition (void)
 CL_PredictUsercmd
 ==============
 */
-void CL_PredictUsercmd (player_state_t *from, player_state_t *to, usercmd_t *u, qboolean spectator)
+void CL_PredictUsercmd (player_state_t *from, player_state_t *to, usercmd_t *u, bool spectator)
 {
 	// split up very long moves
 	if (u->msec > 50)

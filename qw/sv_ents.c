@@ -1,6 +1,3 @@
-#include <u.h>
-#include <libc.h>
-#include <stdio.h>
 #include "quakedef.h"
 
 /*
@@ -78,7 +75,7 @@ int		numnails;
 
 extern	int	sv_nailmodel, sv_supernailmodel, sv_playermodel;
 
-qboolean SV_AddNailUpdate (edict_t *ent)
+bool SV_AddNailUpdate (edict_t *ent)
 {
 	if (ent->v.modelindex != sv_nailmodel
 		&& ent->v.modelindex != sv_supernailmodel)
@@ -135,7 +132,7 @@ Writes part of a packetentities message.
 Can delta from either a baseline or a previous packet_entity
 ==================
 */
-void SV_WriteDelta (entity_state_t *from, entity_state_t *to, sizebuf_t *msg, qboolean force)
+void SV_WriteDelta (entity_state_t *from, entity_state_t *to, sizebuf_t *msg, bool force)
 {
 	int		bits;
 	int		i;

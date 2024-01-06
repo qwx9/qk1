@@ -1,6 +1,3 @@
-#include <u.h>
-#include <libc.h>
-#include <stdio.h>
 #include "quakedef.h"
 
 void (*vid_menudrawfn)(void);
@@ -62,12 +59,12 @@ void M_GameOptions_Key (int key);
 void M_Search_Key (int key);
 void M_ServerList_Key (int key);
 
-qboolean	m_entersound;		// play after drawing a frame, so caching
+bool	m_entersound;		// play after drawing a frame, so caching
 								// won't disrupt the sound
-qboolean	m_recursiveDraw;
+bool	m_recursiveDraw;
 
 int			m_return_state;
-qboolean	m_return_onerror;
+bool	m_return_onerror;
 char		m_return_reason [32];
 
 #define StartingGame	(m_multiplayer_cursor == 1)
@@ -830,7 +827,7 @@ void M_Help_Key (int key)
 
 int		msgNumber;
 int		m_quit_prevstate;
-qboolean	wasInMenus;
+bool	wasInMenus;
 
 char *quitMessage [] = 
 {

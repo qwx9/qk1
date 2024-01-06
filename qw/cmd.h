@@ -53,7 +53,7 @@ void	Cmd_AddCommand (char *cmd_name, xcommand_t function);
 // if function is NULL, the command will be forwarded to the server
 // as a clc_stringcmd instead of executed locally
 
-qboolean Cmd_Exists (char *cmd_name);
+bool Cmd_Exists (char *cmd_name);
 // used by the cvar code to check for cvar / command name overlap
 
 char 	*Cmd_CompleteCommand (char *partial);

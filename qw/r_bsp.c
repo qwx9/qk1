@@ -1,12 +1,9 @@
-#include <u.h>
-#include <libc.h>
-#include <stdio.h>
 #include "quakedef.h"
 
 //
 // current entity info
 //
-qboolean		insubmodel;
+bool		insubmodel;
 entity_t		*currententity;
 vec3_t			modelorg, base_modelorg;
 								// modelorg is the viewpoint reletive to
@@ -31,7 +28,7 @@ static int			numbverts, numbedges;
 
 static mvertex_t	*pfrontenter, *pfrontexit;
 
-static qboolean		makeclippededge;
+static bool		makeclippededge;
 
 
 //===========================================================================

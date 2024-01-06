@@ -1,8 +1,5 @@
 // sv_edict.c -- entity dictionary
 
-#include <u.h>
-#include <libc.h>
-#include <stdio.h>
 #include "quakedef.h"
 
 dprograms_t		*progs;
@@ -18,7 +15,7 @@ int				pr_edict_size;	// in bytes
 int		type_size[8] = {1,sizeof(void *)/4,1,3,1,1,sizeof(void *)/4,sizeof(void *)/4};
 
 ddef_t *ED_FieldAtOfs (int ofs);
-qboolean	ED_ParseEpair (void *base, ddef_t *key, char *s);
+bool	ED_ParseEpair (void *base, ddef_t *key, char *s);
 
 #define	MAX_FIELD_LEN	64
 #define GEFV_CACHESIZE	2
@@ -701,7 +698,7 @@ Can parse either fields or globals
 returns false if error
 =============
 */
-qboolean	ED_ParseEpair (void *base, ddef_t *key, char *s)
+bool	ED_ParseEpair (void *base, ddef_t *key, char *s)
 {
 	int		i;
 	char	string[128];
@@ -778,8 +775,8 @@ Used for initial level load and for savegames.
 char *ED_ParseEdict (char *data, edict_t *ent)
 {
 	ddef_t		*key;
-	qboolean	anglehack;
-	qboolean	init;
+	bool	anglehack;
+	bool	init;
 	char		keyname[256];
 
 	init = false;

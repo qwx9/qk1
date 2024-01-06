@@ -14,7 +14,7 @@ typedef enum {
 
 typedef struct
 {
-	qboolean	active;				// false when server is going down
+	bool	active;				// false when server is going down
 	server_state_t	state;			// precache commands are only valid during load
 
 	double		time;
@@ -22,7 +22,7 @@ typedef struct
 	int			lastcheck;			// used by PF_checkclient
 	double		lastchecktime;		// for monster ai 
 
-	qboolean	paused;				// are we paused?
+	bool	paused;				// are we paused?
 
 	//check player/eyes models for hacks
 	unsigned	model_player_checksum;
@@ -98,12 +98,12 @@ typedef struct client_s
 
 	int				spectator;			// non-interactive
 
-	qboolean		sendinfo;			// at end of frame, send info to all
+	bool		sendinfo;			// at end of frame, send info to all
 										// this prevents malicious multiple broadcasts
 	float			lastnametime;		// time of last name change
 	int				lastnamecount;		// time of last name change
 	unsigned		checksum;			// checksum for calcs
-	qboolean		drop;				// lose this guy next opportunity
+	bool		drop;				// lose this guy next opportunity
 	int				lossage;			// loss percentage
 
 	int				userid;							// identifying number
@@ -133,7 +133,7 @@ typedef struct client_s
 	byte		backbuf_data[MAX_BACK_BUFFERS][MAX_MSGLEN];
 
 	double			connection_started;	// or time of disconnect for zombies
-	qboolean		send_message;		// set on frames a datagram arived on
+	bool		send_message;		// set on frames a datagram arived on
 
 // spawn parms are carried from level to level
 	float			spawn_parms[NUM_SPAWN_PARMS];
@@ -156,12 +156,12 @@ typedef struct client_s
  	int			whensaidhead;       // Head value for floodprots
  	double			lockedtill;
 
-	qboolean		upgradewarn;		// did we warn him?
+	bool		upgradewarn;		// did we warn him?
 
 	FILE			*upload;
 	char			uploadfn[MAX_QPATH];
 	netadr_t		snap_from;
-	qboolean		remote_snap;
+	bool		remote_snap;
  
 //===== NETWORK ============
 	int				chokecount;
@@ -329,8 +329,8 @@ void SV_FullClientUpdateToClient (client_t *, client_t *);
 
 int SV_ModelIndex (char *name);
 
-qboolean SV_CheckBottom (edict_t *ent);
-qboolean SV_movestep (edict_t *ent, vec3_t move, qboolean relink);
+bool SV_CheckBottom (edict_t *ent);
+bool SV_movestep (edict_t *ent, vec3_t move, bool relink);
 
 void SV_WriteClientdataToMessage (client_t *client, sizebuf_t *msg);
 
@@ -363,7 +363,7 @@ void SV_ProgStartFrame (void);
 void SV_Physics (void);
 void SV_CheckVelocity (edict_t *ent);
 void SV_AddGravity (edict_t *ent, float scale);
-qboolean SV_RunThink (edict_t *ent);
+bool SV_RunThink (edict_t *ent);
 void SV_Physics_Toss (edict_t *ent);
 void SV_RunNewmis (void);
 void SV_Impact (edict_t *e1, edict_t *e2);
@@ -426,5 +426,5 @@ void ClientReliableWrite_Short(client_t *cl, int c);
 void ClientReliableWrite_String(client_t *cl, char *s);
 void ClientReliableWrite_SZ(client_t *cl, void *data, int len);
 
-qboolean	ServerPaused(void);
+bool	ServerPaused(void);
 void	SV_SendServerInfoChange(char *key, char *value);

@@ -1,8 +1,5 @@
 // view.c -- player eye positioning
 
-#include <u.h>
-#include <libc.h>
-#include <stdio.h>
 #include "quakedef.h"
 
 /*
@@ -267,7 +264,7 @@ void BuildGammaTable (float g)
 V_CheckGamma
 =================
 */
-qboolean V_CheckGamma (void)
+bool V_CheckGamma (void)
 {
 	static float oldgammavalue;
 	
@@ -459,11 +456,11 @@ V_UpdatePalette
 void V_UpdatePalette (void)
 {
 	int		i, j;
-	qboolean	new;
+	bool	new;
 	byte	*basepal, *newpal;
 	byte	pal[768];
 	int		r,g,b;
-	qboolean force;
+	bool force;
 
 	V_CalcPowerupCshift ();
 	

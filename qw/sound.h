@@ -26,9 +26,9 @@ typedef struct
 
 typedef struct
 {
-	qboolean		gamealive;
-	qboolean		soundalive;
-	qboolean		splitbuffer;
+	bool		gamealive;
+	bool		soundalive;
+	bool		splitbuffer;
 	int				channels;
 	int				samples;				// mono samples in buffer
 	int				submission_chunk;		// don't mix less than this #
@@ -88,7 +88,7 @@ channel_t *SND_PickChannel(int entnum, int entchannel);
 void SND_Spatialize(channel_t *ch);
 
 // initializes cycling through a DMA buffer and returns information on it
-qboolean SNDDMA_Init(void);
+bool SNDDMA_Init(void);
 
 // gets the current DMA position
 int SNDDMA_GetDMAPos(void);
@@ -117,7 +117,7 @@ extern	int			total_channels;
 // number of times stepsnd() is called per second.
 //
 
-extern qboolean 		fakedma;
+extern bool 		fakedma;
 extern int 			fakedma_updates;
 extern int		paintedtime;
 extern volatile dma_t *shm;
@@ -127,7 +127,7 @@ extern vec_t sound_nominal_clip_dist;
 extern	cvar_t bgmvolume;
 extern	cvar_t volume;
 
-extern qboolean	snd_initialized;
+extern bool	snd_initialized;
 
 extern int		snd_blocked;
 

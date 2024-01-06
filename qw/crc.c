@@ -1,6 +1,3 @@
-#include <u.h>
-#include <libc.h>
-#include <stdio.h>
 #include "quakedef.h"
 
 // this is a 16 bit, non-reflected CRC using the polynomial 0x1021

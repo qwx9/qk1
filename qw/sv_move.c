@@ -1,8 +1,5 @@
 // sv_move.c -- monster movement
 
-#include <u.h>
-#include <libc.h>
-#include <stdio.h>
 #include "quakedef.h"
 
 #define	STEPSIZE	18
@@ -18,7 +15,7 @@ is not a staircase.
 */
 int c_yes, c_no;
 
-qboolean SV_CheckBottom (edict_t *ent)
+bool SV_CheckBottom (edict_t *ent)
 {
 	vec3_t	mins, maxs, start, stop;
 	trace_t	trace;
@@ -91,7 +88,7 @@ possible, no move is done, false is returned, and
 pr_global_struct->trace_normal is set to the normal of the blocking wall
 =============
 */
-qboolean SV_movestep (edict_t *ent, vec3_t move, qboolean relink)
+bool SV_movestep (edict_t *ent, vec3_t move, bool relink)
 {
 	float		dz;
 	vec3_t		oldorg, neworg, end;
@@ -214,7 +211,7 @@ facing it.
 ======================
 */
 void PF_changeyaw (void);
-qboolean SV_StepDirection (edict_t *ent, float yaw, float dist)
+bool SV_StepDirection (edict_t *ent, float yaw, float dist)
 {
 	vec3_t		move, oldorigin;
 	float		delta;
@@ -354,7 +351,7 @@ SV_CloseEnough
 
 ======================
 */
-qboolean SV_CloseEnough (edict_t *ent, edict_t *goal, float dist)
+bool SV_CloseEnough (edict_t *ent, edict_t *goal, float dist)
 {
 	int		i;
 	

@@ -1,8 +1,5 @@
 // cl_tent.c -- client side temporary entities
 
-#include <u.h>
-#include <libc.h>
-#include <stdio.h>
 #include "quakedef.h"
 
 

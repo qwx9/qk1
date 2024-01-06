@@ -1,8 +1,5 @@
 // d_sprite.c: software top-level rasterization driver module for drawing sprites
 
-#include <u.h>
-#include <libc.h>
-#include <stdio.h>
 #include "quakedef.h"
 
 static int		sprite_height;

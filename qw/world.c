@@ -1,8 +1,5 @@
 // world.c -- world query functions
 
-#include <u.h>
-#include <libc.h>
-#include <stdio.h>
 #include "quakedef.h"
 
 /*
@@ -341,7 +338,7 @@ SV_LinkEdict
 
 ===============
 */
-void SV_LinkEdict (edict_t *ent, qboolean touch_triggers)
+void SV_LinkEdict (edict_t *ent, bool touch_triggers)
 {
 	areanode_t	*node;
 	
@@ -507,7 +504,7 @@ SV_RecursiveHullCheck
 
 ==================
 */
-qboolean SV_RecursiveHullCheck (hull_t *hull, int num, float p1f, float p2f, vec3_t p1, vec3_t p2, trace_t *trace)
+bool SV_RecursiveHullCheck (hull_t *hull, int num, float p1f, float p2f, vec3_t p1, vec3_t p2, trace_t *trace)
 {
 	dclipnode_t	*node;
 	mplane_t	*plane;

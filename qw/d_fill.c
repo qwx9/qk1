@@ -1,8 +1,5 @@
 // d_clear: clears a specified rectangle to the specified color
 
-#include <u.h>
-#include <libc.h>
-#include <stdio.h>
 #include "quakedef.h"
 
 /*

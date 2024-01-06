@@ -1,8 +1,5 @@
 // cl.input.c  -- builds an intended movement command to send to the server
 
-#include <u.h>
-#include <libc.h>
-#include <stdio.h>
 #include "quakedef.h"
 
 cvar_t	cl_nodelta = {"cl_nodelta","0"};
@@ -154,7 +151,7 @@ Returns 0.25 if a key was pressed and released during the frame,
 float CL_KeyState (kbutton_t *key)
 {
 	float		val;
-	qboolean	impulsedown, impulseup, down;
+	bool	impulsedown, impulseup, down;
 	
 	impulsedown = key->state & 2;
 	impulseup = key->state & 4;

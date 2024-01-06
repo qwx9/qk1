@@ -1,8 +1,5 @@
 // cvar.c -- dynamic variable tracking
 
-#include <u.h>
-#include <libc.h>
-#include <stdio.h>
 #include "quakedef.h"
 
 cvar_t	*cvar_vars;
@@ -180,7 +177,7 @@ Cvar_Command
 Handles variable inspection and changing from the console
 ============
 */
-qboolean	Cvar_Command (void)
+bool	Cvar_Command (void)
 {
 	cvar_t			*v;
 
