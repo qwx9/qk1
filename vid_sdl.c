@@ -23,7 +23,7 @@ resetfb(void)
 	/* lower than 320x240 doesn't really make sense,
 	 * but at least this prevents a crash, beyond that
 	 * it's your funeral */
-	SDL_GetWindowSize(win, &vid.width, &vid.height);
+	SDL_GetRendererOutputSize(rend, &vid.width, &vid.height);
 	vid.width /= v_scale.value;
 	vid.height /= v_scale.value;
 	vid.width = clamp(vid.width, 320, MAXWIDTH);
