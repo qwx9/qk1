@@ -12,13 +12,40 @@ extern pixel_t *r_warpbuffer;
 
 static cvar_t v_snail = {"v_snail", "0"};
 static cvar_t v_fullscreen = {"v_fullscreen", "0", true};
+static cvar_t v_sync = {"v_sync", "1", true};
 static int oldvidbuffersz;
+
+static int
+curwinmode(void)
+{
+	Uint32 fl;
+
+	fl = (win != nil ? SDL_GetWindowFlags(win) : 0) & (SDL_WINDOW_FULLSCREEN_DESKTOP|SDL_WINDOW_FULLSCREEN);
+	if(fl == SDL_WINDOW_FULLSCREEN_DESKTOP)
+		return 2;
+	if(fl == SDL_WINDOW_FULLSCREEN)
+		return 1;
+
+	return 0;
+}
+
+static int
+cvarwinflags(void)
+{
+	if(v_fullscreen.value >= 2)
+		return SDL_WINDOW_FULLSCREEN_DESKTOP;
+	if(v_fullscreen.value >= 1)
+		return SDL_WINDOW_FULLSCREEN;
+	return 0;
+}
 
 static void
 resetfb(void)
 {
 	void *surfcache;
 	int hunkvbuf, scachesz, n;
+
+	setcvar(v_fullscreen.name, va("%d", curwinmode()));
 
 	/* lower than 320x240 doesn't really make sense,
 	 * but at least this prevents a crash, beyond that
@@ -70,6 +97,7 @@ resetfb(void)
 	memset(dvars.zbuffer, 0, hunkvbuf);
 	surfcache = (byte *)(dvars.zbuffer + vid.width * vid.height);
 	D_InitCaches(surfcache, scachesz);
+	vid.resized = false;
 }
 
 void
@@ -108,27 +136,81 @@ setpal(byte *p0)
 }
 
 static void
+v_fullscreen_cb(cvar_t *var)
+{
+	int oldmode, mode;
+
+	oldmode = curwinmode();
+	mode = var->value;
+	if(oldmode != mode && SDL_SetWindowFullscreen(win, mode) == 0)
+		vid.resized = true;
+}
+
+static void
 v_snail_cb(cvar_t *var)
 {
 	sys_snail(var->value != 0);
 }
 
 static void
-v_fullscreen_cb(cvar_t *var)
+hints(void)
 {
-	static int oldmode = 0;
-	int mode;
+	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
+	SDL_SetHint(SDL_HINT_VIDEO_DOUBLE_BUFFER, "1");
+	SDL_SetHint(SDL_HINT_VIDEO_X11_NET_WM_BYPASS_COMPOSITOR, "1");
+	SDL_SetHint(SDL_HINT_VIDEO_X11_NET_WM_PING, "0");
+	SDL_SetHint(SDL_HINT_RENDER_VSYNC, v_sync.value ? "1" : "0");
+}
 
-	if(var->value >= 2)
-		mode = SDL_WINDOW_FULLSCREEN_DESKTOP;
-	else if(var->value >= 1)
-		mode = SDL_WINDOW_FULLSCREEN;
-	else
-		mode = 0;
-	if(oldmode != mode && SDL_SetWindowFullscreen(win, mode) == 0){
-		vid.resized = true;
-		oldmode = mode;
+static void
+makewindow(void)
+{
+	int x, y, w, h;
+
+	if(win != nil){
+		SDL_GetWindowPosition(win, &x, &y);
+		SDL_GetWindowSize(win, &w, &h);
+	}else{
+		x = SDL_WINDOWPOS_CENTERED;
+		y = SDL_WINDOWPOS_CENTERED;
+		w = 800;
+		h = 600;
 	}
+
+	if(fbi != nil)
+		SDL_DestroyTexture(fbi);
+	if(rend != nil)
+		SDL_DestroyRenderer(rend);
+	if(win != nil)
+		SDL_DestroyWindow(win);
+
+	hints();
+	win = SDL_CreateWindow("quake", x, y, w, h, cvarwinflags() | SDL_WINDOW_RESIZABLE);
+	if(win == nil)
+		fatal("SDL_CreateWindow: %s", SDL_GetError());
+	SDL_SetWindowResizable(win, SDL_TRUE);
+	SDL_SetWindowMinimumSize(win, 320, 240);
+	rend = SDL_CreateRenderer(win, -1,
+		(v_sync.value ? SDL_RENDERER_PRESENTVSYNC : 0) |
+		SDL_RENDERER_SOFTWARE
+	);
+	if(rend == nil)
+		fatal("SDL_CreateRenderer: %s", SDL_GetError());
+	SDL_SetRenderDrawColor(rend, 0, 0, 0, 255);
+	SDL_RenderClear(rend);
+	SDL_RenderPresent(rend);
+	vid.resized = true;
+}
+
+static void
+v_sync_cb(cvar_t *var)
+{
+	static int vsync;
+
+	if(vsync == (var->value != 0))
+		return;
+	vsync = var->value != 0;
+	makewindow();
 }
 
 void
@@ -141,23 +223,14 @@ initfb(void)
 
 	if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) < 0)
 		fatal("SDL_Init: %s", SDL_GetError());
-	win = SDL_CreateWindow("quake", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 800, 600, 0);
-	if(win == nil)
-		fatal("SDL_CreateWindow: %s", SDL_GetError());
-	if((rend = SDL_CreateRenderer(win, -1, 0)) == NULL)
-		fatal("SDL_CreateRenderer: %s", SDL_GetError());
-	SDL_SetRenderDrawColor(rend, 0, 0, 0, 255);
-	SDL_RenderClear(rend);
-	SDL_RenderPresent(rend);
-	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
-
+	makewindow();
 	resetfb();
-	SDL_SetWindowResizable(win, SDL_TRUE);
-	SDL_SetWindowMinimumSize(win, 320, 240);
 	IN_Grabm(1);
 
-	Cvar_RegisterVariable(&v_snail);
-	v_snail.cb = v_snail_cb;
-	Cvar_RegisterVariable(&v_fullscreen);
 	v_fullscreen.cb = v_fullscreen_cb;
+	v_snail.cb = v_snail_cb;
+	v_sync.cb = v_sync_cb;
+	Cvar_RegisterVariable(&v_fullscreen);
+	Cvar_RegisterVariable(&v_snail);
+	Cvar_RegisterVariable(&v_sync);
 }
