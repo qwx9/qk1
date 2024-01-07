@@ -81,14 +81,11 @@ D_CalcGradients(int miplevel, msurface_t *pface, vec3_t transformed_modelorg)
 	dvars.bbextentt = ((pface->extents[1] << 16) >> miplevel) - 1;
 }
 
-void dospan_turb(pixel_t *pdest, pixel_t *pbase, int s, int t, int sstep, int tstep, int spancount, int width, byte alpha, uzint *pz, int izi, int izistep);
-void dospan_alpha(pixel_t *pdest, pixel_t *pbase, int s, int t, int sstep, int tstep, int spancount, int width, byte alpha, uzint *pz, int izi, int izistep);
-void dospan(pixel_t *pdest, pixel_t *pbase, int s, int t, int sstep, int tstep, int spancount, int width, byte alpha, uzint *pz, int izi, int izistep);
-
 void
 D_DrawSurfaces (void)
 {
 	surf_t *s;
+	entity_t *e;
 	msurface_t *pface;
 	surfcache_t *pcurrentcache;
 	vec3_t local_modelorg, transformed_modelorg, world_transformed_modelorg;
@@ -96,7 +93,6 @@ D_DrawSurfaces (void)
 	byte alpha;
 	bool blend;
 
-	currententity = cl_entities;
 	TransformVector(modelorg, transformed_modelorg);
 	VectorCopy(transformed_modelorg, world_transformed_modelorg);
 
@@ -105,11 +101,12 @@ D_DrawSurfaces (void)
 		if(!s->spans)
 			continue;
 
-		if((surfdrawflags(s->flags) | entdrawflags(s->entity)) ^ r_drawflags)
+		e = s->entity;
+		if((surfdrawflags(s->flags) | entdrawflags(e)) ^ r_drawflags)
 			continue;
 		alpha = 255;
-		if(enthasalpha(s->entity) && s->entity->alpha != 255)
-			alpha = s->entity->alpha;
+		if(enthasalpha(e) && e->alpha != 255)
+			alpha = e->alpha;
 		else if(s->flags & SURF_TRANS)
 			alpha *= alphafor(s->flags);
 		if(alpha < 1)
@@ -122,10 +119,9 @@ D_DrawSurfaces (void)
 		dvars.ziorigin = s->d_ziorigin;
 
 		if(insubmodel(s)){
-			currententity = s->entity;
-			VectorSubtract(r_origin, currententity->origin, local_modelorg);
+			VectorSubtract(r_origin, e->origin, local_modelorg);
 			TransformVector(local_modelorg, transformed_modelorg);
-			R_RotateBmodel(currententity);
+			R_RotateBmodel(e);
 		}
 
 		pface = s->data;
@@ -149,7 +145,6 @@ D_DrawSurfaces (void)
 		}
 
 		if(insubmodel(s)){
-			currententity = cl_entities;
 			VectorCopy(world_transformed_modelorg, transformed_modelorg);
 			VectorCopy(base_vpn, vpn);
 			VectorCopy(base_vup, vup);
