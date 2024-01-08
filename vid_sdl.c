@@ -86,16 +86,16 @@ resetfb(void)
 	vid.buffer = vidbuffer;
 	vid.conbuffer = vid.buffer;
 
-	if(dvars.zbuffer != nil)
+	if(dvars.zb != nil)
 		D_FlushCaches();
 
 	// alloc an extra line in case we want to wrap, and allocate the z-buffer
-	hunkvbuf = vid.width * vid.height * sizeof(*dvars.zbuffer);
+	hunkvbuf = vid.width * vid.height * sizeof(*dvars.zb);
 	scachesz = D_SurfaceCacheForRes(vid.width, vid.height);
 	hunkvbuf += scachesz;
-	dvars.zbuffer = realloc(dvars.zbuffer, hunkvbuf);
-	memset(dvars.zbuffer, 0, hunkvbuf);
-	surfcache = (byte *)(dvars.zbuffer + vid.width * vid.height);
+	dvars.zb = realloc(dvars.zb, hunkvbuf);
+	memset(dvars.zb, 0, hunkvbuf);
+	surfcache = (byte *)(dvars.zb + vid.width * vid.height);
 	D_InitCaches(surfcache, scachesz);
 	vid.resized = false;
 }

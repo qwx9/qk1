@@ -57,9 +57,9 @@ void D_DrawSkyScans8 (espan_t *pspan)
 
 	do
 	{
-		pdest = dvars.viewbuffer + pspan->v*dvars.width + pspan->u;
+		pdest = dvars.fb + pspan->v*dvars.w + pspan->u;
 		count = pspan->count;
-		pz = dvars.zbuffer + pspan->v*dvars.width + pspan->u;
+		pz = dvars.zb + pspan->v*dvars.w + pspan->u;
 		memset(pz, 0xff, count*sizeof(*pz));
 
 		// calculate the initial s & t

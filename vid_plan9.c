@@ -36,17 +36,17 @@ resetfb(void)
 	vid.width = clamp(vid.width, 320, MAXWIDTH);
 	vid.height = clamp(vid.height, 240, MAXHEIGHT);
 
-	if(dvars.zbuffer != nil)
+	if(dvars.zb != nil)
 		D_FlushCaches();
 
 	// alloc an extra line in case we want to wrap, and allocate the z-buffer
-	hunkvbuf = vid.width * vid.height * sizeof(*dvars.zbuffer);
+	hunkvbuf = vid.width * vid.height * sizeof(*dvars.zb);
 	scachesz = D_SurfaceCacheForRes(vid.width, vid.height);
 	hunkvbuf += scachesz;
-	if((dvars.zbuffer = realloc(dvars.zbuffer, hunkvbuf)) == nil)
+	if((dvars.zb = realloc(dvars.zb, hunkvbuf)) == nil)
 		sysfatal("%r");
-	memset(dvars.zbuffer, 0, hunkvbuf);
-	surfcache = (byte*)(dvars.zbuffer + vid.width * vid.height);
+	memset(dvars.zb, 0, hunkvbuf);
+	surfcache = (byte*)(dvars.zb + vid.width * vid.height);
 	D_InitCaches(surfcache, scachesz);
 
 	vid.aspect = (float)vid.height / (float)vid.width * (320.0/240.0);

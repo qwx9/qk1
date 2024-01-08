@@ -7,16 +7,30 @@ enum {
 };
 
 typedef struct {
-	pixel_t *cacheblock;
-	pixel_t *viewbuffer;
-	uzint *zbuffer;
-	unsigned width;
-	unsigned cachewidth;
-	fixed16_t sadjust, tadjust;
-	fixed16_t bbextents, bbextentt;
-	float sdivzstepu, tdivzstepu, zistepu;
-	float sdivzstepv, tdivzstepv, zistepv;
-	float sdivzorigin, tdivzorigin, ziorigin;
+	struct {
+		float stepu;
+		float stepv;
+		float origin;
+	}divz;
+	fixed16_t adjust;
+	fixed16_t bbextent;
+}tavars_t;
+
+typedef struct {
+	pixel_t *p;
+	unsigned w;
+	tavars_t s, t;
+	struct {
+		float stepu;
+		float stepv;
+		float origin;
+	}z;
+}texvars_t;
+
+typedef struct {
+	pixel_t *fb;
+	uzint *zb;
+	unsigned w;
 }dvars_t;
 
 typedef struct {
@@ -65,7 +79,7 @@ enum {
 	SPAN_TURB,
 };
 
-void D_DrawSpans(espan_t *pspan, pixel_t *pbase, int width, byte alpha, int spanfunc);
+void D_DrawSpans(espan_t *pspan, texvars_t *t, byte alpha, int spanfunc);
 
 void D_DrawSkyScans8 (espan_t *pspan);
 

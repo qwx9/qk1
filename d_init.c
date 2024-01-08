@@ -29,8 +29,8 @@ D_SetupFrame(void)
 
 	r_turb_turb = sintable + ((int)(cl.time*SPEED)&(CYCLE-1));
 
-	dvars.viewbuffer = r_dowarp ? r_warpbuffer : vid.buffer;
-	dvars.width = vid.width;
+	dvars.fb = r_dowarp ? r_warpbuffer : vid.buffer;
+	dvars.w = vid.width;
 
 	d_roverwrapped = false;
 	d_initial_rover = sc_rover;

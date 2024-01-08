@@ -28,7 +28,7 @@ void D_WarpScreen (void)
 	hratio = h / (float)scr_vrect.height;
 
 	for(v = 0; v < scr_vrect.height+AMP2*2; v++)
-		rowptr[v] = dvars.viewbuffer + (r_refdef.vrect.y * dvars.width) + (dvars.width * (int)((float)v * hratio * h / (h + AMP2 * 2)));
+		rowptr[v] = dvars.fb + (r_refdef.vrect.y * dvars.w) + (dvars.w * (int)((float)v * hratio * h / (h + AMP2 * 2)));
 
 	for(u = 0; u < scr_vrect.width+AMP2*2; u++)
 		column[u] = r_refdef.vrect.x + (int)((float)u * wratio * w / (w + AMP2 * 2));
@@ -63,13 +63,13 @@ D_DrawSpanGetMax(float u, float v)
 		if((int)(us*m) != 0 || (int)(vs*m) != 0)
 			return s;
 		s++;
-	}while(m < (int)dvars.width);
+	}while(m < (int)dvars.w);
 
 	return s;
 }
 
 void
-D_DrawSpans(espan_t *pspan, pixel_t *pbase, int width, byte alpha, int spanfunc)
+D_DrawSpans(espan_t *pspan, texvars_t *tv, byte alpha, int spanfunc)
 {
 	int			count, spancount, izistep, spancountminus1, spanshift, spanmax;
 	pixel_t		*pdest;
@@ -84,20 +84,20 @@ D_DrawSpans(espan_t *pspan, pixel_t *pbase, int width, byte alpha, int spanfunc)
 	tstep = 0;	// ditto
 	memset(&fog, 0, sizeof(fog));
 
-	spanshift = D_DrawSpanGetMax(dvars.zistepu, dvars.zistepv);
+	spanshift = D_DrawSpanGetMax(tv->z.stepu, tv->z.stepv);
 	spanmax = 1 << spanshift;
 
-	sdivzstepu = dvars.sdivzstepu * spanmax;
-	tdivzstepu = dvars.tdivzstepu * spanmax;
-	zistepu = dvars.zistepu * spanmax;
-	izistep = (int)(dvars.zistepu * 0x8000 * 0x10000);
+	sdivzstepu = tv->s.divz.stepu * spanmax;
+	tdivzstepu = tv->t.divz.stepu * spanmax;
+	zistepu = tv->z.stepu * spanmax;
+	izistep = (int)(tv->z.stepu * 0x8000 * 0x10000);
 
 	fogenabled = isfogged();
 
 	do{
-		pdest = dvars.viewbuffer + pspan->v*dvars.width + pspan->u;
-		pz = dvars.zbuffer + pspan->v*dvars.width + pspan->u;
-		zi = dvars.ziorigin + pspan->v*dvars.zistepv + pspan->u*dvars.zistepu;
+		pdest = dvars.fb + pspan->v*dvars.w + pspan->u;
+		pz = dvars.zb + pspan->v*dvars.w + pspan->u;
+		zi = tv->z.origin + pspan->v*tv->z.stepv + pspan->u*tv->z.stepu;
 		izi = zi * 0x8000 * 0x10000;
 		count = pspan->count;
 
@@ -105,15 +105,15 @@ D_DrawSpans(espan_t *pspan, pixel_t *pbase, int width, byte alpha, int spanfunc)
 		du = pspan->u;
 		dv = pspan->v;
 
-		sdivz = dvars.sdivzorigin + dv*dvars.sdivzstepv + du*dvars.sdivzstepu;
-		tdivz = dvars.tdivzorigin + dv*dvars.tdivzstepv + du*dvars.tdivzstepu;
+		sdivz = tv->s.divz.origin + dv*tv->s.divz.stepv + du*tv->s.divz.stepu;
+		tdivz = tv->t.divz.origin + dv*tv->t.divz.stepv + du*tv->t.divz.stepu;
 		z = (float)(1<<16) / zi;	// prescale to 16.16 fixed-point
 
-		s = (int)(sdivz * z) + dvars.sadjust;
-		s = clamp(s, 0, dvars.bbextents);
+		s = (int)(sdivz * z) + tv->s.adjust;
+		s = clamp(s, 0, tv->s.bbextent);
 
-		t = (int)(tdivz * z) + dvars.tadjust;
-		t = clamp(t, 0, dvars.bbextentt);
+		t = (int)(tdivz * z) + tv->t.adjust;
+		t = clamp(t, 0, tv->t.bbextent);
 
 		do{
 			// calculate s and t at the far end of the span
@@ -129,15 +129,15 @@ D_DrawSpans(espan_t *pspan, pixel_t *pbase, int width, byte alpha, int spanfunc)
 				// prescale to 16.16 fixed-point
 				z = (float)(1<<16) / (zi + zistepu);
 
-				snext = (int)(sdivz * z) + dvars.sadjust;
+				snext = (int)(sdivz * z) + tv->s.adjust;
 				// prevent round-off error on <0 steps from
 				//  causing overstepping & running off the
 				//  edge of the texture
-				snext = clamp(snext, spanmax, dvars.bbextents);
+				snext = clamp(snext, spanmax, tv->s.bbextent);
 
-				tnext = (int)(tdivz * z) + dvars.tadjust;
+				tnext = (int)(tdivz * z) + tv->t.adjust;
 				// guard against round-off error on <0 steps
-				tnext = clamp(tnext, spanmax, dvars.bbextentt);
+				tnext = clamp(tnext, spanmax, tv->t.bbextent);
 
 				sstep = (snext - s) >> spanshift;
 				tstep = (tnext - t) >> spanshift;
@@ -147,19 +147,19 @@ D_DrawSpans(espan_t *pspan, pixel_t *pbase, int width, byte alpha, int spanfunc)
 				// span by division, biasing steps low so we don't run off the
 				// texture
 				spancountminus1 = spancount - 1;
-				sdivz += dvars.sdivzstepu * spancountminus1;
-				tdivz += dvars.tdivzstepu * spancountminus1;
+				sdivz += tv->s.divz.stepu * spancountminus1;
+				tdivz += tv->t.divz.stepu * spancountminus1;
 				// prescale to 16.16 fixed-point
-				z = (float)(1<<16) / (zi + dvars.zistepu * spancountminus1);
-				snext = (int)(sdivz * z) + dvars.sadjust;
+				z = (float)(1<<16) / (zi + tv->z.stepu * spancountminus1);
+				snext = (int)(sdivz * z) + tv->s.adjust;
 				// prevent round-off error on <0 steps from
 				//  from causing overstepping & running off the
 				//  edge of the texture
-				snext = clamp(snext, spanmax, dvars.bbextents);
+				snext = clamp(snext, spanmax, tv->s.bbextent);
 
-				tnext = (int)(tdivz * z) + dvars.tadjust;
+				tnext = (int)(tdivz * z) + tv->t.adjust;
 				// guard against round-off error on <0 steps
-				tnext = clamp(tnext, spanmax, dvars.bbextentt);
+				tnext = clamp(tnext, spanmax, tv->t.bbextent);
 
 				if(spancount > 1){
 					sstep = (snext - s) / spancountminus1;
@@ -167,38 +167,38 @@ D_DrawSpans(espan_t *pspan, pixel_t *pbase, int width, byte alpha, int spanfunc)
 				}
 			}
 
-			pixel_t *pdest_ = pdest, *pbase_ = pbase;
+			pixel_t *pdest_ = pdest, *pbase = tv->p;
 			uzint *pz_ = pz;
 			fog_t *fog_ = &fog;
 			int spancount_ = spancount, izi_ = izi;
 			if(fogged){
 				switch(spanfunc){
 				case SPAN_SOLID:
-					dospan_solid_f1(pdest_, pbase_, s, t, sstep, tstep, spancount_, width, pz_, izi_, izistep, fog_);
+					dospan_solid_f1(pdest_, pbase, s, t, sstep, tstep, spancount_, tv->w, pz_, izi_, izistep, fog_);
 					break;
 				case SPAN_TURB:
-					dospan_turb_f1(pdest_, pbase_, s, t, sstep, tstep, spancount_, alpha, pz_, izi_, izistep, fog_);
+					dospan_turb_f1(pdest_, pbase, s, t, sstep, tstep, spancount_, alpha, pz_, izi_, izistep, fog_);
 					break;
 				case SPAN_BLEND:
-					dospan_blend_f1(pdest_, pbase_, s, t, sstep, tstep, spancount_, width, alpha, pz_, izi_, izistep, fog_);
+					dospan_blend_f1(pdest_, pbase, s, t, sstep, tstep, spancount_, tv->w, alpha, pz_, izi_, izistep, fog_);
 					break;
 				case SPAN_FENCE:
-					dospan_fence_f1(pdest_, pbase_, s, t, sstep, tstep, spancount_, width, pz_, izi_, izistep, fog_);
+					dospan_fence_f1(pdest_, pbase, s, t, sstep, tstep, spancount_, tv->w, pz_, izi_, izistep, fog_);
 					break;
 				}
 			}else{
 				switch(spanfunc){
 				case SPAN_SOLID:
-					dospan_solid(pdest_, pbase_, s, t, sstep, tstep, spancount_, width, pz_, izi_, izistep);
+					dospan_solid(pdest_, pbase, s, t, sstep, tstep, spancount_, tv->w, pz_, izi_, izistep);
 					break;
 				case SPAN_TURB:
-					dospan_turb(pdest_, pbase_, s, t, sstep, tstep, spancount_, alpha, pz_, izi_, izistep);
+					dospan_turb(pdest_, pbase, s, t, sstep, tstep, spancount_, alpha, pz_, izi_, izistep);
 					break;
 				case SPAN_BLEND:
-					dospan_blend(pdest_, pbase_, s, t, sstep, tstep, spancount_, width, alpha, pz_, izi_, izistep);
+					dospan_blend(pdest_, pbase, s, t, sstep, tstep, spancount_, tv->w, alpha, pz_, izi_, izistep);
 					break;
 				case SPAN_FENCE:
-					dospan_fence(pdest_, pbase_, s, t, sstep, tstep, spancount_, width, pz_, izi_, izistep);
+					dospan_fence(pdest_, pbase, s, t, sstep, tstep, spancount_, tv->w, pz_, izi_, izistep);
 					break;
 				}
 			}
