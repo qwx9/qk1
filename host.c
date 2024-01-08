@@ -512,11 +512,12 @@ void _Host_Frame (float time)
 	// update audio
 	if (cls.signon == SIGNONS)
 	{
-		stepsnd (r_origin, vpn, vright, vup);
+		stepsnd(&r_refdef.view);
 		CL_DecayLights ();
+	}else{
+		static const view_t originview = { 0 };
+		stepsnd(&originview);
 	}
-	else
-		stepsnd (vec3_origin, vec3_origin, vec3_origin, vec3_origin);
 
 	stepcd();
 

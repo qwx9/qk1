@@ -11,6 +11,19 @@ float	anglemod(float a)
 }
 
 /*
+================
+TransformVector
+================
+*/
+void
+TransformVector(vec3_t in, vec3_t out, view_t *v)
+{
+	out[0] = DotProduct(in, v->right);
+	out[1] = DotProduct(in, v->up);
+	out[2] = DotProduct(in, v->pn);
+}
+
+/*
 ==================
 BoxOnPlaneSide
 

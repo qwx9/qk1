@@ -24,14 +24,6 @@ int			r_clipflags;
 pixel_t *r_warpbuffer;
 
 //
-// view origin
-//
-vec3_t	vup, base_vup;
-vec3_t	vpn, base_vpn;
-vec3_t	vright, base_vright;
-vec3_t	r_origin;
-
-//
 // screen size info
 //
 refdef_t	r_refdef;
@@ -155,12 +147,12 @@ void R_Init (void)
 	Cvar_RegisterVariable (&r_lavaalpha);
 	Cvar_RegisterVariable (&r_slimealpha);
 
-	view_clipplanes[0].leftedge = true;
-	view_clipplanes[1].rightedge = true;
-	view_clipplanes[1].leftedge = view_clipplanes[2].leftedge =
-			view_clipplanes[3].leftedge = false;
-	view_clipplanes[0].rightedge = view_clipplanes[2].rightedge =
-			view_clipplanes[3].rightedge = false;
+	r_refdef.view.clipplanes[0].leftedge = true;
+	r_refdef.view.clipplanes[1].rightedge = true;
+	r_refdef.view.clipplanes[1].leftedge = r_refdef.view.clipplanes[2].leftedge =
+			r_refdef.view.clipplanes[3].leftedge = false;
+	r_refdef.view.clipplanes[0].rightedge = r_refdef.view.clipplanes[2].rightedge =
+			r_refdef.view.clipplanes[3].rightedge = false;
 
 	r_refdef.xOrigin = XCENTERING;
 	r_refdef.yOrigin = YCENTERING;
@@ -397,7 +389,7 @@ void R_MarkLeaves (void)
 }
 
 static int
-R_BmodelCheckBBox(model_t *clmodel, float *minmaxs)
+R_BmodelCheckBBox(model_t *clmodel, float *minmaxs, view_t *v)
 {
 	int			i, *pindex, clipflags;
 	vec3_t		acceptpt, rejectpt;
@@ -405,13 +397,10 @@ R_BmodelCheckBBox(model_t *clmodel, float *minmaxs)
 
 	clipflags = 0;
 
-	if (currententity->angles[0] || currententity->angles[1]
-		|| currententity->angles[2])
-	{
-		for (i=0 ; i<4 ; i++)
-		{
-			d = DotProduct (currententity->origin, view_clipplanes[i].normal);
-			d -= view_clipplanes[i].dist;
+	if(currententity->angles[0] || currententity->angles[1] || currententity->angles[2]){
+		for (i=0 ; i<4 ; i++){
+			d = DotProduct (currententity->origin, v->clipplanes[i].normal);
+			d -= v->clipplanes[i].dist;
 
 			if (d <= -clmodel->radius)
 				return BMODEL_FULLY_CLIPPED;
@@ -419,11 +408,8 @@ R_BmodelCheckBBox(model_t *clmodel, float *minmaxs)
 			if (d <= clmodel->radius)
 				clipflags |= (1<<i);
 		}
-	}
-	else
-	{
-		for (i=0 ; i<4 ; i++)
-		{
+	}else{
+		for (i=0 ; i<4 ; i++){
 			// generate accept and reject points
 			// FIXME: do with fast look-ups or integer tests based on the sign bit
 			// of the floating point values
@@ -434,8 +420,8 @@ R_BmodelCheckBBox(model_t *clmodel, float *minmaxs)
 			rejectpt[1] = minmaxs[pindex[1]];
 			rejectpt[2] = minmaxs[pindex[2]];
 
-			d = DotProduct (rejectpt, view_clipplanes[i].normal);
-			d -= view_clipplanes[i].dist;
+			d = DotProduct (rejectpt, v->clipplanes[i].normal);
+			d -= v->clipplanes[i].dist;
 
 			if (d <= 0)
 				return BMODEL_FULLY_CLIPPED;
@@ -444,8 +430,8 @@ R_BmodelCheckBBox(model_t *clmodel, float *minmaxs)
 			acceptpt[1] = minmaxs[pindex[3+1]];
 			acceptpt[2] = minmaxs[pindex[3+2]];
 
-			d = DotProduct (acceptpt, view_clipplanes[i].normal);
-			d -= view_clipplanes[i].dist;
+			d = DotProduct (acceptpt, v->clipplanes[i].normal);
+			d -= v->clipplanes[i].dist;
 
 			if (d <= 0)
 				clipflags |= (1<<i);
@@ -456,15 +442,16 @@ R_BmodelCheckBBox(model_t *clmodel, float *minmaxs)
 }
 
 static int
-R_DrawEntity(entity_t *e)
+R_DrawEntity(entity_t *e, view_t *view)
 {
 	int			j, k, clipflags;
 	alight_t	lighting;
-	float		lightvec[3] = {-1, 0, 0}; // FIXME: remove and do real lighting
+	vec3_t		lightvec = {-1, 0, 0}; // FIXME: remove and do real lighting
 	float		minmaxs[6];
-	vec3_t		dist, oldorigin;
+	vec3_t		dist;
 	int		add;
 	model_t		*clmodel;
+	view_t v;
 
 	if(!r_drawentities.value || e == &cl_entities[cl.viewentity])
 		return 1;
@@ -474,22 +461,22 @@ R_DrawEntity(entity_t *e)
 		e->alpha = 0xff;
 
 	currententity = e;
-	VectorCopy(modelorg, oldorigin);
+	memmove(&v, view, sizeof(v));
 
 	switch(e->model->type){
 	case mod_sprite:
 		VectorCopy(e->origin, r_entorigin);
-		VectorSubtract(r_origin, r_entorigin, modelorg);
-		R_DrawSprite();
+		VectorSubtract(r_refdef.view.org, r_entorigin, v.modelorg);
+		R_DrawSprite(&v);
 		break;
 
 	case mod_alias:
 		VectorCopy(e->origin, r_entorigin);
-		VectorSubtract(r_origin, r_entorigin, modelorg);
+		VectorSubtract(r_refdef.view.org, r_entorigin, v.modelorg);
 
 		// see if the bounding box lets us trivially reject, also sets
 		// trivial accept status
-		if(!R_AliasCheckBBox())
+		if(!R_AliasCheckBBox(&v))
 			break;
 
 		R_LightPoint(currententity->origin, lighting.ambientlight);
@@ -517,7 +504,7 @@ R_DrawEntity(entity_t *e)
 				lighting.shadelight[j] = 192 - lighting.ambientlight[j];
 		}
 
-		R_AliasDrawModel(&lighting);
+		R_AliasDrawModel(&lighting, &v);
 		break;
 
 	case mod_brush:
@@ -531,14 +518,14 @@ R_DrawEntity(entity_t *e)
 			minmaxs[3+j] = currententity->origin[j] + clmodel->maxs[j];
 		}
 
-		clipflags = R_BmodelCheckBBox(clmodel, minmaxs);
+		clipflags = R_BmodelCheckBBox(clmodel, minmaxs, &v);
 		if(clipflags == BMODEL_FULLY_CLIPPED)
 			break;
 
 		VectorCopy(e->origin, r_entorigin);
-		VectorSubtract(r_origin, r_entorigin, modelorg);
+		VectorSubtract(r_refdef.view.org, r_entorigin, v.modelorg);
 		r_pcurrentvertbase = clmodel->vertexes;
-		R_RotateBmodel(e); // FIXME: stop transforming twice
+		R_RotateBmodel(e, &v); // FIXME: stop transforming twice
 
 		// calculate dynamic lighting for bmodel if it's not an
 		// instanced model
@@ -567,29 +554,20 @@ R_DrawEntity(entity_t *e)
 			if(r_pefragtopnode->contents >= 0){
 				// not a leaf; has to be clipped to the world BSP
 				r_clipflags = clipflags;
-				R_DrawSolidClippedSubmodelPolygons(clmodel);
+				R_DrawSolidClippedSubmodelPolygons(clmodel, &v);
 			}else{
 				// falls entirely in one leaf, so we just put all the
 				// edges in the edge list and let 1/z sorting handle
 				// drawing order
-				R_DrawSubmodelPolygons(clmodel, clipflags);
+				R_DrawSubmodelPolygons(clmodel, &v, clipflags);
 			}
 			if(r_drawflags & DRAW_BLEND)
-				R_ScanEdges();
+				R_ScanEdges(&v);
 
 			e->topnode = nil;
 		}
 		break;
 	}
-
-	// put back world rotation and frustum clipping
-	// FIXME: R_RotateBmodel should just work off base_vxx
-	VectorCopy(base_vpn, vpn);
-	VectorCopy(base_vup, vup);
-	VectorCopy(base_vright, vright);
-	VectorCopy(base_modelorg, modelorg);
-	VectorCopy(oldorigin, modelorg);
-	R_TransformFrustum();
 
 	return 1;
 }
@@ -599,14 +577,15 @@ R_DrawEntity(entity_t *e)
 R_DrawViewModel
 =============
 */
-void R_DrawViewModel (void)
+void R_DrawViewModel (view_t *view)
 {
 	// FIXME: remove and do real lighting
-	float		lightvec[3] = {-1, 0, 0};
+	vec3_t		lightvec = {-1, 0, 0};
 	int			lnum, i;
 	vec3_t		dist;
 	float		add;
 	dlight_t	*dl;
+	view_t v;
 
 	if (!r_drawviewmodel.value)
 		return;
@@ -621,11 +600,12 @@ void R_DrawViewModel (void)
 	if (!currententity->model)
 		return;
 
-	VectorCopy (currententity->origin, r_entorigin);
-	VectorSubtract (r_origin, r_entorigin, modelorg);
+	memmove(&v, view, sizeof(v));
+	VectorCopy(currententity->origin, r_entorigin);
+	VectorSubtract(v.org, r_entorigin, v.modelorg);
 
-	VectorCopy (vup, viewlightvec);
-	VectorInverse (viewlightvec);
+	VectorCopy(v.up, viewlightvec);
+	VectorInverse(viewlightvec);
 
 	R_LightPoint(currententity->origin, r_viewlighting.ambientlight);
 	// always give some light on gun
@@ -661,25 +641,25 @@ void R_DrawViewModel (void)
 
 	r_viewlighting.plightvec = lightvec;
 
-	R_AliasDrawModel(&r_viewlighting);
+	R_AliasDrawModel(&r_viewlighting, &v);
 }
 
 void
-R_RenderSolidBrushes(void)
+R_RenderSolidBrushes(view_t *v)
 {
 	entity_t *e;
 	int i;
 
 	R_BeginEdgeFrame();
-	R_RenderWorld();
+	R_RenderWorld(v);
 	for(i = 0; i < cl_numvisedicts; i++){
 		e = cl_visedicts[i];
-		if(e->model != nil && e->model->type == mod_brush && !R_DrawEntity(e)){
+		if(e->model != nil && e->model->type == mod_brush && !R_DrawEntity(e, v)){
 			e->last_reject = ent_reject;
 			ent_reject = e;
 		}
 	}
-	R_ScanEdges();
+	R_ScanEdges(v);
 }
 
 /*
@@ -693,38 +673,40 @@ void R_RenderView (void)
 {
 	entity_t *e;
 	int i;
+	view_t *v;
 
-	R_SetupFrame ();
-	R_MarkLeaves ();	// done here so we know if we're in water
+	R_SetupFrame();
+	R_MarkLeaves();	// done here so we know if we're in water
 
 	if (!cl_entities[0].model || !cl.worldmodel)
 		fatal ("R_RenderView: NULL worldmodel");
 	ent_reject = nil;
-	R_RenderSolidBrushes();
+	v = &r_refdef.view;
 
+	R_RenderSolidBrushes(v);
 	for(i = 0; i < cl_numvisedicts; i++){
 		e = cl_visedicts[i];
-		if(e->model->type != mod_brush && !R_DrawEntity(e)){
+		if(e->model->type != mod_brush && !R_DrawEntity(e, v)){
 			e->last_reject = ent_reject;
 			ent_reject = e;
 		}
 	}
 
-	R_DrawViewModel ();
-	R_DrawParticles ();
+	R_DrawViewModel(v);
+	R_DrawParticles();
 
 	r_drawflags = DRAW_BLEND;
-	R_RenderBlendedBrushes();
+	R_RenderBlendedBrushes(v);
 	// FIXME(sigrid): these need to be sorted with blended brushes and *all* drawn back to front
 	if(cl_numvisedicts > 0){
 		for(i = cl_numvisedicts, e = ent_reject; e != nil && i > 0; e = e->last_reject){
 			if(!enthasalpha(e))
-				R_DrawEntity(e);
+				R_DrawEntity(e, v);
 			else
 				cl_visedicts[--i] = e;
 		}
 		for(; i < cl_numvisedicts; i++)
-			R_DrawEntity(cl_visedicts[i]);
+			R_DrawEntity(cl_visedicts[i], v);
 	}
 	r_drawflags = 0;
 

@@ -66,29 +66,14 @@ extern cvar_t	r_slimealpha;
 
 #define	DIST_NOT_SET	98765
 
-// !!! if this is changed, it must be changed in asm_draw.h too !!!
-typedef struct clipplane_s
-{
-	vec3_t		normal;
-	float		dist;
-	struct		clipplane_s	*next;
-	byte		leftedge;
-	byte		rightedge;
-	byte		reserved[2];
-} clipplane_t;
-
-extern	clipplane_t	view_clipplanes[4];
-
 //=============================================================================
 
-void R_RenderWorld (void);
-void R_RenderBlendedBrushes(void);
+void R_RenderWorld (view_t *v);
+void R_RenderBlendedBrushes(view_t *v);
 
 //=============================================================================
 
 extern	mplane_t	screenedge[4];
-
-extern	vec3_t	r_origin;
 
 extern	vec3_t	r_entorigin;
 
@@ -104,24 +89,24 @@ extern int r_drawflags;
 void R_ResetFog(void);
 void R_InitFog(void);
 
-void R_DrawSprite (void);
-int R_RenderFace (msurface_t *fa, int clipflags);
-void R_RenderBmodelFace (bedge_t *pedges, msurface_t *psurf);
-void R_TransformFrustum (void);
+void R_DrawSprite (view_t *v);
+int R_RenderFace (msurface_t *fa, view_t *v, int clipflags);
+void R_RenderBmodelFace (bedge_t *pedges, msurface_t *psurf, view_t *v);
+void R_TransformFrustum (view_t *v);
 void R_SetSkyFrame (void);
-texture_t *R_TextureAnimation (texture_t *base);
+texture_t *R_TextureAnimation (entity_t *e, texture_t *base);
 
-pixel_t addlight(pixel_t x, int lr, int lg, int lb);
+pixel_t addlight(entity_t *e, pixel_t x, int lr, int lg, int lb);
 
-void R_DrawSubmodelPolygons (model_t *pmodel, int clipflags);
-void R_DrawSolidClippedSubmodelPolygons (model_t *pmodel);
+void R_DrawSolidClippedSubmodelPolygons (model_t *pmodel, view_t *v);
+void R_DrawSubmodelPolygons (model_t *pmodel, view_t *v, int clipflags);
 
 void R_AddPolygonEdges (emitpoint_t *pverts, int numverts, int miplevel);
 surf_t *R_GetSurf (void);
-void R_AliasDrawModel (alight_t *plighting);
+void R_AliasDrawModel (alight_t *plighting, view_t *v);
 void R_BeginEdgeFrame (void);
-void R_ScanEdges (void);
-void D_DrawSurfaces (void);
+void R_ScanEdges(view_t *v);
+void D_DrawSurfaces(view_t *v);
 void R_InsertNewEdges (edge_t *edgestoadd, edge_t *edgelist);
 void R_StepActiveU (edge_t *pedge);
 void R_RemoveEdges (edge_t *pedge);
@@ -133,10 +118,7 @@ extern void R_Surf16End (void);
 extern void R_EdgeCodeStart (void);
 extern void R_EdgeCodeEnd (void);
 
-extern void R_RotateBmodel (entity_t *e);
-
-extern int	c_faceclip;
-extern int	r_polycount;
+extern void R_RotateBmodel (entity_t *e, view_t *v);
 
 extern	model_t		*cl_worldmodel;
 
@@ -166,7 +148,7 @@ extern const float r_avertexnormals[NUMVERTEXNORMALS][3];
 
 extern finalvert_t		*pfinalverts;
 
-bool R_AliasCheckBBox (void);
+bool R_AliasCheckBBox (view_t *v);
 
 //=========================================================
 // turbulence stuff
@@ -221,7 +203,5 @@ void R_AnimateLight (void);
 void R_LightPoint (vec3_t p, int *r);
 void R_SetupFrame (void);
 void R_cshift_f (void);
-void R_EmitEdge (mvertex_t *pv0, mvertex_t *pv1);
-void R_ClipEdge (mvertex_t *pv0, mvertex_t *pv1, clipplane_t *clip);
 void R_SplitEntityOnNode2 (mnode_t *node);
 void R_MarkLights (dlight_t *light, int bit, mnode_t *node);

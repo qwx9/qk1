@@ -9,7 +9,8 @@ static sspan_t	*sprite_spans;
 D_SpriteDrawSpans
 =====================
 */
-void D_SpriteDrawSpans (sspan_t *pspan, byte alpha)
+static void
+D_SpriteDrawSpans(sspan_t *pspan, byte alpha)
 {
 	int			count, spancount, izistep;
 	int			izi;
@@ -151,7 +152,8 @@ NextSpan:
 D_SpriteScanLeftEdge
 =====================
 */
-void D_SpriteScanLeftEdge (void)
+static void
+D_SpriteScanLeftEdge(void)
 {
 	int			i, v, itop, ibottom, lmaxindex;
 	emitpoint_t	*pvert, *pnext;
@@ -212,7 +214,8 @@ void D_SpriteScanLeftEdge (void)
 D_SpriteScanRightEdge
 =====================
 */
-void D_SpriteScanRightEdge (void)
+static void
+D_SpriteScanRightEdge(void)
 {
 	int			i, v, itop, ibottom;
 	emitpoint_t	*pvert, *pnext;
@@ -293,17 +296,18 @@ void D_SpriteScanRightEdge (void)
 D_SpriteCalculateGradients
 =====================
 */
-void D_SpriteCalculateGradients (void)
+static void
+D_SpriteCalculateGradients(view_t *v)
 {
 	vec3_t		p_normal, p_saxis, p_taxis, p_temp1;
 	float		distinv;
 
-	TransformVector (r_spritedesc.vpn, p_normal);
-	TransformVector (r_spritedesc.vright, p_saxis);
-	TransformVector (r_spritedesc.vup, p_taxis);
+	TransformVector (r_spritedesc.vpn, p_normal, v);
+	TransformVector (r_spritedesc.vright, p_saxis, v);
+	TransformVector (r_spritedesc.vup, p_taxis, v);
 	VectorInverse (p_taxis);
 
-	distinv = 1.0 / (-DotProduct (modelorg, r_spritedesc.vpn));
+	distinv = 1.0 / (-DotProduct (v->modelorg, r_spritedesc.vpn));
 
 	dvars.sdivzstepu = p_saxis[0] * xscaleinv;
 	dvars.tdivzstepu = p_taxis[0] * xscaleinv;
@@ -318,7 +322,7 @@ void D_SpriteCalculateGradients (void)
 	dvars.tdivzorigin = p_taxis[2] - xcenter*dvars.tdivzstepu - ycenter*dvars.tdivzstepv;
 	dvars.ziorigin = p_normal[2]*distinv - xcenter*dvars.zistepu - ycenter*dvars.zistepv;
 
-	TransformVector (modelorg, p_temp1);
+	TransformVector (v->modelorg, p_temp1, v);
 
 	dvars.sadjust = ((fixed16_t)(DotProduct (p_temp1, p_saxis) * 0x10000 + 0.5)) - (-(dvars.cachewidth >> 1) << 16);
 	dvars.tadjust = ((fixed16_t)(DotProduct (p_temp1, p_taxis) * 0x10000 + 0.5)) - (-(sprite_height >> 1) << 16);
@@ -334,7 +338,8 @@ void D_SpriteCalculateGradients (void)
 D_DrawSprite
 =====================
 */
-void D_DrawSprite (void)
+void
+D_DrawSprite(view_t *v)
 {
 	int			i, nump;
 	float		ymin, ymax;
@@ -382,8 +387,8 @@ void D_DrawSprite (void)
 	pverts = r_spritedesc.pverts;
 	pverts[nump] = pverts[0];
 
-	D_SpriteCalculateGradients ();
-	D_SpriteScanLeftEdge ();
-	D_SpriteScanRightEdge ();
-	D_SpriteDrawSpans (sprite_spans, currententity->alpha);
+	D_SpriteCalculateGradients(v);
+	D_SpriteScanLeftEdge();
+	D_SpriteScanRightEdge();
+	D_SpriteDrawSpans(sprite_spans, currententity->alpha);
 }

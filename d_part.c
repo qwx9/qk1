@@ -12,7 +12,7 @@ D_DrawParticle (particle_t *pparticle)
 	int i, izi, pix, count, u, v;
 
 	// transform point
-	VectorSubtract(pparticle->org, r_origin, local);
+	VectorSubtract(pparticle->org, r_refdef.view.org, local);
 
 	transformed[0] = DotProduct(local, r_pright);
 	transformed[1] = DotProduct(local, r_pup);

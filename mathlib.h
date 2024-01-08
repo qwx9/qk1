@@ -45,7 +45,23 @@ void AngleVectors (vec3_t angles, vec3_t forward, vec3_t right, vec3_t up);
 int BoxOnPlaneSide (vec3_t emins, vec3_t emaxs, struct mplane_s *plane);
 float	anglemod(float a);
 
+typedef struct clipplane_s
+{
+	vec3_t		normal;
+	float		dist;
+	struct		clipplane_s	*next;
+	byte		leftedge;
+	byte		rightedge;
+} clipplane_t;
 
+typedef struct {
+	vec3_t modelorg, org;
+	vec3_t pn, right, up;
+	vec3_t angles;
+	clipplane_t	clipplanes[4];
+}view_t;
+
+void TransformVector(vec3_t in, vec3_t out, view_t *v);
 
 #define BOX_ON_PLANE_SIDE(emins, emaxs, p)	\
 	(((p)->type < 3)?						\

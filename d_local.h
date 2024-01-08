@@ -69,7 +69,7 @@ void D_DrawSpans(espan_t *pspan, pixel_t *pbase, int width, byte alpha, int span
 
 void D_DrawSkyScans8 (espan_t *pspan);
 
-surfcache_t	*D_CacheSurface (msurface_t *surface, int miplevel);
+surfcache_t	*D_CacheSurface (entity_t *e, msurface_t *surface, int miplevel);
 
 extern int	*d_pscantable;
 extern int	d_scantable[MAXHEIGHT];
@@ -97,5 +97,6 @@ mulalpha(pixel_t ca, int alpha)
 	return a | b;
 }
 
+pixel_t blendadditive(pixel_t ca, pixel_t cb, int alpha);
 pixel_t blendalpha(pixel_t ca, pixel_t cb, int alpha);
 float alphafor(int flags);

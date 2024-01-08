@@ -120,7 +120,7 @@ void D_PolysetDrawFinalVerts (finalvert_t *fv, int numverts, pixel_t *colormap, 
 			z = fv->zi;
 			zbuf = zspantable[fv->v] + fv->u;
 			if(z >= *zbuf){
-				pixel_t p = addlight(skintable[fv->t >> 16][fv->s >> 16], fv->l[0], fv->l[1], fv->l[2]);
+				pixel_t p = addlight(currententity, skintable[fv->t >> 16][fv->s >> 16], fv->l[0], fv->l[1], fv->l[2]);
 				int n = d_scantable[fv->v] + fv->u;
 				if(r_drawflags & DRAW_BLEND){
 					dvars.viewbuffer[n] = blendalpha(p, dvars.viewbuffer[n], alpha);
@@ -308,7 +308,7 @@ split:
 	z = new.zi;
 	zbuf = zspantable[new.v] + new.u;
 	if (z >= *zbuf){
-		pixel_t p = addlight(skintable[new.t >> 16][new.s >> 16], l[0], l[1], l[2]);
+		pixel_t p = addlight(currententity, skintable[new.t >> 16][new.s >> 16], l[0], l[1], l[2]);
 		int n = d_scantable[new.v] + new.u;
 		if(r_drawflags & DRAW_BLEND){
 			dvars.viewbuffer[n] = blendalpha(p, dvars.viewbuffer[n], alpha);
@@ -550,7 +550,7 @@ void D_PolysetDrawSpans8 (spanpackage_t *pspanpackage, pixel_t *colormap, byte a
 			do
 			{
 				if (lzi >= *lpz){
-					pixel_t p = addlight(*lptex, llight[0], llight[1], llight[2]);
+					pixel_t p = addlight(currententity, *lptex, llight[0], llight[1], llight[2]);
 					if(r_drawflags & DRAW_BLEND){
 						*lpdest = blendalpha(
 							p,

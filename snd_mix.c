@@ -318,7 +318,7 @@ ambs(void)
 }
 
 void
-stepsnd(vec3_t origin, vec3_t forward, vec3_t right, vec3_t up)
+stepsnd(view_t *v)
 {
 	long ns;
 	Chan *c, *sum;
@@ -346,10 +346,10 @@ stepsnd(vec3_t origin, vec3_t forward, vec3_t right, vec3_t up)
 	}
 	sndt = nanosec();
 
-	VectorCopy(origin, listener_origin);
-	VectorCopy(forward, listener_forward);
-	VectorCopy(right, listener_right);
-	VectorCopy(up, listener_up);
+	VectorCopy(v->org, listener_origin);
+	VectorCopy(v->pn, listener_forward);
+	VectorCopy(v->right, listener_right);
+	VectorCopy(v->up, listener_up);
 	ambs();
 	sum = nil;
 	for(c=chans+Namb; c<che; c++){

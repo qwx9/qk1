@@ -289,7 +289,7 @@ alplay(alchan_t *c, albuf_t *b, vec3_t zp, float vol, float att, bool rel, bool 
 
 
 static void
-ambs(vec3_t org)
+ambs(const vec3_t org)
 {
 	float vol, *av;
 	ALint state;
@@ -330,30 +330,30 @@ ambs(vec3_t org)
 }
 
 void
-stepsnd(vec3_t zp, vec3_t fw, vec3_t rt, vec3_t up)
+stepsnd(const view_t *v)
 {
-	vec_t fwup[6] = {fw[0], fw[1], fw[2], up[0], up[1], up[2]};
+	vec_t fwup[6] = {v->pn[0], v->pn[1], v->pn[2], v->up[0], v->up[1], v->up[2]};
 	alchan_t *c, *next;
-	static vec3_t ozp;
+	static vec3_t oorg;
 	ALint state;
 	vec3_t vel;
 
 	if(dev == nil)
 		return;
-	if(zp == vec3_origin && fw == vec3_origin && rt == vec3_origin){
+	if(v->pn[0] == 0 && v->pn[1] == 0 && v->pn[2] == 0){
 		alListenerf(AL_GAIN, 0);
 		ALERR();
 		return;
 	}
 
-	alListenerfv(AL_POSITION, zp); ALERR();
+	alListenerfv(AL_POSITION, v->org); ALERR();
 	alListenerfv(AL_ORIENTATION, fwup); ALERR();
-	VectorSubtract(zp, ozp, vel);
-	VectorCopy(zp, ozp);
+	VectorSubtract(v->org, oorg, vel);
+	VectorCopy(v->org, oorg);
 	alListenerfv(AL_VELOCITY, vel); ALERR();
 	alListenerf(AL_GAIN, volume.value); ALERR();
 
-	ambs(zp);
+	ambs(v->org);
 
 	for(c = chans; c != nil; c = next){
 		next = c->next;

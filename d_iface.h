@@ -86,9 +86,8 @@ extern vec3_t	r_pright, r_pup, r_ppn;
 void D_PolysetDraw (pixel_t *colormap);
 void D_PolysetDrawFinalVerts (finalvert_t *fv, int numverts, pixel_t *colormap, byte alpha);
 void D_DrawParticle (particle_t *pparticle);
-void D_DrawPoly (void);
-void D_DrawSprite (void);
-void D_DrawSurfaces (void);
+void D_DrawSprite (view_t *v);
+void D_DrawSurfaces (view_t *v);
 void D_Init (void);
 void D_ViewChanged (void);
 void D_SetupFrame (void);
@@ -129,7 +128,7 @@ typedef struct
 
 extern drawsurf_t	r_drawsurf;
 
-void R_DrawSurface (void);
+void R_DrawSurface (entity_t *e);
 
 // !!! if this is changed, it must be changed in d_ifacea.h too !!!
 #define TURB_TEX_SIZE	64		// base turbulent texture size

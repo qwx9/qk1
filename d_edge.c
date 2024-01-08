@@ -3,8 +3,8 @@
 float scale_for_mip;
 
 // FIXME: should go away
-extern void R_RotateBmodel (entity_t *entity);
-extern void R_TransformFrustum (void);
+extern void R_RotateBmodel (entity_t *entity, view_t *v);
+extern void R_TransformFrustum (view_t *v);
 
 static int
 D_MipLevelForScale(float scale)
@@ -43,16 +43,16 @@ D_DrawSolidSurface(surf_t *surf, pixel_t color)
 
 
 static void
-D_CalcGradients(int miplevel, msurface_t *pface, vec3_t transformed_modelorg)
+D_CalcGradients(int miplevel, msurface_t *pface, vec3_t transformed_modelorg, view_t *v)
 {
-	float mipscale;
 	vec3_t p_temp1, p_saxis, p_taxis;
+	float mipscale;
 	float t;
 
 	mipscale = 1.0 / (float)(1 << miplevel);
 
-	TransformVector (pface->texinfo->vecs[0], p_saxis);
-	TransformVector (pface->texinfo->vecs[1], p_taxis);
+	TransformVector (pface->texinfo->vecs[0], p_saxis, v);
+	TransformVector (pface->texinfo->vecs[1], p_taxis, v);
 
 	t = xscaleinv * mipscale;
 
@@ -82,18 +82,20 @@ D_CalcGradients(int miplevel, msurface_t *pface, vec3_t transformed_modelorg)
 }
 
 void
-D_DrawSurfaces (void)
+D_DrawSurfaces(view_t *v0)
 {
-	surf_t *s;
-	entity_t *e;
-	msurface_t *pface;
-	surfcache_t *pcurrentcache;
 	vec3_t local_modelorg, transformed_modelorg, world_transformed_modelorg;
+	surfcache_t *pcurrentcache;
+	msurface_t *pface;
 	int miplevel;
+	entity_t *e;
+	surf_t *s;
 	byte alpha;
 	bool blend;
+	view_t v;
 
-	TransformVector(modelorg, transformed_modelorg);
+	memmove(&v, v0, sizeof(v));
+	TransformVector(v.modelorg, transformed_modelorg, &v);
 	VectorCopy(transformed_modelorg, world_transformed_modelorg);
 
 	// TODO: could preset a lot of this at mode set time
@@ -119,9 +121,9 @@ D_DrawSurfaces (void)
 		dvars.ziorigin = s->d_ziorigin;
 
 		if(insubmodel(s)){
-			VectorSubtract(r_origin, e->origin, local_modelorg);
-			TransformVector(local_modelorg, transformed_modelorg);
-			R_RotateBmodel(e);
+			VectorSubtract(v.org, e->origin, local_modelorg);
+			TransformVector(local_modelorg, transformed_modelorg, &v);
+			R_RotateBmodel(e, &v);
 		}
 
 		pface = s->data;
@@ -130,15 +132,15 @@ D_DrawSurfaces (void)
 		}else if(s->flags & SURF_DRAWBACKGROUND){
 			D_DrawSolidSurface(s, q1pal[(int)r_clearcolor.value & 0xFF]);
 		}else if(s->flags & SURF_DRAWTURB){
-			D_CalcGradients(0, pface, transformed_modelorg);
+			D_CalcGradients(0, pface, transformed_modelorg, &v);
 			D_DrawSpans(s->spans, pface->texinfo->texture->pixels, 64, alpha, SPAN_TURB);
 		}else{
 			miplevel = D_MipLevelForScale(s->nearzi * scale_for_mip * pface->texinfo->mipadjust);
 			if(s->flags & SURF_FENCE)
 				miplevel = max(miplevel-1, 0);
 
-			pcurrentcache = D_CacheSurface(pface, miplevel);
-			D_CalcGradients(miplevel, pface, transformed_modelorg);
+			pcurrentcache = D_CacheSurface(s->entity, pface, miplevel);
+			D_CalcGradients(miplevel, pface, transformed_modelorg, &v);
 			D_DrawSpans(s->spans, pcurrentcache->pixels, pcurrentcache->width, alpha,
 				(alpha == 255 && s->flags & SURF_FENCE) ? SPAN_FENCE : (blend ? SPAN_BLEND : SPAN_SOLID)
 			);
@@ -146,11 +148,7 @@ D_DrawSurfaces (void)
 
 		if(insubmodel(s)){
 			VectorCopy(world_transformed_modelorg, transformed_modelorg);
-			VectorCopy(base_vpn, vpn);
-			VectorCopy(base_vup, vup);
-			VectorCopy(base_vright, vright);
-			VectorCopy(base_modelorg, modelorg);
-			R_TransformFrustum();
+			memmove(&v, v0, sizeof(v));
 		}
 	}
 }

@@ -39,7 +39,7 @@ const float r_avertexnormals[NUMVERTEXNORMALS][3] = {
 #include "anorms.h"
 };
 
-static void R_AliasSetUpTransform (int trivial_accept);
+static void R_AliasSetUpTransform (int trivial_accept, view_t *v);
 static void R_AliasTransformVector (vec3_t in, vec3_t out);
 static void R_AliasTransformFinalVert (finalvert_t *fv, auxvert_t *av, trivertx_t *pverts, stvert_t *pstverts);
 void R_AliasProjectFinalVert (finalvert_t *fv, auxvert_t *av);
@@ -50,7 +50,7 @@ void R_AliasProjectFinalVert (finalvert_t *fv, auxvert_t *av);
 R_AliasCheckBBox
 ================
 */
-bool R_AliasCheckBBox (void)
+bool R_AliasCheckBBox (view_t *v)
 {
 	int					i, flags, frame, numv;
 	aliashdr_t			*pahdr;
@@ -69,7 +69,7 @@ bool R_AliasCheckBBox (void)
 	pahdr = Mod_Extradata (pmodel);
 	pmdl = (mdl_t *)((byte *)pahdr + pahdr->model);
 
-	R_AliasSetUpTransform (0);
+	R_AliasSetUpTransform (0, v);
 
 	// construct the base bounding box for this frame
 	frame = currententity->frame;
@@ -292,7 +292,7 @@ void R_AliasPreparePoints (trivertx_t *apverts, auxvert_t *auxverts, pixel_t *co
 R_AliasSetUpTransform
 ================
 */
-static void R_AliasSetUpTransform (int trivial_accept)
+static void R_AliasSetUpTransform (int trivial_accept, view_t *v)
 {
 	int		i;
 	float	rotationmatrix[3][4], t2matrix[3][4];
@@ -326,18 +326,18 @@ static void R_AliasSetUpTransform (int trivial_accept)
 		t2matrix[i][2] = alias_up[i];
 	}
 
-	t2matrix[0][3] = -modelorg[0];
-	t2matrix[1][3] = -modelorg[1];
-	t2matrix[2][3] = -modelorg[2];
+	t2matrix[0][3] = -v->modelorg[0];
+	t2matrix[1][3] = -v->modelorg[1];
+	t2matrix[2][3] = -v->modelorg[2];
 
 	// FIXME: can do more efficiently than full concatenation
 	R_ConcatTransforms (t2matrix, tmatrix, rotationmatrix);
 
 	// TODO: should be global, set when vright, etc., set
-	VectorCopy (vright, viewmatrix[0]);
-	VectorCopy (vup, viewmatrix[1]);
+	VectorCopy (v->right, viewmatrix[0]);
+	VectorCopy (v->up, viewmatrix[1]);
 	VectorInverse (viewmatrix[1]);
-	VectorCopy (vpn, viewmatrix[2]);
+	VectorCopy (v->pn, viewmatrix[2]);
 
 	//	viewmatrix[0][3] = 0;
 	//	viewmatrix[1][3] = 0;
@@ -640,7 +640,8 @@ trivertx_t *R_AliasSetupFrame (void)
 R_AliasDrawModel
 ================
 */
-void R_AliasDrawModel (alight_t *plighting)
+void
+R_AliasDrawModel(alight_t *plighting, view_t *v)
 {
 	static finalvert_t finalverts[MAXALIASVERTS];
 	static auxvert_t auxverts[MAXALIASVERTS];
@@ -653,7 +654,7 @@ void R_AliasDrawModel (alight_t *plighting)
 	pmdl = (mdl_t *)((byte *)paliashdr + paliashdr->model);
 
 	R_AliasSetupSkin();
-	R_AliasSetUpTransform(currententity->trivial_accept);
+	R_AliasSetUpTransform(currententity->trivial_accept, v);
 	R_AliasSetupLighting(plighting);
 	pverts = R_AliasSetupFrame ();
 

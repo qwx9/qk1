@@ -18,9 +18,9 @@ void D_Sky_uv_To_st (int u, int v, fixed16_t *s, fixed16_t *t, float skydist)
 	wu = (u - xcenter)/xscale;
 	wv = (ycenter - v)/yscale;
 
-	end[0] = vpn[0] + wu*vright[0] + wv*vup[0];
-	end[1] = vpn[1] + wu*vright[1] + wv*vup[1];
-	end[2] = vpn[2] + wu*vright[2] + wv*vup[2];
+	end[0] = r_refdef.view.pn[0] + wu*r_refdef.view.right[0] + wv*r_refdef.view.up[0];
+	end[1] = r_refdef.view.pn[1] + wu*r_refdef.view.right[1] + wv*r_refdef.view.up[1];
+	end[2] = r_refdef.view.pn[2] + wu*r_refdef.view.right[2] + wv*r_refdef.view.up[2];
 	end[2] *= 3;
 	VectorNormalize(end);
 

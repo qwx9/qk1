@@ -510,9 +510,9 @@ void R_DrawParticles (void)
 	float			dvel;
 	float			frametime;
 
-	VectorScale (vright, xscaleshrink, r_pright);
-	VectorScale (vup, yscaleshrink, r_pup);
-	VectorCopy (vpn, r_ppn);
+	VectorScale (r_refdef.view.right, xscaleshrink, r_pright);
+	VectorScale (r_refdef.view.up, yscaleshrink, r_pup);
+	VectorCopy (r_refdef.view.pn, r_ppn);
 	frametime = cl.time - cl.oldtime;
 	time3 = frametime * 15;
 	time2 = frametime * 10; // 15;

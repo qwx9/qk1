@@ -12,16 +12,17 @@ spritedesc_t			r_spritedesc;
 R_RotateSprite
 ================
 */
-void R_RotateSprite (float beamlength)
+static void
+R_RotateSprite(float beamlength, view_t *v)
 {
 	vec3_t	vec;
 
-	if (beamlength == 0.0)
+	if(beamlength == 0.0)
 		return;
 
-	VectorScale (r_spritedesc.vpn, -beamlength, vec);
-	VectorAdd (r_entorigin, vec, r_entorigin);
-	VectorSubtract (modelorg, vec, modelorg);
+	VectorScale(r_spritedesc.vpn, -beamlength, vec);
+	VectorAdd(r_entorigin, vec, r_entorigin);
+	VectorSubtract(v->org, vec, v->modelorg);
 }
 
 
@@ -33,7 +34,8 @@ Clips the winding at clip_verts[clip_current] and changes clip_current
 Throws out the back side
 ==============
 */
-int R_ClipSpriteFace (int nump, clipplane_t *pclipplane)
+static int
+R_ClipSpriteFace(int nump, clipplane_t *pclipplane)
 {
 	int		i, outcount;
 	float	dists[MAXWORKINGVERTS+1];
@@ -111,7 +113,8 @@ int R_ClipSpriteFace (int nump, clipplane_t *pclipplane)
 R_SetupAndDrawSprite
 ================
 */
-void R_SetupAndDrawSprite (void)
+static void
+R_SetupAndDrawSprite(view_t *v)
 {
 	int			i, nump;
 	float		dot, scale, *pv;
@@ -119,7 +122,7 @@ void R_SetupAndDrawSprite (void)
 	vec3_t		left, up, right, down, transformed, local;
 	emitpoint_t	outverts[MAXWORKINGVERTS+1], *pout;
 
-	dot = DotProduct (r_spritedesc.vpn, modelorg);
+	dot = DotProduct (r_spritedesc.vpn, v->modelorg);
 
 	// backface cull
 	if (dot >= 0)
@@ -163,7 +166,7 @@ void R_SetupAndDrawSprite (void)
 
 	for (i=0 ; i<4 ; i++)
 	{
-		nump = R_ClipSpriteFace (nump, &view_clipplanes[i]);
+		nump = R_ClipSpriteFace (nump, &v->clipplanes[i]);
 		if (nump < 3)
 			return;
 		if (nump >= MAXWORKINGVERTS)
@@ -176,8 +179,8 @@ void R_SetupAndDrawSprite (void)
 
 	for (i=0 ; i<nump ; i++)
 	{
-		VectorSubtract (pv, r_origin, local);
-		TransformVector (local, transformed);
+		VectorSubtract(pv, v->org, local);
+		TransformVector(local, transformed, v);
 
 		if (transformed[2] < NEAR_CLIP)
 			transformed[2] = NEAR_CLIP;
@@ -202,7 +205,7 @@ void R_SetupAndDrawSprite (void)
 	// draw it
 	r_spritedesc.nump = nump;
 	r_spritedesc.pverts = outverts;
-	D_DrawSprite ();
+	D_DrawSprite(v);
 }
 
 
@@ -211,7 +214,8 @@ void R_SetupAndDrawSprite (void)
 R_GetSpriteframe
 ================
 */
-mspriteframe_t *R_GetSpriteframe (msprite_t *psprite)
+static mspriteframe_t *
+R_GetSpriteframe(msprite_t *psprite)
 {
 	mspritegroup_t	*pspritegroup;
 	mspriteframe_t	*pspriteframe;
@@ -255,13 +259,13 @@ mspriteframe_t *R_GetSpriteframe (msprite_t *psprite)
 	return pspriteframe;
 }
 
-
 /*
 ================
 R_DrawSprite
 ================
 */
-void R_DrawSprite (void)
+void
+R_DrawSprite(view_t *v)
 {
 	int				i;
 	msprite_t		*psprite;
@@ -284,9 +288,9 @@ void R_DrawSprite (void)
 		// down, because the cross product will be between two nearly parallel
 		// vectors and starts to approach an undefined state, so we don't draw if
 		// the two vectors are less than 1 degree apart
-		tvec[0] = -modelorg[0];
-		tvec[1] = -modelorg[1];
-		tvec[2] = -modelorg[2];
+		tvec[0] = -v->modelorg[0];
+		tvec[1] = -v->modelorg[1];
+		tvec[2] = -v->modelorg[2];
 		VectorNormalize (tvec);
 		dot = tvec[2];	// same as DotProduct (tvec, r_spritedesc.vup) because
 						//  r_spritedesc.vup is 0, 0, 1
@@ -296,7 +300,7 @@ void R_DrawSprite (void)
 		r_spritedesc.vup[1] = 0;
 		r_spritedesc.vup[2] = 1;
 		r_spritedesc.vright[0] = tvec[1];
-								// CrossProduct(r_spritedesc.vup, -modelorg,
+								// CrossProduct(r_spritedesc.vup, -v->modelorg,
 		r_spritedesc.vright[1] = -tvec[0];
 								//              r_spritedesc.vright)
 		r_spritedesc.vright[2] = 0;
@@ -314,9 +318,9 @@ void R_DrawSprite (void)
 		// position relative to the viewer
 		for (i=0 ; i<3 ; i++)
 		{
-			r_spritedesc.vup[i] = vup[i];
-			r_spritedesc.vright[i] = vright[i];
-			r_spritedesc.vpn[i] = vpn[i];
+			r_spritedesc.vup[i] = v->up[i];
+			r_spritedesc.vright[i] = v->right[i];
+			r_spritedesc.vpn[i] = v->pn[i];
 		}
 	}
 	else if (psprite->type == SPR_VP_PARALLEL_UPRIGHT)
@@ -327,16 +331,17 @@ void R_DrawSprite (void)
 		// down, because the cross product will be between two nearly parallel
 		// vectors and starts to approach an undefined state, so we don't draw if
 		// the two vectors are less than 1 degree apart
-		dot = vpn[2];	// same as DotProduct (vpn, r_spritedesc.vup) because
-						//  r_spritedesc.vup is 0, 0, 1
+		dot = v->pn[2];
+		// same as DotProduct (v->pn, r_spritedesc.vup) because
+		//  r_spritedesc.vup is 0, 0, 1
 		if ((dot > 0.999848) || (dot < -0.999848))	// cosf(1 degree) = 0.999848
 			return;
 		r_spritedesc.vup[0] = 0;
 		r_spritedesc.vup[1] = 0;
 		r_spritedesc.vup[2] = 1;
-		r_spritedesc.vright[0] = vpn[1];
-										// CrossProduct (r_spritedesc.vup, vpn,
-		r_spritedesc.vright[1] = -vpn[0];	//  r_spritedesc.vright)
+		r_spritedesc.vright[0] = v->pn[1];
+										// CrossProduct (r_spritedesc.vup, v->vpn,
+		r_spritedesc.vright[1] = -v->pn[0];	//  r_spritedesc.vright)
 		r_spritedesc.vright[2] = 0;
 		VectorNormalize (r_spritedesc.vright);
 		r_spritedesc.vpn[0] = -r_spritedesc.vright[1];
@@ -362,9 +367,9 @@ void R_DrawSprite (void)
 
 		for (i=0 ; i<3 ; i++)
 		{
-			r_spritedesc.vpn[i] = vpn[i];
-			r_spritedesc.vright[i] = vright[i] * cr + vup[i] * sr;
-			r_spritedesc.vup[i] = vright[i] * -sr + vup[i] * cr;
+			r_spritedesc.vpn[i] = v->pn[i];
+			r_spritedesc.vright[i] = v->right[i] * cr + v->up[i] * sr;
+			r_spritedesc.vup[i] = v->right[i] * -sr + v->up[i] * cr;
 		}
 	}
 	else
@@ -372,8 +377,7 @@ void R_DrawSprite (void)
 		fatal ("R_DrawSprite: Bad sprite type %d", psprite->type);
 	}
 
-	R_RotateSprite (psprite->beamlength);
-
-	R_SetupAndDrawSprite ();
+	R_RotateSprite(psprite->beamlength, v);
+	R_SetupAndDrawSprite(v);
 }
 

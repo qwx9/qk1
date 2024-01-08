@@ -5,7 +5,7 @@ void	initfb(void);
 void	conscmd(void);
 void	Sys_SendKeyEvents(void);
 void	stepcd(void);
-void	stepsnd(vec3_t, vec3_t, vec3_t, vec3_t);
+void	stepsnd(const view_t *);
 void	stopcd(void);
 void	pausecd(void);
 void	resumecd(void);

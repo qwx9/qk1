@@ -16,7 +16,7 @@ static unsigned blocklights[3][18*18];
 R_AddDynamicLights
 ===============
 */
-void R_AddDynamicLights (void)
+void R_AddDynamicLights (entity_t *e)
 {
 	msurface_t *surf;
 	int			lnum;
@@ -39,9 +39,8 @@ void R_AddDynamicLights (void)
 			continue;		// not lit by this light
 
 		rad = cl_dlights[lnum].radius;
-		VectorSubtract(cl_dlights[lnum].origin, currententity->origin, entorigin);
-		dist = DotProduct (entorigin, surf->plane->normal) -
-				surf->plane->dist;
+		VectorSubtract(cl_dlights[lnum].origin, e->origin, entorigin);
+		dist = DotProduct (entorigin, surf->plane->normal) - surf->plane->dist;
 		rad -= fabs(dist);
 		minlight = cl_dlights[lnum].minlight;
 		if (rad < minlight)
@@ -91,7 +90,7 @@ R_BuildLightMap
 Combine and scale multiple lightmaps into the 8.8 format in blocklights
 ===============
 */
-void R_BuildLightMap (void)
+void R_BuildLightMap (entity_t *e)
 {
 	int			smax, tmax;
 	int			t;
@@ -137,7 +136,7 @@ void R_BuildLightMap (void)
 
 	// add all the dynamic lights
 	if (surf->dlightframe == r_framecount)
-		R_AddDynamicLights ();
+		R_AddDynamicLights(e);
 
 	// bound, invert, and shift
 	for (i=0 ; i<size ; i++)
@@ -159,12 +158,13 @@ R_TextureAnimation
 Returns the proper texture for a given time and base texture
 ===============
 */
-texture_t *R_TextureAnimation (texture_t *base)
+texture_t *
+R_TextureAnimation(entity_t *e, texture_t *base)
 {
 	int		reletive;
 	int		count;
 
-	if (currententity->frame)
+	if (e->frame)
 	{
 		if (base->alternate_anims)
 			base = base->alternate_anims;
@@ -186,29 +186,6 @@ texture_t *R_TextureAnimation (texture_t *base)
 	}
 
 	return base;
-}
-
-inline pixel_t
-addlight(pixel_t x, int lr, int lg, int lb)
-{
-	int r, g, b;
-
-	if((x & 0xff000000U) == 0)
-		return x;
-
-	if(currententity != nil && (currententity->effects & EF_ADDITIVE) != 0)
-		return x;
-
-	r = (x>>16) & 0xff;
-	g = (x>>8)  & 0xff;
-	b = (x>>0)  & 0xff;
-
-	r = (r * ((64<<8)-(lr & 0xffff))) >> (8+VID_CBITS);
-	g = (g * ((64<<8)-(lg & 0xffff))) >> (8+VID_CBITS);
-	b = (b * ((64<<8)-(lb & 0xffff))) >> (8+VID_CBITS);
-	x = (x & 0xff000000) | r<<16 | g<<8 | b<<0;
-
-	return x;
 }
 
 #define fullbright 1
@@ -305,7 +282,7 @@ static const drawfunc drawsurf[2/*fullbright*/][2/*additive*/][4/*mipmap*/] = {
 R_DrawSurface
 ===============
 */
-void R_DrawSurface (void)
+void R_DrawSurface (entity_t *e)
 {
 	pixel_t	*basetptr;
 	int				smax, tmax, twidth, lightwidth;
@@ -319,13 +296,13 @@ void R_DrawSurface (void)
 	unsigned *lp[3];
 
 	// calculate the lightings
-	R_BuildLightMap ();
+	R_BuildLightMap(e);
 
 	surfrowbytes = r_drawsurf.rowbytes;
 
 	mt = r_drawsurf.texture;
 
-	draw = drawsurf[mt->drawsurf][currententity != nil && (currententity->effects & EF_ADDITIVE) != 0][r_drawsurf.surfmip];
+	draw = drawsurf[mt->drawsurf][e != nil && (e->effects & EF_ADDITIVE) != 0][r_drawsurf.surfmip];
 
 	r_source = mt->pixels + mt->offsets[r_drawsurf.surfmip];
 
@@ -378,4 +355,27 @@ void R_DrawSurface (void)
 
 		pcolumndest += horzblockstep;
 	}
+}
+
+pixel_t
+addlight(entity_t *e, pixel_t x, int lr, int lg, int lb)
+{
+	int r, g, b;
+
+	if((x & 0xff000000U) == 0)
+		return x;
+
+	if(e != nil && (e->effects & EF_ADDITIVE) != 0)
+		return x;
+
+	r = (x>>16) & 0xff;
+	g = (x>>8)  & 0xff;
+	b = (x>>0)  & 0xff;
+
+	r = (r * ((64<<8)-(lr & 0xffff))) >> (8+VID_CBITS);
+	g = (g * ((64<<8)-(lg & 0xffff))) >> (8+VID_CBITS);
+	b = (b * ((64<<8)-(lb & 0xffff))) >> (8+VID_CBITS);
+	x = (x & 0xff000000) | r<<16 | g<<8 | b<<0;
+
+	return x;
 }

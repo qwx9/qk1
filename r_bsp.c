@@ -5,9 +5,6 @@
 //
 
 entity_t		*currententity;
-vec3_t			modelorg, base_modelorg;
-								// modelorg is the viewpoint reletive to
-								// the currently rendering entity
 vec3_t			r_entorigin;	// the currently rendering entity in world
 								// coordinates
 
@@ -48,14 +45,15 @@ static bool		makeclippededge;
 R_EntityRotate
 ================
 */
-void R_EntityRotate (vec3_t vec)
+static void
+R_EntityRotate(vec3_t vec)
 {
 	vec3_t	tvec;
 
-	VectorCopy (vec, tvec);
-	vec[0] = DotProduct (entity_rotation[0], tvec);
-	vec[1] = DotProduct (entity_rotation[1], tvec);
-	vec[2] = DotProduct (entity_rotation[2], tvec);
+	VectorCopy(vec, tvec);
+	vec[0] = DotProduct(entity_rotation[0], tvec);
+	vec[1] = DotProduct(entity_rotation[1], tvec);
+	vec[2] = DotProduct(entity_rotation[2], tvec);
 }
 
 
@@ -64,7 +62,8 @@ void R_EntityRotate (vec3_t vec)
 R_RotateBmodel
 ================
 */
-void R_RotateBmodel (entity_t *e)
+void
+R_RotateBmodel(entity_t *e, view_t *v)
 {
 	float	angle, s, c, temp1[3][3], temp2[3][3], temp3[3][3];
 
@@ -124,24 +123,24 @@ void R_RotateBmodel (entity_t *e)
 	temp1[2][1] = -s;
 	temp1[2][2] = c;
 
-	R_ConcatRotations (temp1, temp3, entity_rotation);
+	R_ConcatRotations(temp1, temp3, entity_rotation);
 
 	// rotate modelorg and the transformation matrix
-	R_EntityRotate (modelorg);
-	R_EntityRotate (vpn);
-	R_EntityRotate (vright);
-	R_EntityRotate (vup);
+	R_EntityRotate(v->modelorg);
+	R_EntityRotate(v->pn);
+	R_EntityRotate(v->right);
+	R_EntityRotate(v->up);
 
-	R_TransformFrustum ();
+	R_TransformFrustum(v);
 }
-
 
 /*
 ================
 R_RecursiveClipBPoly
 ================
 */
-void R_RecursiveClipBPoly (bedge_t *pedges, mnode_t *pnode, msurface_t *psurf)
+static void
+R_RecursiveClipBPoly(bedge_t *pedges, mnode_t *pnode, msurface_t *psurf, view_t *v)
 {
 	bedge_t		*psideedges[2], *pnextedge, *ptedge;
 	int			i, side, lastside;
@@ -159,9 +158,9 @@ next:
 	// FIXME: cache these?
 	splitplane = pnode->plane;
 	tplane.dist = splitplane->dist - DotProduct(r_entorigin, splitplane->normal);
-	tplane.normal[0] = DotProduct (entity_rotation[0], splitplane->normal);
-	tplane.normal[1] = DotProduct (entity_rotation[1], splitplane->normal);
-	tplane.normal[2] = DotProduct (entity_rotation[2], splitplane->normal);
+	tplane.normal[0] = DotProduct(entity_rotation[0], splitplane->normal);
+	tplane.normal[1] = DotProduct(entity_rotation[1], splitplane->normal);
+	tplane.normal[2] = DotProduct(entity_rotation[2], splitplane->normal);
 
 	// clip edges to BSP plane
 	for ( ; pedges ; pedges = pnextedge)
@@ -284,7 +283,7 @@ next:
 					if (pn->contents != CONTENTS_SOLID)
 					{
 						r_currentbkey = ((mleaf_t *)pn)->key;
-						R_RenderBmodelFace (psideedges[i], psurf);
+						R_RenderBmodelFace(psideedges[i], psurf, v);
 					}
 				}
 				else if(i == 1){ // last, can skip the call
@@ -292,7 +291,7 @@ next:
 					pnode = pnode->children[i];
 					goto next;
 				}else{
-					R_RecursiveClipBPoly (psideedges[i], pnode->children[i], psurf);
+					R_RecursiveClipBPoly(psideedges[i], pnode->children[i], psurf, v);
 				}
 			}
 		}
@@ -305,7 +304,8 @@ next:
 R_DrawSolidClippedSubmodelPolygons
 ================
 */
-void R_DrawSolidClippedSubmodelPolygons (model_t *pmodel)
+void
+R_DrawSolidClippedSubmodelPolygons(model_t *pmodel, view_t *v)
 {
 	int			i, j, lindex, o;
 	vec_t		dot;
@@ -329,7 +329,7 @@ void R_DrawSolidClippedSubmodelPolygons (model_t *pmodel)
 		// find which side of the node we are on
 		pplane = psurf->plane;
 
-		dot = DotProduct (modelorg, pplane->normal) - pplane->dist;
+		dot = DotProduct(v->modelorg, pplane->normal) - pplane->dist;
 
 		// draw the polygon
 		if ((dot > 0) ^ !!(psurf->flags & SURF_PLANEBACK))
@@ -363,7 +363,7 @@ void R_DrawSolidClippedSubmodelPolygons (model_t *pmodel)
 
 				pbedge[j-1].pnext = nil;	// mark end of edges
 
-				R_RecursiveClipBPoly (pbedge, currententity->topnode, psurf);
+				R_RecursiveClipBPoly(pbedge, currententity->topnode, psurf, v);
 			}
 			else
 			{
@@ -379,7 +379,8 @@ void R_DrawSolidClippedSubmodelPolygons (model_t *pmodel)
 R_DrawSubmodelPolygons
 ================
 */
-void R_DrawSubmodelPolygons (model_t *pmodel, int clipflags)
+void
+R_DrawSubmodelPolygons(model_t *pmodel, view_t *v, int clipflags)
 {
 	int			i;
 	vec_t		dot;
@@ -400,7 +401,7 @@ void R_DrawSubmodelPolygons (model_t *pmodel, int clipflags)
 		// find which side of the node we are on
 		pplane = psurf->plane;
 
-		dot = DotProduct (modelorg, pplane->normal) - pplane->dist;
+		dot = DotProduct(v->modelorg, pplane->normal) - pplane->dist;
 
 		// draw the polygon
 		if ((dot > 0) ^ !!(psurf->flags & SURF_PLANEBACK))
@@ -408,7 +409,7 @@ void R_DrawSubmodelPolygons (model_t *pmodel, int clipflags)
 			r_currentkey = ((mleaf_t *)currententity->topnode)->key;
 
 			// FIXME: use bounding-box-based frustum clipping info?
-			R_RenderFace (psurf, clipflags);
+			R_RenderFace(psurf, v, clipflags);
 		}
 	}
 }
@@ -419,7 +420,8 @@ void R_DrawSubmodelPolygons (model_t *pmodel, int clipflags)
 R_RecursiveWorldNode
 ================
 */
-void R_RecursiveWorldNode (mnode_t *node, int clipflags)
+static void
+R_RecursiveWorldNode(mnode_t *node, view_t *v, int clipflags)
 {
 	int			i, c, side, *pindex, rejected;
 	vec3_t		acceptpt, rejectpt;
@@ -455,8 +457,8 @@ again:
 			rejectpt[1] = node->minmaxs[pindex[1]];
 			rejectpt[2] = node->minmaxs[pindex[2]];
 
-			d = DotProduct (rejectpt, view_clipplanes[i].normal);
-			d -= view_clipplanes[i].dist;
+			d = DotProduct (rejectpt, v->clipplanes[i].normal);
+			d -= v->clipplanes[i].dist;
 
 			if (d <= 0)
 				return;
@@ -465,8 +467,8 @@ again:
 			acceptpt[1] = node->minmaxs[pindex[3+1]];
 			acceptpt[2] = node->minmaxs[pindex[3+2]];
 
-			d = DotProduct (acceptpt, view_clipplanes[i].normal);
-			d -= view_clipplanes[i].dist;
+			d = DotProduct (acceptpt, v->clipplanes[i].normal);
+			d -= v->clipplanes[i].dist;
 
 			if (d >= 0)
 				clipflags &= ~(1<<i);	// node is entirely on screen
@@ -505,12 +507,12 @@ again:
 
 		// find which side of the node we are on
 		plane = node->plane;
-		dot = plane->type <= PLANE_Z ? modelorg[plane->type] : DotProduct(modelorg, plane->normal);
+		dot = plane->type <= PLANE_Z ? v->modelorg[plane->type] : DotProduct(v->modelorg, plane->normal);
 		dot -= plane->dist;
 		side = dot < 0;
 
 		// recurse down the children, front side first
-		R_RecursiveWorldNode (node->children[side], clipflags);
+		R_RecursiveWorldNode (node->children[side], v, clipflags);
 
 		// draw stuff
 		c = node->numsurfaces;
@@ -522,13 +524,13 @@ again:
 			if(dot < -BACKFACE_EPSILON){
 				do{
 					if((surf->flags & SURF_PLANEBACK) && surf->visframe == r_framecount)
-						rejected |= !R_RenderFace(surf, clipflags);
+						rejected |= !R_RenderFace(surf, v, clipflags);
 					surf++;
 				}while(--c);
 			}else if(dot > BACKFACE_EPSILON){
 				do{
 					if(!(surf->flags & SURF_PLANEBACK) && surf->visframe == r_framecount)
-						rejected |= !R_RenderFace(surf, clipflags);
+						rejected |= !R_RenderFace(surf, v, clipflags);
 					surf++;
 				}while(--c);
 			}
@@ -559,21 +561,20 @@ again:
 R_RenderWorld
 ================
 */
-void R_RenderWorld (void)
+void R_RenderWorld (view_t *v)
 {
 	model_t		*clmodel;
 
 	currententity = &cl_entities[0];
-	VectorCopy (r_origin, modelorg);
 	clmodel = currententity->model;
 	r_pcurrentvertbase = clmodel->vertexes;
 
 	num_node_rejects = 0;
-	R_RecursiveWorldNode (clmodel->nodes, 15);
+	R_RecursiveWorldNode(clmodel->nodes, v, 15);
 }
 
 void
-R_RenderBlendedBrushes(void)
+R_RenderBlendedBrushes(view_t *v)
 {
 	model_t *clmodel;
 	nodereject_t *rej;
@@ -581,7 +582,6 @@ R_RenderBlendedBrushes(void)
 	unsigned i;
 
 	currententity = &cl_entities[0];
-	VectorCopy (r_origin, modelorg);
 	clmodel = currententity->model;
 	r_pcurrentvertbase = clmodel->vertexes;
 
@@ -595,7 +595,7 @@ R_RenderBlendedBrushes(void)
 		surf = cl.worldmodel->surfaces + rej->node->firstsurface;
 		R_BeginEdgeFrame();
 		for(i = 0; i < rej->node->numsurfaces; i++, surf++)
-			R_RenderFace(surf, rej->clipflags);
-		R_ScanEdges();
+			R_RenderFace(surf, v, rej->clipflags);
+		R_ScanEdges(v);
 	}
 }

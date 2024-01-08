@@ -52,8 +52,6 @@ typedef struct entity_s
 	byte alpha;
 } entity_t;
 
-
-
 // !!! if this is changed, it must be changed in asm_draw.h too !!!
 typedef struct
 {
@@ -77,9 +75,7 @@ typedef struct
 	float		xOrigin;			// should probably always be 0.5
 	float		yOrigin;			// between be around 0.3 to 0.5
 
-	vec3_t		vieworg;
-	vec3_t		viewangles;
-
+	view_t		view;
 	float		fov_x, fov_y;
 
 	int			ambientlight[3];
@@ -91,7 +87,6 @@ typedef struct
 //
 
 extern	refdef_t	r_refdef;
-extern vec3_t	r_origin, vpn, vright, vup;
 
 extern	struct texture_s	*r_notexture_mip;
 

@@ -29,9 +29,7 @@ static int current_iv, edge_head_u_shift20, edge_tail_u_shift20;
 static edge_t edge_head, edge_tail, edge_aftertail, edge_sentinel;
 static float fv;
 
-static void (*pdrawfunc)(void);
-
-void R_GenerateSpans (void);
+void R_GenerateSpans(void);
 
 void R_LeadingEdge (edge_t *edge);
 void R_TrailingEdge (surf_t *surf, edge_t *edge);
@@ -60,7 +58,6 @@ void R_BeginEdgeFrame (void)
 	surfaces[1].flags = SURF_DRAWBACKGROUND;
 
 	// put the background behind everything in the world
-	pdrawfunc = R_GenerateSpans;
 	surfaces[1].key = 0x7FFFFFFF;
 	r_currentkey = 0;
 
@@ -435,7 +432,8 @@ Output:
 Each surface has a linked list of its visible spans
 ==============
 */
-void R_ScanEdges (void)
+void
+R_ScanEdges(view_t *v)
 {
 	int		iv, bottom;
 	espan_t	*basespan_p;
@@ -491,14 +489,14 @@ void R_ScanEdges (void)
 			R_InsertNewEdges (newedges[iv], edge_head.next);
 		}
 
-		(*pdrawfunc) ();
+		R_GenerateSpans();
 
 		// flush the span list if we can't be sure we have enough spans left for
 		// the next scan
 		if (span_p >= max_span_p)
 		{
 			r_outofspans++;
-			D_DrawSurfaces ();
+			D_DrawSurfaces(v);
 
 			// clear the surface span pointers
 			for (s = &surfaces[1] ; s<surface_p ; s++)
@@ -525,10 +523,8 @@ void R_ScanEdges (void)
 	if (newedges[iv])
 		R_InsertNewEdges (newedges[iv], edge_head.next);
 
-	(*pdrawfunc) ();
+	R_GenerateSpans();
 
 	// draw whatever's left in the span list
-	D_DrawSurfaces ();
+	D_DrawSurfaces(v);
 }
-
-

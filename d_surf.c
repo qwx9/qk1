@@ -180,12 +180,12 @@ D_CheckCacheGuard ();   // DEBUG
 D_CacheSurface
 ================
 */
-surfcache_t *D_CacheSurface (msurface_t *surface, int miplevel)
+surfcache_t *D_CacheSurface (entity_t *e, msurface_t *surface, int miplevel)
 {
 	surfcache_t	 *cache;
 
 	// if the surface is animating or flashing, flush the cache
-	r_drawsurf.texture = R_TextureAnimation (surface->texinfo->texture);
+	r_drawsurf.texture = R_TextureAnimation(e, surface->texinfo->texture);
 	r_drawsurf.lightadj[0] = d_lightstylevalue[surface->styles[0]];
 	r_drawsurf.lightadj[1] = d_lightstylevalue[surface->styles[1]];
 	r_drawsurf.lightadj[2] = d_lightstylevalue[surface->styles[2]];
@@ -194,7 +194,7 @@ surfcache_t *D_CacheSurface (msurface_t *surface, int miplevel)
 	// see if the cache holds apropriate data
 	cache = surface->cachespots[miplevel];
 
-	if(currententity == cl_entities || currententity->model->name[0] == '*')
+	if(e == cl_entities || e->model->name[0] == '*')
 	if (cache && !cache->dlight && surface->dlightframe != r_framecount
 			&& cache->texture == r_drawsurf.texture
 			&& cache->lightadj[0] == r_drawsurf.lightadj[0]
@@ -234,7 +234,7 @@ surfcache_t *D_CacheSurface (msurface_t *surface, int miplevel)
 	r_drawsurf.surf = surface;
 
 	c_surf++;
-	R_DrawSurface ();
+	R_DrawSurface(e);
 
 	return surface->cachespots[miplevel];
 }
