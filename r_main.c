@@ -16,9 +16,7 @@ bool	r_dowarp, r_dowarpold, r_viewchanged;
 
 mvertex_t	*r_pcurrentvertbase;
 
-int			c_surf;
 int			r_maxsurfsseen, r_maxedgesseen, r_cnumsurfs;
-bool	r_surfsonstack;
 int			r_clipflags;
 
 pixel_t *r_warpbuffer;

@@ -115,20 +115,17 @@ extern void *acolormap;	// FIXME: should go away
 
 typedef struct
 {
-	pixel_t		*surfdat;	// destination for generated surface
-	int			rowbytes;	// destination logical width in bytes
-	msurface_t	*surf;		// description for surface to generate
-	fixed8_t	lightadj[MAXLIGHTMAPS];
-							// adjust for lightmap levels for dynamic lighting
+	msurface_t	*m;		// description for surface to generate
 	texture_t	*texture;	// corrected for animating textures
-	int			surfmip;	// mipmapped ratio of surface texels / world pixels
-	int			surfwidth;	// in mipmapped texels
-	int			surfheight;	// in mipmapped texels
-} drawsurf_t;
+	pixel_t		*dat;	// destination for generated surface
+	int			mip;	// mipmapped ratio of surface texels / world pixels
+	int			width;	// in mipmapped texels
+	int			height;	// in mipmapped texels
+	unsigned	blocklights[3][18*18];
+	fixed8_t	lightadj[MAXLIGHTMAPS];
+}drawsurf_t;
 
-extern drawsurf_t	r_drawsurf;
-
-void R_DrawSurface (entity_t *e);
+void R_DrawSurface (entity_t *e, drawsurf_t *surf);
 
 // !!! if this is changed, it must be changed in d_ifacea.h too !!!
 #define TURB_TEX_SIZE	64		// base turbulent texture size
@@ -141,7 +138,6 @@ void R_DrawSurface (entity_t *e);
 extern float	skyspeed;
 extern float	skytime;
 
-extern int		c_surf;
 extern vrect_t	scr_vrect;
 
 extern pixel_t *r_warpbuffer;

@@ -1,24 +1,14 @@
 #include "quakedef.h"
 
-drawsurf_t	r_drawsurf;
-
-static int sourcetstep;
-static int surfrowbytes;	// used by ASM files
-static int r_stepback;
-static pixel_t *r_source, *r_sourcemax;
-static pixel_t *pbasesource;
-static void *prowdestbase;
-
-static unsigned blocklights[3][18*18];
-
 /*
 ===============
 R_AddDynamicLights
 ===============
 */
-void R_AddDynamicLights (entity_t *e)
+static void
+R_AddDynamicLights(entity_t *e, drawsurf_t *ds)
 {
-	msurface_t *surf;
+	msurface_t *ms;
 	int			lnum;
 	int			sd, td;
 	float		dist, rad, minlight;
@@ -28,55 +18,49 @@ void R_AddDynamicLights (entity_t *e)
 	int			smax, tmax;
 	mtexinfo_t	*tex;
 
-	surf = r_drawsurf.surf;
-	smax = (surf->extents[0]>>4)+1;
-	tmax = (surf->extents[1]>>4)+1;
-	tex = surf->texinfo;
+	ms = ds->m;
+	smax = (ms->extents[0]>>4)+1;
+	tmax = (ms->extents[1]>>4)+1;
+	tex = ms->texinfo;
 
-	for (lnum=0 ; lnum<MAX_DLIGHTS ; lnum++)
-	{
-		if ( !(surf->dlightbits & (1<<lnum) ) )
-			continue;		// not lit by this light
+	for(lnum = 0; lnum < MAX_DLIGHTS; lnum++){
+		if((ms->dlightbits & (1<<lnum)) == 0)
+			continue; // not lit by this light
 
 		rad = cl_dlights[lnum].radius;
 		VectorSubtract(cl_dlights[lnum].origin, e->origin, entorigin);
-		dist = DotProduct (entorigin, surf->plane->normal) - surf->plane->dist;
+		dist = DotProduct(entorigin, ms->plane->normal) - ms->plane->dist;
 		rad -= fabs(dist);
 		minlight = cl_dlights[lnum].minlight;
-		if (rad < minlight)
+		if(rad < minlight)
 			continue;
 		minlight = rad - minlight;
 
-		for (i=0 ; i<3 ; i++)
-		{
-			impact[i] = entorigin[i] -
-					surf->plane->normal[i]*dist;
-		}
+		for(i = 0; i < 3; i++)
+			impact[i] = entorigin[i] - ms->plane->normal[i]*dist;
 
-		local[0] = DotProduct (impact, tex->vecs[0]) + tex->vecs[0][3];
-		local[1] = DotProduct (impact, tex->vecs[1]) + tex->vecs[1][3];
+		local[0] = DotProduct(impact, tex->vecs[0]) + tex->vecs[0][3];
+		local[1] = DotProduct(impact, tex->vecs[1]) + tex->vecs[1][3];
 
-		local[0] -= surf->texturemins[0];
-		local[1] -= surf->texturemins[1];
+		local[0] -= ms->texturemins[0];
+		local[1] -= ms->texturemins[1];
 
-		for (t = 0 ; t<tmax ; t++)
-		{
+		for(t = 0; t < tmax; t++){
 			td = local[1] - t*16;
-			if (td < 0)
+			if(td < 0)
 				td = -td;
-			for (s=0 ; s<smax ; s++)
-			{
+			for(s = 0; s < smax ; s++){
 				sd = local[0] - s*16;
-				if (sd < 0)
+				if(sd < 0)
 					sd = -sd;
-				if (sd > td)
+				if(sd > td)
 					dist = sd + (td>>1);
 				else
 					dist = td + (sd>>1);
-				if (dist < minlight){
-					blocklights[0][t*smax + s] += (rad - dist)*256;
-					blocklights[1][t*smax + s] += (rad - dist)*256;
-					blocklights[2][t*smax + s] += (rad - dist)*256;
+				if(dist < minlight){
+					ds->blocklights[0][t*smax + s] += (rad - dist)*256;
+					ds->blocklights[1][t*smax + s] += (rad - dist)*256;
+					ds->blocklights[2][t*smax + s] += (rad - dist)*256;
 				}
 			}
 		}
@@ -90,7 +74,8 @@ R_BuildLightMap
 Combine and scale multiple lightmaps into the 8.8 format in blocklights
 ===============
 */
-void R_BuildLightMap (entity_t *e)
+static void
+R_BuildLightMap(entity_t *e, drawsurf_t *ds)
 {
 	int			smax, tmax;
 	int			t;
@@ -98,55 +83,51 @@ void R_BuildLightMap (entity_t *e)
 	byte		*lightmap;
 	unsigned	scale;
 	int			maps;
-	msurface_t	*surf;
+	msurface_t	*ms;
 
-	surf = r_drawsurf.surf;
-
-	smax = (surf->extents[0]>>4)+1;
-	tmax = (surf->extents[1]>>4)+1;
+	ms = ds->m;
+	smax = (ms->extents[0]>>4)+1;
+	tmax = (ms->extents[1]>>4)+1;
 	size = smax*tmax;
-	lightmap = surf->samples;
+	lightmap = ms->samples;
 
-	if (r_fullbright.value || !cl.worldmodel->lightdata)
-	{
-		memset(blocklights, 0, sizeof(blocklights));
+	if(r_fullbright.value || !cl.worldmodel->lightdata){
+		memset(ds->blocklights, 0, sizeof(ds->blocklights));
 		return;
 	}
 
 	// clear to ambient
-	for (i=0 ; i<size ; i++){
-		blocklights[0][i] = r_refdef.ambientlight[0]<<8;
-		blocklights[1][i] = r_refdef.ambientlight[1]<<8;
-		blocklights[2][i] = r_refdef.ambientlight[2]<<8;
+	for(i = 0; i < size; i++){
+		ds->blocklights[0][i] = r_refdef.ambientlight[0]<<8;
+		ds->blocklights[1][i] = r_refdef.ambientlight[1]<<8;
+		ds->blocklights[2][i] = r_refdef.ambientlight[2]<<8;
 	}
 
 	// add all the lightmaps
-	if (lightmap)
-		for (maps = 0 ; maps < MAXLIGHTMAPS && surf->styles[maps] != 255 ;
-			 maps++)
-		{
-			scale = r_drawsurf.lightadj[maps];	// 8.8 fraction
-			for (i=0 ; i<size ; i++){
-				blocklights[0][i] += lightmap[i*3+0] * scale;
-				blocklights[1][i] += lightmap[i*3+1] * scale;
-				blocklights[2][i] += lightmap[i*3+2] * scale;
+	if(lightmap){
+		for(maps = 0; maps < MAXLIGHTMAPS && ms->styles[maps] != 255; maps++){
+			scale = ds->lightadj[maps];	// 8.8 fraction
+			for(i = 0; i < size; i++){
+				ds->blocklights[0][i] += lightmap[i*3+0] * scale;
+				ds->blocklights[1][i] += lightmap[i*3+1] * scale;
+				ds->blocklights[2][i] += lightmap[i*3+2] * scale;
 			}
 			lightmap += size * 3;	// skip to next lightmap
 		}
+	}
 
 	// add all the dynamic lights
-	if (surf->dlightframe == r_framecount)
-		R_AddDynamicLights(e);
+	if(ms->dlightframe == r_framecount)
+		R_AddDynamicLights(e, ds);
 
 	// bound, invert, and shift
-	for (i=0 ; i<size ; i++)
-	{
-		t = (255*256 - (int)blocklights[0][i]) >> (8 - VID_CBITS);
-		blocklights[0][i] = max(t, (1<<6));
-		t = (255*256 - (int)blocklights[1][i]) >> (8 - VID_CBITS);
-		blocklights[1][i] = max(t, (1<<6));
-		t = (255*256 - (int)blocklights[2][i]) >> (8 - VID_CBITS);
-		blocklights[2][i] = max(t, (1<<6));
+	for(i = 0; i < size; i++){
+		t = (255*256 - (int)ds->blocklights[0][i]) >> (8 - VID_CBITS);
+		ds->blocklights[0][i] = max(t, (1<<6));
+		t = (255*256 - (int)ds->blocklights[1][i]) >> (8 - VID_CBITS);
+		ds->blocklights[1][i] = max(t, (1<<6));
+		t = (255*256 - (int)ds->blocklights[2][i]) >> (8 - VID_CBITS);
+		ds->blocklights[2][i] = max(t, (1<<6));
 	}
 }
 
@@ -161,28 +142,23 @@ Returns the proper texture for a given time and base texture
 texture_t *
 R_TextureAnimation(entity_t *e, texture_t *base)
 {
-	int		reletive;
-	int		count;
+	int relative, count;
 
-	if (e->frame)
-	{
-		if (base->alternate_anims)
-			base = base->alternate_anims;
-	}
+	if(e->frame && base->alternate_anims)
+		base = base->alternate_anims;
 
-	if (!base->anim_total)
+	if(!base->anim_total)
 		return base;
 
-	reletive = (int)(cl.time*10) % base->anim_total;
+	relative = (int)(cl.time*10) % base->anim_total;
 
 	count = 0;
-	while (base->anim_min > reletive || base->anim_max <= reletive)
-	{
+	while(base->anim_min > relative || base->anim_max <= relative){
 		base = base->anim_next;
-		if (!base)
-			fatal ("R_TextureAnimation: broken cycle");
-		if (++count > 100)
-			fatal ("R_TextureAnimation: infinite cycle");
+		if(!base)
+			fatal("R_TextureAnimation: broken cycle");
+		if(++count > 100)
+			fatal("R_TextureAnimation: infinite cycle");
 	}
 
 	return base;
@@ -252,7 +228,7 @@ R_TextureAnimation(entity_t *e, texture_t *base)
 #undef DrawSurfaceBlock_m2
 #undef DrawSurfaceBlock_m3
 
-typedef void (*drawfunc)(unsigned *lp[4], unsigned lw, int nb);
+typedef void (*drawfunc)(pixel_t *psource, pixel_t *prowdest, pixel_t *sourcemax, int deststep, int tstep, int stepback, unsigned *lp[4], unsigned lw, int nb);
 
 static const drawfunc drawsurf[2/*fullbright*/][2/*additive*/][4/*mipmap*/] = {
 	{
@@ -282,7 +258,8 @@ static const drawfunc drawsurf[2/*fullbright*/][2/*additive*/][4/*mipmap*/] = {
 R_DrawSurface
 ===============
 */
-void R_DrawSurface (entity_t *e)
+void
+R_DrawSurface(entity_t *e, drawsurf_t *ds)
 {
 	pixel_t	*basetptr;
 	int				smax, tmax, twidth, lightwidth;
@@ -292,68 +269,67 @@ void R_DrawSurface (entity_t *e)
 	int				r_numhblocks, r_numvblocks;
 	pixel_t	*pcolumndest;
 	texture_t		*mt;
+	msurface_t		*ms;
 	drawfunc draw;
 	unsigned *lp[3];
+	int sourcetstep, stepback;
+	pixel_t *source, *sourcemax;
 
 	// calculate the lightings
-	R_BuildLightMap(e);
+	R_BuildLightMap(e, ds);
 
-	surfrowbytes = r_drawsurf.rowbytes;
+	mt = ds->texture;
+	ms = ds->m;
 
-	mt = r_drawsurf.texture;
+	draw = drawsurf[mt->drawsurf][e != nil && (e->effects & EF_ADDITIVE) != 0][ds->mip];
 
-	draw = drawsurf[mt->drawsurf][e != nil && (e->effects & EF_ADDITIVE) != 0][r_drawsurf.surfmip];
-
-	r_source = mt->pixels + mt->offsets[r_drawsurf.surfmip];
+	source = mt->pixels + mt->offsets[ds->mip];
 
 	// the fractional light values should range from 0 to (VID_GRADES - 1) << 16
 	// from a source range of 0 - 255
 
-	texwidth = mt->width >> r_drawsurf.surfmip;
+	texwidth = mt->width >> ds->mip;
 
-	blocksize = 16 >> r_drawsurf.surfmip;
-	blockdivshift = 4 - r_drawsurf.surfmip;
+	blocksize = 16 >> ds->mip;
+	blockdivshift = 4 - ds->mip;
 
-	lightwidth = (r_drawsurf.surf->extents[0]>>4)+1;
+	lightwidth = (ms->extents[0]>>4)+1;
 
-	r_numhblocks = r_drawsurf.surfwidth >> blockdivshift;
-	r_numvblocks = r_drawsurf.surfheight >> blockdivshift;
+	r_numhblocks = ds->width >> blockdivshift;
+	r_numvblocks = ds->height >> blockdivshift;
 
 	// TODO: only needs to be set when there is a display settings change
 	horzblockstep = blocksize;
 
-	smax = mt->width >> r_drawsurf.surfmip;
+	smax = mt->width >> ds->mip;
 	twidth = texwidth;
-	tmax = mt->height >> r_drawsurf.surfmip;
+	tmax = mt->height >> ds->mip;
 	sourcetstep = texwidth;
-	r_stepback = tmax * twidth;
+	stepback = tmax * twidth;
+	sourcemax = source + (tmax * smax);
 
-	r_sourcemax = r_source + (tmax * smax);
-
-	soffset = r_drawsurf.surf->texturemins[0];
-	basetoffset = r_drawsurf.surf->texturemins[1];
+	soffset = ms->texturemins[0];
+	basetoffset = ms->texturemins[1];
 
 	// << 16 components are to guarantee positive values for %
-	soffset = ((soffset >> r_drawsurf.surfmip) + (smax << 16)) % smax;
-	basetptr = &r_source[((((basetoffset >> r_drawsurf.surfmip) + (tmax << 16)) % tmax) * twidth)];
+	soffset = ((soffset >> ds->mip) + (smax << 16)) % smax;
+	basetptr = &source[((((basetoffset >> ds->mip) + (tmax << 16)) % tmax) * twidth)];
 
-	pcolumndest = r_drawsurf.surfdat;
+	for(u = 0, pcolumndest = ds->dat; u < r_numhblocks; u++, pcolumndest += horzblockstep){
+		lp[0] = ds->blocklights[0]+u;
+		lp[1] = ds->blocklights[1]+u;
+		lp[2] = ds->blocklights[2]+u;
 
-	for (u=0 ; u<r_numhblocks; u++){
-		prowdestbase = pcolumndest;
-
-		pbasesource = basetptr + soffset;
-		lp[0] = blocklights[0]+u;
-		lp[1] = blocklights[1]+u;
-		lp[2] = blocklights[2]+u;
-
-		draw(lp, lightwidth, r_numvblocks);
+		draw(
+			pcolumndest,
+			basetptr+soffset, sourcemax,
+			ds->width, sourcetstep, stepback,
+			lp, lightwidth, r_numvblocks
+		);
 
 		soffset = soffset + blocksize;
-		if (soffset >= smax)
+		if(soffset >= smax)
 			soffset = 0;
-
-		pcolumndest += horzblockstep;
 	}
 }
 

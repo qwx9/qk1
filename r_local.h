@@ -188,7 +188,6 @@ void R_AliasClipTriangle (mtriangle_t *ptri, auxvert_t *auxverts);
 
 extern int		r_frustum_indexes[4*6];
 extern int		r_maxsurfsseen, r_maxedgesseen, r_cnumsurfs;
-extern bool	r_surfsonstack;
 extern bool	r_dowarpold, r_viewchanged;
 
 extern mleaf_t	*r_viewleaf, *r_oldviewleaf;

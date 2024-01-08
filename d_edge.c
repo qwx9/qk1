@@ -3,8 +3,7 @@
 float scale_for_mip;
 
 // FIXME: should go away
-extern void R_RotateBmodel (entity_t *entity, view_t *v);
-extern void R_TransformFrustum (view_t *v);
+void R_RotateBmodel(entity_t *entity, view_t *v);
 
 static int
 D_MipLevelForScale(float scale)
@@ -86,6 +85,7 @@ D_DrawSurfaces(view_t *v0)
 {
 	vec3_t local_modelorg, transformed_modelorg, world_transformed_modelorg;
 	surfcache_t *pcurrentcache;
+	drawsurf_t ds = {0};
 	msurface_t *pface;
 	int miplevel;
 	entity_t *e;
@@ -115,8 +115,6 @@ D_DrawSurfaces(view_t *v0)
 		if(alpha < 1)
 			alpha = 255;
 
-		blend = (s->flags & SURF_FENCE) || (r_drawflags & DRAW_BLEND);
-
 		t.z.stepu = s->d_zistepu;
 		t.z.stepv = s->d_zistepv;
 		t.z.origin = s->d_ziorigin;
@@ -142,12 +140,15 @@ D_DrawSurfaces(view_t *v0)
 			if(s->flags & SURF_FENCE)
 				miplevel = max(miplevel-1, 0);
 
-			pcurrentcache = D_CacheSurface(s->entity, pface, miplevel);
+			pcurrentcache = D_CacheSurface(s->entity, pface, &ds, miplevel);
 			t.p = pcurrentcache->pixels;
 			t.w = pcurrentcache->width;
 			D_CalcGradients(miplevel, pface, transformed_modelorg, &v, &t);
+			blend = (s->flags & SURF_FENCE) || (r_drawflags & DRAW_BLEND);
 			D_DrawSpans(s->spans, &t, alpha,
-				(alpha == 255 && s->flags & SURF_FENCE) ? SPAN_FENCE : (blend ? SPAN_BLEND : SPAN_SOLID)
+				(alpha == 255 && (s->flags & SURF_FENCE))
+					? SPAN_FENCE
+					: (blend ? SPAN_BLEND : SPAN_SOLID)
 			);
 		}
 

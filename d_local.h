@@ -83,7 +83,7 @@ void D_DrawSpans(espan_t *pspan, texvars_t *t, byte alpha, int spanfunc);
 
 void D_DrawSkyScans8 (espan_t *pspan);
 
-surfcache_t	*D_CacheSurface (entity_t *e, msurface_t *surface, int miplevel);
+surfcache_t	*D_CacheSurface(entity_t *e, msurface_t *ms, drawsurf_t *ds, int miplevel);
 
 extern int	*d_pscantable;
 extern int	d_scantable[MAXHEIGHT];
