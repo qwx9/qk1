@@ -181,7 +181,7 @@ D_CacheSurface
 ================
 */
 surfcache_t *
-D_CacheSurface(entity_t *e, msurface_t *ms, drawsurf_t *ds, int miplevel)
+D_CacheSurface(entity_t *e, msurface_t *ms, drawsurf_t *ds, int miplevel, void (*lock)(int))
 {
 	surfcache_t *cache;
 
@@ -192,6 +192,8 @@ D_CacheSurface(entity_t *e, msurface_t *ms, drawsurf_t *ds, int miplevel)
 	ds->lightadj[2] = d_lightstylevalue[ms->styles[2]];
 	ds->lightadj[3] = d_lightstylevalue[ms->styles[3]];
 
+	if(lock != nil)
+		lock(1);
 	// see if the cache holds apropriate data
 	cache = ms->cachespots[miplevel];
 
@@ -201,8 +203,11 @@ D_CacheSurface(entity_t *e, msurface_t *ms, drawsurf_t *ds, int miplevel)
 			&& cache->lightadj[0] == ds->lightadj[0]
 			&& cache->lightadj[1] == ds->lightadj[1]
 			&& cache->lightadj[2] == ds->lightadj[2]
-			&& cache->lightadj[3] == ds->lightadj[3] )
+			&& cache->lightadj[3] == ds->lightadj[3] ){
+		if(lock != nil)
+			lock(0);
 		return cache;
+	}
 
 	// determine shape of surface
 	surfscale = 1.0 / (1<<miplevel);
@@ -228,6 +233,8 @@ D_CacheSurface(entity_t *e, msurface_t *ms, drawsurf_t *ds, int miplevel)
 	cache->lightadj[3] = ds->lightadj[3];
 	ds->m = ms;
 	R_DrawSurface(e, ds);
+	if(lock != nil)
+		lock(0);
 
 	return ms->cachespots[miplevel];
 }

@@ -36,7 +36,8 @@ void D_Sky_uv_To_st (int u, int v, fixed16_t *s, fixed16_t *t, float skydist)
 D_DrawSkyScans8
 =================
 */
-void D_DrawSkyScans8 (espan_t *pspan)
+void
+D_DrawSkyScans8(espan_t *pspan, int first, int end)
 {
 	int count, spancount, u, v, spancountminus1;
 	pixel_t *pdest, pix;
@@ -57,6 +58,8 @@ void D_DrawSkyScans8 (espan_t *pspan)
 
 	do
 	{
+		if(pspan->v < first || pspan->v >= end)
+			continue;
 		pdest = dvars.fb + pspan->v*dvars.w + pspan->u;
 		count = pspan->count;
 		pz = dvars.zb + pspan->v*dvars.w + pspan->u;

@@ -69,7 +69,7 @@ D_DrawSpanGetMax(float u, float v)
 }
 
 void
-D_DrawSpans(espan_t *pspan, texvars_t *tv, byte alpha, int spanfunc)
+D_DrawSpans(espan_t *pspan, texvars_t *tv, byte alpha, int spanfunc, int first, int end)
 {
 	int			count, spancount, izistep, spancountminus1, spanshift, spanmax;
 	pixel_t		*pdest;
@@ -95,6 +95,8 @@ D_DrawSpans(espan_t *pspan, texvars_t *tv, byte alpha, int spanfunc)
 	fogenabled = isfogged();
 
 	do{
+		if(pspan->v < first || pspan->v >= end)
+			continue;
 		pdest = dvars.fb + pspan->v*dvars.w + pspan->u;
 		pz = dvars.zb + pspan->v*dvars.w + pspan->u;
 		zi = tv->z.origin + pspan->v*tv->z.stepv + pspan->u*tv->z.stepu;

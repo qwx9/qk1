@@ -1,3 +1,9 @@
+#define _GNU_SOURCE
+#include <pthread.h>
+#include <sys/syscall.h>
+#include <unistd.h>
+#include <limits.h>
+#include "fast_barrier.h"
 #include "quakedef.h"
 
 float scale_for_mip;
@@ -23,7 +29,7 @@ D_MipLevelForScale(float scale)
 }
 
 static void
-D_DrawSolidSurface(surf_t *surf, pixel_t color)
+D_DrawSolidSurface(surf_t *surf, pixel_t color, int first, int end)
 {
 	espan_t *span;
 	pixel_t *pdest;
@@ -31,6 +37,8 @@ D_DrawSolidSurface(surf_t *surf, pixel_t color)
 	int u, u2;
 
 	for(span = surf->spans; span; span=span->pnext){
+		if(span->v < first || span->v >= end)
+			continue;
 		pdest = dvars.fb + span->v*dvars.w;
 		pz = dvars.zb + span->v*dvars.w;
 		memset(pz, 0xfe, span->count*sizeof(*pz));
@@ -80,8 +88,30 @@ D_CalcGradients(int miplevel, msurface_t *pface, vec3_t transformed_modelorg, vi
 	tv->t.bbextent = ((pface->extents[1] << 16) >> miplevel) - 1;
 }
 
-void
-D_DrawSurfaces(view_t *v0)
+static fast_barrier_t spansgobrr, spansgohome;
+static pthread_spinlock_t spancache;
+
+typedef struct span_thread_t span_thread_t;
+
+struct span_thread_t {
+	pthread_t tid;
+	int n;
+	int first;
+	int end;
+};
+
+static int nthreads = 8;
+static bool spawned = false;
+static view_t *v0;
+
+static void
+spancachelock(int n)
+{
+	(n ? pthread_spin_lock : pthread_spin_unlock)(&spancache);
+}
+
+static void
+spannothread(view_t *v0, int first, int end)
 {
 	vec3_t local_modelorg, transformed_modelorg, world_transformed_modelorg;
 	surfcache_t *pcurrentcache;
@@ -90,23 +120,35 @@ D_DrawSurfaces(view_t *v0)
 	int miplevel;
 	entity_t *e;
 	texvars_t t;
-	surf_t *s;
 	byte alpha;
 	bool blend;
+	surf_t *s;
 	view_t v;
+	espan_t *sp;
+	bool yes;
+
+	///uvlong t0 = nanosec();
 
 	memmove(&v, v0, sizeof(v));
 	TransformVector(v.modelorg, transformed_modelorg, &v);
 	VectorCopy(transformed_modelorg, world_transformed_modelorg);
 
 	// TODO: could preset a lot of this at mode set time
-	for(s = &surfaces[1]; s < surface_p; s++){
-		if(!s->spans)
+	for(s = surfaces+1; s < surface_p; s++){
+		e = s->entity;
+		if(!s->spans || ((surfdrawflags(s->flags) | entdrawflags(e)) ^ r_drawflags))
 			continue;
 
-		e = s->entity;
-		if((surfdrawflags(s->flags) | entdrawflags(e)) ^ r_drawflags)
+		yes = false;
+		for(sp = s->spans; sp != nil; sp = sp->pnext){
+			if(sp->v >= first && sp->v < end){
+				yes = true;
+				break;
+			}
+		}
+		if(!yes)
 			continue;
+
 		alpha = 255;
 		if(enthasalpha(e) && e->alpha != 255)
 			alpha = e->alpha;
@@ -127,20 +169,20 @@ D_DrawSurfaces(view_t *v0)
 
 		pface = s->data;
 		if(s->flags & SURF_DRAWSKY){
-			D_DrawSkyScans8(s->spans);
+			D_DrawSkyScans8(s->spans, first, end);
 		}else if(s->flags & SURF_DRAWBACKGROUND){
-			D_DrawSolidSurface(s, q1pal[(int)r_clearcolor.value & 0xFF]);
+			D_DrawSolidSurface(s, q1pal[(int)r_clearcolor.value & 0xFF], first, end);
 		}else if(s->flags & SURF_DRAWTURB){
 			t.p = pface->texinfo->texture->pixels;
 			t.w = 64;
 			D_CalcGradients(0, pface, transformed_modelorg, &v, &t);
-			D_DrawSpans(s->spans, &t, alpha, SPAN_TURB);
+			D_DrawSpans(s->spans, &t, alpha, SPAN_TURB, first, end);
 		}else{
 			miplevel = D_MipLevelForScale(s->nearzi * scale_for_mip * pface->texinfo->mipadjust);
 			if(s->flags & SURF_FENCE)
 				miplevel = max(miplevel-1, 0);
 
-			pcurrentcache = D_CacheSurface(s->entity, pface, &ds, miplevel);
+			pcurrentcache = D_CacheSurface(s->entity, pface, &ds, miplevel, spancachelock);
 			t.p = pcurrentcache->pixels;
 			t.w = pcurrentcache->width;
 			D_CalcGradients(miplevel, pface, transformed_modelorg, &v, &t);
@@ -148,7 +190,9 @@ D_DrawSurfaces(view_t *v0)
 			D_DrawSpans(s->spans, &t, alpha,
 				(alpha == 255 && (s->flags & SURF_FENCE))
 					? SPAN_FENCE
-					: (blend ? SPAN_BLEND : SPAN_SOLID)
+					: (blend ? SPAN_BLEND : SPAN_SOLID),
+				first,
+				end
 			);
 		}
 
@@ -156,5 +200,182 @@ D_DrawSurfaces(view_t *v0)
 			VectorCopy(world_transformed_modelorg, transformed_modelorg);
 			memmove(&v, v0, sizeof(v));
 		}
+	}
+
+	///uvlong t1 = nanosec();
+	///if(first != 0 || end != vid.height)
+	///	fprintf(stderr, "@%d %llu\n", 0, t1-t0);
+}
+
+static void *
+spanthread(void *th_)
+{
+	vec3_t local_modelorg, transformed_modelorg, world_transformed_modelorg;
+	surfcache_t *pcurrentcache;
+	span_thread_t *th = th_;
+	drawsurf_t ds = {0};
+	msurface_t *pface;
+	int miplevel, ns;
+	entity_t *e;
+	texvars_t t;
+	byte alpha;
+	bool blend;
+	surf_t *s;
+	espan_t *sp;
+	bool yes;
+	view_t v;
+
+	for(;;){
+		fast_barrier_wait(&spansgobrr);
+
+		//uvlong t0 = nanosec();
+		memmove(&v, v0, sizeof(v));
+		TransformVector(v.modelorg, transformed_modelorg, &v);
+		VectorCopy(transformed_modelorg, world_transformed_modelorg);
+		ns = 0;
+
+		// TODO: could preset a lot of this at mode set time
+		for(s = surfaces+1; s < surface_p; s++){
+			e = s->entity;
+			if(!s->spans || ((surfdrawflags(s->flags) | entdrawflags(e)) ^ r_drawflags))
+				continue;
+			yes = false;
+			for(sp = s->spans; sp != nil; sp = sp->pnext){
+				if(sp->v >= th->first && sp->v < th->end){
+					yes = true;
+					break;
+				}
+			}
+			if(!yes)
+				continue;
+			ns++;
+			alpha = 255;
+			if(enthasalpha(e) && e->alpha != 255)
+				alpha = e->alpha;
+			else if(s->flags & SURF_TRANS)
+				alpha *= alphafor(s->flags);
+			if(alpha < 1)
+				alpha = 255;
+
+			t.z.stepu = s->d_zistepu;
+			t.z.stepv = s->d_zistepv;
+			t.z.origin = s->d_ziorigin;
+
+			if(insubmodel(s)){
+				VectorSubtract(v.org, e->origin, local_modelorg);
+				TransformVector(local_modelorg, transformed_modelorg, &v);
+				R_RotateBmodel(e, &v);
+			}
+
+			pface = s->data;
+			if(s->flags & SURF_DRAWSKY){
+				D_DrawSkyScans8(s->spans, th->first, th->end);
+			}else if(s->flags & SURF_DRAWBACKGROUND){
+				D_DrawSolidSurface(s, q1pal[(int)r_clearcolor.value & 0xFF], th->first, th->end);
+			}else if(s->flags & SURF_DRAWTURB){
+				t.p = pface->texinfo->texture->pixels;
+				t.w = 64;
+				D_CalcGradients(0, pface, transformed_modelorg, &v, &t);
+				D_DrawSpans(s->spans, &t, alpha, SPAN_TURB, th->first, th->end);
+			}else{
+				miplevel = D_MipLevelForScale(s->nearzi * scale_for_mip * pface->texinfo->mipadjust);
+				if(s->flags & SURF_FENCE)
+					miplevel = max(miplevel-1, 0);
+
+				pcurrentcache = D_CacheSurface(s->entity, pface, &ds, miplevel, spancachelock);
+				t.p = pcurrentcache->pixels;
+				t.w = pcurrentcache->width;
+				D_CalcGradients(miplevel, pface, transformed_modelorg, &v, &t);
+				blend = (s->flags & SURF_FENCE) || (r_drawflags & DRAW_BLEND);
+				D_DrawSpans(s->spans, &t, alpha,
+					(alpha == 255 && (s->flags & SURF_FENCE))
+						? SPAN_FENCE
+						: (blend ? SPAN_BLEND : SPAN_SOLID),
+					th->first,
+					th->end
+				);
+			}
+
+			if(insubmodel(s)){
+				VectorCopy(world_transformed_modelorg, transformed_modelorg);
+				memmove(&v, v0, sizeof(v));
+			}
+		}
+
+		///uvlong t1 = nanosec();
+		///fprintf(stderr, "@%d %llu\n", th->n, t1-t0);
+		//fprintf(stderr, "!%d %d\n", th->n, ns);
+		fast_barrier_wait(&spansgohome);
+	}
+
+	return nil;
+}
+
+static span_thread_t *threads;
+
+void
+D_DrawSurfaces(view_t *v0_)
+{
+	static int lastheight = -1;
+	span_thread_t *t;
+	int i, split, dt, n, y;
+
+	if(lastheight < 0)
+		pthread_spin_init(&spancache, PTHREAD_PROCESS_PRIVATE);
+
+	if(nthreads > 1 && threads == nil){
+		pthread_barrierattr_t battr;
+		cpu_set_t set;
+
+		pthread_barrierattr_setpshared(&battr, PTHREAD_PROCESS_PRIVATE);
+		fast_barrier_init(&spansgobrr, &battr, nthreads);
+		fast_barrier_init(&spansgohome, &battr, nthreads);
+
+		threads = calloc(1, sizeof(*threads) * nthreads);
+		for(t = threads, i = 0; i < nthreads; i++, t++){
+			t->n = i;
+			CPU_ZERO(&set);
+			CPU_SET(2*i, &set);
+			if(i == 0){
+				sched_setaffinity(getpid(), sizeof(set), &set);
+			}else{
+				pthread_create(&t->tid, nil, spanthread, t);
+				pthread_setaffinity_np(t->tid, sizeof(set), &set);
+			}
+		}
+		spawned = true;
+	}
+	if(threads != nil && lastheight != vid.height){
+		lastheight = vid.height;
+		split = (nthreads+2)*nthreads/8;
+		dt = vid.height/2 / split;
+		n = dt*nthreads/2;
+		y = 0;
+		for(t = threads, i = 0; i < nthreads; i++, t++){
+			t->first = y;
+			t->end = y = y + n;
+			if((n -= dt) == 0){
+				dt = -dt;
+				n = -dt;
+			}
+			///fprintf(stderr, "# %d: %d...%d\n", i, t->first, t->end);
+		}
+		t[-1].end = vid.height;
+	}
+
+	v0 = v0_;
+	if(nthreads < 2 || (r_drawflags & DRAW_BLEND) != 0){
+		// overhead (lots of small objects + synchronization)
+		// not worth it - run it all in the same thread
+		spannothread(v0, 0, vid.height);
+	}else{
+		///uvlong t0 = nanosec();
+		fast_barrier_wait(&spansgobrr);
+		///uvlong t1 = nanosec();
+		spannothread(v0, threads[0].first, threads[0].end);
+		///uvlong t2 = nanosec();
+		fast_barrier_wait(&spansgohome);
+		///uvlong t3 = nanosec();
+		///fprintf(stderr, "---------- total=%llu start_barrier=%llu end_barrier=%llu\n", t3-t0, t1-t0, t3-t2);
 	}
 }

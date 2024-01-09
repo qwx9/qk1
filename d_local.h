@@ -3,7 +3,7 @@
 enum {
 	DS_SPAN_LIST_END = -128,
 
-	SURFCACHE_SIZE_AT_320X200 = 600*1024,
+	SURFCACHE_SIZE_AT_320X200 = 8*1024*1024,
 };
 
 typedef struct {
@@ -79,11 +79,11 @@ enum {
 	SPAN_TURB,
 };
 
-void D_DrawSpans(espan_t *pspan, texvars_t *t, byte alpha, int spanfunc);
+void D_DrawSpans(espan_t *pspan, texvars_t *t, byte alpha, int spanfunc, int first, int end);
 
-void D_DrawSkyScans8 (espan_t *pspan);
+void D_DrawSkyScans8 (espan_t *pspan, int first, int end);
 
-surfcache_t	*D_CacheSurface(entity_t *e, msurface_t *ms, drawsurf_t *ds, int miplevel);
+surfcache_t	*D_CacheSurface(entity_t *e, msurface_t *ms, drawsurf_t *ds, int miplevel, void (*lock)(int n));
 
 extern int	*d_pscantable;
 extern int	d_scantable[MAXHEIGHT];

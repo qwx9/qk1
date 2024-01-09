@@ -101,8 +101,6 @@ pixel_t addlight(entity_t *e, pixel_t x, int lr, int lg, int lb);
 void R_DrawSolidClippedSubmodelPolygons (model_t *pmodel, view_t *v);
 void R_DrawSubmodelPolygons (model_t *pmodel, view_t *v, int clipflags);
 
-void R_AddPolygonEdges (emitpoint_t *pverts, int numverts, int miplevel);
-surf_t *R_GetSurf (void);
 void R_AliasDrawModel (alight_t *plighting, view_t *v);
 void R_BeginEdgeFrame (void);
 void R_ScanEdges(view_t *v);
@@ -110,13 +108,6 @@ void D_DrawSurfaces(view_t *v);
 void R_InsertNewEdges (edge_t *edgestoadd, edge_t *edgelist);
 void R_StepActiveU (edge_t *pedge);
 void R_RemoveEdges (edge_t *pedge);
-
-extern void R_Surf8Start (void);
-extern void R_Surf8End (void);
-extern void R_Surf16Start (void);
-extern void R_Surf16End (void);
-extern void R_EdgeCodeStart (void);
-extern void R_EdgeCodeEnd (void);
 
 extern void R_RotateBmodel (entity_t *e, view_t *v);
 

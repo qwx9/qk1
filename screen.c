@@ -321,6 +321,7 @@ static void SCR_DrawFPS (void)
 		fps = host_framecount - lastcnt;
 		lastcnt = host_framecount;
 		lastframetime = t;
+fprintf(stderr, "%d\n", fps);
 	}
 	n = snprint(s, sizeof(s), "%d", fps);
 	Draw_String(vid.width - n*8, 0, s);
