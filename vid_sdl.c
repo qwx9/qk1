@@ -191,8 +191,7 @@ makewindow(void)
 	SDL_SetWindowResizable(win, SDL_TRUE);
 	SDL_SetWindowMinimumSize(win, 320, 240);
 	rend = SDL_CreateRenderer(win, -1,
-		(v_sync.value ? SDL_RENDERER_PRESENTVSYNC : 0) |
-		SDL_RENDERER_SOFTWARE
+		(v_sync.value ? SDL_RENDERER_PRESENTVSYNC : 0)
 	);
 	if(rend == nil)
 		fatal("SDL_CreateRenderer: %s", SDL_GetError());
