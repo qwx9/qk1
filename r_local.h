@@ -109,16 +109,6 @@ void R_AliasDrawModel (alight_t *plighting, view_t *v);
 void R_BeginEdgeFrame (void);
 void R_ScanEdges(view_t *v);
 void D_DrawSurfaces(view_t *v);
-void R_InsertNewEdges (edge_t *edgestoadd, edge_t *edgelist);
-void R_StepActiveU (edge_t *pedge);
-void R_RemoveEdges (edge_t *pedge);
-
-extern void R_Surf8Start (void);
-extern void R_Surf8End (void);
-extern void R_Surf16Start (void);
-extern void R_Surf16End (void);
-extern void R_EdgeCodeStart (void);
-extern void R_EdgeCodeEnd (void);
 
 extern void R_RotateBmodel (entity_t *e, view_t *v);
 

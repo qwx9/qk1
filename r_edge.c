@@ -29,11 +29,6 @@ static int current_iv, edge_head_u_shift20, edge_tail_u_shift20;
 static edge_t edge_head, edge_tail, edge_aftertail, edge_sentinel;
 static float fv;
 
-void R_GenerateSpans(void);
-
-void R_LeadingEdge (edge_t *edge);
-void R_TrailingEdge (surf_t *surf, edge_t *edge);
-
 //=============================================================================
 
 /*
@@ -41,7 +36,8 @@ void R_TrailingEdge (surf_t *surf, edge_t *edge);
 R_BeginEdgeFrame
 ==============
 */
-void R_BeginEdgeFrame (void)
+void
+R_BeginEdgeFrame(void)
 {
 	r_edges = Arr_AllocExtra(r_edges, &r_numallocatededges, r_outofedges);
 	edge_p = r_edges;
@@ -76,30 +72,18 @@ sentinel at the end (actually, this is the active edge table starting at
 edge_head.next).
 ==============
 */
-void R_InsertNewEdges (edge_t *edgestoadd, edge_t *edgelist)
+static void
+R_InsertNewEdges(edge_t *edgestoadd, edge_t *edgelist)
 {
 	edge_t	*next_edge;
 
 	do
 	{
-		next_edge = edgestoadd->next;
-edgesearch:
-		if (edgelist->u >= edgestoadd->u)
-			goto addedge;
-		edgelist=edgelist->next;
-		if (edgelist->u >= edgestoadd->u)
-			goto addedge;
-		edgelist=edgelist->next;
-		if (edgelist->u >= edgestoadd->u)
-			goto addedge;
-		edgelist=edgelist->next;
-		if (edgelist->u >= edgestoadd->u)
-			goto addedge;
-		edgelist=edgelist->next;
-		goto edgesearch;
+		while(edgelist->u < edgestoadd->u)
+			edgelist = edgelist->next;
 
 		// insert edgestoadd before edgelist
-addedge:
+		next_edge = edgestoadd->next;
 		edgestoadd->next = edgelist;
 		edgestoadd->prev = edgelist->prev;
 		edgelist->prev->next = edgestoadd;
@@ -113,7 +97,8 @@ addedge:
 R_RemoveEdges
 ==============
 */
-void R_RemoveEdges (edge_t *pedge)
+static void
+R_RemoveEdges(edge_t *pedge)
 {
 	do
 	{
@@ -128,36 +113,20 @@ void R_RemoveEdges (edge_t *pedge)
 R_StepActiveU
 ==============
 */
-void R_StepActiveU (edge_t *pedge)
+static void
+R_StepActiveU(edge_t *pedge)
 {
 	edge_t		*pnext_edge, *pwedge;
 
 	while (1)
 	{
-nextedge:
-		pedge->u += pedge->u_step;
-		if (pedge->u < pedge->prev->u)
-			goto pushback;
-		pedge = pedge->next;
+		while(1){
+			pedge->u += pedge->u_step;
+			if(pedge->u < pedge->prev->u)
+				break;
+			pedge = pedge->next;
+		}
 
-		pedge->u += pedge->u_step;
-		if (pedge->u < pedge->prev->u)
-			goto pushback;
-		pedge = pedge->next;
-
-		pedge->u += pedge->u_step;
-		if (pedge->u < pedge->prev->u)
-			goto pushback;
-		pedge = pedge->next;
-
-		pedge->u += pedge->u_step;
-		if (pedge->u < pedge->prev->u)
-			goto pushback;
-		pedge = pedge->next;
-
-		goto nextedge;
-
-pushback:
 		if (pedge == &edge_aftertail)
 			return;
 
@@ -172,9 +141,7 @@ pushback:
 		pwedge = pedge->prev->prev;
 
 		while (pwedge->u > pedge->u)
-		{
 			pwedge = pwedge->prev;
-		}
 
 		// put the edge back into the edge list
 		pedge->next = pwedge->next;
@@ -194,7 +161,8 @@ pushback:
 R_CleanupSpan
 ==============
 */
-void R_CleanupSpan (void)
+static void
+R_CleanupSpan(void)
 {
 	surf_t	*surf;
 	int		iu;
@@ -227,7 +195,8 @@ void R_CleanupSpan (void)
 R_TrailingEdge
 ==============
 */
-void R_TrailingEdge (surf_t *surf, edge_t *edge)
+static void
+R_TrailingEdge(surf_t *surf, edge_t *edge)
 {
 	espan_t			*span;
 	int				iu;
@@ -266,7 +235,8 @@ void R_TrailingEdge (surf_t *surf, edge_t *edge)
 R_LeadingEdge
 ==============
 */
-void R_LeadingEdge (edge_t *edge)
+static void
+R_LeadingEdge(edge_t *edge)
 {
 	espan_t			*span;
 	surf_t			*surf, *surf2;
@@ -391,7 +361,8 @@ gotposition:
 R_GenerateSpans
 ==============
 */
-void R_GenerateSpans (void)
+static void
+R_GenerateSpans(void)
 {
 	edge_t			*edge;
 	surf_t			*surf;
