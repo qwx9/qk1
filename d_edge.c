@@ -1,26 +1,7 @@
 #include "quakedef.h"
 
-float scale_for_mip;
-
 // FIXME: should go away
 void R_RotateBmodel(entity_t *entity, view_t *v);
-
-static int
-D_MipLevelForScale(float scale)
-{
-	int lmiplevel;
-
-	if(scale >= d_scalemip[0])
-		lmiplevel = 0;
-	else if(scale >= d_scalemip[1])
-		lmiplevel = 1;
-	else if(scale >= d_scalemip[2])
-		lmiplevel = 2;
-	else
-		lmiplevel = 3;
-
-	return max(d_minmip, lmiplevel);
-}
 
 static void
 D_DrawSolidSurface(surf_t *surf, pixel_t color)
@@ -87,7 +68,6 @@ D_DrawSurfaces(view_t *v0)
 	surfcache_t *pcurrentcache;
 	drawsurf_t ds = {0};
 	msurface_t *pface;
-	int miplevel;
 	entity_t *e;
 	texvars_t t;
 	surf_t *s;
@@ -136,14 +116,10 @@ D_DrawSurfaces(view_t *v0)
 			D_CalcGradients(0, pface, transformed_modelorg, &v, &t);
 			D_DrawSpans(s->spans, &t, alpha, SPAN_TURB);
 		}else{
-			miplevel = D_MipLevelForScale(s->nearzi * scale_for_mip * pface->texinfo->mipadjust);
-			if(s->flags & SURF_FENCE)
-				miplevel = max(miplevel-1, 0);
-
-			pcurrentcache = D_CacheSurface(s->entity, pface, &ds, miplevel);
+			pcurrentcache = D_CacheSurface(s->entity, pface, &ds, s->miplevel);
 			t.p = pcurrentcache->pixels;
 			t.w = pcurrentcache->width;
-			D_CalcGradients(miplevel, pface, transformed_modelorg, &v, &t);
+			D_CalcGradients(s->miplevel, pface, transformed_modelorg, &v, &t);
 			blend = (s->flags & SURF_FENCE) || (r_drawflags & DRAW_BLEND);
 			D_DrawSpans(s->spans, &t, alpha,
 				(alpha == 255 && (s->flags & SURF_FENCE))

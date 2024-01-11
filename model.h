@@ -62,21 +62,21 @@ typedef struct texture_s
 } texture_t;
 
 enum {
-	SURF_PLANEBACK = 1<<1,
-	SURF_DRAWSKY = 1<<2,
-	SURF_DRAWSPRITE = 1<<3,
-	SURF_DRAWTURB = 1<<4,
-	SURF_DRAWTILED = 1<<5,
-	SURF_DRAWBACKGROUND = 1<<6,
-	SURF_TRANS = 1<<8,
-	SURF_FENCE = 1<<9,
-	SURF_LAVA = 1<<10,
-	SURF_SLIME = 1<<11,
-	SURF_TELE = 1<<12,
-	SURF_IN_SUBMODEL = 1<<31, /* makes surf->flags negative */
+	SURF_PLANEBACK = 1<<0,
+	SURF_DRAWSKY = 1<<1,
+	SURF_DRAWSPRITE = 1<<2,
+	SURF_DRAWTURB = 1<<3,
+	SURF_DRAWTILED = 1<<4,
+	SURF_DRAWBACKGROUND = 1<<5,
+	SURF_TRANS = 1<<6,
+	SURF_FENCE = 1<<7,
+	SURF_LAVA = 1<<8,
+	SURF_SLIME = 1<<9,
+	SURF_TELE = 1<<10,
+	SURF_IN_SUBMODEL = 1<<11,
 };
 
-#define insubmodel(s) ((s)->flags < 0)
+#define insubmodel(s) ((s)->flags & SURF_IN_SUBMODEL)
 
 // !!! if this is changed, it must be changed in asm_draw.h too !!!
 typedef struct

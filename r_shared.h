@@ -71,8 +71,8 @@ typedef struct surf_s
 	struct espan_s	*spans;			// pointer to linked list of spans to draw
 	void		*data;				// associated data like msurface_t
 	entity_t	*entity;
-	int			flags;
-	float		nearzi;				// nearest 1/z on surface, for mipmapping
+	u16int		flags;
+	s16int		miplevel;
 	float		d_ziorigin;
 	float		d_zistepu;
 	float		d_zistepv;

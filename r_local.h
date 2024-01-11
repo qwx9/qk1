@@ -82,6 +82,8 @@ extern	float	xOrigin, yOrigin;
 
 extern	int		r_visframecount;
 
+extern float	scale_for_mip;
+
 //=============================================================================
 
 extern int r_drawflags;

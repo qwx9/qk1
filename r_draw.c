@@ -8,6 +8,8 @@
 
 static unsigned int cacheoffset;
 
+float scale_for_mip;
+
 int r_drawflags;
 
 static medge_t			*r_pedge;
@@ -326,6 +328,23 @@ void R_EmitCachedEdge (void)
 
 float alphafor(int flags);
 
+static int
+R_MipLevelForScale(float scale)
+{
+	int lmiplevel;
+
+	if(scale >= d_scalemip[0])
+		lmiplevel = 0;
+	else if(scale >= d_scalemip[1])
+		lmiplevel = 1;
+	else if(scale >= d_scalemip[2])
+		lmiplevel = 2;
+	else
+		lmiplevel = 3;
+
+	return max(d_minmip, lmiplevel);
+}
+
 /*
 ================
 R_RenderFace
@@ -490,8 +509,10 @@ int R_RenderFace (msurface_t *fa, view_t *v, int clipflags)
 	if (!r_emitted)
 		return 1;
 
+	surface_p->miplevel = R_MipLevelForScale(r_nearzi * scale_for_mip * fa->texinfo->mipadjust);
+	if(fa->flags & SURF_FENCE)
+		surface_p->miplevel = max(surface_p->miplevel-1, 0);
 	surface_p->data = (void *)fa;
-	surface_p->nearzi = r_nearzi;
 	surface_p->flags = fa->flags | (currententity == cl_entities ? 0 : SURF_IN_SUBMODEL);
 	surface_p->spanstate = 0;
 	surface_p->entity = currententity;
@@ -602,8 +623,10 @@ R_RenderBmodelFace(bedge_t *pedges, msurface_t *psurf, view_t *v)
 	if (!r_emitted)
 		return;
 
+	surface_p->miplevel = R_MipLevelForScale(r_nearzi * scale_for_mip * psurf->texinfo->mipadjust);
+	if(psurf->flags & SURF_FENCE)
+		surface_p->miplevel = max(surface_p->miplevel-1, 0);
 	surface_p->data = (void *)psurf;
-	surface_p->nearzi = r_nearzi;
 	surface_p->flags = psurf->flags | SURF_IN_SUBMODEL;
 	surface_p->spanstate = 0;
 	surface_p->entity = currententity;
