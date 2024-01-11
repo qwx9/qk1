@@ -17,22 +17,20 @@ typedef struct efrag_s
 
 typedef struct entity_s
 {
-	bool				forcelink;		// model changed
-
-	int						update_type;
-
+	struct model_s			*model;			// NULL = no model
+	struct efrag_s			*efrag;			// linked list of efrags
+	pixel_t					*colormap;
+	struct entity_s			*last_reject;
 	entity_state_t			baseline;		// to fill in defaults in updates
 
 	double					msgtime;		// time of last update
+
 	vec3_t					msg_origins[2];	// last two updates (0 is newest)
 	vec3_t					origin;
 	vec3_t					msg_angles[2];	// last two updates (0 is newest)
 	vec3_t					angles;
-	struct model_s			*model;			// NULL = no model
-	struct efrag_s			*efrag;			// linked list of efrags
 	int						frame;
 	float					syncbase;		// for client-side animations
-	pixel_t					*colormap;
 	int						effects;		// light, particals, etc
 	int						skinnum;		// for Alias models
 	int						visframe;		// last frame this entity was
@@ -41,15 +39,15 @@ typedef struct entity_s
 	int						dlightframe;	// dynamic lighting
 	int						dlightbits;
 
+	bool forcelink;		// model changed
+	int update_type;
+	byte alpha;
+
 // FIXME: could turn these into a union
 	int						trivial_accept;
 	struct mnode_s			*topnode;		// for bmodels, first world node
 											//  that splits bmodel, or NULL if
 											//  not split
-
-	struct entity_s			*last_reject;
-
-	byte alpha;
 } entity_t;
 
 // !!! if this is changed, it must be changed in asm_draw.h too !!!

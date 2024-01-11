@@ -42,7 +42,6 @@ typedef struct mplane_s
 	float	dist;
 	byte	type;			// for texture axis selection and fast side tests
 	byte	signbits;		// signx + signy<<1 + signz<<1
-	byte	pad[2];
 } mplane_t;
 
 enum {
@@ -52,12 +51,12 @@ enum {
 typedef struct texture_s
 {
 	char name[16];
+	struct texture_s *anim_next;		// in the animation sequence
+	struct texture_s *alternate_anims;	// bmodels in frmae 1 use these
 	int drawsurf;
 	int width, height;
 	int anim_total;				// total tenths in sequence ( 0 = no)
 	int anim_min, anim_max;		// time for this frame min <=time< max
-	struct texture_s *anim_next;		// in the animation sequence
-	struct texture_s *alternate_anims;	// bmodels in frmae 1 use these
 	int offsets[MIPLEVELS];		// four mip maps stored
 	pixel_t pixels[];
 } texture_t;
@@ -88,9 +87,9 @@ typedef struct
 
 typedef struct
 {
+	texture_t	*texture;
 	float		vecs[2][4];
 	float		mipadjust;
-	texture_t	*texture;
 	int			flags;
 } mtexinfo_t;
 
@@ -187,7 +186,6 @@ typedef struct mspriteframe_s
 {
 	int		width;
 	int		height;
-	void	*pcachespot;			// remove?
 	float	up, down, left, right;
 	pixel_t	pixels[];
 } mspriteframe_t;
@@ -201,11 +199,11 @@ typedef struct
 
 typedef struct
 {
-	spriteframetype_t	type;
 	union {
 		mspriteframe_t *frameptr;
 		mspritegroup_t *framegrp;
 	};
+	spriteframetype_t	type;
 } mspriteframedesc_t;
 
 typedef struct
@@ -216,7 +214,6 @@ typedef struct
 	int					maxheight;
 	int					numframes;
 	float				beamlength;		// remove?
-	void				*cachespot;		// remove?
 	mspriteframedesc_t	frames[];
 } msprite_t;
 
@@ -242,7 +239,6 @@ typedef struct
 typedef struct
 {
 	aliasskintype_t		type;
-	void				*pcachespot;
 	int					skin;
 } maliasskindesc_t;
 
@@ -315,9 +311,9 @@ typedef struct
 
 typedef struct model_s
 {
-	char		name[Npath];
-	int	needload;		// bmodels and sprites don't cache normally
-	bool	blend;
+	char name[Npath];
+	int needload;		// bmodels and sprites don't cache normally
+	bool blend;
 
 	int ver;
 	int numwads;
@@ -339,49 +335,36 @@ typedef struct model_s
 //
 // brush model
 //
-	int			firstmodelsurface, nummodelsurfaces;
-
-	int			numsubmodels;
 	submodel_t	*submodels;
-
-	int			numplanes;
 	mplane_t	*planes;
-
-	int			numleafs;		// number of visible leafs, not counting 0
 	mleaf_t		*leafs;
-
-	int			numvertexes;
 	mvertex_t	*vertexes;
-
-	int			numedges;
 	medge_t		*edges;
-
-	int			numnodes;
 	mnode_t		*nodes;
-
-	int			numtexinfo;
 	mtexinfo_t	*texinfo;
-
-	int			numsurfaces;
 	msurface_t	*surfaces;
-
-	int			numsurfedges;
 	int			*surfedges;
-
-	int			numclipnodes;
 	mclipnode_t	*clipnodes;
-
-	int			nummarksurfaces;
 	msurface_t	**marksurfaces;
-
-	hull_t		hulls[MAX_MAP_HULLS];
-
-	int			numtextures;
 	texture_t	**textures;
-
 	byte		*visdata;
 	byte		*lightdata;
 	char		*entities;
+
+	int			firstmodelsurface, nummodelsurfaces;
+	int			numsubmodels;
+	int			numplanes;
+	int			numleafs;		// number of visible leafs, not counting 0
+	int			numvertexes;
+	int			numedges;
+	int			numnodes;
+	int			numtexinfo;
+	int			numsurfaces;
+	int			numsurfedges;
+	int			numclipnodes;
+	int			nummarksurfaces;
+	hull_t		hulls[MAX_MAP_HULLS];
+	int			numtextures;
 
 //
 // additional model data

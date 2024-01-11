@@ -54,26 +54,28 @@ extern	entity_t		*currententity;
 // !!! if this is changed, it must be changed in asm_draw.h too !!!
 typedef struct espan_s
 {
-	int				u, v, count;
-	struct espan_s	*pnext;
+	struct espan_s *pnext;
+	u16int v, u, count;
 } espan_t;
 
 typedef struct surf_s
 {
 	int			key;				// sorting key (BSP order)
-	int			flags;
 	s16int		last_u;				// set during tracing
 	s16int		spanstate;			// 0 = not in span
 									// 1 = in span
 									// -1 = in inverted span (end before
 									//  start)
-	float		nearzi;				// nearest 1/z on surface, for mipmapping
-	float		d_ziorigin, d_zistepu, d_zistepv;
 	struct surf_s	*next;			// active surface stack in r_edge.c
 	struct surf_s	*prev;			// used in r_edge.c for active surf stack
 	struct espan_s	*spans;			// pointer to linked list of spans to draw
 	void		*data;				// associated data like msurface_t
 	entity_t	*entity;
+	int			flags;
+	float		nearzi;				// nearest 1/z on surface, for mipmapping
+	float		d_ziorigin;
+	float		d_zistepu;
+	float		d_zistepv;
 } surf_t;
 
 extern int r_numallocatedbasespans;
@@ -116,11 +118,11 @@ extern void SetUpForLineScan(fixed8_t startvertu, fixed8_t startvertv,
 // !!! if this is changed, it must be changed in asm_draw.h too !!!
 typedef struct edge_s
 {
+	u16int	surfs[2];
 	fixed16_t		u;
 	fixed16_t		u_step;
-	struct edge_s	*prev, *next;
-	unsigned int	surfs[2];
-	struct edge_s	*nextremove;
 	float			nearzi;
+	struct edge_s	*prev, *next;
+	struct edge_s	*nextremove;
 	medge_t			*owner;
 } edge_t;

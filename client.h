@@ -59,8 +59,8 @@ typedef struct
 #define	MAX_BEAMS	128
 typedef struct
 {
-	int		entity;
 	struct model_s	*model;
+	int		entity;
 	float	endtime;
 	vec3_t	start, end;
 } beam_t;

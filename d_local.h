@@ -8,8 +8,8 @@ enum {
 
 typedef struct {
 	struct {
-		float stepu;
 		float stepv;
+		float stepu;
 		float origin;
 	}divz;
 	fixed16_t adjust;
@@ -17,14 +17,14 @@ typedef struct {
 }tavars_t;
 
 typedef struct {
-	pixel_t *p;
-	unsigned w;
-	tavars_t s, t;
 	struct {
-		float stepu;
-		float stepv;
 		float origin;
+		float stepv;
+		float stepu;
 	}z;
+	unsigned w;
+	pixel_t *p;
+	tavars_t s, t;
 }texvars_t;
 
 typedef struct {
@@ -45,13 +45,13 @@ typedef struct surfcache_s
 {
 	struct surfcache_s	*next;
 	struct surfcache_s 	**owner;		// NULL is an empty chunk of memory
+	struct texture_s	*texture;	// checked for animating textures
 	int					lightadj[MAXLIGHTMAPS]; // checked for strobe flush
 	int					dlight;
 	int					size;		// including header
 	int					width;
 	int					height;		// DEBUG only needed for debug
 	float				mipscale;
-	struct texture_s	*texture;	// checked for animating textures
 	pixel_t				pixels[];	// width*height elements
 } surfcache_t;
 

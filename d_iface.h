@@ -45,10 +45,10 @@ typedef struct
 {
 	pixel_t				*pskin;
 	maliasskindesc_t	*pskindesc;
-	int					skinwidth;
-	int					skinheight;
 	mtriangle_t			*ptriangles;
 	finalvert_t			*pfinalverts;
+	int					skinwidth;
+	int					skinheight;
 	int					numtriangles;
 	int					drawtype;
 	int					seamfixupX16;
@@ -56,11 +56,11 @@ typedef struct
 
 typedef struct
 {
-	int			nump;
 	emitpoint_t	*pverts;	// there's room for an extra element at [nump],
 							//  if the driver wants to duplicate element [0] at
 							//  element [nump] to avoid dealing with wrapping
 	mspriteframe_t	*pspriteframe;
+	int			nump;
 	vec3_t			vup, vright, vpn;	// in worldspace
 	float			nearzi;
 } spritedesc_t;

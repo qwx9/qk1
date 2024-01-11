@@ -22,9 +22,9 @@ int entdrawflags(entity_t *e);
 // viewmodel lighting
 
 typedef struct {
+	float		*plightvec;
 	int			ambientlight[3];
 	int			shadelight[3];
-	float		*plightvec;
 } alight_t;
 
 //===========================================================================

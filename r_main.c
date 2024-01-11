@@ -2,7 +2,7 @@
 
 void		*colormap;
 static vec3_t viewlightvec;
-static alight_t r_viewlighting = {{128,128,128}, {192,192,192}, viewlightvec};
+static alight_t r_viewlighting = {viewlightvec, {128,128,128}, {192,192,192}};
 int			r_numallocatededges;
 int			r_numallocatedbasespans;
 void		*r_basespans;

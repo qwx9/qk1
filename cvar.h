@@ -38,11 +38,11 @@ struct cvar_s
 {
 	char *name;
 	char *string;
-	bool archive;		// set to true to cause it to be saved to vars.rc
-	bool server;		// notifies players when changed
+	bool archive; // set to true to cause it to be saved to vars.rc
 	float value;
-	void (*cb) (cvar_t *);
 	struct cvar_s *next;
+	void (*cb) (cvar_t *);
+	bool server;		// notifies players when changed
 };
 
 void 	Cvar_RegisterVariable (cvar_t *variable);
