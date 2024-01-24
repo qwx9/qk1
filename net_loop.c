@@ -180,8 +180,9 @@ bool Loop_CanSendMessage (qsocket_t *sock)
 }
 
 
-bool Loop_CanSendUnreliableMessage (qsocket_t *) /*sock*/
+bool Loop_CanSendUnreliableMessage (qsocket_t *sock)
 {
+	USED(sock);
 	return true;
 }
 
