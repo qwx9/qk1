@@ -1002,24 +1002,22 @@ FloatNoSwap(float f)
 void
 initfs(char **paths)
 {
-	byte swaptest[2] = {1,0};
+#ifdef QUAKE_LITTLE_ENDIAN
+	BigShort = ShortSwap;
+	LittleShort = ShortNoSwap;
+	BigLong = LongSwap;
+	LittleLong = LongNoSwap;
+	BigFloat = FloatSwap;
+	LittleFloat = FloatNoSwap;
+#else
+	BigShort = ShortNoSwap;
+	LittleShort = ShortSwap;
+	BigLong = LongNoSwap;
+	LittleLong = LongSwap;
+	BigFloat = FloatNoSwap;
+	LittleFloat = FloatSwap;
+#endif
 
-	if(*(short *)swaptest == 1)
-	{
-		BigShort = ShortSwap;
-		LittleShort = ShortNoSwap;
-		BigLong = LongSwap;
-		LittleLong = LongNoSwap;
-		BigFloat = FloatSwap;
-		LittleFloat = FloatNoSwap;
-	}else{
-		BigShort = ShortNoSwap;
-		LittleShort = ShortSwap;
-		BigLong = LongNoSwap;
-		LittleLong = LongSwap;
-		BigFloat = FloatNoSwap;
-		LittleFloat = FloatSwap;
-	}
 	initns(paths);
 	chkreg();
 	Cmd_AddCommand("path", path);

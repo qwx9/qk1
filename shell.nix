@@ -5,6 +5,8 @@ stdenvNoCC.mkDerivation {
   SDL2
   openal
   pkg-config
+  meson
+  ninja
   gcc13
  ];
 }
