@@ -61,6 +61,5 @@ extern char lasterr[256];
 #define werrstr(fmt...) do{snprint(lasterr, sizeof(lasterr), fmt); }while(0)
 
 char *seprint(char *, char *, char *, ...);
-int nrand(int);
 
 #define DotProduct(x,y) DotProduct_((x),(y))

@@ -57,12 +57,6 @@ sys_timestamp(void)
 	return ts;
 }
 
-int
-nrand(int n)
-{
-	return random() % n;
-}
-
 void
 fatal(char *fmt, ...)
 {
@@ -187,7 +181,8 @@ main(int argc, char **argv)
 	if(snailenabled)
 		initsnail();
 
-	srand(nanosec() + time(nil));
+	m_random_init(time(nil));
+	srand(time(nil));
 
 	paths[1] = strdup(va("%s/.quake", getenv("HOME")));
 	Host_Init(nargs, argv, paths);

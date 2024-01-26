@@ -113,6 +113,7 @@ typedef u8int byte;
 #include "zone.h"
 #include "dat.h"
 #include "mathlib.h"
+#include "m_random.h"
 #include "fns.h"
 #include "bspfile.h"
 #include "vid.h"

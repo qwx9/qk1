@@ -39,7 +39,8 @@ OFILES=\
 	in_plan9.$O\
 	isnanf.$O\
 	keys.$O\
-	m_dotproduct`{test -f span_$objtype.s && echo -n _$objtype}.$O\
+	m_dotproduct`{test -f m_dotproduct_$objtype.s && echo -n _$objtype}.$O\
+	m_random.$O\
 	mathlib.$O\
 	menu.$O\
 	model.$O\
@@ -49,6 +50,7 @@ OFILES=\
 	model_bsp2.$O\
 	model_bsp30.$O\
 	model_sprite.$O\
+	mt19937-64.$O\
 	nanosec.$O\
 	net_dgrm_plan9.$O\
 	net_loop.$O\

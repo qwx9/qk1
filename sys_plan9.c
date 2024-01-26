@@ -176,7 +176,9 @@ threadmain(int argc, char **argv)
 		break;
 	default: usage();
 	}ARGEND
-	srand(getpid());
+
+	m_random_init(time(nil));
+	srand(time(nil));
 	/* ignore fp exceptions: rendering shit assumes they are */
 	setfcr(getfcr() & ~(FPOVFL|FPUNFL|FPINVAL|FPZDIV));
 	notify(croak);
