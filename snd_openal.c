@@ -711,13 +711,15 @@ trackcb(ALvoid *aux, ALvoid *sampledata, ALsizei numbytes)
 }
 
 static void *
-trackdecoder(void *f)
+trackdecoder(void *f_)
 {
 	byte b[65536];
 	ssize_t n;
 	fpos_t off;
 	int left;
+	FILE *f;
 
+	f = f_;
 	if(fgetpos(f, &off) == 0){
 		left = track.len;
 		for(;;){
