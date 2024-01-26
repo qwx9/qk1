@@ -113,6 +113,7 @@ cc = meson.get_compiler('c')
 if cc.get_id() == 'clang'
 	add_global_arguments(
 		'-Wno-microsoft-anon-tag',
+		'-D__wchar_t=__please_no_wchar_t_thank_you',
 		language: 'c',
 	)
 endif
