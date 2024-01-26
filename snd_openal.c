@@ -771,14 +771,14 @@ playcd(int nt, bool loop)
 		return;
 
 	track.decoder = -1;
-	track.reader = -1;
+	track.reader = 0;
 	if(pipe(s) != 0){
 err:
 		close(track.pcm);
 		close(track.dec);
 		if(track.decoder > 0)
 			waitpid(track.decoder, nil, 0);
-		if(track.reader > 0)
+		if(track.reader != 0)
 			pthread_join(track.reader, nil);
 		return;
 	}
