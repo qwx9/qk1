@@ -35,7 +35,7 @@ lerr(void)
 int
 sys_mkdir(char *path)
 {
-	return (mkdir(path, 0770) == 0 || errno == EEXIST) ? 0 : -1;
+	return (mkdir(path) == 0 || errno == EEXIST) ? 0 : -1;
 }
 
 char *
@@ -116,8 +116,8 @@ main(int argc, char **argv)
 
 	i = 0;
 	paths[i++] = ".";
-	paths[i++] = "/usr/games/quake";
-	paths[i++] = strdup(va("%s/.quake", getenv("HOME")));
+	paths[i++] = "c:\\quake_sw";
+	paths[i++] = "c:\\quake";
 
 	parg_init(&ps);
 	nargs = 0;
@@ -174,7 +174,7 @@ main(int argc, char **argv)
 			if(dt < sys_ticrate.value)
 				continue;
 			dt = sys_ticrate.value;
-		}
+        }
 		if(dt > sys_ticrate.value * 2)
 			t = t2;
 		else

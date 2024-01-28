@@ -1,0 +1,11 @@
+[binaries]
+c = 'x86_64-w64-mingw32.static-gcc'
+pkg-config = 'x86_64-w64-mingw32.static-pkg-config'
+strip = 'x86_64-w64-mingw32.static-strip'
+windres = 'x86_64-w64-mingw32.static-windres'
+
+[host_machine]
+system = 'windows'
+cpu_family = 'x86_64'
+cpu = 'x86_64'
+endian = 'little'

@@ -1,6 +1,5 @@
 #include "quakedef.h"
 #include <SDL.h>
-#include <sys/mman.h>
 
 pixel_t q1pal[256];
 
@@ -10,10 +9,8 @@ static SDL_Window *win;
 static pixel_t *vidbuffer;
 extern pixel_t *r_warpbuffer;
 
-static cvar_t v_snail = {"v_snail", "0"};
 static cvar_t v_fullscreen = {"v_fullscreen", "0", true};
 static cvar_t v_sync = {"v_sync", "1", true};
-static int oldvidbuffersz;
 
 static int
 curwinmode(void)
@@ -61,17 +58,8 @@ resetfb(void)
 	vid.conheight = vid.height;
 
 	n = (vid.width*vid.height+16)*sizeof(pixel_t);
-	if(snailenabled){
-		if(oldvidbuffersz != 0)
-			munmap(vidbuffer, oldvidbuffersz);
-		vidbuffer = mmap(nil, n, PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
-		oldvidbuffersz = n;
-	}else{
-		free(vidbuffer);
-		vidbuffer = emalloc(n);
-	}
-	free(r_warpbuffer);
-	r_warpbuffer = emalloc(n);
+	vidbuffer = realloc(vidbuffer, n);
+	r_warpbuffer = realloc(r_warpbuffer, n);
 	vid.maxwarpwidth = vid.width;
 	vid.maxwarpheight = vid.height;
 
@@ -147,12 +135,6 @@ v_fullscreen_cb(cvar_t *var)
 }
 
 static void
-v_snail_cb(cvar_t *var)
-{
-	sys_snail(var->value != 0);
-}
-
-static void
 hints(void)
 {
 	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
@@ -212,6 +194,13 @@ v_sync_cb(cvar_t *var)
 	makewindow();
 }
 
+char *
+sys_wrpath(void)
+{
+	// it's a bit awkward to use SDL for this but oh well
+	return SDL_GetPrefPath(nil, "NeinQuake");
+}
+
 void
 initfb(void)
 {
@@ -227,9 +216,7 @@ initfb(void)
 	IN_Grabm(1);
 
 	v_fullscreen.cb = v_fullscreen_cb;
-	v_snail.cb = v_snail_cb;
 	v_sync.cb = v_sync_cb;
 	Cvar_RegisterVariable(&v_fullscreen);
-	Cvar_RegisterVariable(&v_snail);
 	Cvar_RegisterVariable(&v_sync);
 }

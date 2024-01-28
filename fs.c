@@ -325,7 +325,7 @@ createfile(char *path)
 			return nil;
 	}
 
-	return fopen(path, "wbe");
+	return fopen(path, "wb");
 }
 
 void
@@ -353,31 +353,35 @@ openlmp(char *f, int *len)
 	Paklist *pl;
 	Pak *p;
 	Lump *l;
+	int fd;
 
 	fs_lmpfrom = nil;
-	for(pl=pkl; pl != nil; pl=pl->pl){
-		if(pl->p != nil){
-			p = pl->p;
-			l = p->l;
-			while(l < p->e){
-				if(strcmp(l->f, f) == 0){
-					fseek(p->bf, l->ofs, SEEK_SET);
-					if(len != nil)
-						*len = l->len;
-					fs_lmpfrom = pl->f;
-					return p->bf;
-				}
-				l++;
-			}
-			continue;
+	for(pl = pkl; pl != nil; pl = pl->pl){
+		snprint(d, sizeof(d), "%s/%s", pl->f, f);
+		if((bf = fopen(d, "rb")) != nil){
+			if(len != nil)
+				*len = bsize(bf);
+			fs_lmpfrom = pl->f;
+			return bf;
 		}
-		snprint(d, sizeof d, "%s/%s", pl->f, f);
-		if(bf = fopen(d, "rbe"), bf == nil)
+
+		if((p = pl->p) == nil)
 			continue;
-		if(len != nil)
-			*len = bsize(bf);
-		fs_lmpfrom = pl->f;
-		return bf;
+		for(l = p->l; l < p->e; l++){
+			if(strcmp(l->f, f) != 0)
+				continue;
+			if((fd = sys_dup(fileno(p->bf))) < 0)
+				break;
+			if((bf = fdopen(fd, "rb")) == nil){
+				close(fd);
+				break;
+			}
+			fseek(bf, l->ofs, SEEK_SET);
+			if(len != nil)
+				*len = l->len;
+			fs_lmpfrom = pl->f;
+			return bf;
+		}
 	}
 	werrstr("openlmp %s: not found", f);
 	return nil;
@@ -504,7 +508,7 @@ dumpcfg(void)
 
 	if(!host_initialized)
 		return;
-	bf = fopen(va("%s/config.cfg", fsdir), "wbe");
+	bf = fopen(va("%s/config.cfg", fsdir), "wb");
 	if(bf == nil){
 		Con_DPrintf("dumpcfg: %s\n", lerr());
 		return;
@@ -527,7 +531,7 @@ savnames(void)
 		*canld = 0;
 		memset(*s, 0, sizeof *s);
 		strcpy(*s, "--- UNUSED SLOT ---");
-		bf = fopen(va("%s/s%d.sav", fsdir, n), "rbe");
+		bf = fopen(va("%s/s%d.sav", fsdir, n), "rb");
 		if(bf == nil){
 			Con_DPrintf("savnames: %s\n", lerr());
 			continue;
@@ -609,7 +613,7 @@ dumpsav(char *f, char *cm)
 	float *fs, *fe;
 	FILE *bf;
 
-	bf = fopen(f, "wbe");
+	bf = fopen(f, "wb");
 	if(bf == nil)
 		return -1;
 	fprintf(bf, "%d\n%s\n", Nsavver, cm);
@@ -728,7 +732,7 @@ loadsav(char *f)
 	char *s;
 	FILE *bf;
 
-	bf = fopen(f, "rbe");
+	bf = fopen(f, "rb");
 	if(bf == nil)
 		return -1;
 	r = -1;
@@ -817,7 +821,7 @@ opendm(char *f, int trk)
 {
 	char s[16];
 
-	demobf = fopen(f, "wbe");
+	demobf = fopen(f, "wb");
 	if(demobf == nil)
 		return -1;
 	sprint(s, "%d\n", trk);
@@ -834,7 +838,7 @@ pak(char *f)
 	Lump *l;
 	Pak *p;
 
-	bf = fopen(f, "rbe");
+	bf = fopen(f, "rb");
 	if(bf == nil)
 		return nil;
 	memset(u, 0, sizeof u);

@@ -65,11 +65,6 @@ sys_timestamp(void)
 	return ts;
 }
 
-void
-sys_snail(bool)
-{
-}
-
 char *
 lerr(void)
 {
@@ -142,7 +137,7 @@ croak(void *, char *note)
 static void
 usage(void)
 {
-	fprint(2, "usage: %s [-d] [-g game] [-m kB] [-x netmtpt] [-N cd|snd]\n", argv0);
+	fprint(2, "usage: %s [-b basepath] [-d] [-g game] [-x netmtpt] [-N cd|snd]\n", argv0);
 	exits("usage");
 }
 
@@ -151,13 +146,18 @@ threadmain(int argc, char **argv)
 {
 	double t, t´, Δt;
 	char *e;
-	static char *paths[] = {
-		"/sys/games/lib/quake",
-		nil,
-		nil,
-	};
+	int i;
+	static char *paths[8] = {0};
+
+	i = 0;
+	paths[i++] = ".";
+	paths[i++] = "/sys/games/lib/quake";
 
 	ARGBEGIN{
+	case 'b':
+		if(i < nelem(paths)-2)
+			paths[i++] = EARGF(usage());
+		break;
 	case 'D':
 		debug = 1;
 		break;
@@ -184,7 +184,7 @@ threadmain(int argc, char **argv)
 	notify(croak);
 
 	e = getenv("home");
-	paths[1] = smprint("%s/lib/quake", e);
+	paths[i] = smprint("%s/lib/quake", e);
 	free(e);
 	Host_Init(argc, argv, paths);
 

@@ -64,10 +64,7 @@ uvlong	nanosec(void);
 char *lerr(void);
 int	sys_mkdir(char *path);
 char *sys_timestamp(void);
-
-extern bool snailenabled;
-void sys_snail(bool);
-void initsnail(void);
+char *sys_wrpath(void);
 
 long sndqueued(void);
 void sndstop(void);

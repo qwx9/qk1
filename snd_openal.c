@@ -1,10 +1,8 @@
 #include "quakedef.h"
+#include "stb_vorbis.h"
 #include <AL/al.h>
 #include <AL/alc.h>
 #include <AL/alext.h>
-#include <sys/wait.h>
-#include <unistd.h>
-#include <pthread.h>
 
 typedef struct albuf_t albuf_t;
 typedef struct alchan_t alchan_t;
@@ -31,13 +29,10 @@ enum {
 cvar_t volume = {"volume", "0.7", true};
 
 static struct {
-	ALuint src, buf;
-	int pcm, dec;
+	stb_vorbis *v;
 	int len;
-	bool playing;
+	ALuint src, buf;
 	bool stop;
-	pid_t decoder;
-	pthread_t reader;
 }track;
 
 static cvar_t s_al_dev = {"s_al_device", "0", true};
@@ -68,6 +63,59 @@ typedef ALsizei (*qalBufferCallbackTypeSOFT)(ALvoid *, ALvoid *, ALsizei);
 static void (*qalBufferCallbackSOFT)(ALuint buf, ALenum fmt, ALsizei freq, qalBufferCallbackTypeSOFT cb, ALvoid *aux);
 
 #define ALERR() alcheckerr(__FILE__, __LINE__)
+
+static char *
+vorbiserr(int err)
+{
+	switch(err){
+	case VORBIS_invalid_api_mixing: return "can't mix api modes";
+	case VORBIS_outofmem: return "oom";
+	case VORBIS_feature_not_supported: return "feature not supported";
+	case VORBIS_too_many_channels: return "too many channels";
+	case VORBIS_unexpected_eof: return "unexpected EOF";
+	case VORBIS_seek_invalid: return "invalid seek";
+	case VORBIS_invalid_setup: return "invalid setup";
+	case VORBIS_invalid_stream: return "invalid stream";
+	case VORBIS_missing_capture_pattern: return "missing capture pattern";
+	case VORBIS_invalid_stream_structure_version: return "invalid stream struct verion";
+	case VORBIS_continued_packet_flag_invalid: return "continued packet flag invalid";
+	case VORBIS_incorrect_stream_serial_number: return "incorrect stream serial number";
+	case VORBIS_invalid_first_page: return "invalid first page";
+	case VORBIS_bad_packet_type: return "bad packet type";
+	case VORBIS_cant_find_last_page: return "can't find last page";
+	case VORBIS_seek_failed: return "seek failed";
+	case VORBIS_ogg_skeleton_not_supported: return "ogg skeleton not supported";
+	default: return "???";
+	}
+}
+
+static ALsizei
+trackcb(ALvoid *aux, ALvoid *sampledata, ALsizei numbytes)
+{
+	ssize_t n;
+	byte *b;
+	bool eof;
+	int err;
+
+	USED(aux);
+	eof = false;
+	for(b = sampledata; numbytes > 0; b += n, numbytes -= n){
+		n = 2 * sizeof(float) * stb_vorbis_get_samples_float_interleaved(track.v, 2, (float*)b, numbytes/sizeof(float));
+		if(n <= 0){
+			if(n < 0 || eof || !cdloop){
+				if((err = stb_vorbis_get_error(track.v)) != 0)
+					Con_Printf("track%02d: %s\n", cdntrk, vorbiserr(err));
+				track.stop = true;
+				break;
+			}
+			eof = true;
+			n = 0;
+			stb_vorbis_seek_start(track.v);
+		}
+	}
+
+	return b - (byte*)sampledata;
+}
 
 static int
 alcheckerr(const char *file, int line)
@@ -474,7 +522,7 @@ alcattr(bool hrtf)
 			attr[i++] = s_al_hrtf.value - 1;
 		}
 	}
-	/* get more sources, those get depleated fast with AD */
+	// get more sources, those get depleated fast with AD
 	attr[i++] = ALC_MONO_SOURCES;
 	attr[i++] = 512;
 	attr[i++] = 0;
@@ -526,10 +574,25 @@ closedev:
 	}
 
 	qalBufferCallbackSOFT = nil;
-	if(alIsExtensionPresent("AL_SOFT_callback_buffer") && (alGenSources(1, &track.src), !ALERR())){
+	cdenabled = cdenabled &&
+		alIsExtensionPresent("AL_EXT_float32") &&
+		alIsExtensionPresent("AL_SOFT_callback_buffer") &&
+		(alGenSources(1, &track.src), !ALERR());
+	if(cdenabled){
 		alSourcei(track.src, AL_SOURCE_SPATIALIZE_SOFT, AL_FALSE); ALERR();
-		qalBufferCallbackSOFT = alGetProcAddress("alBufferCallbackSOFT");
+		qalBufferCallbackSOFT = alGetProcAddress("alBufferCallbackSOFT"); ALERR();
 		alGenBuffers(1, &track.buf); ALERR();
+		// test run to make sure it works
+		qalBufferCallbackSOFT(track.buf, AL_FORMAT_STEREO_FLOAT32, 44100, trackcb, nil);
+		if(ALERR()){
+fail:
+			alDeleteBuffers(1, &track.buf); ALERR();
+			track.buf = 0;
+			cdenabled = false;
+		}
+		alSourcei(track.src, AL_BUFFER, track.buf);
+		if(ALERR())
+			goto fail;
 	}
 
 	return 0;
@@ -687,152 +750,47 @@ stepcd(void)
 
 	if(track.stop)
 		stopcd();
-	else if(track.playing){
+	else if(track.v != nil){
 		alSourcef(track.src, AL_GAIN, bgmvolume.value);
 		ALERR();
 	}
 }
 
-static ALsizei
-trackcb(ALvoid *aux, ALvoid *sampledata, ALsizei numbytes)
-{
-	ssize_t n;
-	byte *b;
-
-	USED(aux);
-	for(b = sampledata; numbytes > 0; b += n, numbytes -= n){
-		if((n = read(track.pcm, b, numbytes)) <= 0){
-			track.stop = true;
-			return 0;
-		}
-	}
-
-	return b - (byte*)sampledata;
-}
-
-static void *
-trackdecoder(void *f_)
-{
-	byte b[65536];
-	ssize_t n;
-	fpos_t off;
-	int left;
-	FILE *f;
-
-	f = f_;
-	if(fgetpos(f, &off) == 0){
-		left = track.len;
-		for(;;){
-			if((n = fread(b, 1, min(left, (int)sizeof(b)), f)) < 1){
-				if(ferror(f)){
-					perror("fread");
-					break;
-				}
-			}
-			if(write(track.dec, b, n) != n)
-				break;
-			left -= n;
-			if(left < 1){
-				if(!cdloop)
-					break;
-				if(fsetpos(f, &off) != 0){
-					perror("fsetpos");
-					break;
-				}
-				left = track.len;
-			}
-		}
-	}
-	track.stop = true;
-	waitpid(track.decoder, nil, 0);
-
-	return nil;
-}
-
 void
 playcd(int nt, bool loop)
 {
-	int s[2], in[2];
-	pid_t pid;
+	stb_vorbis_info info;
 	FILE *f;
+	int err;
 
 	if(dev == nil || !cdenabled)
 		return;
 
 	stopcd();
-	if(qalBufferCallbackSOFT == nil)
+	if((f = openlmp(va("music/track%02d.ogg", nt), &track.len)) == nil)
 		return;
-
-	if((f = openlmp(va("music/track%02d.ogg", nt), &track.len)) == nil){
-		if((f = openlmp(va("music/track%02d.mp3", nt), &track.len)) == nil)
-			f = openlmp(va("music/track%02d.wav", nt), &track.len);
-	}
-	if(f == nil)
-		return;
-
-	track.decoder = -1;
-	track.reader = 0;
-	if(pipe(s) != 0){
-err:
-		close(track.pcm);
-		close(track.dec);
-		if(track.decoder > 0)
-			waitpid(track.decoder, nil, 0);
-		if(track.reader != 0)
-			pthread_join(track.reader, nil);
+	track.v = stb_vorbis_open_file_section(f, true, &err, nil, track.len);
+	if(track.v == nil){
+		werrstr("track%02d: %s", nt, vorbiserr(err));
+		fclose(f);
 		return;
 	}
-	if(pipe(in) != 0){
-		close(s[0]);
-		close(s[1]);
-		goto err;
-	}
-
-	switch((pid = fork())){
-	case 0:
-		close(s[1]); dup2(s[0], 0);
-		close(in[0]); dup2(in[1], 1);
-		close(s[0]);
-		execl(
-			"/usr/bin/env", "/usr/bin/env",
-			"ffmpeg",
-				"-loglevel", "fatal",
-				"-i", "-",
-				"-acodec", "pcm_s16le",
-				"-f", "s16le",
-				"-ac", "2",
-				"-ar", "44100",
-				"-",
-			nil
-		);
-		perror("execl ffmpeg"); // FIXME(sigrid): add and use Con_Errorf?
-		exit(1);
-	case -1:
-		goto err;
-	}
-	track.decoder = pid;
-
-	track.dec = s[1]; close(s[0]);
-	track.pcm = in[0]; close(in[1]);
+	info = stb_vorbis_get_info(track.v);
 	cdloop = loop;
 	cdtrk = nt;
-
-	if(pthread_create(&track.reader, nil, trackdecoder, f) != 0)
-		goto err;
-
-	qalBufferCallbackSOFT(track.buf, AL_FORMAT_STEREO16, 44100, trackcb, nil);
-	if(ALERR())
-		goto err;
-	track.playing = true;
 	track.stop = false;
-	alSourcei(track.src, AL_BUFFER, track.buf); ALERR();
-	alSourcePlay(track.src); ALERR();
+	alSourcei(track.src, AL_BUFFER, 0);
+	qalBufferCallbackSOFT(track.buf, AL_FORMAT_STEREO_FLOAT32, info.sample_rate, trackcb, nil);
+	if(ALERR() || (alSourcei(track.src, AL_BUFFER, track.buf), ALERR()) || (alSourcePlay(track.src), ALERR())){
+		stb_vorbis_close(track.v);
+		track.v = nil;
+	}
 }
 
 void
 resumecd(void)
 {
-	if(track.playing){
+	if(track.v != nil){
 		alSourcePlay(track.src);
 		ALERR();
 	}
@@ -841,7 +799,7 @@ resumecd(void)
 void
 pausecd(void)
 {
-	if(track.playing){
+	if(track.v != nil){
 		alSourcePause(track.src);
 		ALERR();
 	}
@@ -858,16 +816,11 @@ initcd(void)
 void
 stopcd(void)
 {
-	if(track.playing){
+	if(track.v != nil){
 		alSourceStop(track.src); ALERR();
-		alSourcei(track.src, AL_BUFFER, 0); ALERR();
-		close(track.dec);
-		close(track.pcm);
-		pthread_join(track.reader, nil);
+		stb_vorbis_close(track.v);
+		track.v = nil;
 	}
-	track.dec = -1;
-	track.pcm = -1;
-	track.playing = false;
 	track.stop = false;
 }
 
@@ -894,12 +847,12 @@ initsnd(void)
 	Cmd_AddCommand("cd", cdcmd);
 
 	if(!isdisabled("snd")){
+		cdenabled = !isdisabled("cd");
 		s_al_dev.cb = s_al_hrtf.cb = alvarcb;
 		s_al_doppler_factor.cb = aldopplercb;
 		alinit(nil);
 		known_sfx = Hunk_Alloc(MAX_SOUNDS * sizeof *known_sfx);
 		num_sfx = 0;
-		cdenabled = !isdisabled("cd");
 	}
 
 	return 0;

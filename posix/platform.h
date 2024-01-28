@@ -1,6 +1,5 @@
 #include <assert.h>
 #include <ctype.h>
-#include <endian.h>
 #include <fcntl.h>
 #include <math.h>
 #include <setjmp.h>
@@ -45,20 +44,26 @@ typedef uintptr_t uintptr;
 
 #define qctz(x) __builtin_ctz(x)
 
+#ifndef HAVE_ENDIAN_H
+#define QUAKE_LITTLE_ENDIAN
+#else
+#include <endian.h>
 #ifndef BYTE_ORDER
 #define LITTLE_ENDIAN __LITTLE_ENDIAN
 #define BIG_ENDIAN __BIG_ENDIAN
 #define BYTE_ORDER __BYTE_ORDER
 #endif
-
 #if BYTE_ORDER == LITTLE_ENDIAN
 #define QUAKE_LITTLE_ENDIAN
 #else
 #define QUAKE_BIG_ENDIAN
 #endif
+#endif
 
 extern char lasterr[256];
 #define werrstr(fmt...) do{snprint(lasterr, sizeof(lasterr), fmt); }while(0)
+
+#define sys_dup(d) dup((d))
 
 char *seprint(char *, char *, char *, ...);
 

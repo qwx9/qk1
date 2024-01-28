@@ -86,6 +86,7 @@ src_common = [
 	'sbar.c',
 	'screen.c',
 	'softfloat.c',
+	'stb_vorbis.c',
 	'sv_main.c',
 	'sv_move.c',
 	'sv_phys.c',
@@ -96,22 +97,8 @@ src_common = [
 	'zone.c',
 ]
 
-src_unix = [
-	'3rd/parg/parg.c',
-	'in_sdl.c',
-	'net_udp_unix.c',
-	'seprint.c',
-	'snd_openal.c',
-	'sys_snail.c',
-	'sys_unix.c',
-	'vid_sdl.c',
-]
-
-sdl2 = dependency('sdl2')
-openal = dependency('openal')
-threads = dependency('threads')
-
 cc = meson.get_compiler('c')
+
 if cc.get_id() == 'clang'
 	add_global_arguments(
 		'-Wno-microsoft-anon-tag',
@@ -121,18 +108,50 @@ if cc.get_id() == 'clang'
 endif
 
 libm = cc.find_library('m', required: false)
+libws = dependency('', required: false)
+
+src_sys = [
+	'in_sdl.c',
+	'parg.c',
+	'seprint.c',
+	'snd_openal.c',
+	'vid_sdl.c',
+]
+
+if host_machine.system() == 'windows'
+	src_sys += [
+		'net_udp_windows.c',
+		'sys_windows.c',
+	]
+	libws = cc.find_library('ws2_32')
+else
+	src_sys += [
+		'net_udp_unix.c',
+		'sys_unix.c',
+	]
+	if cc.check_header('endian.h')
+		add_global_arguments(
+			'-DHAVE_ENDIAN_H',
+			language: 'c',
+		)
+	endif
+endif
+
+openal = dependency('openal')
+sdl2 = dependency('sdl2')
+threads = dependency('threads')
 
 executable(
 	'qk1',
-	sources: src_common + src_unix,
+	sources: src_common + src_sys,
 	dependencies: [
-		sdl2,
-		openal,
-		threads,
 		libm,
+		libws,
+		openal,
+		sdl2,
+		threads,
 	],
 	include_directories: include_directories(
-		'3rd/parg',
-		'unix',
+		'posix',
 	),
 )

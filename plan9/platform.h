@@ -44,6 +44,8 @@ typedef enum {false, true} bool;
 static double ln2c;
 #define exp2f(x) (exp((x) * (ln2c ? ln2c : (ln2c = log(2.0)))))
 
+#define sys_dup(d) dup((d), -1)
+
 int qctz(unsigned);
 
 float DotProduct(const float v1[3], const float v2[3]);

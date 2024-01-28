@@ -85,7 +85,7 @@ init_by_array64(mt19937_64 *context, unsigned long long init_key[], unsigned lon
     for(; k; k--){
 		m = context->mt[i-1];
 		m = (m ^ (m >> 62)) * 3935559000370003845ULL;
-        context->mt[i] = context->mt[i] ^ m + init_key[j] + j; /* non linear */
+        context->mt[i] = context->mt[i] ^ (m + init_key[j] + j); /* non linear */
         i++;
         j++;
         if(i >= NN){
@@ -98,7 +98,7 @@ init_by_array64(mt19937_64 *context, unsigned long long init_key[], unsigned lon
     for(k = NN-1; k; k--){
 		m = context->mt[i-1];
 		m = (m ^ (m >> 62)) * 2862933555777941757ULL;
-        context->mt[i] = context->mt[i] ^ m - i; /* non linear */
+        context->mt[i] = context->mt[i] ^ (m - i); /* non linear */
         i++;
         if(i >= NN){
         	context->mt[0] = context->mt[NN-1];
