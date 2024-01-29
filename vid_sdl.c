@@ -198,7 +198,7 @@ char *
 sys_wrpath(void)
 {
 	// it's a bit awkward to use SDL for this but oh well
-	return SDL_GetPrefPath(nil, "NeinQuake");
+	return SDL_GetPrefPath(nil, "qk1");
 }
 
 void

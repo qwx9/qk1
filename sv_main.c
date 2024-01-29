@@ -248,7 +248,7 @@ void SV_SendServerinfo (client_t *client)
 	char tmp[64];
 
 	MSG_WriteByte (&client->message, svc_print);
-	snprint(tmp, sizeof(tmp), "%c\nNeinQuake %4.2f SERVER (%ud CRC)\n", 2, VERSION, crcn);
+	snprint(tmp, sizeof(tmp), "%c\nqk1 %4.2f SERVER (%ud CRC)\n", 2, VERSION, crcn);
 	MSG_WriteString (&client->message, tmp);
 
 	MSG_WriteByte (&client->message, svc_serverinfo);
