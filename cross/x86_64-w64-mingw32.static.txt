@@ -1,8 +1,13 @@
+[constants]
+path = '@DIRNAME@/windows/bin/'
+prefix = path + 'x86_64-w64-mingw32.static-'
+
 [binaries]
-c = 'x86_64-w64-mingw32.static-gcc'
-pkg-config = 'x86_64-w64-mingw32.static-pkg-config'
-strip = 'x86_64-w64-mingw32.static-strip'
-windres = 'x86_64-w64-mingw32.static-windres'
+c = prefix + 'gcc'
+pkg-config = prefix + 'pkg-config'
+sdl2-config = prefix + 'sdl2-config'
+strip = prefix + 'strip'
+windres = prefix + 'windres'
 
 [host_machine]
 system = 'windows'
