@@ -48,6 +48,7 @@ static Sfx *known_sfx;
 static int num_sfx;
 static int map;
 static alchan_t *chans;
+static char *curdev = nil;
 
 static cvar_t ambient_level = {"ambient_level", "0.3"};
 static cvar_t ambient_fade = {"ambient_fade", "100"};
@@ -58,7 +59,6 @@ static int al_default_resampler, al_num_resamplers;
 static ALchar *(*qalGetStringiSOFT)(ALenum, ALsizei);
 static ALCchar *(*qalcGetStringiSOFT)(ALCdevice *, ALenum, ALsizei);
 static ALCboolean (*qalcResetDeviceSOFT)(ALCdevice *, const ALCint *attr);
-static ALCboolean *(*qalcReopenDeviceSOFT)(ALCdevice *, const ALCchar *devname, const ALCint *attr);
 typedef ALsizei (*qalBufferCallbackTypeSOFT)(ALvoid *, ALvoid *, ALsizei);
 static void (*qalBufferCallbackSOFT)(ALuint buf, ALenum fmt, ALsizei freq, qalBufferCallbackTypeSOFT cb, ALvoid *aux);
 
@@ -536,15 +536,26 @@ alinit(const char *devname)
 	ALCcontext *c;
 	int e;
 
+	if(devname == nil){
+		// ALC_DEFAULT_DEVICE_SPECIFIER would make more sense,
+		// but unfortunately it's not a _full_ name
+		devname = alcGetString(nil, ALC_ALL_DEVICES_SPECIFIER);
+		ALERR();
+	}
+
 	dev = alcOpenDevice(devname); ALERR();
 	if(dev == nil)
 		return -1;
+	free(curdev);
+	curdev = strdup(devname);
 
 	c = alcCreateContext(dev, nil); ALERR();
 	if(c == nil){
 closedev:
 		alcCloseDevice(dev); ALERR();
 		dev = nil;
+		free(curdev);
+		curdev = nil;
 		return -1;
 	}
 	ctx = c;
@@ -598,38 +609,52 @@ fail:
 	return 0;
 }
 
+static int
+alreopen(const char *new, ALCint *attr)
+{
+	ALCboolean *(*qalcReopenDeviceSOFT)(
+		ALCdevice *,
+		const ALCchar *devname,
+		const ALCint *attr
+	);
+	int r;
+
+	qalcReopenDeviceSOFT = nil;
+	if(alcIsExtensionPresent(dev, "ALC_SOFT_reopen_device"))
+		qalcReopenDeviceSOFT = alcGetProcAddress(dev, "alcReopenDeviceSOFT");
+	if(qalcReopenDeviceSOFT == nil){
+		Con_Printf("AL: can't change device settings on the fly\n");
+		return -1;
+	}
+	r = qalcReopenDeviceSOFT(dev, new, attr) ? 0 : -1;
+	ALERR();
+	return r;
+}
+
 static void
 alreinit(const char *def, const char *all)
 {
-	const char *s;
+	const char *newdev;
 	int i, n;
 	bool hrtf;
 
 	n = s_al_dev.value;
-
-	if(qalcReopenDeviceSOFT == nil && alcIsExtensionPresent(nil, "ALC_SOFT_reopen_device"))
-		qalcReopenDeviceSOFT = alGetProcAddress("alcReopenDeviceSOFT");
-	if(qalcReopenDeviceSOFT == nil){
-		Con_Printf("AL: can't change device settings on the fly\n");
-		return;
-	}
-	for(i = 1, s = all; s != nil && *s; i++){
-		if((n == 0 && def != nil && strcmp(s, def) == 0) || n == i){
-			if(dev == nil)
-				n = alinit(all);
-			else{
-				n = qalcReopenDeviceSOFT(dev, s, alcattr(false)) ? 0 : -1;
-				ALERR();
-			}
+	for(i = 1, newdev = all; newdev != nil && *newdev; i++){
+		if((n == 0 && def != nil && strcmp(newdev, def) == 0) || n == i){
+			if(curdev != nil && strcmp(newdev, curdev) == 0)
+				break;
+			n = dev == nil ? alinit(all) : alreopen(newdev, alcattr(false));
 			if(n != 0){
-				Con_Printf("AL: failed to switch to %s\n", s);
+				Con_Printf("AL: failed to switch to %s\n", newdev);
 				return;
 			}
+			free(curdev);
+			curdev = strdup(newdev);
 			break;
 		}
-		s += strlen(s)+1;
+		newdev += strlen(newdev)+1;
 	}
-	if(s == nil || !*s){
+	if(newdev == nil || !*newdev){
 		Con_Printf("AL: no such device: %d\n", n);
 		return;
 	}
