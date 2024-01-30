@@ -3,17 +3,20 @@ project(
 	'c',
 	version: '1.09',
 	default_options: [
-		'c_std=c2x',
+		'c_std=c99',
 		'warning_level=2',
-		'buildtype=debugoptimized',
+		'buildtype=debug',
 		#'b_coverage=true',
 	],
 )
 
-add_global_arguments(
+add_project_arguments(
 	'-Wno-unknown-pragmas',
 	'-Wno-missing-field-initializers',
 	'-Wno-implicit-fallthrough',
+	'-Werror=odr',
+	'-Werror=lto-type-mismatch',
+	'-Werror=strict-aliasing',
 	'-fms-extensions',
 	'-D_DEFAULT_SOURCE',
 	language: 'c',
@@ -100,7 +103,7 @@ src_common = [
 cc = meson.get_compiler('c')
 
 if cc.get_id() == 'clang'
-	add_global_arguments(
+	add_project_arguments(
 		'-Wno-microsoft-anon-tag',
 		'-D__wchar_t=__please_no_wchar_t_thank_you',
 		language: 'c',
@@ -130,7 +133,7 @@ else
 		'sys_unix.c',
 	]
 	if cc.check_header('endian.h')
-		add_global_arguments(
+		add_project_arguments(
 			'-DHAVE_ENDIAN_H',
 			language: 'c',
 		)

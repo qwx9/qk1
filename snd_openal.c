@@ -33,6 +33,7 @@ static struct {
 	int len;
 	ALuint src, buf;
 	bool stop;
+	stb_vorbis_alloc tmp;
 }track;
 
 static cvar_t s_al_dev = {"s_al_device", "0", true};
@@ -794,10 +795,13 @@ playcd(int nt, bool loop)
 	stopcd();
 	if((f = openlmp(va("music/track%02d.ogg", nt), &track.len)) == nil)
 		return;
-	track.v = stb_vorbis_open_file_section(f, true, &err, nil, track.len);
+	if(track.tmp.alloc_buffer == nil){
+		track.tmp.alloc_buffer_length_in_bytes = 512*1024;
+		track.tmp.alloc_buffer = malloc(track.tmp.alloc_buffer_length_in_bytes);
+	}
+	track.v = stb_vorbis_open_file_section(f, true, &err, &track.tmp, track.len);
 	if(track.v == nil){
 		werrstr("track%02d: %s", nt, vorbiserr(err));
-		fclose(f);
 		return;
 	}
 	info = stb_vorbis_get_info(track.v);
@@ -845,6 +849,8 @@ stopcd(void)
 		alSourceStop(track.src); ALERR();
 		stb_vorbis_close(track.v);
 		track.v = nil;
+		free(track.tmp.alloc_buffer);
+		track.tmp.alloc_buffer = nil;
 	}
 	track.stop = false;
 }
