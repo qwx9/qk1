@@ -145,6 +145,9 @@ else
 		]
 		network = cc.find_library('ws2_32')
 	else
+		if host_machine.system() == 'haiku'
+			network = cc.find_library('network')
+		endif
 		src_sys += [
 			'net_udp_unix.c',
 			'sys_unix.c',
