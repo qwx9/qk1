@@ -15,8 +15,6 @@
 #include <unistd.h>
 
 typedef unsigned char uchar;
-typedef long long vlong;
-typedef unsigned long long uvlong;
 typedef int8_t s8int;
 typedef uint8_t u8int;
 typedef int16_t s16int;

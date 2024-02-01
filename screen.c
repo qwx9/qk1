@@ -308,9 +308,9 @@ static void SCR_DrawTurtle (void)
 
 static void SCR_DrawFPS (void)
 {
-	static uvlong lastframetime;
+	static u64int lastframetime;
 	static int lastcnt, fps;
-	uvlong t;
+	u64int t;
 	int n;
 	char s[16];
 

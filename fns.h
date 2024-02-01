@@ -56,10 +56,10 @@ void	initfs(char **paths);
 #pragma varargck	argpos	fatal	1
 _Noreturn void	fatal(char*, ...);
 void*	emalloc(long);
-vlong	flen(int);
+s64int	flen(int);
 double	dtime(void);
 void	game_shutdown(void);
-uvlong	nanosec(void);
+u64int	nanosec(void);
 
 char *lerr(void);
 int	sys_mkdir(char *path);

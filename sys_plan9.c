@@ -97,10 +97,10 @@ emalloc(long n)
 	return p;
 }
 
-vlong
+s64int
 flen(int fd)
 {
-	vlong l;
+	s64int l;
 	Dir *d;
 
 	if((d = dirfstat(fd)) == nil)	/* file assumed extant and readable */

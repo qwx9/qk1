@@ -8,7 +8,7 @@ enum{
 extern int svonly;
 
 int Sys_mkdir(char *);
-vlong flen(int);
+s64int flen(int);
 
 void Sys_Error(char *, ...);
 void Sys_Printf(char *, ...);
@@ -22,6 +22,6 @@ void Sys_HighFPPrecision(void);
 void Sys_SetFPCW(void);
 void Sys_Init(void);
 void initparm(quakeparms_t *);
-uvlong nanosec(void);
+u64int nanosec(void);
 
 void*	emalloc(ulong);

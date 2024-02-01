@@ -78,7 +78,7 @@ emalloc(long n)
 	return p;
 }
 
-uvlong
+u64int
 nanosec(void)
 {
 	static time_t sec0;

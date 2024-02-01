@@ -102,7 +102,7 @@ static int loadsize;
 static byte *loadbuf;
 static mem_user_t *loadcache;
 static FILE *demobf;
-static vlong demoofs;
+static s64int demoofs;
 
 #define	GBIT32(p)	((p)[0]|((p)[1]<<8)|((p)[2]<<16)|((p)[3]<<24))
 #define	PBIT32(p,v)	(p)[0]=(v);(p)[1]=(v)>>8;(p)[2]=(v)>>16;(p)[3]=(v)>>24
@@ -266,10 +266,10 @@ putfl(FILE *bf, float v)
 	put32(bf, w.u);
 }
 
-static vlong
+static s64int
 bsize(FILE *bf)
 {
-	vlong o, n;
+	s64int o, n;
 
 	o = ftell(bf);
 	fseek(bf, 0, SEEK_END);

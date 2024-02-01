@@ -34,7 +34,7 @@ static Chan *chans, *che;
 
 static int ainit, mixbufi;
 static byte mixbufs[2][Ssamp*Sblk], *mixbuf;
-static vlong sndt, sampt;
+static s64int sndt, sampt;
 static int nsamp;
 static int sampbuf[Ssamp*2];
 static int scalt[32][256];

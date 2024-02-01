@@ -7,11 +7,11 @@
  * so need to use cycles() instead, but fall back to
  * nsec() in case we can't
  */
-uvlong
+u64int
 nanosec(void)
 {
-	static uvlong fasthz, xstart;
-	uvlong x, div;
+	static u64int fasthz, xstart;
+	u64int x, div;
 
 	if(fasthz == ~0ULL)
 		return nsec() - xstart;
