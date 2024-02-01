@@ -1783,7 +1783,7 @@ PF_tokenize(pr_t *pr)
 
 	s = G_STRING(pr, OFS_PARM0);
 	for(n = 0; s != nil && n < nelem(pr->parse_cl_command.argv); n++){
-		while(*s && isspace(*s))
+		while(*s && isspace((int)*s))
 			s++;
 		if(*s == 0 || (s = COM_Parse(s)) == nil)
 			break;

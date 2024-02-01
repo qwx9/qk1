@@ -64,11 +64,6 @@ static cvar_t loadas8bit = {"loadas8bit", "0"};
 static cvar_t ambient_level = {"ambient_level", "0.3"};
 static cvar_t ambient_fade = {"ambient_fade", "100"};
 
-static byte	*data_p;
-static byte 	*iff_end;
-static byte 	*last_chunk;
-static byte 	*iff_data;
-
 /* TODO: refuctor wav loading */
 static void
 resample(sfxcache_t *sc, byte *data, float stepscale)
@@ -318,7 +313,7 @@ ambs(void)
 }
 
 void
-stepsnd(view_t *v)
+stepsnd(const view_t *v)
 {
 	long ns;
 	Chan *c, *sum;

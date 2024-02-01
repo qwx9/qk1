@@ -227,7 +227,7 @@ TGA_Decode(byte *in, int sz, bool *premult)
 		if(f.extoff != 0 && memcmp(p, tga_sig, sizeof(f.sig)) == 0){
 			f.extoff += ExtAreaAttrTypeOffset - HeaderSize;
 			if(f.extoff >= (u32int)sz){
-				werrstr("extoff out of range: %d", f.extoff);
+				werrstr("extoff out of range: %d", (int)f.extoff);
 				goto err;
 			}
 			switch(in[f.extoff]){

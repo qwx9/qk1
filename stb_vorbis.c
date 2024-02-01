@@ -4340,7 +4340,7 @@ static int get_seek_page_info(stb_vorbis *f, ProbedPage *z)
 // start of a packet
 static int go_to_page_before(stb_vorbis *f, unsigned int limit_offset)
 {
-   unsigned int previous_safe, end;
+   u32int previous_safe, end;
 
    // now we want to seek back 64K from the limit
    if (limit_offset >= 65536 && limit_offset-65536 >= f->first_audio_page_offset)
@@ -4611,13 +4611,12 @@ int stb_vorbis_seek_start(stb_vorbis *f)
 
 unsigned int stb_vorbis_stream_length_in_samples(stb_vorbis *f)
 {
-   unsigned int restore_offset, previous_safe;
-   unsigned int end, last_page_loc;
+   u32int restore_offset, previous_safe;
+   u32int end, last_page_loc;
 
    if (IS_PUSH_MODE(f)) return error(f, VORBIS_invalid_api_mixing);
    if (!f->total_samples) {
-      unsigned int last;
-      u32int lo,hi;
+      u32int last, lo, hi;
       char header[6];
 
       // first, store the current decode position so we can restore it
