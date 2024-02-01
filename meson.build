@@ -110,49 +110,73 @@ if cc.get_id() == 'clang'
 	)
 endif
 
-libm = cc.find_library('m', required: false)
-libws = dependency('', required: false)
-
 src_sys = [
-	'in_sdl.c',
-	'parg.c',
 	'seprint.c',
-	'snd_openal.c',
-	'vid_sdl.c',
 ]
 
-if host_machine.system() == 'windows'
+math = cc.find_library('m', required: false)
+network = dependency('', required: false)
+audio = dependency('', required: false)
+video = dependency('', required: false)
+
+if host_machine.system() == 'macos'
 	src_sys += [
-		'net_udp_windows.c',
-		'sys_windows.c',
+		'cd_null.c',
+		'in_null.c',
+		'net_udp_null.c',
+		'snd_mix.c',
+		'snd_null.c',
+		'sys_macos.c',
+		'vid_null.c',
 	]
-	libws = cc.find_library('ws2_32')
 else
+	audio = dependency('openal')
+	video = dependency('sdl2')
 	src_sys += [
-		'net_udp_unix.c',
-		'sys_unix.c',
+		'in_sdl.c',
+		'parg.c',
+		'snd_openal.c',
+		'vid_sdl.c',
 	]
-	if cc.check_header('endian.h')
-		add_project_arguments(
-			'-DHAVE_ENDIAN_H',
-			language: 'c',
-		)
+	if host_machine.system() == 'windows'
+		src_sys += [
+			'net_udp_windows.c',
+			'sys_windows.c',
+		]
+		network = cc.find_library('ws2_32')
+	else
+		src_sys += [
+			'net_udp_unix.c',
+			'sys_unix.c',
+		]
 	endif
 endif
 
-openal = dependency('openal')
-sdl2 = dependency('sdl2')
-threads = dependency('threads')
+if cc.check_header('endian.h')
+	add_project_arguments(
+		'-DHAVE_ENDIAN_H',
+		language: 'c',
+	)
+elif host_machine.endian() == 'big'
+	add_project_arguments(
+		'-DQUAKE_BIG_ENDIAN',
+		language: 'c',
+	)
+else
+	add_project_arguments(
+		'-DQUAKE_LITTLE_ENDIAN',
+		language: 'c',
+	)
+endif
 
 executable(
 	'qk1',
 	sources: src_common + src_sys,
 	dependencies: [
-		libm,
-		libws,
-		openal,
-		sdl2,
-		threads,
+		audio,
+		math,
+		network,
+		video,
 	],
 	include_directories: include_directories(
 		'posix',
