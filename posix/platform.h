@@ -42,9 +42,7 @@ typedef uintptr_t uintptr;
 
 #define qctz(x) __builtin_ctz(x)
 
-#ifndef HAVE_ENDIAN_H
-#define QUAKE_LITTLE_ENDIAN
-#else
+#ifdef HAVE_ENDIAN_H
 #include <endian.h>
 #ifndef BYTE_ORDER
 #define LITTLE_ENDIAN __LITTLE_ENDIAN
