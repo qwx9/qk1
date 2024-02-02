@@ -15,7 +15,6 @@ add_project_arguments(
 	'-Wno-missing-field-initializers',
 	'-Wno-implicit-fallthrough',
 	'-Werror=odr',
-	'-Werror=lto-type-mismatch',
 	'-Werror=strict-aliasing',
 	'-fms-extensions',
 	'-D_DEFAULT_SOURCE',
@@ -106,6 +105,11 @@ if cc.get_id() == 'clang'
 	add_project_arguments(
 		'-Wno-microsoft-anon-tag',
 		'-D__wchar_t=__please_no_wchar_t_thank_you',
+		language: 'c',
+	)
+else
+	add_project_arguments(
+		'-Werror=lto-type-mismatch',
 		language: 'c',
 	)
 endif
