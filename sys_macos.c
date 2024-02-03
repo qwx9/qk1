@@ -23,13 +23,6 @@ mkdir(const char *path, mode_t mode)
 	return -1;
 }
 
-int
-dup(int a)
-{
-	USED(a);
-	return -1;
-}
-
 bool
 isdisabled(char *s)
 {

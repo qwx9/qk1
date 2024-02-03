@@ -25,7 +25,6 @@ struct Lump{
 };
 struct Pak{
 	char f[Nfspath];
-	FILE *bf;
 	Lump *l;
 	Lump *e;
 };
@@ -337,11 +336,6 @@ removefile(char *path)
 static void
 closelmp(FILE *bf)
 {
-	Paklist *pl;
-
-	for(pl=pkl; pl!=nil; pl=pl->pl)
-		if(pl->p && pl->p->bf == bf)
-			return;
 	fclose(bf);
 }
 
@@ -353,7 +347,6 @@ openlmp(char *f, int *len)
 	Paklist *pl;
 	Pak *p;
 	Lump *l;
-	int fd;
 
 	fs_lmpfrom = nil;
 	for(pl = pkl; pl != nil; pl = pl->pl){
@@ -370,12 +363,8 @@ openlmp(char *f, int *len)
 		for(l = p->l; l < p->e; l++){
 			if(strcmp(l->f, f) != 0)
 				continue;
-			if((fd = sys_dup(fileno(p->bf))) < 0)
+			if((bf = fopen(p->f, "rb")) == nil)
 				break;
-			if((bf = fdopen(fd, "rb")) == nil){
-				close(fd);
-				break;
-			}
 			fseek(bf, l->ofs, SEEK_SET);
 			if(len != nil)
 				*len = l->len;
@@ -855,7 +844,6 @@ pak(char *f)
 	l = Hunk_Alloc(nlmp * sizeof *l);
 	p = Hunk_Alloc(sizeof *p);
 	snprint(p->f, sizeof(p->f), "%s", f);
-	p->bf = bf;
 	p->l = l;
 	p->e = l + nlmp;
 	fseek(bf, ofs, SEEK_SET);
@@ -873,6 +861,7 @@ pak(char *f)
 	}
 	if(crcn != Npak0crc)
 		notid1 = 1;
+	fclose(bf);
 	return p;
 }
 

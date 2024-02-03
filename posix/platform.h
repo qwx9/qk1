@@ -59,8 +59,6 @@ typedef uintptr_t uintptr;
 extern char lasterr[256];
 #define werrstr(fmt...) do{snprint(lasterr, sizeof(lasterr), fmt); }while(0)
 
-#define sys_dup(d) dup((d))
-
 char *seprint(char *, char *, char *, ...);
 
 #define DotProduct(x,y) DotProduct_((x),(y))
