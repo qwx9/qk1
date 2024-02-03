@@ -66,7 +66,6 @@ src_common = [
 	'mt19937-64.c',
 	'net_loop.c',
 	'net_main.c',
-	'pal.c',
 	'pr_cmds.c',
 	'pr_edict.c',
 	'pr_exec.c',

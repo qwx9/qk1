@@ -15,8 +15,6 @@ static pixel_t *vidbuffers[2];
 static int bufi = 0;
 static Channel *frame;
 
-void pal2xrgb(int n, s32int *pal, u8int *s, u32int *d);
-
 static void
 resetfb(void)
 {
