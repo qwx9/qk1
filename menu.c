@@ -1105,7 +1105,7 @@ static char *bindnames[][2] =
 	{"+back", 			"backpedal"},
 	{"+left", 			"turn left"},
 	{"+right", 			"turn right"},
-	{"+speed", 			"run"},
+	{"+speed", 			"run / walk"},
 	{"+moveleft", 		"step left"},
 	{"+moveright", 		"step right"},
 	{"+strafe", 		"sidestep"},

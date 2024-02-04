@@ -278,7 +278,11 @@ void CL_BaseMove (usercmd_t *cmd)
 	// adjust for speed key
 	if (in_speed.state & 1)
 	{
-		cmd->forwardmove *= cl_movespeedkey.value;
+		if((cmd->forwardmove > 0 && cl_forwardspeed.value > 200) ||
+		   (cmd->forwardmove < 0 && cl_backspeed.value > 200))
+			cmd->forwardmove /= cl_movespeedkey.value;
+		else
+			cmd->forwardmove *= cl_movespeedkey.value;
 		cmd->sidemove *= cl_movespeedkey.value;
 		cmd->upmove *= cl_movespeedkey.value;
 	}
