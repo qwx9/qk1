@@ -61,7 +61,7 @@ Sys_SendKeyEvents(void)
 			break;
 		case SDL_MOUSEBUTTONDOWN:
 		case SDL_MOUSEBUTTONUP:
-			if(mouseon && (b = event.button.button-1) >= 0 && b < nelem(mbuttons))
+			if((b = event.button.button-1) >= 0 && b < nelem(mbuttons))
 				Key_Event(mbuttons[b], event.type == SDL_MOUSEBUTTONDOWN);
 			break;
 		case SDL_KEYDOWN:
