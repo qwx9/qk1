@@ -5,7 +5,8 @@
 R_CheckVariables
 ===============
 */
-void R_CheckVariables (void)
+static void
+R_CheckVariables(void)
 {
 	static float	oldbright;
 

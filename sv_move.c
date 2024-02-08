@@ -202,8 +202,8 @@ facing it.
 
 ======================
 */
-void PF_changeyaw (pr_t *pr);
-bool SV_StepDirection (edict_t *ent, float yaw, float dist)
+bool
+SV_StepDirection(edict_t *ent, float yaw, float dist)
 {
 	vec3_t		move, oldorigin;
 	float		delta;
@@ -238,7 +238,8 @@ SV_FixCheckBottom
 
 ======================
 */
-void SV_FixCheckBottom (edict_t *ent)
+static void
+SV_FixCheckBottom(edict_t *ent)
 {
 	//Con_Printf ("SV_FixCheckBottom\n");
 

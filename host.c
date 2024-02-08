@@ -120,7 +120,8 @@ Host_Error (char *fmt, ...)
 Host_FindMaxClients
 ================
 */
-void	Host_FindMaxClients (void)
+static void
+Host_FindMaxClients(void)
 {
 	svs.maxclients = 1;
 	cls.state = ca_disconnected;
@@ -150,7 +151,8 @@ void	Host_FindMaxClients (void)
 Host_InitLocal
 ======================
 */
-void Host_InitLocal (void)
+static void
+Host_InitLocal(void)
 {
 	Host_InitCommands ();
 
@@ -440,7 +442,8 @@ boundfps(float t)
 	return 0;
 }
 
-void _Host_Frame (float time)
+static void
+_Host_Frame(float time)
 {
 	static double		time1 = 0;
 	static double		time2 = 0;

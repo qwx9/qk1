@@ -21,7 +21,8 @@ R_Alias_clip_z
 pfv0 is the unclipped vertex, pfv1 is the z-clipped vertex
 ================
 */
-void R_Alias_clip_z (finalvert_t *pfv0, finalvert_t *pfv1, finalvert_t *out)
+static void
+R_Alias_clip_z(finalvert_t *pfv0, finalvert_t *pfv1, finalvert_t *out)
 {
 	float		scale;
 	auxvert_t	*pav0, *pav1, avout;
@@ -139,9 +140,8 @@ void R_Alias_clip_bottom (finalvert_t *pfv0, finalvert_t *pfv1, finalvert_t *out
 	}
 }
 
-
-int R_AliasClip (finalvert_t *in, finalvert_t *out, int flag, int count,
-	void(*clip)(finalvert_t *pfv0, finalvert_t *pfv1, finalvert_t *out) )
+static int
+R_AliasClip(finalvert_t *in, finalvert_t *out, int flag, int count, void(*clip)(finalvert_t *pfv0, finalvert_t *pfv1, finalvert_t *out) )
 {
 	int			i,j,k;
 	int			flags, oldflags;

@@ -149,3 +149,8 @@ void ED_PrintEdicts(void);
 void ED_PrintNum(pr_t *pr, int ent);
 
 eval_t *GetEdictFieldValue(pr_t *pr, edict_t *ed, char *field);
+
+char *PR_GlobalString(pr_t *pr, int ofs);
+char *PR_GlobalStringNoContents(pr_t *pr, int ofs);
+void PF_changeyaw(pr_t *pr);
+void PR_InitSV(pr_t *pr);

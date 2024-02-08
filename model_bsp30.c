@@ -1,6 +1,5 @@
 #include "quakedef.h"
-
-int BSP_CalcSurfaceExtents(model_t *mod, msurface_t *s);
+#include "model_bsp.h"
 
 int
 BSP30_LoadEntities(model_t *mod, byte *in, int sz)

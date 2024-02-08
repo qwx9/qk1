@@ -215,3 +215,6 @@ void SV_CheckForNewClients (void);
 void SV_RunClients (void);
 void SV_SaveSpawnparms (void);
 void SV_SpawnServer (char *server);
+
+bool SV_StepDirection (edict_t *ent, float yaw, float dist);
+void SV_NewChaseDir (edict_t *actor, edict_t *enemy, float dist);

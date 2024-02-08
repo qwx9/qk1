@@ -423,8 +423,8 @@ void D_PolysetScanLeftEdge (int height)
 D_PolysetSetUpForLineScan
 ====================
 */
-void D_PolysetSetUpForLineScan(fixed8_t startvertu, fixed8_t startvertv,
-		fixed8_t endvertu, fixed8_t endvertv)
+static void
+D_PolysetSetUpForLineScan(fixed8_t startvertu, fixed8_t startvertv, fixed8_t endvertu, fixed8_t endvertv)
 {
 	double		dm, dn;
 	int			tm, tn, n;

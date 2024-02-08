@@ -67,7 +67,7 @@ entdrawflags(entity_t *e)
 R_EmitEdge
 ================
 */
-void
+static void
 R_EmitEdge(mvertex_t *pv0, mvertex_t *pv1, view_t *view)
 {
 	edge_t	*edge, *pcheck;
@@ -309,7 +309,8 @@ R_ClipEdge(mvertex_t *pv0, mvertex_t *pv1, clipplane_t *clip, view_t *v)
 R_EmitCachedEdge
 ================
 */
-void R_EmitCachedEdge (void)
+static void
+R_EmitCachedEdge(void)
 {
 	edge_t		*pedge_t;
 

@@ -29,7 +29,8 @@ void Host_Quit_f (void)
 Host_Status_f
 ==================
 */
-void Host_Status_f (void)
+static void
+Host_Status_f(void)
 {
 	client_t	*client;
 	int			seconds;
@@ -82,7 +83,8 @@ Host_God_f
 Sets client to godmode
 ==================
 */
-void Host_God_f (void)
+static void
+Host_God_f(void)
 {
 	if (cmd_source == src_command)
 	{
@@ -100,7 +102,8 @@ void Host_God_f (void)
 		SV_ClientPrintf ("godmode ON\n");
 }
 
-void Host_Notarget_f (void)
+static void
+Host_Notarget_f(void)
 {
 	if (cmd_source == src_command)
 	{
@@ -120,7 +123,8 @@ void Host_Notarget_f (void)
 
 bool noclip_anglehack;
 
-void Host_Noclip_f (void)
+static void
+Host_Noclip_f(void)
 {
 	if (cmd_source == src_command)
 	{
@@ -152,7 +156,8 @@ Host_Fly_f
 Sets client to flymode
 ==================
 */
-void Host_Fly_f (void)
+static void
+Host_Fly_f(void)
 {
 	if (cmd_source == src_command)
 	{
@@ -182,7 +187,8 @@ Host_Ping_f
 
 ==================
 */
-void Host_Ping_f (void)
+static void
+Host_Ping_f(void)
 {
 	int		i, j;
 	float	total;
@@ -225,7 +231,8 @@ map <servername>
 command from the console.  Active clients are kicked off.
 ======================
 */
-void Host_Map_f (void)
+static void
+Host_Map_f(void)
 {
 	int		i;
 	char	name[Npath];
@@ -276,7 +283,8 @@ Host_Changelevel_f
 Goes to a new map, taking all clients along
 ==================
 */
-void Host_Changelevel_f (void)
+static void
+Host_Changelevel_f(void)
 {
 	char	level[Npath];
 
@@ -302,7 +310,8 @@ Host_Restart_f
 Restarts the current server for a dead player
 ==================
 */
-void Host_Restart_f (void)
+static void
+Host_Restart_f(void)
 {
 	char	mapname[Npath];
 
@@ -331,7 +340,8 @@ Host_Connect_f
 User command to connect to server
 =====================
 */
-void Host_Connect_f (void)
+static void
+Host_Connect_f(void)
 {
 	char	name[Npath];
 
@@ -351,7 +361,8 @@ void Host_Connect_f (void)
 Host_Name_f
 ======================
 */
-void Host_Name_f (void)
+static void
+Host_Name_f(void)
 {
 	char	newName[16];
 
@@ -389,15 +400,15 @@ void Host_Name_f (void)
 	MSG_WriteString (&sv.reliable_datagram, host_client->name);
 }
 
-
-void Host_Version_f (void)
+static void
+Host_Version_f(void)
 {
-	Con_Printf ("Version %4.2f\n", VERSION);
-	Con_Printf ("Exe: 00:00:00 Jun 22 1996\n");
+	Con_Printf("Version %4.2f\n", VERSION);
+	Con_Printf("Exe: <REDACTED>\n");
 }
 
-
-void Host_Say(bool teamonly)
+static void
+Host_Say(bool teamonly)
 {
 	client_t *client;
 	client_t *save;
@@ -460,20 +471,20 @@ void Host_Say(bool teamonly)
 	Con_DPrintf("%s", &text[1]);
 }
 
-
-void Host_Say_f(void)
+static void
+Host_Say_f(void)
 {
 	Host_Say(false);
 }
 
-
-void Host_Say_Team_f(void)
+static void
+Host_Say_Team_f(void)
 {
 	Host_Say(true);
 }
 
-
-void Host_Tell_f(void)
+static void
+Host_Tell_f(void)
 {
 	client_t *client;
 	client_t *save;
@@ -530,7 +541,8 @@ void Host_Tell_f(void)
 Host_Color_f
 ==================
 */
-void Host_Color_f(void)
+static void
+Host_Color_f(void)
 {
 	int		top, bottom;
 	int		playercolor;
@@ -581,7 +593,8 @@ void Host_Color_f(void)
 Host_Kill_f
 ==================
 */
-void Host_Kill_f (void)
+static void
+Host_Kill_f(void)
 {
 	if (cmd_source == src_command)
 	{
@@ -606,7 +619,8 @@ void Host_Kill_f (void)
 Host_Pause_f
 ==================
 */
-void Host_Pause_f (void)
+static void
+Host_Pause_f(void)
 {
 
 	if (cmd_source == src_command)
@@ -643,7 +657,8 @@ void Host_Pause_f (void)
 Host_PreSpawn_f
 ==================
 */
-void Host_PreSpawn_f (void)
+static void
+Host_PreSpawn_f(void)
 {
 	if(cmd_source == src_command){
 		Con_Printf("prespawn is not valid from the console\n");
@@ -663,7 +678,8 @@ void Host_PreSpawn_f (void)
 Host_Spawn_f
 ==================
 */
-void Host_Spawn_f (void)
+static void
+Host_Spawn_f(void)
 {
 	int		i;
 	client_t	*client;
@@ -786,7 +802,8 @@ void Host_Spawn_f (void)
 Host_Begin_f
 ==================
 */
-void Host_Begin_f (void)
+static void
+Host_Begin_f(void)
 {
 	if (cmd_source == src_command)
 	{
@@ -895,7 +912,8 @@ Host_Kick_f
 Kicks a user off of the server
 ==================
 */
-void Host_Kick_f (void)
+static void
+Host_Kick_f(void)
 {
 	char		*who;
 	char		*message = nil;
@@ -987,7 +1005,8 @@ DEBUGGING TOOLS
 Host_Give_f
 ==================
 */
-void Host_Give_f (void)
+static void
+Host_Give_f(void)
 {
 	char	*t;
 	int		v;
@@ -1141,7 +1160,8 @@ void Host_Give_f (void)
 	}
 }
 
-edict_t	*FindViewthing (void)
+static edict_t *
+FindViewthing(void)
 {
 	int		i;
 	edict_t	*e;
@@ -1161,7 +1181,8 @@ edict_t	*FindViewthing (void)
 Host_Viewmodel_f
 ==================
 */
-void Host_Viewmodel_f (void)
+static void
+Host_Viewmodel_f(void)
 {
 	edict_t	*e;
 	model_t	*m;
@@ -1186,7 +1207,8 @@ void Host_Viewmodel_f (void)
 Host_Viewframe_f
 ==================
 */
-void Host_Viewframe_f (void)
+static void
+Host_Viewframe_f(void)
 {
 	edict_t	*e;
 	int		f;
@@ -1204,8 +1226,8 @@ void Host_Viewframe_f (void)
 	e->v.frame = f;
 }
 
-
-void PrintFrameName (model_t *m, int frame)
+static void
+PrintFrameName(model_t *m, int frame)
 {
 	aliashdr_t 			*hdr;
 	maliasframedesc_t	*pframedesc;
@@ -1223,7 +1245,8 @@ void PrintFrameName (model_t *m, int frame)
 Host_Viewnext_f
 ==================
 */
-void Host_Viewnext_f (void)
+static void
+Host_Viewnext_f(void)
 {
 	edict_t	*e;
 	model_t	*m;
@@ -1245,7 +1268,8 @@ void Host_Viewnext_f (void)
 Host_Viewprev_f
 ==================
 */
-void Host_Viewprev_f (void)
+static void
+Host_Viewprev_f(void)
 {
 	edict_t	*e;
 	model_t	*m;
@@ -1277,7 +1301,8 @@ DEMO LOOP CONTROL
 Host_Startdemos_f
 ==================
 */
-void Host_Startdemos_f (void)
+static void
+Host_Startdemos_f(void)
 {
 	int		i, c;
 
@@ -1316,7 +1341,8 @@ Host_Demos_f
 Return to looping demos
 ==================
 */
-void Host_Demos_f (void)
+static void
+Host_Demos_f(void)
 {
 	if (cls.state == ca_dedicated)
 		return;
@@ -1333,7 +1359,8 @@ Host_Stopdemo_f
 Return to looping demos
 ==================
 */
-void Host_Stopdemo_f (void)
+static void
+Host_Stopdemo_f(void)
 {
 	if (cls.state == ca_dedicated)
 		return;
@@ -1350,7 +1377,8 @@ void Host_Stopdemo_f (void)
 Host_InitCommands
 ==================
 */
-void Host_InitCommands (void)
+void
+Host_InitCommands(void)
 {
 	Cmd_AddCommand ("status", Host_Status_f);
 	Cmd_AddCommand ("quit", Host_Quit_f);

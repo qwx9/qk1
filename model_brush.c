@@ -1,7 +1,6 @@
 #include "quakedef.h"
 
 void BSP_MakeHull0(model_t *mod);
-model_t *Mod_FindName (char *name);
 
 int BSP_LoadClipnodes(model_t *mod, byte *in, int sz);
 int BSP_LoadEdges(model_t *mod, byte *in, int sz);

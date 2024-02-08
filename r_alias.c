@@ -225,7 +225,8 @@ R_AliasPreparePoints
 General clipped case
 ================
 */
-void R_AliasPreparePoints (trivertx_t *apverts, auxvert_t *auxverts, pixel_t *colormap)
+static void
+R_AliasPreparePoints(trivertx_t *apverts, auxvert_t *auxverts, pixel_t *colormap)
 {
 	int			i;
 	stvert_t	*pstverts;
@@ -409,7 +410,8 @@ static void R_AliasTransformFinalVert (finalvert_t *fv, auxvert_t *av, trivertx_
 R_AliasTransformAndProjectFinalVerts
 ================
 */
-void R_AliasTransformAndProjectFinalVerts (finalvert_t *fv, stvert_t *pstverts, trivertx_t *pverts)
+static void
+R_AliasTransformAndProjectFinalVerts(finalvert_t *fv, stvert_t *pstverts, trivertx_t *pverts)
 {
 	int			i;
 	float		lightcos, zi;
@@ -477,7 +479,8 @@ void R_AliasProjectFinalVert (finalvert_t *fv, auxvert_t *av)
 R_AliasPrepareUnclippedPoints
 ================
 */
-void R_AliasPrepareUnclippedPoints (trivertx_t *pverts, pixel_t *colormap)
+static void
+R_AliasPrepareUnclippedPoints(trivertx_t *pverts, pixel_t *colormap)
 {
 	stvert_t	*pstverts;
 	finalvert_t	*fv;
@@ -504,7 +507,8 @@ void R_AliasPrepareUnclippedPoints (trivertx_t *pverts, pixel_t *colormap)
 R_AliasSetupSkin
 ===============
 */
-void R_AliasSetupSkin (void)
+static void
+R_AliasSetupSkin(void)
 {
 	int					skinnum;
 	int					i, numskins;
@@ -560,7 +564,8 @@ void R_AliasSetupSkin (void)
 R_AliasSetupLighting
 ================
 */
-void R_AliasSetupLighting (alight_t *plighting)
+static void
+R_AliasSetupLighting(alight_t *plighting)
 {
 	int i;
 
@@ -592,7 +597,8 @@ R_AliasSetupFrame
 set r_apverts
 =================
 */
-trivertx_t *R_AliasSetupFrame (void)
+static trivertx_t *
+R_AliasSetupFrame(void)
 {
 	int				frame;
 	int				i, numframes;

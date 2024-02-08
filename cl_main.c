@@ -30,7 +30,7 @@ lightstyle_t	cl_lightstyle[Nlights];
 dlight_t		cl_dlights[MAX_DLIGHTS];
 int				cl_numvisedicts;
 
-void
+static void
 CL_ApplyInterpolation(entity_t *e, float frac)
 {
 	float d, f;

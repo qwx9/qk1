@@ -84,7 +84,8 @@ Con_MessageMode_f
 */
 extern bool team_message;
 
-void Con_MessageMode_f (void)
+static void
+Con_MessageMode_f(void)
 {
 	key_dest = key_message;
 	team_message = false;
@@ -96,7 +97,8 @@ void Con_MessageMode_f (void)
 Con_MessageMode2_f
 ================
 */
-void Con_MessageMode2_f (void)
+static void
+Con_MessageMode2_f(void)
 {
 	key_dest = key_message;
 	team_message = true;
@@ -193,7 +195,8 @@ void Con_Init (void)
 Con_Linefeed
 ===============
 */
-void Con_Linefeed (void)
+static void
+Con_Linefeed(void)
 {
 	con_x = 0;
 	con_current++;
@@ -354,7 +357,8 @@ Con_DrawInput
 The input line scrolls horizontally if typing goes beyond the right edge
 ================
 */
-void Con_DrawInput (void)
+static void
+Con_DrawInput(void)
 {
 	int		y;
 	int		i;

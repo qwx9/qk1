@@ -11,6 +11,7 @@ project(
 )
 
 add_project_arguments(
+	'-Wmissing-prototypes',
 	'-Wno-unknown-pragmas',
 	'-Wno-missing-field-initializers',
 	'-Wno-implicit-fallthrough',

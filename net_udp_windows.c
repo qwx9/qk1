@@ -185,7 +185,8 @@ int UDP_Connect (Addr *addr)
 
 //=============================================================================
 
-int UDP_CheckNewConnections (void)
+static int
+UDP_CheckNewConnections(void)
 {
 	unsigned long available;
 

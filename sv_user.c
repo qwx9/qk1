@@ -22,8 +22,8 @@ bool	onground;
 
 usercmd_t	cmd;
 
-cvar_t	sv_idealpitchscale = {"sv_idealpitchscale","0.8"};
-
+cvar_t sv_idealpitchscale = {"sv_idealpitchscale","0.8"};
+cvar_t sv_nouse = {"sv_nouse", "0"};
 
 /*
 ===============
@@ -100,7 +100,8 @@ SV_UserFriction
 
 ==================
 */
-void SV_UserFriction (void)
+static void
+SV_UserFriction(void)
 {
 	float	*vel;
 	float	speed, newspeed, control;
@@ -147,7 +148,8 @@ SV_Accelerate
 */
 cvar_t	sv_maxspeed = {"sv_maxspeed", "320", false, true};
 cvar_t	sv_accelerate = {"sv_accelerate", "10"};
-void SV_Accelerate (void)
+static void
+SV_Accelerate(void)
 {
 	int			i;
 	float		addspeed, accelspeed, currentspeed;
@@ -164,7 +166,8 @@ void SV_Accelerate (void)
 		velocity[i] += accelspeed*wishdir[i];
 }
 
-void SV_AirAccelerate (vec3_t wishveloc)
+static void
+SV_AirAccelerate(vec3_t wishveloc)
 {
 	int			i;
 	float		addspeed, wishspd, accelspeed, currentspeed;
@@ -184,8 +187,8 @@ void SV_AirAccelerate (vec3_t wishveloc)
 		velocity[i] += accelspeed*wishveloc[i];
 }
 
-
-void DropPunchAngle (void)
+static void
+DropPunchAngle(void)
 {
 	float	len;
 
@@ -203,7 +206,8 @@ SV_WaterMove
 
 ===================
 */
-void SV_WaterMove (void)
+static void
+SV_WaterMove(void)
 {
 	int		i;
 	vec3_t	wishvel;
@@ -257,7 +261,8 @@ void SV_WaterMove (void)
 		velocity[i] += accelspeed * wishvel[i];
 }
 
-void SV_WaterJump (void)
+static void
+SV_WaterJump(void)
 {
 	if (sv.time > sv_player->v.teleport_time
 	|| !sv_player->v.waterlevel)
@@ -273,10 +278,10 @@ void SV_WaterJump (void)
 /*
 ===================
 SV_AirMove
-
 ===================
 */
-void SV_AirMove (void)
+static void
+SV_AirMove(void)
 {
 	int			i;
 	vec3_t		wishvel;
@@ -384,7 +389,8 @@ void SV_ClientThink (void)
 SV_ReadClientMove
 ===================
 */
-void SV_ReadClientMove (usercmd_t *move)
+static void
+SV_ReadClientMove(usercmd_t *move)
 {
 	int		i;
 	vec3_t	angle;
@@ -408,8 +414,10 @@ void SV_ReadClientMove (usercmd_t *move)
 
 	// read buttons
 	bits = MSG_ReadByte ();
-	host_client->edict->v.button0 = bits & 1;
-	host_client->edict->v.button2 = (bits & 2)>>1;
+	host_client->edict->v.button0 = (bits & 1) != 0;
+	host_client->edict->v.button2 = (bits & 2) != 0;
+	if(!sv_nouse.value)
+		host_client->edict->v.button1 = (bits & 4) != 0;
 
 	i = MSG_ReadByte ();
 	if (i)
@@ -423,7 +431,8 @@ SV_ReadClientMessage
 Returns false if the client should be killed
 ===================
 */
-bool SV_ReadClientMessage (void)
+static bool
+SV_ReadClientMessage(void)
 {
 	int ret, i, cmd;
 	client_t *tmp;

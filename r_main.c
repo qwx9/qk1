@@ -575,7 +575,8 @@ R_DrawEntity(entity_t *e, view_t *view)
 R_DrawViewModel
 =============
 */
-void R_DrawViewModel (view_t *view)
+static void
+R_DrawViewModel(view_t *view)
 {
 	// FIXME: remove and do real lighting
 	vec3_t		lightvec = {-1, 0, 0};
@@ -642,7 +643,7 @@ void R_DrawViewModel (view_t *view)
 	R_AliasDrawModel(&r_viewlighting, &v);
 }
 
-void
+static void
 R_RenderSolidBrushes(view_t *v)
 {
 	entity_t *e;

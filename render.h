@@ -21,9 +21,12 @@ typedef struct entity_s
 	struct efrag_s			*efrag;			// linked list of efrags
 	pixel_t					*colormap;
 	struct entity_s			*last_reject;
-	entity_state_t			baseline;		// to fill in defaults in updates
-
+	struct mnode_s			*topnode;		// for bmodels, first world node
+											//  that splits bmodel, or NULL if
+											//  not split
 	double					msgtime;		// time of last update
+
+	entity_state_t			baseline;		// to fill in defaults in updates
 
 	vec3_t					msg_origins[2];	// last two updates (0 is newest)
 	vec3_t					origin;
@@ -39,15 +42,10 @@ typedef struct entity_s
 	int						dlightframe;	// dynamic lighting
 	int						dlightbits;
 
-	bool forcelink;		// model changed
 	int update_type;
+	int trivial_accept;
 	byte alpha;
-
-// FIXME: could turn these into a union
-	int						trivial_accept;
-	struct mnode_s			*topnode;		// for bmodels, first world node
-											//  that splits bmodel, or NULL if
-											//  not split
+	bool forcelink;		// model changed
 } entity_t;
 
 // !!! if this is changed, it must be changed in asm_draw.h too !!!

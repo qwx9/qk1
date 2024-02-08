@@ -93,10 +93,6 @@ static const char *pr_opnames[] =
 "BITOR"
 };
 
-char *PR_GlobalString (pr_t *pr, int ofs);
-char *PR_GlobalStringNoContents (pr_t *pr, int ofs);
-
-
 //=============================================================================
 
 /*
@@ -104,7 +100,8 @@ char *PR_GlobalStringNoContents (pr_t *pr, int ofs);
 PR_PrintStatement
 =================
 */
-void PR_PrintStatement (pr_t *pr, dstatement_t *s)
+static void
+PR_PrintStatement(pr_t *pr, dstatement_t *s)
 {
 	int		i;
 
@@ -144,7 +141,8 @@ void PR_PrintStatement (pr_t *pr, dstatement_t *s)
 PR_StackTrace
 ============
 */
-void PR_StackTrace (pr_t *pr)
+static void
+PR_StackTrace(pr_t *pr)
 {
 	dfunction_t	*f;
 	int			i;
@@ -248,7 +246,8 @@ PR_EnterFunction
 Returns the new program statement counter
 ====================
 */
-int PR_EnterFunction (pr_t *pr, dfunction_t *f)
+static int
+PR_EnterFunction(pr_t *pr, dfunction_t *f)
 {
 	int		i, j, c, o;
 
@@ -287,7 +286,8 @@ int PR_EnterFunction (pr_t *pr, dfunction_t *f)
 PR_LeaveFunction
 ====================
 */
-int PR_LeaveFunction (pr_t *pr)
+static int
+PR_LeaveFunction(pr_t *pr)
 {
 	int		i, c;
 

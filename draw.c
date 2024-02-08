@@ -368,7 +368,8 @@ void Draw_ConsoleBackground (int lines)
 R_DrawRect8
 ==============
 */
-void R_DrawRect8 (vrect_t *prect, int rowbytes, pixel_t *psrc, int transparent)
+static void
+R_DrawRect8(vrect_t *prect, int rowbytes, pixel_t *psrc, int transparent)
 {
 	pixel_t	t, *pdest;
 	int		i, j, srcdelta, destdelta;

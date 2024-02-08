@@ -180,7 +180,8 @@ int UDP_Connect (Addr *addr)
 
 //=============================================================================
 
-int UDP_CheckNewConnections (void)
+static int
+UDP_CheckNewConnections(void)
 {
 	unsigned long available;
 
@@ -196,7 +197,8 @@ int UDP_CheckNewConnections (void)
 
 //=============================================================================
 
-int UDP_Read (int socket, uint8_t *buf, int len, Addr *addr)
+static int
+UDP_Read(int socket, uint8_t *buf, int len, Addr *addr)
 {
 	socklen_t addrlen = sizeof (Addr);
 	int ret;
@@ -209,7 +211,8 @@ int UDP_Read (int socket, uint8_t *buf, int len, Addr *addr)
 
 //=============================================================================
 
-int UDP_MakeSocketBroadcastCapable (int socket)
+static int
+UDP_MakeSocketBroadcastCapable (int socket)
 {
 	int i = 1;
 
@@ -223,7 +226,8 @@ int UDP_MakeSocketBroadcastCapable (int socket)
 
 //=============================================================================
 
-static int UDP_Write (int socket, uint8_t *buf, int len, Addr *addr)
+static int
+UDP_Write(int socket, uint8_t *buf, int len, Addr *addr)
 {
 	int ret;
 
@@ -235,7 +239,8 @@ static int UDP_Write (int socket, uint8_t *buf, int len, Addr *addr)
 
 //=============================================================================
 
-int UDP_Broadcast (int socket, uint8_t *buf, int len)
+static int
+UDP_Broadcast(int socket, uint8_t *buf, int len)
 {
 	int ret;
 
@@ -268,7 +273,8 @@ char *UDP_AddrToString (Addr *addr)
 
 //=============================================================================
 
-int UDP_StringToAddr (char *string, Addr *addr)
+static int
+UDP_StringToAddr(char *string, Addr *addr)
 {
 	int ha1, ha2, ha3, ha4, hp;
 	int ipaddr;
@@ -299,7 +305,8 @@ static int UDP_GetSocketAddr (int socket, Addr *addr)
 
 //=============================================================================
 
-int UDP_GetNameFromAddr (Addr *addr, char *name)
+static int
+UDP_GetNameFromAddr(Addr *addr, char *name)
 {
 	struct hostent *hostentry;
 
@@ -316,7 +323,8 @@ int UDP_GetNameFromAddr (Addr *addr, char *name)
 
 //=============================================================================
 
-int UDP_GetAddrFromName(char *name, Addr *addr)
+static int
+UDP_GetAddrFromName(char *name, Addr *addr)
 {
 	struct hostent *hostentry;
 

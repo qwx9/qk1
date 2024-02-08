@@ -1,5 +1,4 @@
-#include <stdio.h>
-#include <stdarg.h>
+#include "platform.h"
 
 char *
 seprint(char *buf, char *e, char *fmt, ...)

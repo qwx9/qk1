@@ -2,10 +2,7 @@
 
 static char loadname[32];	// for hunk tags
 
-void Mod_LoadSpriteModel (model_t *mod, byte *buffer, int total);
-void Mod_LoadBrushModel (model_t *mod, byte *buffer, int total);
-void Mod_LoadAliasModel (model_t *mod, void *buffer);
-model_t *Mod_LoadModel (model_t *mod, bool crash);
+static model_t *Mod_LoadModel (model_t *mod, bool crash);
 
 #define	MAX_MOD_KNOWN	4096
 static model_t *mod_known;
@@ -224,7 +221,8 @@ Mod_LoadModel
 Loads a model into the cache
 ==================
 */
-model_t *Mod_LoadModel (model_t *mod, bool crash)
+static model_t *
+Mod_LoadModel (model_t *mod, bool crash)
 {
 	byte *buf;
 	int len;

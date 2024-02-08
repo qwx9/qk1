@@ -13,8 +13,6 @@ const int type_size[8] = {
 
 bool	ED_ParseEpair (pr_t *pr, void *base, ddef_t *key, char *s);
 
-void PR_InitSV(pr_t *pr);
-
 cvar_t	nomonsters = {"nomonsters", "0"};
 
 static cvar_t scratch1 = {"scratch1", "0"};
@@ -59,7 +57,7 @@ PR_CopyStrTmp(pr_t *pr, char *s)
 	return PR_SetStr(pr, t);
 }
 
-int
+static int
 PR_StrSlot(pr_t *pr)
 {
 	if(pr->num_str >= pr->max_str){
@@ -105,7 +103,7 @@ ED_ClearEdict
 Sets everything to nil
 =================
 */
-void
+static void
 ED_ClearEdict(pr_t *pr, edict_t *e)
 {
 	memset(&e->v, 0, pr->entityfields * 4);
@@ -157,7 +155,8 @@ Marks the edict as free
 FIXME: walk all entities and NULL out references to this entity
 =================
 */
-void ED_Free (edict_t *ed)
+void
+ED_Free(edict_t *ed)
 {
 	SV_UnlinkEdict (ed);		// unlink from world bsp
 
@@ -183,7 +182,8 @@ void ED_Free (edict_t *ed)
 ED_GlobalAtOfs
 ============
 */
-ddef_t *ED_GlobalAtOfs (pr_t *pr, int ofs)
+static ddef_t *
+ED_GlobalAtOfs(pr_t *pr, int ofs)
 {
 	ddef_t		*def;
 	int			i;
@@ -202,7 +202,8 @@ ddef_t *ED_GlobalAtOfs (pr_t *pr, int ofs)
 ED_FieldAtOfs
 ============
 */
-ddef_t *ED_FieldAtOfs (pr_t *pr, int ofs)
+ddef_t *
+ED_FieldAtOfs(pr_t *pr, int ofs)
 {
 	ddef_t		*def;
 	int			i;
@@ -221,7 +222,8 @@ ddef_t *ED_FieldAtOfs (pr_t *pr, int ofs)
 ED_FindField
 ============
 */
-ddef_t *ED_FindField (pr_t *pr, char *name)
+static ddef_t *
+ED_FindField(pr_t *pr, char *name)
 {
 	ddef_t		*def;
 	int			i;
@@ -241,7 +243,8 @@ ddef_t *ED_FindField (pr_t *pr, char *name)
 ED_FindGlobal
 ============
 */
-ddef_t *ED_FindGlobal (pr_t *pr, char *name)
+static ddef_t *
+ED_FindGlobal(pr_t *pr, char *name)
 {
 	ddef_t		*def;
 	int			i;
@@ -315,7 +318,8 @@ PR_ValueString
 Returns a string describing *data in a type specific manner
 =============
 */
-char *PR_ValueString (pr_t *pr, etype_t type, eval_t *val)
+static char *
+PR_ValueString(pr_t *pr, etype_t type, eval_t *val)
 {
 	static char	line[256];
 	ddef_t		*def;
@@ -416,7 +420,8 @@ Returns a string with a description and the contents of a global,
 padded to 20 field width
 ============
 */
-char *PR_GlobalString (pr_t *pr, int ofs)
+char *
+PR_GlobalString(pr_t *pr, int ofs)
 {
 	char	*s;
 	int		i;
@@ -442,7 +447,8 @@ char *PR_GlobalString (pr_t *pr, int ofs)
 	return line;
 }
 
-char *PR_GlobalStringNoContents (pr_t *pr, int ofs)
+char *
+PR_GlobalStringNoContents(pr_t *pr, int ofs)
 {
 	int		i;
 	ddef_t	*def;
@@ -525,7 +531,8 @@ ED_PrintEdicts
 For debugging, prints all the entities in the current server
 =============
 */
-void ED_PrintEdicts (void)
+void
+ED_PrintEdicts(void)
 {
 	int		i;
 
@@ -541,7 +548,8 @@ ED_PrintEdict_f
 For debugging, prints a single edicy
 =============
 */
-void ED_PrintEdict_f (void)
+static void
+ED_PrintEdict_f(void)
 {
 	int		i;
 
@@ -561,7 +569,8 @@ ED_Count
 For debugging
 =============
 */
-void ED_Count (void)
+static void
+ED_Count(void)
 {
 	int		i;
 	edict_t	*ent;

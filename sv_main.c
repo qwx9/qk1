@@ -93,6 +93,7 @@ void SV_Init (void)
 	extern	cvar_t	sv_maxspeed;
 	extern	cvar_t	sv_accelerate;
 	extern	cvar_t	sv_idealpitchscale;
+	extern	cvar_t	sv_nouse;
 	extern	cvar_t	sv_aim;
 
 	Cvar_RegisterVariable (&sv_maxvelocity);
@@ -105,6 +106,7 @@ void SV_Init (void)
 	Cvar_RegisterVariable (&sv_idealpitchscale);
 	Cvar_RegisterVariable (&sv_aim);
 	Cvar_RegisterVariable (&sv_nostep);
+	Cvar_RegisterVariable (&sv_nouse);
 	Cvar_RegisterVariable (&developer);
 
 	Cmd_AddCommand("sv_protocol", SV_Protocol_f);
@@ -241,7 +243,8 @@ Sends the first message from the server to a connected client.
 This will be sent on the initial connection and upon each server load.
 ================
 */
-void SV_SendServerinfo (client_t *client)
+static void
+SV_SendServerinfo(client_t *client)
 {
 	char **s;
 	int n;
@@ -292,7 +295,8 @@ Initializes a client_t for a new net connection.  This will only be called
 once for a player each game, not once for each level change.
 ================
 */
-void SV_ConnectClient (int clientnum)
+static void
+SV_ConnectClient(int clientnum)
 {
 	int i, edictnum;
 	float spawn_parms[Nparms];
@@ -406,7 +410,8 @@ static int fatbytes;
 static byte	*fatpvs;
 static int fatpvs_size;
 
-void SV_AddToFatPVS (vec3_t org, mnode_t *node, model_t *m)
+static void
+SV_AddToFatPVS(vec3_t org, mnode_t *node, model_t *m)
 {
 	int		i, sz;
 	byte	*pvs;
@@ -449,7 +454,8 @@ Calculates a PVS that is the inclusive or of all leafs within 8 pixels of the
 given point.
 =============
 */
-byte *SV_FatPVS (vec3_t org, model_t *m)
+static byte *
+SV_FatPVS(vec3_t org, model_t *m)
 {
 	fatbytes = (m->numleafs+31)>>3;
 	if(fatpvs == nil || fatbytes > fatpvs_size){
@@ -470,7 +476,8 @@ SV_WriteEntitiesToClient
 
 =============
 */
-void SV_WriteEntitiesToClient (edict_t	*clent, sizebuf_t *msg)
+static void
+SV_WriteEntitiesToClient(edict_t *clent, sizebuf_t *msg)
 {
 	u32int	bits;
 	int		e, i, model, alpha;
@@ -615,7 +622,8 @@ SV_CleanupEnts
 
 =============
 */
-void SV_CleanupEnts (void)
+static void
+SV_CleanupEnts(void)
 {
 	int		e;
 	edict_t	*ent;
@@ -799,7 +807,8 @@ void SV_WriteClientdataToMessage (edict_t *ent, sizebuf_t *msg)
 SV_SendClientDatagram
 =======================
 */
-bool SV_SendClientDatagram (client_t *client)
+static bool
+SV_SendClientDatagram(client_t *client)
 {
 	static byte		buf[MAX_DATAGRAM_LOCAL];
 	sizebuf_t	msg;
@@ -837,7 +846,8 @@ bool SV_SendClientDatagram (client_t *client)
 SV_UpdateToReliableMessages
 =======================
 */
-void SV_UpdateToReliableMessages (void)
+static void
+SV_UpdateToReliableMessages(void)
 {
 	int			i, j;
 	client_t *client;
@@ -879,7 +889,8 @@ Send a nop message without trashing or sending the accumulated client
 message buffer
 =======================
 */
-void SV_SendNop (client_t *client)
+static void
+SV_SendNop(client_t *client)
 {
 	sizebuf_t	msg;
 	byte		buf[4];
@@ -1023,7 +1034,8 @@ SV_CreateBaseline
 
 ================
 */
-void SV_CreateBaseline (void)
+static void
+SV_CreateBaseline(void)
 {
 	u32int bits;
 	int			i;
@@ -1103,7 +1115,8 @@ SV_SendReconnect
 Tell all the clients that the server is changing levels
 ================
 */
-void SV_SendReconnect (void)
+static void
+SV_SendReconnect(void)
 {
 	byte data[128];
 	sizebuf_t	msg;

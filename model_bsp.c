@@ -1,5 +1,6 @@
 #include "quakedef.h"
 #include "softfloat.h"
+#include "model_bsp.h"
 
 static float
 dotadd80(float *a, float *b)

@@ -989,9 +989,6 @@ CloseEnough(edict_t *ent, edict_t *goal, float dist)
 	return true;
 }
 
-bool SV_StepDirection (edict_t *ent, float yaw, float dist);
-void SV_NewChaseDir (edict_t *actor, edict_t *enemy, float dist);
-
 static void
 PF_MoveToGoal(pr_t *pr)
 {

@@ -377,6 +377,7 @@ typedef struct model_s
 
 void	Mod_Init (void);
 void	Mod_ClearAll (void);
+model_t *Mod_FindName (char *name);
 model_t *Mod_ForName (char *name, bool crash);
 void	*Mod_Extradata (model_t *mod);	// handles caching
 void	Mod_TouchModel (char *name);
@@ -386,3 +387,7 @@ byte	*Mod_LeafPVS (mleaf_t *leaf, model_t *model, int *sz);
 void	Mod_Print(void);
 
 texture_t *Load_ExternalTexture(char *map, char *name);
+
+void Mod_LoadBrushModel(model_t *mod, byte *buffer, int total);
+void Mod_LoadSpriteModel(model_t *mod, byte *buffer, int total);
+void Mod_LoadAliasModel(model_t *mod, void *buffer);

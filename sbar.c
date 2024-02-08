@@ -42,7 +42,6 @@ static qpic_t *hsb_items[2];
 
 void Sbar_MiniDeathmatchOverlay (void);
 void Sbar_DeathmatchOverlay (void);
-void M_DrawPic (int x, int y, qpic_t *pic);
 
 /*
 ===============
@@ -51,7 +50,8 @@ Sbar_ShowScores
 Tab key down
 ===============
 */
-void Sbar_ShowScores (void)
+static void
+Sbar_ShowScores(void)
 {
 	if (sb_showscores)
 		return;
@@ -66,7 +66,8 @@ Sbar_DontShowScores
 Tab key up
 ===============
 */
-void Sbar_DontShowScores (void)
+static void
+Sbar_DontShowScores(void)
 {
 	sb_showscores = false;
 	sb_updates = 0;
@@ -236,7 +237,8 @@ void Sbar_Init (void)
 Sbar_DrawPic
 =============
 */
-void Sbar_DrawPic (int x, int y, qpic_t *pic)
+static void
+Sbar_DrawPic(int x, int y, qpic_t *pic)
 {
 	if (cl.gametype == GAME_DEATHMATCH)
 		Draw_Pic (x /* + ((vid.width - 320)>>1)*/, y + (vid.height-SBAR_HEIGHT), pic);
@@ -249,7 +251,8 @@ void Sbar_DrawPic (int x, int y, qpic_t *pic)
 Sbar_DrawTransPic
 =============
 */
-void Sbar_DrawTransPic (int x, int y, qpic_t *pic)
+static void
+Sbar_DrawTransPic(int x, int y, qpic_t *pic)
 {
 	if (cl.gametype == GAME_DEATHMATCH)
 		Draw_TransPic (x /*+ ((vid.width - 320)>>1)*/, y + (vid.height-SBAR_HEIGHT), pic);
@@ -264,7 +267,8 @@ Sbar_DrawCharacter
 Draws one solid graphics character
 ================
 */
-void Sbar_DrawCharacter (int x, int y, int num)
+static void
+Sbar_DrawCharacter(int x, int y, int num)
 {
 	if (cl.gametype == GAME_DEATHMATCH)
 		Draw_Character ( x /*+ ((vid.width - 320)>>1) */ + 4 , y + vid.height-SBAR_HEIGHT, num);
@@ -277,7 +281,8 @@ void Sbar_DrawCharacter (int x, int y, int num)
 Sbar_DrawString
 ================
 */
-void Sbar_DrawString (int x, int y, char *str)
+static void
+Sbar_DrawString(int x, int y, char *str)
 {
 	if (cl.gametype == GAME_DEATHMATCH)
 		Draw_String (x /*+ ((vid.width - 320)>>1)*/, y+ vid.height-SBAR_HEIGHT, str);
@@ -290,7 +295,8 @@ void Sbar_DrawString (int x, int y, char *str)
 Sbar_itoa
 =============
 */
-int Sbar_itoa (int num, char *buf)
+static int
+Sbar_itoa(int num, char *buf)
 {
 	char	*str;
 	int		pow10;
@@ -326,7 +332,8 @@ int Sbar_itoa (int num, char *buf)
 Sbar_DrawNum
 =============
 */
-void Sbar_DrawNum (int x, int y, int num, int digits, int color)
+static void
+Sbar_DrawNum(int x, int y, int num, int digits, int color)
 {
 	char			str[12];
 	char			*ptr;
@@ -362,7 +369,8 @@ static int scoreboardlines;
 Sbar_SortFrags
 ===============
 */
-void Sbar_SortFrags (void)
+static void
+Sbar_SortFrags(void)
 {
 	int		i, j, k;
 
@@ -387,7 +395,8 @@ void Sbar_SortFrags (void)
 			}
 }
 
-int	Sbar_ColorForMap (int m)
+static int
+Sbar_ColorForMap(int m)
 {
 	return m < 128 ? m + 8 : m + 8;
 }
@@ -397,7 +406,8 @@ int	Sbar_ColorForMap (int m)
 Sbar_SoloScoreboard
 ===============
 */
-void Sbar_SoloScoreboard (void)
+static void
+Sbar_SoloScoreboard(void)
 {
 	char	str[80];
 	int		minutes, seconds, tens, units;
@@ -427,7 +437,8 @@ void Sbar_SoloScoreboard (void)
 Sbar_DrawScoreboard
 ===============
 */
-void Sbar_DrawScoreboard (void)
+static void
+Sbar_DrawScoreboard(void)
 {
 	Sbar_SoloScoreboard ();
 	if (cl.gametype == GAME_DEATHMATCH)
@@ -441,7 +452,8 @@ void Sbar_DrawScoreboard (void)
 Sbar_DrawInventory
 ===============
 */
-void Sbar_DrawInventory (void)
+static void
+Sbar_DrawInventory(void)
 {
 	int		i;
 	char	num[6];
@@ -661,7 +673,8 @@ void Sbar_DrawInventory (void)
 Sbar_DrawFrags
 ===============
 */
-void Sbar_DrawFrags (void)
+static void
+Sbar_DrawFrags(void)
 {
 	int				i, k, l;
 	int				top, bottom;
@@ -723,7 +736,8 @@ void Sbar_DrawFrags (void)
 Sbar_DrawFace
 ===============
 */
-void Sbar_DrawFace (void)
+static void
+Sbar_DrawFace(void)
 {
 	int		f, anim;
 
@@ -821,7 +835,8 @@ void Sbar_DrawFace (void)
 Sbar_Draw
 ===============
 */
-void Sbar_Draw (void)
+void
+Sbar_Draw(void)
 {
 	if (scr_con_current == vid.height)
 		return;		// console is full screen
@@ -947,7 +962,8 @@ Sbar_IntermissionNumber
 
 ==================
 */
-void Sbar_IntermissionNumber (int x, int y, int num, int digits, int color)
+static void
+Sbar_IntermissionNumber(int x, int y, int num, int digits, int color)
 {
 	char			str[12];
 	char			*ptr;

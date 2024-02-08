@@ -24,7 +24,8 @@ int	 D_SurfaceCacheForRes (int width, int height)
 	return size;
 }
 
-void D_CheckCacheGuard (void)
+static void
+D_CheckCacheGuard(void)
 {
 	byte	*s;
 	int			 i;
@@ -35,7 +36,8 @@ void D_CheckCacheGuard (void)
 			fatal ("D_CheckCacheGuard: failed");
 }
 
-void D_ClearCacheGuard (void)
+static void
+D_ClearCacheGuard(void)
 {
 	byte	*s;
 	int			 i;
