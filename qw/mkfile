@@ -37,12 +37,14 @@ CLOBJ=\
 	draw.$O\
 	in.$O\
 	keys.$O\
-	../m_dotproduct`{test -f span_$objtype.s && echo -n _$objtype}.$O\
+	../m_dotproduct`{test -f m_dotproduct_$objtype.s && echo -n _$objtype}.$O\
+	../m_random.$O\
 	mathlib.$O\
 	md4.$O\
 	menu.$O\
 	model.$O\
-	nanosec.$O\
+	../mt19937-64.$O\
+	../nanosec.$O\
 	net_chan.$O\
 	net_udp.$O\
 	nonintel.$O\
@@ -79,10 +81,12 @@ SVOBJ=\
 	crc.$O\
 	cvar.$O\
 	../isnanf.$O\
-	../m_dotproduct`{test -f span_$objtype.s && echo -n _$objtype}.$O\
+	../m_dotproduct`{test -f m_dotproduct_$objtype.s && echo -n _$objtype}.$O\
+	../m_random.$O\
 	mathlib.$O\
 	md4.$O\
-	nanosec.$O\
+	../mt19937-64.$O\
+	../nanosec.$O\
 	net_chan.$O\
 	net_udp.$O\
 	pmove.$O\
@@ -121,6 +125,7 @@ HFILES=\
 	draw.h\
 	input.h\
 	keys.h\
+	../m_random.h\
 	../mathlib.h\
 	menu.h\
 	model.h\

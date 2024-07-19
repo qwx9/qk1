@@ -85,3 +85,5 @@ void	Cmd_ForwardToServer (void);
 // so when they are typed in at the console, they will need to be forwarded.
 
 void Cmd_StuffCmds_f (void);
+
+char	*CopyString(char *);

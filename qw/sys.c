@@ -63,17 +63,17 @@ Sys_mkdir(char *path)
 	return 0;
 }
 
-vlong
+s64int
 flen(int fd)
 {
+	s64int l;
 	Dir *d;
-	vlong sz;
 
-	sz = -1;
-	if((d = dirfstat(fd)) != nil)
-		sz = d->length;
+	if((d = dirfstat(fd)) == nil)	/* file assumed extant and readable */
+		sysfatal("flen: %r");
+	l = d->length;
 	free(d);
-	return sz;
+	return l;
 }
 
 double
@@ -120,4 +120,6 @@ Sys_Quit(void)
 void
 Sys_Init(void)
 {
+	m_random_init(time(nil));
+	srand(time(nil));
 }

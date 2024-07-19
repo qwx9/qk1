@@ -123,7 +123,8 @@ char soundlist_name[] =
 CL_Quit_f
 ==================
 */
-void CL_Quit_f (void)
+static void
+CL_Quit_f(void)
 {
 	if (1 /* key_dest != key_console */ /* && cls.state != ca_dedicated */)
 	{
@@ -139,7 +140,8 @@ void CL_Quit_f (void)
 CL_Version_f
 ======================
 */
-void CL_Version_f (void)
+static void
+CL_Version_f(void)
 {
 	Con_Printf ("Version %4.2f\n", VERSION);
 	Con_Printf ("Exe: 00:00:00 Dec 17 1996\n");
@@ -153,7 +155,8 @@ CL_SendConnectPacket
 called by CL_Connect_f and CL_CheckResend
 ======================
 */
-void CL_SendConnectPacket (void)
+static void
+CL_SendConnectPacket(void)
 {
 	netadr_t	adr;
 	char	data[2048];
@@ -195,7 +198,8 @@ Resend a connect message if the last one has timed out
 
 =================
 */
-void CL_CheckForResend (void)
+static void
+CL_CheckForResend(void)
 {
 	netadr_t	adr;
 	char	data[2048];
@@ -224,7 +228,8 @@ void CL_CheckForResend (void)
 	NET_SendPacket (strlen(data), data, &adr);
 }
 
-void CL_BeginServerConnect(void)
+void
+CL_BeginServerConnect(void)
 {
 	connect_time = 0;
 	CL_CheckForResend();
@@ -236,7 +241,8 @@ CL_Connect_f
 
 ================
 */
-void CL_Connect_f (void)
+static void
+CL_Connect_f(void)
 {
 	char	*server;
 
@@ -263,7 +269,8 @@ CL_Rcon_f
   an unconnected command.
 =====================
 */
-void CL_Rcon_f (void)
+static void
+CL_Rcon_f(void)
 {
 	char	message[1024];
 	int		i;
@@ -318,7 +325,8 @@ CL_ClearState
 
 =====================
 */
-void CL_ClearState (void)
+void
+CL_ClearState(void)
 {
 	int			i;
 
@@ -359,7 +367,8 @@ Sends a disconnect message to the server
 This is also called on Host_Error, so it shouldn't cause any errors
 =====================
 */
-void CL_Disconnect (void)
+void
+CL_Disconnect(void)
 {
 	byte	final[10];
 
@@ -398,7 +407,8 @@ void CL_Disconnect (void)
 
 }
 
-void CL_Disconnect_f (void)
+static void
+CL_Disconnect_f(void)
 {
 	CL_Disconnect ();
 }
@@ -412,7 +422,8 @@ user <name or userid>
 Dump userdata / masterdata for a user
 ====================
 */
-void CL_User_f (void)
+static void
+CL_User_f(void)
 {
 	int		uid;
 	int		i;
@@ -446,7 +457,8 @@ CL_Users_f
 Dump userids for all current players
 ====================
 */
-void CL_Users_f (void)
+static void
+CL_Users_f(void)
 {
 	int		i;
 	int		c;
@@ -466,7 +478,8 @@ void CL_Users_f (void)
 	Con_Printf ("%d total users\n", c);
 }
 
-void CL_Color_f (void)
+static void
+CL_Color_f(void)
 {
 	// just for quake compatability...
 	int		top, bottom;
@@ -509,7 +522,8 @@ CL_FullServerinfo_f
 Sent by server when serverinfo changes
 ==================
 */
-void CL_FullServerinfo_f (void)
+static void
+CL_FullServerinfo_f(void)
 {
 	char *p;
 	float v;
@@ -540,7 +554,8 @@ Allow clients to change userinfo
 ==================
 Casey was here :)
 */
-void CL_FullInfo_f (void)
+static void
+CL_FullInfo_f(void)
 {
 	char	key[512];
 	char	value[512];
@@ -592,7 +607,8 @@ CL_SetInfo_f
 Allow clients to change userinfo
 ==================
 */
-void CL_SetInfo_f (void)
+static void
+CL_SetInfo_f(void)
 {
 	if (Cmd_Argc() == 1)
 	{
@@ -621,7 +637,8 @@ packet <destination> <contents>
 Contents allows \n escape character
 ====================
 */
-void CL_Packet_f (void)
+static void
+CL_Packet_f(void)
 {
 	char	send[2048];
 	int		i, l;
@@ -668,7 +685,8 @@ CL_NextDemo
 Called to play the next demo in the demo loop
 =====================
 */
-void CL_NextDemo (void)
+void
+CL_NextDemo(void)
 {
 	char	str[1024];
 
@@ -700,7 +718,8 @@ Just sent as a hint to the client that they should
 drop to full console
 =================
 */
-void CL_Changing_f (void)
+static void
+CL_Changing_f(void)
 {
 	if (cls.download)  // don't change when downloading
 		return;
@@ -719,7 +738,8 @@ CL_Reconnect_f
 The server is changing levels
 =================
 */
-void CL_Reconnect_f (void)
+static void
+CL_Reconnect_f(void)
 {
 	if (cls.download)  // don't change when downloading
 		return;
@@ -749,7 +769,8 @@ CL_ConnectionlessPacket
 Responses to broadcasts, etc
 =================
 */
-void CL_ConnectionlessPacket (void)
+static void
+CL_ConnectionlessPacket(void)
 {
 	char	*s;
 	int		c;
@@ -874,7 +895,8 @@ void CL_ConnectionlessPacket (void)
 CL_ReadPackets
 =================
 */
-void CL_ReadPackets (void)
+static void
+CL_ReadPackets(void)
 {
 //	while (NET_GetPacket ())
 	while (CL_GetMessage())
@@ -932,7 +954,8 @@ void CL_ReadPackets (void)
 CL_Download_f
 =====================
 */
-void CL_Download_f (void)
+static void
+CL_Download_f(void)
 {
 	char *p, *q;
 

@@ -399,11 +399,6 @@ void SV_BeginRedirect (redirect_t rd);
 void SV_EndRedirect (void);
 
 //
-// sv_ccmds.c
-//
-void SV_Status_f (void);
-
-//
 // sv_ents.c
 //
 void SV_WriteEntitiesToClient (client_t *client, sizebuf_t *msg);

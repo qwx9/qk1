@@ -254,7 +254,8 @@ void Cmd_StuffCmds_f (void)
 Cmd_Exec_f
 ===============
 */
-void Cmd_Exec_f (void)
+static void
+Cmd_Exec_f(void)
 {
 	char	*f;
 	int		mark;
@@ -288,7 +289,8 @@ Cmd_Echo_f
 Just prints the rest of the line to the console
 ===============
 */
-void Cmd_Echo_f (void)
+static void
+Cmd_Echo_f(void)
 {
 	int		i;
 	
@@ -305,7 +307,8 @@ Creates a new command that executes a command string (possibly ; seperated)
 ===============
 */
 
-char *CopyString (char *in)
+char *
+CopyString(char *in)
 {
 	char	*out;
 	
@@ -314,7 +317,8 @@ char *CopyString (char *in)
 	return out;
 }
 
-void Cmd_Alias_f (void)
+static void
+Cmd_Alias_f(void)
 {
 	cmdalias_t	*a;
 	char		cmd[1024];
@@ -439,7 +443,8 @@ Cmd_TokenizeString
 Parses the given string into command line tokens.
 ============
 */
-void Cmd_TokenizeString (char *text)
+void
+Cmd_TokenizeString(char *text)
 {
 	int		i;
 	

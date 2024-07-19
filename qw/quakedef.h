@@ -139,6 +139,7 @@ typedef struct
 #include "sys.h"
 #include "zone.h"
 #include "mathlib.h"
+#include "m_random.h"
 #include "wad.h"
 #include "draw.h"
 #include "cvar.h"

@@ -110,7 +110,8 @@ void Con_ClearNotify (void)
 Con_MessageMode_f
 ================
 */
-void Con_MessageMode_f (void)
+static void
+Con_MessageMode_f(void)
 {
 	chat_team = false;
 	key_dest = key_message;
@@ -121,7 +122,8 @@ void Con_MessageMode_f (void)
 Con_MessageMode2_f
 ================
 */
-void Con_MessageMode2_f (void)
+static void
+Con_MessageMode2_f(void)
 {
 	chat_team = true;
 	key_dest = key_message;
@@ -233,7 +235,8 @@ void Con_Init (void)
 Con_Linefeed
 ===============
 */
-void Con_Linefeed (void)
+static void
+Con_Linefeed(void)
 {
 	con->x = 0;
 	if (con->display == con->current)
@@ -400,7 +403,8 @@ Con_DrawInput
 The input line scrolls horizontally if typing goes beyond the right edge
 ================
 */
-void Con_DrawInput (void)
+static void
+Con_DrawInput(void)
 {
 	int		i;
 	char	*text;

@@ -848,7 +848,8 @@ cvar_t	filterban = {"filterban", "1"};
 SV_AddIP_f
 =================
 */
-void SV_AddIP_f (void)
+static void
+SV_AddIP_f(void)
 {
 	int		i;
 
@@ -866,7 +867,8 @@ void SV_AddIP_f (void)
 SV_RemoveIP_f
 =================
 */
-void SV_RemoveIP_f (void)
+static void
+SV_RemoveIP_f(void)
 {
 	netadr_t a;
 	int			i, j;
@@ -889,7 +891,8 @@ void SV_RemoveIP_f (void)
 SV_ListIP_f
 =================
 */
-void SV_ListIP_f (void)
+static void
+SV_ListIP_f(void)
 {
 	int		i;
 
@@ -903,7 +906,8 @@ void SV_ListIP_f (void)
 SV_WriteIP_f
 =================
 */
-void SV_WriteIP_f (void)
+static void
+SV_WriteIP_f(void)
 {
 	FILE	*f;
 	char	name[MAX_OSPATH];

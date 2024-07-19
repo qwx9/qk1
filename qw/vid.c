@@ -136,14 +136,11 @@ resetfb(void)
 void
 VID_Init(uchar *)
 {
-	int n;
-
 	vid.maxwarpwidth = WARP_WIDTH;
 	vid.maxwarpheight = WARP_HEIGHT;
 	vid.numpages = 2;
 	vid.colormap = host_colormap;
 	vid.fullbright = 256 - LittleLong(*((int *)vid.colormap + 2048));
-	srand(getpid());
 	if(initdraw(nil, nil, "quake") < 0)
 		sysfatal("initdraw: %r\n");
 	resetfb();

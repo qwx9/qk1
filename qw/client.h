@@ -333,7 +333,6 @@ void Host_WriteConfiguration (void);
 void CL_EstablishConnection (char *host);
 
 void CL_Disconnect (void);
-void CL_Disconnect_f (void);
 void CL_NextDemo (void);
 bool CL_DemoBehind(void);
 
@@ -367,8 +366,6 @@ void CL_ParseTEnt (void);
 void CL_UpdateTEnts (void);
 
 void CL_ClearState (void);
-
-void CL_ReadPackets (void);
 
 int  CL_ReadFromServer (void);
 void CL_WriteToServer (usercmd_t *cmd);

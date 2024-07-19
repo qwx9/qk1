@@ -471,7 +471,7 @@ void Draw_ConsoleBackground (int lines)
 		sprintf (ver, "%4.2f", VERSION);
 		dest = conback->data + 320 + 320*186 - 11 - 8*strlen(ver);
 	} else {
-		sprint(ver, "(9) %4.2f QuakeWorld %4.2f", PLAN9_VERSION, VERSION);
+		sprint(ver, "qk1w %4.2f QuakeWorld %4.2f", PLAN9_VERSION, VERSION);
 		dest = conback->data + 320 - (strlen(ver)*8 + 11) + 320*186;
 	}
 
@@ -507,8 +507,8 @@ void Draw_ConsoleBackground (int lines)
 R_DrawRect8
 ==============
 */
-void R_DrawRect8 (vrect_t *prect, int rowbytes, byte *psrc,
-	int transparent)
+static void
+R_DrawRect8(vrect_t *prect, int rowbytes, byte *psrc, int transparent)
 {
 	byte	t;
 	int		i, j, srcdelta, destdelta;
