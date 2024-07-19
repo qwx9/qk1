@@ -8,7 +8,7 @@ mainstacksize = 512*1024;
 
 /* FIXME: stupid-ass linking kludges */
 server_static_t	svs;
-qboolean ServerPaused(void)
+bool ServerPaused(void)
 {
 	return 0;
 }

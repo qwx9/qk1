@@ -5,6 +5,8 @@ TARG=\
 	qwcl\
 	qwsv\
 
+CFLAGS=$CFLAGS -D__plan9__ -D__${objtype}__ -I/sys/include -I.
+
 CLOBJ=\
 	cd.$O\
 	cl_cam.$O\
@@ -35,6 +37,7 @@ CLOBJ=\
 	draw.$O\
 	in.$O\
 	keys.$O\
+	../dotproduct`{test -f dotproduct_$objtype.s && echo -n _$objtype}.$O\
 	mathlib.$O\
 	md4.$O\
 	menu.$O\
@@ -75,6 +78,8 @@ SVOBJ=\
 	common.$O\
 	crc.$O\
 	cvar.$O\
+	../isnanf.$O\
+	../dotproduct`{test -f dotproduct_$objtype.s && echo -n _$objtype}.$O\
 	mathlib.$O\
 	md4.$O\
 	nanosec.$O\
@@ -143,6 +148,9 @@ HFILES=\
 	zone.h\
 
 </sys/src/cmd/mkmany
+
+%.$O: %.c
+	$CC $CFLAGS -o $target $stem.c
 
 $O.qwcl: $CLOBJ
 	$LD -o $target $prereq

@@ -701,7 +701,7 @@ void SV_BeginDownload_f(void)
 SV_Say
 ==================
 */
-void SV_Say (qboolean team)
+void SV_Say (bool team)
 {
 	client_t *client;
 	int		j, tmp;
@@ -1514,7 +1514,7 @@ void SV_ExecuteClientMessage (client_t *cl)
 	usercmd_t	oldest, oldcmd, newcmd;
 	client_frame_t	*frame;
 	vec3_t o;
-	qboolean	move_issued = false; //only allow one move command
+	bool	move_issued = false; //only allow one move command
 	int		checksumIndex;
 	byte	checksum, calculatedChecksum;
 	int		seq_hash;

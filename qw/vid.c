@@ -139,8 +139,6 @@ resetfb(void)
 void
 VID_Init(uchar *)
 {
-	int n;
-
 	vid.maxwarpwidth = WARP_WIDTH;
 	vid.maxwarpheight = WARP_HEIGHT;
 	vid.numpages = 2;

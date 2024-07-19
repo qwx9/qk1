@@ -157,7 +157,7 @@ PM_RecursiveHullCheck
 
 ==================
 */
-qboolean PM_RecursiveHullCheck (hull_t *hull, int num, float p1f, float p2f, vec3_t p1, vec3_t p2, pmtrace_t *trace)
+bool PM_RecursiveHullCheck (hull_t *hull, int num, float p1f, float p2f, vec3_t p1, vec3_t p2, pmtrace_t *trace)
 {
 	dclipnode_t	*node;
 	mplane_t	*plane;
@@ -295,7 +295,7 @@ PM_TestPlayerPosition
 Returns false if the given player position is not valid (in solid)
 ================
 */
-qboolean PM_TestPlayerPosition (vec3_t pos)
+bool PM_TestPlayerPosition (vec3_t pos)
 {
 	int			i;
 	physent_t	*pe;

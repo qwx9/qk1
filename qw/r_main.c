@@ -10,16 +10,16 @@ vec3_t		viewlightvec;
 alight_t	r_viewlighting = {128, 192, viewlightvec};
 float		r_time1;
 int			r_numallocatededges;
-qboolean	r_drawpolys;
-qboolean	r_drawculledpolys;
-qboolean	r_worldpolysbacktofront;
-qboolean	r_recursiveaffinetriangles = true;
+bool	r_drawpolys;
+bool	r_drawculledpolys;
+bool	r_worldpolysbacktofront;
+bool	r_recursiveaffinetriangles = true;
 int			r_pixbytes = 1;
 float		r_aliasuvscale = 1.0;
 int			r_outofsurfaces;
 int			r_outofedges;
 
-qboolean	r_dowarp, r_dowarpold, r_viewchanged;
+bool	r_dowarp, r_dowarpold, r_viewchanged;
 
 int			numbtofpolys;
 btofpoly_t	*pbtofpolys;
@@ -27,7 +27,7 @@ mvertex_t	*r_pcurrentvertbase;
 
 int			c_surf;
 int			r_maxsurfsseen, r_maxedgesseen, r_cnumsurfs;
-qboolean	r_surfsonstack;
+bool	r_surfsonstack;
 int			r_clipflags;
 
 byte		*r_warpbuffer;
@@ -289,7 +289,7 @@ void R_SetVrect (vrect_t *pvrectin, vrect_t *pvrect, int lineadj)
 {
 	int		h;
 	float	size;
-	qboolean full = false;
+	bool full = false;
 
 	if (scr_viewsize.value >= 100.0) {
 		size = 100.0;

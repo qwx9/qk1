@@ -19,11 +19,11 @@ static char	*safeargvs[NUM_SAFE_ARGVS] =
 
 cvar_t	registered = {"registered","0"};
 
-qboolean	com_modified;	// set true if using non-id files
+bool	com_modified;	// set true if using non-id files
 
 int		static_registered = 1;	// only for startup check, then set
 
-qboolean		msg_suppress_1 = 0;
+bool		msg_suppress_1 = 0;
 
 void COM_InitFilesystem (void);
 void COM_Path_f (void);
@@ -33,7 +33,7 @@ void COM_Path_f (void);
 #define	PAK0_COUNT		339
 #define	PAK0_CRC		52883
 
-qboolean		standard_quake = true, rogue, hipnotic;
+bool		standard_quake = true, rogue, hipnotic;
 
 char	gamedirfile[MAX_OSPATH];
 
@@ -252,7 +252,7 @@ float Q_atof (char *str)
 ============================================================================
 */
 
-qboolean	bigendien;
+bool	bigendien;
 
 short	(*BigShort) (short l);
 short	(*LittleShort) (short l);
@@ -470,7 +470,7 @@ void MSG_WriteDeltaUsercmd (sizebuf_t *buf, usercmd_t *from, usercmd_t *cmd)
 // reading functions
 //
 int			msg_readcount;
-qboolean	msg_badread;
+bool	msg_badread;
 
 void MSG_BeginReading (void)
 {
@@ -968,7 +968,7 @@ COM_InitArgv
 */
 void COM_InitArgv (int argc, char **argv)
 {
-	qboolean	safe;
+	bool	safe;
 	int			i;
 
 	safe = false;

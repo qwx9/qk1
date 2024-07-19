@@ -3,7 +3,7 @@
 typedef unsigned char 		byte;
 #define _DEF_BYTE_
 
-typedef enum {false, true}	qboolean;
+typedef enum {false, true}	bool;
 
 #define	MAX_INFO_STRING	196
 #define	MAX_SERVERINFO_STRING	512
@@ -13,8 +13,8 @@ typedef enum {false, true}	qboolean;
 
 typedef struct sizebuf_s
 {
-	qboolean	allowoverflow;	// if false, do a Sys_Error
-	qboolean	overflowed;		// set to true if the buffer size failed
+	bool	allowoverflow;	// if false, do a Sys_Error
+	bool	overflowed;		// set to true if the buffer size failed
 	byte	*data;
 	int		maxsize;
 	int		cursize;
@@ -63,7 +63,7 @@ void InsertLinkAfter (link_t *l, link_t *after);
 
 //============================================================================
 
-extern	qboolean		bigendien;
+extern	bool		bigendien;
 
 extern	short	(*BigShort) (short l);
 extern	short	(*LittleShort) (short l);
@@ -90,7 +90,7 @@ void MSG_WriteAngle16 (sizebuf_t *sb, float f);
 void MSG_WriteDeltaUsercmd (sizebuf_t *sb, struct usercmd_s *from, struct usercmd_s *cmd);
 
 extern	int			msg_readcount;
-extern	qboolean	msg_badread;		// set if a read goes beyond end of message
+extern	bool	msg_badread;		// set if a read goes beyond end of message
 
 void MSG_BeginReading (void);
 int MSG_GetReadCount(void);
@@ -115,7 +115,7 @@ float Q_atof (char *str);
 //============================================================================
 
 extern	char		com_token[1024];
-extern	qboolean	com_eof;
+extern	bool	com_eof;
 
 char *COM_Parse (char *data);
 
@@ -157,7 +157,7 @@ void COM_CreatePath (char *path);
 void COM_Gamedir (char *dir);
 
 extern	struct cvar_s	registered;
-extern qboolean		standard_quake, rogue, hipnotic;
+extern bool		standard_quake, rogue, hipnotic;
 
 char *Info_ValueForKey (char *s, char *key);
 void Info_RemoveKey (char *s, char *key);

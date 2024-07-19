@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include "quakedef.h"
 
-qboolean	sv_allow_cheats;
+bool	sv_allow_cheats;
 
 int fp_messages=4, fp_persecond=4, fp_secondsdead=10;
 char fp_msg[255];
@@ -142,7 +142,7 @@ SV_SetPlayer
 Sets host_client and sv_player to the player with idnum Cmd_Argv(1)
 ==================
 */
-qboolean SV_SetPlayer (void)
+bool SV_SetPlayer (void)
 {
 	client_t	*cl;
 	int			i;

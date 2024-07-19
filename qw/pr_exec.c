@@ -18,7 +18,7 @@ int			localstack[LOCALSTACK_SIZE];
 int			localstack_used;
 
 
-qboolean	pr_trace;
+bool	pr_trace;
 dfunction_t	*pr_xfunction;
 int			pr_xstatement;
 

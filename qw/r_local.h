@@ -103,7 +103,7 @@ void R_DrawPolyList (void);
 //
 // current entity info
 //
-extern	qboolean		insubmodel;
+extern	bool		insubmodel;
 extern	vec3_t			r_worldmodelorg;
 
 
@@ -204,7 +204,7 @@ extern int				r_acliptype;
 extern finalvert_t		*pfinalverts;
 extern auxvert_t		*pauxverts;
 
-qboolean R_AliasCheckBBox (void);
+bool R_AliasCheckBBox (void);
 
 //=========================================================
 // turbulence stuff
@@ -255,9 +255,9 @@ extern float	dp_time1, dp_time2, db_time1, db_time2, rw_time1, rw_time2;
 extern float	se_time1, se_time2, de_time1, de_time2, dv_time1, dv_time2;
 extern int		r_frustum_indexes[4*6];
 extern int		r_maxsurfsseen, r_maxedgesseen, r_cnumsurfs;
-extern qboolean	r_surfsonstack;
+extern bool	r_surfsonstack;
 extern cshift_t	cshift_water;
-extern qboolean	r_dowarpold, r_viewchanged;
+extern bool	r_dowarpold, r_viewchanged;
 
 extern mleaf_t	*r_viewleaf, *r_oldviewleaf;
 

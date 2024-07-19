@@ -1,7 +1,7 @@
 typedef struct
 {
 	char		name[16];
-	qboolean	failedload;		// the name isn't a valid skin
+	bool	failedload;		// the name isn't a valid skin
 	cache_user_t	cache;
 } skin_t;
 
@@ -71,7 +71,7 @@ typedef struct
 	player_state_t	playerstate[MAX_CLIENTS];	// message received that reflects performing
 							// the usercmd
 	packet_entities_t	packet_entities;
-	qboolean	invalid;		// true if the packet_entities delta was invalid
+	bool	invalid;		// true if the packet_entities delta was invalid
 } frame_t;
 
 
@@ -165,9 +165,9 @@ typedef struct
 
 // demo recording info must be here, because record is started before
 // entering a map (and clearing client_state_t)
-	qboolean	demorecording;
-	qboolean	demoplayback;
-	qboolean	timedemo;
+	bool	demorecording;
+	bool	demoplayback;
+	bool	timedemo;
 	FILE		*demofile;
 	float		td_lastframe;		// to meter out one message a frame
 	int			td_startframe;		// host_framecount at start
@@ -229,14 +229,14 @@ typedef struct
 
 // pitch drifting vars
 	float		pitchvel;
-	qboolean	nodrift;
+	bool	nodrift;
 	float		driftmove;
 	double		laststop;
 
 
 	float		crouch;			// local amount for smoothing stepups
 
-	qboolean	paused;			// send over by server
+	bool	paused;			// send over by server
 
 	float		punchangle;		// temporar yview kick from weapon firing
 	
@@ -315,7 +315,7 @@ extern	entity_t		cl_static_entities[MAX_STATIC_ENTITIES];
 extern	lightstyle_t	cl_lightstyle[MAX_LIGHTSTYLES];
 extern	dlight_t		cl_dlights[MAX_DLIGHTS];
 
-extern	qboolean	nomaster;
+extern	bool	nomaster;
 extern float	server_version;	// version of server we connected to
 
 //=============================================================================
@@ -335,7 +335,7 @@ void CL_EstablishConnection (char *host);
 void CL_Disconnect (void);
 void CL_Disconnect_f (void);
 void CL_NextDemo (void);
-qboolean CL_DemoBehind(void);
+bool CL_DemoBehind(void);
 
 void CL_BeginServerConnect(void);
 
@@ -382,7 +382,7 @@ char *Key_KeynumToString (int keynum);
 // cl_demo.c
 //
 void CL_StopPlayback (void);
-qboolean CL_GetMessage (void);
+bool CL_GetMessage (void);
 void CL_WriteDemoCmd (usercmd_t *pcmd);
 
 void CL_Stop_f (void);
@@ -400,8 +400,8 @@ extern int	packet_latency[NET_TIMINGS];
 int CL_CalcNet (void);
 void CL_ParseServerMessage (void);
 void CL_NewTranslation (int slot);
-qboolean	CL_CheckOrDownloadFile (char *filename);
-qboolean CL_IsUploading(void);
+bool	CL_CheckOrDownloadFile (char *filename);
+bool CL_IsUploading(void);
 void CL_NextUpload(void);
 void CL_StartUpload (byte *data, int size);
 void CL_StopUpload(void);
@@ -430,11 +430,11 @@ void CL_ClearTEnts (void);
 // cl_ents.c
 //
 void CL_SetSolidPlayers (int playernum);
-void CL_SetUpPlayerPrediction(qboolean dopred);
+void CL_SetUpPlayerPrediction(bool dopred);
 void CL_EmitEntities (void);
 void CL_ClearProjectiles (void);
 void CL_ParseProjectiles (void);
-void CL_ParsePacketEntities (qboolean delta);
+void CL_ParsePacketEntities (bool delta);
 void CL_SetSolidEntities (void);
 void CL_ParsePlayerinfo (void);
 
@@ -443,7 +443,7 @@ void CL_ParsePlayerinfo (void);
 //
 void CL_InitPrediction (void);
 void CL_PredictMove (void);
-void CL_PredictUsercmd (player_state_t *from, player_state_t *to, usercmd_t *u, qboolean spectator);
+void CL_PredictUsercmd (player_state_t *from, player_state_t *to, usercmd_t *u, bool spectator);
 
 //
 // cl_cam.c
@@ -454,8 +454,8 @@ void CL_PredictUsercmd (player_state_t *from, player_state_t *to, usercmd_t *u, 
 extern	int		autocam;
 extern int spec_track; // player# of who we are tracking
 
-qboolean Cam_DrawViewModel(void);
-qboolean Cam_DrawPlayer(int playernum);
+bool Cam_DrawViewModel(void);
+bool Cam_DrawPlayer(int playernum);
 void Cam_Track(usercmd_t *cmd);
 void Cam_FinishMove(usercmd_t *cmd);
 void Cam_Reset(void);

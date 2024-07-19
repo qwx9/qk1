@@ -29,7 +29,7 @@ extern	int		edit_line;
 extern	int		key_linepos;
 		
 
-qboolean	con_initialized;
+bool	con_initialized;
 
 
 void Key_ClearTyping (void)
@@ -336,7 +336,7 @@ void Con_Printf (char *fmt, ...)
 {
 	va_list		argptr;
 	char		msg[MAXPRINTMSG];
-	static qboolean	inupdate;
+	static bool	inupdate;
 	
 	va_start (argptr,fmt);
 	vsprintf (msg,fmt,argptr);

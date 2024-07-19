@@ -13,19 +13,19 @@ netadr_t cons[2*MAX_CLIENTS];
 static uchar netbuf[8192];
 static int afd = -1, lpid;
 
-qboolean
+bool
 NET_CompareBaseAdr(netadr_t *a, netadr_t *b)
 {
 	return strcmp(a->addr, b->addr) == 0;
 }
 
-qboolean
+bool
 NET_CompareAdr(netadr_t *a, netadr_t *b)
 {
 	return strcmp(a->sys, b->sys) == 0;
 }
 
-qboolean
+bool
 NET_StringToAdr(char *s, netadr_t *a, char *port)
 {
 	int fd, n;
@@ -78,7 +78,7 @@ getinfo(netadr_t *a)
 	free(nc);
 }
 
-qboolean
+bool
 NET_GetPacket(void)
 {
 	int n, fd;
