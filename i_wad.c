@@ -160,8 +160,10 @@ static int
 W_ReadPixelsAt(Wad *wad, char *name, int off, int sz, pixel_t *out, int num)
 {
 	int n, palsz, x, fb;
+	pixel_t *out0;
 	byte *t, *pal;
 
+	out0 = out;
 	num = min(num, sz);
 	num = min(num, wad->sz-off);
 	t = wad->in + off;
@@ -190,6 +192,7 @@ W_ReadPixelsAt(Wad *wad, char *name, int off, int sz, pixel_t *out, int num)
 				*out = ((fb && x >= palsz-32*3) ? 0 : 0xff)<<24 | pal[x+0]<<16 | pal[x+1]<<8 | pal[x+2];
 		}
 	}
+	PixTransform(out0, num);
 	return num;
 err:
 	return -1;

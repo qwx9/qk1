@@ -33,6 +33,7 @@ Load_ExternalTexture(char *map, char *name)
 		return nil;
 	}
 	n = q->width * q->height;
+	PixTransform(q->pixels, n);
 	tx = Hunk_Alloc(sizeof(*tx) + n*85/64*sizeof(pixel_t));
 	strncpy(tx->name, name, sizeof(tx->name)-1);
 	tx->name[sizeof(tx->name)-1] = 0;

@@ -48,6 +48,7 @@ BSP30_LoadLighting(model_t *mod, byte *in, int sz)
 	}
 
 	memcpy(mod->lightdata = Hunk_Alloc(sz), in, sz);
+	LightTransform(mod->lightdata, sz);
 	return 0;
 }
 

@@ -12,6 +12,9 @@ when crossing a water boudnary.
 cvar_t lcd_x = {"lcd_x","0"};
 
 cvar_t v_scale = {"v_scale", "1", true};
+cvar_t v_saturation = {"v_saturation", "1", true};
+cvar_t v_lightness = {"v_lightness", "1", true};
+cvar_t v_brightness = {"v_brightness", "1", true};
 
 static cvar_t lcd_yaw = {"lcd_yaw","0"};
 
@@ -969,6 +972,9 @@ void V_Init (void)
 
 	Cvar_RegisterVariable(&v_scale);
 	v_scale.cb = v_scale_cb;
+	Cvar_RegisterVariable(&v_saturation);
+	Cvar_RegisterVariable(&v_lightness);
+	Cvar_RegisterVariable(&v_brightness);
 
 	Cvar_RegisterVariable (&lcd_x);
 	Cvar_RegisterVariable (&lcd_yaw);

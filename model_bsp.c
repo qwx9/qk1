@@ -266,6 +266,7 @@ BSP_LoadLighting(model_t *mod, byte *in, int sz)
 		if((lit = loadhunklmp(s, &litsz)) != nil && litsz >= 4+4+sz*3){
 			if(memcmp(lit, "QLIT", 4) == 0 && lit[4] == 1 && lit[5] == 0 && lit[6] == 0 && lit[7] == 0){
 				mod->lightdata = lit + 8;
+				LightTransform(mod->lightdata, sz);
 				return 0;
 			}else{
 				Con_Printf("%s: invalid/unsupported LIT file\n", s);
@@ -280,6 +281,7 @@ BSP_LoadLighting(model_t *mod, byte *in, int sz)
 		mod->lightdata[i*3+1] = in[i];
 		mod->lightdata[i*3+2] = in[i];
 	}
+	LightTransform(mod->lightdata, sz);
 	return 0;
 }
 

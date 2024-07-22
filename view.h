@@ -5,6 +5,9 @@ extern float v_blend[4];
 
 extern cvar_t lcd_x;
 extern cvar_t v_scale;
+extern cvar_t v_saturation;
+extern cvar_t v_lightness;
+extern cvar_t v_brightness;
 
 void V_Init (void);
 void V_RenderView (void);

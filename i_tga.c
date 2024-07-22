@@ -155,8 +155,9 @@ TGA_Encode(byte **out, char *id, pixel_t *pix, int w, int h)
 	*p++ = h & 0xff; *p++ = h>>8; /* h */
 	*p++ = 24; /* bpp */
 	*p++ = FlagOriginTop; /* flags */
-	if(id != nil)
+	if(id != nil){
 		memmove(p, id, n); p += n; /* id */
+	}
 	n = w * h;
 	for(i = 0; i < n; i++){
 		*p++ = pix[i] >> 0;
