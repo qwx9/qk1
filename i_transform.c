@@ -59,7 +59,7 @@ PixTransform(pixel_t *pixels, int n)
 	if(sa == 1.0 && li == 1.0 && br == 1.0)
 		return;
 
-	in = 0;
+	in = out = 0;
 	for(i = 0; i < n; i++){
 		p = pixels[i];
 		if(p == 0)

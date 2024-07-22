@@ -32,9 +32,11 @@ OFILES=\
 	fs.$O\
 	host.$O\
 	host_cmd.$O\
+	hsluv.$O\
 	i_external.$O\
 	i_resize.$O\
 	i_tga.$O\
+	i_transform.$O\
 	i_wad.$O\
 	in_plan9.$O\
 	isnanf.$O\
