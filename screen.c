@@ -443,13 +443,13 @@ static void SCR_DrawConsole (void)
 	if (scr_con_current)
 	{
 		Con_DrawConsole (scr_con_current, true);
-		clearconsole = 0;
 	}
 	else
 	{
 		if (key_dest == key_game || key_dest == key_message)
 			Con_DrawNotify ();	// only draw notify in game
 	}
+	clearconsole = 0;
 }
 
 /*
