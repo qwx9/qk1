@@ -180,9 +180,6 @@ static void SCR_CalcRefdef (void)
 	scr_fullupdate = 0;		// force a background redraw
 	vid.recalc_refdef = false;
 
-	// force the status bar to redraw
-	Sbar_Changed ();
-
 //========================================
 
 	// bound viewsize
@@ -427,7 +424,6 @@ static void SCR_SetUpToDrawConsole (void)
 	if (clearconsole++ < vid.numpages)
 	{
 		Draw_TileClear (0,(int)scr_con_current,vid.width, vid.height - (int)scr_con_current);
-		Sbar_Changed ();
 	}
 	else if (clearnotify++ < vid.numpages)
 	{
@@ -478,7 +474,6 @@ void SCR_BeginLoadingPlaque (void)
 
 	scr_drawloading = true;
 	scr_fullupdate = 0;
-	Sbar_Changed ();
 	SCR_UpdateScreen(false);
 	scr_drawloading = false;
 
@@ -651,7 +646,6 @@ void SCR_UpdateScreen (bool drawdialog)
 	if (scr_fullupdate++ < vid.numpages)
 	{	// clear the entire screen
 		Draw_TileClear (0,0,vid.width,vid.height);
-		Sbar_Changed ();
 	}
 	SCR_SetUpToDrawConsole ();
 	SCR_EraseCenterString ();

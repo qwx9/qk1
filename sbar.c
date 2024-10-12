@@ -1,8 +1,5 @@
 #include "quakedef.h"
 
-
-static int sb_updates;		// if >= vid.numpages, no update needed
-
 #define STAT_MINUS		10	// num frame for '-' stats digit
 static qpic_t *sb_nums[2][11];
 static qpic_t *sb_colon, *sb_slash;
@@ -56,7 +53,6 @@ Sbar_ShowScores(void)
 	if (sb_showscores)
 		return;
 	sb_showscores = true;
-	sb_updates = 0;
 }
 
 /*
@@ -70,17 +66,6 @@ static void
 Sbar_DontShowScores(void)
 {
 	sb_showscores = false;
-	sb_updates = 0;
-}
-
-/*
-===============
-Sbar_Changed
-===============
-*/
-void Sbar_Changed (void)
-{
-	sb_updates = 0;	// update next frame
 }
 
 /*
@@ -490,9 +475,6 @@ Sbar_DrawInventory(void)
 				flashon = (flashon%5) + 2;
 
          Sbar_DrawPic (i*24, -16, sb_weapons[flashon][i]);
-
-			if (flashon > 1)
-				sb_updates = 0;		// force update to remove flash
 		}
 	}
 
@@ -547,8 +529,6 @@ Sbar_DrawInventory(void)
             }
             else
                Sbar_DrawPic (176 + (i*24), -16, hsb_weapons[flashon][i]);
-            if (flashon > 1)
-               sb_updates = 0;      // force update to remove flash
          }
       }
     }
@@ -587,7 +567,6 @@ Sbar_DrawInventory(void)
 			time = cl.item_gettime[17+i];
 			if (time && time > cl.time - 2 && flashon )
 			{  // flash frame
-				sb_updates = 0;
 			}
 			else
 			{
@@ -597,8 +576,6 @@ Sbar_DrawInventory(void)
 					Sbar_DrawPic (192 + i*16, -16, sb_items[i]);
 				}
 			}
-			if (time && time > cl.time - 2)
-			sb_updates = 0;
 		}
 	}
 	//MED 01/04/97 added hipnotic items
@@ -611,14 +588,11 @@ Sbar_DrawInventory(void)
 				time = cl.item_gettime[24+i];
 				if (time && time > cl.time - 2 && flashon )
 				{  // flash frame
-					sb_updates = 0;
 				}
 				else
 				{
 					Sbar_DrawPic (288 + i*16, -16, hsb_items[i]);
 				}
-				if (time && time > cl.time - 2)
-					sb_updates = 0;
 			}
 	}
 
@@ -633,15 +607,12 @@ Sbar_DrawInventory(void)
 
 				if (time &&	time > cl.time - 2 && flashon )
 				{	// flash frame
-					sb_updates = 0;
 				}
 				else
 				{
 					Sbar_DrawPic (288 + i*16, -16, rsb_items[i]);
 				}
 
-				if (time &&	time > cl.time - 2)
-					sb_updates = 0;
 			}
 		}
 	}
@@ -655,12 +626,9 @@ Sbar_DrawInventory(void)
 				time = cl.item_gettime[28+i];
 				if (time &&	time > cl.time - 2 && flashon )
 				{	// flash frame
-					sb_updates = 0;
 				}
 				else
 					Sbar_DrawPic (320-32 + i*8, -16, sb_sigil[i]);
-				if (time &&	time > cl.time - 2)
-					sb_updates = 0;
 			}
 		}
 	}
@@ -823,7 +791,6 @@ Sbar_DrawFace(void)
 	if (cl.time <= cl.faceanimtime)
 	{
 		anim = 1;
-		sb_updates = 0;		// make sure the anim gets drawn over
 	}
 	else
 		anim = 0;
@@ -841,11 +808,6 @@ Sbar_Draw(void)
 	if (scr_con_current == vid.height)
 		return;		// console is full screen
 
-	if (sb_updates >= vid.numpages)
-		return;
-
-	sb_updates++;
-
 	if (sb_lines && vid.width > 320)
 		Draw_TileClear (0, vid.height - sb_lines, vid.width, sb_lines);
 
@@ -860,7 +822,6 @@ Sbar_Draw(void)
 	{
 		Sbar_DrawPic (0, 0, sb_scorebar);
 		Sbar_DrawScoreboard ();
-		sb_updates = 0;
 	}
 	else if (sb_lines)
 	{

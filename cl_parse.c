@@ -463,7 +463,6 @@ static void CL_ParseClientdata (unsigned int bits)
 
 	i = (bits & SU_ITEMS) ? MSG_ReadLong() : cl.items;
 	if(cl.items != i){ // set flash times
-		Sbar_Changed ();
 		for (j=0 ; j<32 ; j++)
 			if ( (i & (1<<j)) && !(cl.items & (1<<j)))
 				cl.item_gettime[j] = cl.time;
@@ -473,52 +472,20 @@ static void CL_ParseClientdata (unsigned int bits)
 	cl.onground = (bits & SU_ONGROUND) != 0;
 	cl.inwater = (bits & SU_INWATER) != 0;
 	cl.stats[STAT_WEAPONFRAME] = (bits & SU_WEAPONFRAME) ? MSG_ReadByte() : 0;
-
-	i = (bits & SU_ARMOR) ? MSG_ReadByte() : 0;
-	if(cl.stats[STAT_ARMOR] != i){
-		cl.stats[STAT_ARMOR] = i;
-		Sbar_Changed ();
-	}
-
+	cl.stats[STAT_ARMOR] = (bits & SU_ARMOR) ? MSG_ReadByte() : 0;
 	weaponmodel = (bits & SU_WEAPON) ? MSG_ReadByte() : 0;
+	cl.stats[STAT_HEALTH] = MSG_ReadShort();
+	cl.stats[STAT_AMMO] = MSG_ReadByte();
 
-	i = MSG_ReadShort();
-	if (cl.stats[STAT_HEALTH] != i){
-		cl.stats[STAT_HEALTH] = i;
-		Sbar_Changed();
-	}
-
-	i = MSG_ReadByte();
-	if(cl.stats[STAT_AMMO] != i){
-		cl.stats[STAT_AMMO] = i;
-		Sbar_Changed();
-	}
-
-	for (i=0 ; i<4 ; i++){
-		j = MSG_ReadByte();
-		if(cl.stats[STAT_SHELLS+i] != j){
-			cl.stats[STAT_SHELLS+i] = j;
-			Sbar_Changed();
-		}
-	}
+	for (i=0 ; i<4 ; i++)
+		cl.stats[STAT_SHELLS+i] = MSG_ReadByte();
 
 	i = MSG_ReadByte();
-	if(standard_quake){
-		if(cl.stats[STAT_ACTIVEWEAPON] != i){
-			cl.stats[STAT_ACTIVEWEAPON] = i;
-			Sbar_Changed();
-		}
-	}else if(cl.stats[STAT_ACTIVEWEAPON] != (1<<i)){
-		cl.stats[STAT_ACTIVEWEAPON] = (1<<i);
-		Sbar_Changed();
-	}
+	cl.stats[STAT_ACTIVEWEAPON] = standard_quake ? i : (1<<i);
 
 	if(bits & cl.protocol.fl_large_weaponmodel)
 		weaponmodel |= MSG_ReadByte() << 8;
-	if(cl.stats[STAT_WEAPON] != weaponmodel){
-		cl.stats[STAT_WEAPON] = weaponmodel;
-		Sbar_Changed();
-	}
+	cl.stats[STAT_WEAPON] = weaponmodel;
 
 	if(bits & cl.protocol.fl_large_weaponframe)
 		cl.stats[STAT_WEAPONFRAME] |= MSG_ReadByte() << 8;
@@ -744,7 +711,6 @@ void CL_ParseServerMessage (void)
 			break;
 
 		case svc_updatename:
-			Sbar_Changed ();
 			i = MSG_ReadByte ();
 			if (i >= cl.maxclients)
 				Host_Error ("CL_ParseServerMessage: svc_updatename > MAX_SCOREBOARD");
@@ -752,7 +718,6 @@ void CL_ParseServerMessage (void)
 			break;
 
 		case svc_updatefrags:
-			Sbar_Changed ();
 			i = MSG_ReadByte ();
 			if (i >= cl.maxclients)
 				Host_Error ("CL_ParseServerMessage: svc_updatefrags > MAX_SCOREBOARD");
@@ -760,7 +725,6 @@ void CL_ParseServerMessage (void)
 			break;
 
 		case svc_updatecolors:
-			Sbar_Changed ();
 			i = MSG_ReadByte ();
 			if (i >= cl.maxclients)
 				Host_Error ("CL_ParseServerMessage: svc_updatecolors > MAX_SCOREBOARD");
