@@ -1,9 +1,13 @@
 #include "quakedef.h"
 #include <thread.h>
 
+typedef struct Mixbuf Mixbuf;
+struct Mixbuf{
+	byte *buf;
+	long sz;
+};
+
 static int afd;
-static QLock alock;
-static uchar *mixbuf;
 static Channel *ach;
 
 long
@@ -20,15 +24,14 @@ sndqueued(void)
 static void
 auproc(void *p)
 {
-	long sz, n;
+	Mixbuf m;
+	long n;
 
 	for(;;){
-		if((sz = recvul(p)) < 1)
+		if(recv(p, &m) < 0)
 			break;
-		qlock(&alock);
-		n = write(afd, mixbuf, sz);
-		qunlock(&alock);
-		if(n != sz){
+		n = write(afd, m.buf, m.sz);
+		if(n != m.sz){
 			Con_DPrintf("sndwrite: %r\n");
 			break;
 		}
@@ -44,12 +47,12 @@ sndstop(void)
 void
 sndwrite(uchar *buf, long sz)
 {
+	Mixbuf m;
+
 	if(ach == nil)
 		return;
-	qlock(&alock);
-	sendul(ach, sz);
-	mixbuf = buf;
-	qunlock(&alock);
+	m = (Mixbuf){buf, sz};
+	send(ach, &m);
 }
 
 void
@@ -67,7 +70,7 @@ sndopen(void)
 {
 	if((afd = open("/dev/audio", OWRITE)) < 0)
 		return -1;
-	ach = chancreate(sizeof(ulong), 0);
+	ach = chancreate(sizeof(Mixbuf), 1);
 	proccreate(auproc, ach, 4096);
 	return 0;
 }
