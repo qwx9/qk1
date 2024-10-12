@@ -1301,7 +1301,7 @@ static int getn(vorb *z, u8int *data, int n)
 {
    if (USE_MEMORY(z)) {
       if (z->stream+n > z->stream_end) { z->eof = 1; return 0; }
-      memcpy(data, z->stream, n);
+      memmove(data, z->stream, n);
       z->stream += n;
       return 1;
    }
@@ -2974,7 +2974,7 @@ static int vorbis_decode_packet_rest(vorb *f, int *len, Mode *m, int left_start,
       assert(f->alloc.alloc_buffer_length_in_bytes == f->temp_offset);
 
    // re-enable coupled channels if necessary
-   memcpy(really_zero_channel, zero_channel, sizeof(really_zero_channel[0]) * f->channels);
+   memmove(really_zero_channel, zero_channel, sizeof(really_zero_channel[0]) * f->channels);
    for (i=0; i < map->coupling_steps; ++i)
       if (!zero_channel[map->chan[i].magnitude] || !zero_channel[map->chan[i].angle]) {
          zero_channel[map->chan[i].magnitude] = zero_channel[map->chan[i].angle] = false;
@@ -3450,7 +3450,7 @@ static int start_decoder(vorb *f)
 
          c->codeword_lengths = (u8int *) setup_malloc(f, c->entries);
          if (c->codeword_lengths == nil) return error(f, VORBIS_outofmem);
-         memcpy(c->codeword_lengths, lengths, c->entries);
+         memmove(c->codeword_lengths, lengths, c->entries);
          setup_temp_free(f, lengths, c->entries); // note this is only safe if there have been no intervening temp mallocs!
          lengths = c->codeword_lengths;
          c->sparse = 0;
@@ -5122,7 +5122,7 @@ int stb_vorbis_get_samples_float(stb_vorbis *f, int channels, float **buffer, in
       if (n+k >= num_samples) k = num_samples - n;
       if (k) {
          for (i=0; i < z; ++i)
-            memcpy(buffer[i]+n, f->channel_buffers[i]+f->channel_buffer_start, sizeof(float)*k);
+            memmove(buffer[i]+n, f->channel_buffers[i]+f->channel_buffer_start, sizeof(float)*k);
          for (   ; i < channels; ++i)
             memset(buffer[i]+n, 0, sizeof(float) * k);
       }

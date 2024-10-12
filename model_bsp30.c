@@ -14,7 +14,7 @@ BSP30_LoadEntities(model_t *mod, byte *in, int sz)
 		return 0;
 	}
 
-	memcpy(mod->entities = Hunk_Alloc(sz), in, sz);
+	memmove(mod->entities = Hunk_Alloc(sz), in, sz);
 	if((s = strstr((char*)mod->entities, "\"wad\"")) == nil ||
 	   (s = strchr(s+5, '"')) == nil ||
 	   (e = strchr(s+1, '"')) == nil)
@@ -47,7 +47,7 @@ BSP30_LoadLighting(model_t *mod, byte *in, int sz)
 		return 0;
 	}
 
-	memcpy(mod->lightdata = Hunk_Alloc(sz), in, sz);
+	memmove(mod->lightdata = Hunk_Alloc(sz), in, sz);
 	return 0;
 }
 

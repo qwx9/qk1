@@ -709,7 +709,7 @@ loadparms(FILE *bf, char *f)
 	}
 	r = 0;
 	loadedicts(bf, sv.pr);
-	memcpy(svs.clients->spawn_parms, sp, sizeof sp);
+	memmove(svs.clients->spawn_parms, sp, sizeof sp);
 exit:
 	return r;
 }

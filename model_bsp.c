@@ -368,7 +368,7 @@ bad:
 	}
 
 	if(mod->visdata == nil)
-		memcpy(mod->visdata = Hunk_Alloc(sz), in, sz);
+		memmove(mod->visdata = Hunk_Alloc(sz), in, sz);
 	return 0;
 }
 
@@ -378,7 +378,7 @@ BSP_LoadEntities(model_t *mod, byte *in, int sz)
 	if(sz == 0)
 		mod->entities = nil;
 	else
-		memcpy(mod->entities = Hunk_Alloc(sz), in, sz);
+		memmove(mod->entities = Hunk_Alloc(sz), in, sz);
 	return 0;
 }
 

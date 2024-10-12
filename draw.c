@@ -348,7 +348,7 @@ void Draw_ConsoleBackground (int lines)
 		v = (vid.conheight - lines + y) * 200 / vid.conheight;
 		src = conback->pixels + v * 320;
 		if(vid.conwidth == 320)
-			memcpy(dest, src, vid.conwidth*sizeof(pixel_t));
+			memmove(dest, src, vid.conwidth*sizeof(pixel_t));
 		else{
 			f = 0;
 			fstep = 320 * 0x10000 / vid.conwidth;
@@ -394,7 +394,7 @@ R_DrawRect8(vrect_t *prect, int rowbytes, pixel_t *psrc, int transparent)
 		}
 	}else{
 		for (i=0 ; i<prect->height ; i++){
-			memcpy (pdest, psrc, prect->width*sizeof(pixel_t));
+			memmove (pdest, psrc, prect->width*sizeof(pixel_t));
 			psrc += rowbytes;
 			pdest += vid.width;
 		}

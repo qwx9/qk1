@@ -688,7 +688,7 @@ PF_newcheckclient(pr_t *pr, int check)
 		checkpvs = realloc(checkpvs, size);
 		checkpvs_size = size;
 	}
-	memcpy (checkpvs, pvs, size);
+	memmove (checkpvs, pvs, size);
 
 	return i;
 }

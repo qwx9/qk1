@@ -105,17 +105,17 @@ cmcvarcb(cvar_t *var)
 void
 cminit(void)
 {
-	memcpy(cm, cm0, sizeof(cm));
+	memmove(cm, cm0, sizeof(cm));
 
 	Cvar_RegisterVariable(&v_brightness);
 	v_brightness.cb = cmcvarcb;
-	memcpy(cmbrightness, cmf0, sizeof(cmf0));
+	memmove(cmbrightness, cmf0, sizeof(cmf0));
 
 	Cvar_RegisterVariable(&v_contrast);
 	v_contrast.cb = cmcvarcb;
-	memcpy(cmcontrast, cmf0, sizeof(cmf0));
+	memmove(cmcontrast, cmf0, sizeof(cmf0));
 
 	Cvar_RegisterVariable(&v_saturation);
 	v_saturation.cb = cmcvarcb;
-	memcpy(cmsaturation, cmf0, sizeof(cmf0));
+	memmove(cmsaturation, cmf0, sizeof(cmf0));
 }

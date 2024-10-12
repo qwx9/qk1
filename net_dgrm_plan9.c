@@ -32,7 +32,7 @@ netpack(Addr *a, int f, uint seq, byte *buf, int n)
 	hnputl(netbuf, NET_HEADERSIZE + n | f);
 	hnputl(netbuf+4, seq);
 	if(buf != nil)
-		memcpy(netbuf+8, buf, n);
+		memmove(netbuf+8, buf, n);
 	return udpwrite(netbuf, NET_HEADERSIZE + n, a);
 }
 
@@ -52,7 +52,7 @@ int Datagram_SendMessage (qsocket_t *s, sizebuf_t *data)
 		fatal("SendMessage: called with canSend == false\n");
 #endif
 
-	memcpy(s->sendMessage, data->data, data->cursize);
+	memmove(s->sendMessage, data->data, data->cursize);
 	s->sendMessageLength = data->cursize;
 	if(data->cursize <= MAX_DATAGRAM){
 		n = data->cursize;
@@ -231,7 +231,7 @@ int	Datagram_GetMessage (qsocket_t *sock)
 			sock->sendMessageLength -= MAX_DATAGRAM;
 			if (sock->sendMessageLength > 0)
 			{
-				memcpy(sock->sendMessage, sock->sendMessage+MAX_DATAGRAM, sock->sendMessageLength);
+				memmove(sock->sendMessage, sock->sendMessage+MAX_DATAGRAM, sock->sendMessageLength);
 				sock->sendNext = true;
 			}
 			else
@@ -265,7 +265,7 @@ int	Datagram_GetMessage (qsocket_t *sock)
 				break;
 			}
 
-			memcpy(sock->receiveMessage + sock->receiveMessageLength, netbuf+8, n);
+			memmove(sock->receiveMessage + sock->receiveMessageLength, netbuf+8, n);
 			sock->receiveMessageLength += n;
 			continue;
 		}
@@ -558,7 +558,7 @@ static qsocket_t *_Datagram_CheckNewConnections (void)
 	// everything is allocated, just fill in the details
 	sock->socket = newsock;
 	sock->landriver = net_landriverlevel;
-	memcpy(&sock->addr, &clientaddr, sizeof clientaddr);
+	memmove(&sock->addr, &clientaddr, sizeof clientaddr);
 	strcpy(sock->address, UDP_AddrToString(&clientaddr));
 
 	// send him back the info about the server connection he has been allocated
@@ -616,7 +616,7 @@ static qsocket_t *_Datagram_Connect (char *host)
 	// connect to the host
 	if (dfunc.Connect(&sendaddr) == -1)
 		goto ErrorReturn;
-	memcpy(&readaddr, &sendaddr, sizeof readaddr);
+	memmove(&readaddr, &sendaddr, sizeof readaddr);
 
 	// send the connection request
 	Con_Printf("trying...\n"); SCR_UpdateScreen (false);
@@ -682,7 +682,7 @@ static qsocket_t *_Datagram_Connect (char *host)
 	do{
 		if(getnewcon(&sendaddr) > 0){
 			close(readaddr.fd);
-			memcpy(&readaddr, &sendaddr, sizeof readaddr);
+			memmove(&readaddr, &sendaddr, sizeof readaddr);
 			break;
 		}
 		sleep(1);
@@ -716,7 +716,7 @@ static qsocket_t *_Datagram_Connect (char *host)
 
 	if (ret == CPACCEPT)
 	{
-		memcpy(&sock->addr, &readaddr, sizeof readaddr);
+		memmove(&sock->addr, &readaddr, sizeof readaddr);
 		dfunc.SetSocketPort (&sock->addr, MSG_ReadLong());
 	}
 	else
