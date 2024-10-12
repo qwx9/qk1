@@ -1,7 +1,7 @@
 #include <u.h>
 
 int
-isnanf(float f)
+isNaNf(float f)
 {
 	union {
 		float f;

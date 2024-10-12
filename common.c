@@ -9,11 +9,8 @@ bool		standard_quake = true, rogue, hipnotic;
 void
 pal3torgbx(byte *in, pixel_t *out, int n, byte *pal, int palsz)
 {
-	int x, n0;
-	pixel_t *out0;
+	int x;
 
-	out0 = out;
-	n0 = n;
 	palsz *= 3;
 	if(in < (byte*)out || in > (byte*)(out+n) || in+n < (byte*)out){
 		while(n-- > 0){
@@ -30,17 +27,11 @@ pal3torgbx(byte *in, pixel_t *out, int n, byte *pal, int palsz)
 			out[n] = 0xff<<24 | pal[x+0]<<16 | pal[x+1]<<8 | pal[x+2];
 		}
 	}
-	PixTransform(out0, n0);
 }
 
 void
 paltorgbx(byte *in, pixel_t *out, int n, pixel_t *pal)
 {
-	pixel_t *out0;
-	int n0;
-
-	out0 = out;
-	n0 = n;
 	if(in < (byte*)out || in > (byte*)(out+n) || in+n < (byte*)out){
 		while(n-- > 0)
 			*out++ = pal[*in++];
@@ -48,7 +39,6 @@ paltorgbx(byte *in, pixel_t *out, int n, pixel_t *pal)
 		while(n-- > 0)
 			out[n] = pal[in[n]];
 	}
-	PixTransform(out0, n0);
 }
 
 void

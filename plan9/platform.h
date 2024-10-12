@@ -15,6 +15,7 @@
 #define sinf sin
 #define sqrtf sqrt
 #define tanf tan
+int isNaNf(float f);
 
 #define __inline__ inline
 

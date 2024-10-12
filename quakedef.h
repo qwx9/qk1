@@ -141,7 +141,6 @@ void pixels_resize(pixel_t *in, pixel_t *out, int iw, int ih, int ow, int oh, bo
 
 #include "i_tga.h"
 #include "i_wad.h"
-#include "i_transform.h"
 #include "draw.h"
 #include "screen.h"
 #include "net.h"

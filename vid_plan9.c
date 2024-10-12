@@ -1,4 +1,5 @@
 #include "quakedef.h"
+#include "colormatrix.h"
 #include <draw.h>
 #include <thread.h>
 
@@ -8,7 +9,7 @@ Rectangle grabr;
 
 pixel_t q1pal[256];
 static Image *fbi;
-static u32int *scibuf;
+static s32int *scibuf;
 static int scifactor;
 static Rectangle fbr;
 static pixel_t *vidbuffers[2];
@@ -68,10 +69,10 @@ resetfb(void)
 
 	freeimage(fbi);
 	if(scifactor != 1){
-		fbi = allocimage(display, Rect(0, 0, vid.width*scifactor, 1), XRGB32, 1, DNofill);
+		fbi = allocimage(display, Rect(0, 0, vid.width*scifactor, 1), screen->chan, 1, DNofill);
 		scibuf = realloc(scibuf, vid.width*scifactor*sizeof(*scibuf));
 	}else{
-		fbi = allocimage(display, Rect(0, 0, vid.width, vid.height), XRGB32, 0, 0);
+		fbi = allocimage(display, Rect(0, 0, vid.width, vid.height), screen->chan, 0, 0);
 		free(scibuf);
 		scibuf = nil;
 	}
@@ -82,7 +83,7 @@ resetfb(void)
 static void
 loader(void *)
 {
-	u32int *in, *out;
+	s32int *in, *out;
 	int n, x, y, j;
 	Point center;
 	Rectangle r;
@@ -98,14 +99,14 @@ loader(void *)
 	for(;;){
 		if((f = recvp(frame)) == nil)
 			break;
+		cmprocess(cm, f, f, vid.width*vid.height);
 		if(scibuf != nil){
-			in = (u32int*)f;
+			in = (s32int*)f;
 
 			r = rectsubpt(
 				rectaddpt(Rect(0, 0, scifactor*vid.width, scifactor), center),
 				Pt(scifactor*vid.width/2, scifactor*vid.height/2)
 			);
-
 			for(y = 0; y < vid.height; y++){
 				for(x = 0, out = scibuf; x < vid.width; x++, in++){
 					for(j = 0; j < scifactor; j++, out++)

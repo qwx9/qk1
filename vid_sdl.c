@@ -1,4 +1,5 @@
 #include "quakedef.h"
+#include "colormatrix.h"
 #include <SDL.h>
 
 pixel_t q1pal[256];
@@ -104,6 +105,8 @@ flipfb(void)
 		Con_Clear_f();
 		return;
 	}
+
+	cmprocess(cm, vidbuffer, vidbuffer, vid.width*vid.height);
 
 	SDL_UpdateTexture(fbi, nil, vidbuffer, vid.width*4);
 	SDL_RenderCopy(rend, fbi, nil, nil);
@@ -215,8 +218,8 @@ initfb(void)
 	resetfb();
 	IN_Grabm(1);
 
-	v_fullscreen.cb = v_fullscreen_cb;
-	v_sync.cb = v_sync_cb;
 	Cvar_RegisterVariable(&v_fullscreen);
+	v_fullscreen.cb = v_fullscreen_cb;
 	Cvar_RegisterVariable(&v_sync);
+	v_sync.cb = v_sync_cb;
 }

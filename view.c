@@ -1,4 +1,5 @@
 #include "quakedef.h"
+#include "colormatrix.h"
 
 /*
 
@@ -12,9 +13,6 @@ when crossing a water boudnary.
 cvar_t lcd_x = {"lcd_x","0"};
 
 cvar_t v_scale = {"v_scale", "1", true};
-cvar_t v_saturation = {"v_saturation", "1", true};
-cvar_t v_lightness = {"v_lightness", "1", true};
-cvar_t v_brightness = {"v_brightness", "1", true};
 
 static cvar_t lcd_yaw = {"lcd_yaw","0"};
 
@@ -240,55 +238,6 @@ static cshift_t cshift_water = { {130,80,50}, 128 };
 static cshift_t cshift_slime = { {0,25,5}, 150 };
 static cshift_t cshift_lava = { {255,80,0}, 150 };
 
-cvar_t v_gamma = {"gamma", "1", true};
-
-static byte gammatable[256];	// palette is sent through this
-
-static void
-BuildGammaTable(float g)
-{
-	int		i, inf;
-
-	if (g == 1.0)
-	{
-		for (i=0 ; i<256 ; i++)
-			gammatable[i] = i;
-		return;
-	}
-
-	for (i=0 ; i<256 ; i++)
-	{
-		inf = 255 * pow ( (i+0.5)/255.5 , g ) + 0.5;
-		if (inf < 0)
-			inf = 0;
-		if (inf > 255)
-			inf = 255;
-		gammatable[i] = inf;
-	}
-}
-
-/*
-=================
-V_CheckGamma
-=================
-*/
-static bool
-V_CheckGamma(void)
-{
-	static float oldgammavalue;
-
-	if (v_gamma.value == oldgammavalue)
-		return false;
-	oldgammavalue = v_gamma.value;
-
-	BuildGammaTable (v_gamma.value);
-	vid.recalc_refdef = true;				// force a surface cache flush
-
-	return true;
-}
-
-
-
 /*
 ===============
 V_ParseDamage
@@ -461,27 +410,18 @@ V_UpdatePalette
 void V_UpdatePalette (void)
 {
 	int		i, j;
-	bool	new;
-	byte	*basepal, *newpal;
-	byte	pal[768];
-	int		r,g,b;
-	bool force;
 
 	V_CalcPowerupCshift ();
-
-	new = false;
 
 	for (i=0 ; i<NUM_CSHIFTS ; i++)
 	{
 		if (cl.cshifts[i].percent != cl.prev_cshifts[i].percent)
 		{
-			new = true;
 			cl.prev_cshifts[i].percent = cl.cshifts[i].percent;
 		}
 		for (j=0 ; j<3 ; j++)
 			if (cl.cshifts[i].destcolor[j] != cl.prev_cshifts[i].destcolor[j])
 			{
-				new = true;
 				cl.prev_cshifts[i].destcolor[j] = cl.cshifts[i].destcolor[j];
 			}
 	}
@@ -495,34 +435,7 @@ void V_UpdatePalette (void)
 	cl.cshifts[CSHIFT_BONUS].percent -= host_frametime*100;
 	if (cl.cshifts[CSHIFT_BONUS].percent <= 0)
 		cl.cshifts[CSHIFT_BONUS].percent = 0;
-
-	force = V_CheckGamma ();
-	if (!new && !force)
-		return;
-
-	basepal = host_basepal;
-	newpal = pal;
-
-	for (i=0 ; i<256 ; i++)
-	{
-		r = basepal[0];
-		g = basepal[1];
-		b = basepal[2];
-		basepal += 3;
-
-		for (j=0 ; j<NUM_CSHIFTS ; j++)
-		{
-			r += (cl.cshifts[j].percent*(cl.cshifts[j].destcolor[0]-r))>>8;
-			g += (cl.cshifts[j].percent*(cl.cshifts[j].destcolor[1]-g))>>8;
-			b += (cl.cshifts[j].percent*(cl.cshifts[j].destcolor[2]-b))>>8;
-		}
-
-		newpal[0] = gammatable[r];
-		newpal[1] = gammatable[g];
-		newpal[2] = gammatable[b];
-		newpal += 3;
-	}
-	//setpal(pal); // FIXME(sigrid): 24-bit
+	// FIXME(sigrid): 24-bit
 }
 
 
@@ -965,6 +878,8 @@ V_Init
 */
 void V_Init (void)
 {
+	cminit();
+
 	Cmd_AddCommand("v_cshift", V_cshift_f);
 	Cmd_AddCommand("bf", V_BonusFlash_f);
 	Cmd_AddCommand("centerview", V_StartPitchDrift);
@@ -972,9 +887,6 @@ void V_Init (void)
 
 	Cvar_RegisterVariable(&v_scale);
 	v_scale.cb = v_scale_cb;
-	Cvar_RegisterVariable(&v_saturation);
-	Cvar_RegisterVariable(&v_lightness);
-	Cvar_RegisterVariable(&v_brightness);
 
 	Cvar_RegisterVariable (&lcd_x);
 	Cvar_RegisterVariable (&lcd_yaw);
@@ -1007,7 +919,4 @@ void V_Init (void)
 	Cvar_RegisterVariable (&v_kicktime);
 	Cvar_RegisterVariable (&v_kickroll);
 	Cvar_RegisterVariable (&v_kickpitch);
-
-	BuildGammaTable (1.0);	// no gamma yet
-	Cvar_RegisterVariable (&v_gamma);
 }

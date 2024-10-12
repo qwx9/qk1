@@ -1,4 +1,5 @@
 #include "quakedef.h"
+#include "colormatrix.h"
 
 char savs[Nsav][Nsavcm];
 int savcanld[Nsav];
@@ -890,46 +891,41 @@ static void M_AdjustSliders (int dir)
 	{
 	case 3:	// screen size
 		scr_viewsize.value += dir * 10;
-		if (scr_viewsize.value < 100)
-			scr_viewsize.value = 100;
-		if (scr_viewsize.value > 120)
-			scr_viewsize.value = 120;
-		setcvarv ("viewsize", scr_viewsize.value);
+		scr_viewsize.value = clamp(scr_viewsize.value, 100, 120);
+		setcvarv("viewsize", scr_viewsize.value);
 		break;
-	case 4:	// gamma
-		v_gamma.value -= dir * 0.05;
-		if (v_gamma.value < 0.5)
-			v_gamma.value = 0.5;
-		if (v_gamma.value > 1)
-			v_gamma.value = 1;
-		setcvarv ("gamma", v_gamma.value);
+	case 4:	// brightness
+		v_brightness.value += dir * 0.05;
+		v_brightness.value = clamp(v_brightness.value, 0.5, 4.5);
+		setcvarv("v_brightness", v_brightness.value);
 		break;
-	case 5:	// mouse speed
+	case 5:	// contrast
+		v_contrast.value += dir * 0.05;
+		v_contrast.value = clamp(v_contrast.value, 0.5, 1.5);
+		setcvarv("v_contrast", v_contrast.value);
+		break;
+	case 6:	// saturation
+		v_saturation.value += dir * 0.05;
+		v_saturation.value = clamp(v_saturation.value, 0, 2.0);
+		setcvarv("v_saturation", v_saturation.value);
+		break;
+	case 7:	// mouse speed
 		sensitivity.value += dir * 0.5;
-		if (sensitivity.value < 1)
-			sensitivity.value = 1;
-		if (sensitivity.value > 11)
-			sensitivity.value = 11;
-		setcvarv ("sensitivity", sensitivity.value);
+		sensitivity.value = clamp(sensitivity.value, 1, 11);
+		setcvarv("sensitivity", sensitivity.value);
 		break;
-	case 6:	// music volume
+	case 8:	// music volume
 		bgmvolume.value += dir * 0.1;
-		if (bgmvolume.value < 0)
-			bgmvolume.value = 0;
-		if (bgmvolume.value > 1)
-			bgmvolume.value = 1;
-		setcvarv ("bgmvolume", bgmvolume.value);
+		bgmvolume.value = clamp(bgmvolume.value, 0, 1);
+		setcvarv("bgmvolume", bgmvolume.value);
 		break;
-	case 7:	// sfx volume
+	case 9:	// sfx volume
 		volume.value += dir * 0.1;
-		if (volume.value < 0)
-			volume.value = 0;
-		if (volume.value > 1)
-			volume.value = 1;
-		setcvarv ("volume", volume.value);
+		volume.value = clamp(volume.value, 0, 1);
+		setcvarv("volume", volume.value);
 		break;
 
-	case 8:	// always run
+	case 10:	// always run
 		if (cl_forwardspeed.value > 200)
 		{
 			setcvarv ("cl_forwardspeed", 200);
@@ -942,15 +938,15 @@ static void M_AdjustSliders (int dir)
 		}
 		break;
 
-	case 9:	// invert mouse
+	case 11:	// invert mouse
 		setcvarv ("m_pitch", -m_pitch.value);
 		break;
 
-	case 10:	// lookspring
+	case 12:	// lookspring
 		setcvarv ("lookspring", !lookspring.value);
 		break;
 
-	case 11:	// lookstrafe
+	case 13:	// lookstrafe
 		setcvarv ("lookstrafe", !lookstrafe.value);
 		break;
 	}
@@ -988,47 +984,58 @@ static void M_DrawCheckbox (int x, int y, int on)
 static void M_Options_Draw (void)
 {
 	float		r;
+	int y;
 	qpic_t	*p;
 
 	M_DrawTransPic (16, 4, Draw_CachePic ("gfx/qplaque.lmp") );
 	p = Draw_CachePic ("gfx/p_option.lmp");
 	M_DrawPic ( (320-p->width)/2, 4, p);
 
-	M_Print (16, 32, "    Customize controls");
-	M_Print (16, 40, "         Go to console");
-	M_Print (16, 48, "     Reset to defaults");
+	y = 32;
+	M_Print (16, y, "    Customize controls"); y += 8;
+	M_Print (16, y, "         Go to console"); y += 8;
+	M_Print (16, y, "     Reset to defaults"); y += 8;
 
-	M_Print (16, 56, "           Screen size");
+	M_Print (16, y, "           Screen size");
 	r = (scr_viewsize.value - 100) / (120 - 100);
-	M_DrawSlider (220, 56, r);
+	M_DrawSlider (220, y, r); y += 8;
 
-	M_Print (16, 64, "            Brightness");
-	r = (1.0 - v_gamma.value) / 0.5;
-	M_DrawSlider (220, 64, r);
+	M_Print (16, y, "            Brightness");
+	r = (v_brightness.value - 0.5) / (4.5 - 0.5);
+	M_DrawSlider (220, y, r); y += 8;
 
-	M_Print (16, 72, "           Mouse Speed");
+	M_Print (16, y, "              Contrast");
+	r = (v_contrast.value - 0.5) / (1.5 - 0.5);
+	M_DrawSlider (220, y, r); y += 8;
+
+	M_Print (16, y, "            Saturation");
+	r = (v_saturation.value - 0.0) / (2 - 0.0);
+	M_DrawSlider (220, y, r); y += 8;
+
+	M_Print (16, y, "           Mouse Speed");
 	r = (sensitivity.value - 1)/10;
-	M_DrawSlider (220, 72, r);
+	M_DrawSlider (220, y, r); y += 8;
 
-	M_Print (16, 80, "       CD Music Volume");
+	M_Print (16, y, "       CD Music Volume");
 	r = bgmvolume.value;
-	M_DrawSlider (220, 80, r);
+	M_DrawSlider (220, y, r); y += 8;
 
-	M_Print (16, 88, "          Sound Volume");
+	M_Print (16, y, "          Sound Volume");
 	r = volume.value;
-	M_DrawSlider (220, 88, r);
+	M_DrawSlider (220, y, r); y += 8;
 
-	M_Print (16, 96,  "            Always Run");
-	M_DrawCheckbox (220, 96, cl_forwardspeed.value > 200);
+	M_Print (16, y,  "            Always Run");
+	M_DrawCheckbox (220, y, cl_forwardspeed.value > 200); y += 8;
 
-	M_Print (16, 104, "          Invert Mouse");
-	M_DrawCheckbox (220, 104, m_pitch.value < 0);
+	M_Print (16, y, "          Invert Mouse");
+	M_DrawCheckbox (220, y, m_pitch.value < 0); y += 8;
 
-	M_Print (16, 112, "            Lookspring");
-	M_DrawCheckbox (220, 112, lookspring.value);
+	M_Print (16, y, "            Lookspring");
+	M_DrawCheckbox (220, y, lookspring.value); y += 8;
 
 	M_Print (16, 120, "            Lookstrafe");
-	M_DrawCheckbox (220, 120, lookstrafe.value);
+	M_DrawCheckbox (220, y, lookstrafe.value); y += 8;
+	USED(y);
 
 	// cursor
 	M_DrawCharacter (200, 32 + options_cursor*8, 12+((int)(realtime*4)&1));

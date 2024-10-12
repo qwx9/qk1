@@ -39,6 +39,7 @@ typedef uintptr_t uintptr;
 #define getmalloctag(p) (USED(p), 0)
 #define setmalloctag(p, t) do{USED(p); USED(t);}while(0)
 #define setrealloctag(p, t) do{USED(p); USED(t);}while(0)
+#define isNaNf isnan
 
 #define qctz(x) __builtin_ctz(x)
 

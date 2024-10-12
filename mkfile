@@ -14,6 +14,8 @@ OFILES=\
 	cl_parse.$O\
 	cl_tent.$O\
 	cmd.$O\
+	cmprocess`{test -f cmprocess_$objtype.s && echo -n _$objtype}.$O\
+	colormatrix.$O\
 	common.$O\
 	console.$O\
 	cvar.$O\
@@ -32,11 +34,9 @@ OFILES=\
 	fs.$O\
 	host.$O\
 	host_cmd.$O\
-	hsluv.$O\
 	i_external.$O\
 	i_resize.$O\
 	i_tga.$O\
-	i_transform.$O\
 	i_wad.$O\
 	in_plan9.$O\
 	isnanf.$O\
@@ -98,6 +98,7 @@ HFILES=\
 	bspfile.h\
 	client.h\
 	cmd.h\
+	colormatrix.h\
 	common.h\
 	console.h\
 	cvar.h\
