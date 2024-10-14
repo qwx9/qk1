@@ -1132,6 +1132,7 @@ err:
 	pl = &lumps[PR_LUMP_FIELDDEFS];
 	PR_FieldDefs(pr, in0 + pl->off, pl->num);
 	pr->edict_size = pr->entityfields*4 + sizeof(edict_t) - sizeof(entvars_t);
+	pr->edict_size = (pr->edict_size + 7) & ~7;
 
 	Con_DPrintf("Programs occupy %dK.\n", n/1024);
 
