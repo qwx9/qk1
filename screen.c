@@ -598,8 +598,6 @@ needs almost the entire 256k of stack space!
 */
 void SCR_UpdateScreen (bool drawdialog)
 {
-	static float oldlcd_x;
-
 	if (scr_disabled_for_loading)
 	{
 		if (realtime - scr_disabled_time > 60)
@@ -621,12 +619,6 @@ void SCR_UpdateScreen (bool drawdialog)
 	if (oldfov != scr_fov.value)
 	{
 		oldfov = scr_fov.value;
-		vid.recalc_refdef = true;
-	}
-
-	if (oldlcd_x != lcd_x.value)
-	{
-		oldlcd_x = lcd_x.value;
 		vid.recalc_refdef = true;
 	}
 

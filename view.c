@@ -10,11 +10,7 @@ when crossing a water boudnary.
 
 */
 
-cvar_t lcd_x = {"lcd_x","0"};
-
 cvar_t v_scale = {"v_scale", "1", true};
-
-static cvar_t lcd_yaw = {"lcd_yaw","0"};
 
 static cvar_t scr_ofsx = {"scr_ofsx","0", false};
 static cvar_t scr_ofsy = {"scr_ofsy","0", false};
@@ -783,39 +779,7 @@ void V_RenderView (void)
 
 	R_PushDlights ();
 
-	if (lcd_x.value)
-	{
-		// render two interleaved views
-		int		i;
-
-		vid.width <<= 1;
-		vid.aspect *= 0.5;
-
-		r_refdef.view.angles[YAW] -= lcd_yaw.value;
-		for (i=0 ; i<3 ; i++)
-			r_refdef.view.org[i] -= right[i]*lcd_x.value;
-		R_RenderView ();
-
-		vid.buffer += vid.width>>1;
-
-		R_PushDlights ();
-
-		r_refdef.view.angles[YAW] += lcd_yaw.value*2;
-		for (i=0 ; i<3 ; i++)
-			r_refdef.view.org[i] += 2*right[i]*lcd_x.value;
-		R_RenderView ();
-
-		vid.buffer -= vid.width>>1;
-
-		r_refdef.vrect.height <<= 1;
-
-		vid.width >>= 1;
-		vid.aspect *= 2;
-	}
-	else
-	{
-		R_RenderView ();
-	}
+	R_RenderView ();
 
 	if (crosshair.value)
 		Draw_Character(
@@ -887,9 +851,6 @@ void V_Init (void)
 
 	Cvar_RegisterVariable(&v_scale);
 	v_scale.cb = v_scale_cb;
-
-	Cvar_RegisterVariable (&lcd_x);
-	Cvar_RegisterVariable (&lcd_yaw);
 
 	Cvar_RegisterVariable (&v_centermove);
 	Cvar_RegisterVariable (&v_centerspeed);
