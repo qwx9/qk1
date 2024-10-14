@@ -50,8 +50,6 @@ Tab key down
 static void
 Sbar_ShowScores(void)
 {
-	if (sb_showscores)
-		return;
 	sb_showscores = true;
 }
 
@@ -277,43 +275,6 @@ Sbar_DrawString(int x, int y, char *str)
 
 /*
 =============
-Sbar_itoa
-=============
-*/
-static int
-Sbar_itoa(int num, char *buf)
-{
-	char	*str;
-	int		pow10;
-	int		dig;
-
-	str = buf;
-
-	if (num < 0)
-	{
-		*str++ = '-';
-		num = -num;
-	}
-
-	for (pow10 = 10 ; num >= pow10 ; pow10 *= 10)
-	;
-
-	do
-	{
-		pow10 /= 10;
-		dig = num/pow10;
-		*str++ = '0'+dig;
-		num -= dig*pow10;
-	} while (pow10 != 1);
-
-	*str = 0;
-
-	return str-buf;
-}
-
-
-/*
-=============
 Sbar_DrawNum
 =============
 */
@@ -324,7 +285,7 @@ Sbar_DrawNum(int x, int y, int num, int digits, int color)
 	char			*ptr;
 	int				l, frame;
 
-	l = Sbar_itoa (num, str);
+	l = snprint(str, sizeof(str), "%d", num);
 	ptr = str;
 	if (l > digits)
 		ptr += (l-digits);
@@ -930,7 +891,7 @@ Sbar_IntermissionNumber(int x, int y, int num, int digits, int color)
 	char			*ptr;
 	int				l, frame;
 
-	l = Sbar_itoa (num, str);
+	l = snprint(str, sizeof(str), "%d", num);
 	ptr = str;
 	if (l > digits)
 		ptr += (l-digits);
