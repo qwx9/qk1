@@ -303,19 +303,6 @@ char *Key_KeynumToString (int keynum);
 void CL_ParseServerMessage (void);
 
 //
-// view
-//
-void V_StartPitchDrift (void);
-void V_StopPitchDrift (void);
-
-void V_RenderView (void);
-void V_UpdatePalette (void);
-void V_Register (void);
-void V_ParseDamage (void);
-void V_SetContentsColor (int contents);
-
-
-//
 // cl_tent
 //
 void CL_InitTEnts (void);

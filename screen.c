@@ -680,7 +680,7 @@ void SCR_UpdateScreen (bool drawdialog)
 		M_Draw ();
 	}
 	SCR_DrawFPS();
-	V_UpdatePalette ();
+	V_ApplyShifts();
 
 	flipfb();
 }

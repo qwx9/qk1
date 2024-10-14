@@ -426,10 +426,10 @@ V_Blend(void)
 
 /*
 =============
-V_UpdatePalette
+V_ApplyShifts
 =============
 */
-void V_UpdatePalette (void)
+void V_ApplyShifts (void)
 {
 	int		i, j;
 
