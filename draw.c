@@ -213,37 +213,12 @@ void Draw_TransPic (int x, int y, qpic_t *pic)
 
 	source = pic->pixels;
 	dest = vid.buffer + y * vid.width + x;
-	if(pic->width & 7){	// general
-		for(v=0; v<pic->height; v++){
-			for(u=0; u<pic->width; u++)
-				if(opaque(tpix = source[u]))
-					dest[u] = tpix;
-			dest += vid.width;
-			source += pic->width;
-		}
-	}else{	// unwound
-		for(v=0; v<pic->height; v++){
-			for(u=0; u<pic->width; u+=8){
-				if(opaque(tpix = source[u]))
-					dest[u] = tpix;
-				if(opaque(tpix = source[u+1]))
-					dest[u+1] = tpix;
-				if(opaque(tpix = source[u+2]))
-					dest[u+2] = tpix;
-				if(opaque(tpix = source[u+3]))
-					dest[u+3] = tpix;
-				if(opaque(tpix = source[u+4]))
-					dest[u+4] = tpix;
-				if(opaque(tpix = source[u+5]))
-					dest[u+5] = tpix;
-				if(opaque(tpix = source[u+6]))
-					dest[u+6] = tpix;
-				if(opaque(tpix = source[u+7]))
-					dest[u+7] = tpix;
-			}
-			dest += vid.width;
-			source += pic->width;
-		}
+	for(v=0; v<pic->height; v++){
+		for(u=0; u<pic->width; u++)
+			if(opaque(tpix = source[u]))
+				dest[u] = tpix;
+		dest += vid.width;
+		source += pic->width;
 	}
 }
 
@@ -263,37 +238,12 @@ void Draw_TransPicTranslate (int x, int y, qpic_t *pic, byte *translation)
 
 	source = pic->pixels;
 	dest = vid.buffer + y * vid.width + x;
-	if (pic->width & 7){	// general
-		for(v=0; v<pic->height; v++){
-			for(u=0; u<pic->width; u++)
-				if(opaque(tpix = source[u]))
-					dest[u] = tpix;
-			dest += vid.width;
-			source += pic->width;
-		}
-	}else{	// unwound
-		for(v=0; v<pic->height; v++){
-			for(u=0; u<pic->width; u+=8){
-				if(opaque(tpix = source[u]))
-					dest[u] = tpix;
-				if(opaque(tpix = source[u+1]))
-					dest[u+1] = tpix;
-				if(opaque(tpix = source[u+2]))
-					dest[u+2] = tpix;
-				if(opaque(tpix = source[u+3]))
-					dest[u+3] = tpix;
-				if(opaque(tpix = source[u+4]))
-					dest[u+4] = tpix;
-				if(opaque(tpix = source[u+5]))
-					dest[u+5] = tpix;
-				if(opaque(tpix = source[u+6]))
-					dest[u+6] = tpix;
-				if(opaque(tpix = source[u+7]))
-					dest[u+7] = tpix;
-			}
-			dest += vid.width;
-			source += pic->width;
-		}
+	for(v=0; v<pic->height; v++){
+		for(u=0; u<pic->width; u++)
+			if(opaque(tpix = source[u]))
+				dest[u] = tpix;
+		dest += vid.width;
+		source += pic->width;
 	}
 }
 
