@@ -193,6 +193,5 @@ void R_StoreEfrags (efrag_t **ppefrag);
 void R_AnimateLight (void);
 void R_LightPoint (vec3_t p, int *r);
 void R_SetupFrame (void);
-void R_cshift_f (void);
 void R_SplitEntityOnNode2 (mnode_t *node);
 void R_MarkLights (dlight_t *light, int bit, mnode_t *node);

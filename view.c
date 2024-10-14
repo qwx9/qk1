@@ -12,6 +12,8 @@ when crossing a water boudnary.
 
 cvar_t v_scale = {"v_scale", "1", true};
 
+static cvar_t v_cshiftpercent = {"v_cshiftpercent", "30", true};
+
 static cvar_t scr_ofsx = {"scr_ofsx","0", false};
 static cvar_t scr_ofsy = {"scr_ofsy","0", false};
 static cvar_t scr_ofsz = {"scr_ofsz","0", false};
@@ -398,6 +400,30 @@ V_CalcPowerupCshift(void)
 		cl.cshifts[CSHIFT_POWERUP].percent = 0;
 }
 
+static void
+V_Blend(void)
+{
+	float c[4], a;
+	int i;
+
+	c[0] = c[1] = c[2] = c[3] = 0;
+	for(i = 0; i < NUM_CSHIFTS; i++){
+		a = ((cl.cshifts[i].percent * v_cshiftpercent.value)/100.0)/255.0;
+		if(a > 0){
+			c[3] += a*(1 - c[3]);
+			a = a/c[3];
+			c[0] = c[0]*(1-a) + cl.cshifts[i].destcolor[0]*a;
+			c[1] = c[1]*(1-a) + cl.cshifts[i].destcolor[1]*a;
+			c[2] = c[2]*(1-a) + cl.cshifts[i].destcolor[2]*a;
+		}
+	}
+	c[3] = clamp(c[3], 0, 1.0);
+	c[2] *= c[3]/255.0;
+	c[1] *= c[3]/255.0;
+	c[0] *= c[3]/255.0;
+	cmsetvblend(c);
+}
+
 /*
 =============
 V_UpdatePalette
@@ -431,7 +457,8 @@ void V_UpdatePalette (void)
 	cl.cshifts[CSHIFT_BONUS].percent -= host_frametime*100;
 	if (cl.cshifts[CSHIFT_BONUS].percent <= 0)
 		cl.cshifts[CSHIFT_BONUS].percent = 0;
-	// FIXME(sigrid): 24-bit
+
+	V_Blend();
 }
 
 
@@ -852,6 +879,7 @@ void V_Init (void)
 	Cvar_RegisterVariable(&v_scale);
 	v_scale.cb = v_scale_cb;
 
+	Cvar_RegisterVariable(&v_cshiftpercent);
 	Cvar_RegisterVariable (&v_centermove);
 	Cvar_RegisterVariable (&v_centerspeed);
 
