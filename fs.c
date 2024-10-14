@@ -725,15 +725,15 @@ loadsav(char *f)
 	if(bf == nil)
 		return -1;
 	r = -1;
-	if(s = frdline(bf), s == nil)
+	if((s = frdline(bf)) == nil)
 		goto exit;
 	n = strtol(s, nil, 10);
 	if(n != Nsavver){
 		werrstr("invalid version %d", n);
 		goto exit;
 	}
-	frdline(bf);
-	r = loadparms(bf, f);
+	if(frdline(bf) != nil)
+		r = loadparms(bf, f);
 exit:
 	fclose(bf);
 	return r;

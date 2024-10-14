@@ -692,7 +692,10 @@ alvarcb(cvar_t *var)
 	if(var == &s_al_dev && Cmd_Argc() == 1){
 		Con_Printf("%-2d: default (%s)\n", 0, def ? def : "<invalid>");
 		for(i = 1, s = all; s != nil && *s; i++){
-			Con_Printf("%-2d: %s%s\n", i, s, strcmp(s, def) == 0 ? " (default)" : "");
+			Con_Printf(
+				"%-2d: %s%s\n",
+				i, s, (def != nil && strcmp(s, def) == 0) ? " (default)" : ""
+			);
 			s += strlen(s)+1;
 		}
 		return;

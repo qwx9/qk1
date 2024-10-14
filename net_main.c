@@ -437,6 +437,8 @@ int NET_SendToAll(sizebuf_t *data, int blocktime)
 	bool	state1 [MAX_SCOREBOARD];
 	bool	state2 [MAX_SCOREBOARD];
 
+	memset(state1, 0, sizeof(state1));
+	memset(state2, 0, sizeof(state2));
 	for (i=0, host_client = svs.clients ; i<svs.maxclients ; i++, host_client++)
 	{
 		if (!host_client->netconnection)
@@ -451,8 +453,6 @@ int NET_SendToAll(sizebuf_t *data, int blocktime)
 				continue;
 			}
 			count++;
-			state1[i] = false;
-			state2[i] = false;
 		}
 		else
 		{
