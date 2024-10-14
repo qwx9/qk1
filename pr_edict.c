@@ -72,7 +72,7 @@ PR_SetStr(pr_t *pr, char *s)
 {
 	int i;
 
-	if(s == nil)
+	if(s == nil || pr->strings == nil)
 		return 0;
 	if(s >= pr->strings && s < pr->strings+pr->strings_size-1)
 		return s - pr->strings;

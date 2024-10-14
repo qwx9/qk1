@@ -213,7 +213,7 @@ get32(FILE *bf)
 	u32int v;
 
 	v = get16(bf);
-	return v | get16(bf) << 16;
+	return v | (u32int)get16(bf) << 16;
 }
 
 static float

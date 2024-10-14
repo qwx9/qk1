@@ -4,7 +4,7 @@
 void
 cmprocess(s16int cm[4*4], void *in_, void *out_, int n)
 {
-	u32int *in, *out;
+	pixel_t *in, *out;
 	int i;
 
 	in = in_;
@@ -28,6 +28,6 @@ cmprocess(s16int cm[4*4], void *in_, void *out_, int n)
 			clamp(y[2], 0, 255),
 			0xff,
 		};
-		*out++ = z[0]<<0 | z[1]<<8 | z[2]<<16 | z[3]<<24;
+		*out++ = z[0]<<0 | z[1]<<8 | z[2]<<16 | (pixel_t)z[3]<<24;
 	}
 }

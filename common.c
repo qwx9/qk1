@@ -280,9 +280,9 @@ int MSG_ReadLong (void)
 	}
 
 	c = net_message.data[msg_readcount]
-	+ (net_message.data[msg_readcount+1]<<8)
-	+ (net_message.data[msg_readcount+2]<<16)
-	+ (net_message.data[msg_readcount+3]<<24);
+		| (net_message.data[msg_readcount+1]<<8)
+		| (net_message.data[msg_readcount+2]<<16)
+		| (net_message.data[msg_readcount+3]<<24);
 
 	msg_readcount += 4;
 

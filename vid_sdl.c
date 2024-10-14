@@ -114,11 +114,11 @@ flipfb(void)
 void
 setpal(byte *p0)
 {
-	int x;
+	pixel_t x;
 	byte *p;
 
 	for(p = p0, x = 0; x < 256; x++, p += 3){
-		q1pal[x] = (x < 256-32 ? 0xff : 0)<<24 | p[0]<<16 | p[1]<<8 | p[2];
+		q1pal[x] = (x < 256U-32U ? 0xffU : 0)<<24 | p[0]<<16 | p[1]<<8 | p[2];
 		q1palindexed[x] = opaque(q1pal[x]) ? (x<<24 | p[0]<<16 | p[1]<<8 | p[2]) : 0;
 	}
 	q1pal[255] = 0;

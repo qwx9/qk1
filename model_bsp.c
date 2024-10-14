@@ -303,7 +303,7 @@ BSP_LoadLeafs(model_t *mod, byte *in, int sz)
 
 	for(i = 0; i < mod->numleafs; i++, out++){
 		out->contents = le32(in);
-		out->compressed_vis = (p = le32(in)) < 0 ? nil : mod->visdata + p;
+		out->compressed_vis = ((p = le32(in)) < 0 || mod->visdata == nil) ? nil : mod->visdata + p;
 
 		for(j = 0; j < 3; j++)
 			out->minmaxs[0+j] = le16(in);

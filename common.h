@@ -64,7 +64,7 @@ extern	float	(*LittleFloat) (float l);
 
 float f32le(u32int u);
 
-#define le32(p) (p += 4, (int)(p[-4]|p[-3]<<8|p[-2]<<16|p[-1]<<24))
+#define le32(p) (p += 4, (int)(p[-4]|p[-3]<<8|p[-2]<<16|(u32int)p[-1]<<24))
 #define le32u(p) (u32int)le32(p)
 #define le16(p) (p += 2, (short)(p[-2]|p[-1]<<8))
 #define le16u(p) (u16int)le16(p)

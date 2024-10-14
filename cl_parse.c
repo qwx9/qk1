@@ -443,7 +443,7 @@ Server information pertaining to this client only
 */
 static void CL_ParseClientdata (unsigned int bits)
 {
-	int		i, j, weaponmodel;
+	unsigned i, j, weaponmodel;
 
 	if(bits & SU_MOREBITS){
 		bits |= MSG_ReadByte() << 16;
@@ -455,16 +455,15 @@ static void CL_ParseClientdata (unsigned int bits)
 	cl.idealpitch = (bits & SU_IDEALPITCH) ? MSG_ReadChar() : 0;
 
 	VectorCopy(cl.mvelocity[0], cl.mvelocity[1]);
-	for (i=0 ; i<3 ; i++)
-	{
+	for(i = 0; i < 3; i++){
 		cl.punchangle[i] = (bits & (SU_PUNCH1<<i)) ? MSG_ReadChar() : 0;
 		cl.mvelocity[0][i] = (bits & (SU_VELOCITY1<<i)) ? MSG_ReadChar()*16 : 0;
 	}
 
 	i = (bits & SU_ITEMS) ? MSG_ReadLong() : cl.items;
 	if(cl.items != i){ // set flash times
-		for (j=0 ; j<32 ; j++)
-			if ( (i & (1<<j)) && !(cl.items & (1<<j)))
+		for(j = 0; j < 32; j++)
+			if((i & (1U<<j)) && !(cl.items & (1U<<j)))
 				cl.item_gettime[j] = cl.time;
 		cl.items = i;
 	}
@@ -477,7 +476,7 @@ static void CL_ParseClientdata (unsigned int bits)
 	cl.stats[STAT_HEALTH] = MSG_ReadShort();
 	cl.stats[STAT_AMMO] = MSG_ReadByte();
 
-	for (i=0 ; i<4 ; i++)
+	for(i = 0; i < 4; i++)
 		cl.stats[STAT_SHELLS+i] = MSG_ReadByte();
 
 	i = MSG_ReadByte();

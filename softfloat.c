@@ -637,7 +637,7 @@ softfloat_normSubnormalExtF80Sig( u64int sig )
 
     shiftDist = softfloat_countLeadingZeros64( sig );
     z.exp = -shiftDist;
-    z.sig = sig<<shiftDist;
+    z.sig = shiftDist < 64 ? (sig<<shiftDist) : 0;
     return z;
 
 }
