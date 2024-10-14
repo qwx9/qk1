@@ -78,7 +78,7 @@ byte *Mod_DecompressVis (byte *in, model_t *model)
 	out = decompressed;
 
 	/*
-	memcpy (out, in, row);
+	memmove (out, in, row);
 	*/
 	if (!in)
 	{	// no vis info, so make all visible
@@ -293,13 +293,13 @@ void Mod_LoadTextures (lump_t *l)
 		tx = Hunk_AllocName (sizeof(texture_t) +pixels, loadname );
 		loadmodel->textures[i] = tx;
 
-		memcpy (tx->name, mt->name, sizeof(tx->name));
+		memmove (tx->name, mt->name, sizeof(tx->name));
 		tx->width = mt->width;
 		tx->height = mt->height;
 		for (j=0 ; j<MIPLEVELS ; j++)
 			tx->offsets[j] = mt->offsets[j] + sizeof(texture_t) - sizeof(miptex_t);
 		// the pixels immediately follow the structures
-		memcpy ( tx+1, mt+1, pixels);
+		memmove ( tx+1, mt+1, pixels);
 	}
 
 //
@@ -409,7 +409,7 @@ void Mod_LoadLighting (lump_t *l)
 		return;
 	}
 	loadmodel->lightdata = Hunk_AllocName ( l->filelen, loadname);	
-	memcpy (loadmodel->lightdata, mod_base + l->fileofs, l->filelen);
+	memmove (loadmodel->lightdata, mod_base + l->fileofs, l->filelen);
 }
 
 
@@ -426,7 +426,7 @@ void Mod_LoadVisibility (lump_t *l)
 		return;
 	}
 	loadmodel->visdata = Hunk_AllocName ( l->filelen, loadname);	
-	memcpy (loadmodel->visdata, mod_base + l->fileofs, l->filelen);
+	memmove (loadmodel->visdata, mod_base + l->fileofs, l->filelen);
 }
 
 
@@ -443,7 +443,7 @@ void Mod_LoadEntities (lump_t *l)
 		return;
 	}
 	loadmodel->entities = Hunk_AllocName ( l->filelen, loadname);	
-	memcpy (loadmodel->entities, mod_base + l->fileofs, l->filelen);
+	memmove (loadmodel->entities, mod_base + l->fileofs, l->filelen);
 }
 
 

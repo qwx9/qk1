@@ -805,7 +805,7 @@ SV_Snap(int uid)
 	}
 	strcpy(cl->uploadfn, checkname);
 
-	memcpy(&cl->snap_from, &net_from, sizeof(net_from));
+	memmove(&cl->snap_from, &net_from, sizeof(net_from));
 	if (sv_redirected != RD_NONE)
 		cl->remote_snap = true;
 	else

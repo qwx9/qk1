@@ -38,7 +38,7 @@ void SV_FlushRedirect (void)
 		send[2] = 0xff;
 		send[3] = 0xff;
 		send[4] = A2C_PRINT;
-		memcpy (send+5, outputbuf, strlen(outputbuf)+1);
+		memmove (send+5, outputbuf, strlen(outputbuf)+1);
 
 		NET_SendPacket (strlen(send)+1, send, net_from);
 	}
@@ -706,7 +706,7 @@ void SV_SendClientMessages (void)
 				
 				//move along, move along
 				for (j = 1; j < c->num_backbuf; j++) {
-					memcpy(c->backbuf_data[j - 1], c->backbuf_data[j],
+					memmove(c->backbuf_data[j - 1], c->backbuf_data[j],
 						c->backbuf_size[j]);
 					c->backbuf_size[j - 1] = c->backbuf_size[j];
 				}

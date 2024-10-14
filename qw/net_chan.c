@@ -134,7 +134,7 @@ void Netchan_Setup (netchan_t *chan, netadr_t *adr, int qport)
 	memset (chan, 0, sizeof(*chan));
 
 	if(adr != nil)
-		memcpy(&chan->remote_address, adr, sizeof *adr);
+		memmove(&chan->remote_address, adr, sizeof *adr);
 	chan->last_received = realtime;
 	
 	chan->message.data = chan->message_buf;
@@ -214,7 +214,7 @@ void Netchan_Transmit (netchan_t *chan, int length, byte *data)
 // if the reliable transmit buffer is empty, copy the current message out
 	if (!chan->reliable_length && chan->message.cursize)
 	{
-		memcpy (chan->reliable_buf, chan->message_buf, chan->message.cursize);
+		memmove (chan->reliable_buf, chan->message_buf, chan->message.cursize);
 		chan->reliable_length = chan->message.cursize;
 		chan->message.cursize = 0;
 		chan->reliable_sequence ^= 1;
