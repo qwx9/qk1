@@ -68,12 +68,10 @@ Con_Clear_f(void)
 Con_ClearNotify
 ================
 */
-void Con_ClearNotify (void)
+void
+Con_ClearNotify(void)
 {
-	int		i;
-
-	for (i=0 ; i<NUM_CON_TIMES ; i++)
-		con_times[i] = 0;
+	memset(con_times, 0, sizeof(con_times));
 }
 
 
@@ -112,7 +110,8 @@ Con_CheckResize
 If the line width has changed, reformat the buffer.
 ================
 */
-void Con_CheckResize (void)
+void
+Con_CheckResize(void)
 {
 	int		i, j, width, oldwidth, oldtotallines, numlines, numchars;
 	char	tbuf[CON_TEXTSIZE];
@@ -171,7 +170,8 @@ void Con_CheckResize (void)
 Con_Init
 ================
 */
-void Con_Init (void)
+void
+Con_Init(void)
 {
 	con_text = Hunk_Alloc(CON_TEXTSIZE);
 	memset(con_text, ' ', CON_TEXTSIZE);
@@ -323,7 +323,8 @@ Con_DPrintf
 A Con_Printf that only shows up if the "developer" cvar is set
 ================
 */
-void Con_DPrintf (char *fmt, ...)
+void
+Con_DPrintf(char *fmt, ...)
 {
 	va_list		argptr;
 	char		msg[MAXPRINTMSG];
@@ -362,7 +363,7 @@ Con_DrawInput(void)
 {
 	int		y;
 	int		i;
-	char	*text;
+	char	*text, c;
 
 	if (key_dest != key_console && !con_forcedup)
 		return;		// don't draw anything
@@ -370,11 +371,9 @@ Con_DrawInput(void)
 	text = key_lines[edit_line];
 
 	// add the cursor frame
-	text[key_linepos] = 10+((int)(realtime*con_cursorspeed)&1);
-
-	// fill out remainder with spaces
-	for (i=key_linepos+1 ; i< con_linewidth ; i++)
-		text[i] = ' ';
+	c = text[key_linepos];
+	if((int)(realtime*con_cursorspeed)&1)
+		text[key_linepos] = 11;
 
 	//	prestep if horizontally scrolling
 	if (key_linepos >= con_linewidth)
@@ -382,11 +381,11 @@ Con_DrawInput(void)
 
 	// draw it
 	y = con_vislines-16;
-	for (i=0 ; i<con_linewidth ; i++)
+	for(i=0 ; (c != 0 || i <= key_linepos) && i < con_linewidth && text[i] != 0 ; i++)
 		Draw_Character ( (i+1)<<3, y, text[i]);
 
 	// remove cursor
-	key_lines[edit_line][key_linepos] = 0;
+	key_lines[edit_line][key_linepos] = c;
 }
 
 

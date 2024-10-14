@@ -140,13 +140,14 @@ Interactive line editing and console scrollback
 static void
 Key_Console(int key)
 {
-	char	*cmd;
+	char *cmd, *s;
+	int n;
 
-	if (key == K_ENTER)
-	{
-		Cbuf_AddText (key_lines[edit_line]+1);	// skip the >
-		Cbuf_AddText ("\n");
-		Con_Printf ("%s\n",key_lines[edit_line]);
+	s = key_lines[edit_line];
+	if(key == K_ENTER){
+		Cbuf_AddText(s+1);	// skip the >
+		Cbuf_AddText("\n");
+		Con_Printf("%s\n", s);
 		edit_line = (edit_line + 1) & 31;
 		history_line = edit_line;
 		key_lines[edit_line][0] = ']';
@@ -157,31 +158,42 @@ Key_Console(int key)
 		return;
 	}
 
-	if (key == K_TAB)
-	{	// command completion
-		cmd = Cmd_CompleteCommand (key_lines[edit_line]+1);
-		if (!cmd)
-			cmd = Cvar_CompleteVariable (key_lines[edit_line]+1);
-		if (cmd)
-		{
-			strcpy(key_lines[edit_line]+1, cmd);
+	if(key == K_TAB){	// command completion
+		if((cmd = Cmd_CompleteCommand(s+1)) == nil)
+			cmd = Cvar_CompleteVariable(s+1);
+		if(cmd){
+			strcpy(s+1, cmd);
 			key_linepos = strlen(cmd)+1;
-			key_lines[edit_line][key_linepos] = ' ';
+			s[key_linepos] = ' ';
 			key_linepos++;
-			key_lines[edit_line][key_linepos] = 0;
+			s[key_linepos] = 0;
 			return;
 		}
 	}
 
-	if (key == K_BACKSPACE || key == K_LEFTARROW)
-	{
-		if (key_linepos > 1)
+	if(key == K_LEFTARROW){
+		if(key_linepos > 1)
 			key_linepos--;
 		return;
 	}
+	if(key == K_RIGHTARROW){
+		if(s[key_linepos] != 0)
+			key_linepos++;
+		return;
+	}
+	if(key == K_BACKSPACE){
+		if(key_linepos > 1){
+			key_linepos--;
+			memmove(s+key_linepos, s+key_linepos+1, strlen(s+key_linepos+1)+1);
+		}
+		return;
+	}
+	if(key == K_DEL){
+		memmove(s+key_linepos, s+key_linepos+1, strlen(s+key_linepos+1)+1);
+		return;
+	}
 
-	if (key == K_UPARROW)
-	{
+	if(key == K_UPARROW){
 		do
 		{
 			history_line = (history_line - 1) & 31;
@@ -190,7 +202,7 @@ Key_Console(int key)
 		if (history_line == edit_line)
 			history_line = (edit_line+1)&31;
 		key_linepos = strlen(key_lines[history_line]);
-		memmove(key_lines[edit_line], key_lines[history_line], key_linepos+1);
+		memmove(s, key_lines[history_line], key_linepos+1);
 		return;
 	}
 
@@ -205,13 +217,13 @@ Key_Console(int key)
 			&& !key_lines[history_line][1]);
 		if (history_line == edit_line)
 		{
-			key_lines[edit_line][0] = ']';
+			s[0] = ']';
 			key_linepos = 1;
 		}
 		else
 		{
 			key_linepos = strlen(key_lines[history_line]);
-			memmove(key_lines[edit_line], key_lines[history_line], key_linepos+1);
+			memmove(s, key_lines[history_line], key_linepos+1);
 		}
 		return;
 	}
@@ -247,11 +259,16 @@ Key_Console(int key)
 	if (key < 32 || key > 127)
 		return;	// non printable
 
-	if (key_linepos < MAXCMDLINE-1)
+	if ((n = strlen(s)) < MAXCMDLINE-1)
 	{
-		key_lines[edit_line][key_linepos] = key;
-		key_linepos++;
-		key_lines[edit_line][key_linepos] = 0;
+		n -= key_linepos;
+		if(s[key_linepos] != 0){
+			memmove(s+key_linepos+1, s+key_linepos, n+1);
+			s[key_linepos++] = key;
+		}else{
+			s[key_linepos++] = key;
+			s[key_linepos] = 0;
+		}
 	}
 
 }
@@ -496,6 +513,7 @@ void Key_Init (void)
 	consolekeys[K_UPARROW] = true;
 	consolekeys[K_DOWNARROW] = true;
 	consolekeys[K_BACKSPACE] = true;
+	consolekeys[K_DEL] = true;
 	consolekeys[K_PGUP] = true;
 	consolekeys[K_PGDN] = true;
 	consolekeys[K_SHIFT] = true;
