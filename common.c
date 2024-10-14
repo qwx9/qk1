@@ -1,5 +1,7 @@
 #include "quakedef.h"
 
+pixel_t q1pal[256], q1palindexed[256];
+
 cvar_t  registered = {"registered","0"};
 
 char	com_token[1024];

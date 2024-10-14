@@ -139,13 +139,12 @@ W_ReadQpic(Wad *wad, char *name, mem_user_t *c)
 	q = Cache_Alloc(c, sizeof(*q) + n*sizeof(pixel_t));
 	q->width = w;
 	q->height = h;
-
 	if(wad->ver == WAD_VER2){
-		for(i = 0; i < n; i++)
-			q->pixels[i] = q1pal[p[i]];
+		for(i = 0; i < n; i++, p++)
+			q->pixels[i] = q1palindexed[*p];
 	}else if(wad->ver == WAD_VER3 && palsz > 0){
-		for(i = 0; i < n; i++){
-			j = (*p++)*3;
+		for(i = 0; i < n; i++, p++){
+			j = *p*3;
 			q->pixels[i] = j < palsz*3 ? (0xff<<24 | pal[j+0]<<16 | pal[j+1]<<8 | pal[j+2]) : 0;
 		}
 	}

@@ -63,8 +63,8 @@ qpic_t	*Draw_CachePic (char *path)
 	q->width = LittleLong(q->width);
 	q->height = LittleLong(q->height);
 	n = q->width*q->height;
-	q = Cache_Realloc(&pic->cache, sizeof(*q)+n*sizeof(pixel_t));
-	torgbx((byte*)q->pixels, q->pixels, n);
+	q = Cache_Realloc(&pic->cache, sizeof(*q) + n*sizeof(pixel_t));
+	paltorgbx((byte*)q->pixels, q->pixels, n, q1palindexed);
 
 	return q;
 }
@@ -230,8 +230,8 @@ Draw_TransPicTranslate
 */
 void Draw_TransPicTranslate (int x, int y, qpic_t *pic, byte *translation)
 {
-	pixel_t	*dest, *source, tpix;
-	int				v, u;
+	pixel_t *dest, *source, tpix;
+	int v, u;
 
 	if (x < 0 || y < 0 || x+pic->width > vid.width || y+pic->height > vid.height)
 		fatal ("Draw_TransPic: bad coordinates");
@@ -241,7 +241,7 @@ void Draw_TransPicTranslate (int x, int y, qpic_t *pic, byte *translation)
 	for(v=0; v<pic->height; v++){
 		for(u=0; u<pic->width; u++)
 			if(opaque(tpix = source[u]))
-				dest[u] = tpix;
+				dest[u] = q1pal[translation[tpix>>24]];
 		dest += vid.width;
 		source += pic->width;
 	}

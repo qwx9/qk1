@@ -186,7 +186,7 @@ bool isdisabled(char *s);
 
 #define opaque(p) ((p) != 0)
 
-extern pixel_t q1pal[256];
+extern pixel_t q1pal[256], q1palindexed[256];
 void pal3torgbx(byte *in, pixel_t *out, int n, byte *pal, int palsz);
 void paltorgbx(byte *in, pixel_t *out, int n, pixel_t *pal);
 void torgbx(byte *in, pixel_t *out, int n);
