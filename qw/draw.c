@@ -283,7 +283,7 @@ void Draw_Pic (int x, int y, qpic_t *pic)
 	source = pic->data;
 	dest = vid.buffer + y * vid.rowbytes + x;
 	for(v=0; v<pic->height; v++){
-		memcpy(dest, source, pic->width);
+		memmove(dest, source, pic->width);
 		dest += vid.rowbytes;
 		source += pic->width;
 	}
@@ -311,7 +311,7 @@ void Draw_SubPic(int x, int y, qpic_t *pic, int srcx, int srcy, int width, int h
 	source = pic->data + srcy * pic->width + srcx;
 	dest = vid.buffer + y * vid.rowbytes + x;
 	for(v=0; v<height; v++){
-		memcpy(dest, source, width);
+		memmove(dest, source, width);
 		dest += vid.rowbytes;
 		source += pic->width;
 	}
@@ -478,7 +478,7 @@ void Draw_ConsoleBackground (int lines)
 		dest = conback->data + 320 - (strlen(ver)*8 + 11) + 320*186;
 	}
 
-	memcpy(saveback, conback->data + 320*186, 320*8);
+	memmove(saveback, conback->data + 320*186, 320*8);
 	for (x=0 ; x<strlen(ver) ; x++)
 		Draw_CharToConback (ver[x], dest+(x<<3));
 	
@@ -488,7 +488,7 @@ void Draw_ConsoleBackground (int lines)
 		v = (vid.conheight - lines + y) * 200 / vid.conheight;
 		src = conback->data + v * 320;
 		if(vid.conwidth == 320)
-			memcpy(dest, src, vid.conwidth);
+			memmove(dest, src, vid.conwidth);
 		else{
 			f = 0;
 			fstep = 320 * 0x10000 / vid.conwidth;
@@ -501,7 +501,7 @@ void Draw_ConsoleBackground (int lines)
 		}
 	}
 	// put it back
-	memcpy(conback->data + 320*186, saveback, 320*8);
+	memmove(conback->data + 320*186, saveback, 320*8);
 }
 
 
@@ -546,7 +546,7 @@ void R_DrawRect8 (vrect_t *prect, int rowbytes, byte *psrc,
 	{
 		for (i=0 ; i<prect->height ; i++)
 		{
-			memcpy (pdest, psrc, prect->width);
+			memmove (pdest, psrc, prect->width);
 			psrc += rowbytes;
 			pdest += vid.rowbytes;
 		}

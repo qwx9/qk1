@@ -143,7 +143,7 @@ void Con_CheckResize (void)
 		if (con_linewidth < numchars)
 			numchars = con_linewidth;
 
-		memcpy(tbuf, con_text, CON_TEXTSIZE);
+		memmove(tbuf, con_text, CON_TEXTSIZE);
 		memset(con_text, ' ', CON_TEXTSIZE);
 
 		for (i=0 ; i<numlines ; i++)

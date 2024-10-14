@@ -121,7 +121,7 @@ NET_SendPacket(int length, void *data, netadr_t *to)
 	if(a == cons + nelem(cons))
 		return;
 	else if(a->fd < 0){
-		memcpy(a, to, sizeof *a);
+		memmove(a, to, sizeof *a);
 		if((a->fd = dial(netmkaddr(a->addr, "udp", a->srv), nil, nil, nil)) < 0){
 			fprint(2, "dial: %r\n");
 			return;

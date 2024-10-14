@@ -363,7 +363,7 @@ again:
 void
 SZ_Write(sizebuf_t *buf, void *data, int length)
 {
-	memcpy(SZ_GetSpace(buf, length), data, length);
+	memmove(SZ_GetSpace(buf, length), data, length);
 }
 
 void
@@ -374,9 +374,9 @@ SZ_Print(sizebuf_t *buf, char *data)
 	len = strlen(data)+1;
 
 	if(buf->data[buf->cursize-1])
-		memcpy(SZ_GetSpace(buf, len), data, len);	// no trailing 0
+		memmove(SZ_GetSpace(buf, len), data, len);	// no trailing 0
 	else
-		memcpy((uchar *)SZ_GetSpace(buf, len-1)-1, data, len);	// write over trailing 0
+		memmove((uchar *)SZ_GetSpace(buf, len-1)-1, data, len);	// write over trailing 0
 }
 
 /*

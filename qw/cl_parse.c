@@ -447,7 +447,7 @@ void CL_NextUpload(void)
 	r = upload_size - upload_pos;
 	if (r > 768)
 		r = 768;
-	memcpy(buffer, upload_data + upload_pos, r);
+	memmove(buffer, upload_data + upload_pos, r);
 	MSG_WriteByte (&cls.netchan.message, clc_upload);
 	MSG_WriteShort (&cls.netchan.message, r);
 
@@ -483,7 +483,7 @@ void CL_StartUpload (byte *data, int size)
 Con_DPrintf("Upload starting of %d...\n", size);
 
 	upload_data = malloc(size);
-	memcpy(upload_data, data, size);
+	memmove(upload_data, data, size);
 	upload_size = size;
 	upload_pos = 0;
 
@@ -888,7 +888,7 @@ void CL_NewTranslation (int slot)
 
 		dest = player->translations;
 		source = vid.colormap;
-		memcpy (dest, vid.colormap, sizeof(player->translations));
+		memmove (dest, vid.colormap, sizeof(player->translations));
 		top = player->topcolor;
 		if (top > 13 || top < 0)
 			top = 13;
@@ -901,13 +901,13 @@ void CL_NewTranslation (int slot)
 		for (i=0 ; i<VID_GRADES ; i++, dest += 256, source+=256)
 		{
 			if (top < 128)	// the artists made some backwards ranges.  sigh.
-				memcpy (dest + TOP_RANGE, source + top, 16);
+				memmove (dest + TOP_RANGE, source + top, 16);
 			else
 				for (j=0 ; j<16 ; j++)
 					dest[TOP_RANGE+j] = source[top+15-j];
 					
 			if (bottom < 128)
-				memcpy (dest + BOTTOM_RANGE, source + bottom, 16);
+				memmove (dest + BOTTOM_RANGE, source + bottom, 16);
 			else
 				for (j=0 ; j<16 ; j++)
 					dest[BOTTOM_RANGE+j] = source[bottom+15-j];		

@@ -110,7 +110,7 @@ BSP_LoadTextures(model_t *mod, byte *in, int sz)
 		tx->width = w;
 		tx->height = h;
 		// the pixels immediately follow the structures
-		memcpy(tx+1, p, pixels);
+		memmove(tx+1, p, pixels);
 		if(strncmp(tx->name, "sky", 3) == 0)
 			R_InitSky(tx);
 	}
@@ -210,7 +210,7 @@ BSP_LoadLighting(model_t *mod, byte *in, int sz)
 	if(sz == 0)
 		mod->lightdata = nil;
 	else
-		memcpy(mod->lightdata = Hunk_Alloc(sz), in, sz);
+		memmove(mod->lightdata = Hunk_Alloc(sz), in, sz);
 	return 0;
 }
 
@@ -220,7 +220,7 @@ BSP_LoadVisibility(model_t *mod, byte *in, int sz)
 	if(sz == 0)
 		mod->visdata = nil;
 	else
-		memcpy(mod->visdata = Hunk_Alloc(sz), in, sz);
+		memmove(mod->visdata = Hunk_Alloc(sz), in, sz);
 	return 0;
 }
 
@@ -230,7 +230,7 @@ BSP_LoadEntities(model_t *mod, byte *in, int sz)
 	if(sz == 0)
 		mod->entities = nil;
 	else
-		memcpy(mod->entities = Hunk_Alloc(sz), in, sz);
+		memmove(mod->entities = Hunk_Alloc(sz), in, sz);
 	return 0;
 }
 

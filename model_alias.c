@@ -110,7 +110,7 @@ Mod_LoadAliasSkin(void * pin, int *pskinindex, int skinsize, aliashdr_t *pheader
 	*pskinindex = Hunk_From(pheader);
 	pskin = Hunk_Alloc(skinsize);
 	pinskin = (uchar *)pin;
-	memcpy(pskin, pinskin, skinsize);
+	memmove(pskin, pinskin, skinsize);
 	pinskin += skinsize;
 	return (void *)pinskin;
 }

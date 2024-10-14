@@ -184,7 +184,7 @@ void SV_CalcPHS (void)
 	vcount = 0;
 	for (i=0 ; i<num ; i++, scan+=rowbytes)
 	{
-		memcpy (scan, Mod_LeafPVS(sv.worldmodel->leafs+i, sv.worldmodel),
+		memmove (scan, Mod_LeafPVS(sv.worldmodel->leafs+i, sv.worldmodel),
 			rowbytes);
 		if (i == 0)
 			continue;
@@ -204,7 +204,7 @@ void SV_CalcPHS (void)
 	dest = (unsigned *)sv.phs;
 	for (i=0 ; i<num ; i++, dest += rowwords, scan += rowbytes)
 	{
-		memcpy (dest, scan, rowbytes);
+		memmove (dest, scan, rowbytes);
 		for (j=0 ; j<rowbytes ; j++)
 		{
 			bitbyte = scan[j];
