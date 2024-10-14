@@ -359,7 +359,7 @@ static void CL_ParseUpdate (int bits)
 	else
 		ent->colormap = cl.scores[colormap-1].translations;
 
-	if(skin != ent->skinnum && num >= 0 && num <= cl.maxclients){
+	if(skin != ent->skinnum && num >= 0){
 		// FIXME(sigrid): update the skin
 		ent->skinnum = skin;
 	}
