@@ -534,6 +534,7 @@ alcattr(bool hrtf)
 static int
 alinit(const char *devname)
 {
+	static ALCint attr[] = {ALC_MONO_SOURCES, 1024, 0};
 	ALCcontext *c;
 	int e;
 
@@ -550,7 +551,7 @@ alinit(const char *devname)
 	free(curdev);
 	curdev = strdup(devname);
 
-	c = alcCreateContext(dev, nil); ALERR();
+	c = alcCreateContext(dev, attr); ALERR();
 	if(c == nil){
 closedev:
 		alcCloseDevice(dev); ALERR();
