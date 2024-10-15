@@ -1,18 +1,5 @@
 #include "quakedef.h"
 
-void Cmd_ForwardToServer (void);
-
-#define	MAX_ALIAS_NAME	32
-
-typedef struct cmdalias_s
-{
-	struct cmdalias_s	*next;
-	char	name[MAX_ALIAS_NAME];
-	char	*value;
-} cmdalias_t;
-
-static cmdalias_t	*cmd_alias;
-
 static bool	cmd_wait;
 
 //=============================================================================
@@ -26,8 +13,9 @@ next frame.  This allows commands like:
 bind g "impulse 5 ; +attack ; wait ; -attack ; impulse 2"
 ============
 */
-static void Cmd_Wait_f (void)
+static void Cmd_Wait_f (cmd_t *c)
 {
+	USED(c);
 	cmd_wait = true;
 }
 
@@ -180,11 +168,12 @@ Cmd_Exec_f
 ===============
 */
 static void
-Cmd_Exec_f(void)
+Cmd_Exec_f(cmd_t *c)
 {
 	char	*f;
 	void	*mark;
 
+	USED(c);
 	if (Cmd_Argc () != 2)
 	{
 		Con_Printf ("exec <filename> : execute a script file\n");
@@ -212,10 +201,11 @@ Just prints the rest of the line to the console
 ===============
 */
 static void
-Cmd_Echo_f(void)
+Cmd_Echo_f(cmd_t *c)
 {
 	int		i;
 
+	USED(c);
 	for (i=1 ; i<Cmd_Argc() ; i++)
 		Con_Printf ("%s ",Cmd_Argv(i));
 	Con_Printf ("\n");
@@ -231,6 +221,23 @@ CopyString(char *in)
 	return out;
 }
 
+static void
+Cmd_AliasList(char *name, void *v, void *aux)
+{
+	cmd_t *a;
+
+	USED(aux);
+	a = v;
+	if(iscmd(a) && a->alias != nil)
+		Con_Printf("  %s : %s\n", name, a->alias);
+}
+
+static void
+Cmd_ExecAlias_f(cmd_t *a)
+{
+	Cbuf_InsertText(a->alias);
+}
+
 /*
 ===============
 Cmd_Alias_f
@@ -239,58 +246,47 @@ Creates a new command that executes a command string (possibly ; seperated)
 ===============
 */
 static void
-Cmd_Alias_f(void)
+Cmd_Alias_f(cmd_t *t)
 {
-	cmdalias_t	*a;
-	char		cmd[1024];
-	int			i, c;
-	char		*s;
+	char *s, cmd[1024];
+	cmd_t *a;
+	int i, c;
 
-	if (Cmd_Argc() == 1)
-	{
+	USED(t);
+	if(Cmd_Argc() == 1){
 		Con_Printf ("Current alias commands:\n");
-		for (a = cmd_alias ; a ; a=a->next)
-			Con_Printf ("%s : %s\n", a->name, a->value);
+		Con_SearchObject("", 0, Cmd_AliasList, nil);
 		return;
 	}
 
 	s = Cmd_Argv(1);
-	if (strlen(s) >= MAX_ALIAS_NAME)
-	{
-		Con_Printf ("Alias name is too long\n");
+	if(strlen(Cmd_Args()) - strlen(s) >= sizeof(cmd)){
+		Con_Printf("Alias commands are too long\n");
 		return;
 	}
 
-	// if the alias already exists, reuse it
-	for (a = cmd_alias ; a ; a=a->next)
-	{
-		if(strcmp(s, a->name) == 0)
-		{
-			Z_Free (a->value);
-			break;
+	if((a = Con_FindObject(s)) != nil){
+		if(!iscmd(a) || a->alias == nil){
+			Con_Printf("Can't register alias %s, already defined\n", s);
+			return;
 		}
+		Z_Free(a->alias);
 	}
 
-	if (a == nil)
-	{
-		a = Z_Malloc(sizeof *a);
-		a->next = cmd_alias;
-		cmd_alias = a;
-	}
-	strcpy (a->name, s);
+	if(a == nil)
+		a = Cmd_AddCommand(CopyString(s), Cmd_ExecAlias_f);
 
 	// copy the rest of the command line
 	cmd[0] = 0;		// start out with a null string
 	c = Cmd_Argc();
-	for (i=2 ; i< c ; i++)
-	{
-		strcat (cmd, Cmd_Argv(i));
-		if (i != c)
-			strcat (cmd, " ");
+	for(i = 2; i < c; i++){
+		strcat(cmd, Cmd_Argv(i));
+		if(i != c)
+			strcat(cmd, " ");
 	}
-	strcat (cmd, "\n");
+	strcat(cmd, "\n");
 
-	a->value = CopyString (cmd);
+	a->alias = CopyString(cmd);
 }
 
 /*
@@ -310,9 +306,6 @@ static	char		*cmd_args = nil;
 
 cmd_source_t	cmd_source;
 
-
-static	cmd_function_t	*cmd_functions;		// possible commands to execute
-
 /*
 ============
 Cmd_Init
@@ -320,9 +313,9 @@ Cmd_Init
 */
 void Cmd_Init (void)
 {
-	Cmd_AddCommand ("exec",Cmd_Exec_f);
-	Cmd_AddCommand ("echo",Cmd_Echo_f);
-	Cmd_AddCommand ("alias",Cmd_Alias_f);
+	Cmd_AddCommand ("exec", Cmd_Exec_f);
+	Cmd_AddCommand ("echo", Cmd_Echo_f);
+	Cmd_AddCommand ("alias", Cmd_Alias_f);
 	Cmd_AddCommand ("cmd", Cmd_ForwardToServer);
 	Cmd_AddCommand ("wait", Cmd_Wait_f);
 }
@@ -373,8 +366,10 @@ Cmd_TokenizeString(char *text)
 	int		i;
 
 	// clear the args from the last string
-	for (i=0 ; i<cmd_argc ; i++)
-		Z_Free (cmd_argv[i]);
+	for(i = 0; i < cmd_argc; i++){
+		Z_Free(cmd_argv[i]);
+		cmd_argv[i] = nil;
+	}
 
 	cmd_argc = 0;
 	cmd_args = nil;
@@ -415,80 +410,21 @@ Cmd_TokenizeString(char *text)
 Cmd_AddCommand
 ============
 */
-cmd_function_t *
-Cmd_AddCommand (char *cmd_name, xcommand_t function)
+cmd_t *
+Cmd_AddCommand(char *name, cmdfun_t f)
 {
-	cmd_function_t	*cmd;
+	cmd_t	*cmd;
 
-	if (host_initialized)	// because hunk allocation would get stomped
-		fatal("Cmd_AddCommand after host_initialized");
-
-	// fail if the command is a variable name
-	if (Cvar_VariableString(cmd_name)[0])
-	{
-		Con_Printf ("Cmd_AddCommand: %s already defined as a var\n", cmd_name);
+	if(Con_FindObject(name) != nil){
+		Con_Printf("Cmd_AddCommand: %s already defined\n", name);
 		return nil;
 	}
 
-	// fail if the command already exists
-	for (cmd=cmd_functions ; cmd ; cmd=cmd->next)
-	{
-		if(strcmp(cmd_name, cmd->name) == 0)
-		{
-			Con_Printf ("Cmd_AddCommand: %s already defined\n", cmd_name);
-			return cmd;
-		}
-	}
-
-	cmd = Hunk_Alloc(sizeof *cmd);
-	cmd->name = cmd_name;
-	cmd->function = function;
-	cmd->next = cmd_functions;
-	cmd_functions = cmd;
+	cmd = Z_Malloc(sizeof *cmd);
+	cmd->name = name;
+	cmd->f = f;
+	Con_AddObject(name, cmd);
 	return cmd;
-}
-
-/*
-============
-Cmd_Exists
-============
-*/
-bool	Cmd_Exists (char *cmd_name)
-{
-	cmd_function_t	*cmd;
-
-	for (cmd=cmd_functions ; cmd ; cmd=cmd->next)
-	{
-		if(strcmp(cmd_name, cmd->name) == 0)
-			return true;
-	}
-
-	return false;
-}
-
-
-
-/*
-============
-Cmd_CompleteCommand
-============
-*/
-char *Cmd_CompleteCommand (char *partial)
-{
-	cmd_function_t	*cmd;
-	int				len;
-
-	len = strlen(partial);
-
-	if (!len)
-		return nil;
-
-	// check functions
-	for (cmd=cmd_functions ; cmd ; cmd=cmd->next)
-		if(strncmp(partial, cmd->name, len) == 0 && !cmd->hidden)
-			return cmd->name;
-
-	return nil;
 }
 
 /*
@@ -499,40 +435,26 @@ A complete command line has been parsed, so try to execute it
 FIXME: lookupnoadd the token to speed search?
 ============
 */
-void	Cmd_ExecuteString (char *text, cmd_source_t src)
+void
+Cmd_ExecuteString (char *text, cmd_source_t src)
 {
-	cmd_function_t	*cmd;
-	cmdalias_t		*a;
+	cmd_t *cmd;
 
 	cmd_source = src;
 	Cmd_TokenizeString (text);
 
 	// execute the command line
-	if (!Cmd_Argc())
+	if(!Cmd_Argc())
 		return;		// no tokens
 
-	// check functions
-	for (cmd=cmd_functions ; cmd ; cmd=cmd->next)
-	{
-		if(cistrcmp(cmd_argv[0],cmd->name) == 0)
-		{
-			cmd->function ();
-			return;
-		}
-	}
-
-	// check alias
-	for (a=cmd_alias ; a ; a=a->next)
-	{
-		if(cistrcmp(cmd_argv[0], a->name) == 0)
-		{
-			Cbuf_InsertText (a->value);
-			return;
-		}
+	cmd = Con_FindObject(cmd_argv[0]);
+	if(cmd != nil && iscmd(cmd)){
+		cmd->f(cmd);
+		return;
 	}
 
 	// check cvars
-	if (!Cvar_Command ())
+	if (!Cvar_Command())
 		Con_Printf ("Unknown command \"%s\": %s\n", Cmd_Argv(0), text);
 
 }
@@ -545,8 +467,9 @@ Cmd_ForwardToServer
 Sends the entire command line over to the server
 ===================
 */
-void Cmd_ForwardToServer (void)
+void Cmd_ForwardToServer (cmd_t *c)
 {
+	USED(c);
 	if (cls.state != ca_connected)
 	{
 		Con_Printf ("Can't \"%s\", not connected\n", Cmd_Argv(0));

@@ -44,26 +44,13 @@ void Sbar_DeathmatchOverlay (void);
 ===============
 Sbar_ShowScores
 
-Tab key down
+Tab key down/up
 ===============
 */
 static void
-Sbar_ShowScores(void)
+Sbar_ShowScores(cmd_t *c)
 {
-	sb_showscores = true;
-}
-
-/*
-===============
-Sbar_DontShowScores
-
-Tab key up
-===============
-*/
-static void
-Sbar_DontShowScores(void)
-{
-	sb_showscores = false;
+	sb_showscores = c->name[0] == '+';
 }
 
 /*
@@ -152,7 +139,7 @@ void Sbar_Init (void)
 	sb_face_quad = Draw_PicFromWad ("face_quad");
 
 	Cmd_AddCommand ("+showscores", Sbar_ShowScores);
-	Cmd_AddCommand ("-showscores", Sbar_DontShowScores);
+	Cmd_AddCommand ("-showscores", Sbar_ShowScores);
 
 	sb_sbar = Draw_PicFromWad ("sbar");
 	sb_ibar = Draw_PicFromWad ("ibar");

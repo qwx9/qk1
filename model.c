@@ -282,16 +282,13 @@ Mod_ForName(char *name, bool crash)
 	return Mod_LoadModel(Mod_FindName(name), crash);
 }
 
-/*
-================
-Mod_Print
-================
-*/
-void Mod_Print (void)
+void
+Mod_Print_f(cmd_t *c)
 {
 	int		i;
 	model_t	*mod;
 
+	USED(c);
 	Con_Printf ("Cached models:\n");
 	for (i=0, mod=mod_known ; i < mod_numknown ; i++, mod++)
 	{

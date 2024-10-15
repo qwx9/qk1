@@ -27,8 +27,9 @@ abortdemo(void)
 }
 
 void
-stopdemo(void)
+stopdemo(cmd_t *c)
 {
+	USED(c);
 	if(cmd_source != src_command)
 		return;
 	if(!cls.demorecording){
@@ -84,15 +85,16 @@ readcl(void)
 }
 
 void
-timedemo(void)
+timedemo(cmd_t *cmd)
 {
+	USED(cmd);
 	if(cmd_source != src_command)
 		return;
 	if(Cmd_Argc() != 2){
 		Con_Printf("timedemo <demoname> : gets demo speeds\n");
 		return;
 	}
-	playdemo();
+	playdemo(nil);
 	if(cls.demoplayback != 1)
 		return;
 	/* cls.td_starttime will be grabbed at the second frame of the demo, so
@@ -103,11 +105,12 @@ timedemo(void)
 }
 
 void
-recdemo(void)
+recdemo(cmd_t *cmd)
 {
 	int c, trk;
 	char *s, *a;
 
+	USED(cmd);
 	if(cmd_source != src_command)
 		return;
 	c = Cmd_Argc();
@@ -141,10 +144,11 @@ recdemo(void)
  * NET_GetMessages are read from the demo file. whenever cl.time gets past
  * the last received message, another message is read from the demo lump. */
 void
-playdemo(void)
+playdemo(cmd_t *cmd)
 {
 	char *s, *a;
 
+	USED(cmd);
 	if(cmd_source != src_command)
 		return;
 	if(Cmd_Argc() != 2){

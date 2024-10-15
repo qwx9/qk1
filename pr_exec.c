@@ -172,13 +172,14 @@ PR_Profile_f
 
 ============
 */
-void PR_Profile_f (void)
+void PR_Profile_f (cmd_t *c)
 {
 	dfunction_t	*f, *best;
 	int			max;
 	int			num;
 	int			i;
 
+	USED(c);
 	if (!sv.active)
 		return;
 

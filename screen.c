@@ -238,8 +238,9 @@ SCR_SizeUp_f
 Keybinding command
 =================
 */
-static void SCR_SizeUp_f (void)
+static void SCR_SizeUp_f (cmd_t *c)
 {
+	USED(c);
 	setcvarv ("viewsize",scr_viewsize.value+10);
 	vid.recalc_refdef = true;
 }
@@ -252,8 +253,9 @@ SCR_SizeDown_f
 Keybinding command
 =================
 */
-static void SCR_SizeDown_f (void)
+static void SCR_SizeDown_f (cmd_t *c)
 {
+	USED(c);
 	setcvarv ("viewsize",scr_viewsize.value-10);
 	vid.recalc_refdef = true;
 }
@@ -269,8 +271,8 @@ void SCR_Init (void)
 	Cvar_RegisterVariable (&scr_centertime);
 	Cvar_RegisterVariable (&scr_printspeed);
 	Cvar_RegisterVariable(&scr_showfps);
-	Cmd_AddCommand ("sizeup",SCR_SizeUp_f);
-	Cmd_AddCommand ("sizedown",SCR_SizeDown_f);
+	Cmd_AddCommand ("sizeup", SCR_SizeUp_f);
+	Cmd_AddCommand ("sizedown", SCR_SizeDown_f);
 
 	scr_net = Draw_PicFromWad ("net");
 	scr_turtle = Draw_PicFromWad ("turtle");
@@ -460,7 +462,7 @@ SCR_BeginLoadingPlaque
 */
 void SCR_BeginLoadingPlaque (void)
 {
-	stopallsfx();
+	stopallsfx(nil);
 
 	if (cls.state != ca_connected)
 		return;

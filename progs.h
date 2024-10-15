@@ -100,7 +100,7 @@ int PR_SetStr(pr_t *pr, char *s);
 char *PR_Str(pr_t *pr, int ofs);
 char *PR_UglyValueString(pr_t *pr, etype_t, eval_t *);
 
-void PR_Profile_f (void);
+void PR_Profile_f (cmd_t *c);
 
 edict_t *ED_Alloc(pr_t *pr);
 void ED_Free(edict_t *ed);
@@ -145,7 +145,7 @@ extern const int type_size[8];
 void PR_RunError (pr_t *pr, char *error, ...);
 
 ddef_t *ED_FieldAtOfs (pr_t *pr, int ofs);
-void ED_PrintEdicts(void);
+void ED_PrintEdicts(cmd_t *c);
 void ED_PrintNum(pr_t *pr, int ent);
 
 eval_t *GetEdictFieldValue(pr_t *pr, edict_t *ed, char *field);

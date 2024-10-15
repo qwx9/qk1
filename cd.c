@@ -6,11 +6,12 @@ int cdtrk = 0, cdntrk = 0;
 bool cdloop = false, cdenabled;
 
 void
-cdcmd(void)
+cdcmd(cmd_t *cmd)
 {
 	char *c;
 	bool loop;
 
+	USED(cmd);
 	if(!cdenabled){
 		Con_Printf("cd disabled\n");
 		return;

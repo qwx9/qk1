@@ -22,12 +22,13 @@ r_skyfog_cb(cvar_t *var)
 }
 
 static void
-fog(void)
+fog(cmd_t *c)
 {
 	int i, n;
 	float x;
 	char *s;
 
+	USED(c);
 	i = 1;
 	n = Cmd_Argc();
 	switch(n){

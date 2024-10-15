@@ -52,10 +52,11 @@ SV_SignonFrame(void)
 //============================================================================
 
 static void
-SV_Protocol_f(void)
+SV_Protocol_f(cmd_t *c)
 {
 	int i, n;
 
+	USED(c);
 	i = Cmd_Argc();
 	if(i == 1)
 		Con_Printf("\"sv_protocol\" is \"%d\" (%s)\n", sv_protocol->version, sv_protocol->name);

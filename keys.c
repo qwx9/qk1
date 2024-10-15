@@ -129,6 +129,29 @@ static keyname_t keynames[] =
 ==============================================================================
 */
 
+static void
+Key_Complete(char *name, void *o, void *aux)
+{
+	static int printed = 0;
+	int n;
+	char *longest;
+
+	if(ishiddencmd(o))
+		return;
+	longest = aux;
+	if(longest[0] == 0){
+		strcpy(longest, name);
+		printed = 0;
+		return;
+	}
+	if(!printed){
+		Con_Printf("\n  %s\n", longest);
+		printed = 1;
+	}
+	Con_Printf("  %s (%s)\n", name, iscmd(o) ? "cmd" : "cvar");
+	for(n = 0; longest[n] == name[n]; n++);
+	longest[n] = 0;
+}
 
 /*
 ====================
@@ -140,7 +163,7 @@ Interactive line editing and console scrollback
 static void
 Key_Console(int key)
 {
-	char *cmd, *s;
+	char longest[128], *s;
 	int n;
 
 	s = key_lines[edit_line];
@@ -158,17 +181,18 @@ Key_Console(int key)
 		return;
 	}
 
-	if(key == K_TAB){	// command completion
-		if((cmd = Cmd_CompleteCommand(s+1)) == nil)
-			cmd = Cvar_CompleteVariable(s+1);
-		if(cmd){
-			strcpy(s+1, cmd);
-			key_linepos = strlen(cmd)+1;
-			s[key_linepos] = ' ';
-			key_linepos++;
-			s[key_linepos] = 0;
+	if(key == K_TAB){	// command/cvar completion
+		longest[0] = 0;
+		if(key_linepos < 2)
 			return;
+		if((n = Con_SearchObject(s+1, key_linepos-1, Key_Complete, longest)) >= 1 && longest[0] != 0){
+			key_linepos = strlen(longest);
+			memmove(s+1, longest, key_linepos);
+			if(n == 1)
+				s[++key_linepos] = ' ';
+			s[++key_linepos] = 0;
 		}
+		return;
 	}
 
 	if(key == K_LEFTARROW){
@@ -410,10 +434,11 @@ Key_Unbind_f
 ===================
 */
 static void
-Key_Unbind_f(void)
+Key_Unbind_f(cmd_t *c)
 {
 	int		b;
 
+	USED(c);
 	if (Cmd_Argc() != 2)
 	{
 		Con_Printf ("unbind <key> : remove commands from a key\n");
@@ -431,13 +456,14 @@ Key_Unbind_f(void)
 }
 
 static void
-Key_Unbindall_f(void)
+Key_Unbindall_f(cmd_t *c)
 {
 	int		i;
 
-	for (i=0 ; i<256 ; i++)
-		if (keybindings[i])
-			Key_SetBinding (i, "");
+	USED(c);
+	for(i = 0; i < 256; i++)
+		if(keybindings[i])
+			Key_SetBinding(i, "");
 }
 
 
@@ -447,13 +473,13 @@ Key_Bind_f
 ===================
 */
 static void
-Key_Bind_f(void)
+Key_Bind_f(cmd_t *t)
 {
 	int			i, c, b;
 	char		cmd[1024];
 
+	USED(t);
 	c = Cmd_Argc();
-
 	if (c != 2 && c != 3)
 	{
 		Con_Printf ("bind <key> [command] : attach a command to a key\n");
@@ -553,9 +579,9 @@ void Key_Init (void)
 		menubound[K_F1+i] = true;
 
 	// register our functions
-	Cmd_AddCommand ("bind",Key_Bind_f);
-	Cmd_AddCommand ("unbind",Key_Unbind_f);
-	Cmd_AddCommand ("unbindall",Key_Unbindall_f);
+	Cmd_AddCommand ("bind", Key_Bind_f);
+	Cmd_AddCommand ("unbind", Key_Unbind_f);
+	Cmd_AddCommand ("unbindall", Key_Unbindall_f);
 
 
 }
@@ -614,7 +640,7 @@ void Key_Event (int key, bool down)
 			break;
 		case key_game:
 		case key_console:
-			M_ToggleMenu_f ();
+			M_ToggleMenu_f (nil);
 			break;
 		default:
 			fatal ("Bad key_dest");
@@ -650,7 +676,7 @@ void Key_Event (int key, bool down)
 	// during demo playback, most keys bring up the main menu
 	if (cls.demoplayback && down && consolekeys[key] && key_dest == key_game)
 	{
-		M_ToggleMenu_f ();
+		M_ToggleMenu_f (nil);
 		return;
 	}
 

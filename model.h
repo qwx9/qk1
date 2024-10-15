@@ -384,7 +384,7 @@ void	Mod_TouchModel (char *name);
 
 mleaf_t *Mod_PointInLeaf (const vec3_t p, model_t *model);
 byte	*Mod_LeafPVS (mleaf_t *leaf, model_t *model, int *sz);
-void	Mod_Print(void);
+void	Mod_Print_f(cmd_t *c);
 
 texture_t *Load_ExternalTexture(char *map, char *name);
 

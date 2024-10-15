@@ -532,10 +532,11 @@ For debugging, prints all the entities in the current server
 =============
 */
 void
-ED_PrintEdicts(void)
+ED_PrintEdicts(cmd_t *c)
 {
 	int		i;
 
+	USED(c);
 	Con_Printf ("%d entities\n", sv.pr->num_edicts);
 	for (i=0 ; i<sv.pr->num_edicts ; i++)
 		ED_PrintNum(sv.pr, i);
@@ -549,10 +550,11 @@ For debugging, prints a single edicy
 =============
 */
 static void
-ED_PrintEdict_f(void)
+ED_PrintEdict_f(cmd_t *c)
 {
 	int		i;
 
+	USED(c);
 	i = atoi(Cmd_Argv(1));
 	if (i >= sv.pr->num_edicts)
 	{
@@ -570,12 +572,13 @@ For debugging
 =============
 */
 static void
-ED_Count(void)
+ED_Count(cmd_t *c)
 {
 	int		i;
 	edict_t	*ent;
 	int		active, models, solid, step;
 
+	USED(c);
 	active = models = solid = step = 0;
 	for (i=0 ; i<sv.pr->num_edicts ; i++)
 	{
@@ -1132,6 +1135,7 @@ err:
 	pl = &lumps[PR_LUMP_FIELDDEFS];
 	PR_FieldDefs(pr, in0 + pl->off, pl->num);
 	pr->edict_size = pr->entityfields*4 + sizeof(edict_t) - sizeof(entvars_t);
+	// 
 	pr->edict_size = (pr->edict_size + 7) & ~7;
 
 	Con_DPrintf("Programs occupy %dK.\n", n/1024);

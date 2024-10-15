@@ -376,8 +376,9 @@ stepsnd(const view_t *v)
 }
 
 void
-stopallsfx(void)
+stopallsfx(cmd_t *c)
 {
+	USED(c);
 	if(!ainit)
 		return;
 	memset(chans, 0, sizeof(*chans)*Nchan);
@@ -558,13 +559,14 @@ precachesfx(char *s)
 }
 
 static void
-playsfx(void)
+playsfx(cmd_t *c)
 {
 	static int hash = 345;
 	int i;
 	char *s;
 	Sfx *sfx;
 
+	USED(c);
 	if(Cmd_Argc() < 2){
 		Con_Printf("play wav [wav..]: play a wav lump\n");
 		return;
@@ -582,7 +584,7 @@ playsfx(void)
 }
 
 static void
-playvolsfx(void)
+playvolsfx(cmd_t *c)
 {
 	static int hash = 543;
 	int i;
@@ -590,6 +592,7 @@ playvolsfx(void)
 	char *s;
 	Sfx *sfx;
 
+	USED(c);
 	if(Cmd_Argc() < 3){
 		Con_Printf("play wav vol [wav vol]..: play an amplified wav lump\n");
 		return;
@@ -608,13 +611,14 @@ playvolsfx(void)
 }
 
 static void
-sfxlist(void)
+sfxlist(cmd_t *cmd)
 {
 	char c;
 	int sz, sum;
 	Sfx *sfx, *e;
 	sfxcache_t *sc;
 
+	USED(cmd);
 	sum = 0;
 	for(sfx=known_sfx, e=known_sfx+num_sfx; sfx<e; sfx++){
 		if(sc = Cache_Check(&sfx->cu), sc == nil)
@@ -678,7 +682,7 @@ initsnd(void)
 
 		ambsfx[Ambwater] = precachesfx("ambience/water1.wav");
 		ambsfx[Ambsky] = precachesfx("ambience/wind2.wav");
-		stopallsfx();
+		stopallsfx(nil);
 	}
 	return 0;
 }

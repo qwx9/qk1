@@ -73,6 +73,7 @@ src_common = [
 	'pr_edict.c',
 	'pr_exec.c',
 	'protocol.c',
+	'qp.c',
 	'r_aclip.c',
 	'r_alias.c',
 	'r_bsp.c',

@@ -149,7 +149,7 @@ flipfb(void)
 		resetfb();
 		vid.recalc_refdef = true;	/* force a surface cache flush */
 		Con_CheckResize();
-		Con_Clear_f();
+		Con_Clear_f(nil);
 		return;
 	}
 	if(frame == nil){

@@ -6,6 +6,7 @@ struct mem_t
 {
 	mem_t *prev, *next;
 	mem_user_t *user;
+	int tag;
 	int size; // NOT including this header
 };
 
@@ -71,6 +72,28 @@ Hunk_Alloc(int size)
 	hunk_head = m;
 
 	return m+1;
+}
+
+void
+Hunk_SetTag(void *p, int tag)
+{
+	mem_t *m;
+
+	assert(p != nil);
+	m = p;
+	m--;
+	m->tag = tag;
+}
+
+int
+Hunk_GetTag(void *p)
+{
+	mem_t *m;
+
+	assert(p != nil);
+	m = p;
+	m--;
+	return m->tag;
 }
 
 void *
@@ -160,10 +183,11 @@ Cache_Check(mem_user_t *c)
 }
 
 static void
-Cache_Flush(void)
+Cache_Flush(cmd_t *c)
 {
 	mem_t *s;
 
+	USED(c);
 	while(cache_head != nil){
 		s = cache_head->next;
 		free(cache_head);

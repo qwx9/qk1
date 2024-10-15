@@ -286,10 +286,11 @@ void PrintStats(qsocket_t *s)
 	Con_Printf("\n");
 }
 
-void NET_Stats_f (void)
+void NET_Stats_f (cmd_t *c)
 {
 	qsocket_t	*s;
 
+	USED(c);
 	if (Cmd_Argc () == 1)
 	{
 		Con_Printf("unreliable messages sent   = %d\n", unreliableMessagesSent);
@@ -448,6 +449,7 @@ static qsocket_t *_Datagram_CheckNewConnections (void)
 
 	if (command == CQRUINFO)
 	{
+/* FIXME(sigrid): wtf is this MEGASHIT
 		char	*prevCvarName;
 		cvar_t	*var;
 
@@ -485,7 +487,7 @@ static qsocket_t *_Datagram_CheckNewConnections (void)
 		*((int *)net_message.data) = BigLong(NFCTL | (net_message.cursize & NFMASK));
 		dfunc.Write(net_message.data, net_message.cursize, &clientaddr);
 		SZ_Clear(&net_message);
-
+*/
 		goto done;
 	}
 

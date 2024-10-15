@@ -109,6 +109,7 @@ enum {
 typedef u8int byte;
 
 #include "cvar.h"
+#include "cmd.h"
 #include "common.h"
 #include "zone.h"
 #include "dat.h"
@@ -145,7 +146,6 @@ void pixels_resize(pixel_t *in, pixel_t *out, int iw, int ih, int ow, int oh, bo
 #include "screen.h"
 #include "net.h"
 #include "protocol.h"
-#include "cmd.h"
 #include "sbar.h"
 
 extern cvar_t bgmvolume;
@@ -167,7 +167,6 @@ extern cvar_t volume;
 #include "d_local.h"
 
 extern bool noclip_anglehack;
-
 
 //
 // host
@@ -199,7 +198,7 @@ void Host_Shutdown(void);
 _Noreturn void Host_Error (char *error, ...);
 void Host_EndGame (char *message, ...);
 void Host_Frame (float time);
-void Host_Quit_f (void);
+void Host_Quit_f (cmd_t *c);
 void Host_ClientCommands (char *fmt, ...);
 void Host_ShutdownServer (bool crash);
 

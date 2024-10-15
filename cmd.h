@@ -46,15 +46,21 @@ not apropriate.
 
 */
 
-typedef void (*xcommand_t) (void);
+typedef struct cmd_t cmd_t;
 
-typedef struct cmd_function_s
+typedef void (*cmdfun_t)(cmd_t *cmd);
+
+struct cmd_t
 {
-	struct cmd_function_s	*next;
-	char					*name;
-	xcommand_t				function;
+	char *name;
+	char *_dummy;
 	bool hidden;
-} cmd_function_t;
+	cmdfun_t f;
+	char *alias;
+};
+
+#define iscmd(p) (((cmd_t*)(p))->_dummy == nil)
+#define ishiddencmd(p) (iscmd(p) && ((cmd_t*)(p))->hidden)
 
 typedef enum
 {
@@ -67,7 +73,7 @@ extern	cmd_source_t	cmd_source;
 
 void	Cmd_Init (void);
 
-cmd_function_t *Cmd_AddCommand (char *cmd_name, xcommand_t function);
+cmd_t *Cmd_AddCommand(char *cmd_name, cmdfun_t f);
 // called by the init functions of other parts of the program to
 // register commands and functions to call for them.
 // The cmd_name is referenced later, so it should not be in temp memory
@@ -90,7 +96,7 @@ void	Cmd_ExecuteString (char *text, cmd_source_t src);
 // Parses a single line of text into arguments and tries to execute it.
 // The text can come from the command buffer, a remote client, or stdin.
 
-void	Cmd_ForwardToServer (void);
+void	Cmd_ForwardToServer (cmd_t *c);
 // adds the current command line as a clc_stringcmd to the client message.
 // things like godmode, noclip, etc, are commands directed to the server,
 // so when they are typed in at the console, they will need to be forwarded.

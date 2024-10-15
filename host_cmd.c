@@ -8,13 +8,14 @@ Host_Quit_f
 ==================
 */
 
-extern void M_Menu_Quit_f (void);
+extern void M_Menu_Quit_f (cmd_t *c);
 
-void Host_Quit_f (void)
+void Host_Quit_f (cmd_t *c)
 {
+	USED(c);
 	if (key_dest != key_console && cls.state != ca_dedicated)
 	{
-		M_Menu_Quit_f ();
+		M_Menu_Quit_f (c);
 		return;
 	}
 	CL_Disconnect ();
@@ -30,7 +31,7 @@ Host_Status_f
 ==================
 */
 static void
-Host_Status_f(void)
+Host_Status_f(cmd_t *c)
 {
 	client_t	*client;
 	int			seconds;
@@ -39,11 +40,12 @@ Host_Status_f(void)
 	int			j;
 	void		(*print) (char *fmt, ...);
 
+	USED(c);
 	if (cmd_source == src_command)
 	{
 		if (!sv.active)
 		{
-			Cmd_ForwardToServer ();
+			Cmd_ForwardToServer (nil);
 			return;
 		}
 		print = Con_Printf;
@@ -84,11 +86,12 @@ Sets client to godmode
 ==================
 */
 static void
-Host_God_f(void)
+Host_God_f(cmd_t *c)
 {
+	USED(c);
 	if (cmd_source == src_command)
 	{
-		Cmd_ForwardToServer ();
+		Cmd_ForwardToServer (nil);
 		return;
 	}
 
@@ -103,11 +106,12 @@ Host_God_f(void)
 }
 
 static void
-Host_Notarget_f(void)
+Host_Notarget_f(cmd_t *c)
 {
+	USED(c);
 	if (cmd_source == src_command)
 	{
-		Cmd_ForwardToServer ();
+		Cmd_ForwardToServer (nil);
 		return;
 	}
 
@@ -124,11 +128,12 @@ Host_Notarget_f(void)
 bool noclip_anglehack;
 
 static void
-Host_Noclip_f(void)
+Host_Noclip_f(cmd_t *c)
 {
+	USED(c);
 	if (cmd_source == src_command)
 	{
-		Cmd_ForwardToServer ();
+		Cmd_ForwardToServer (nil);
 		return;
 	}
 
@@ -157,11 +162,12 @@ Sets client to flymode
 ==================
 */
 static void
-Host_Fly_f(void)
+Host_Fly_f(cmd_t *c)
 {
+	USED(c);
 	if (cmd_source == src_command)
 	{
-		Cmd_ForwardToServer ();
+		Cmd_ForwardToServer (nil);
 		return;
 	}
 
@@ -188,15 +194,16 @@ Host_Ping_f
 ==================
 */
 static void
-Host_Ping_f(void)
+Host_Ping_f(cmd_t *c)
 {
 	int		i, j;
 	float	total;
 	client_t	*client;
 
+	USED(c);
 	if (cmd_source == src_command)
 	{
-		Cmd_ForwardToServer ();
+		Cmd_ForwardToServer (nil);
 		return;
 	}
 
@@ -232,11 +239,12 @@ command from the console.  Active clients are kicked off.
 ======================
 */
 static void
-Host_Map_f(void)
+Host_Map_f(cmd_t *c)
 {
 	int		i;
 	char	name[Npath];
 
+	USED(c);
 	if (cmd_source != src_command)
 		return;
 
@@ -284,10 +292,11 @@ Goes to a new map, taking all clients along
 ==================
 */
 static void
-Host_Changelevel_f(void)
+Host_Changelevel_f(cmd_t *c)
 {
 	char	level[Npath];
 
+	USED(c);
 	if (Cmd_Argc() != 2)
 	{
 		Con_Printf ("changelevel <levelname> : continue game on a new level\n");
@@ -311,10 +320,11 @@ Restarts the current server for a dead player
 ==================
 */
 static void
-Host_Restart_f(void)
+Host_Restart_f(cmd_t *c)
 {
 	char	mapname[Npath];
 
+	USED(c);
 	if (cls.demoplayback || !sv.active)
 		return;
 
@@ -327,8 +337,9 @@ Host_Restart_f(void)
 
 /* wait for signon messages; sent before server level change */
 static void
-reconnect(void)
+reconnect(cmd_t *c)
 {
+	USED(c);
 	SCR_BeginLoadingPlaque();
 	cls.signon = 0;
 }
@@ -341,10 +352,11 @@ User command to connect to server
 =====================
 */
 static void
-Host_Connect_f(void)
+Host_Connect_f(cmd_t *c)
 {
 	char	name[Npath];
 
+	USED(c);
 	cls.demonum = -1;		// stop demo loop in case this fails
 	if (cls.demoplayback)
 	{
@@ -353,7 +365,7 @@ Host_Connect_f(void)
 	}
 	strcpy (name, Cmd_Argv(1));
 	CL_EstablishConnection (name);
-	reconnect();
+	reconnect(c);
 }
 
 /*
@@ -362,10 +374,11 @@ Host_Name_f
 ======================
 */
 static void
-Host_Name_f(void)
+Host_Name_f(cmd_t *c)
 {
 	char	newName[16];
 
+	USED(c);
 	if (Cmd_Argc () == 1)
 	{
 		Con_Printf ("\"name\" is \"%s\"\n", cl_name.string);
@@ -383,7 +396,7 @@ Host_Name_f(void)
 			return;
 		setcvar ("_cl_name", newName);
 		if (cls.state == ca_connected)
-			Cmd_ForwardToServer ();
+			Cmd_ForwardToServer (nil);
 		return;
 	}
 
@@ -401,8 +414,9 @@ Host_Name_f(void)
 }
 
 static void
-Host_Version_f(void)
+Host_Version_f(cmd_t *c)
 {
+	USED(c);
 	Con_Printf("Version %4.2f\n", VERSION);
 	Con_Printf("Exe: <REDACTED>\n");
 }
@@ -426,7 +440,7 @@ Host_Say(bool teamonly)
 		}
 		else
 		{
-			Cmd_ForwardToServer ();
+			Cmd_ForwardToServer (nil);
 			return;
 		}
 	}
@@ -472,19 +486,21 @@ Host_Say(bool teamonly)
 }
 
 static void
-Host_Say_f(void)
+Host_Say_f(cmd_t *c)
 {
+	USED(c);
 	Host_Say(false);
 }
 
 static void
-Host_Say_Team_f(void)
+Host_Say_Team_f(cmd_t *c)
 {
+	USED(c);
 	Host_Say(true);
 }
 
 static void
-Host_Tell_f(void)
+Host_Tell_f(cmd_t *c)
 {
 	client_t *client;
 	client_t *save;
@@ -492,9 +508,10 @@ Host_Tell_f(void)
 	char	*p;
 	char	text[64];
 
+	USED(c);
 	if (cmd_source == src_command)
 	{
-		Cmd_ForwardToServer ();
+		Cmd_ForwardToServer (nil);
 		return;
 	}
 
@@ -542,11 +559,12 @@ Host_Color_f
 ==================
 */
 static void
-Host_Color_f(void)
+Host_Color_f(cmd_t *c)
 {
 	int		top, bottom;
 	int		playercolor;
 
+	USED(c);
 	if (Cmd_Argc() == 1)
 	{
 		Con_Printf ("\"color\" is \"%d %d\"\n", ((int)cl_color.value) >> 4, ((int)cl_color.value) & 0x0f);
@@ -575,7 +593,7 @@ Host_Color_f(void)
 	{
 		setcvarv ("_cl_color", playercolor);
 		if (cls.state == ca_connected)
-			Cmd_ForwardToServer ();
+			Cmd_ForwardToServer (nil);
 		return;
 	}
 
@@ -594,11 +612,12 @@ Host_Kill_f
 ==================
 */
 static void
-Host_Kill_f(void)
+Host_Kill_f(cmd_t *c)
 {
+	USED(c);
 	if (cmd_source == src_command)
 	{
-		Cmd_ForwardToServer ();
+		Cmd_ForwardToServer (nil);
 		return;
 	}
 
@@ -620,12 +639,12 @@ Host_Pause_f
 ==================
 */
 static void
-Host_Pause_f(void)
+Host_Pause_f(cmd_t *c)
 {
-
+	USED(c);
 	if (cmd_source == src_command)
 	{
-		Cmd_ForwardToServer ();
+		Cmd_ForwardToServer (nil);
 		return;
 	}
 	if (!pausable.value)
@@ -658,8 +677,9 @@ Host_PreSpawn_f
 ==================
 */
 static void
-Host_PreSpawn_f(void)
+Host_PreSpawn_f(cmd_t *c)
 {
+	USED(c);
 	if(cmd_source == src_command){
 		Con_Printf("prespawn is not valid from the console\n");
 		return;
@@ -679,13 +699,14 @@ Host_Spawn_f
 ==================
 */
 static void
-Host_Spawn_f(void)
+Host_Spawn_f(cmd_t *c)
 {
 	int		i;
 	client_t	*client;
 	edict_t	*ent;
 	float *a;
 
+	USED(c);
 	if (cmd_source == src_command)
 	{
 		Con_Printf ("spawn is not valid from the console\n");
@@ -803,8 +824,9 @@ Host_Begin_f
 ==================
 */
 static void
-Host_Begin_f(void)
+Host_Begin_f(cmd_t *c)
 {
+	USED(c);
 	if (cmd_source == src_command)
 	{
 		Con_Printf ("begin is not valid from the console\n");
@@ -837,11 +859,12 @@ savecomment(char *cm)
 }
 
 static void
-savegame(void)
+savegame(cmd_t *cmd)
 {
 	char *s, *a, cm[Nsavcm];
 	client_t *c, *e;
 
+	USED(cmd);
 	if(cmd_source != src_command)
 		return;
 	else if(!sv.active){
@@ -878,7 +901,7 @@ savegame(void)
 }
 
 static void
-loadgame(void)
+loadgame(cmd_t *c)
 {
 	char *s, *a;
 
@@ -901,7 +924,7 @@ loadgame(void)
 	}
 	if(cls.state != ca_dedicated){
 		CL_EstablishConnection("local");
-		reconnect();
+		reconnect(c);
 	}
 }
 
@@ -913,7 +936,7 @@ Kicks a user off of the server
 ==================
 */
 static void
-Host_Kick_f(void)
+Host_Kick_f(cmd_t *c)
 {
 	char		*who;
 	char		*message = nil;
@@ -921,11 +944,12 @@ Host_Kick_f(void)
 	int			i;
 	bool	byNumber = false;
 
+	USED(c);
 	if (cmd_source == src_command)
 	{
 		if (!sv.active)
 		{
-			Cmd_ForwardToServer ();
+			Cmd_ForwardToServer (nil);
 			return;
 		}
 	}
@@ -1006,15 +1030,16 @@ Host_Give_f
 ==================
 */
 static void
-Host_Give_f(void)
+Host_Give_f(cmd_t *c)
 {
 	char	*t;
 	int		v;
 	eval_t	*val;
 
+	USED(c);
 	if (cmd_source == src_command)
 	{
-		Cmd_ForwardToServer ();
+		Cmd_ForwardToServer (nil);
 		return;
 	}
 
@@ -1182,11 +1207,12 @@ Host_Viewmodel_f
 ==================
 */
 static void
-Host_Viewmodel_f(void)
+Host_Viewmodel_f(cmd_t *c)
 {
 	edict_t	*e;
 	model_t	*m;
 
+	USED(c);
 	e = FindViewthing ();
 	if (!e)
 		return;
@@ -1208,12 +1234,13 @@ Host_Viewframe_f
 ==================
 */
 static void
-Host_Viewframe_f(void)
+Host_Viewframe_f(cmd_t *c)
 {
 	edict_t	*e;
 	int		f;
 	model_t	*m;
 
+	USED(c);
 	e = FindViewthing ();
 	if (!e)
 		return;
@@ -1246,11 +1273,12 @@ Host_Viewnext_f
 ==================
 */
 static void
-Host_Viewnext_f(void)
+Host_Viewnext_f(cmd_t *c)
 {
 	edict_t	*e;
 	model_t	*m;
 
+	USED(c);
 	e = FindViewthing ();
 	if (!e)
 		return;
@@ -1269,11 +1297,12 @@ Host_Viewprev_f
 ==================
 */
 static void
-Host_Viewprev_f(void)
+Host_Viewprev_f(cmd_t *c)
 {
 	edict_t	*e;
 	model_t	*m;
 
+	USED(c);
 	e = FindViewthing ();
 	if (!e)
 		return;
@@ -1302,10 +1331,11 @@ Host_Startdemos_f
 ==================
 */
 static void
-Host_Startdemos_f(void)
+Host_Startdemos_f(cmd_t *cmd)
 {
 	int		i, c;
 
+	USED(cmd);
 	if (cls.state == ca_dedicated)
 	{
 		if (!sv.active)
@@ -1342,13 +1372,14 @@ Return to looping demos
 ==================
 */
 static void
-Host_Demos_f(void)
+Host_Demos_f(cmd_t *c)
 {
+	USED(c);
 	if (cls.state == ca_dedicated)
 		return;
 	if (cls.demonum == -1)
 		cls.demonum = 1;
-	CL_Disconnect_f ();
+	CL_Disconnect_f (nil);
 	CL_NextDemo ();
 }
 
@@ -1360,8 +1391,9 @@ Return to looping demos
 ==================
 */
 static void
-Host_Stopdemo_f(void)
+Host_Stopdemo_f(cmd_t *c)
 {
+	USED(c);
 	if (cls.state == ca_dedicated)
 		return;
 	if (!cls.demoplayback)
@@ -1417,5 +1449,5 @@ Host_InitCommands(void)
 	Cmd_AddCommand ("viewnext", Host_Viewnext_f);
 	Cmd_AddCommand ("viewprev", Host_Viewprev_f);
 
-	Cmd_AddCommand ("mcache", Mod_Print);
+	Cmd_AddCommand ("mcache", Mod_Print_f);
 }

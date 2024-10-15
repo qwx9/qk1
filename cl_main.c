@@ -78,7 +78,7 @@ void CL_ClearState (void)
 	memset(&cl, 0, sizeof cl);
 
 	if(cls.state == ca_connected)
-		stopallsfx();
+		stopallsfx(nil);
 
 	SZ_Clear (&cls.message);
 	CL_ResetTEnts();
@@ -106,7 +106,7 @@ This is also called on Host_Error, so it shouldn't cause any errors
 */
 void CL_Disconnect (void)
 {
-	stopallsfx();
+	stopallsfx(nil);
 
 	// bring the console down and fade the colors back to normal
 	SCR_BringDownConsole ();
@@ -116,7 +116,7 @@ void CL_Disconnect (void)
 		abortdemo();
 	else if (cls.state == ca_connected){
 		if (cls.demorecording)
-			stopdemo();
+			stopdemo(nil);
 
 		Con_DPrintf("CL_Disconnect: sending clc_disconnect...\n");
 		SZ_Clear (&cls.message);
@@ -134,9 +134,10 @@ void CL_Disconnect (void)
 	cls.signon = 0;
 }
 
-void CL_Disconnect_f (void)
+void CL_Disconnect_f(cmd_t *c)
 {
-	CL_Disconnect ();
+	USED(c);
+	CL_Disconnect();
 	if (sv.active)
 		Host_ShutdownServer (false);
 }
@@ -247,11 +248,12 @@ CL_NextDemo (void)
 CL_PrintEntities_f
 ==============
 */
-static void CL_PrintEntities_f (void)
+static void CL_PrintEntities_f(cmd_t *c)
 {
 	entity_t	*ent;
 	int			i;
 
+	USED(c);
 	for (i=0,ent=cl_entities ; i<cl.num_entities ; i++,ent++)
 	{
 		if (!ent->model)

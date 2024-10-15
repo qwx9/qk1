@@ -413,10 +413,11 @@ stepsnd(const view_t *v)
 }
 
 void
-stopallsfx(void)
+stopallsfx(cmd_t *cmd)
 {
 	alchan_t *c, *next;
 
+	USED(cmd);
 	if(dev == nil)
 		return;
 	alListenerf(AL_GAIN, 0); ALERR();
@@ -725,12 +726,13 @@ aldopplercb(cvar_t *var)
 }
 
 static void
-sfxlist(void)
+sfxlist(cmd_t *c)
 {
 	int sz, sum, w, ch;
 	Sfx *sfx, *e;
 	albuf_t *b;
 
+	USED(c);
 	sum = 0;
 	for(sfx = known_sfx, e = known_sfx+num_sfx; sfx < e; sfx++){
 		if((b = Cache_Check(&sfx->cu)) == nil)

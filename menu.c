@@ -6,19 +6,19 @@ int savcanld[Nsav];
 
 enum {m_none, m_main, m_singleplayer, m_load, m_save, m_multiplayer, m_setup, m_net, m_options, m_keys, m_help, m_quit, m_lanconfig, m_gameoptions} m_state;
 
-void M_Menu_Main_f (void);
-	static void M_Menu_SinglePlayer_f (void);
-		static void M_Menu_Load_f (void);
-		static void M_Menu_Save_f (void);
-	static void M_Menu_MultiPlayer_f (void);
-		static void M_Menu_Setup_f (void);
-		static void M_Menu_Net_f (void);
-	static void M_Menu_Options_f (void);
-		static void M_Menu_Keys_f (void);
-	static void M_Menu_Help_f (void);
-	void M_Menu_Quit_f (void);
-static void M_Menu_LanConfig_f (void);
-static void M_Menu_GameOptions_f (void);
+void M_Menu_Main_f (cmd_t *c);
+	static void M_Menu_SinglePlayer_f (cmd_t *c);
+		static void M_Menu_Load_f (cmd_t *c);
+		static void M_Menu_Save_f (cmd_t *c);
+	static void M_Menu_MultiPlayer_f (cmd_t *c);
+		static void M_Menu_Setup_f (cmd_t *c);
+		static void M_Menu_Net_f (cmd_t *c);
+	static void M_Menu_Options_f (cmd_t *c);
+		static void M_Menu_Keys_f (cmd_t *c);
+	static void M_Menu_Help_f (cmd_t *c);
+	void M_Menu_Quit_f (cmd_t *c);
+static void M_Menu_LanConfig_f (cmd_t *c);
+static void M_Menu_GameOptions_f (cmd_t *c);
 
 static void M_Main_Draw (void);
 	static void M_SinglePlayer_Draw (void);
@@ -194,13 +194,14 @@ static void M_DrawTextBox (int x, int y, int width, int lines)
 static int m_save_demonum;
 
 void
-M_ToggleMenu_f(void)
+M_ToggleMenu_f(cmd_t *c)
 {
+	USED(c);
 	m_entersound = true;
 
 	if(key_dest == key_menu){
 		if(m_state != m_main){
-			M_Menu_Main_f();
+			M_Menu_Main_f(nil);
 			return;
 		}
 		key_dest = key_game;
@@ -208,10 +209,10 @@ M_ToggleMenu_f(void)
 		return;
 	}
 	if(key_dest == key_console)
-		Con_ToggleConsole_f();
+		Con_ToggleConsole_f(nil);
 	else{
 		IN_Grabm(0);
-		M_Menu_Main_f();
+		M_Menu_Main_f(nil);
 	}
 }
 
@@ -223,8 +224,9 @@ static int	m_main_cursor;
 #define	MAIN_ITEMS	5
 
 
-void M_Menu_Main_f (void)
+void M_Menu_Main_f (cmd_t *c)
 {
+	USED(c);
 	if (key_dest != key_menu)
 	{
 		m_save_demonum = cls.demonum;
@@ -284,23 +286,23 @@ static void M_Main_Key (int key)
 		switch (m_main_cursor)
 		{
 		case 0:
-			M_Menu_SinglePlayer_f ();
+			M_Menu_SinglePlayer_f(nil);
 			break;
 
 		case 1:
-			M_Menu_MultiPlayer_f ();
+			M_Menu_MultiPlayer_f(nil);
 			break;
 
 		case 2:
-			M_Menu_Options_f ();
+			M_Menu_Options_f(nil);
 			break;
 
 		case 3:
-			M_Menu_Help_f ();
+			M_Menu_Help_f(nil);
 			break;
 
 		case 4:
-			M_Menu_Quit_f ();
+			M_Menu_Quit_f(nil);
 			break;
 		}
 	}
@@ -312,8 +314,9 @@ static void M_Main_Key (int key)
 static int	m_singleplayer_cursor;
 #define	SINGLEPLAYER_ITEMS	3
 
-static void M_Menu_SinglePlayer_f (void)
+static void M_Menu_SinglePlayer_f (cmd_t *c)
 {
+	USED(c);
 	key_dest = key_menu;
 	m_state = m_singleplayer;
 	m_entersound = true;
@@ -339,7 +342,7 @@ static void M_SinglePlayer_Key (int key)
 	switch (key)
 	{
 	case K_ESCAPE:
-		M_Menu_Main_f ();
+		M_Menu_Main_f (nil);
 		break;
 
 	case K_DOWNARROW:
@@ -371,11 +374,11 @@ static void M_SinglePlayer_Key (int key)
 			break;
 
 		case 1:
-			M_Menu_Load_f ();
+			M_Menu_Load_f (nil);
 			break;
 
 		case 2:
-			M_Menu_Save_f ();
+			M_Menu_Save_f (nil);
 			break;
 		}
 	}
@@ -386,16 +389,18 @@ static void M_SinglePlayer_Key (int key)
 
 static int		load_cursor;		// 0 < load_cursor < Nsav
 
-static void M_Menu_Load_f (void)
+static void M_Menu_Load_f (cmd_t *c)
 {
+	USED(c);
 	m_entersound = true;
 	m_state = m_load;
 	key_dest = key_menu;
 	savnames();
 }
 
-static void M_Menu_Save_f (void)
+static void M_Menu_Save_f (cmd_t *c)
 {
+	USED(c);
 	if (!sv.active)
 		return;
 	if (cl.intermission)
@@ -443,7 +448,7 @@ static void M_Load_Key (int k)
 	switch (k)
 	{
 	case K_ESCAPE:
-		M_Menu_SinglePlayer_f ();
+		M_Menu_SinglePlayer_f (nil);
 		break;
 
 	case K_ENTER:
@@ -484,7 +489,7 @@ static void M_Save_Key (int k)
 	switch (k)
 	{
 	case K_ESCAPE:
-		M_Menu_SinglePlayer_f ();
+		M_Menu_SinglePlayer_f (nil);
 		break;
 
 	case K_ENTER:
@@ -517,8 +522,9 @@ static void M_Save_Key (int k)
 static int	m_multiplayer_cursor;
 #define	MULTIPLAYER_ITEMS	3
 
-static void M_Menu_MultiPlayer_f (void)
+static void M_Menu_MultiPlayer_f (cmd_t *c)
 {
+	USED(c);
 	key_dest = key_menu;
 	m_state = m_multiplayer;
 	m_entersound = true;
@@ -544,7 +550,7 @@ static void M_MultiPlayer_Key (int key)
 	switch (key)
 	{
 	case K_ESCAPE:
-		M_Menu_Main_f ();
+		M_Menu_Main_f (nil);
 		break;
 
 	case K_DOWNARROW:
@@ -564,15 +570,15 @@ static void M_MultiPlayer_Key (int key)
 		switch (m_multiplayer_cursor)
 		{
 		case 0:
-			M_Menu_Net_f ();
+			M_Menu_Net_f (nil);
 			break;
 
 		case 1:
-			M_Menu_Net_f ();
+			M_Menu_Net_f (nil);
 			break;
 
 		case 2:
-			M_Menu_Setup_f ();
+			M_Menu_Setup_f (nil);
 			break;
 		}
 	}
@@ -593,8 +599,9 @@ static int		setup_bottom;
 
 #define	NUM_SETUP_CMDS	5
 
-static void M_Menu_Setup_f (void)
+static void M_Menu_Setup_f (cmd_t *c)
 {
+	USED(c);
 	key_dest = key_menu;
 	m_state = m_setup;
 	m_entersound = true;
@@ -648,7 +655,7 @@ static void M_Setup_Key (int k)
 	switch (k)
 	{
 	case K_ESCAPE:
-		M_Menu_MultiPlayer_f ();
+		M_Menu_MultiPlayer_f (nil);
 		break;
 
 	case K_UPARROW:
@@ -700,7 +707,7 @@ forward:
 		if(setup_top != setup_oldtop || setup_bottom != setup_oldbottom)
 			Cbuf_AddText(va("color %d %d\n", setup_top, setup_bottom));
 		m_entersound = true;
-		M_Menu_MultiPlayer_f ();
+		M_Menu_MultiPlayer_f (nil);
 		break;
 
 	case K_BACKSPACE:
@@ -775,8 +782,9 @@ static char *net_helpMessage [] =
   " Area Network.          "
 };
 
-static void M_Menu_Net_f (void)
+static void M_Menu_Net_f (cmd_t *c)
 {
+	USED(c);
 	key_dest = key_menu;
 	m_state = m_net;
 	m_entersound = true;
@@ -832,7 +840,7 @@ again:
 	switch (k)
 	{
 	case K_ESCAPE:
-		M_Menu_MultiPlayer_f ();
+		M_Menu_MultiPlayer_f (nil);
 		break;
 
 	case K_DOWNARROW:
@@ -856,7 +864,7 @@ again:
 		case 1:
 			break;
 		case 2:
-			M_Menu_LanConfig_f ();
+			M_Menu_LanConfig_f (nil);
 			break;
 
 		default:
@@ -876,8 +884,9 @@ again:
 
 static int		options_cursor;
 
-static void M_Menu_Options_f (void)
+static void M_Menu_Options_f (cmd_t *c)
 {
+	USED(c);
 	key_dest = key_menu;
 	m_state = m_options;
 	m_entersound = true;
@@ -1046,7 +1055,7 @@ static void M_Options_Key (int k)
 	switch (k)
 	{
 	case K_ESCAPE:
-		M_Menu_Main_f ();
+		M_Menu_Main_f (nil);
 		break;
 
 	case K_ENTER:
@@ -1054,11 +1063,11 @@ static void M_Options_Key (int k)
 		switch (options_cursor)
 		{
 		case 0:
-			M_Menu_Keys_f ();
+			M_Menu_Keys_f (nil);
 			break;
 		case 1:
 			m_state = m_none;
-			Con_ToggleConsole_f ();
+			Con_ToggleConsole_f (nil);
 			break;
 		case 2:
 			Cbuf_AddText ("exec default.cfg\n");
@@ -1128,8 +1137,9 @@ static char *bindnames[][2] =
 static int		keys_cursor;
 static int		bind_grab;
 
-static void M_Menu_Keys_f (void)
+static void M_Menu_Keys_f (cmd_t *c)
 {
+	USED(c);
 	key_dest = key_menu;
 	m_state = m_keys;
 	m_entersound = true;
@@ -1248,7 +1258,7 @@ static void M_Keys_Key (int k)
 	switch (k)
 	{
 	case K_ESCAPE:
-		M_Menu_Options_f ();
+		M_Menu_Options_f (nil);
 		break;
 
 	case K_LEFTARROW:
@@ -1289,8 +1299,9 @@ static void M_Keys_Key (int k)
 static int		help_page;
 #define	NUM_HELP_PAGES	6
 
-static void M_Menu_Help_f (void)
+static void M_Menu_Help_f (cmd_t *c)
 {
+	USED(c);
 	key_dest = key_menu;
 	m_state = m_help;
 	m_entersound = true;
@@ -1307,7 +1318,7 @@ static void M_Help_Key (int key)
 	switch (key)
 	{
 	case K_ESCAPE:
-		M_Menu_Main_f ();
+		M_Menu_Main_f (nil);
 		break;
 
 	case K_UPARROW:
@@ -1378,8 +1389,9 @@ static char *quitMessage [] =
   "                        "
 };
 
-void M_Menu_Quit_f (void)
+void M_Menu_Quit_f (cmd_t *c)
 {
+	USED(c);
 	if (m_state == m_quit)
 		return;
 	wasInMenus = (key_dest == key_menu);
@@ -1412,7 +1424,7 @@ static void M_Quit_Key (int key)
 	case 'Y':
 	case 'y':
 		key_dest = key_console;
-		Host_Quit_f ();
+		Host_Quit_f (nil);
 		break;
 
 	default:
@@ -1448,8 +1460,9 @@ static int		lanConfig_cursor_table [] = {72, 92};
 static char	lanConfig_portname[8];
 static char	lanConfig_joinname[22];
 
-static void M_Menu_LanConfig_f (void)
+static void M_Menu_LanConfig_f (cmd_t *c)
 {
+	USED(c);
 	key_dest = key_menu;
 	m_state = m_lanconfig;
 	m_entersound = true;
@@ -1516,7 +1529,7 @@ static void M_LanConfig_Key (int key)
 	switch (key)
 	{
 	case K_ESCAPE:
-		M_Menu_Net_f ();
+		M_Menu_Net_f (nil);
 		break;
 
 	case K_UPARROW:
@@ -1546,7 +1559,7 @@ static void M_LanConfig_Key (int key)
 		if (lanConfig_cursor == 1)
 		{
 			if(StartingGame){
-				M_Menu_GameOptions_f ();
+				M_Menu_GameOptions_f (nil);
 				break;
 			}else{
 				m_return_state = m_state;
@@ -1758,8 +1771,9 @@ static int maxplayers;
 static bool m_serverInfoMessage = false;
 static double m_serverInfoMessageTime;
 
-static void M_Menu_GameOptions_f (void)
+static void M_Menu_GameOptions_f (cmd_t *c)
 {
+	USED(c);
 	key_dest = key_menu;
 	m_state = m_gameoptions;
 	m_entersound = true;
@@ -2004,7 +2018,7 @@ static void M_GameOptions_Key (int key)
 	switch (key)
 	{
 	case K_ESCAPE:
-		M_Menu_Net_f ();
+		M_Menu_Net_f (nil);
 		break;
 
 	case K_UPARROW:
@@ -2076,6 +2090,8 @@ void M_Init (void)
 	Cmd_AddCommand ("menu_keys", M_Menu_Keys_f);
 	Cmd_AddCommand ("help", M_Menu_Help_f);
 	Cmd_AddCommand ("menu_quit", M_Menu_Quit_f);
+	Cmd_AddCommand ("menu_lan_config", M_Menu_LanConfig_f);
+	Cmd_AddCommand ("menu_game_options", M_Menu_GameOptions_f);
 }
 
 void M_Draw (void)

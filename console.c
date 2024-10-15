@@ -1,4 +1,5 @@
 #include "quakedef.h"
+#include "qp.h"
 
 static int con_linewidth;
 
@@ -33,12 +34,57 @@ bool	con_initialized;
 
 int			con_notifylines;		// scan lines to clear for notify lines
 
-extern void M_Menu_Main_f (void);
+extern void M_Menu_Main_f (cmd_t *c);
 
+static Trie *conobj;
 
 void
-Con_ToggleConsole_f(void)
+Con_AddObject(char *name, void *obj)
 {
+	conobj = qpset(conobj, name, 0, obj);
+}
+
+void *
+Con_FindObject(char *name)
+{
+	char *k;
+	void *v;
+
+	if(qpget(conobj, name, 0, &k, &v) != 0)
+		v = nil;
+	return v;
+}
+
+int
+Con_SearchObject(char *prefix, int len0, void (*f)(char *name, void *obj, void *aux), void *aux)
+{
+	char *k;
+	void *v;
+	int n, len, c;
+
+	if(conobj == nil)
+		return 0;
+
+	k = nil;
+	v = nil;
+	len = 0;
+	for(n = 0;;){
+		if(qpnext(conobj, &k, &len, &v) < 0)
+			break;
+		if(len0 == 0 || (len >= len0 && (c = strncmp(k, prefix, len0)) == 0)){
+			f(k, v, aux);
+			n++;
+		}else if(c > 0)
+			break;
+	}
+
+	return n;
+}
+
+void
+Con_ToggleConsole_f(cmd_t *c)
+{
+	USED(c);
 	if(key_dest == key_console){
 		if(cls.state == ca_connected){
 			key_dest = key_game;
@@ -46,7 +92,7 @@ Con_ToggleConsole_f(void)
 			key_linepos = 1;
 			IN_Grabm(1);
 		}else
-			M_Menu_Main_f();
+			M_Menu_Main_f(c);
 	}else{
 		key_dest = key_console;
 		IN_Grabm(0);
@@ -57,8 +103,9 @@ Con_ToggleConsole_f(void)
 }
 
 void
-Con_Clear_f(void)
+Con_Clear_f(cmd_t *c)
 {
+	USED(c);
 	if(con_text)
 		memset(con_text, ' ', CON_TEXTSIZE);
 }
@@ -83,8 +130,9 @@ Con_MessageMode_f
 extern bool team_message;
 
 static void
-Con_MessageMode_f(void)
+Con_MessageMode_f(cmd_t *c)
 {
+	USED(c);
 	key_dest = key_message;
 	team_message = false;
 }
@@ -96,8 +144,9 @@ Con_MessageMode2_f
 ================
 */
 static void
-Con_MessageMode2_f(void)
+Con_MessageMode2_f(cmd_t *c)
 {
+	USED(c);
 	key_dest = key_message;
 	team_message = true;
 }

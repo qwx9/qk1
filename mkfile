@@ -62,6 +62,7 @@ OFILES=\
 	pr_edict.$O\
 	pr_exec.$O\
 	protocol.$O\
+	qp.$O\
 	r_aclip.$O\
 	r_alias.$O\
 	r_bsp.$O\
@@ -121,6 +122,7 @@ HFILES=\
 	progdefs.h\
 	progs.h\
 	protocol.h\
+	qp.h\
 	quakedef.h\
 	r_local.h\
 	r_shared.h\

@@ -124,21 +124,21 @@ static cvar_t v_centermove = {"v_centermove", "0.15", false};
 static cvar_t v_centerspeed = {"v_centerspeed","500"};
 
 
-void V_StartPitchDrift (void)
+void
+V_StartPitchDrift(cmd_t *c)
 {
-	if (cl.laststop == cl.time)
-	{
+	USED(c);
+	if(cl.laststop == cl.time)
 		return;		// something else is keeping it from drifting
-	}
-	if (cl.nodrift || !cl.pitchvel)
-	{
+	if(cl.nodrift || !cl.pitchvel){
 		cl.pitchvel = v_centerspeed.value;
 		cl.nodrift = false;
 		cl.driftmove = 0;
 	}
 }
 
-void V_StopPitchDrift (void)
+void
+V_StopPitchDrift(void)
 {
 	cl.laststop = cl.time;
 	cl.nodrift = true;
@@ -179,9 +179,7 @@ V_DriftPitch(void)
 			cl.driftmove += host_frametime;
 
 		if ( cl.driftmove > v_centermove.value)
-		{
-			V_StartPitchDrift ();
-		}
+			V_StartPitchDrift(nil);
 		return;
 	}
 
@@ -309,8 +307,9 @@ V_cshift_f
 ==================
 */
 static void
-V_cshift_f(void)
+V_cshift_f(cmd_t *c)
 {
+	USED(c);
 	cshift_empty.destcolor[0] = atoi(Cmd_Argv(1));
 	cshift_empty.destcolor[1] = atoi(Cmd_Argv(2));
 	cshift_empty.destcolor[2] = atoi(Cmd_Argv(3));
@@ -326,8 +325,9 @@ When you run over an item, the server sends this command
 ==================
 */
 static void
-V_BonusFlash_f(void)
+V_BonusFlash_f(cmd_t *c)
 {
+	USED(c);
 	cl.cshifts[CSHIFT_BONUS].destcolor[0] = 215;
 	cl.cshifts[CSHIFT_BONUS].destcolor[1] = 186;
 	cl.cshifts[CSHIFT_BONUS].destcolor[2] = 69;
@@ -818,7 +818,7 @@ void V_RenderView (void)
 //============================================================================
 
 static void
-screenshot(void)
+screenshot(cmd_t *c)
 {
 	static char opath[48];
 	static int pathcnt = 2;
@@ -827,6 +827,7 @@ screenshot(void)
 	byte *b;
 	int n;
 
+	USED(c);
 	if((t = sys_timestamp()) == nil){
 err:
 		Con_Printf("screenshot: %s\n", lerr());

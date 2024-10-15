@@ -90,51 +90,52 @@ static void KeyUp (kbutton_t *b)
 	b->state |= 4; 		// impulse up
 }
 
-static void IN_KLookDown (void) {KeyDown(&in_klook);}
-static void IN_KLookUp (void) {KeyUp(&in_klook);}
-static void IN_MLookDown (void) {KeyDown(&in_mlook);}
-static void IN_MLookUp (void) {
+static void IN_KLookDown (cmd_t *c) {USED(c); KeyDown(&in_klook);}
+static void IN_KLookUp (cmd_t *c) {USED(c); KeyUp(&in_klook);}
+static void IN_MLookDown (cmd_t *c) {USED(c); KeyDown(&in_mlook);}
+static void IN_MLookUp (cmd_t *c) {
 	KeyUp(&in_mlook);
 	if ( !(in_mlook.state&1) &&  lookspring.value)
-		V_StartPitchDrift();
+		V_StartPitchDrift(c);
 }
-static void IN_UpDown(void) {KeyDown(&in_up);}
-static void IN_UpUp(void) {KeyUp(&in_up);}
-static void IN_DownDown(void) {KeyDown(&in_down);}
-static void IN_DownUp(void) {KeyUp(&in_down);}
-static void IN_LeftDown(void) {KeyDown(&in_left);}
-static void IN_LeftUp(void) {KeyUp(&in_left);}
-static void IN_RightDown(void) {KeyDown(&in_right);}
-static void IN_RightUp(void) {KeyUp(&in_right);}
-static void IN_ForwardDown(void) {KeyDown(&in_forward);}
-static void IN_ForwardUp(void) {KeyUp(&in_forward);}
-static void IN_BackDown(void) {KeyDown(&in_back);}
-static void IN_BackUp(void) {KeyUp(&in_back);}
-static void IN_LookupDown(void) {KeyDown(&in_lookup);}
-static void IN_LookupUp(void) {KeyUp(&in_lookup);}
-static void IN_LookdownDown(void) {KeyDown(&in_lookdown);}
-static void IN_LookdownUp(void) {KeyUp(&in_lookdown);}
-static void IN_MoveleftDown(void) {KeyDown(&in_moveleft);}
-static void IN_MoveleftUp(void) {KeyUp(&in_moveleft);}
-static void IN_MoverightDown(void) {KeyDown(&in_moveright);}
-static void IN_MoverightUp(void) {KeyUp(&in_moveright);}
+static void IN_UpDown(cmd_t *c) {USED(c); KeyDown(&in_up);}
+static void IN_UpUp(cmd_t *c) {USED(c); KeyUp(&in_up);}
+static void IN_DownDown(cmd_t *c) {USED(c); KeyDown(&in_down);}
+static void IN_DownUp(cmd_t *c) {USED(c); KeyUp(&in_down);}
+static void IN_LeftDown(cmd_t *c) {USED(c); KeyDown(&in_left);}
+static void IN_LeftUp(cmd_t *c) {USED(c); KeyUp(&in_left);}
+static void IN_RightDown(cmd_t *c) {USED(c); KeyDown(&in_right);}
+static void IN_RightUp(cmd_t *c) {USED(c); KeyUp(&in_right);}
+static void IN_ForwardDown(cmd_t *c) {USED(c); KeyDown(&in_forward);}
+static void IN_ForwardUp(cmd_t *c) {USED(c); KeyUp(&in_forward);}
+static void IN_BackDown(cmd_t *c) {USED(c); KeyDown(&in_back);}
+static void IN_BackUp(cmd_t *c) {USED(c); KeyUp(&in_back);}
+static void IN_LookupDown(cmd_t *c) {USED(c); KeyDown(&in_lookup);}
+static void IN_LookupUp(cmd_t *c) {USED(c); KeyUp(&in_lookup);}
+static void IN_LookdownDown(cmd_t *c) {USED(c); KeyDown(&in_lookdown);}
+static void IN_LookdownUp(cmd_t *c) {USED(c); KeyUp(&in_lookdown);}
+static void IN_MoveleftDown(cmd_t *c) {USED(c); KeyDown(&in_moveleft);}
+static void IN_MoveleftUp(cmd_t *c) {USED(c); KeyUp(&in_moveleft);}
+static void IN_MoverightDown(cmd_t *c) {USED(c); KeyDown(&in_moveright);}
+static void IN_MoverightUp(cmd_t *c) {USED(c); KeyUp(&in_moveright);}
 
-static void IN_SpeedDown(void) {KeyDown(&in_speed);}
-static void IN_SpeedUp(void) {KeyUp(&in_speed);}
-static void IN_StrafeDown(void) {KeyDown(&in_strafe);}
-static void IN_StrafeUp(void) {KeyUp(&in_strafe);}
+static void IN_SpeedDown(cmd_t *c) {USED(c); KeyDown(&in_speed);}
+static void IN_SpeedUp(cmd_t *c) {USED(c); KeyUp(&in_speed);}
+static void IN_StrafeDown(cmd_t *c) {USED(c); KeyDown(&in_strafe);}
+static void IN_StrafeUp(cmd_t *c) {USED(c); KeyUp(&in_strafe);}
 
-static void IN_AttackDown(void) {KeyDown(&in_attack);}
-static void IN_AttackUp(void) {KeyUp(&in_attack);}
+static void IN_AttackDown(cmd_t *c) {USED(c); KeyDown(&in_attack);}
+static void IN_AttackUp(cmd_t *c) {USED(c); KeyUp(&in_attack);}
 
-static void IN_UseDown (void) {KeyDown(&in_use);}
-static void IN_UseUp (void) {KeyUp(&in_use);}
-static void IN_JumpDown (void) {KeyDown(&in_jump);}
-static void IN_JumpUp (void) {KeyUp(&in_jump);}
+static void IN_UseDown (cmd_t *c) {USED(c); KeyDown(&in_use);}
+static void IN_UseUp (cmd_t *c) {USED(c); KeyUp(&in_use);}
+static void IN_JumpDown (cmd_t *c) {USED(c); KeyDown(&in_jump);}
+static void IN_JumpUp (cmd_t *c) {USED(c); KeyUp(&in_jump);}
 
 static void
-IN_Impulse(void)
+IN_Impulse(cmd_t *c)
 {
+	USED(c);
 	in_impulse = atoi(Cmd_Argv(1));
 }
 

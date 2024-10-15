@@ -143,10 +143,11 @@ radix(char *f, char *d)
 }
 
 static void
-path(void)
+path(cmd_t *c)
 {
 	Paklist *pl;
 
+	USED(c);
 	for(pl=pkl; pl!=nil; pl=pl->pl)
 		if(pl->p)
 			Con_Printf(va("%s (%zd files)\n", pl->p->f, pl->p->e - pl->p->l));
@@ -427,7 +428,7 @@ loadstklmp(char *f, void *buf, int nbuf, int *n)
 }
 
 void
-loadpoints(void)
+loadpoints(cmd_t *c)
 {
 	int i, n, nv;
 	FILE *bf;
@@ -435,6 +436,7 @@ loadpoints(void)
 	vec_t *v;
 	particle_t *p;
 
+	USED(c);
 	bf = openlmp(va("maps/%s.pts", sv.name), &n);
 	if(bf == nil){
 		Con_Printf(va("loadpoints: %s\n", lerr()));
@@ -469,14 +471,19 @@ loadpoints(void)
 }
 
 static void
-dumpcvars(FILE *bf)
+dumpcvar(char *name, void *o, void *bf)
 {
 	cvar_t *c;
 
-	for(c=cvar_vars; c!=nil; c=c->next)
-		if(c->archive)
-			if(fprintf(bf, "%s \"%s\"\n", c->name, c->string) < 0)
-				fatal("dumpcvars: %s", lerr());
+	c = o;
+	if(!iscmd(o) && c->archive && fprintf(bf, "%s \"%s\"\n", name, c->string) < 0)
+		fatal("dumpcvar: %s", lerr());
+}
+
+static void
+dumpcvars(FILE *bf)
+{
+	Con_SearchObject("", 0, dumpcvar, bf);
 }
 
 static void
@@ -687,7 +694,7 @@ loadparms(FILE *bf, char *f)
 	setcvarv("skill", (float)current_skill);
 	if(s = frdlinedup(bf), s == nil)
 		goto exit;
-	CL_Disconnect_f();
+	CL_Disconnect_f(nil);
 	SV_SpawnServer(s);
 	free(s);
 	if(!sv.active){

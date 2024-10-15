@@ -1081,7 +1081,7 @@ PF_coredump(pr_t *pr)
 {
 	// FIXME(sigrid): needs to be pr-specific
 	USED(pr);
-	ED_PrintEdicts();
+	ED_PrintEdicts(nil);
 }
 
 static void

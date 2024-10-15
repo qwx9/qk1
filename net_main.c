@@ -161,10 +161,11 @@ void NET_FreeQSocket(qsocket_t *sock)
 	sock->disconnected = true;
 }
 
-static void MaxPlayers_f (void)
+static void MaxPlayers_f (cmd_t *c)
 {
 	int 	n;
 
+	USED(c);
 	if (Cmd_Argc () != 2)
 	{
 		Con_Printf ("\"maxplayers\" is \"%d\"\n", svs.maxclients);
@@ -194,10 +195,11 @@ static void MaxPlayers_f (void)
 }
 
 
-static void NET_Port_f (void)
+static void NET_Port_f (cmd_t *c)
 {
 	int 	n;
 
+	USED(c);
 	if (Cmd_Argc () != 2)
 	{
 		Con_Printf ("\"port\" is \"%s\"\n", myip.srv);

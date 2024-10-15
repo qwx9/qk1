@@ -261,7 +261,7 @@ void CL_Signon3 (void);
 void CL_Signon4 (void);
 
 void CL_Disconnect (void);
-void CL_Disconnect_f (void);
+void CL_Disconnect_f (cmd_t *c);
 bool CL_NextDemo (void);
 
 #define			MAX_VISEDICTS	65536

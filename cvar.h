@@ -40,7 +40,6 @@ struct cvar_s
 	char *string;
 	bool archive; // set to true to cause it to be saved to vars.rc
 	float value;
-	struct cvar_s *next;
 	void (*cb) (cvar_t *);
 	bool server;		// notifies players when changed
 };
