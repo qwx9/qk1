@@ -12,7 +12,7 @@ static s16int cm0[4*4] = {
 	CM(0), CM(0), CM(1), CM(0),
 	CM(0), CM(0), CM(0), CM(1),
 };
-static bool cmident = true;
+int cmkind = -1;
 
 static float cmf0[4*4] = {
 	1, 0, 0, 0,
@@ -48,7 +48,16 @@ cmrecalc(void)
 	mmul(t, t2, cmvblend);
 	for(i = 0; i < 4*4; i++)
 		cm[i] = CM(t[i]);
-	cmident = memcmp(cm, cm0, sizeof(cm)) == 0;
+	cmkind = (
+		cm[4*0] >= CM(1) &&
+		cm[4*0+0] == cm[4*1+1] &&
+		cm[4*1+1] == cm[4*2+2] &&
+		                  cm[4*0+1] == 0 && cm[4*0+2] == 0 && cm[4*0+3] == 0 &&
+		cm[4*1+0] == 0 &&                   cm[4*1+2] == 0 && cm[4*1+3] == 0 &&
+		cm[4*2+0] == 0 && cm[4*2+1] == 0 &&                   cm[4*2+3] == 0
+		)
+		? (cm[4*0] == CM(1) ? CmIdent : CmBright)
+		: -1;
 }
 
 void
