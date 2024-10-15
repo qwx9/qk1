@@ -253,14 +253,14 @@ BSP_LoadLighting(model_t *mod, byte *in, int sz)
 {
 	int i, litsz;
 	byte *lit;
-	char s[64], *t;
+	char s[128+1], *t;
 
 	if(sz == 0){
 		mod->lightdata = nil;
 		return 0;
 	}
 
-	strcpy(s, mod->name);
+	snprint(s, sizeof(s), "%s", mod->name);
 	if((t = strrchr(s, '.')) != nil){
 		strcpy(t, ".lit");
 		if((lit = loadhunklmp(s, &litsz)) != nil && litsz >= 4+4+sz*3){
@@ -322,7 +322,7 @@ BSP_LoadLeafs(model_t *mod, byte *in, int sz)
 int
 BSP_LoadVisibility(model_t *mod, byte *in, int sz)
 {
-	char s[32+1], *t;
+	char s[128+1], *t;
 	byte *vis, *leaf;
 	int filesz, combined, vissz, leafsz;
 
@@ -333,7 +333,7 @@ BSP_LoadVisibility(model_t *mod, byte *in, int sz)
 	// external vis files
 	// FIXME(sigrid): add support for big combo ("id1.vis") files?
 	if(mod->ver == BSPVERSION){ // bsp2 should have proper vis built in already
-		strcpy(s, mod->name);
+		snprint(s, sizeof(s)-4, "%s", mod->name);
 		if((t = strrchr(s, '.')) != nil){
 			strcpy(t, ".vis");
 			if((t = strrchr(mod->name, '/')) != nil)
