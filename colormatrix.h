@@ -12,6 +12,6 @@ extern cvar_t v_brightness;
 extern int cmkind;
 
 void cmsetvblend(float blend[4]);
-void cmprocess(s16int cm[4*4], void *in, void *out, int n);
+void cmprocess(s16int cm[4*4], pixel_t *p, int n);
 void cminit(void);
 #endif

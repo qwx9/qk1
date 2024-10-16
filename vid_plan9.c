@@ -8,7 +8,7 @@ Point center;		/* of window */
 Rectangle grabr;
 
 static Image *fbi;
-static s32int *scibuf;
+static pixel_t *scibuf;
 static int scifactor;
 static Rectangle fbr;
 static pixel_t *vidbuffers[2];
@@ -82,7 +82,7 @@ resetfb(void)
 static void
 loader(void *)
 {
-	s32int *in, *out;
+	pixel_t *in, *out;
 	int n, x, y, j;
 	Point center;
 	Rectangle r;
@@ -98,10 +98,9 @@ loader(void *)
 	for(;;){
 		if((f = recvp(frame)) == nil)
 			break;
-		cmprocess(cm, f, f, vid.width*vid.height);
+		in = (pixel_t*)f;
+		cmprocess(cm, in, vid.width*vid.height);
 		if(scibuf != nil){
-			in = (s32int*)f;
-
 			r = rectsubpt(
 				rectaddpt(Rect(0, 0, scifactor*vid.width, scifactor), center),
 				Pt(scifactor*vid.width/2, scifactor*vid.height/2)

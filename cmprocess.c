@@ -4,22 +4,17 @@
 extern int cmflags;
 
 void
-cmprocess(s16int cm[4*4], void *in_, void *out_, int n)
+cmprocess(s16int cm[4*4], pixel_t *p, int n)
 {
-	pixel_t *in, *out;
-
 	if(cmkind == CmIdent)
 		return;
 
-	in = in_;
-	out = out_;
-
 	if(cmkind == CmBright){
-		for(; n > 0; in++, n--){
+		for(; n > 0; n--){
 			s32int x[4] = {
-				(*in>>0)&0xff,
-				(*in>>8)&0xff,
-				(*in>>16)&0xff,
+				(*p>>0)&0xff,
+				(*p>>8)&0xff,
+				(*p>>16)&0xff,
 				0xff,
 			};
 			s32int y[4] = {
@@ -34,16 +29,16 @@ cmprocess(s16int cm[4*4], void *in_, void *out_, int n)
 				min(y[2], 255),
 				0xff,
 			};
-			*out++ = z[0]<<0 | z[1]<<8 | z[2]<<16 | (pixel_t)0xff<<24;
+			*p++ = z[0]<<0 | z[1]<<8 | z[2]<<16 | (pixel_t)0xff<<24;
 		}
 		return;
 	}
 
-	for(; n > 0; in++, n--){
+	for(; n > 0; n--){
 		s32int x[4] = {
-			(*in>>0)&0xff,
-			(*in>>8)&0xff,
-			(*in>>16)&0xff,
+			(*p>>0)&0xff,
+			(*p>>8)&0xff,
+			(*p>>16)&0xff,
 			0xff,
 		};
 		s32int y[4] = {
@@ -58,6 +53,6 @@ cmprocess(s16int cm[4*4], void *in_, void *out_, int n)
 			clamp(y[2], 0, 255),
 			0xff,
 		};
-		*out++ = z[0]<<0 | z[1]<<8 | z[2]<<16 | z[3]<<24;
+		*p++ = z[0]<<0 | z[1]<<8 | z[2]<<16 | z[3]<<24;
 	}
 }

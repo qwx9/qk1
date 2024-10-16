@@ -104,7 +104,7 @@ flipfb(void)
 		return;
 	}
 
-	cmprocess(cm, vidbuffer, vidbuffer, vid.width*vid.height);
+	cmprocess(cm, vidbuffer, vid.width*vid.height);
 
 	SDL_UpdateTexture(fbi, nil, vidbuffer, vid.width*4);
 	SDL_RenderCopy(rend, fbi, nil, nil);
