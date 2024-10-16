@@ -24,7 +24,7 @@ static float cmbrightness[4*4];
 static float cmcontrast[4*4];
 static float cmsaturation[4*4];
 static float cmvblend[4*4];
-static float gs[3] = {0.3086, 0.6094, 0.0820};
+static float gs[3] = {0.0820, 0.6094, 0.3086};
 
 static void
 mmul(float d[4*4], float a[4*4], float b[4*4])
