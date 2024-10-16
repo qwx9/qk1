@@ -431,34 +431,41 @@ V_ApplyShifts
 */
 void V_ApplyShifts (void)
 {
-	int		i, j;
+	int i, j;
+	bool update;
 
-	V_CalcPowerupCshift ();
+	V_CalcPowerupCshift();
 
-	for (i=0 ; i<NUM_CSHIFTS ; i++)
-	{
-		if (cl.cshifts[i].percent != cl.prev_cshifts[i].percent)
-		{
+	update = false;
+	for(i = 0; i < NUM_CSHIFTS; i++){
+		if(cl.cshifts[i].percent != cl.prev_cshifts[i].percent){
 			cl.prev_cshifts[i].percent = cl.cshifts[i].percent;
+			update = true;
 		}
-		for (j=0 ; j<3 ; j++)
-			if (cl.cshifts[i].destcolor[j] != cl.prev_cshifts[i].destcolor[j])
-			{
+		for(j = 0; j < 3; j++){
+			if(cl.cshifts[i].destcolor[j] != cl.prev_cshifts[i].destcolor[j]){
 				cl.prev_cshifts[i].destcolor[j] = cl.cshifts[i].destcolor[j];
+				update = true;
 			}
+		}
 	}
 
 	// drop the damage value
-	cl.cshifts[CSHIFT_DAMAGE].percent -= host_frametime*150;
-	if (cl.cshifts[CSHIFT_DAMAGE].percent <= 0)
-		cl.cshifts[CSHIFT_DAMAGE].percent = 0;
+	if(cl.cshifts[CSHIFT_DAMAGE].percent > 0){
+		cl.cshifts[CSHIFT_DAMAGE].percent -= host_frametime*150;
+		if(cl.cshifts[CSHIFT_DAMAGE].percent < 0)
+			cl.cshifts[CSHIFT_DAMAGE].percent = 0;
+	}
 
 	// drop the bonus value
-	cl.cshifts[CSHIFT_BONUS].percent -= host_frametime*100;
-	if (cl.cshifts[CSHIFT_BONUS].percent <= 0)
-		cl.cshifts[CSHIFT_BONUS].percent = 0;
+	if(cl.cshifts[CSHIFT_BONUS].percent > 0){
+		cl.cshifts[CSHIFT_BONUS].percent -= host_frametime*100;
+		if(cl.cshifts[CSHIFT_BONUS].percent < 0)
+			cl.cshifts[CSHIFT_BONUS].percent = 0;
+	}
 
-	V_Blend();
+	if(update)
+		V_Blend();
 }
 
 
