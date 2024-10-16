@@ -174,6 +174,7 @@ Key_Console(int key)
 		edit_line = (edit_line + 1) & 31;
 		history_line = edit_line;
 		key_lines[edit_line][0] = ']';
+		key_lines[edit_line][1] = 0;
 		key_linepos = 1;
 		if (cls.state == ca_disconnected)
 			SCR_UpdateScreen (false);	// force an update, because the command
@@ -242,6 +243,7 @@ Key_Console(int key)
 		if (history_line == edit_line)
 		{
 			s[0] = ']';
+			s[1] = 0;
 			key_linepos = 1;
 		}
 		else
