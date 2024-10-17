@@ -1,6 +1,6 @@
 /* cmkind values for optimized special-casing */
 #define CmIdent 0 /* identity (== 1) */
-#define CmBright 1 /* only brightness is changed (> 1) */
+#define CmBright 1 /* only brightness is changed (>= 0) */
 
 #define CM(v) ((v)*(1<<12))
 
