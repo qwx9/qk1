@@ -71,6 +71,7 @@ Con_SearchObject(char *prefix, int len0, void (*f)(char *name, void *obj, void *
 	for(n = 0;;){
 		if(qpnext(conobj, &k, &len, &v) < 0)
 			break;
+		c = -1;
 		if(len0 == 0 || (len >= len0 && (c = strncmp(k, prefix, len0)) == 0)){
 			f(k, v, aux);
 			n++;
