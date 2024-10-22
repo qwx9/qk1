@@ -1306,7 +1306,7 @@ void SV_SpawnServer (char *server)
 		if (host_client->active)
 			SV_SendServerinfo (host_client);
 
-	IN_Grabm(1);
+	IN_Grabm(true);
 	Con_DPrintf("server spawned\n");
 }
 

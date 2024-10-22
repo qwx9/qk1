@@ -1,10 +1,10 @@
 #include "quakedef.h"
-#include <SDL.h>
+#include <SDL3/SDL.h>
 
 static cvar_t m_windowed = {"m_windowed", "1", true};
 static cvar_t m_filter = {"m_filter", "0", true};
 static cvar_t m_raw = {"m_raw", "1", true};
-static int mouseon, oldmwin, focuslost;
+static bool mouseon, focuslost = true;
 static float dx, dy, olddx, olddy;
 
 static int mbuttons[] = {
@@ -26,48 +26,42 @@ Sys_SendKeyEvents(void)
 
 	if(cls.state == ca_dedicated)
 		return;
-	if(oldmwin != (int)m_windowed.value){
-		oldmwin = (int)m_windowed.value;
-		IN_Grabm(oldmwin);
-	}
 
 	while(SDL_PollEvent(&event)){
 		switch(event.type){
-		case SDL_QUIT:
+		case SDL_EVENT_QUIT:
 			Cbuf_AddText("menu_quit\n");
 			break;
-		case SDL_WINDOWEVENT:
-			switch(event.window.event){
-			case SDL_WINDOWEVENT_RESIZED:
-				vid.resized = true;
-				break;
-			case SDL_WINDOWEVENT_CLOSE:
-				Cbuf_AddText("menu_quit\n");
-				break;
-			case SDL_WINDOWEVENT_LEAVE:
-				focuslost = mouseon;
-				IN_Grabm(0);
-				break;
-			case SDL_WINDOWEVENT_ENTER:
-				IN_Grabm(focuslost);
-				break;
-			}
+		case SDL_EVENT_WINDOW_RESIZED:
+			vid.resized = true;
 			break;
-		case SDL_MOUSEMOTION:
+		case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
+			Cbuf_AddText("menu_quit\n");
+			break;
+		case SDL_EVENT_WINDOW_MOUSE_LEAVE:
+			focuslost = mouseon;
+			IN_Grabm(false);
+			break;
+		case SDL_EVENT_WINDOW_MOUSE_ENTER:
+			IN_Grabm(focuslost);
+			break;
+		case SDL_EVENT_MOUSE_MOTION:
 			if(mouseon){
 				dx += event.motion.xrel;
 				dy += event.motion.yrel;
 			}
 			break;
-		case SDL_MOUSEBUTTONDOWN:
-		case SDL_MOUSEBUTTONUP:
+		case SDL_EVENT_MOUSE_BUTTON_DOWN:
+		case SDL_EVENT_MOUSE_BUTTON_UP:
 			if((b = event.button.button-1) >= 0 && b < nelem(mbuttons))
-				Key_Event(mbuttons[b], event.type == SDL_MOUSEBUTTONDOWN);
+				Key_Event(mbuttons[b], event.type == SDL_EVENT_MOUSE_BUTTON_DOWN);
 			break;
-		case SDL_KEYDOWN:
-		case SDL_KEYUP:
-			switch(key = event.key.keysym.sym){
-			case SDLK_BACKQUOTE: key = '~'; break;
+		case SDL_EVENT_KEY_DOWN:
+		case SDL_EVENT_KEY_UP:
+			if(event.key.repeat)
+				break;
+			switch(key = event.key.key){
+			case SDLK_GRAVE: key = '~'; break;
 			case SDLK_DELETE: key = K_DEL; break;
 			case SDLK_BACKSPACE: key = K_BACKSPACE; break;
 			case SDLK_F1: key = K_F1; break;
@@ -99,7 +93,7 @@ Sys_SendKeyEvents(void)
 				break;
 			}
 			if(key > 0)
-				Key_Event(key, event.key.state);
+				Key_Event(key, event.key.down);
 			break;
 		}
 	}
@@ -153,21 +147,22 @@ IN_Move(usercmd_t *cmd)
 }
 
 void
-IN_Grabm(int on)
+IN_Grabm(bool on)
 {
-	SDL_SetRelativeMouseMode(mouseon = on);
+	extern SDL_Window *win;
+	SDL_SetWindowRelativeMouseMode(win, mouseon = on);
 }
 
 void
 IN_Shutdown(void)
 {
-	IN_Grabm(0);
+	IN_Grabm(false);
 }
 
 void
 IN_Init(void)
 {
-	SDL_SetHint(SDL_HINT_VIDEO_WAYLAND_EMULATE_MOUSE_WARP, "0");
+	SDL_SetHint(SDL_HINT_MOUSE_RELATIVE_MODE_WARP, "0");
 	m_raw.cb = m_raw_cb;
 	Cvar_RegisterVariable(&m_windowed);
 	Cvar_RegisterVariable(&m_filter);

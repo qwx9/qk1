@@ -1,10 +1,10 @@
 #include "quakedef.h"
 #include "colormatrix.h"
-#include <SDL.h>
+#include <SDL3/SDL.h>
 
+SDL_Window *win;
 static SDL_Renderer *rend;
 static SDL_Texture *fbi;
-static SDL_Window *win;
 static pixel_t *vidbuffer;
 extern pixel_t *r_warpbuffer;
 
@@ -16,9 +16,7 @@ curwinmode(void)
 {
 	Uint32 fl;
 
-	fl = (win != nil ? SDL_GetWindowFlags(win) : 0) & (SDL_WINDOW_FULLSCREEN_DESKTOP|SDL_WINDOW_FULLSCREEN);
-	if(fl == SDL_WINDOW_FULLSCREEN_DESKTOP)
-		return 2;
+	fl = (win != nil ? SDL_GetWindowFlags(win) : 0) & SDL_WINDOW_FULLSCREEN;
 	if(fl == SDL_WINDOW_FULLSCREEN)
 		return 1;
 
@@ -28,8 +26,6 @@ curwinmode(void)
 static int
 cvarwinflags(void)
 {
-	if(v_fullscreen.value >= 2)
-		return SDL_WINDOW_FULLSCREEN_DESKTOP;
 	if(v_fullscreen.value >= 1)
 		return SDL_WINDOW_FULLSCREEN;
 	return 0;
@@ -46,7 +42,7 @@ resetfb(void)
 	/* lower than 320x240 doesn't really make sense,
 	 * but at least this prevents a crash, beyond that
 	 * it's your funeral */
-	SDL_GetRendererOutputSize(rend, &vid.width, &vid.height);
+	SDL_GetCurrentRenderOutputSize(rend, &vid.width, &vid.height);
 	vid.width /= v_scale.value;
 	vid.height /= v_scale.value;
 	vid.width = clamp(vid.width, 320, MAXWIDTH);
@@ -64,7 +60,7 @@ resetfb(void)
 
 	if(fbi != nil)
 		SDL_DestroyTexture(fbi);
-	fbi = SDL_CreateTexture(rend, SDL_PIXELFORMAT_RGB888, SDL_TEXTUREACCESS_STATIC, vid.width, vid.height);
+	fbi = SDL_CreateTexture(rend, SDL_PIXELFORMAT_XRGB8888, SDL_TEXTUREACCESS_STATIC, vid.width, vid.height);
 	if(fbi == NULL)
 		fatal("SDL_CreateTexture: %s", SDL_GetError());
 	SDL_SetTextureBlendMode(fbi, SDL_BLENDMODE_NONE);
@@ -107,7 +103,7 @@ flipfb(void)
 	cmprocess(cm, vidbuffer, vid.width*vid.height);
 
 	SDL_UpdateTexture(fbi, nil, vidbuffer, vid.width*4);
-	SDL_RenderCopy(rend, fbi, nil, nil);
+	SDL_RenderTexture(rend, fbi, nil, nil);
 	SDL_RenderPresent(rend);
 }
 
@@ -141,8 +137,8 @@ v_fullscreen_cb(cvar_t *var)
 static void
 hints(void)
 {
-	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
 	SDL_SetHint(SDL_HINT_VIDEO_DOUBLE_BUFFER, "1");
+	SDL_SetHint(SDL_HINT_WINDOWS_CLOSE_ON_ALT_F4, "0");
 	SDL_SetHint(SDL_HINT_VIDEO_X11_NET_WM_BYPASS_COMPOSITOR, "1");
 	SDL_SetHint(SDL_HINT_VIDEO_X11_NET_WM_PING, "0");
 	SDL_SetHint(SDL_HINT_RENDER_VSYNC, v_sync.value ? "1" : "0");
@@ -171,16 +167,10 @@ makewindow(void)
 		SDL_DestroyWindow(win);
 
 	hints();
-	win = SDL_CreateWindow("quake", x, y, w, h, cvarwinflags() | SDL_WINDOW_RESIZABLE);
-	if(win == nil)
+	if(!SDL_CreateWindowAndRenderer("quake", w, h, cvarwinflags() | SDL_WINDOW_RESIZABLE, &win, &rend))
 		fatal("SDL_CreateWindow: %s", SDL_GetError());
-	SDL_SetWindowResizable(win, SDL_TRUE);
+	SDL_SetWindowResizable(win, true);
 	SDL_SetWindowMinimumSize(win, 320, 240);
-	rend = SDL_CreateRenderer(win, -1,
-		(v_sync.value ? SDL_RENDERER_PRESENTVSYNC : 0)
-	);
-	if(rend == nil)
-		fatal("SDL_CreateRenderer: %s", SDL_GetError());
 	SDL_SetRenderDrawColor(rend, 0, 0, 0, 255);
 	SDL_RenderClear(rend);
 	SDL_RenderPresent(rend);
@@ -213,11 +203,11 @@ initfb(void)
 	torgbx(host_colormap, vid.colormap, 256*64);
 	vid.fullbright = 256 - LittleLong(*((int *)vid.colormap + 2048));
 
-	if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) < 0)
+	if(!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS))
 		fatal("SDL_Init: %s", SDL_GetError());
 	makewindow();
 	resetfb();
-	IN_Grabm(1);
+	IN_Grabm(true);
 
 	Cvar_RegisterVariable(&v_fullscreen);
 	v_fullscreen.cb = v_fullscreen_cb;

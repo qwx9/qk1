@@ -211,7 +211,7 @@ M_ToggleMenu_f(cmd_t *c)
 	if(key_dest == key_console)
 		Con_ToggleConsole_f(nil);
 	else{
-		IN_Grabm(0);
+		IN_Grabm(false);
 		M_Menu_Main_f(nil);
 	}
 }
@@ -265,7 +265,7 @@ static void M_Main_Key (int key)
 		if(cls.state != ca_connected && !cls.demoplayback && cls.demonum != -1)
 			CL_NextDemo();
 		if(cls.state == ca_connected || cls.demoplayback)
-			IN_Grabm(1);
+			IN_Grabm(true);
 		break;
 
 	case K_DOWNARROW:

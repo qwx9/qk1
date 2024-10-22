@@ -138,7 +138,7 @@ if host_machine.system() == 'macos'
 	]
 else
 	audio = dependency('openal')
-	video = dependency('sdl2')
+	video = dependency('sdl3')
 	src_sys += [
 		'in_sdl.c',
 		'parg.c',
