@@ -44,6 +44,7 @@ static keyname_t keynames[] =
 	{"DOWNARROW", K_DOWNARROW},
 	{"LEFTARROW", K_LEFTARROW},
 	{"RIGHTARROW", K_RIGHTARROW},
+	{"SEMICOLON", ';'},	// because a raw semicolon seperates commands
 
 	{"ALT", K_ALT},
 	{"CTRL", K_CTRL},
@@ -68,10 +69,15 @@ static keyname_t keynames[] =
 	{"PGUP", K_PGUP},
 	{"HOME", K_HOME},
 	{"END", K_END},
+	{"PAUSE", K_PAUSE},
 
 	{"MOUSE1", K_MOUSE1},
 	{"MOUSE2", K_MOUSE2},
 	{"MOUSE3", K_MOUSE3},
+	{"MOUSE4", K_MOUSE4},
+	{"MOUSE5", K_MOUSE5},
+	{"MWHEELUP", K_MWHEELUP},
+	{"MWHEELDOWN", K_MWHEELDOWN},
 
 	{"JOY1", K_JOY1},
 	{"JOY2", K_JOY2},
@@ -110,13 +116,6 @@ static keyname_t keynames[] =
 	{"AUX30", K_AUX30},
 	{"AUX31", K_AUX31},
 	{"AUX32", K_AUX32},
-
-	{"PAUSE", K_PAUSE},
-
-	{"MWHEELUP", K_MWHEELUP},
-	{"MWHEELDOWN", K_MWHEELDOWN},
-
-	{"SEMICOLON", ';'},	// because a raw semicolon seperates commands
 
 	{nil,0}
 };

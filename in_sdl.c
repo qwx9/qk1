@@ -11,6 +11,8 @@ static int mbuttons[] = {
 	K_MOUSE1,
 	K_MOUSE3,
 	K_MOUSE2,
+	K_MOUSE3,
+	K_MOUSE5,
 };
 
 void
