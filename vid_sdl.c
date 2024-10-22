@@ -28,7 +28,7 @@ cvarwinflags(void)
 {
 	if(v_fullscreen.value >= 1)
 		return SDL_WINDOW_FULLSCREEN;
-	return 0;
+	return SDL_WINDOW_RESIZABLE;
 }
 
 static void
@@ -167,7 +167,7 @@ makewindow(void)
 		SDL_DestroyWindow(win);
 
 	hints();
-	if(!SDL_CreateWindowAndRenderer("quake", w, h, cvarwinflags() | SDL_WINDOW_RESIZABLE, &win, &rend))
+	if(!SDL_CreateWindowAndRenderer("quake", w, h, cvarwinflags(), &win, &rend))
 		fatal("SDL_CreateWindow: %s", SDL_GetError());
 	SDL_SetWindowResizable(win, true);
 	SDL_SetWindowMinimumSize(win, 320, 240);

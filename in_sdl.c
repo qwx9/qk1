@@ -33,6 +33,8 @@ Sys_SendKeyEvents(void)
 			Cbuf_AddText("menu_quit\n");
 			break;
 		case SDL_EVENT_WINDOW_RESIZED:
+		case SDL_EVENT_WINDOW_ENTER_FULLSCREEN:
+		case SDL_EVENT_WINDOW_LEAVE_FULLSCREEN:
 			vid.resized = true;
 			break;
 		case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
