@@ -31,6 +31,7 @@ OFILES=\
 	d_surf.$O\
 	d_vars.$O\
 	draw.$O\
+	fn.$O\
 	fs.$O\
 	host.$O\
 	host_cmd.$O\
@@ -62,7 +63,6 @@ OFILES=\
 	pr_edict.$O\
 	pr_exec.$O\
 	protocol.$O\
-	qp.$O\
 	r_aclip.$O\
 	r_alias.$O\
 	r_bsp.$O\
@@ -87,6 +87,7 @@ OFILES=\
 	sv_phys.$O\
 	sv_user.$O\
 	sys_plan9.$O\
+	tbl.$O\
 	vid_plan9.$O\
 	view.$O\
 	wav.$O\
@@ -107,6 +108,7 @@ HFILES=\
 	d_local.h\
 	dat.h\
 	draw.h\
+	fn.h\
 	fns.h\
 	i_tga.h\
 	i_wad.h\
@@ -122,7 +124,6 @@ HFILES=\
 	progdefs.h\
 	progs.h\
 	protocol.h\
-	qp.h\
 	quakedef.h\
 	r_local.h\
 	r_shared.h\
@@ -132,6 +133,7 @@ HFILES=\
 	server.h\
 	softfloat.h\
 	spritegn.h\
+	tbl.h\
 	vid.h\
 	view.h\
 	world.h\
@@ -147,3 +149,6 @@ r_surf.$O: r_surf_block.h r_surf_light.h r_surf_x.h
 
 i_resize.$O: i_resize.c
 	$CC $CFLAGS -p i_resize.c
+
+fn.$O: fn.c
+	$CC $CFLAGS -p fn.c

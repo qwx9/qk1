@@ -129,7 +129,7 @@ static keyname_t keynames[] =
 */
 
 static void
-Key_Complete(char *name, void *o, void *aux)
+Key_Complete(const char *name, void *o, void *aux)
 {
 	static int printed = 0;
 	int n;

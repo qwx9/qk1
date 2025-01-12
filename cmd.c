@@ -222,7 +222,7 @@ CopyString(char *in)
 }
 
 static void
-Cmd_AliasList(char *name, void *v, void *aux)
+Cmd_AliasList(const char *name, void *v, void *aux)
 {
 	cmd_t *a;
 

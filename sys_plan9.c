@@ -9,6 +9,16 @@ static const char *disabled[32];
 static int ndisabled;
 
 int
+qclz(unsigned x)
+{
+	unsigned r;
+	if(x == 0)
+		return 32;
+	for(r = 0; (x & (1UL<<31)) == 0; x <<= 1, r++);
+	return r;
+}
+
+int
 qctz(unsigned x)
 {
 	unsigned r;

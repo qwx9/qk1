@@ -41,6 +41,7 @@ typedef uintptr_t uintptr;
 #define setrealloctag(p, t) do{USED(p); USED(t);}while(0)
 #define isNaNf isnan
 
+#define qclz(x) __builtin_clz(x)
 #define qctz(x) __builtin_ctz(x)
 
 #ifdef HAVE_ENDIAN_H

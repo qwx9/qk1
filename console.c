@@ -1,5 +1,5 @@
 #include "quakedef.h"
-#include "qp.h"
+#include "tbl.h"
 
 static int con_linewidth;
 
@@ -36,31 +36,26 @@ int			con_notifylines;		// scan lines to clear for notify lines
 
 extern void M_Menu_Main_f (cmd_t *c);
 
-static Trie *conobj;
+static Tbl *conobj;
 
 void
 Con_AddObject(char *name, void *obj)
 {
-	conobj = qpset(conobj, name, 0, obj);
+	conobj = Tset(conobj, name, obj);
 }
 
 void *
 Con_FindObject(char *name)
 {
-	char *k;
-	void *v;
-
-	if(qpget(conobj, name, 0, &k, &v) != 0)
-		v = nil;
-	return v;
+	return Tget(conobj, name);
 }
 
 int
-Con_SearchObject(char *prefix, int len0, void (*f)(char *name, void *obj, void *aux), void *aux)
+Con_SearchObject(const char *prefix, int len0, void (*f)(const char *name, void *obj, void *aux), void *aux)
 {
-	char *k;
+	const char *k;
 	void *v;
-	int n, len, c;
+	int n, c, len;
 
 	if(conobj == nil)
 		return 0;
@@ -69,7 +64,7 @@ Con_SearchObject(char *prefix, int len0, void (*f)(char *name, void *obj, void *
 	v = nil;
 	len = 0;
 	for(n = 0;;){
-		if(qpnext(conobj, &k, &len, &v) < 0)
+		if(!Tnextl(conobj, &k, &len, &v))
 			break;
 		c = -1;
 		if(len0 == 0 || (len >= len0 && (c = strncmp(k, prefix, len0)) == 0)){
@@ -259,9 +254,9 @@ Con_Linefeed(void)
 static void
 Con_Print(char *txt)
 {
+	static bool cr;
 	int		y;
 	int		c, l;
-	static int	cr;
 	int		mask;
 
 	con_backscroll = 0;
@@ -312,13 +307,10 @@ Con_Print(char *txt)
 
 		switch (c)
 		{
+		case '\r':
+			cr = true;
 		case '\n':
 			con_x = 0;
-			break;
-
-		case '\r':
-			con_x = 0;
-			cr = 1;
 			break;
 
 		default:	// display character and advance

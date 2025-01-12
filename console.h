@@ -24,4 +24,4 @@ void Con_ToggleConsole_f (cmd_t *c);
 
 void Con_AddObject(char *name, void *obj);
 void *Con_FindObject(char *name);
-int Con_SearchObject(char *prefix, int len, void (*f)(char *, void *, void *), void *aux);
+int Con_SearchObject(const char *prefix, int len, void (*f)(const char *, void *, void *), void *aux);

@@ -471,7 +471,7 @@ loadpoints(cmd_t *c)
 }
 
 static void
-dumpcvar(char *name, void *o, void *bf)
+dumpcvar(const char *name, void *o, void *bf)
 {
 	cvar_t *c;
 
