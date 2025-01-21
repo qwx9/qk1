@@ -934,8 +934,6 @@ chkreg(void)
 	bf = openlmp("gfx/pop.lmp", nil);
 	if(bf == nil){
 		Con_DPrintf("chkreg: shareware version\n");
-		if(notid1)
-			fatal("chkreg: phase error -- %s", lerr());
 		return;
 	}
 	p = pop;
