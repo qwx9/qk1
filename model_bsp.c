@@ -322,7 +322,7 @@ BSP_LoadLeafs(model_t *mod, byte *in, int sz)
 int
 BSP_LoadVisibility(model_t *mod, byte *in, int sz)
 {
-	char s[128+1], *t;
+	char s[128+4+1], *t;
 	byte *vis, *leaf;
 	int filesz, combined, vissz, leafsz;
 
