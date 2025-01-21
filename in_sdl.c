@@ -62,7 +62,7 @@ Sys_SendKeyEvents(void)
 			break;
 		case SDL_EVENT_KEY_DOWN:
 		case SDL_EVENT_KEY_UP:
-			if(event.key.repeat)
+			if(event.key.repeat && key_dest == key_game)
 				break;
 			switch(key = event.key.key){
 			case SDLK_GRAVE: key = '~'; break;
