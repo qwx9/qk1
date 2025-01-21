@@ -120,6 +120,8 @@ loadsfx(Sfx *sfx)
 	sfxcache_t *sc;
 	byte *u, buf[1024];	/* avoid dirtying the cache heap */
 
+	if(sfx == nil)
+		return nil;
 	if(sc = Cache_Check(&sfx->cu), sc != nil)
 		return sc;
 	u = loadstklmp(va("sound/%s", sfx->s), buf, sizeof buf, &len);

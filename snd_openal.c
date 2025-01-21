@@ -263,6 +263,8 @@ loadsfx(Sfx *sfx)
 	byte *in;
 	int len;
 
+	if(sfx == nil)
+		return nil;
 	if((b = Cache_Check(&sfx->cu)) != nil)
 		return b;
 	in = loadstklmp(va("sound/%s", sfx->s), nil, 0, &len);
