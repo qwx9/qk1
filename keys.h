@@ -4,7 +4,7 @@
 enum {
 	K_TAB = '\t',
 	K_ENTER = '\r',
-	K_ESCAPE = '\e',
+	K_ESCAPE = 0x1b,
 	K_SPACE = ' ',
 	// normal keys should be passed as lowercased ascii
 
