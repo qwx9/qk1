@@ -111,7 +111,7 @@ IN_Commands(void)
 static void
 m_raw_cb(cvar_t *var)
 {
-	SDL_SetHint(SDL_HINT_MOUSE_RELATIVE_MODE_WARP, var->value > 0 ? "0" : "1");
+	SDL_SetHint(SDL_HINT_MOUSE_RELATIVE_MODE_CENTER, var->value > 0 ? "0" : "1");
 }
 
 void
@@ -166,7 +166,7 @@ IN_Shutdown(void)
 void
 IN_Init(void)
 {
-	SDL_SetHint(SDL_HINT_MOUSE_RELATIVE_MODE_WARP, "0");
+	SDL_SetHint(SDL_HINT_MOUSE_RELATIVE_MODE_CENTER, "0");
 	m_raw.cb = m_raw_cb;
 	Cvar_RegisterVariable(&m_windowed);
 	Cvar_RegisterVariable(&m_filter);
