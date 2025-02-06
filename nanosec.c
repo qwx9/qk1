@@ -2,6 +2,10 @@
 #include <libc.h>
 #include <tos.h>
 
+enum {
+	Nsec = 1000000000ULL,
+};
+
 /*
  * nsec() is wallclock and can be adjusted by timesync
  * so need to use cycles() instead, but fall back to
@@ -11,7 +15,7 @@ u64int
 nanosec(void)
 {
 	static u64int fasthz, xstart;
-	u64int x, div;
+	u64int x;
 
 	if(fasthz == ~0ULL)
 		return nsec() - xstart;
@@ -29,8 +33,8 @@ nanosec(void)
 	cycles(&x);
 	x -= xstart;
 
-	/* this is ugly */
-	for(div = 1000000000ULL; x < 0x1999999999999999ULL && div > 1 ; div /= 10ULL, x *= 10ULL);
+	u64int q = x / fasthz;
+	u64int r = x % fasthz;
 
-	return x / (fasthz / div);
+	return q*Nsec + r*Nsec/fasthz;
 }
