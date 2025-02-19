@@ -109,6 +109,7 @@ enum {
 	MOVETYPE_NOCLIP,
 	MOVETYPE_FLYMISSILE, // extra size to monsters
 	MOVETYPE_BOUNCE,
+	MOVETYPE_GIB,
 
 	// edict->solid values
 	SOLID_NOT = 0, // no interaction with other objects
