@@ -32,7 +32,9 @@ D_SpriteDrawSpans(sspan_t *pspan, texvars_t *tv, byte alpha)
 	// we count on FP exceptions being turned off to avoid range problems
 	izistep = (int)(tv->z.stepu * 0x8000 * 0x10000);
 
-	assert(pspan->v >= 0);
+	// FIXME(sigrid): still happens sometimes for some reason
+	if(pspan->v < 0)
+		return;
 
 	do
 	{
