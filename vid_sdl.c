@@ -64,6 +64,7 @@ resetfb(void)
 	if(fbi == NULL)
 		fatal("SDL_CreateTexture: %s", SDL_GetError());
 	SDL_SetTextureBlendMode(fbi, SDL_BLENDMODE_NONE);
+	SDL_SetTextureScaleMode(fbi, SDL_SCALEMODE_NEAREST);
 	SDL_RenderClear(rend);
 
 	vid.buffer = vidbuffer;
