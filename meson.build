@@ -5,7 +5,7 @@ project(
 	default_options: [
 		'c_std=c99',
 		'warning_level=2',
-		'buildtype=debug',
+		'buildtype=release',
 		#'b_coverage=true',
 	],
 )
