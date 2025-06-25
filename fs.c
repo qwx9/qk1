@@ -920,7 +920,8 @@ initns(char **paths)
 		pakdir(va("%s/id1", *p));
 		if(game != nil)
 			pakdir(va("%s/%s", *p, game));
-		mkpath(fsdir);
+		if(p[1] == nil)
+			mkpath(fsdir);
 	}
 }
 
