@@ -454,10 +454,17 @@ _Host_Frame(float time)
 		return;			// something bad happened, or the server disconnected
 
 	// keep the random time dependent
-	rand ();
+	rand();
 
-	if(boundfps(time) < 0)
-		return;
+	// update audio
+	if (cls.signon == SIGNONS)
+	{
+		stepsnd(&r_refdef.view);
+		CL_DecayLights();
+	}else{
+		static const view_t originview = { 0 };
+		stepsnd(&originview);
+	}
 
 	// get new key events
 	Sys_SendKeyEvents ();
@@ -471,6 +478,11 @@ _Host_Frame(float time)
 	// if running the server locally, make intentions now
 	if (sv.active)
 		CL_SendCmd ();
+
+	stepcd();
+
+	if(boundfps(time) < 0)
+		return;
 
 	//-------------------
 	//
@@ -511,18 +523,6 @@ _Host_Frame(float time)
 
 	if (host_speeds.value)
 		time2 = dtime ();
-
-	// update audio
-	if (cls.signon == SIGNONS)
-	{
-		stepsnd(&r_refdef.view);
-		CL_DecayLights ();
-	}else{
-		static const view_t originview = { 0 };
-		stepsnd(&originview);
-	}
-
-	stepcd();
 
 	if (host_speeds.value)
 	{
