@@ -460,7 +460,7 @@ static void CL_ParseClientdata (unsigned int bits)
 		cl.mvelocity[0][i] = (bits & (SU_VELOCITY1<<i)) ? MSG_ReadChar()*16 : 0;
 	}
 
-	i = (bits & SU_ITEMS) ? MSG_ReadLong() : cl.items;
+	i = (bits & SU_ITEMS) ? (unsigned)MSG_ReadLong() : cl.items;
 	if(cl.items != i){ // set flash times
 		for(j = 0; j < 32; j++)
 			if((i & (1U<<j)) && !(cl.items & (1U<<j)))
@@ -480,7 +480,7 @@ static void CL_ParseClientdata (unsigned int bits)
 		cl.stats[STAT_SHELLS+i] = MSG_ReadByte();
 
 	i = MSG_ReadByte();
-	cl.stats[STAT_ACTIVEWEAPON] = standard_quake ? i : (1<<i);
+	cl.stats[STAT_ACTIVEWEAPON] = standard_quake ? i : (1U<<i);
 
 	if(bits & cl.protocol.fl_large_weaponmodel)
 		weaponmodel |= MSG_ReadByte() << 8;
