@@ -244,6 +244,11 @@ Host_Map_f(cmd_t *c)
 	int		i;
 	char	name[Npath];
 
+	if(Cmd_Argc() < 2){
+		if(cls.state != ca_disconnected)
+			Con_Printf("%s\n", cls.mapstring);
+		return;
+	}
 	USED(c);
 	if (cmd_source != src_command)
 		return;
