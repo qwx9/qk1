@@ -11,7 +11,7 @@ enum {
 typedef struct fogvars_t fogvars_t;
 
 struct fogvars_t {
-	pixel_t pix, skypix;
+	pixel_t pix, fbpix, skypix;
 	float density;
 	byte c0, c1, c2;
 	bool allowed, enabled;

@@ -3,6 +3,7 @@ typedef struct fog_t fog_t;
 struct fog_t {
 	pixel64_t v;
 	pixel64_t d;
+	pixel64_t fbv;
 };
 
 #define fogstep(f) do{ \
@@ -41,8 +42,9 @@ pixfrom64(pixel64_t p)
 static inline pixel_t
 blendfog(pixel_t pix, fog_t fog)
 {
-	pixel_t a = pixfrom64(fog.v);
-	pixel_t b = mulalpha(pix, 0xff - (fog.v>>56));
+	pixel64_t v = (pix & 0xff000000) != 0 ? fog.v : fog.fbv;
+	pixel_t a = pixfrom64(v);
+	pixel_t b = mulalpha(pix, 0xff - (v>>56));
 	return a + b;
 }
 
@@ -56,6 +58,7 @@ fogcalc(uzint zi0, uzint zi1, int cnt, fog_t *f)
 		return false;
 
 	f->v = pixto64(mulalpha(fogvars.pix, v));
+	f->fbv = pixto64(mulalpha(fogvars.fbpix, v));
 	x = pixto64(mulalpha(fogvars.pix, (e<v ? v-e : e-v)));
 	f->d =
 		(((x & (0xffffULL<<48))/cnt) & (0xffffULL<<48)) |

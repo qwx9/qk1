@@ -1,6 +1,7 @@
 #include "quakedef.h"
 
 static cvar_t r_fog = {"r_fog", "1", true};
+static cvar_t r_fullbrightfog = {"r_fullbrightfog", "0.9"};
 static cvar_t r_skyfog = {"r_skyfog", "0.5"};
 
 fogvars_t fogvars;
@@ -11,11 +12,19 @@ fogrecalc(void)
 	fogvars.pix = (fogvars.allowed && fogvars.enabled)
 		? 0xff<<24 | fogvars.c2<<16 | fogvars.c1<<8 | fogvars.c0
 		: 0;
+	fogvars.fbpix = mulalpha(fogvars.pix, 255 * clamp(r_fullbrightfog.value, 0.0, 1.0));
 	fogvars.skypix = mulalpha(fogvars.pix, 255 * clamp(r_skyfog.value, 0.0, 1.0));
 }
 
 static void
 r_skyfog_cb(cvar_t *var)
+{
+	USED(var);
+	fogrecalc();
+}
+
+static void
+r_fullbrightfog_cb(cvar_t *var)
 {
 	USED(var);
 	fogrecalc();
@@ -87,9 +96,11 @@ void
 R_InitFog(void)
 {
 	r_fog.cb = r_fog_cb;
+	r_fullbrightfog.cb = r_fullbrightfog_cb;
 	r_skyfog.cb = r_skyfog_cb;
 	Cmd_AddCommand("fog", fog);
 	Cvar_RegisterVariable(&r_fog);
+	Cvar_RegisterVariable(&r_fullbrightfog);
 	Cvar_RegisterVariable(&r_skyfog);
 
 	// Nehahra

@@ -1,4 +1,5 @@
 #include "quakedef.h"
+#include "r_fog.h"
 
 // !!! if this is changed, it must be changed in asm_draw.h too !!!
 typedef struct {
@@ -80,7 +81,7 @@ void D_PolysetDrawSpans8 (spanpackage_t *pspanpackage, pixel_t *colormap, byte a
 void D_PolysetCalcGradients (int skinwidth);
 void D_DrawSubdiv (pixel_t *colormap);
 void D_DrawNonSubdiv (void);
-void D_PolysetRecursiveTriangle (finalvert_t *p1, finalvert_t *p2, finalvert_t *p3, byte alpha, int l[3]);
+static void D_PolysetRecursiveTriangle (finalvert_t *p1, finalvert_t *p2, finalvert_t *p3, byte alpha, int l[3], bool fogenabled);
 void D_PolysetSetEdgeTable (void);
 void D_RasterizeAliasPolySmooth (void);
 void D_PolysetScanLeftEdge (int height);
@@ -113,6 +114,8 @@ void D_PolysetDrawFinalVerts (finalvert_t *fv, int numverts, pixel_t *colormap, 
 	int		i, z;
 	uzint	*zbuf;
 
+	d_pcolormap = colormap;
+	bool fogenabled = isfogged();
 	for(i = 0 ; i < numverts; i++, fv++){
 		// valid triangle coordinates for filling can include the bottom and
 		// right clip edges, due to the fill rule; these shouldn't be drawn
@@ -120,11 +123,17 @@ void D_PolysetDrawFinalVerts (finalvert_t *fv, int numverts, pixel_t *colormap, 
 			z = fv->zi;
 			zbuf = zspantable[fv->v] + fv->u;
 			if(z >= *zbuf){
+				fog_t fog;
+				bool fogged = fogenabled && fogcalc(z, z+1, 1, &fog);
 				pixel_t p = addlight(currententity, skintable[fv->t >> 16][fv->s >> 16], fv->l[0], fv->l[1], fv->l[2]);
 				int n = d_scantable[fv->v] + fv->u;
 				if(r_drawflags & DRAW_BLEND){
+					if(fogged)
+						p = 0xff<<24 | blendfog(p, fog);
 					dvars.fb[n] = blendalpha(p, dvars.fb[n], alpha);
 				}else{
+					if(fogged)
+						p = blendfog(p, fog);
 					dvars.fb[n] = p;
 					*zbuf = z;
 				}
@@ -149,6 +158,7 @@ void D_DrawSubdiv (pixel_t *colormap)
 	pfv = r_affinetridesc.pfinalverts;
 	ptri = r_affinetridesc.ptriangles;
 	lnumtriangles = r_affinetridesc.numtriangles;
+	bool fogenabled = isfogged();
 
 	for (i=0 ; i<lnumtriangles ; i++)
 	{
@@ -168,7 +178,7 @@ void D_DrawSubdiv (pixel_t *colormap)
 
 		if (ptri[i].facesfront)
 		{
-			D_PolysetRecursiveTriangle(index0, index1, index2, currententity->alpha, index0->l);
+			D_PolysetRecursiveTriangle(index0, index1, index2, currententity->alpha, index0->l, fogenabled);
 		}
 		else
 		{
@@ -185,7 +195,7 @@ void D_DrawSubdiv (pixel_t *colormap)
 			if (index2->flags & ALIAS_ONSEAM)
 				index2->s += r_affinetridesc.seamfixupX16;
 
-			D_PolysetRecursiveTriangle(index0, index1, index2, currententity->alpha, index0->l);
+			D_PolysetRecursiveTriangle(index0, index1, index2, currententity->alpha, index0->l, fogenabled);
 
 			index0->s = s0;
 			index1->s = s1;
@@ -248,7 +258,7 @@ void D_DrawNonSubdiv (void)
 D_PolysetRecursiveTriangle
 ================
 */
-void D_PolysetRecursiveTriangle (finalvert_t *lp1, finalvert_t *lp2, finalvert_t *lp3, byte alpha, int l[3])
+static void D_PolysetRecursiveTriangle (finalvert_t *lp1, finalvert_t *lp2, finalvert_t *lp3, byte alpha, int l[3], bool fogenabled)
 {
 	finalvert_t new, *temp;
 	uzint *zbuf;
@@ -308,11 +318,18 @@ split:
 	z = new.zi;
 	zbuf = zspantable[new.v] + new.u;
 	if (z >= *zbuf){
-		pixel_t p = addlight(currententity, skintable[new.t >> 16][new.s >> 16], l[0], l[1], l[2]);
+		fog_t fog;
+		bool fogged = fogenabled && fogcalc(z, z+1, 1, &fog);
+		pixel_t p = skintable[new.t >> 16][new.s >> 16];
+		p = addlight(currententity, p, l[0], l[1], l[2]);
 		int n = d_scantable[new.v] + new.u;
 		if(r_drawflags & DRAW_BLEND){
+			if(fogged)
+					p = 0xff<<24 | blendfog(p, fog);
 			dvars.fb[n] = blendalpha(p, dvars.fb[n], alpha);
 		}else{
+			if(fogged)
+				p = blendfog(p, fog);
 			dvars.fb[n] = p;
 			*zbuf = z;
 		}
@@ -320,8 +337,8 @@ split:
 
 nodraw:
 	// recursively continue
-	D_PolysetRecursiveTriangle(lp3, lp1, &new, alpha, l);
-	D_PolysetRecursiveTriangle(lp3, &new, lp2, alpha, l);
+	D_PolysetRecursiveTriangle(lp3, lp1, &new, alpha, l, fogenabled);
+	D_PolysetRecursiveTriangle(lp3, &new, lp2, alpha, l, fogenabled);
 }
 
 
@@ -519,7 +536,11 @@ void D_PolysetDrawSpans8 (spanpackage_t *pspanpackage, pixel_t *colormap, byte a
 	int		llight[3];
 	int		lzi;
 	uzint	*lpz;
+	fog_t	fog;
+	bool	fogenabled, fogged;
 
+	d_pcolormap = colormap;
+	fogenabled = isfogged();
 	do
 	{
 		lcount = d_aspancount - pspanpackage->count;
@@ -546,18 +567,24 @@ void D_PolysetDrawSpans8 (spanpackage_t *pspanpackage, pixel_t *colormap, byte a
 			llight[1] = pspanpackage->light[1];
 			llight[2] = pspanpackage->light[2];
 			lzi = pspanpackage->zi;
+			fogged = fogenabled && fogcalc(lzi, lzi+r_zistepx*lcount, lcount, &fog);
 
 			do
 			{
-				if (lzi >= *lpz){
-					pixel_t p = addlight(currententity, *lptex, llight[0], llight[1], llight[2]);
+				pixel_t p = *lptex;
+				if (opaque(p) && lzi >= *lpz){
+					p = addlight(currententity, p, llight[0], llight[1], llight[2]);
 					if(r_drawflags & DRAW_BLEND){
+						if(fogged)
+							p = 0xff<<24 | (blendfog(p, fog) & 0xffffffU);
 						*lpdest = blendalpha(
 							p,
 							*lpdest,
 							alpha
 						);
 					}else{
+						if(fogged)
+							p = blendfog(p, fog);
 						*lpdest = p;
 						// gel mapping	*lpdest = gelmap[*lpdest];
 						*lpz = lzi;
@@ -579,6 +606,8 @@ void D_PolysetDrawSpans8 (spanpackage_t *pspanpackage, pixel_t *colormap, byte a
 					lptex += r_affinetridesc.skinwidth;
 					ltfrac &= 0xFFFF;
 				}
+				if(fogged)
+					fogstep(fog);
 			} while (--lcount);
 		}
 
