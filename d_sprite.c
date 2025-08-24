@@ -1,4 +1,5 @@
 #include "quakedef.h"
+#include "r_fog.h"
 
 static int		sprite_height;
 static int		minindex, maxindex;
@@ -36,6 +37,7 @@ D_SpriteDrawSpans(sspan_t *pspan, texvars_t *tv, byte alpha)
 	if(pspan->v < 0)
 		return;
 
+	bool fogenabled = isfogged();
 	do
 	{
 		pdest = dvars.fb + dvars.w * pspan->v + pspan->u;
@@ -56,6 +58,8 @@ D_SpriteDrawSpans(sspan_t *pspan, texvars_t *tv, byte alpha)
 		z = (float)0x10000 / zi;	// prescale to 16.16 fixed-point
 		// we count on FP exceptions being turned off to avoid range problems
 		izi = (int)(zi * 0x8000 * 0x10000);
+		fog_t fog;
+		bool fogged = fogenabled && fogcalc(izi, izi+izistep*count, count, &fog);
 
 		s = (int)(sdivz * z) + tv->s.adjust;
 		s = clamp(s, 0, tv->s.bbextent);
@@ -120,9 +124,13 @@ D_SpriteDrawSpans(sspan_t *pspan, texvars_t *tv, byte alpha)
 				btemp = *(pbase + (s >> 16) + (t >> 16) * tv->w);
 				if(opaque(btemp) && *pz <= izi){
 					if(r_drawflags & DRAW_BLEND){
+						if(fogged)
+							btemp = 0xff<<24 | blendfog(btemp, fog);
 						*pdest = blendalpha(btemp, *pdest, alpha);
 					}else{
 						*pz = izi;
+						if(fogged)
+							btemp = blendfog(btemp, fog);
 						*pdest = btemp;
 					}
 				}
