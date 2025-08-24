@@ -1,5 +1,8 @@
 // input.h -- external (non-keyboard) input devices
 
+#define MAX_PITCH 90
+#define MAX_ROLL 50
+
 void IN_Init (void);
 
 void IN_Shutdown (void);
