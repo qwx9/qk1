@@ -189,6 +189,7 @@ static void CL_ParseServerInfo (void)
 	int		nummodels, numsounds;
 	static char	model_precache[MAX_MODELS][Npath];
 	static char	sound_precache[MAX_SOUNDS][Npath];
+	char *e;
 
 	Con_DPrintf("CL_ParseServerInfo: parsing serverinfo pkt...\n");
 	CL_ClearState ();
@@ -287,6 +288,12 @@ static void CL_ParseServerInfo (void)
 
 	// local state
 	cl_entities[0].model = cl.worldmodel = cl.model_precache[1];
+	if((str = strchr(model_precache[1], '/')) != nil){
+		str++;
+		if((e = strrchr(model_precache[1], '.')) != nil)
+			*e = 0;
+	}
+	setcvar("mapname", str == nil ? "<invalid>" : str);
 
 	R_NewMap();
 	V_NewMap();
