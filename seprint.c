@@ -10,7 +10,7 @@ seprint(char *buf, char *e, char *fmt, ...)
 		return e;
 
 	va_start(a, fmt);
-	m = e-buf-1;
+	m = e - buf - 1;
 	n = vsnprintf(buf, m, fmt, a);
 	va_end(a);
 

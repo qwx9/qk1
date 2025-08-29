@@ -7,7 +7,7 @@ int d_scantable[MAXHEIGHT];
 uzint *zspantable[MAXHEIGHT];
 
 void
-D_ViewChanged (void)
+D_ViewChanged(void)
 {
 	int i;
 
@@ -15,8 +15,8 @@ D_ViewChanged (void)
 
 	d_pix_scale = 90.0 / max(r_refdef.fov_x, r_refdef.fov_y);
 	d_pix_min = (r_refdef.vrect.width / 320.0) * d_pix_scale;
-	d_pix_max = 0.5 + d_pix_min*4.0;
-	d_pix_max = max(d_pix_max, d_pix_min+1);
+	d_pix_max = 0.5 + d_pix_min * 4.0;
+	d_pix_max = max(d_pix_max, d_pix_min + 1);
 
 	d_vrectx = r_refdef.vrect.x;
 	d_vrecty = r_refdef.vrect.y;
@@ -24,9 +24,8 @@ D_ViewChanged (void)
 	d_vrectbottom_particle = r_refdef.vrectbottom - d_pix_max;
 	dvars.w = vid.width;
 
-	for(i = 0; i < vid.height; i++){
+	for(i = 0; i < vid.height; i++) {
 		d_scantable[i] = i * dvars.w;
-		zspantable[i] = dvars.zb + i*dvars.w;
+		zspantable[i] = dvars.zb + i * dvars.w;
 	}
 }
-

@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <ctype.h>
 
-#define RAND_MAX ((2<<15)-1)
+#define RAND_MAX ((2 << 15) - 1)
 
 #define acosf acos
 #define asinf asin
@@ -22,25 +22,28 @@ int isNaNf(float f);
 #ifdef __mips__
 #define QUAKE_BIG_ENDIAN
 #else
-# ifdef __power__
-# define QUAKE_BIG_ENDIAN
-# else
-#  ifdef __power64__
-#  define QUAKE_BIG_ENDIAN
-#  else
-#   ifdef __sparc__
-#   define QUAKE_BIG_ENDIAN
-#   else
-#    ifdef __sparc64__
-#    else
-#    define QUAKE_LITTLE_ENDIAN
-#    endif
-#   endif
-#  endif
-# endif
+#ifdef __power__
+#define QUAKE_BIG_ENDIAN
+#else
+#ifdef __power64__
+#define QUAKE_BIG_ENDIAN
+#else
+#ifdef __sparc__
+#define QUAKE_BIG_ENDIAN
+#else
+#ifdef __sparc64__
+#else
+#define QUAKE_LITTLE_ENDIAN
+#endif
+#endif
+#endif
+#endif
 #endif
 
-typedef enum {false, true} bool;
+typedef enum {
+	false,
+	true
+} bool;
 
 static double ln2c;
 #define exp2f(x) (exp((x) * (ln2c ? ln2c : (ln2c = log(2.0)))))

@@ -20,8 +20,8 @@ nanosec(void)
 	if(fasthz == ~0ULL)
 		return nsec() - xstart;
 
-	if(fasthz == 0){
-		if(_tos->cyclefreq){
+	if(fasthz == 0) {
+		if(_tos->cyclefreq) {
 			fasthz = _tos->cyclefreq;
 			cycles(&xstart);
 		} else {
@@ -36,5 +36,5 @@ nanosec(void)
 	u64int q = x / fasthz;
 	u64int r = x % fasthz;
 
-	return q*Nsec + r*Nsec/fasthz;
+	return q * Nsec + r * Nsec / fasthz;
 }

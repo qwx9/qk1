@@ -1,5 +1,7 @@
+#pragma once
+
 #define BSPVERSION 29
-#define BSP2VERSION ('B'|'S'<<8|'P'<<16|'2'<<24)
+#define BSP2VERSION ('B' | 'S' << 8 | 'P' << 16 | '2' << 24)
 #define BSP30VERSION 30
 
 enum {
@@ -67,5 +69,5 @@ enum {
 	CONTENTS_SOLID,
 	CONTENTS_EMPTY,
 
-	TEX_SPECIAL = 1<<0, // sky or slime, no lightmap or 256 subdivision
+	TEX_SPECIAL = 1 << 0, // sky or slime, no lightmap or 256 subdivision
 };

@@ -10,8 +10,14 @@ void
 pixels_resize(pixel_t *in, pixel_t *out, int iw, int ih, int ow, int oh, bool premul, bool fence)
 {
 	stbir_resize(
-		(byte*)in, iw, ih, iw*sizeof(pixel_t),
-		(byte*)out, ow, oh, ow*sizeof(pixel_t),
+		(byte *)in,
+		iw,
+		ih,
+		iw * sizeof(pixel_t),
+		(byte *)out,
+		ow,
+		oh,
+		ow * sizeof(pixel_t),
 		(premul || fence) ? STBIR_RGBA_PM : STBIR_RGBA,
 		STBIR_TYPE_UINT8_SRGB,
 		STBIR_EDGE_CLAMP,

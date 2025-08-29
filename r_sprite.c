@@ -1,21 +1,15 @@
 #include "quakedef.h"
 
-static int				clip_current;
-static vec5_t			clip_verts[2][MAXWORKINGVERTS];
-static int				sprite_width, sprite_height;
+static int clip_current;
+static vec5_t clip_verts[2][MAXWORKINGVERTS];
+static int sprite_width, sprite_height;
 
-spritedesc_t			r_spritedesc;
+spritedesc_t r_spritedesc;
 
-
-/*
-================
-R_RotateSprite
-================
-*/
 static void
 R_RotateSprite(float beamlength, view_t *v)
 {
-	vec3_t	vec;
+	vec3_t vec;
 
 	if(beamlength == 0.0)
 		return;
@@ -25,114 +19,95 @@ R_RotateSprite(float beamlength, view_t *v)
 	VectorSubtract(v->org, vec, v->modelorg);
 }
 
-
 /*
-=============
-R_ClipSpriteFace
-
-Clips the winding at clip_verts[clip_current] and changes clip_current
-Throws out the back side
-==============
-*/
+ * Clips the winding at clip_verts[clip_current] and changes clip_current
+ * Throws out the back side
+ */
 static int
 R_ClipSpriteFace(int nump, clipplane_t *pclipplane)
 {
-	int		i, outcount;
-	float	dists[MAXWORKINGVERTS+1];
-	float	frac, clipdist, *pclipnormal;
-	float	*in, *instep, *outstep, *vert2;
+	int i, outcount;
+	float dists[MAXWORKINGVERTS + 1];
+	float frac, clipdist, *pclipnormal;
+	float *in, *instep, *outstep, *vert2;
 
 	clipdist = pclipplane->dist;
 	pclipnormal = pclipplane->normal;
 
 	// calc dists
-	if (clip_current)
-	{
+	if(clip_current) {
 		in = clip_verts[1][0];
 		outstep = clip_verts[0][0];
 		clip_current = 0;
-	}
-	else
-	{
+	} else {
 		in = clip_verts[0][0];
 		outstep = clip_verts[1][0];
 		clip_current = 1;
 	}
 
 	instep = in;
-	for (i=0 ; i<nump ; i++, instep += sizeof (vec5_t) / sizeof (float))
-	{
-		dists[i] = DotProduct (instep, pclipnormal) - clipdist;
-	}
+	for(i = 0; i < nump; i++, instep += sizeof(vec5_t) / sizeof(float))
+		dists[i] = DotProduct(instep, pclipnormal) - clipdist;
 
 	// handle wraparound case
 	dists[nump] = dists[0];
 	memmove(instep, in, sizeof(vec5_t));
 
-
 	// clip the winding
 	instep = in;
 	outcount = 0;
 
-	for (i=0 ; i<nump ; i++, instep += sizeof (vec5_t) / sizeof (float))
-	{
-		if (dists[i] >= 0)
-		{
+	for(i = 0; i < nump; i++, instep += sizeof(vec5_t) / sizeof(float)) {
+		if(dists[i] >= 0) {
 			memmove(outstep, instep, sizeof(vec5_t));
-			outstep += sizeof (vec5_t) / sizeof (float);
+			outstep += sizeof(vec5_t) / sizeof(float);
 			outcount++;
 		}
 
-		if (dists[i] == 0 || dists[i+1] == 0)
+		if(dists[i] == 0 || dists[i + 1] == 0)
 			continue;
 
-		if ( (dists[i] > 0) == (dists[i+1] > 0) )
+		if((dists[i] > 0) == (dists[i + 1] > 0))
 			continue;
 
 		// split it into a new vertex
-		frac = dists[i] / (dists[i] - dists[i+1]);
+		frac = dists[i] / (dists[i] - dists[i + 1]);
 
-		vert2 = instep + sizeof (vec5_t) / sizeof (float);
+		vert2 = instep + sizeof(vec5_t) / sizeof(float);
 
-		outstep[0] = instep[0] + frac*(vert2[0] - instep[0]);
-		outstep[1] = instep[1] + frac*(vert2[1] - instep[1]);
-		outstep[2] = instep[2] + frac*(vert2[2] - instep[2]);
-		outstep[3] = instep[3] + frac*(vert2[3] - instep[3]);
-		outstep[4] = instep[4] + frac*(vert2[4] - instep[4]);
+		outstep[0] = instep[0] + frac * (vert2[0] - instep[0]);
+		outstep[1] = instep[1] + frac * (vert2[1] - instep[1]);
+		outstep[2] = instep[2] + frac * (vert2[2] - instep[2]);
+		outstep[3] = instep[3] + frac * (vert2[3] - instep[3]);
+		outstep[4] = instep[4] + frac * (vert2[4] - instep[4]);
 
-		outstep += sizeof (vec5_t) / sizeof (float);
+		outstep += sizeof(vec5_t) / sizeof(float);
 		outcount++;
 	}
 
 	return outcount;
 }
 
-
-/*
-================
-R_SetupAndDrawSprite
-================
-*/
 static void
 R_SetupAndDrawSprite(view_t *v)
 {
-	int			i, nump;
-	float		dot, scale, *pv;
-	vec5_t		*pverts;
-	vec3_t		left, up, right, down, transformed, local;
-	emitpoint_t	outverts[MAXWORKINGVERTS+1], *pout;
+	int i, nump;
+	float dot, scale, *pv;
+	vec5_t *pverts;
+	vec3_t left, up, right, down, transformed, local;
+	emitpoint_t outverts[MAXWORKINGVERTS + 1], *pout;
 
-	dot = DotProduct (r_spritedesc.vpn, v->modelorg);
+	dot = DotProduct(r_spritedesc.vpn, v->modelorg);
 
 	// backface cull
-	if (dot >= 0)
+	if(dot >= 0)
 		return;
 
 	// build the sprite poster in worldspace
-	VectorScale (r_spritedesc.vright, r_spritedesc.pspriteframe->right, right);
-	VectorScale (r_spritedesc.vup, r_spritedesc.pspriteframe->up, up);
-	VectorScale (r_spritedesc.vright, r_spritedesc.pspriteframe->left, left);
-	VectorScale (r_spritedesc.vup, r_spritedesc.pspriteframe->down, down);
+	VectorScale(r_spritedesc.vright, r_spritedesc.pspriteframe->right, right);
+	VectorScale(r_spritedesc.vup, r_spritedesc.pspriteframe->up, up);
+	VectorScale(r_spritedesc.vright, r_spritedesc.pspriteframe->left, left);
+	VectorScale(r_spritedesc.vup, r_spritedesc.pspriteframe->down, down);
 
 	pverts = clip_verts[0];
 
@@ -164,12 +139,11 @@ R_SetupAndDrawSprite(view_t *v)
 	nump = 4;
 	clip_current = 0;
 
-	for (i=0 ; i<4 ; i++)
-	{
-		nump = R_ClipSpriteFace (nump, &v->clipplanes[i]);
-		if (nump < 3)
+	for(i = 0; i < 4; i++) {
+		nump = R_ClipSpriteFace(nump, &v->clipplanes[i]);
+		if(nump < 3)
 			return;
-		if (nump >= MAXWORKINGVERTS)
+		if(nump >= MAXWORKINGVERTS)
 			fatal("R_SetupAndDrawSprite: too many points");
 	}
 
@@ -177,17 +151,16 @@ R_SetupAndDrawSprite(view_t *v)
 	pv = &clip_verts[clip_current][0][0];
 	r_spritedesc.nearzi = -Q_MAXFLOAT;
 
-	for (i=0 ; i<nump ; i++)
-	{
+	for(i = 0; i < nump; i++) {
 		VectorSubtract(pv, v->org, local);
 		TransformVector(local, transformed, v);
 
-		if (transformed[2] < NEAR_CLIP)
+		if(transformed[2] < NEAR_CLIP)
 			transformed[2] = NEAR_CLIP;
 
 		pout = &outverts[i];
 		pout->zi = 1.0 / transformed[2];
-		if (pout->zi > r_spritedesc.nearzi)
+		if(pout->zi > r_spritedesc.nearzi)
 			r_spritedesc.nearzi = pout->zi;
 
 		pout->s = pv[3];
@@ -199,7 +172,7 @@ R_SetupAndDrawSprite(view_t *v)
 		scale = yscale * pout->zi;
 		pout->v = (ycenter - scale * transformed[1]);
 
-		pv += sizeof (vec5_t) / sizeof (*pv);
+		pv += sizeof(vec5_t) / sizeof(*pv);
 	}
 
 	// draw it
@@ -208,38 +181,28 @@ R_SetupAndDrawSprite(view_t *v)
 	D_DrawSprite(v);
 }
 
-
-/*
-================
-R_GetSpriteframe
-================
-*/
 static mspriteframe_t *
 R_GetSpriteframe(msprite_t *psprite)
 {
-	mspritegroup_t	*pspritegroup;
-	mspriteframe_t	*pspriteframe;
-	int				i, numframes, frame;
-	float			*pintervals, fullinterval, targettime, time;
+	mspritegroup_t *pspritegroup;
+	mspriteframe_t *pspriteframe;
+	int i, numframes, frame;
+	float *pintervals, fullinterval, targettime, time;
 
 	frame = currententity->frame;
 
-	if ((frame >= psprite->numframes) || (frame < 0))
-	{
-		Con_DPrintf ("R_DrawSprite: no such frame %d\n", frame);
+	if((frame >= psprite->numframes) || (frame < 0)) {
+		Con_DPrintf("R_DrawSprite: no such frame %d\n", frame);
 		frame = 0;
 	}
 
-	if (psprite->frames[frame].type == SPR_SINGLE)
-	{
+	if(psprite->frames[frame].type == SPR_SINGLE)
 		pspriteframe = psprite->frames[frame].frameptr;
-	}
-	else
-	{
+	else {
 		pspritegroup = (mspritegroup_t *)psprite->frames[frame].frameptr;
 		pintervals = pspritegroup->intervals;
 		numframes = pspritegroup->numframes;
-		fullinterval = pintervals[numframes-1];
+		fullinterval = pintervals[numframes - 1];
 
 		time = cl.time + currententity->syncbase;
 
@@ -247,9 +210,8 @@ R_GetSpriteframe(msprite_t *psprite)
 		// are positive, so we don't have to worry about division by 0
 		targettime = time - ((int)(time / fullinterval)) * fullinterval;
 
-		for (i=0 ; i<(numframes-1) ; i++)
-		{
-			if (pintervals[i] > targettime)
+		for(i = 0; i < (numframes - 1); i++) {
+			if(pintervals[i] > targettime)
 				break;
 		}
 
@@ -259,29 +221,23 @@ R_GetSpriteframe(msprite_t *psprite)
 	return pspriteframe;
 }
 
-/*
-================
-R_DrawSprite
-================
-*/
 void
 R_DrawSprite(view_t *v)
 {
-	int				i;
-	msprite_t		*psprite;
-	vec3_t			tvec;
-	float			dot, angle, sr, cr;
+	int i;
+	msprite_t *psprite;
+	vec3_t tvec;
+	float dot, angle, sr, cr;
 
 	psprite = currententity->model->cache.data;
 
-	r_spritedesc.pspriteframe = R_GetSpriteframe (psprite);
+	r_spritedesc.pspriteframe = R_GetSpriteframe(psprite);
 
 	sprite_width = r_spritedesc.pspriteframe->width;
 	sprite_height = r_spritedesc.pspriteframe->height;
 
 	// TODO: make this caller-selectable
-	if (psprite->type == SPR_FACING_UPRIGHT)
-	{
+	if(psprite->type == SPR_FACING_UPRIGHT) {
 		// generate the sprite's axes, with vup straight up in worldspace, and
 		// r_spritedesc.vright perpendicular to modelorg.
 		// This will not work if the view direction is very close to straight up or
@@ -291,93 +247,76 @@ R_DrawSprite(view_t *v)
 		tvec[0] = -v->modelorg[0];
 		tvec[1] = -v->modelorg[1];
 		tvec[2] = -v->modelorg[2];
-		VectorNormalize (tvec);
-		dot = tvec[2];	// same as DotProduct (tvec, r_spritedesc.vup) because
-						//  r_spritedesc.vup is 0, 0, 1
-		if ((dot > 0.999848) || (dot < -0.999848))	// cosf(1 degree) = 0.999848
+		VectorNormalize(tvec);
+		dot = tvec[2]; // same as DotProduct(tvec, r_spritedesc.vup) because r_spritedesc.vup is 0,
+					   // 0, 1
+		if((dot > 0.999848) || (dot < -0.999848)) // cosf(1 degree) = 0.999848
 			return;
 		r_spritedesc.vup[0] = 0;
 		r_spritedesc.vup[1] = 0;
 		r_spritedesc.vup[2] = 1;
-		r_spritedesc.vright[0] = tvec[1];
-								// CrossProduct(r_spritedesc.vup, -v->modelorg,
-		r_spritedesc.vright[1] = -tvec[0];
-								//              r_spritedesc.vright)
+		r_spritedesc.vright[0] = tvec[1]; // CrossProduct(r_spritedesc.vup, -v->modelorg,
+		r_spritedesc.vright[1] = -tvec[0]; //  r_spritedesc.vright)
 		r_spritedesc.vright[2] = 0;
-		VectorNormalize (r_spritedesc.vright);
+		VectorNormalize(r_spritedesc.vright);
 		r_spritedesc.vpn[0] = -r_spritedesc.vright[1];
 		r_spritedesc.vpn[1] = r_spritedesc.vright[0];
 		r_spritedesc.vpn[2] = 0;
-					// CrossProduct (r_spritedesc.vright, r_spritedesc.vup,
-					//  r_spritedesc.vpn)
-	}
-	else if (psprite->type == SPR_VP_PARALLEL)
-	{
+		// CrossProduct(r_spritedesc.vright, r_spritedesc.vup,
+		//  r_spritedesc.vpn)
+	} else if(psprite->type == SPR_VP_PARALLEL) {
 		// generate the sprite's axes, completely parallel to the viewplane. There
 		// are no problem situations, because the sprite is always in the same
 		// position relative to the viewer
-		for (i=0 ; i<3 ; i++)
-		{
+		for(i = 0; i < 3; i++) {
 			r_spritedesc.vup[i] = v->up[i];
 			r_spritedesc.vright[i] = v->right[i];
 			r_spritedesc.vpn[i] = v->pn[i];
 		}
-	}
-	else if (psprite->type == SPR_VP_PARALLEL_UPRIGHT)
-	{
+	} else if(psprite->type == SPR_VP_PARALLEL_UPRIGHT) {
 		// generate the sprite's axes, with vup straight up in worldspace, and
 		// r_spritedesc.vright parallel to the viewplane.
 		// This will not work if the view direction is very close to straight up or
 		// down, because the cross product will be between two nearly parallel
 		// vectors and starts to approach an undefined state, so we don't draw if
 		// the two vectors are less than 1 degree apart
-		dot = v->pn[2];
-		// same as DotProduct (v->pn, r_spritedesc.vup) because
-		//  r_spritedesc.vup is 0, 0, 1
-		if ((dot > 0.999848) || (dot < -0.999848))	// cosf(1 degree) = 0.999848
+		dot = v->pn[2]; // same as DotProduct(v->pn, r_spritedesc.vup) because r_spritedesc.vup is
+						// 0, 0, 1
+		if((dot > 0.999848) || (dot < -0.999848)) // cosf(1 degree) = 0.999848
 			return;
 		r_spritedesc.vup[0] = 0;
 		r_spritedesc.vup[1] = 0;
 		r_spritedesc.vup[2] = 1;
-		r_spritedesc.vright[0] = v->pn[1];
-										// CrossProduct (r_spritedesc.vup, v->vpn,
-		r_spritedesc.vright[1] = -v->pn[0];	//  r_spritedesc.vright)
+		r_spritedesc.vright[0] = v->pn[1]; // CrossProduct(r_spritedesc.vup, v->vpn,
+		r_spritedesc.vright[1] = -v->pn[0]; //  r_spritedesc.vright)
 		r_spritedesc.vright[2] = 0;
-		VectorNormalize (r_spritedesc.vright);
+		VectorNormalize(r_spritedesc.vright);
 		r_spritedesc.vpn[0] = -r_spritedesc.vright[1];
 		r_spritedesc.vpn[1] = r_spritedesc.vright[0];
 		r_spritedesc.vpn[2] = 0;
-					// CrossProduct (r_spritedesc.vright, r_spritedesc.vup,
-					//  r_spritedesc.vpn)
-	}
-	else if (psprite->type == SPR_ORIENTED)
-	{
+		// CrossProduct(r_spritedesc.vright, r_spritedesc.vup,
+		//  r_spritedesc.vpn)
+	} else if(psprite->type == SPR_ORIENTED) {
 		// generate the sprite's axes, according to the sprite's world orientation
-		AngleVectors (currententity->angles, r_spritedesc.vpn,
-					  r_spritedesc.vright, r_spritedesc.vup);
-	}
-	else if (psprite->type == SPR_VP_PARALLEL_ORIENTED)
-	{
+		AngleVectors(
+			currententity->angles, r_spritedesc.vpn, r_spritedesc.vright, r_spritedesc.vup
+		);
+	} else if(psprite->type == SPR_VP_PARALLEL_ORIENTED) {
 		// generate the sprite's axes, parallel to the viewplane, but rotated in
 		// that plane around the center according to the sprite entity's roll
 		// angle. So vpn stays the same, but vright and vup rotate
-		angle = currententity->angles[ROLL] * (M_PI*2 / 360);
+		angle = currententity->angles[ROLL] * (M_PI * 2 / 360);
 		sr = sinf(angle);
 		cr = cosf(angle);
-
-		for (i=0 ; i<3 ; i++)
-		{
+		for(i = 0; i < 3; i++) {
 			r_spritedesc.vpn[i] = v->pn[i];
 			r_spritedesc.vright[i] = v->right[i] * cr + v->up[i] * sr;
 			r_spritedesc.vup[i] = v->right[i] * -sr + v->up[i] * cr;
 		}
-	}
-	else
-	{
-		fatal ("R_DrawSprite: Bad sprite type %d", psprite->type);
+	} else {
+		fatal("R_DrawSprite: Bad sprite type %d", psprite->type);
 	}
 
 	R_RotateSprite(psprite->beamlength, v);
 	R_SetupAndDrawSprite(v);
 }
-

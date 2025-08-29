@@ -1,3 +1,5 @@
+#pragma once
+
 void BSP_MakeHull0(model_t *mod);
 void BSP_SetParent(mnode_t *node, mnode_t *parent);
 int BSP_CalcSurfaceExtents(model_t *mod, msurface_t *s);

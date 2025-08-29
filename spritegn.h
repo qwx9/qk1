@@ -1,4 +1,6 @@
-// spritegn.h: header file for sprite generation program
+#pragma once
+
+// header file for sprite generation program
 
 enum {
 	SPRITE_VERSION = 1,
@@ -14,7 +16,7 @@ enum {
 typedef enum {
 	SPR_SINGLE,
 	SPR_GROUP,
-}spriteframetype_t;
+} spriteframetype_t;
 
-#define IDSPRITEHEADER	(('P'<<24)+('S'<<16)+('D'<<8)+'I')
+#define IDSPRITEHEADER (('P' << 24) + ('S' << 16) + ('D' << 8) + 'I')
 // little-endian "IDSP"

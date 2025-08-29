@@ -2,7 +2,8 @@
 #include <thread.h>
 
 typedef struct Mixbuf Mixbuf;
-struct Mixbuf{
+
+struct Mixbuf {
 	byte *buf;
 	long sz;
 };
@@ -27,11 +28,11 @@ auproc(void *p)
 	Mixbuf m;
 	long n;
 
-	for(;;){
+	for(;;) {
 		if(recv(p, &m) < 0)
 			break;
 		n = write(afd, m.buf, m.sz);
-		if(n != m.sz){
+		if(n != m.sz) {
 			Con_DPrintf("sndwrite: %r\n");
 			break;
 		}
@@ -58,7 +59,7 @@ sndwrite(byte *buf, long sz)
 void
 sndclose(void)
 {
-	if(ach != nil){
+	if(ach != nil) {
 		chanclose(ach);
 		close(afd);
 		afd = -1;

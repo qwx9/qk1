@@ -37,7 +37,7 @@ RadiusFromBounds(vec3_t mins, vec3_t maxs)
 	vec3_t corner;
 	float fmin, fmax;
 
-	for(i=0 ; i<3 ; i++){
+	for(i = 0; i < 3; i++) {
 		fmin = fabs(mins[i]);
 		fmax = fabs(maxs[i]);
 		corner[i] = max(fmin, fmax);
@@ -93,62 +93,61 @@ Mod_LoadBrushModel(model_t *mod, byte *in0, int total)
 	mod->type = mod_brush;
 	mod->ver = le32(in);
 	mod->leafs = nil;
-	if(mod->ver == BSPVERSION){
+	if(mod->ver == BSPVERSION) {
 		// all set
-	}else if(mod->ver == BSP30VERSION){
-		loadf[LUMP_ENTITIES] = BSP30_LoadEntities,
-		loadf[LUMP_FACES] = BSP30_LoadFaces;
+	} else if(mod->ver == BSP30VERSION) {
+		loadf[LUMP_ENTITIES] = BSP30_LoadEntities, loadf[LUMP_FACES] = BSP30_LoadFaces;
 		loadf[LUMP_LIGHTING] = BSP30_LoadLighting;
 		loadf[LUMP_TEXTURES] = BSP30_LoadTextures;
-	}else if(mod->ver == BSP2VERSION){
+	} else if(mod->ver == BSP2VERSION) {
 		loadf[LUMP_EDGES] = BSP2_LoadEdges;
 		loadf[LUMP_FACES] = BSP2_LoadFaces;
 		loadf[LUMP_MARKSURFACES] = BSP2_LoadMarksurfaces;
 		loadf[LUMP_LEAFS] = BSP2_LoadLeafs;
 		loadf[LUMP_NODES] = BSP2_LoadNodes;
 		loadf[LUMP_CLIPNODES] = BSP2_LoadClipnodes;
-	}else{
+	} else {
 		werrstr("unsupported version: %d", mod->ver);
 		goto err;
 	}
 
-	if(total < 4+nelem(loadf)*2*4){
+	if(total < 4 + nelem(loadf) * 2 * 4) {
 		werrstr("truncated: total=%d", total);
 		goto err;
 	}
 
-	for(i = 0; i < nelem(loadf); i++){
-		in = in0+4+2*4*order[i];
+	for(i = 0; i < nelem(loadf); i++) {
+		in = in0 + 4 + 2 * 4 * order[i];
 		off = le32(in);
 		sz = le32(in);
-		if(off < 0 || sz < 0 || off+sz > total){
+		if(off < 0 || sz < 0 || off + sz > total) {
 			werrstr("invalid lump off=%d sz=%d total=%d", off, sz, total);
 			goto err;
 		}
-		if(loadf[order[i]](mod, in0+off, sz) != 0)
+		if(loadf[order[i]](mod, in0 + off, sz) != 0)
 			goto err;
 	}
 
 	BSP_MakeHull0(mod);
 
-	mod->numframes = 2;		// regular and alternate animation
+	mod->numframes = 2; // regular and alternate animation
 	mod->flags = 0;
 
 	// set up the submodels (FIXME: this is confusing)
-	for(i = 0; i < mod->numsubmodels; i++){
+	for(i = 0; i < mod->numsubmodels; i++) {
 		bm = &mod->submodels[i];
 
 		mod->hulls[0].firstclipnode = bm->headnode[0];
-		for(j = 1; j < MAX_MAP_HULLS; j++){
+		for(j = 1; j < MAX_MAP_HULLS; j++) {
 			mod->hulls[j].firstclipnode = bm->headnode[j];
-			mod->hulls[j].lastclipnode = mod->numclipnodes-1;
+			mod->hulls[j].lastclipnode = mod->numclipnodes - 1;
 		}
 
 		mod->firstmodelsurface = bm->firstface;
 		mod->nummodelsurfaces = bm->numfaces;
 		mod->blend = false;
-		for(j = bm->firstface; j < bm->firstface+bm->numfaces; j++){
-			if(mod->surfaces[j].flags & SURF_TRANS){
+		for(j = bm->firstface; j < bm->firstface + bm->numfaces; j++) {
+			if(mod->surfaces[j].flags & SURF_TRANS) {
 				mod->blend = true;
 				break;
 			}
@@ -159,8 +158,8 @@ Mod_LoadBrushModel(model_t *mod, byte *in0, int total)
 		mod->radius = RadiusFromBounds(mod->mins, mod->maxs);
 		mod->numleafs = bm->visleafs;
 
-		if(i < mod->numsubmodels-1){
-			snprint(name, sizeof(name), "*%d", i+1);
+		if(i < mod->numsubmodels - 1) {
+			snprint(name, sizeof(name), "*%d", i + 1);
 			submod = Mod_FindName(name);
 			*submod = *mod;
 			strcpy(submod->name, name);

@@ -19,7 +19,8 @@ nrand(int n)
 int
 mkdir(const char *path, mode_t mode)
 {
-	USED(path); USED(mode);
+	USED(path);
+	USED(mode);
 	return -1;
 }
 
@@ -28,7 +29,7 @@ isdisabled(char *s)
 {
 	int i;
 
-	for(i = 0; i < ndisabled; i++){
+	for(i = 0; i < ndisabled; i++) {
 		if(strcmp(disabled[i], s) == 0)
 			return true;
 	}
@@ -60,9 +61,16 @@ sys_timestamp(void)
 
 	if((t = time(nil)) == (time_t)-1 || (tm = localtime(&t)) == nil)
 		return nil;
-	snprint(ts, sizeof(ts),
+	snprint(
+		ts,
+		sizeof(ts),
 		"%04d%02d%02d-%02d%02d%02d",
-		tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday, tm->tm_hour, tm->tm_min, tm->tm_sec
+		tm->tm_year + 1900,
+		tm->tm_mon + 1,
+		tm->tm_mday,
+		tm->tm_hour,
+		tm->tm_min,
+		tm->tm_sec
 	);
 
 	return ts;
@@ -100,7 +108,7 @@ nanosec(void)
 double
 dtime(void)
 {
-	return nanosec()/1000000000.0;
+	return nanosec() / 1000000000.0;
 }
 
 void
@@ -128,10 +136,10 @@ main(int argc, char **argv)
 	Host_Init(nargs, argv, paths);
 
 	t = dtime() - 1.0 / Fpsmax;
-	for(;;){
+	for(;;) {
 		t2 = dtime();
 		dt = t2 - t;
-		if(cls.state == ca_dedicated){
+		if(cls.state == ca_dedicated) {
 			if(dt < sys_ticrate.value)
 				continue;
 			dt = sys_ticrate.value;

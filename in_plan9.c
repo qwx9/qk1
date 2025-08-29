@@ -10,13 +10,15 @@ extern Rectangle grabr;
 
 typedef struct Kev Kev;
 
-enum{
+enum {
 	Nbuf = 20
 };
-struct Kev{
+
+struct Kev {
 	int key;
 	int down;
 };
+
 static Channel *inchan;
 static QLock mlck;
 
@@ -34,7 +36,7 @@ conscmd(void)
 
 	if(cls.state != ca_dedicated)
 		return;
-	while(p = nbrecvp(inchan), p != nil){
+	while(p = nbrecvp(inchan), p != nil) {
 		Cbuf_AddText(p);
 		free(p);
 	}
@@ -48,10 +50,10 @@ cproc(void *)
 
 	if(bf = Bfdopen(0, OREAD), bf == nil)
 		sysfatal("Bfdopen: %r");
-	for(;;){
+	for(;;) {
 		if(s = Brdstr(bf, '\n', 1), s == nil)
 			break;
-		if(sendp(inchan, s) < 0){
+		if(sendp(inchan, s) < 0) {
 			free(s);
 			break;
 		}
@@ -67,7 +69,7 @@ Sys_SendKeyEvents(void)
 
 	if(cls.state == ca_dedicated)
 		return;
-	if(oldmwin != (int)m_windowed.value){
+	if(oldmwin != (int)m_windowed.value) {
 		oldmwin = (int)m_windowed.value;
 		IN_Grabm(oldmwin);
 	}
@@ -89,11 +91,11 @@ IN_Commands(void)
 	b = mb;
 	qunlock(&mlck);
 	b = b & 0x19 | (b & 2) << 1 | (b & 4) >> 1;
-	for(i=0, k=K_MOUSE1; i<5; i++, k++){
+	for(i = 0, k = K_MOUSE1; i < 5; i++, k++) {
 		if(i == 3)
 			k = K_MWHEELUP;
-		r = b & 1<<i;
-		if(r ^ oldmb & 1<<i)
+		r = b & 1 << i;
+		if(r ^ oldmb & 1 << i)
 			Key_Event(k, r);
 	}
 	oldmb = b & 7;
@@ -112,7 +114,7 @@ IN_Move(usercmd_t *cmd)
 	mΔx = 0;
 	mΔy = 0;
 	qunlock(&mlck);
-	if(m_filter.value){
+	if(m_filter.value) {
 		dx = (dx + olddx) * 0.5;
 		dy = (dy + olddy) * 0.5;
 	}
@@ -126,10 +128,10 @@ IN_Move(usercmd_t *cmd)
 		cl.viewangles[YAW] -= m_yaw.value * dx;
 	if(in_mlook.state & 1)
 		V_StopPitchDrift();
-	if(in_mlook.state & 1 && ~in_strafe.state & 1){
+	if(in_mlook.state & 1 && ~in_strafe.state & 1) {
 		cl.viewangles[PITCH] += m_pitch.value * dy;
 		cl.viewangles[PITCH] = clamp(cl.viewangles[PITCH], -MAX_PITCH, MAX_PITCH);
-	}else{
+	} else {
 		if(in_strafe.state & 1 && noclip_anglehack)
 			cmd->upmove -= m_forward.value * dy;
 		else
@@ -142,39 +144,101 @@ runetokey(Rune r)
 {
 	int k = 0;
 
-	switch(r){
-	case Kpgup:	k = K_PGUP; break;
-	case Kpgdown:	k = K_PGDN; break;
-	case Khome:	k = K_HOME; break;
-	case Kend:	k = K_END; break;
-	case Kleft:	k = K_LEFTARROW; break;
-	case Kright:	k = K_RIGHTARROW; break;
-	case Kdown:	k = K_DOWNARROW; break;
-	case Kup:	k = K_UPARROW; break;
-	case Kesc:	k = K_ESCAPE; break;
-	case '\n':	k = K_ENTER; break;
-	case '\t':	k = K_TAB; break;
-	case KF|1:	k = K_F1; break;
-	case KF|2:	k = K_F2; break;
-	case KF|3:	k = K_F3; break;
-	case KF|4:	k = K_F4; break;
-	case KF|5:	k = K_F5; break;
-	case KF|6:	k = K_F6; break;
-	case KF|7:	k = K_F7; break;
-	case KF|8:	k = K_F8; break;
-	case KF|9:	k = K_F9; break;
-	case KF|10:	k = K_F10; break;
-	case KF|11:	k = K_F11; break;
-	case KF|12:	k = K_F12; break;
-	case Kbs:	k = K_BACKSPACE; break;
-	case Kdel:	k = K_DEL; break;
-	case Kbreak:	k = K_PAUSE; break;
-	case Kshift:	k = K_SHIFT; break;
-	case Kctl:	k = K_CTRL; break;
+	switch(r) {
+	case Kpgup:
+		k = K_PGUP;
+		break;
+	case Kpgdown:
+		k = K_PGDN;
+		break;
+	case Khome:
+		k = K_HOME;
+		break;
+	case Kend:
+		k = K_END;
+		break;
+	case Kleft:
+		k = K_LEFTARROW;
+		break;
+	case Kright:
+		k = K_RIGHTARROW;
+		break;
+	case Kdown:
+		k = K_DOWNARROW;
+		break;
+	case Kup:
+		k = K_UPARROW;
+		break;
+	case Kesc:
+		k = K_ESCAPE;
+		break;
+	case '\n':
+		k = K_ENTER;
+		break;
+	case '\t':
+		k = K_TAB;
+		break;
+	case KF | 1:
+		k = K_F1;
+		break;
+	case KF | 2:
+		k = K_F2;
+		break;
+	case KF | 3:
+		k = K_F3;
+		break;
+	case KF | 4:
+		k = K_F4;
+		break;
+	case KF | 5:
+		k = K_F5;
+		break;
+	case KF | 6:
+		k = K_F6;
+		break;
+	case KF | 7:
+		k = K_F7;
+		break;
+	case KF | 8:
+		k = K_F8;
+		break;
+	case KF | 9:
+		k = K_F9;
+		break;
+	case KF | 10:
+		k = K_F10;
+		break;
+	case KF | 11:
+		k = K_F11;
+		break;
+	case KF | 12:
+		k = K_F12;
+		break;
+	case Kbs:
+		k = K_BACKSPACE;
+		break;
+	case Kdel:
+		k = K_DEL;
+		break;
+	case Kbreak:
+		k = K_PAUSE;
+		break;
+	case Kshift:
+		k = K_SHIFT;
+		break;
+	case Kctl:
+		k = K_CTRL;
+		break;
 	case Kalt:
-	case Kaltgr:	k = K_ALT; break;
-	case Kins:	k = K_INS; break;
-	case L'§':	k = '~'; break;
+	case Kaltgr:
+		k = K_ALT;
+		break;
+	case Kins:
+		k = K_INS;
+		break;
+	case L'§':
+		k = '~';
+		break;
 	default:
 		if(r < 0x80)
 			k = r;
@@ -197,18 +261,18 @@ kproc(void *)
 	memset(kdown, 0, sizeof kdown);
 	evc.key = K_ENTER;
 	evc.down = true;
-	for(;;){
-		if(buf[0] != 0){
-			n = strlen(buf)+1;
-			memmove(buf, buf+n, sizeof(buf)-n);
+	for(;;) {
+		if(buf[0] != 0) {
+			n = strlen(buf) + 1;
+			memmove(buf, buf + n, sizeof(buf) - n);
 		}
-		if(buf[0] == 0){
-			if(n = read(fd, buf, sizeof(buf)-1), n <= 0)
+		if(buf[0] == 0) {
+			if(n = read(fd, buf, sizeof(buf) - 1), n <= 0)
 				break;
-			buf[n-1] = 0;
+			buf[n - 1] = 0;
 			buf[n] = 0;
 		}
-		switch(buf[0]){
+		switch(buf[0]) {
 		case 'c':
 			if(send(inchan, &evc) < 0)
 				threadexits(nil);
@@ -216,18 +280,18 @@ kproc(void *)
 			continue;
 		case 'k':
 			ev.down = true;
-			s = buf+1;
-			p = kdown+1;
+			s = buf + 1;
+			p = kdown + 1;
 			break;
 		case 'K':
 			ev.down = false;
-			s = kdown+1;
-			p = buf+1;
+			s = kdown + 1;
+			p = buf + 1;
 			break;
 		}
-		while(*s != 0){
+		while(*s != 0) {
 			s += chartorune(&r, s);
-			if(utfrune(p, r) == nil){
+			if(utfrune(p, r) == nil) {
 				k = runetokey(r);
 				if(k == 0)
 					continue;
@@ -246,7 +310,7 @@ static void
 mproc(void *)
 {
 	int b, n, nerr, fd;
-	char buf[1+5*12];
+	char buf[1 + 5 * 12];
 	Point p, o;
 
 	fd = open("/dev/mouse", ORDWR);
@@ -254,35 +318,35 @@ mproc(void *)
 		sysfatal("open /dev/mouse: %r");
 	nerr = 0;
 	o = center;
-	for(;;){
-		if(n = read(fd, buf, sizeof buf), n != 1+4*12){
+	for(;;) {
+		if(n = read(fd, buf, sizeof buf), n != 1 + 4 * 12) {
 			if(n < 0 || ++nerr > 10)
 				break;
 			Con_DPrintf("mproc: bad count %d not 49: %r\n", n);
 			continue;
 		}
 		nerr = 0;
-		switch(*buf){
+		switch(*buf) {
 		case 'r':
 			vid.resized = true;
 			/* fall through */
 		case 'm':
 			if(!mouseon)
 				break;
-			if(fixms){
+			if(fixms) {
 				fixms = 0;
 				goto res;
 			}
-			p.x = atoi(buf+1+0*12);
-			p.y = atoi(buf+1+1*12);
-			b = atoi(buf+1+2*12);
+			p.x = atoi(buf + 1 + 0 * 12);
+			p.y = atoi(buf + 1 + 1 * 12);
+			b = atoi(buf + 1 + 2 * 12);
 			qlock(&mlck);
 			mΔx += p.x - o.x;
 			mΔy += p.y - o.y;
 			mb = b;
 			qunlock(&mlck);
-			if(!ptinrect(p, grabr)){
-		res:
+			if(!ptinrect(p, grabr)) {
+res:
 				fprint(fd, "m%d %d", center.x, center.y);
 				p = center;
 			}
@@ -295,20 +359,20 @@ mproc(void *)
 void
 IN_Grabm(int on)
 {
-	static char nocurs[2*4+2*2*16];
+	static char nocurs[2 * 4 + 2 * 2 * 16];
 	static int fd = -1;
 
 	if(mouseon == on)
 		return;
-	if(mouseon = on && m_windowed.value){
-		fd = open("/dev/cursor", ORDWR|OCEXEC);
-		if(fd < 0){
+	if(mouseon = on && m_windowed.value) {
+		fd = open("/dev/cursor", ORDWR | OCEXEC);
+		if(fd < 0) {
 			Con_DPrintf("IN_Grabm:open: %r\n");
 			return;
 		}
 		write(fd, nocurs, sizeof nocurs);
 		fixms++;
-	}else if(fd >= 0){
+	} else if(fd >= 0) {
 		close(fd);
 		fd = -1;
 	}
@@ -325,7 +389,7 @@ IN_Shutdown(void)
 void
 IN_Init(void)
 {
-	if(cls.state == ca_dedicated){
+	if(cls.state == ca_dedicated) {
 		if(inchan = chancreate(sizeof(void *), 2), inchan == nil)
 			sysfatal("chancreate: %r");
 		if(proccreate(cproc, nil, 8192) < 0)

@@ -13,7 +13,7 @@ Tgetkv(Tbl *t, const char *key, int len, const char **pkey, void **pval)
 {
 	if(t == nil)
 		return false;
-	while(isbranch(t)){
+	while(isbranch(t)) {
 		Tindex i = t->index;
 		Tbitmap b = twigbit(i, key, len);
 		if(!hastwig(i, b))
@@ -31,26 +31,27 @@ static bool
 next_rec(Trie *t, const char **pkey, int *plen, void **pval)
 {
 	Tindex i = t->index;
-	if(Tindex_branch(i)){
+	if(Tindex_branch(i)) {
 		// Recurse to find either this leaf (*pkey != nil)
 		// or the next one (*pkey == nil).
 		Tbitmap b = twigbit(i, *pkey, *plen);
-		u32int s, m; TWIGOFFMAX(s, m, i, b);
-		for(; s < m; s++){
-			if(next_rec(Tbranch_twigs(t)+s, pkey, plen, pval))
+		u32int s, m;
+		TWIGOFFMAX(s, m, i, b);
+		for(; s < m; s++) {
+			if(next_rec(Tbranch_twigs(t) + s, pkey, plen, pval))
 				return true;
 		}
 		return false;
 	}
 	// We have found the next leaf.
-	if(*pkey == nil){
+	if(*pkey == nil) {
 		*pkey = Tleaf_key(t);
 		*plen = strlen(*pkey);
 		*pval = Tleaf_val(t);
 		return true;
 	}
 	// We have found this leaf, so start looking for the next one.
-	if(strcmp(*pkey, Tleaf_key(t)) == 0){
+	if(strcmp(*pkey, Tleaf_key(t)) == 0) {
 		*pkey = nil;
 		*plen = 0;
 		return false;
@@ -62,7 +63,7 @@ next_rec(Trie *t, const char **pkey, int *plen, void **pval)
 bool
 Tnextl(Tbl *tbl, const char **pkey, int *plen, void **pval)
 {
-	if(tbl == nil){
+	if(tbl == nil) {
 		*pkey = nil;
 		*plen = 0;
 		return false;
@@ -78,31 +79,32 @@ Tdelkv(Tbl *tbl, const char *key, int len, const char **pkey, void **pval)
 	Trie *t = tbl, *p = nil;
 	Tindex i = 0;
 	Tbitmap b = 0;
-	while(isbranch(t)){
+	while(isbranch(t)) {
 		i = t->index;
 		b = twigbit(i, key, len);
 		if(!hastwig(i, b))
 			return tbl;
-		p = t; t = Tbranch_twigs(t) + twigoff(i, b);
+		p = t;
+		t = Tbranch_twigs(t) + twigoff(i, b);
 	}
 	if(strcmp(key, Tleaf_key(t)) != 0)
 		return tbl;
 	*pkey = Tleaf_key(t);
 	*pval = Tleaf_val(t);
-	if(p == nil){
+	if(p == nil) {
 		free(tbl);
 		return nil;
 	}
 	Trie *twigs = Tbranch_twigs(p);
 	u32int m = __builtin_popcount(Tindex_bitmap(i));
-	assert(twigs <= t && t < twigs+m);
-	if(m == 2){
+	assert(twigs <= t && t < twigs + m);
+	if(m == 2) {
 		// Move the other twig to the parent branch.
 		*p = twigs[twigs == t];
 		free(twigs);
 		return tbl;
 	}
-	memmove(t, t+1, ((twigs + m) - (t + 1)) * sizeof(Trie));
+	memmove(t, t + 1, ((twigs + m) - (t + 1)) * sizeof(Trie));
 	p->index = Tbitmap_del(i, b);
 	// We have now correctly removed the twig from the trie, so if
 	// realloc() fails we can ignore it and continue to use the
@@ -120,7 +122,7 @@ Tsetl(Tbl *tbl, const char *key, int len, void *val)
 	if(val == nil)
 		return Tdell(tbl, key, len);
 	// First leaf in an empty tbl?
-	if(tbl == nil){
+	if(tbl == nil) {
 		tbl = malloc(sizeof(*tbl));
 		if(tbl == nil)
 			return nil;
@@ -133,7 +135,7 @@ Tsetl(Tbl *tbl, const char *key, int len, void *val)
 	// its key with our new key to find the first differing nibble,
 	// which can be at a lower index than the point at which we
 	// detect a difference.
-	while(isbranch(t)){
+	while(isbranch(t)) {
 		Tindex i = t->index;
 		Tbitmap b = twigbit(i, key, len);
 		// Even if our key is missing from this branch we need to
@@ -147,7 +149,7 @@ Tsetl(Tbl *tbl, const char *key, int len, void *val)
 	// Do the keys differ, and if so, where?
 	u32int off, xor, shf;
 	const char *tkey = Tleaf_key(t);
-	for(off = 0; off <= (u32int)len; off++){
+	for(off = 0; off <= (u32int)len; off++) {
 		xor = (u8int)key[off] ^ (u8int)tkey[off];
 		if(xor != 0)
 			goto newkey;
@@ -160,8 +162,8 @@ newkey:; // We have the branch's byte index; what is its chunk index?
 	off = qo * 5 / 8;
 	shf = qo * 5 % 8;
 	// re-index keys with adjusted offset
-	Tbitmap nb = 1U << knybble(key,off,shf);
-	Tbitmap tb = 1U << knybble(tkey,off,shf);
+	Tbitmap nb = 1U << knybble(key, off, shf);
+	Tbitmap tb = 1U << knybble(tkey, off, shf);
 	// Prepare the new leaf.
 	Trie nt;
 	Tset_key(&nt, key);
@@ -169,7 +171,7 @@ newkey:; // We have the branch's byte index; what is its chunk index?
 	// Find where to insert a branch or grow an existing branch.
 	t = tbl;
 	Tindex i;
-	while(isbranch(t)){
+	while(isbranch(t)) {
 		i = t->index;
 		if(off == Tindex_offset(i) && shf == Tindex_shift(i))
 			goto growbranch;
@@ -193,12 +195,13 @@ newbranch:;
 	return tbl;
 growbranch:
 	assert(!hastwig(i, nb));
-	u32int s, m; TWIGOFFMAX(s, m, i, nb);
+	u32int s, m;
+	TWIGOFFMAX(s, m, i, nb);
 	twigs = realloc(Tbranch_twigs(t), sizeof(Trie) * (m + 1));
 	if(twigs == nil)
 		return nil;
-	memmove(twigs+s+1, twigs+s, sizeof(Trie) * (m - s));
-	memmove(twigs+s, &nt, sizeof(Trie));
+	memmove(twigs + s + 1, twigs + s, sizeof(Trie) * (m - s));
+	memmove(twigs + s, &nt, sizeof(Trie));
 	Tset_twigs(t, twigs);
 	Tset_index(t, Tbitmap_add(i, nb));
 	return tbl;

@@ -1,7 +1,7 @@
 #include "quakedef.h"
 #include <thread.h>
 
-int mainstacksize = 1*1024*1024;
+int mainstacksize = 1 * 1024 * 1024;
 char *netmtpt = "/net";
 char *game;
 int debug;
@@ -14,7 +14,8 @@ qclz(unsigned x)
 	unsigned r;
 	if(x == 0)
 		return 32;
-	for(r = 0; (x & (1UL<<31)) == 0; x <<= 1, r++);
+	for(r = 0; (x & (1UL << 31)) == 0; x <<= 1, r++)
+		;
 	return r;
 }
 
@@ -26,7 +27,8 @@ qctz(unsigned x)
 	if(x == 0)
 		r = 32;
 	else
-		for(r = 0; (x & 1) == 0; x >>= 1, r++);
+		for(r = 0; (x & 1) == 0; x >>= 1, r++)
+			;
 
 	return r;
 }
@@ -36,7 +38,7 @@ isdisabled(char *s)
 {
 	int i;
 
-	for(i = 0; i < ndisabled; i++){
+	for(i = 0; i < ndisabled; i++) {
 		if(strcmp(disabled[i], s) == 0)
 			return true;
 	}
@@ -50,7 +52,7 @@ sys_mkdir(char *path)
 
 	if(access(path, AEXIST) == 0)
 		return 0;
-	if((d = create(path, OREAD, DMDIR|0777)) < 0){
+	if((d = create(path, OREAD, DMDIR | 0777)) < 0) {
 		Con_DPrintf("Sys_mkdir: create: %r\n");
 		return -1;
 	}
@@ -67,9 +69,16 @@ sys_timestamp(void)
 
 	if((t = time(nil)) < 0 || (tm = localtime(t)) == nil)
 		return nil;
-	snprint(ts, sizeof(ts),
+	snprint(
+		ts,
+		sizeof(ts),
 		"%04d%02d%02d-%02d%02d%02d",
-		tm->year + 1900, tm->mon + 1, tm->mday, tm->hour, tm->min, tm->sec
+		tm->year + 1900,
+		tm->mon + 1,
+		tm->mday,
+		tm->hour,
+		tm->min,
+		tm->sec
 	);
 
 	return ts;
@@ -90,7 +99,7 @@ fatal(char *fmt, ...)
 	va_list arg;
 
 	va_start(arg, fmt);
-	vseprint(s, s+sizeof s, fmt, arg);
+	vseprint(s, s + sizeof s, fmt, arg);
 	va_end(arg);
 	Host_Shutdown();
 	sysfatal("%s", s);
@@ -113,7 +122,7 @@ flen(int fd)
 	s64int l;
 	Dir *d;
 
-	if((d = dirfstat(fd)) == nil)	/* file assumed extant and readable */
+	if((d = dirfstat(fd)) == nil) /* file assumed extant and readable */
 		sysfatal("flen: %r");
 	l = d->length;
 	free(d);
@@ -137,7 +146,7 @@ game_shutdown(void)
 static void
 croak(void *, char *note)
 {
-	if(strncmp(note, "sys:", 4) == 0){
+	if(strncmp(note, "sys:", 4) == 0) {
 		IN_Grabm(0);
 		threadkillgrp(0);
 	}
@@ -163,9 +172,10 @@ threadmain(int argc, char **argv)
 	paths[i++] = ".";
 	paths[i++] = "/sys/games/lib/quake";
 
-	ARGBEGIN{
+	ARGBEGIN
+	{
 	case 'b':
-		if(i < nelem(paths)-2)
+		if(i < nelem(paths) - 2)
 			paths[i++] = EARGF(usage());
 		break;
 	case 'D':
@@ -184,13 +194,15 @@ threadmain(int argc, char **argv)
 		if(ndisabled < nelem(disabled))
 			disabled[ndisabled++] = EARGF(usage());
 		break;
-	default: usage();
-	}ARGEND
+	default:
+		usage();
+	}
+	ARGEND
 
 	m_random_init(time(nil));
 	srand(time(nil));
 	/* ignore fp exceptions: rendering shit assumes they are */
-	setfcr(getfcr() & ~(FPOVFL|FPUNFL|FPINVAL|FPZDIV));
+	setfcr(getfcr() & ~(FPOVFL | FPUNFL | FPINVAL | FPZDIV));
 	notify(croak);
 
 	e = getenv("home");
@@ -199,14 +211,14 @@ threadmain(int argc, char **argv)
 	Host_Init(argc, argv, paths);
 
 	t = dtime() - 1.0 / Fpsmax;
-	for(;;){
+	for(;;) {
 		t´ = dtime();
 		Δt = t´ - t;
-		if(cls.state == ca_dedicated){
+		if(cls.state == ca_dedicated) {
 			if(Δt < sys_ticrate.value)
 				continue;
 			Δt = sys_ticrate.value;
-        	}
+		}
 		if(Δt > sys_ticrate.value * 2)
 			t = t´;
 		else

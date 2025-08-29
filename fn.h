@@ -1,3 +1,5 @@
+#pragma once
+
 // fn.h: quintet bit popcount patricia tries, new version
 //
 // This version uses somewhat different terminology than older
@@ -37,72 +39,69 @@ __builtin_popcount(Tbitmap w)
 typedef struct Tbl {
 	Tindex index;
 	void *ptr;
-}Trie;
+} Trie;
 
 // accessor functions, except for the index word
 
 #define Tset_field(cast, elem, type, field) \
-	static inline void \
-	Tset_##field(Trie *t, type field) \
+	static inline void Tset_##field(Trie *t, type field) \
 	{ \
 		t->elem = cast field; \
 	} \
 	struct dummy
 
-Tset_field((void *),          ptr,   Trie *,       twigs);
-Tset_field((Tindex),          index, Tindex,       index);
-Tset_field((void *)(uintptr), ptr,   const char *, key);
-Tset_field((Tindex)(uintptr), index, void *,       val);
+Tset_field((void *)(uintptr), ptr, Trie *, twigs);
+Tset_field((Tindex)(uintptr), index, Tindex, index);
+Tset_field((void *)(uintptr), ptr, const char *, key);
+Tset_field((Tindex)(uintptr), index, void *, val);
 
 static inline bool Tindex_branch(Tindex i);
 
-static inline bool isbranch(Trie *t)
+static inline bool
+isbranch(Trie *t)
 {
 	return Tindex_branch(t->index);
 }
 
 #define Tbranch(t) assert(isbranch(t))
-#define Tleaf(t)  assert(!isbranch(t))
+#define Tleaf(t) assert(!isbranch(t))
 
 #define Tcheck_get(type, tag, field, expr) \
-	static inline type \
-	tag##_##field(Trie *t) \
+	static inline type tag##_##field(Trie *t) \
 	{ \
 		tag(t); \
 		return expr; \
 	} \
 	struct dummy
 
-Tcheck_get(Trie *,       Tbranch, twigs, t->ptr);
-Tcheck_get(const char *, Tleaf,   key,   t->ptr);
-Tcheck_get(void *,       Tleaf,   val,   (void*)(uintptr)t->index);
+Tcheck_get(Trie *, Tbranch, twigs, t->ptr);
+Tcheck_get(const char *, Tleaf, key, t->ptr);
+Tcheck_get(void *, Tleaf, val, (void *)(uintptr)t->index);
 
 // index word layout
 
 #define Tix_width_branch 1
-#define Tix_width_shift  3
+#define Tix_width_shift 3
 #define Tix_width_offset 28
 #define Tix_width_bitmap 32
 
 #define Tix_base_branch 0
-#define Tix_base_shift  (Tix_base_branch + Tix_width_branch)
-#define Tix_base_offset (Tix_base_shift  + Tix_width_shift)
+#define Tix_base_shift (Tix_base_branch + Tix_width_branch)
+#define Tix_base_offset (Tix_base_shift + Tix_width_shift)
 #define Tix_base_bitmap (Tix_base_offset + Tix_width_offset)
 
 #define Tix_place(field) ((Tindex)(field) << Tix_base_##field)
 
 #define Tix_mask(field) ((1ULL << Tix_width_##field) - 1ULL)
 
-#define Tunmask(field,index) \
-	((u32int)(((index) >> Tix_base_##field) & Tix_mask(field)))
+#define Tunmask(field, index) ((u32int)(((index) >> Tix_base_##field) & Tix_mask(field)))
 
 #define Tmaxlen Tix_mask(offset)
 
 // index word accessor functions
 
 #define Tindex_get(type, field) \
-	static inline type \
-	Tindex_##field(Tindex i) \
+	static inline type Tindex_##field(Tindex i) \
 	{ \
 		return Tunmask(field, i); \
 	} \
@@ -117,11 +116,7 @@ static inline Tindex
 Tindex_new(u32int shift, u32int offset, Tbitmap bitmap)
 {
 	u32int branch = 1;
-	return
-		Tix_place(branch) |
-		Tix_place(shift)  |
-		Tix_place(offset) |
-		Tix_place(bitmap) ;
+	return Tix_place(branch) | Tix_place(shift) | Tix_place(offset) | Tix_place(bitmap);
 }
 
 static inline Tindex
@@ -160,9 +155,9 @@ static_assert(Tunmask(shift,0xFEDCBAULL) == 5,
 static inline u8int
 knybble(const char *key, u32int off, u32int shift)
 {
-	u32int word = (u8int)key[off]<<8;
+	u32int word = (u8int)key[off] << 8;
 	if(word)
-		word |= key[off+1];
+		word |= key[off + 1];
 	u32int right = 16 - 5 - shift;
 	return (word >> right) & 0x1FU;
 }
@@ -191,10 +186,11 @@ hastwig(Tindex i, Tbitmap bit)
 static inline u32int
 twigoff(Tindex i, Tbitmap bit)
 {
-	return __builtin_popcount(Tindex_bitmap(i) & (bit-1));
+	return __builtin_popcount(Tindex_bitmap(i) & (bit - 1));
 }
 
-#define TWIGOFFMAX(off, max, i, b) do{ \
+#define TWIGOFFMAX(off, max, i, b) \
+	do { \
 		off = twigoff(i, b); \
 		max = __builtin_popcount(Tindex_bitmap(i)); \
-	}while(0)
+	} while(0)

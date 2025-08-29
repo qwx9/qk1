@@ -10,8 +10,8 @@ static void
 fogrecalc(void)
 {
 	fogvars.pix = (fogvars.allowed && fogvars.enabled)
-		? 0xff<<24 | fogvars.c2<<16 | fogvars.c1<<8 | fogvars.c0
-		: 0;
+					  ? 0xff << 24 | fogvars.c2 << 16 | fogvars.c1 << 8 | fogvars.c0
+					  : 0;
 	fogvars.fbpix = mulalpha(fogvars.pix, 255 * clamp(r_fullbrightfog.value, 0.0, 1.0));
 	fogvars.skypix = mulalpha(fogvars.pix, 255 * clamp(r_skyfog.value, 0.0, 1.0));
 }
@@ -40,11 +40,11 @@ fog(cmd_t *c)
 	USED(c);
 	i = 1;
 	n = Cmd_Argc();
-	switch(n){
+	switch(n) {
 	case 5:
 	case 2:
 		x = atof(Cmd_Argv(i++));
-		if(n == 2 && strncmp(s = Cmd_Argv(0), "gl_fog", 6) == 0 && s[6] != 'd'){ // Nehahra
+		if(n == 2 && strncmp(s = Cmd_Argv(0), "gl_fog", 6) == 0 && s[6] != 'd') { // Nehahra
 			x = 255 * clamp(x, 0.0, 1.0);
 			if(s[6] == 'r')
 				fogvars.c2 = x;
@@ -52,7 +52,7 @@ fog(cmd_t *c)
 				fogvars.c1 = x;
 			else if(s[6] == 'b')
 				fogvars.c0 = x;
-			else if(s[6] == 'e'){
+			else if(s[6] == 'e') {
 				fogvars.enabled = x > 0;
 				setcvar("r_skyfog", x > 0 ? "1" : "0");
 			}

@@ -1,4 +1,6 @@
-enum{
+#pragma once
+
+enum {
 	Npath = 128,
 	Nfspath = 128,
 	Nsav = 12,
@@ -20,14 +22,13 @@ struct Sfx {
 	mem_user_t cu;
 };
 
-struct wavinfo_t
-{
-	int		rate;
-	int		width;
-	int		channels;
-	int		loopofs;
-	int		samples;
-	int		dataofs;
+struct wavinfo_t {
+	int rate;
+	int width;
+	int channels;
+	int loopofs;
+	int samples;
+	int dataofs;
 };
 
 extern char *game;
@@ -41,12 +42,12 @@ extern int savcanld[];
 
 extern int dedicated;
 
-enum{
+enum {
 	Fpsmin = 5,
 	Fpsmax = 72
 };
 
-enum{
+enum {
 	Ambwater,
 	Ambsky,
 	Ambslime,

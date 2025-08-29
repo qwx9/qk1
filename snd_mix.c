@@ -4,7 +4,7 @@ cvar_t volume = {"volume", "0.7", 1};
 
 typedef struct Chan Chan;
 
-enum{
+enum {
 	Srate = 44100,
 	Ssize = 2,
 	Sch = 2,
@@ -15,9 +15,10 @@ enum{
 	Ndyn = 8,
 	Sstat = Ndyn + Namb
 };
+
 static float Clipdist = 1000.0;
 
-struct Chan{
+struct Chan {
 	Sfx *sfx;
 	int chvol;
 	int lvol;
@@ -33,31 +34,30 @@ struct Chan{
 static Chan *chans, *che;
 
 static int ainit, mixbufi;
-static byte mixbufs[2][Ssamp*Sblk], *mixbuf;
+static byte mixbufs[2][Ssamp * Sblk], *mixbuf;
 static s64int sndt, sampt;
 static int nsamp;
-static int sampbuf[Ssamp*2];
+static int sampbuf[Ssamp * 2];
 static int scalt[32][256];
 
 static Sfx *ambsfx[Namb];
 
-typedef struct
-{
-	int 	length;
-	int 	speed;
-	int 	width;
-	int 	stereo;
-	int		loop;
-	byte	data[1];		// variable sized
+typedef struct {
+	int length;
+	int speed;
+	int width;
+	int stereo;
+	int loop;
+	byte data[1]; // variable sized
 } sfxcache_t;
 
-static vec3_t		listener_origin;
-static vec3_t		listener_forward;
-static vec3_t		listener_right;
-static vec3_t		listener_up;
-static Sfx			*known_sfx;		// hunk allocated
-static int			num_sfx;
-static int			map;
+static vec3_t listener_origin;
+static vec3_t listener_forward;
+static vec3_t listener_right;
+static vec3_t listener_up;
+static Sfx *known_sfx; // hunk allocated
+static int num_sfx;
+static int map;
 
 static cvar_t precache = {"precache", "1"};
 static cvar_t loadas8bit = {"loadas8bit", "0"};
@@ -69,44 +69,40 @@ static void
 resample(sfxcache_t *sc, byte *data, float stepscale)
 {
 	int inwidth;
-	int		outcount;
-	int		srcsample;
-	int		i;
-	int		sample, samplefrac, fracstep;
+	int outcount;
+	int srcsample;
+	int i;
+	int sample, samplefrac, fracstep;
 
 	inwidth = sc->width;
 	outcount = sc->length / stepscale;
 	sc->length = outcount;
 	sc->speed = Srate;
-	if (loadas8bit.value)
+	if(loadas8bit.value)
 		sc->width = 1;
 	else
 		sc->width = inwidth;
 	sc->stereo = 0;
 
-	if (stepscale == 1 && inwidth == 1 && sc->width == 1)
-	{
-// fast special case
-		for (i=0 ; i<outcount ; i++)
-			((s8int*)sc->data)[i] = (int)((u8int)(data[i]) - 128);
-	}
-	else
-	{
-// general case
+	if(stepscale == 1 && inwidth == 1 && sc->width == 1) {
+		// fast special case
+		for(i = 0; i < outcount; i++)
+			((s8int *)sc->data)[i] = (int)((u8int)(data[i]) - 128);
+	} else {
+		// general case
 		samplefrac = 0;
-		fracstep = stepscale*256;
-		for (i=0 ; i<outcount ; i++)
-		{
+		fracstep = stepscale * 256;
+		for(i = 0; i < outcount; i++) {
 			srcsample = samplefrac >> 8;
 			samplefrac += fracstep;
-			if (inwidth == 2)
-				sample = LittleShort ( ((short*)data)[srcsample] );
+			if(inwidth == 2)
+				sample = LittleShort(((short *)data)[srcsample]);
 			else
-				sample = (int)( (u8int)(data[srcsample]) - 128) << 8;
-			if (sc->width == 2)
-				((short*)sc->data)[i] = sample;
+				sample = (int)((u8int)(data[srcsample]) - 128) << 8;
+			if(sc->width == 2)
+				((short *)sc->data)[i] = sample;
 			else
-				((s8int*)sc->data)[i] = sample >> 8;
+				((s8int *)sc->data)[i] = sample >> 8;
 		}
 	}
 }
@@ -118,18 +114,18 @@ loadsfx(Sfx *sfx)
 	int len;
 	float stepscale;
 	sfxcache_t *sc;
-	byte *u, buf[1024];	/* avoid dirtying the cache heap */
+	byte *u, buf[1024]; /* avoid dirtying the cache heap */
 
 	if(sfx == nil)
 		return nil;
 	if(sc = Cache_Check(&sfx->cu), sc != nil)
 		return sc;
 	u = loadstklmp(va("sound/%s", sfx->s), buf, sizeof buf, &len);
-	if(u == nil || wavinfo(u, len, &info) != 0){
+	if(u == nil || wavinfo(u, len, &info) != 0) {
 		Con_Printf("loadsfx: %s: %s\n", sfx->s, lerr());
 		return nil;
 	}
-	if(info.channels != 1){
+	if(info.channels != 1) {
 		Con_DPrintf("loadsfx: %s: non mono wave\n", sfx->s);
 		return nil;
 	}
@@ -160,7 +156,7 @@ sndout(void)
 	p = mixbuf;
 	pb = sampbuf;
 	pe = sampbuf + nsamp * 2;
-	while(pb < pe){
+	while(pb < pe) {
 		v = *pb++ * vol;
 		if(v > 0x7fff)
 			v = 0x7fff;
@@ -187,7 +183,7 @@ sample8(Chan *c, void *d, int n)
 	p = (byte *)d + c->p;
 	pb = sampbuf;
 	pe = sampbuf + n * 2;
-	while(pb < pe){
+	while(pb < pe) {
 		v = *p++;
 		*pb++ += ls[v];
 		*pb++ += rs[v];
@@ -205,7 +201,7 @@ sample16(Chan *c, void *d, int n)
 	p = (short *)d + c->p;
 	pb = sampbuf;
 	pe = sampbuf + n * 2;
-	while(pb < pe){
+	while(pb < pe) {
 		v = *p++;
 		*pb++ += v * lv >> 8;
 		*pb++ += v * rv >> 8;
@@ -221,7 +217,7 @@ samplesfx(void)
 	void (*sf)(Chan *, void *, int);
 
 	memset(sampbuf, 0, sizeof sampbuf);
-	for(c=chans; c<che; c++){
+	for(c = chans; c < che; c++) {
 		if(c->sfx == nil)
 			continue;
 		if(c->lvol == 0 && c->rvol == 0)
@@ -230,18 +226,18 @@ samplesfx(void)
 			continue;
 		sf = sc->width == 1 ? sample8 : sample16;
 		n = nsamp;
-		while(n > 0){
+		while(n > 0) {
 			m = n < c->n ? n : c->n;
 			if(m > 0)
 				sf(c, sc->data, m);
 			c->p += m;
 			c->n -= m;
 			n -= m;
-			if(c->n <= 0){
-				if(sc->loop >= 0){
+			if(c->n <= 0) {
+				if(sc->loop >= 0) {
 					c->p = sc->loop;
 					c->n = sc->length - c->p;
-				}else{
+				} else {
 					c->sfx = nil;
 					break;
 				}
@@ -257,7 +253,7 @@ spatialize(Chan *c)
 	vec_t Δr, m;
 	vec3_t src;
 
-	if(c->entn == cl.viewentity){
+	if(c->entn == cl.viewentity) {
 		c->lvol = c->chvol;
 		c->rvol = c->chvol;
 		return;
@@ -287,23 +283,23 @@ ambs(void)
 	c = chans;
 	e = chans + Namb;
 	l = Mod_PointInLeaf(listener_origin, cl.worldmodel);
-	if(l == nil || !ambient_level.value){
+	if(l == nil || !ambient_level.value) {
 		while(c < e)
 			c++->sfx = nil;
 		return;
 	}
 	sfx = ambsfx;
 	av = l->ambient_sound_level;
-	while(c < e){
+	while(c < e) {
 		c->sfx = *sfx++;
 		vol = ambient_level.value * *av++;
 		if(vol < 8)
 			vol = 0;
-		if(c->chvol < vol){
+		if(c->chvol < vol) {
 			c->chvol += host_frametime * ambient_fade.value;
 			if(c->chvol > vol)
 				c->chvol = vol;
-		}else if(c->chvol > vol){
+		} else if(c->chvol > vol) {
 			c->chvol -= host_frametime * ambient_fade.value;
 			if(c->chvol < vol)
 				c->chvol = vol;
@@ -328,7 +324,7 @@ stepsnd(const view_t *v)
 	nsamp = (nanosec() - sndt) / (Te9 / Srate);
 	if(!cls.timedemo)
 		nsamp = (nsamp + 15) & ~15;
-	nsamp -= sndqueued()/Sblk - Srate/Fpsmax;
+	nsamp -= sndqueued() / Sblk - Srate / Fpsmax;
 	if(nsamp < 1)
 		return;
 	if(nsamp > Ssamp)
@@ -337,7 +333,7 @@ stepsnd(const view_t *v)
 	mixbuf = mixbufs[mixbufi];
 	samplesfx();
 	sampt += nsamp;
-	if(ns != 0){
+	if(ns != 0) {
 		sndwrite(mixbuf, ns);
 		mixbufi = (mixbufi + 1) % nelem(mixbufs);
 	}
@@ -349,26 +345,26 @@ stepsnd(const view_t *v)
 	VectorCopy(v->up, listener_up);
 	ambs();
 	sum = nil;
-	for(c=chans+Namb; c<che; c++){
+	for(c = chans + Namb; c < che; c++) {
 		if(c->sfx == nil)
 			continue;
 		spatialize(c);
 		if(c->lvol == 0 && c->rvol == 0)
 			continue;
 		/* sum static sounds to avoid useless remixing */
-		if(c >= chans + Sstat){
-			if(sum != nil && sum->sfx == c->sfx){
+		if(c >= chans + Sstat) {
+			if(sum != nil && sum->sfx == c->sfx) {
 				sum->lvol += c->lvol;
 				sum->rvol += c->rvol;
 				c->lvol = c->rvol = 0;
 				continue;
 			}
-			for(sum=chans + Sstat; sum<c; sum++)
+			for(sum = chans + Sstat; sum < c; sum++)
 				if(sum->sfx == c->sfx)
 					break;
 			if(sum == che)
 				sum = nil;
-			else if(sum != c){
+			else if(sum != c) {
 				sum->lvol += c->lvol;
 				sum->rvol += c->rvol;
 				c->lvol = c->rvol = 0;
@@ -383,7 +379,7 @@ stopallsfx(cmd_t *c)
 	USED(c);
 	if(!ainit)
 		return;
-	memset(chans, 0, sizeof(*chans)*Nchan);
+	memset(chans, 0, sizeof(*chans) * Nchan);
 	che = chans + Sstat;
 	sndstop();
 }
@@ -397,8 +393,8 @@ stopsfx(int n, int ch)
 		return;
 	c = chans;
 	e = chans + Ndyn;
-	while(c < e){
-		if(c->entn == n && c->entch == ch){
+	while(c < e) {
+		if(c->entn == n && c->entch == ch) {
 			c->sfx = nil;
 			return;
 		}
@@ -414,15 +410,14 @@ pickchan(int entn, int entch)
 
 	p = nil;
 	Δt = 0x7fffffff;
-	for(c=chans+Namb, e=c+Ndyn; c<e; c++){
-		if(entch != 0 && c->entn == entn
-		&& (c->entch == entch || entch == -1)){
+	for(c = chans + Namb, e = c + Ndyn; c < e; c++) {
+		if(entch != 0 && c->entn == entn && (c->entch == entch || entch == -1)) {
 			p = c;
 			break;
 		}
 		if(c->entn == cl.viewentity && entn != cl.viewentity && c->sfx != nil)
 			continue;
-		if(c->n < Δt){
+		if(c->n < Δt) {
 			Δt = c->n;
 			p = c;
 		}
@@ -458,7 +453,7 @@ startsfx(int entn, int entch, Sfx *sfx, vec3_t zp, float vol, float att)
 	c->p = 0;
 	c->n = sc->length;
 	/* don't sum identical sfx started on the same frame */
-	for(c2=chans+Namb, e=chans+Sstat; c2<e; c2++){
+	for(c2 = chans + Namb, e = chans + Sstat; c2 < e; c2++) {
 		if(c2 == c || c2->sfx != sfx || c2->p != 0)
 			continue;
 		skip = nrand(Srate / Fpsmin);
@@ -487,12 +482,12 @@ staticsfx(Sfx *sfx, vec3_t zp, float vol, float att)
 	Chan *c;
 	sfxcache_t *sc;
 
-	if(sfx == nil || che >= chans+Nchan)
+	if(sfx == nil || che >= chans + Nchan)
 		return;
 	c = che++;
 	if(sc = loadsfx(sfx), sc == nil)
 		return;
-	if(sc->loop < 0){
+	if(sc->loop < 0) {
 		Con_DPrintf("staticsfx %s: nonlooped static sound\n", sfx->s);
 		return;
 	}
@@ -513,14 +508,14 @@ findsfx(char *s)
 		Host_Error("findsfx: path too long %s", s);
 	sfx = known_sfx;
 	e = known_sfx + num_sfx;
-	while(sfx < e){
+	while(sfx < e) {
 		if(strcmp(sfx->s, s) == 0)
 			return sfx;
 		sfx++;
 	}
-	if(num_sfx == MAX_SOUNDS){
+	if(num_sfx == MAX_SOUNDS) {
 		sfx = known_sfx;
-		while(sfx < e){
+		while(sfx < e) {
 			if(sfx->map && sfx->map < map)
 				break;
 			sfx++;
@@ -529,7 +524,7 @@ findsfx(char *s)
 			Host_Error("findsfx: sfx list overflow: %s", s);
 		if(Cache_Check(&sfx->cu))
 			Cache_Free(&sfx->cu);
-	}else
+	} else
 		num_sfx++;
 	strcpy(sfx->s, s);
 	return sfx;
@@ -569,12 +564,12 @@ playsfx(cmd_t *c)
 	Sfx *sfx;
 
 	USED(c);
-	if(Cmd_Argc() < 2){
+	if(Cmd_Argc() < 2) {
 		Con_Printf("play wav [wav..]: play a wav lump\n");
 		return;
 	}
 	i = 1;
-	while(i < Cmd_Argc()){
+	while(i < Cmd_Argc()) {
 		if(strrchr(Cmd_Argv(i), '.') == nil)
 			s = va("%s.wav", Cmd_Argv(i));
 		else
@@ -595,12 +590,12 @@ playvolsfx(cmd_t *c)
 	Sfx *sfx;
 
 	USED(c);
-	if(Cmd_Argc() < 3){
+	if(Cmd_Argc() < 3) {
 		Con_Printf("play wav vol [wav vol]..: play an amplified wav lump\n");
 		return;
 	}
 	i = 1;
-	while(i < Cmd_Argc()){
+	while(i < Cmd_Argc()) {
 		if(strrchr(Cmd_Argv(i), '.') == nil)
 			s = va("%s.wav", Cmd_Argv(i));
 		else
@@ -622,7 +617,7 @@ sfxlist(cmd_t *cmd)
 
 	USED(cmd);
 	sum = 0;
-	for(sfx=known_sfx, e=known_sfx+num_sfx; sfx<e; sfx++){
+	for(sfx = known_sfx, e = known_sfx + num_sfx; sfx < e; sfx++) {
 		if(sc = Cache_Check(&sfx->cu), sc == nil)
 			continue;
 		sz = sc->length * sc->width * (sc->stereo + 1);
@@ -645,7 +640,7 @@ sfxend(void)
 	Sfx *sfx;
 	int i;
 
-	for(i = 0, sfx = known_sfx; i < num_sfx; i++, sfx++){
+	for(i = 0, sfx = known_sfx; i < num_sfx; i++, sfx++) {
 		if(sfx->map >= map || sfx == ambsfx[Ambsky] || sfx == ambsfx[Ambwater])
 			continue;
 		if(Cache_Check(&sfx->cu) != nil)
@@ -668,13 +663,13 @@ initsnd(void)
 	Cvar_RegisterVariable(&ambient_level);
 	Cvar_RegisterVariable(&ambient_fade);
 
-	if(!isdisabled("snd")){
+	if(!isdisabled("snd")) {
 		if(sndopen() != 0)
 			return -1;
 		ainit = 1;
 
-		for(p=scalt[1], i=8; i<8*nelem(scalt); i+=8){
-			for(j=0; j<256; j++)
+		for(p = scalt[1], i = 8; i < 8 * nelem(scalt); i += 8) {
+			for(j = 0; j < 256; j++)
 				*p++ = (char)j * i;
 		}
 

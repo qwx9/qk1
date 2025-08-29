@@ -12,22 +12,22 @@ cdcmd(cmd_t *cmd)
 	bool loop;
 
 	USED(cmd);
-	if(!cdenabled){
+	if(!cdenabled) {
 		Con_Printf("cd disabled\n");
 		return;
 	}
 
-	if(Cmd_Argc() < 2){
+	if(Cmd_Argc() < 2) {
 usage:
 		Con_Printf("cd (play|loop|stop|pause|resume|info) [track]\n");
 		return;
 	}
 	c = Cmd_Argv(1);
-	if((loop = cistrcmp(c, "loop") == 0) || cistrcmp(c, "play") == 0){
+	if((loop = cistrcmp(c, "loop") == 0) || cistrcmp(c, "play") == 0) {
 		if(Cmd_Argc() < 3)
 			goto usage;
 		playcd(atoi(Cmd_Argv(2)), loop);
-	}else if(cistrcmp(c, "stop") == 0)
+	} else if(cistrcmp(c, "stop") == 0)
 		stopcd();
 	else if(cistrcmp(c, "pause") == 0)
 		pausecd();

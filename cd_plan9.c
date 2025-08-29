@@ -14,13 +14,13 @@ cproc(void *)
 	short *p;
 	double vol;
 
-	if((afd = open("/dev/audio", OWRITE)) < 0){
+	if((afd = open("/dev/audio", OWRITE)) < 0) {
 		Con_DPrintf("cd: open: %r\n");
 		return;
 	}
 	fd = -1;
-	for(;;){
-		if(chtrk > 0){
+	for(;;) {
+		if(chtrk > 0) {
 			close(fd);
 			cdtrk = chtrk;
 			snprint(f, sizeof f, "%s%03ud", cdfile, cdtrk);
@@ -28,23 +28,23 @@ cproc(void *)
 				Con_DPrintf("cd: open: %r\n");
 			chtrk = 0;
 		}
-		if(!cdread || fd < 0){
+		if(!cdread || fd < 0) {
 			sleep(1);
 			continue;
 		}
 		if((n = read(fd, buf, sizeof buf)) < 0)
 			break;
-		if(n == 0){
+		if(n == 0) {
 			if(cdloop)
 				seek(fd, 0, 0);
-			else{
+			else {
 				close(fd);
 				fd = -1;
 			}
 			continue;
 		}
 		vol = bgmvolume.value;
-		for(p=buf; p<buf+n/sizeof*buf; p++){
+		for(p = buf; p < buf + n / sizeof *buf; p++) {
 			v = *p * vol;
 			if(v > 0x7fff)
 				v = 0x7fff;
@@ -95,8 +95,8 @@ playcd(int nt, bool loop)
 {
 	if(cdntrk < 1)
 		return;
-	nt -= 1;	/* d001 assumed part of track list */
-	if(nt < 1 || nt > cdntrk){
+	nt -= 1; /* d001 assumed part of track list */
+	if(nt < 1 || nt > cdntrk) {
 		Con_Printf("cd: invalid track number %d\n", nt);
 		return;
 	}
@@ -121,8 +121,8 @@ cdinfo(void)
 	if(n < 0)
 		return -1;
 	pat = regcomp("[au][0-9][0-9][0-9]");
-	for(type=0, i=0; i<n; i++)
-		if(regexec(pat, d[i].name, nil, 0)){
+	for(type = 0, i = 0; i < n; i++)
+		if(regexec(pat, d[i].name, nil, 0)) {
 			if(type == 0)
 				type = d[i].name[0];
 			cdntrk++;
@@ -144,7 +144,7 @@ initcd(void)
 	if(!(cdenabled = !isdisabled("cd")))
 		return 0;
 
-	if(cdinfo() < 0){
+	if(cdinfo() < 0) {
 		Con_DPrintf("cdinfo: %r\n");
 		return -1;
 	}

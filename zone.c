@@ -2,8 +2,7 @@
 
 typedef struct mem_t mem_t;
 
-struct mem_t
-{
+struct mem_t {
 	mem_t *prev, *next;
 	mem_user_t *user;
 	int tag;
@@ -19,9 +18,9 @@ Hunk_From(void *p)
 	mem_t *m;
 	int off;
 
-	for(off = 0, m = hunk_head; m != nil; m = m->next){
+	for(off = 0, m = hunk_head; m != nil; m = m->next) {
 		off += m->size;
-		if((void*)(m+1) == p)
+		if((void *)(m + 1) == p)
 			break;
 	}
 	assert(m != nil || p == nil);
@@ -35,20 +34,20 @@ Hunk_CacheFrom(mem_user_t *c, void *p)
 	mem_t *n, *prev;
 	byte *data;
 
-	for(size = 0, n = hunk_head; n != nil; n = n->next){
+	for(size = 0, n = hunk_head; n != nil; n = n->next) {
 		size += n->size;
-		if((void*)(n+1) == p)
+		if((void *)(n + 1) == p)
 			break;
 	}
-	assert(n != nil && (void*)(n+1) == p);
+	assert(n != nil && (void *)(n + 1) == p);
 	data = Cache_Alloc(c, size);
-	setmalloctag((mem_t*)data-1, getcallerpc(&c));
+	setmalloctag((mem_t *)data - 1, getcallerpc(&c));
 
 	hunk_head = n->next;
 	if(hunk_head != nil)
 		hunk_head->prev = nil;
-	for(size = 0; n != nil; n = prev){
-		memmove(data+size, n+1, n->size);
+	for(size = 0; n != nil; n = prev) {
+		memmove(data + size, n + 1, n->size);
 		size += n->size;
 		prev = n->prev;
 		free(n);
@@ -71,7 +70,7 @@ Hunk_Alloc(int size)
 		hunk_head->prev = m;
 	hunk_head = m;
 
-	return m+1;
+	return m + 1;
 }
 
 void
@@ -104,20 +103,20 @@ Hunk_Double(void *p)
 	assert(p != nil);
 	m = p;
 	m--;
-	n = realloc(m, sizeof(*m) + m->size*2);
+	n = realloc(m, sizeof(*m) + m->size * 2);
 	if(m == nil)
 		fatal("Hunk_Double: %s", lerr());
 	if(hunk_head == m)
 		hunk_head = n;
 	m = n;
 	setrealloctag(m, getcallerpc(&p));
-	memset((byte*)(m+1) + m->size, 0, m->size);
+	memset((byte *)(m + 1) + m->size, 0, m->size);
 	m->size *= 2;
 	if(m->prev != nil)
 		m->prev->next = m;
 	if(m->next != nil)
 		m->next->prev = m;
-	return m+1;
+	return m + 1;
 }
 
 void *
@@ -131,7 +130,7 @@ Hunk_FreeToMark(void *mark)
 {
 	mem_t *m;
 
-	while(hunk_head != mark){
+	while(hunk_head != mark) {
 		m = hunk_head->next;
 		free(hunk_head);
 		hunk_head = m;
@@ -160,11 +159,11 @@ Hunk_Free(void *p)
 void *
 Hunk_TempAlloc(int size)
 {
-	static void	*buf;
+	static void *buf;
 	static int bufsz = -1;
 
 	assert(size >= 0);
-	if(size > bufsz){
+	if(size > bufsz) {
 		buf = realloc(buf, size);
 		if(buf == nil)
 			fatal("Hunk_TempAlloc: %s", lerr());
@@ -188,7 +187,7 @@ Cache_Flush(cmd_t *c)
 	mem_t *s;
 
 	USED(c);
-	while(cache_head != nil){
+	while(cache_head != nil) {
 		s = cache_head->next;
 		free(cache_head);
 		cache_head = s;
@@ -235,7 +234,7 @@ Cache_Alloc(mem_user_t *c, int size)
 		cache_head->prev = cs;
 	cache_head = cs;
 	cs->user = c;
-	c->data = cs+1;
+	c->data = cs + 1;
 
 	return c->data;
 }
@@ -263,10 +262,10 @@ Cache_Realloc(mem_user_t *c, int size)
 		cs->next->prev = cs;
 	setrealloctag(cs, getcallerpc(&c));
 	if(size > cs->size)
-		memset((byte*)(cs+1) + cs->size, 0, size - cs->size);
+		memset((byte *)(cs + 1) + cs->size, 0, size - cs->size);
 	cs->size = size;
 	cs->user = c;
-	c->data = cs+1;
+	c->data = cs + 1;
 
 	return c->data;
 }

@@ -29,8 +29,8 @@ Sys_SendKeyEvents(void)
 	if(cls.state == ca_dedicated)
 		return;
 
-	while(SDL_PollEvent(&event)){
-		switch(event.type){
+	while(SDL_PollEvent(&event)) {
+		switch(event.type) {
 		case SDL_EVENT_QUIT:
 			Cbuf_AddText("menu_quit\n");
 			break;
@@ -50,47 +50,93 @@ Sys_SendKeyEvents(void)
 			IN_Grabm(focuslost);
 			break;
 		case SDL_EVENT_MOUSE_MOTION:
-			if(mouseon){
+			if(mouseon) {
 				dx += event.motion.xrel;
 				dy += event.motion.yrel;
 			}
 			break;
 		case SDL_EVENT_MOUSE_BUTTON_DOWN:
 		case SDL_EVENT_MOUSE_BUTTON_UP:
-			if((b = event.button.button-1) >= 0 && b < nelem(mbuttons))
+			if((b = event.button.button - 1) >= 0 && b < nelem(mbuttons))
 				Key_Event(mbuttons[b], event.type == SDL_EVENT_MOUSE_BUTTON_DOWN);
 			break;
 		case SDL_EVENT_KEY_DOWN:
 		case SDL_EVENT_KEY_UP:
 			if(event.key.repeat && key_dest == key_game)
 				break;
-			switch(key = event.key.key){
-			case SDLK_GRAVE: key = '~'; break;
-			case SDLK_DELETE: key = K_DEL; break;
-			case SDLK_BACKSPACE: key = K_BACKSPACE; break;
-			case SDLK_F1: key = K_F1; break;
-			case SDLK_F2: key = K_F2; break;
-			case SDLK_F3: key = K_F3; break;
-			case SDLK_F4: key = K_F4; break;
-			case SDLK_F5: key = K_F5; break;
-			case SDLK_F6: key = K_F6; break;
-			case SDLK_F7: key = K_F7; break;
-			case SDLK_F8: key = K_F8; break;
-			case SDLK_F9: key = K_F9; break;
-			case SDLK_F10: key = K_F10; break;
-			case SDLK_F11: key = K_F11; break;
-			case SDLK_F12: key = K_F12; break;
-			case SDLK_PAUSE: key = K_PAUSE; break;
-			case SDLK_UP: key = K_UPARROW; break;
-			case SDLK_DOWN: key = K_DOWNARROW; break;
-			case SDLK_RIGHT: key = K_RIGHTARROW; break;
-			case SDLK_LEFT: key = K_LEFTARROW; break;
+			switch(key = event.key.key) {
+			case SDLK_GRAVE:
+				key = '~';
+				break;
+			case SDLK_DELETE:
+				key = K_DEL;
+				break;
+			case SDLK_BACKSPACE:
+				key = K_BACKSPACE;
+				break;
+			case SDLK_F1:
+				key = K_F1;
+				break;
+			case SDLK_F2:
+				key = K_F2;
+				break;
+			case SDLK_F3:
+				key = K_F3;
+				break;
+			case SDLK_F4:
+				key = K_F4;
+				break;
+			case SDLK_F5:
+				key = K_F5;
+				break;
+			case SDLK_F6:
+				key = K_F6;
+				break;
+			case SDLK_F7:
+				key = K_F7;
+				break;
+			case SDLK_F8:
+				key = K_F8;
+				break;
+			case SDLK_F9:
+				key = K_F9;
+				break;
+			case SDLK_F10:
+				key = K_F10;
+				break;
+			case SDLK_F11:
+				key = K_F11;
+				break;
+			case SDLK_F12:
+				key = K_F12;
+				break;
+			case SDLK_PAUSE:
+				key = K_PAUSE;
+				break;
+			case SDLK_UP:
+				key = K_UPARROW;
+				break;
+			case SDLK_DOWN:
+				key = K_DOWNARROW;
+				break;
+			case SDLK_RIGHT:
+				key = K_RIGHTARROW;
+				break;
+			case SDLK_LEFT:
+				key = K_LEFTARROW;
+				break;
 			case SDLK_RSHIFT:
-			case SDLK_LSHIFT: key = K_SHIFT; break;
+			case SDLK_LSHIFT:
+				key = K_SHIFT;
+				break;
 			case SDLK_RCTRL:
-			case SDLK_LCTRL: key = K_CTRL; break;
+			case SDLK_LCTRL:
+				key = K_CTRL;
+				break;
 			case SDLK_RALT:
-			case SDLK_LALT: key = K_ALT; break;
+			case SDLK_LALT:
+				key = K_ALT;
+				break;
 			default:
 				if(key >= 128)
 					key = 0;
@@ -120,7 +166,7 @@ IN_Move(usercmd_t *cmd)
 	if(!mouseon)
 		return;
 
-	if(m_filter.value){
+	if(m_filter.value) {
 		dx = (dx + olddx) * 0.5;
 		dy = (dy + olddy) * 0.5;
 	}
@@ -134,10 +180,10 @@ IN_Move(usercmd_t *cmd)
 		cl.viewangles[YAW] -= m_yaw.value * dx;
 	if(in_mlook.state & 1)
 		V_StopPitchDrift();
-	if(in_mlook.state & 1 && ~in_strafe.state & 1){
+	if(in_mlook.state & 1 && ~in_strafe.state & 1) {
 		cl.viewangles[PITCH] += m_pitch.value * dy;
 		cl.viewangles[PITCH] = clamp(cl.viewangles[PITCH], -MAX_PITCH, MAX_PITCH);
-	}else{
+	} else {
 		if(in_strafe.state & 1 && noclip_anglehack)
 			cmd->upmove -= m_forward.value * dy;
 		else

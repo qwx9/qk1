@@ -14,7 +14,8 @@ sndstop(void)
 void
 sndwrite(byte *buf, long sz)
 {
-	USED(buf); USED(sz);
+	USED(buf);
+	USED(sz);
 }
 
 void

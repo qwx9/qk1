@@ -1,7 +1,9 @@
+#pragma once
+
 // this file is shared by quake and qcc
 
-typedef int	func_t;
-typedef int	string_t;
+typedef int func_t;
+typedef int string_t;
 
 typedef enum {
 	ev_void,
@@ -12,7 +14,7 @@ typedef enum {
 	ev_field,
 	ev_function,
 	ev_pointer,
-}etype_t;
+} etype_t;
 
 enum {
 	OFS_NULL,
@@ -31,7 +33,7 @@ enum {
 
 	MAX_PARMS = 8,
 
-	DEF_SAVEGLOBAL = 1<<15,
+	DEF_SAVEGLOBAL = 1 << 15,
 
 	PR_LUMP_STATEMENTS = 0, // statement 0 is an error
 	PR_LUMP_GLOBALDEFS,
@@ -122,8 +124,8 @@ enum {
 
 typedef struct {
 	u16int op;
-	s16int a,b,c;
-}dstatement_t;
+	s16int a, b, c;
+} dstatement_t;
 
 typedef struct {
 	// if DEF_SAVEGLOBGAL bit is set
@@ -131,7 +133,7 @@ typedef struct {
 	u16int type;
 	u16int ofs;
 	int s_name;
-}ddef_t;
+} ddef_t;
 
 typedef struct {
 	int first_statement; // negative numbers are builtins
@@ -142,16 +144,16 @@ typedef struct {
 	int s_file; // source file defined in
 	int numparms;
 	byte parm_size[MAX_PARMS];
-}dfunction_t;
+} dfunction_t;
 
 typedef struct {
 	int off;
 	int num;
-}dproglump_t;
+} dproglump_t;
 
 typedef struct {
 	int version;
 	int crc; // check of header file
 	dproglump_t lumps[NUM_PR_LUMPS];
 	int entityfields;
-}dprograms_t;
+} dprograms_t;

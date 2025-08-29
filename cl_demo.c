@@ -32,7 +32,7 @@ stopdemo(cmd_t *c)
 	USED(c);
 	if(cmd_source != src_command)
 		return;
-	if(!cls.demorecording){
+	if(!cls.demorecording) {
 		Con_Printf("stop: no recording in progress\n");
 		return;
 	}
@@ -46,17 +46,17 @@ stopdemo(cmd_t *c)
 static int
 dmmsg(void)
 {
-	if(cls.signon == SIGNONS){
-		if(cls.timedemo){
+	if(cls.signon == SIGNONS) {
+		if(cls.timedemo) {
 			if(host_framecount == cls.td_lastframe)
 				return 0;
 			cls.td_lastframe = host_framecount;
 			if(host_framecount == cls.td_startframe + 1)
 				cls.td_starttime = realtime;
-		}else if(cl.time <= cl.mtime[0])
-				return 0;
+		} else if(cl.time <= cl.mtime[0])
+			return 0;
 	}
-	if(readdm() < 0){
+	if(readdm() < 0) {
 		abortdemo();
 		return 0;
 	}
@@ -70,7 +70,7 @@ readcl(void)
 
 	if(cls.demoplayback)
 		return dmmsg();
-	for(;;){
+	for(;;) {
 		r = NET_GetMessage(cls.netcon);
 		if(r != 1 && r != 2)
 			return r;
@@ -90,7 +90,7 @@ timedemo(cmd_t *cmd)
 	USED(cmd);
 	if(cmd_source != src_command)
 		return;
-	if(Cmd_Argc() != 2){
+	if(Cmd_Argc() != 2) {
 		Con_Printf("timedemo <demoname> : gets demo speeds\n");
 		return;
 	}
@@ -101,7 +101,7 @@ timedemo(cmd_t *cmd)
 	 * all the loading time doesn't get counted */
 	cls.timedemo = 1;
 	cls.td_startframe = host_framecount;
-	cls.td_lastframe = -1;	/* get a new message this frame */
+	cls.td_lastframe = -1; /* get a new message this frame */
 }
 
 void
@@ -114,25 +114,25 @@ recdemo(cmd_t *cmd)
 	if(cmd_source != src_command)
 		return;
 	c = Cmd_Argc();
-	if(c < 2 || c > 4){
+	if(c < 2 || c > 4) {
 		Con_Printf("record <demoname> [<map> [cd track]]\n");
 		return;
 	}
 	trk = -1;
-	if(strstr(Cmd_Argv(1), "..") != nil){
+	if(strstr(Cmd_Argv(1), "..") != nil) {
 		Con_Printf("recdemo: invalid path\n");
 		return;
-	}else if(c == 2 && cls.state == ca_connected){
+	} else if(c == 2 && cls.state == ca_connected) {
 		Con_Printf("recdemo: too late, already connected\n");
 		return;
-	}else if(c == 4)
+	} else if(c == 4)
 		trk = atoi(Cmd_Argv(3));
 	a = Cmd_Argv(1);
 	if(c > 2)
 		Cmd_ExecuteString(va("map %s", Cmd_Argv(2)), src_command);
 	s = va("%s/%s%s", fsdir, a, ext(a, ".dem"));
 	Con_DPrintf("recdemo: writing to file %s\n", s);
-	if(opendm(s, trk) < 0){
+	if(opendm(s, trk) < 0) {
 		Con_Printf(va("recdemo: %s\n", lerr()));
 		return;
 	}
@@ -151,7 +151,7 @@ playdemo(cmd_t *cmd)
 	USED(cmd);
 	if(cmd_source != src_command)
 		return;
-	if(Cmd_Argc() != 2){
+	if(Cmd_Argc() != 2) {
 		Con_Printf("playdemo <demo> : plays a demo\n");
 		return;
 	}
@@ -159,7 +159,7 @@ playdemo(cmd_t *cmd)
 	a = Cmd_Argv(1);
 	s = va("%s%s", a, ext(a, ".dem"));
 	Con_DPrintf("playdemo: reading file %s\n", s);
-	if(loaddm(s) < 0){
+	if(loaddm(s) < 0) {
 		Con_Printf(va("playdemo: %s\n", lerr()));
 		cls.demonum = -1;
 		return;

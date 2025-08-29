@@ -15,7 +15,7 @@ isdisabled(char *s)
 {
 	int i;
 
-	for(i = 0; i < ndisabled; i++){
+	for(i = 0; i < ndisabled; i++) {
 		if(strcmp(disabled[i], s) == 0)
 			return true;
 	}
@@ -47,9 +47,16 @@ sys_timestamp(void)
 
 	if((t = time(nil)) == (time_t)-1 || (tm = localtime(&t)) == nil)
 		return nil;
-	snprint(ts, sizeof(ts),
+	snprint(
+		ts,
+		sizeof(ts),
 		"%04d%02d%02d-%02d%02d%02d",
-		tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday, tm->tm_hour, tm->tm_min, tm->tm_sec
+		tm->tm_year + 1900,
+		tm->tm_mon + 1,
+		tm->tm_mday,
+		tm->tm_hour,
+		tm->tm_min,
+		tm->tm_sec
 	);
 
 	return ts;
@@ -89,13 +96,13 @@ nanosec(void)
 	if(sec0 == 0)
 		sec0 = t.tv_sec;
 	t.tv_sec -= sec0;
-	return t.tv_sec*1000000000ULL + t.tv_nsec;
+	return t.tv_sec * 1000000000ULL + t.tv_nsec;
 }
 
 double
 dtime(void)
 {
-	return nanosec()/1000000000.0;
+	return nanosec() / 1000000000.0;
 }
 
 void
@@ -121,14 +128,14 @@ main(int argc, char **argv)
 
 	parg_init(&ps);
 	nargs = 0;
-	while((c = parg_getopt(&ps, argc, argv, "b:Ddg:N:")) >= 0){
-		switch(c){
+	while((c = parg_getopt(&ps, argc, argv, "b:Ddg:N:")) >= 0) {
+		switch(c) {
 		case 1:
-			argv[nargs++] = (char*)ps.optarg;
+			argv[nargs++] = (char *)ps.optarg;
 			break;
 		case 'b':
-			if(i < nelem(paths)-2)
-				paths[i++] = (char*)ps.optarg;
+			if(i < nelem(paths) - 2)
+				paths[i++] = (char *)ps.optarg;
 			break;
 		case 'N':
 			if(ndisabled < nelem(disabled))
@@ -141,7 +148,7 @@ main(int argc, char **argv)
 			dedicated = 1;
 			break;
 		case 'g':
-			game = (char*)ps.optarg;
+			game = (char *)ps.optarg;
 			break;
 		case 'h':
 			fprintf(stderr, "usage: qk1 [-g game]\n");
@@ -167,10 +174,10 @@ main(int argc, char **argv)
 	fesetround(FE_TOWARDZERO);
 
 	t = dtime() - 1.0 / Fpsmax;
-	for(;;){
+	for(;;) {
 		t2 = dtime();
 		dt = t2 - t;
-		if(cls.state == ca_dedicated){
+		if(cls.state == ca_dedicated) {
 			if(dt < sys_ticrate.value)
 				continue;
 			dt = sys_ticrate.value;

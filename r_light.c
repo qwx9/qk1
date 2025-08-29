@@ -1,137 +1,99 @@
 #include "quakedef.h"
 
-int	r_dlightframecount;
+/* DYNAMIC LIGHTS */
 
+int r_dlightframecount;
 
-/*
-==================
-R_AnimateLight
-==================
-*/
-void R_AnimateLight (void)
+void
+R_AnimateLight(void)
 {
-	int			i,j,k;
+	int i, j, k;
 
 	// light animations
 	// 'm' is normal light, 'a' is no light, 'z' is double bright
-	i = (int)(cl.time*10);
-	for (j=0 ; j<Nlights ; j++)
-	{
-		if (!cl_lightstyle[j].length)
-		{
+	i = (int)(cl.time * 10);
+	for(j = 0; j < Nlights; j++) {
+		if(!cl_lightstyle[j].length) {
 			d_lightstylevalue[j] = 256;
 			continue;
 		}
 		k = i % cl_lightstyle[j].length;
 		k = cl_lightstyle[j].map[k] - 'a';
-		k = k*22;
+		k = k * 22;
 		d_lightstylevalue[j] = k;
 	}
 }
 
-
-/*
-=============================================================================
-
-DYNAMIC LIGHTS
-
-=============================================================================
-*/
-
-/*
-=============
-R_MarkLights
-=============
-*/
-void R_MarkLights (dlight_t *light, int bit, mnode_t *node)
+void
+R_MarkLights(dlight_t *light, int bit, mnode_t *node)
 {
-	mplane_t	*splitplane;
-	float		dist;
-	msurface_t	*surf;
-	unsigned	i;
+	mplane_t *splitplane;
+	float dist;
+	msurface_t *surf;
+	unsigned int i;
 
-	if (node->contents < 0)
+	if(node->contents < 0)
 		return;
 
 	splitplane = node->plane;
-	dist = DotProduct (light->origin, splitplane->normal) - splitplane->dist;
+	dist = DotProduct(light->origin, splitplane->normal) - splitplane->dist;
 
-	if (dist > light->radius)
-	{
-		R_MarkLights (light, bit, node->children[0]);
+	if(dist > light->radius) {
+		R_MarkLights(light, bit, node->children[0]);
 		return;
 	}
-	if (dist < -light->radius)
-	{
-		R_MarkLights (light, bit, node->children[1]);
+	if(dist < -light->radius) {
+		R_MarkLights(light, bit, node->children[1]);
 		return;
 	}
 
 	// mark the polygons
 	surf = cl.worldmodel->surfaces + node->firstsurface;
-	for (i=0 ; i<node->numsurfaces ; i++, surf++)
-	{
-		if (surf->dlightframe != r_dlightframecount)
-		{
+	for(i = 0; i < node->numsurfaces; i++, surf++) {
+		if(surf->dlightframe != r_dlightframecount) {
 			surf->dlightbits = 0;
 			surf->dlightframe = r_dlightframecount;
 		}
 		surf->dlightbits |= bit;
 	}
 
-	R_MarkLights (light, bit, node->children[0]);
-	R_MarkLights (light, bit, node->children[1]);
+	R_MarkLights(light, bit, node->children[0]);
+	R_MarkLights(light, bit, node->children[1]);
 }
 
-
-/*
-=============
-R_PushDlights
-=============
-*/
-void R_PushDlights (void)
+void
+R_PushDlights(void)
 {
-	int		i;
-	dlight_t	*l;
+	int i;
+	dlight_t *l;
 
-	r_dlightframecount = r_framecount + 1;	// because the count hasn't
-											//  advanced yet for this frame
+	// because the count hasn't advanced yet for this frame
+	r_dlightframecount = r_framecount + 1;
+
 	l = cl_dlights;
-
-	for (i=0 ; i<MAX_DLIGHTS ; i++, l++)
-	{
-		if (l->die < cl.time || !l->radius)
+	for(i = 0; i < MAX_DLIGHTS; i++, l++) {
+		if(l->die < cl.time || !l->radius)
 			continue;
-		R_MarkLights ( l, 1<<i, cl.worldmodel->nodes );
+		R_MarkLights(l, 1 << i, cl.worldmodel->nodes);
 	}
 }
 
-
-/*
-=============================================================================
-
-LIGHT SAMPLING
-
-=============================================================================
-*/
+/* LIGHT SAMPLING */
 
 static int
 RecursiveLightPoint(mnode_t *node, vec3_t start, vec3_t end, int *r)
 {
-	float		front, back, frac;
-	int			side;
-	mplane_t	*plane;
-	vec3_t		mid;
-	msurface_t	*surf;
-	int			s, t, ds, dt;
-	unsigned	i;
-	mtexinfo_t	*tex;
-	byte		*lightmap;
-	unsigned	scale;
-	int			maps;
+	float front, back, frac;
+	int side, s, t, ds, dt, maps;
+	mplane_t *plane;
+	vec3_t mid;
+	msurface_t *surf;
+	unsigned int i, scale;
+	mtexinfo_t *tex;
+	byte *lightmap;
 
 	if(node->contents < 0)
-		return -1;		// didn't hit anything
+		return -1; // didn't hit anything
 
 	// calculate mid point
 
@@ -144,24 +106,24 @@ RecursiveLightPoint(mnode_t *node, vec3_t start, vec3_t end, int *r)
 	if((back < 0) == side)
 		return RecursiveLightPoint(node->children[side], start, end, r);
 
-	frac = front / (front-back);
-	mid[0] = start[0] + (end[0] - start[0])*frac;
-	mid[1] = start[1] + (end[1] - start[1])*frac;
-	mid[2] = start[2] + (end[2] - start[2])*frac;
+	frac = front / (front - back);
+	mid[0] = start[0] + (end[0] - start[0]) * frac;
+	mid[1] = start[1] + (end[1] - start[1]) * frac;
+	mid[2] = start[2] + (end[2] - start[2]) * frac;
 
 	// go down front side
 	if(RecursiveLightPoint(node->children[side], start, mid, r) >= 0)
-		return 0;		// hit something
+		return 0; // hit something
 
 	if((back < 0) == side)
-		return -1;		// didn't hit anything
+		return -1; // didn't hit anything
 
 	// check for impact on this node
 
 	surf = cl.worldmodel->surfaces + node->firstsurface;
-	for(i = 0; i < node->numsurfaces; i++, surf++){
+	for(i = 0; i < node->numsurfaces; i++, surf++) {
 		if(surf->flags & SURF_DRAWTILED)
-			continue;	// no lightmaps
+			continue; // no lightmaps
 
 		tex = surf->texinfo;
 
@@ -185,15 +147,15 @@ RecursiveLightPoint(mnode_t *node, vec3_t start, vec3_t end, int *r)
 
 		lightmap = surf->samples;
 		r[0] = r[1] = r[2] = 0;
-		if(lightmap != nil){
-			lightmap += (dt * ((surf->extents[0]>>4)+1) + ds) * 3;
+		if(lightmap != nil) {
+			lightmap += (dt * ((surf->extents[0] >> 4) + 1) + ds) * 3;
 
-			for(maps = 0; maps < MAXLIGHTMAPS && surf->styles[maps] != 255; maps++){
+			for(maps = 0; maps < MAXLIGHTMAPS && surf->styles[maps] != 255; maps++) {
 				scale = d_lightstylevalue[surf->styles[maps]];
 				r[0] += lightmap[0] * scale;
 				r[1] += lightmap[1] * scale;
 				r[2] += lightmap[2] * scale;
-				lightmap += ((surf->extents[0]>>4)+1) * ((surf->extents[1]>>4)+1) * 3;
+				lightmap += ((surf->extents[0] >> 4) + 1) * ((surf->extents[1] >> 4) + 1) * 3;
 			}
 
 			r[0] >>= 8;
@@ -211,9 +173,9 @@ RecursiveLightPoint(mnode_t *node, vec3_t start, vec3_t end, int *r)
 void
 R_LightPoint(vec3_t p, int *r)
 {
-	vec3_t		end;
+	vec3_t end;
 
-	if (!cl.worldmodel->lightdata){
+	if(!cl.worldmodel->lightdata) {
 		r[0] = 255;
 		r[1] = 255;
 		r[2] = 255;
@@ -225,9 +187,8 @@ R_LightPoint(vec3_t p, int *r)
 	end[2] = p[2] - 2048;
 
 	r[0] = r[1] = r[2] = -1024;
-	RecursiveLightPoint (cl.worldmodel->nodes, p, end, r);
+	RecursiveLightPoint(cl.worldmodel->nodes, p, end, r);
 	r[0] = max(r[0], r_refdef.ambientlight[0]);
 	r[1] = max(r[1], r_refdef.ambientlight[1]);
 	r[2] = max(r[2], r_refdef.ambientlight[2]);
 }
-

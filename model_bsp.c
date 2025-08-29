@@ -9,14 +9,15 @@ dotadd80(float *a, float *b)
 	int i;
 
 	f32_to_extF80M(b[3], &z);
-	for(i = 0; i < 3; i++){
+	for(i = 0; i < 3; i++) {
 		f32_to_extF80M(a[i], &x);
 		f32_to_extF80M(b[i], &y);
 		extF80M_mul(&x, &y, &m);
 		extF80M_add(&z, &m, &z);
 	}
 
-	return extF80M_to_f32(&z);;
+	return extF80M_to_f32(&z);
+	;
 }
 
 void
@@ -33,7 +34,7 @@ int
 BSP_CalcSurfaceExtents(model_t *mod, msurface_t *s)
 {
 	float mins[2], maxs[2], val;
-	int i,j, e;
+	int i, j, e;
 	mvertex_t *v;
 	mtexinfo_t *tex;
 	int bmins[2], bmaxs[2];
@@ -42,14 +43,14 @@ BSP_CalcSurfaceExtents(model_t *mod, msurface_t *s)
 	maxs[0] = maxs[1] = -Q_MAXFLOAT;
 	tex = s->texinfo;
 
-	for(i = 0; i < s->numedges; i++){
-		e = mod->surfedges[s->firstedge+i];
+	for(i = 0; i < s->numedges; i++) {
+		e = mod->surfedges[s->firstedge + i];
 		if(e >= 0)
 			v = &mod->vertexes[mod->edges[e].v[0]];
 		else
 			v = &mod->vertexes[mod->edges[-e].v[1]];
 
-		for(j = 0; j < 2; j++){
+		for(j = 0; j < 2; j++) {
 			// this is... weird.
 			// because everybody built maps long time ago, precision was
 			// (most likely) 80 bits. we could just cast to double here,
@@ -64,14 +65,15 @@ BSP_CalcSurfaceExtents(model_t *mod, msurface_t *s)
 		}
 	}
 
-	for(i = 0; i < 2; i++){
-		bmins[i] = floorf(mins[i]/16.0);
-		bmaxs[i] = ceilf(maxs[i]/16.0);
+	for(i = 0; i < 2; i++) {
+		bmins[i] = floorf(mins[i] / 16.0);
+		bmaxs[i] = ceilf(maxs[i] / 16.0);
 
 		s->texturemins[i] = bmins[i] * 16;
 		s->extents[i] = (bmaxs[i] - bmins[i]) * 16;
-		if((tex->flags & TEX_SPECIAL) == 0 && s->extents[i] > 2000){
-			werrstr("BSP_CalcSurfaceExtents: bad surface: texture=%s flags=%ux extents[%d]=%d",
+		if((tex->flags & TEX_SPECIAL) == 0 && s->extents[i] > 2000) {
+			werrstr(
+				"BSP_CalcSurfaceExtents: bad surface: texture=%s flags=%ux extents[%d]=%d",
 				tex->texture->name,
 				tex->flags,
 				i,
@@ -92,63 +94,65 @@ BSP_LoadTextures(model_t *mod, byte *in, int sz)
 	texture_t *tx, *tx2;
 	texture_t *anims[10];
 	texture_t *altanims[10];
-	static const int elsz = 16+2*4+4*4;
+	static const int elsz = 16 + 2 * 4 + 4 * 4;
 
-	if(sz < 1){
+	if(sz < 1) {
 		mod->textures = nil;
 		return 0;
 	}
-	if(sz < 4 || (sz % 4) != 0){
+	if(sz < 4 || (sz % 4) != 0) {
 		werrstr("funny lump size");
 		goto err;
 	}
 
 	in0 = in;
 	mod->numtextures = le32(in);
-	if(mod->numtextures*4 > sz-4){
-		werrstr("overflow? %d > %d", mod->numtextures*4, sz-4);
+	if(mod->numtextures * 4 > sz - 4) {
+		werrstr("overflow? %d > %d", mod->numtextures * 4, sz - 4);
 		goto err;
 	}
 	mod->textures = Hunk_Alloc(mod->numtextures * sizeof(*mod->textures));
 
-	for(i = 0; i < mod->numtextures; i++){
+	for(i = 0; i < mod->numtextures; i++) {
 		off = le32(in);
 		if(off == -1)
 			continue;
-		if(off < 0 || off > sz-elsz){
+		if(off < 0 || off > sz - elsz) {
 			werrstr("bad offset %d (sz %d)", off, sz);
 			goto err;
 		}
-		if((mod->textures[i] = tx = Load_ExternalTexture(mod->name, (char*)in0+off)) == nil){
-			p = in0+off+16;
+		if((mod->textures[i] = tx = Load_ExternalTexture(mod->name, (char *)in0 + off)) == nil) {
+			p = in0 + off + 16;
 			w = le32(p);
 			h = le32(p);
-			pixels = w*h*85/64;
-			tx = Hunk_Alloc(sizeof(*tx) + pixels*sizeof(pixel_t));
-			strncpy(tx->name, (char*)in0+off, sizeof(tx->name)-1);
-			tx->name[sizeof(tx->name)-1] = 0;
+			pixels = w * h * 85 / 64;
+			tx = Hunk_Alloc(sizeof(*tx) + pixels * sizeof(pixel_t));
+			strncpy(tx->name, (char *)in0 + off, sizeof(tx->name) - 1);
+			tx->name[sizeof(tx->name) - 1] = 0;
 			for(j = 0; j < MIPLEVELS; j++)
-				tx->offsets[j] = le32(p) - (16+2*4+4*4);
+				tx->offsets[j] = le32(p) - (16 + 2 * 4 + 4 * 4);
 			mod->textures[i] = tx;
 			tx->width = w;
 			tx->height = h;
 			// the pixels immediately follow the structures
 			torgbx(p, tx->pixels, pixels);
-			for(j = 0; j < pixels; j++){
-				if(tx->pixels[j] != 0 && (tx->pixels[j] & 0xff000000) == 0){
+			for(j = 0; j < pixels; j++) {
+				if(tx->pixels[j] != 0 && (tx->pixels[j] & 0xff000000) == 0) {
 					tx->drawsurf |= DRAWSURF_FULLBRIGHT;
 					break;
 				}
 			}
-			if(tx->name[0] == '{'){
-				for(j = 1; j < MIPLEVELS; j++){
+			if(tx->name[0] == '{') {
+				for(j = 1; j < MIPLEVELS; j++) {
 					w /= 2;
 					h /= 2;
 					pixels_resize(
-						tx->pixels+tx->offsets[0],
-						tx->pixels+tx->offsets[j],
-						tx->width, tx->height,
-						w, h,
+						tx->pixels + tx->offsets[0],
+						tx->pixels + tx->offsets[j],
+						tx->width,
+						tx->height,
+						w,
+						h,
 						false,
 						true
 					);
@@ -160,12 +164,12 @@ BSP_LoadTextures(model_t *mod, byte *in, int sz)
 	}
 
 	// sequence the animations
-	for(i = 0; i < mod->numtextures; i++){
+	for(i = 0; i < mod->numtextures; i++) {
 		tx = mod->textures[i];
 		if(!tx || tx->name[0] != '+')
 			continue;
 		if(tx->anim_next)
-			continue;	// already sequenced
+			continue; // already sequenced
 
 		// find the number of frames in the animation
 		memset(anims, 0, sizeof(anims));
@@ -174,69 +178,69 @@ BSP_LoadTextures(model_t *mod, byte *in, int sz)
 		max = tx->name[1];
 		if(max >= 'a' && max <= 'z')
 			max -= 'a' - 'A';
-		if(max >= '0' && max <= '9'){
+		if(max >= '0' && max <= '9') {
 			max -= '0';
 			altmax = 0;
 			anims[max++] = tx;
-		}else if(max >= 'A' && max <= 'J'){
+		} else if(max >= 'A' && max <= 'J') {
 			altmax = max - 'A';
 			max = 0;
 			altanims[altmax++] = tx;
-		}else{
+		} else {
 badanim:
 			werrstr("bad animating texture: %s", tx->name);
 			goto err;
 		}
 
-		for(j = i+1; j < mod->numtextures; j++){
+		for(j = i + 1; j < mod->numtextures; j++) {
 			tx2 = mod->textures[j];
 			if(!tx2 || tx2->name[0] != '+')
 				continue;
-			if(strcmp(tx2->name+2, tx->name+2) != 0)
+			if(strcmp(tx2->name + 2, tx->name + 2) != 0)
 				continue;
 
 			num = tx2->name[1];
 			if(num >= 'a' && num <= 'z')
 				num -= 'a' - 'A';
-			if(num >= '0' && num <= '9'){
+			if(num >= '0' && num <= '9') {
 				num -= '0';
 				anims[num] = tx2;
-				if(num+1 > max)
+				if(num + 1 > max)
 					max = num + 1;
-			}else if(num >= 'A' && num <= 'J'){
+			} else if(num >= 'A' && num <= 'J') {
 				num = num - 'A';
 				altanims[num] = tx2;
-				if(num+1 > altmax)
-					altmax = num+1;
-			}else{
+				if(num + 1 > altmax)
+					altmax = num + 1;
+			} else {
 				goto badanim;
 			}
 		}
 
-#define	ANIM_CYCLE	2
+#define ANIM_CYCLE 2
 		// link them all together
-		for(j = 0; j < max; j++){
+		for(j = 0; j < max; j++) {
 			tx2 = anims[j];
-			if(!tx2){
+			if(!tx2) {
 badframe:
 				werrstr("missing frame %d of %s", j, tx->name);
 				goto err;
 			}
 			tx2->anim_total = max * ANIM_CYCLE;
 			tx2->anim_min = j * ANIM_CYCLE;
-			tx2->anim_max = (j+1) * ANIM_CYCLE;
-			tx2->anim_next = anims[(j+1) % max];
+			tx2->anim_max = (j + 1) * ANIM_CYCLE;
+			tx2->anim_next = anims[(j + 1) % max];
 			if(altmax)
 				tx2->alternate_anims = altanims[0];
 		}
-		for(j = 0; j < altmax; j++){
+		for(j = 0; j < altmax; j++) {
 			tx2 = altanims[j];
 			if(!tx2)
 				goto badframe;
 			tx2->anim_total = altmax * ANIM_CYCLE;
 			tx2->anim_min = j * ANIM_CYCLE;
-			tx2->anim_max = (j+1) * ANIM_CYCLE;
-			tx2->anim_next = altanims[(j+1) % altmax];
+			tx2->anim_max = (j + 1) * ANIM_CYCLE;
+			tx2->anim_next = altanims[(j + 1) % altmax];
 			if(max)
 				tx2->alternate_anims = anims[0];
 		}
@@ -253,32 +257,33 @@ BSP_LoadLighting(model_t *mod, byte *in, int sz)
 {
 	int i, litsz;
 	byte *lit;
-	char s[128+1], *t;
+	char s[128 + 1], *t;
 
-	if(sz == 0){
+	if(sz == 0) {
 		mod->lightdata = nil;
 		return 0;
 	}
 
 	snprint(s, sizeof(s), "%s", mod->name);
-	if((t = strrchr(s, '.')) != nil){
+	if((t = strrchr(s, '.')) != nil) {
 		strcpy(t, ".lit");
-		if((lit = loadhunklmp(s, &litsz)) != nil && litsz >= 4+4+sz*3){
-			if(memcmp(lit, "QLIT", 4) == 0 && lit[4] == 1 && lit[5] == 0 && lit[6] == 0 && lit[7] == 0){
+		if((lit = loadhunklmp(s, &litsz)) != nil && litsz >= 4 + 4 + sz * 3) {
+			if(memcmp(lit, "QLIT", 4) == 0 && lit[4] == 1 && lit[5] == 0 && lit[6] == 0 &&
+			   lit[7] == 0) {
 				mod->lightdata = lit + 8;
 				return 0;
-			}else{
+			} else {
 				Con_Printf("%s: invalid/unsupported LIT file\n", s);
 			}
 		}
 		Hunk_Free(lit);
 	}
 
-	mod->lightdata = Hunk_Alloc(sz*3);
-	for(i = 0; i < sz; i++){
-		mod->lightdata[i*3+0] = in[i];
-		mod->lightdata[i*3+1] = in[i];
-		mod->lightdata[i*3+2] = in[i];
+	mod->lightdata = Hunk_Alloc(sz * 3);
+	for(i = 0; i < sz; i++) {
+		mod->lightdata[i * 3 + 0] = in[i];
+		mod->lightdata[i * 3 + 1] = in[i];
+		mod->lightdata[i * 3 + 2] = in[i];
 	}
 	return 0;
 }
@@ -288,27 +293,27 @@ BSP_LoadLeafs(model_t *mod, byte *in, int sz)
 {
 	mleaf_t *out;
 	int i, j, p;
-	static const int elsz = 4+4+3*2+3*2+2+2+Namb;
+	static const int elsz = 4 + 4 + 3 * 2 + 3 * 2 + 2 + 2 + Namb;
 
 	// skip if loaded external one
 	if(mod->leafs != nil)
 		return 0;
 
-	if(sz % elsz){
+	if(sz % elsz) {
 		werrstr("BSP_LoadLeafs: funny lump size");
 		return -1;
 	}
 	mod->numleafs = sz / elsz;
 	mod->leafs = out = Hunk_Alloc(mod->numleafs * sizeof(*out));
 
-	for(i = 0; i < mod->numleafs; i++, out++){
+	for(i = 0; i < mod->numleafs; i++, out++) {
 		out->contents = le32(in);
 		out->compressed_vis = ((p = le32(in)) < 0 || mod->visdata == nil) ? nil : mod->visdata + p;
 
 		for(j = 0; j < 3; j++)
-			out->minmaxs[0+j] = le16(in);
+			out->minmaxs[0 + j] = le16(in);
 		for(j = 0; j < 3; j++)
-			out->minmaxs[3+j] = le16(in);
+			out->minmaxs[3 + j] = le16(in);
 
 		out->firstmarksurface = mod->marksurfaces + le16u(in);
 		out->nummarksurfaces = le16u(in);
@@ -322,7 +327,7 @@ BSP_LoadLeafs(model_t *mod, byte *in, int sz)
 int
 BSP_LoadVisibility(model_t *mod, byte *in, int sz)
 {
-	char s[128+4+1], *t;
+	char s[128 + 4 + 1], *t;
 	byte *vis, *leaf;
 	int filesz, combined, vissz, leafsz;
 
@@ -332,29 +337,29 @@ BSP_LoadVisibility(model_t *mod, byte *in, int sz)
 
 	// external vis files
 	// FIXME(sigrid): add support for big combo ("id1.vis") files?
-	if(mod->ver == BSPVERSION){ // bsp2 should have proper vis built in already
-		snprint(s, sizeof(s)-4, "%s", mod->name);
-		if((t = strrchr(s, '.')) != nil){
+	if(mod->ver == BSPVERSION) { // bsp2 should have proper vis built in already
+		snprint(s, sizeof(s) - 4, "%s", mod->name);
+		if((t = strrchr(s, '.')) != nil) {
 			strcpy(t, ".vis");
 			if((t = strrchr(mod->name, '/')) != nil)
 				t++;
 			else
 				t = mod->name;
 			vis = loadhunklmp(s, &filesz);
-			if(vis != nil && strcmp(fs_lmpfrom, mod->lmpfrom) == 0 && filesz >= 32+4+4+4){
+			if(vis != nil && strcmp(fs_lmpfrom, mod->lmpfrom) == 0 && filesz >= 32 + 4 + 4 + 4) {
 				vis += 32;
 				combined = le32(vis);
-				filesz -= 32+4;
+				filesz -= 32 + 4;
 				vis[-4] = 0;
-				if(combined > filesz || strcmp(t, (char*)&vis[-32-4]) != 0){
+				if(combined > filesz || strcmp(t, (char *)&vis[-32 - 4]) != 0) {
 bad:
 					Con_Printf("%s: invalid/unsupported VIS file\n", s);
 					mod->visdata = nil;
 					mod->leafs = nil;
-				}else{
+				} else {
 					vissz = le32(vis);
 					combined -= 4;
-					if(vissz+4 > combined)
+					if(vissz + 4 > combined)
 						goto bad;
 					mod->visdata = vis;
 					leaf = vis + vissz;
@@ -387,15 +392,15 @@ BSP_LoadVertexes(model_t *mod, byte *in, int sz)
 {
 	mvertex_t *out;
 	int i;
-	static const int elsz = 3*4;
+	static const int elsz = 3 * 4;
 
-	if(sz % elsz){
+	if(sz % elsz) {
 		werrstr("BSP_LoadVertexes: funny lump size");
 		return -1;
 	}
 	mod->numvertexes = sz / elsz;
 	mod->vertexes = out = Hunk_Alloc(mod->numvertexes * sizeof(*out));
-	for(i = 0; i < mod->numvertexes; i++, out++){
+	for(i = 0; i < mod->numvertexes; i++, out++) {
 		out->position[0] = f32(in);
 		out->position[1] = f32(in);
 		out->position[2] = f32(in);
@@ -408,16 +413,16 @@ BSP_LoadSubmodels(model_t *mod, byte *in, int sz)
 {
 	submodel_t *out;
 	int i, j;
-	static const int elsz = 3*4+3*4+3*4+MAX_MAP_HULLS*4+4+4+4;
+	static const int elsz = 3 * 4 + 3 * 4 + 3 * 4 + MAX_MAP_HULLS * 4 + 4 + 4 + 4;
 
-	if(sz % elsz){
+	if(sz % elsz) {
 		werrstr("BSP_LoadSubmodels: funny lump size");
 		return -1;
 	}
 	mod->numsubmodels = sz / elsz;
 	mod->submodels = out = Hunk_Alloc(mod->numsubmodels * sizeof(*out));
 
-	for(i = 0 ; i < mod->numsubmodels; i++, out++){
+	for(i = 0; i < mod->numsubmodels; i++, out++) {
 		for(j = 0; j < 3; j++)
 			out->mins[j] = f32(in) - 1.0;
 		for(j = 0; j < 3; j++)
@@ -438,16 +443,16 @@ BSP_LoadEdges(model_t *mod, byte *in, int sz)
 {
 	medge_t *out;
 	int i;
-	static const int elsz = 2*2;
+	static const int elsz = 2 * 2;
 
-	if(sz % elsz){
+	if(sz % elsz) {
 		werrstr("BSP_LoadEdges: funny lump size");
 		return -1;
 	}
 	mod->numedges = sz / elsz;
 	mod->edges = out = Hunk_Alloc(mod->numedges * sizeof(*out));
 
-	for(i = 0; i < mod->numedges; i++, out++){
+	for(i = 0; i < mod->numedges; i++, out++) {
 		out->v[0] = le16u(in);
 		out->v[1] = le16u(in);
 	}
@@ -460,28 +465,28 @@ BSP_LoadTexinfo(model_t *mod, byte *in, int sz)
 	mtexinfo_t *out;
 	int i, j, k, miptex;
 	float len1, len2;
-	static const int elsz = 2*4*4+4+4;
+	static const int elsz = 2 * 4 * 4 + 4 + 4;
 
-	if(sz % elsz){
+	if(sz % elsz) {
 		werrstr("BSP_LoadTexinfo: funny lump size");
 		return -1;
 	}
 	mod->numtexinfo = sz / elsz;
 	mod->texinfo = out = Hunk_Alloc(mod->numtexinfo * sizeof(*out));
 
-	for(i = 0; i < mod->numtexinfo; i++, out++){
-		for(j = 0; j < 2; j++){
+	for(i = 0; i < mod->numtexinfo; i++, out++) {
+		for(j = 0; j < 2; j++) {
 			for(k = 0; k < 4; k++)
 				out->vecs[j][k] = f32(in);
 		}
 		len1 = Length(out->vecs[0]);
 		len2 = Length(out->vecs[1]);
-		len1 = (len1 + len2)/2;
-		if (len1 < 0.32)
+		len1 = (len1 + len2) / 2;
+		if(len1 < 0.32)
 			out->mipadjust = 4;
-		else if (len1 < 0.49)
+		else if(len1 < 0.49)
 			out->mipadjust = 3;
-		else if (len1 < 0.99)
+		else if(len1 < 0.99)
 			out->mipadjust = 2;
 		else
 			out->mipadjust = 1;
@@ -489,14 +494,14 @@ BSP_LoadTexinfo(model_t *mod, byte *in, int sz)
 		miptex = le32(in);
 		out->flags = le32(in);
 		out->texture = nil;
-		if(mod->textures != nil){
-			if(miptex >= mod->numtextures){
+		if(mod->textures != nil) {
+			if(miptex >= mod->numtextures) {
 				werrstr("BSP_LoadTexinfo: miptex >= mod->numtextures");
 				return -1;
 			}
 			out->texture = mod->textures[miptex];
 		}
-		if(out->texture == nil){
+		if(out->texture == nil) {
 			out->texture = r_notexture_mip; // texture not found
 			out->flags = 0;
 		}
@@ -509,16 +514,16 @@ BSP_LoadFaces(model_t *mod, byte *in, int sz)
 {
 	msurface_t *out;
 	int i, surfnum;
-	static const int elsz = 2+2+4+2+2+MAXLIGHTMAPS+4;
+	static const int elsz = 2 + 2 + 4 + 2 + 2 + MAXLIGHTMAPS + 4;
 
-	if(sz % elsz){
+	if(sz % elsz) {
 		werrstr("BSP_LoadFaces: funny lump size");
 		return -1;
 	}
 	mod->numsurfaces = sz / elsz;
 	mod->surfaces = out = Hunk_Alloc(mod->numsurfaces * sizeof(*out));
 
-	for(surfnum = 0; surfnum < mod->numsurfaces; surfnum++, out++){
+	for(surfnum = 0; surfnum < mod->numsurfaces; surfnum++, out++) {
 		out->plane = mod->planes + le16u(in);
 		out->flags = le16u(in) ? SURF_PLANEBACK : 0;
 		out->firstedge = le32u(in);
@@ -533,15 +538,15 @@ BSP_LoadFaces(model_t *mod, byte *in, int sz)
 		memmove(out->styles, in, MAXLIGHTMAPS);
 		in += MAXLIGHTMAPS;
 		i = le32(in);
-		out->samples = i < 0 ? nil : mod->lightdata + i*3;
+		out->samples = i < 0 ? nil : mod->lightdata + i * 3;
 
 		// set the drawing flags flag
 
 		if(strncmp(out->texinfo->texture->name, "sky", 3) == 0)
 			out->flags |= SURF_DRAWSKY | SURF_DRAWTILED;
-		else if(out->texinfo->texture->name[0] == '*'){	// turbulent
+		else if(out->texinfo->texture->name[0] == '*') { // turbulent
 			out->flags |= SURF_DRAWTURB | SURF_DRAWTILED | SURF_TRANS;
-			for(i = 0; i < 2; i++){
+			for(i = 0; i < 2; i++) {
 				out->extents[i] = 16384;
 				out->texturemins[i] = -8192;
 			}
@@ -549,11 +554,11 @@ BSP_LoadFaces(model_t *mod, byte *in, int sz)
 				out->flags |= SURF_LAVA;
 			if(strstr(out->texinfo->texture->name, "slime") != nil)
 				out->flags |= SURF_SLIME;
-			if(strstr(out->texinfo->texture->name, "tele") != nil){
+			if(strstr(out->texinfo->texture->name, "tele") != nil) {
 				out->flags |= SURF_TELE;
 				out->flags &= ~SURF_TRANS;
 			}
-		}else if(out->texinfo->texture->name[0] == '{')
+		} else if(out->texinfo->texture->name[0] == '{')
 			out->flags |= SURF_TRANS | SURF_FENCE;
 	}
 	return 0;
@@ -564,30 +569,30 @@ BSP_LoadNodes(model_t *mod, byte *in, int sz)
 {
 	int i, j, p;
 	mnode_t *out;
-	static const int elsz = 4+2*2+3*2+3*2+2+2;
+	static const int elsz = 4 + 2 * 2 + 3 * 2 + 3 * 2 + 2 + 2;
 
-	if(sz % elsz){
+	if(sz % elsz) {
 		werrstr("BSP_LoadNodes: funny lump size");
 		return -1;
 	}
 	mod->numnodes = sz / elsz;
 	mod->nodes = out = Hunk_Alloc(mod->numnodes * sizeof(*out));
 
-	for(i = 0; i < mod->numnodes; i++, out++){
+	for(i = 0; i < mod->numnodes; i++, out++) {
 		out->plane = mod->planes + le32u(in);
 
-		for(j = 0; j < 2; j++){
+		for(j = 0; j < 2; j++) {
 			p = le16u(in);
 			if(p >= 0 && p < mod->numnodes)
 				out->children[j] = mod->nodes + p;
-			else{
-				p = 0xffff-p;
+			else {
+				p = 0xffff - p;
 				assert(mod->leafs != nil);
 				if(p >= 0 && p < mod->numleafs)
-					out->children[j] = (mnode_t*)(mod->leafs + p);
-				else{
+					out->children[j] = (mnode_t *)(mod->leafs + p);
+				else {
 					Con_DPrintf("BSP_LoadNodes: invalid node child\n");
-					out->children[j] = (mnode_t*)mod->leafs;
+					out->children[j] = (mnode_t *)mod->leafs;
 				}
 			}
 		}
@@ -609,9 +614,9 @@ BSP_LoadClipnodes(model_t *mod, byte *in, int sz)
 	mclipnode_t *out;
 	int i;
 	hull_t *hull;
-	static const int elsz = 4+2*2;
+	static const int elsz = 4 + 2 * 2;
 
-	if(sz % elsz){
+	if(sz % elsz) {
 		werrstr("BSP_LoadClipnodes: funny lump size");
 		return -1;
 	}
@@ -621,7 +626,7 @@ BSP_LoadClipnodes(model_t *mod, byte *in, int sz)
 	hull = &mod->hulls[1];
 	hull->clipnodes = out;
 	hull->firstclipnode = 0;
-	hull->lastclipnode = mod->numclipnodes-1;
+	hull->lastclipnode = mod->numclipnodes - 1;
 	hull->planes = mod->planes;
 	hull->clip_mins[0] = -16;
 	hull->clip_mins[1] = -16;
@@ -633,7 +638,7 @@ BSP_LoadClipnodes(model_t *mod, byte *in, int sz)
 	hull = &mod->hulls[2];
 	hull->clipnodes = out;
 	hull->firstclipnode = 0;
-	hull->lastclipnode = mod->numclipnodes-1;
+	hull->lastclipnode = mod->numclipnodes - 1;
 	hull->planes = mod->planes;
 	hull->clip_mins[0] = -32;
 	hull->clip_mins[1] = -32;
@@ -642,7 +647,7 @@ BSP_LoadClipnodes(model_t *mod, byte *in, int sz)
 	hull->clip_maxs[1] = 32;
 	hull->clip_maxs[2] = 64;
 
-	for(i = 0; i < mod->numclipnodes; i++, out++){
+	for(i = 0; i < mod->numclipnodes; i++, out++) {
 		out->planenum = le32u(in);
 		out->children[0] = le16u(in);
 		out->children[1] = le16u(in);
@@ -669,12 +674,12 @@ BSP_MakeHull0(model_t *mod)
 
 	hull->clipnodes = out;
 	hull->firstclipnode = 0;
-	hull->lastclipnode = mod->numnodes-1;
+	hull->lastclipnode = mod->numnodes - 1;
 	hull->planes = mod->planes;
 
-	for(i = 0; i < mod->numnodes; i++, out++, in++){
+	for(i = 0; i < mod->numnodes; i++, out++, in++) {
 		out->planenum = in->plane - mod->planes;
-		for(j = 0; j < 2; j++){
+		for(j = 0; j < 2; j++) {
 			child = in->children[j];
 			if(child->contents < 0)
 				out->children[j] = child->contents;
@@ -691,16 +696,16 @@ BSP_LoadMarksurfaces(model_t *mod, byte *in, int sz)
 	msurface_t **out;
 	static const int elsz = 2;
 
-	if(sz % elsz){
+	if(sz % elsz) {
 		werrstr("BSP_LoadMarksurfaces: funny lump size");
 		return -1;
 	}
 	mod->nummarksurfaces = sz / elsz;
 	mod->marksurfaces = out = Hunk_Alloc(mod->nummarksurfaces * sizeof(*out));
 
-	for(i = 0; i < mod->nummarksurfaces; i++){
+	for(i = 0; i < mod->nummarksurfaces; i++) {
 		j = le16u(in);
-		if(j < 0 || j >= mod->numsurfaces){
+		if(j < 0 || j >= mod->numsurfaces) {
 			werrstr("BSP_LoadMarksurfaces: bad surface number: %d", j);
 			return -1;
 		}
@@ -715,7 +720,7 @@ BSP_LoadSurfedges(model_t *mod, byte *in, int sz)
 	int i, *out;
 	static const int elsz = 4;
 
-	if(sz % elsz){
+	if(sz % elsz) {
 		werrstr("BSP_LoadSurfedges: funny lump size");
 		return -1;
 	}
@@ -732,20 +737,20 @@ BSP_LoadPlanes(model_t *mod, byte *in, int sz)
 {
 	int i, j, bits;
 	mplane_t *out;
-	static const int elsz = 3*4+4+4;
+	static const int elsz = 3 * 4 + 4 + 4;
 
-	if(sz % elsz){
+	if(sz % elsz) {
 		werrstr("BSP_LoadPlanes: funny lump size");
 		return -1;
 	}
 	mod->numplanes = sz / elsz;
 	mod->planes = out = Hunk_Alloc(mod->numplanes * sizeof(*out));
 
-	for(i = 0; i < mod->numplanes; i++, out++){
+	for(i = 0; i < mod->numplanes; i++, out++) {
 		bits = 0;
-		for(j = 0; j < 3; j++){
+		for(j = 0; j < 3; j++) {
 			if((out->normal[j] = f32(in)) < 0)
-				bits |= 1<<j;
+				bits |= 1 << j;
 		}
 
 		out->dist = f32(in);

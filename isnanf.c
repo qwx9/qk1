@@ -6,8 +6,8 @@ isNaNf(float f)
 	union {
 		float f;
 		u32int u;
-	}x;
+	} x;
 
 	x.f = f;
-	return (x.u & (0xff<<23)) == (0xff<<23);
+	return (x.u & (0xff << 23)) == (0xff << 23);
 }

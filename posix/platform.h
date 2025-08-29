@@ -28,7 +28,7 @@ typedef uintptr_t uintptr;
 
 #define nil NULL
 #define USED(x) (void)(x)
-#define nelem(x) (int)(sizeof(x)/sizeof((x)[0]))
+#define nelem(x) (int)(sizeof(x) / sizeof((x)[0]))
 
 #define sprint sprintf
 #define snprint snprintf
@@ -37,8 +37,16 @@ typedef uintptr_t uintptr;
 #define cistrncmp strncasecmp
 #define getcallerpc(x) nil
 #define getmalloctag(p) (USED(p), 0)
-#define setmalloctag(p, t) do{USED(p); USED(t);}while(0)
-#define setrealloctag(p, t) do{USED(p); USED(t);}while(0)
+#define setmalloctag(p, t) \
+	do { \
+		USED(p); \
+		USED(t); \
+	} while(0)
+#define setrealloctag(p, t) \
+	do { \
+		USED(p); \
+		USED(t); \
+	} while(0)
 #define isNaNf isnan
 
 #define qclz(x) __builtin_clz(x)
@@ -59,8 +67,11 @@ typedef uintptr_t uintptr;
 #endif
 
 extern char lasterr[256];
-#define werrstr(fmt...) do{snprint(lasterr, sizeof(lasterr), fmt); }while(0)
+#define werrstr(fmt...) \
+	do { \
+		snprint(lasterr, sizeof(lasterr), fmt); \
+	} while(0)
 
 char *seprint(char *, char *, char *, ...);
 
-#define DotProduct(x,y) DotProduct_((x),(y))
+#define DotProduct(x, y) DotProduct_((x), (y))

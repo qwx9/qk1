@@ -15,7 +15,7 @@ UDP_Init(void)
 
 	fmtinstall('I', eipfmt);
 	if(strcmp(hostname.string, "UNNAMED") == 0)
-		if((s = getenv("sysname")) != nil){
+		if((s = getenv("sysname")) != nil) {
 			setcvar("hostname", s);
 			free(s);
 		}
@@ -40,11 +40,9 @@ lproc(void *)
 	snprint(data, sizeof data, "%s/udp!*!%s", netmtpt, myip.srv);
 	if((afd = announce(data, adir)) < 0)
 		sysfatal("announce: %r");
-	for(;;){
-		if((lfd = listen(adir, ldir)) < 0
-			|| (fd = accept(lfd, ldir)) < 0
-			|| close(lfd) < 0
-			|| send(lchan, &fd) < 0)
+	for(;;) {
+		if((lfd = listen(adir, ldir)) < 0 || (fd = accept(lfd, ldir)) < 0 || close(lfd) < 0 ||
+			send(lchan, &fd) < 0)
 			break;
 	}
 }
@@ -61,7 +59,7 @@ udpname(void)
 void
 UDP_Listen(bool on)
 {
-	if(lpid < 0){
+	if(lpid < 0) {
 		if(on)
 			udpname();
 		return;
@@ -80,20 +78,20 @@ udpinfo(Addr *a)
 {
 	NetConnInfo *nc;
 
-	if((nc = getnetconninfo(nil, a->fd)) == nil){
+	if((nc = getnetconninfo(nil, a->fd)) == nil) {
 		Con_DPrintf("getnetconninfo: %r\n");
 		return;
 	}
-	strncpy(a->ip, nc->raddr, sizeof(a->ip)-1);
-	strncpy(a->srv, nc->rserv, sizeof(a->srv)-1);
-	strncpy(a->sys, nc->rsys, sizeof(a->sys)-1);
+	strncpy(a->ip, nc->raddr, sizeof(a->ip) - 1);
+	strncpy(a->srv, nc->rserv, sizeof(a->srv) - 1);
+	strncpy(a->sys, nc->rsys, sizeof(a->sys) - 1);
 	free(nc);
 }
 
 int
 UDP_Connect(Addr *a)
 {
-	if((a->fd = dial(netmkaddr(a->ip, "udp", a->srv), myip.srv, nil, nil)) < 0){
+	if((a->fd = dial(netmkaddr(a->ip, "udp", a->srv), myip.srv, nil, nil)) < 0) {
 		Con_DPrintf("dial: %r\n");
 		return -1;
 	}
@@ -118,7 +116,7 @@ udpread(byte *buf, int len, Addr *a)
 
 	if(flen(a->fd) < 1)
 		return 0;
-	if((n = read(a->fd, buf, len)) <= 0){
+	if((n = read(a->fd, buf, len)) <= 0) {
 		Con_DPrintf("udpread: %r\n");
 		return -1;
 	}
@@ -128,7 +126,7 @@ udpread(byte *buf, int len, Addr *a)
 int
 udpwrite(byte *buf, int len, Addr *a)
 {
-	if(write(a->fd, buf, len) != len){
+	if(write(a->fd, buf, len) != len) {
 		Con_DPrintf("udpwrite: %r\n");
 		return -1;
 	}
@@ -141,7 +139,7 @@ UDP_AddrToString(Addr *a)
 	char *p;
 	static char buf[52];
 
-	strncpy(buf, a->sys, sizeof(buf)-1);
+	strncpy(buf, a->sys, sizeof(buf) - 1);
 	if((p = strrchr(buf, '!')) != nil)
 		*p = ':';
 	return buf;
@@ -154,7 +152,7 @@ UDP_Broadcast(byte *buf, int len)
 	char ip[46];
 
 	snprint(ip, sizeof ip, "%I", IPv4bcast);
-	if((fd = dial(netmkaddr(ip, "udp", myip.srv), myip.srv, nil, nil)) < 0){
+	if((fd = dial(netmkaddr(ip, "udp", myip.srv), myip.srv, nil, nil)) < 0) {
 		Con_DPrintf("UDP_Broadcast: %r\n");
 		return -1;
 	}
@@ -180,12 +178,12 @@ getip(char *s, Addr *a)
 		p++;
 	snprint(buf, sizeof buf, "udp!%s!%s", s, p);
 	n = strlen(buf);
-	if(write(fd, buf, n) != n){
+	if(write(fd, buf, n) != n) {
 		Con_DPrintf("translating %s: %r\n", s);
 		return -1;
 	}
 	seek(fd, 0, 0);
-	if((n = read(fd, buf, sizeof(buf)-1)) <= 0){
+	if((n = read(fd, buf, sizeof(buf) - 1)) <= 0) {
 		Con_DPrintf("reading cs tables: %r");
 		return -1;
 	}
@@ -193,10 +191,10 @@ getip(char *s, Addr *a)
 	close(fd);
 	if(getfields(buf, f, 4, 0, " !") < 2)
 		goto err;
-	strncpy(a->ip, f[1], sizeof(a->ip)-1);
-	a->ip[sizeof(a->ip)-1] = 0;
-	strncpy(a->srv, f[2], sizeof(a->srv)-1);
-	a->srv[sizeof(a->srv)-1] = 0;
+	strncpy(a->ip, f[1], sizeof(a->ip) - 1);
+	a->ip[sizeof(a->ip) - 1] = 0;
+	strncpy(a->srv, f[2], sizeof(a->srv) - 1);
+	a->srv[sizeof(a->srv) - 1] = 0;
 	snprint(a->sys, sizeof a->sys, "%s!%s", a->ip, a->srv);
 	return 0;
 err:
@@ -223,5 +221,5 @@ UDP_GetSocketPort(Addr *a)
 void
 UDP_SetSocketPort(Addr *a, u16int port)
 {
-	snprint(a->srv, sizeof a->srv, "%hud", port);	/* was htons'ed */
+	snprint(a->srv, sizeof a->srv, "%hud", port); /* was htons'ed */
 }

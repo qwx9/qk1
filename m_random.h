@@ -1,3 +1,5 @@
+#pragma once
+
 void m_random_init(u64int seed);
 u64int m_random_64(void);
 s64int m_random_63(void);

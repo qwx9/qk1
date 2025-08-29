@@ -1,4 +1,6 @@
-// protocol.h -- communications protocols
+#pragma once
+
+// communications protocols
 
 enum {
 	PROTO_NQ,
@@ -8,8 +10,8 @@ enum {
 
 // these are the only ones supported with RMQ atm
 enum {
-	PF_RMQ_ANGLE_INT16 = 1<<1,
-	PF_RMQ_COORD_INT32 = 1<<7,
+	PF_RMQ_ANGLE_INT16 = 1 << 1,
+	PF_RMQ_COORD_INT32 = 1 << 7,
 };
 
 enum {
@@ -19,8 +21,8 @@ enum {
 
 #define defalpha(a) ((a) == DEFAULT_ALPHA || (a) == 0xff)
 #define zeroalpha(a) (!defalpha(a) && (a) <= ZERO_ALPHA)
-#define f2alpha(f) ((f) == 0.0 ? DEFAULT_ALPHA : clamp((f)*254+1, 1, 255))
-#define alpha2f(a) (zeroalpha(a) ? 0.0 : (float)(a)/255.0)
+#define f2alpha(f) ((f) == 0.0 ? DEFAULT_ALPHA : clamp((f) * 254 + 1, 1, 255))
+#define alpha2f(a) (zeroalpha(a) ? 0.0 : (float)(a) / 255.0)
 
 typedef struct protocol_t protocol_t;
 
@@ -49,7 +51,8 @@ struct protocol_t {
 	u32int fl_baseline_alpha;
 	u32int fl_weapon_alpha;
 
-	u32int fl_baseline_effects; /* FIXME(sigrid): this is absolutely made up and NOT a standard anywhere */
+	u32int fl_baseline_effects; /* FIXME(sigrid): this is absolutely made up and NOT a standard
+								   anywhere */
 
 	// absolute limits for the protocol
 	int limit_entity;
@@ -70,7 +73,7 @@ struct protocol_t {
 extern protocol_t protos[PROTO_NUM];
 
 // defaults for clientinfo messages
-#define	DEFAULT_VIEWHEIGHT	22
+#define DEFAULT_VIEWHEIGHT 22
 
 // if the high bit of the servercmd is set, the low bits are fast update flags:
 enum {
@@ -79,49 +82,49 @@ enum {
 	GAME_COOP = 0,
 	GAME_DEATHMATCH,
 
-	U_MOREBITS = 1<<0,
-	U_ORIGIN1 = 1<<1,
-	U_ORIGIN2 = 1<<2,
-	U_ORIGIN3 = 1<<3,
-	U_ANGLE2 = 1<<4,
-	U_NOLERP = 1<<5,		// don't interpolate movement
-	U_FRAME = 1<<6,
-	U_SIGNAL = 1<<7,		// just differentiates from other updates
+	U_MOREBITS = 1 << 0,
+	U_ORIGIN1 = 1 << 1,
+	U_ORIGIN2 = 1 << 2,
+	U_ORIGIN3 = 1 << 3,
+	U_ANGLE2 = 1 << 4,
+	U_NOLERP = 1 << 5, // don't interpolate movement
+	U_FRAME = 1 << 6,
+	U_SIGNAL = 1 << 7, // just differentiates from other updates
 	// svc_update can pass all of the fast update bits, plus more
-	U_ANGLE1 = 1<<8,
-	U_ANGLE3 = 1<<9,
-	U_MODEL = 1<<10,
-	U_COLORMAP = 1<<11,
-	U_SKIN = 1<<12,
-	U_EFFECTS = 1<<13,
-	U_LONGENTITY = 1<<14,
-	U_MOREBITS2 = 1<<15,
+	U_ANGLE1 = 1 << 8,
+	U_ANGLE3 = 1 << 9,
+	U_MODEL = 1 << 10,
+	U_COLORMAP = 1 << 11,
+	U_SKIN = 1 << 12,
+	U_EFFECTS = 1 << 13,
+	U_LONGENTITY = 1 << 14,
+	U_MOREBITS2 = 1 << 15,
 	// some of the bits here (1<<16…1<<22) are reserved by specific protocols
-	U_MOREBITS3 = 1<<23,
+	U_MOREBITS3 = 1 << 23,
 
-	SU_VIEWHEIGHT = 1<<0,
-	SU_IDEALPITCH = 1<<1,
-	SU_PUNCH1 = 1<<2,
-	SU_PUNCH2 = 1<<3,
-	SU_PUNCH3 = 1<<4,
-	SU_VELOCITY1 = 1<<5,
-	SU_VELOCITY2 = 1<<6,
-	SU_VELOCITY3 = 1<<7,
-	//SU_AIMENT = 1<<8,  AVAILABLE BIT
-	SU_ITEMS = 1<<9,
-	SU_ONGROUND = 1<<10,		// no data follows, the bit is it
-	SU_INWATER = 1<<11,		// no data follows, the bit is it
-	SU_WEAPONFRAME = 1<<12,
-	SU_ARMOR = 1<<13,
-	SU_WEAPON = 1<<14,
-	SU_MOREBITS = 1<<15,
+	SU_VIEWHEIGHT = 1 << 0,
+	SU_IDEALPITCH = 1 << 1,
+	SU_PUNCH1 = 1 << 2,
+	SU_PUNCH2 = 1 << 3,
+	SU_PUNCH3 = 1 << 4,
+	SU_VELOCITY1 = 1 << 5,
+	SU_VELOCITY2 = 1 << 6,
+	SU_VELOCITY3 = 1 << 7,
+	// SU_AIMENT = 1<<8,  AVAILABLE BIT
+	SU_ITEMS = 1 << 9,
+	SU_ONGROUND = 1 << 10, // no data follows, the bit is it
+	SU_INWATER = 1 << 11, // no data follows, the bit is it
+	SU_WEAPONFRAME = 1 << 12,
+	SU_ARMOR = 1 << 13,
+	SU_WEAPON = 1 << 14,
+	SU_MOREBITS = 1 << 15,
 	// some of the bits here (1<<16…1<<22) are reserved by specific protocols
-	SU_MOREBITS2 = 1<<23,
+	SU_MOREBITS2 = 1 << 23,
 
 	// a sound with no channel is a local only sound
-	SND_VOLUME = 1<<0,		// a byte
-	SND_ATTENUATION = 1<<1,		// a byte
-	SND_LOOPING = 1<<2,		// a long
+	SND_VOLUME = 1 << 0, // a byte
+	SND_ATTENUATION = 1 << 1, // a byte
+	SND_LOOPING = 1 << 2, // a long
 
 	// server to client
 	svc_bad = 0,
@@ -134,12 +137,12 @@ enum {
 	svc_time, // [float] server time
 	svc_print, // [string] null terminated string
 	svc_stufftext, // [string] stuffed into client's console buffer
-								// the string should be \n terminated
+				   // the string should be \n terminated
 	svc_setangle, // [angle3] set the view angle to this absolute value
 	svc_serverinfo, // [long] version
-						// [string] signon string
-						// [string]..[0]model cache
-						// [string]...[0]sounds cache
+					// [string] signon string
+					// [string]..[0]model cache
+					// [string]...[0]sounds cache
 	svc_lightstyle, // [byte] [string]
 	svc_updatename, // [byte] [string]
 	svc_updatefrags, // [byte] [short]

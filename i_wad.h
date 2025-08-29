@@ -1,3 +1,5 @@
+#pragma once
+
 typedef struct Wad Wad;
 #pragma incomplete Wad
 

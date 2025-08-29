@@ -23,6 +23,8 @@ add_project_arguments(
 )
 
 src_common = [
+	'adivtab.c',
+	'anorms.c',
 	'cd.c',
 	'chase.c',
 	'cl_demo.c',
@@ -148,7 +150,7 @@ else
 	]
 	if host_machine.system() == 'windows'
 		src_sys += [
-			'net_udp_windows.c',
+			'net_udp_null.c',
 			'sys_windows.c',
 		]
 		network = cc.find_library('ws2_32')
@@ -157,7 +159,7 @@ else
 			network = cc.find_library('network')
 		endif
 		src_sys += [
-			'net_udp_unix.c',
+			'net_udp_null.c',
 			'sys_unix.c',
 		]
 	endif

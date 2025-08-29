@@ -34,7 +34,7 @@ static struct {
 	ALuint src, buf;
 	bool stop;
 	stb_vorbis_alloc tmp;
-}track;
+} track;
 
 static cvar_t s_al_dev = {"s_al_device", "0", true};
 
@@ -61,32 +61,52 @@ static ALchar *(*qalGetStringiSOFT)(ALenum, ALsizei);
 static ALCchar *(*qalcGetStringiSOFT)(ALCdevice *, ALenum, ALsizei);
 static ALCboolean (*qalcResetDeviceSOFT)(ALCdevice *, const ALCint *attr);
 typedef ALsizei (*qalBufferCallbackTypeSOFT)(ALvoid *, ALvoid *, ALsizei);
-static void (*qalBufferCallbackSOFT)(ALuint buf, ALenum fmt, ALsizei freq, qalBufferCallbackTypeSOFT cb, ALvoid *aux);
+static void (*qalBufferCallbackSOFT)(
+	ALuint buf, ALenum fmt, ALsizei freq, qalBufferCallbackTypeSOFT cb, ALvoid *aux
+);
 
 #define ALERR() alcheckerr(__FILE__, __LINE__)
 
 static char *
 vorbiserr(int err)
 {
-	switch(err){
-	case VORBIS_invalid_api_mixing: return "can't mix api modes";
-	case VORBIS_outofmem: return "oom";
-	case VORBIS_feature_not_supported: return "feature not supported";
-	case VORBIS_too_many_channels: return "too many channels";
-	case VORBIS_unexpected_eof: return "unexpected EOF";
-	case VORBIS_seek_invalid: return "invalid seek";
-	case VORBIS_invalid_setup: return "invalid setup";
-	case VORBIS_invalid_stream: return "invalid stream";
-	case VORBIS_missing_capture_pattern: return "missing capture pattern";
-	case VORBIS_invalid_stream_structure_version: return "invalid stream struct verion";
-	case VORBIS_continued_packet_flag_invalid: return "continued packet flag invalid";
-	case VORBIS_incorrect_stream_serial_number: return "incorrect stream serial number";
-	case VORBIS_invalid_first_page: return "invalid first page";
-	case VORBIS_bad_packet_type: return "bad packet type";
-	case VORBIS_cant_find_last_page: return "can't find last page";
-	case VORBIS_seek_failed: return "seek failed";
-	case VORBIS_ogg_skeleton_not_supported: return "ogg skeleton not supported";
-	default: return "???";
+	switch(err) {
+	case VORBIS_invalid_api_mixing:
+		return "can't mix api modes";
+	case VORBIS_outofmem:
+		return "oom";
+	case VORBIS_feature_not_supported:
+		return "feature not supported";
+	case VORBIS_too_many_channels:
+		return "too many channels";
+	case VORBIS_unexpected_eof:
+		return "unexpected EOF";
+	case VORBIS_seek_invalid:
+		return "invalid seek";
+	case VORBIS_invalid_setup:
+		return "invalid setup";
+	case VORBIS_invalid_stream:
+		return "invalid stream";
+	case VORBIS_missing_capture_pattern:
+		return "missing capture pattern";
+	case VORBIS_invalid_stream_structure_version:
+		return "invalid stream struct verion";
+	case VORBIS_continued_packet_flag_invalid:
+		return "continued packet flag invalid";
+	case VORBIS_incorrect_stream_serial_number:
+		return "incorrect stream serial number";
+	case VORBIS_invalid_first_page:
+		return "invalid first page";
+	case VORBIS_bad_packet_type:
+		return "bad packet type";
+	case VORBIS_cant_find_last_page:
+		return "can't find last page";
+	case VORBIS_seek_failed:
+		return "seek failed";
+	case VORBIS_ogg_skeleton_not_supported:
+		return "ogg skeleton not supported";
+	default:
+		return "???";
 	}
 }
 
@@ -100,10 +120,13 @@ trackcb(ALvoid *aux, ALvoid *sampledata, ALsizei numbytes)
 
 	USED(aux);
 	eof = false;
-	for(b = sampledata; numbytes > 0; b += n, numbytes -= n){
-		n = 2 * sizeof(float) * stb_vorbis_get_samples_float_interleaved(track.v, 2, (float*)b, numbytes/sizeof(float));
-		if(n <= 0){
-			if(n < 0 || eof || !cdloop){
+	for(b = sampledata; numbytes > 0; b += n, numbytes -= n) {
+		n = 2 * sizeof(float) *
+			stb_vorbis_get_samples_float_interleaved(
+				track.v, 2, (float *)b, numbytes / sizeof(float)
+			);
+		if(n <= 0) {
+			if(n < 0 || eof || !cdloop) {
 				if((err = stb_vorbis_get_error(track.v)) != 0)
 					Con_Printf("track%02d: %s\n", cdntrk, vorbiserr(err));
 				track.stop = true;
@@ -115,7 +138,7 @@ trackcb(ALvoid *aux, ALvoid *sampledata, ALsizei numbytes)
 		}
 	}
 
-	return b - (byte*)sampledata;
+	return b - (byte *)sampledata;
 }
 
 static int
@@ -125,13 +148,23 @@ alcheckerr(const char *file, int line)
 	char *s, tmp[32];
 
 	ret = 0;
-	if(ctx != nil && (e = alGetError()) != AL_NO_ERROR){
-		switch(e){
-		case AL_INVALID_NAME: s = "invalid name"; break;
-		case AL_INVALID_ENUM: s = "invalid enum"; break;
-		case AL_INVALID_VALUE: s = "invalid value"; break;
-		case AL_INVALID_OPERATION: s = "invalid operation"; break;
-		case AL_OUT_OF_MEMORY: s = "out of memory"; break;
+	if(ctx != nil && (e = alGetError()) != AL_NO_ERROR) {
+		switch(e) {
+		case AL_INVALID_NAME:
+			s = "invalid name";
+			break;
+		case AL_INVALID_ENUM:
+			s = "invalid enum";
+			break;
+		case AL_INVALID_VALUE:
+			s = "invalid value";
+			break;
+		case AL_INVALID_OPERATION:
+			s = "invalid operation";
+			break;
+		case AL_OUT_OF_MEMORY:
+			s = "out of memory";
+			break;
 		default:
 			snprint(tmp, sizeof(tmp), "unknown (0x%x)", e);
 			s = tmp;
@@ -140,13 +173,23 @@ alcheckerr(const char *file, int line)
 		ret |= e;
 		fprintf(stderr, "AL: %s:%d: %s\n", file, line, s);
 	}
-	if(dev != nil && (e = alcGetError(dev)) != ALC_NO_ERROR){
-		switch(e){
-		case ALC_INVALID_DEVICE: s = "invalid device"; break;
-		case ALC_INVALID_ENUM: s = "invalid enum"; break;
-		case ALC_INVALID_VALUE: s = "invalid value"; break;
-		case ALC_INVALID_CONTEXT: s = "invalid context"; break;
-		case ALC_OUT_OF_MEMORY: s = "out of memory"; break;
+	if(dev != nil && (e = alcGetError(dev)) != ALC_NO_ERROR) {
+		switch(e) {
+		case ALC_INVALID_DEVICE:
+			s = "invalid device";
+			break;
+		case ALC_INVALID_ENUM:
+			s = "invalid enum";
+			break;
+		case ALC_INVALID_VALUE:
+			s = "invalid value";
+			break;
+		case ALC_INVALID_CONTEXT:
+			s = "invalid context";
+			break;
+		case ALC_OUT_OF_MEMORY:
+			s = "out of memory";
+			break;
 		default:
 			snprint(tmp, sizeof(tmp), "unknown error (0x%x)", e);
 			s = tmp;
@@ -167,17 +210,17 @@ getchan(int ent, int ch)
 	ALuint src;
 
 	stopped = nil;
-	for(c = chans; c != nil; c = c->next){
+	for(c = chans; c != nil; c = c->next) {
 		if(c->ent == ent && c->ch == ch)
 			return c;
-		if(stopped == nil){
+		if(stopped == nil) {
 			alGetSourcei(c->src, AL_SOURCE_STATE, &state);
 			if(!ALERR() && state != AL_PLAYING)
 				stopped = c;
 		}
 	}
 
-	if(stopped != nil){
+	if(stopped != nil) {
 		c = stopped;
 		c->ent = ent;
 		c->ch = ch;
@@ -209,9 +252,12 @@ delchan(alchan_t *c)
 		c->next->prev = c->prev;
 	if(chans == c)
 		chans = c->next;
-	alSourceStop(c->src); ALERR();
-	alSourcei(c->src, AL_BUFFER, 0); ALERR();
-	alDeleteSources(1, &c->src); ALERR();
+	alSourceStop(c->src);
+	ALERR();
+	alSourcei(c->src, AL_BUFFER, 0);
+	ALERR();
+	alDeleteSources(1, &c->src);
+	ALERR();
 	free(c);
 }
 
@@ -225,28 +271,29 @@ findsfx(char *s)
 		Host_Error("findsfx: path too long %s", s);
 	sfx = known_sfx;
 	e = known_sfx + num_sfx;
-	while(sfx < e){
-		if(strcmp(sfx->s, s) == 0){
+	while(sfx < e) {
+		if(strcmp(sfx->s, s) == 0) {
 			sfx->map = map;
 			return sfx;
 		}
 		sfx++;
 	}
-	if(num_sfx == MAX_SOUNDS){
+	if(num_sfx == MAX_SOUNDS) {
 		sfx = known_sfx;
-		while(sfx < e){
+		while(sfx < e) {
 			if(sfx->map && sfx->map < map)
 				break;
 			sfx++;
 		}
 		if(sfx == e)
 			Host_Error("findsfx: sfx list overflow: %s", s);
-		if((b = Cache_Check(&sfx->cu)) != nil){
-			alDeleteBuffers(1, &b->buf); ALERR();
+		if((b = Cache_Check(&sfx->cu)) != nil) {
+			alDeleteBuffers(1, &b->buf);
+			ALERR();
 			Cache_Free(&sfx->cu);
 			sfx->map = map;
 		}
-	}else
+	} else
 		num_sfx++;
 	strcpy(sfx->s, s);
 	return sfx;
@@ -268,11 +315,11 @@ loadsfx(Sfx *sfx)
 	if((b = Cache_Check(&sfx->cu)) != nil)
 		return b;
 	in = loadstklmp(va("sound/%s", sfx->s), nil, 0, &len);
-	if(in == nil){
+	if(in == nil) {
 		Con_DPrintf("loadsfx: %s\n", lerr());
 		return nil;
 	}
-	if(wavinfo(in, len, &info) != 0){
+	if(wavinfo(in, len, &info) != 0) {
 		Con_Printf("loadsfx: %s: %s\n", sfx->s, lerr());
 		// complain but get some silence in place so it looks like it got loaded
 		memset(&info, 0, sizeof(info));
@@ -288,17 +335,19 @@ loadsfx(Sfx *sfx)
 	alGenBuffers(1, &buf);
 	if(ALERR())
 		return nil;
-	alBufferData(buf, fmt, in+info.dataofs, info.samples*info.width, info.rate);
-	if(ALERR()){
-		alDeleteBuffers(1, &buf); ALERR();
+	alBufferData(buf, fmt, in + info.dataofs, info.samples * info.width, info.rate);
+	if(ALERR()) {
+		alDeleteBuffers(1, &buf);
+		ALERR();
 		return nil;
 	}
 	b = Cache_Alloc(&sfx->cu, sizeof(*b));
 	b->buf = buf;
-	if(info.loopofs >= 0){
+	if(info.loopofs >= 0) {
 		loop[0] = info.loopofs;
 		loop[1] = info.samples;
-		alBufferiv(b->buf, AL_LOOP_POINTS_SOFT, loop); ALERR();
+		alBufferiv(b->buf, AL_LOOP_POINTS_SOFT, loop);
+		ALERR();
 		b->loop = true;
 	}
 	b->upsample = info.rate < 22050;
@@ -313,31 +362,43 @@ alplay(alchan_t *c, albuf_t *b, vec3_t zp, float vol, float att, bool rel, bool 
 	int n;
 
 	src = c->src;
-	if(rel){
-		alSourcefv(src, AL_POSITION, vec3_origin); ALERR();
-		alSourcei(src, AL_SOURCE_RELATIVE, AL_TRUE); ALERR();
-		alSourcef(src, AL_ROLLOFF_FACTOR, 0.0f); ALERR();
-		alSourcef(src, AL_REFERENCE_DISTANCE, 0.0f); ALERR();
-	}else{
-		alSourcefv(src, AL_POSITION, zp); ALERR();
-		alSourcei(src, AL_SOURCE_RELATIVE, AL_FALSE); ALERR();
-		alSourcef(src, AL_ROLLOFF_FACTOR, att * 8.191); ALERR();
-		alSourcef(src, AL_REFERENCE_DISTANCE, 1.0f); ALERR();
-		alSourcef(src, AL_MAX_DISTANCE, 8192.0f); ALERR();
+	if(rel) {
+		alSourcefv(src, AL_POSITION, vec3_origin);
+		ALERR();
+		alSourcei(src, AL_SOURCE_RELATIVE, AL_TRUE);
+		ALERR();
+		alSourcef(src, AL_ROLLOFF_FACTOR, 0.0f);
+		ALERR();
+		alSourcef(src, AL_REFERENCE_DISTANCE, 0.0f);
+		ALERR();
+	} else {
+		alSourcefv(src, AL_POSITION, zp);
+		ALERR();
+		alSourcei(src, AL_SOURCE_RELATIVE, AL_FALSE);
+		ALERR();
+		alSourcef(src, AL_ROLLOFF_FACTOR, att * 8.191);
+		ALERR();
+		alSourcef(src, AL_REFERENCE_DISTANCE, 1.0f);
+		ALERR();
+		alSourcef(src, AL_MAX_DISTANCE, 8192.0f);
+		ALERR();
 	}
-	alSourcef(src, AL_GAIN, vol); ALERR();
-	if(al_num_resamplers > 0){
+	alSourcef(src, AL_GAIN, vol);
+	ALERR();
+	if(al_num_resamplers > 0) {
 		n = b->upsample ? s_al_resampler_up.value : s_al_resampler_default.value;
-		if(n >= 0){
+		if(n >= 0) {
 			alSourcei(src, AL_SOURCE_RESAMPLER_SOFT, n);
 			ALERR();
 		}
 	}
-	alSourcei(src, AL_BUFFER, b->buf); ALERR();
-	alSourcei(src, AL_LOOPING, (b->loop || loop) ? AL_TRUE : AL_FALSE); ALERR();
-	alSourcePlay(src); ALERR();
+	alSourcei(src, AL_BUFFER, b->buf);
+	ALERR();
+	alSourcei(src, AL_LOOPING, (b->loop || loop) ? AL_TRUE : AL_FALSE);
+	ALERR();
+	alSourcePlay(src);
+	ALERR();
 }
-
 
 static void
 ambs(const vec3_t org)
@@ -355,24 +416,25 @@ ambs(const vec3_t org)
 		return;
 	l = Mod_PointInLeaf(org, cl.worldmodel);
 	asl = l->ambient_sound_level;
-	for(i = 0; i < Namb; i++){
+	for(i = 0; i < Namb; i++) {
 		if((sfx = ambsfx[i]) == nil || (b = loadsfx(sfx)) == nil)
 			continue;
 		vol = ambient_level.value * asl[i];
 		av = &ambvol[i];
 		if(vol < 8)
 			vol = 0;
-		if(*av < vol){
+		if(*av < vol) {
 			*av += host_frametime * ambient_fade.value;
 			if(*av > vol)
 				*av = vol;
-		}else if(*av > vol){
+		} else if(*av > vol) {
 			*av -= host_frametime * ambient_fade.value;
 			if(*av < vol)
 				*av = vol;
 		}
-		if((ch = getchan(Srcamb, i)) != nil){
-			alSourcef(ch->src, AL_GAIN, *av / 255.0f); ALERR();
+		if((ch = getchan(Srcamb, i)) != nil) {
+			alSourcef(ch->src, AL_GAIN, *av / 255.0f);
+			ALERR();
 			alGetSourcei(ch->src, AL_SOURCE_STATE, &state);
 			if(!ALERR() && state != AL_PLAYING)
 				alplay(ch, b, vec3_origin, *av, 0.0f, true, true);
@@ -391,22 +453,26 @@ stepsnd(const view_t *v)
 
 	if(dev == nil)
 		return;
-	if(v->pn[0] == 0 && v->pn[1] == 0 && v->pn[2] == 0){
+	if(v->pn[0] == 0 && v->pn[1] == 0 && v->pn[2] == 0) {
 		alListenerf(AL_GAIN, 0);
 		ALERR();
 		return;
 	}
 
-	alListenerfv(AL_POSITION, v->org); ALERR();
-	alListenerfv(AL_ORIENTATION, fwup); ALERR();
+	alListenerfv(AL_POSITION, v->org);
+	ALERR();
+	alListenerfv(AL_ORIENTATION, fwup);
+	ALERR();
 	VectorSubtract(v->org, oorg, vel);
 	VectorCopy(v->org, oorg);
-	alListenerfv(AL_VELOCITY, vel); ALERR();
-	alListenerf(AL_GAIN, volume.value); ALERR();
+	alListenerfv(AL_VELOCITY, vel);
+	ALERR();
+	alListenerf(AL_GAIN, volume.value);
+	ALERR();
 
 	ambs(v->org);
 
-	for(c = chans; c != nil; c = next){
+	for(c = chans; c != nil; c = next) {
 		next = c->next;
 		alGetSourcei(c->src, AL_SOURCE_STATE, &state);
 		if(!ALERR() && state != AL_PLAYING)
@@ -422,8 +488,9 @@ stopallsfx(cmd_t *cmd)
 	USED(cmd);
 	if(dev == nil)
 		return;
-	alListenerf(AL_GAIN, 0); ALERR();
-	for(c = chans; c != nil; c = next){
+	alListenerf(AL_GAIN, 0);
+	ALERR();
+	for(c = chans; c != nil; c = next) {
 		next = c->next;
 		delchan(c);
 	}
@@ -438,7 +505,7 @@ stopsfx(int ent, int ch)
 
 	if(dev == nil)
 		return;
-	for(c = chans; c != nil; c = c->next){
+	for(c = chans; c != nil; c = c->next) {
 		if(c->ent == ent && c->ch == ch)
 			break;
 	}
@@ -463,7 +530,8 @@ startsfx(int ent, int ch, Sfx *sfx, vec3_t zp, float vol, float att)
 
 	if(dev == nil || (b = loadsfx(sfx)) == nil || (c = getchan(ent, ch)) == nil)
 		return;
-	alSourceStop(c->src); ALERR();
+	alSourceStop(c->src);
+	ALERR();
 	alplay(c, b, zp, vol, att, ent == cl.viewentity, ent == Srcstatic);
 }
 
@@ -484,7 +552,7 @@ staticsfx(Sfx *sfx, vec3_t zp, float vol, float att)
 	if(dev == nil)
 		return;
 
-	startsfx(Srcstatic, numst++, sfx, zp, vol, att/1.5f);
+	startsfx(Srcstatic, numst++, sfx, zp, vol, att / 1.5f);
 }
 
 void
@@ -518,10 +586,11 @@ alcattr(bool hrtf)
 	int i;
 
 	attr[i = 0] = 0;
-	if(hrtf){
+	if(hrtf) {
 		attr[i++] = s_al_hrtf.value != 0 ? ALC_HRTF_SOFT : 0;
-		attr[i++] = s_al_hrtf.value != 0 ? (s_al_hrtf.value > 0 ? ALC_TRUE : ALC_FALSE) : ALC_DONT_CARE_SOFT;
-		if(attr[i-1] == ALC_TRUE){
+		attr[i++] = s_al_hrtf.value != 0 ? (s_al_hrtf.value > 0 ? ALC_TRUE : ALC_FALSE)
+										 : ALC_DONT_CARE_SOFT;
+		if(attr[i - 1] == ALC_TRUE) {
 			attr[i++] = ALC_HRTF_ID_SOFT;
 			attr[i++] = s_al_hrtf.value - 1;
 		}
@@ -541,43 +610,52 @@ alinit(const char *devname)
 	ALCcontext *c;
 	int e;
 
-	if(devname == nil){
+	if(devname == nil) {
 		// ALC_DEFAULT_DEVICE_SPECIFIER would make more sense,
 		// but unfortunately it's not a _full_ name
 		devname = alcGetString(nil, ALC_ALL_DEVICES_SPECIFIER);
 		ALERR();
 	}
 
-	dev = alcOpenDevice(devname); ALERR();
+	dev = alcOpenDevice(devname);
+	ALERR();
 	if(dev == nil)
 		return -1;
 	free(curdev);
 	curdev = strdup(devname);
 
-	c = alcCreateContext(dev, attr); ALERR();
-	if(c == nil){
+	c = alcCreateContext(dev, attr);
+	ALERR();
+	if(c == nil) {
 closedev:
-		alcCloseDevice(dev); ALERR();
+		alcCloseDevice(dev);
+		ALERR();
 		dev = nil;
 		free(curdev);
 		curdev = nil;
 		return -1;
 	}
 	ctx = c;
-	e = alcMakeContextCurrent(c); ALERR();
-	if(!e){
+	e = alcMakeContextCurrent(c);
+	ALERR();
+	if(!e) {
 		ctx = nil;
-		alcDestroyContext(c); ALERR();
+		alcDestroyContext(c);
+		ALERR();
 		goto closedev;
 	}
-	alListenerf(AL_GAIN, volume.value); ALERR();
-	alDistanceModel(AL_LINEAR_DISTANCE_CLAMPED); ALERR();
+	alListenerf(AL_GAIN, volume.value);
+	ALERR();
+	alDistanceModel(AL_LINEAR_DISTANCE_CLAMPED);
+	ALERR();
 
 	// assuming 64 Quake units is ~1.7m
-	alSpeedOfSound(343.3 * 64.0 / 1.7); ALERR();
-	alDopplerFactor(s_al_doppler_factor.value); ALERR();
+	alSpeedOfSound(343.3 * 64.0 / 1.7);
+	ALERR();
+	alDopplerFactor(s_al_doppler_factor.value);
+	ALERR();
 
-	if(alIsExtensionPresent("AL_SOFT_source_resampler")){
+	if(alIsExtensionPresent("AL_SOFT_source_resampler")) {
 		al_default_resampler = alGetInteger(AL_DEFAULT_RESAMPLER_SOFT);
 		if(ALERR())
 			al_default_resampler = 0;
@@ -585,24 +663,27 @@ closedev:
 		if(ALERR())
 			al_num_resamplers = 0;
 		qalGetStringiSOFT = alGetProcAddress("alGetStringiSOFT");
-	}else{
+	} else {
 		qalGetStringiSOFT = nil;
 	}
 
 	qalBufferCallbackSOFT = nil;
-	cdenabled = cdenabled &&
-		alIsExtensionPresent("AL_EXT_float32") &&
-		alIsExtensionPresent("AL_SOFT_callback_buffer") &&
-		(alGenSources(1, &track.src), !ALERR());
-	if(cdenabled){
-		alSourcei(track.src, AL_SOURCE_SPATIALIZE_SOFT, AL_FALSE); ALERR();
-		qalBufferCallbackSOFT = alGetProcAddress("alBufferCallbackSOFT"); ALERR();
-		alGenBuffers(1, &track.buf); ALERR();
+	cdenabled = cdenabled && alIsExtensionPresent("AL_EXT_float32") &&
+				alIsExtensionPresent("AL_SOFT_callback_buffer") &&
+				(alGenSources(1, &track.src), !ALERR());
+	if(cdenabled) {
+		alSourcei(track.src, AL_SOURCE_SPATIALIZE_SOFT, AL_FALSE);
+		ALERR();
+		qalBufferCallbackSOFT = alGetProcAddress("alBufferCallbackSOFT");
+		ALERR();
+		alGenBuffers(1, &track.buf);
+		ALERR();
 		// test run to make sure it works
 		qalBufferCallbackSOFT(track.buf, AL_FORMAT_STEREO_FLOAT32, 44100, trackcb, nil);
-		if(ALERR()){
+		if(ALERR()) {
 fail:
-			alDeleteBuffers(1, &track.buf); ALERR();
+			alDeleteBuffers(1, &track.buf);
+			ALERR();
 			track.buf = 0;
 			cdenabled = false;
 		}
@@ -617,17 +698,13 @@ fail:
 static int
 alreopen(const char *new, ALCint *attr)
 {
-	ALCboolean *(*qalcReopenDeviceSOFT)(
-		ALCdevice *,
-		const ALCchar *devname,
-		const ALCint *attr
-	);
+	ALCboolean *(*qalcReopenDeviceSOFT)(ALCdevice *, const ALCchar *devname, const ALCint *attr);
 	int r;
 
 	qalcReopenDeviceSOFT = nil;
 	if(alcIsExtensionPresent(dev, "ALC_SOFT_reopen_device"))
 		qalcReopenDeviceSOFT = alcGetProcAddress(dev, "alcReopenDeviceSOFT");
-	if(qalcReopenDeviceSOFT == nil){
+	if(qalcReopenDeviceSOFT == nil) {
 		Con_Printf("AL: can't change device settings on the fly\n");
 		return -1;
 	}
@@ -644,12 +721,12 @@ alreinit(const char *def, const char *all)
 	bool hrtf;
 
 	n = s_al_dev.value;
-	for(i = 1, newdev = all; newdev != nil && *newdev; i++){
-		if((n == 0 && def != nil && strcmp(newdev, def) == 0) || n == i){
+	for(i = 1, newdev = all; newdev != nil && *newdev; i++) {
+		if((n == 0 && def != nil && strcmp(newdev, def) == 0) || n == i) {
 			if(curdev != nil && strcmp(newdev, curdev) == 0)
 				break;
 			n = dev == nil ? alinit(all) : alreopen(newdev, alcattr(false));
-			if(n != 0){
+			if(n != 0) {
 				Con_Printf("AL: failed to switch to %s\n", newdev);
 				return;
 			}
@@ -657,24 +734,24 @@ alreinit(const char *def, const char *all)
 			curdev = strdup(newdev);
 			break;
 		}
-		newdev += strlen(newdev)+1;
+		newdev += strlen(newdev) + 1;
 	}
-	if(newdev == nil || !*newdev){
+	if(newdev == nil || !*newdev) {
 		Con_Printf("AL: no such device: %d\n", n);
 		return;
 	}
 
-	if(alcIsExtensionPresent(dev, "ALC_SOFT_HRTF")){
+	if(alcIsExtensionPresent(dev, "ALC_SOFT_HRTF")) {
 		qalcGetStringiSOFT = alcGetProcAddress(dev, "alcGetStringiSOFT");
 		qalcResetDeviceSOFT = alcGetProcAddress(dev, "alcResetDeviceSOFT");
 		hrtf = true;
-	}else{
+	} else {
 		qalcGetStringiSOFT = nil;
 		qalcResetDeviceSOFT = nil;
 		hrtf = false;
 	}
 
-	if(qalcResetDeviceSOFT != nil){
+	if(qalcResetDeviceSOFT != nil) {
 		qalcResetDeviceSOFT(dev, alcattr(hrtf));
 		ALERR();
 	}
@@ -693,30 +770,30 @@ alvarcb(cvar_t *var)
 	if(ALERR())
 		all = nil;
 
-	if(var == &s_al_dev && Cmd_Argc() == 1){
+	if(var == &s_al_dev && Cmd_Argc() == 1) {
 		Con_Printf("%-2d: default (%s)\n", 0, def ? def : "<invalid>");
-		for(i = 1, s = all; s != nil && *s; i++){
+		for(i = 1, s = all; s != nil && *s; i++) {
 			Con_Printf(
-				"%-2d: %s%s\n",
-				i, s, (def != nil && strcmp(s, def) == 0) ? " (default)" : ""
+				"%-2d: %s%s\n", i, s, (def != nil && strcmp(s, def) == 0) ? " (default)" : ""
 			);
-			s += strlen(s)+1;
+			s += strlen(s) + 1;
 		}
 		return;
 	}
 
 	alreinit(def, all);
 
-	if(var == &s_al_hrtf && Cmd_Argc() == 1){
+	if(var == &s_al_hrtf && Cmd_Argc() == 1) {
 		Con_Printf("%-2d: disabled\n", -1);
 		Con_Printf("%-2d: don't care (default)\n", 0);
 		if(qalcGetStringiSOFT == nil)
 			return;
-		alcGetIntegerv(dev, ALC_NUM_HRTF_SPECIFIERS_SOFT, 1, &n); ALERR();
-		for(i = 0; i < n; i++){
+		alcGetIntegerv(dev, ALC_NUM_HRTF_SPECIFIERS_SOFT, 1, &n);
+		ALERR();
+		for(i = 0; i < n; i++) {
 			s = qalcGetStringiSOFT(dev, ALC_HRTF_SPECIFIER_SOFT, i);
 			if(!ALERR() && s != nil)
-				Con_Printf("%-2d: %s\n", i+1, s);
+				Con_Printf("%-2d: %s\n", i + 1, s);
 		}
 	}
 }
@@ -724,7 +801,8 @@ alvarcb(cvar_t *var)
 static void
 aldopplercb(cvar_t *var)
 {
-	alDopplerFactor(var->value); ALERR();
+	alDopplerFactor(var->value);
+	ALERR();
 }
 
 static void
@@ -736,13 +814,16 @@ sfxlist(cmd_t *c)
 
 	USED(c);
 	sum = 0;
-	for(sfx = known_sfx, e = known_sfx+num_sfx; sfx < e; sfx++){
+	for(sfx = known_sfx, e = known_sfx + num_sfx; sfx < e; sfx++) {
 		if((b = Cache_Check(&sfx->cu)) == nil)
 			continue;
-		alGetBufferi(b->buf, AL_SIZE, &sz); ALERR();
-		alGetBufferi(b->buf, AL_CHANNELS, &ch); ALERR();
-		alGetBufferi(b->buf, AL_BITS, &w); ALERR();
-		sum += sz * ch * w/8;
+		alGetBufferi(b->buf, AL_SIZE, &sz);
+		ALERR();
+		alGetBufferi(b->buf, AL_CHANNELS, &ch);
+		ALERR();
+		alGetBufferi(b->buf, AL_BITS, &w);
+		ALERR();
+		sum += sz * ch * w / 8;
 		Con_Printf("%c(%2db) %6d : %s\n", b->loop ? 'L' : ' ', w, sz, sfx->s);
 	}
 	Con_Printf("Total resident: %d\n", sum);
@@ -766,11 +847,12 @@ sfxend(void)
 
 	ambsfx[Ambwater] = precachesfx("ambience/water1.wav");
 	ambsfx[Ambsky] = precachesfx("ambience/wind2.wav");
-	for(i = 0, sfx = known_sfx; i < num_sfx; i++, sfx++){
+	for(i = 0, sfx = known_sfx; i < num_sfx; i++, sfx++) {
 		if(sfx->map >= map || sfx == ambsfx[Ambsky] || sfx == ambsfx[Ambwater])
 			continue;
-		if((b = Cache_Check(&sfx->cu)) != nil){
-			alDeleteBuffers(1, &b->buf); ALERR();
+		if((b = Cache_Check(&sfx->cu)) != nil) {
+			alDeleteBuffers(1, &b->buf);
+			ALERR();
 			Cache_Free(&sfx->cu);
 		}
 	}
@@ -784,7 +866,7 @@ stepcd(void)
 
 	if(track.stop)
 		stopcd();
-	else if(track.v != nil){
+	else if(track.v != nil) {
 		alSourcef(track.src, AL_GAIN, bgmvolume.value);
 		ALERR();
 	}
@@ -803,12 +885,12 @@ playcd(int nt, bool loop)
 	stopcd();
 	if((f = openlmp(va("music/track%02d.ogg", nt), &track.len)) == nil)
 		return;
-	if(track.tmp.alloc_buffer == nil){
-		track.tmp.alloc_buffer_length_in_bytes = 512*1024;
+	if(track.tmp.alloc_buffer == nil) {
+		track.tmp.alloc_buffer_length_in_bytes = 512 * 1024;
 		track.tmp.alloc_buffer = malloc(track.tmp.alloc_buffer_length_in_bytes);
 	}
 	track.v = stb_vorbis_open_file_section(f, true, &err, &track.tmp, track.len);
-	if(track.v == nil){
+	if(track.v == nil) {
 		werrstr("track%02d: %s", nt, vorbiserr(err));
 		return;
 	}
@@ -818,7 +900,8 @@ playcd(int nt, bool loop)
 	track.stop = false;
 	alSourcei(track.src, AL_BUFFER, 0);
 	qalBufferCallbackSOFT(track.buf, AL_FORMAT_STEREO_FLOAT32, info.sample_rate, trackcb, nil);
-	if(ALERR() || (alSourcei(track.src, AL_BUFFER, track.buf), ALERR()) || (alSourcePlay(track.src), ALERR())){
+	if(ALERR() || (alSourcei(track.src, AL_BUFFER, track.buf), ALERR()) ||
+	   (alSourcePlay(track.src), ALERR())) {
 		stb_vorbis_close(track.v);
 		track.v = nil;
 	}
@@ -827,7 +910,7 @@ playcd(int nt, bool loop)
 void
 resumecd(void)
 {
-	if(track.v != nil){
+	if(track.v != nil) {
 		alSourcePlay(track.src);
 		ALERR();
 	}
@@ -836,7 +919,7 @@ resumecd(void)
 void
 pausecd(void)
 {
-	if(track.v != nil){
+	if(track.v != nil) {
 		alSourcePause(track.src);
 		ALERR();
 	}
@@ -853,8 +936,9 @@ initcd(void)
 void
 stopcd(void)
 {
-	if(track.v != nil){
-		alSourceStop(track.src); ALERR();
+	if(track.v != nil) {
+		alSourceStop(track.src);
+		ALERR();
 		stb_vorbis_close(track.v);
 		track.v = nil;
 		free(track.tmp.alloc_buffer);
@@ -885,7 +969,7 @@ initsnd(void)
 	Cmd_AddCommand("soundlist", sfxlist);
 	Cmd_AddCommand("cd", cdcmd);
 
-	if(!isdisabled("snd")){
+	if(!isdisabled("snd")) {
 		cdenabled = !isdisabled("cd");
 		s_al_dev.cb = s_al_hrtf.cb = alvarcb;
 		s_al_doppler_factor.cb = aldopplercb;
@@ -902,6 +986,10 @@ sndclose(void)
 {
 	if(dev == nil)
 		return;
-	alcDestroyContext(ctx); ctx = nil; ALERR();
-	alcCloseDevice(dev); dev = nil; ALERR();
+	alcDestroyContext(ctx);
+	ctx = nil;
+	ALERR();
+	alcCloseDevice(dev);
+	dev = nil;
+	ALERR();
 }

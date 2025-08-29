@@ -3,7 +3,7 @@
 extern double d_pix_scale;
 
 void
-D_DrawParticle (particle_t *pparticle)
+D_DrawParticle(particle_t *pparticle)
 {
 	vec3_t local, transformed;
 	double zi;
@@ -27,15 +27,12 @@ D_DrawParticle (particle_t *pparticle)
 	u = xcenter + zi * transformed[0] + 0.5;
 	v = ycenter - zi * transformed[1] + 0.5;
 
-	if ((v > d_vrectbottom_particle) ||
-		(u > d_vrectright_particle) ||
-		(v < d_vrecty) ||
-		(u < d_vrectx))
-	{
+	if((v > d_vrectbottom_particle) || (u > d_vrectright_particle) || (v < d_vrecty) ||
+	   (u < d_vrectx)) {
 		return;
 	}
 
-	pz = dvars.zb + v*dvars.w + u;
+	pz = dvars.zb + v * dvars.w + u;
 	pdest = dvars.fb + d_scantable[v] + u;
 	izi = zi * 0x8000 * 0x10000;
 
@@ -45,9 +42,9 @@ D_DrawParticle (particle_t *pparticle)
 		pix = 1;
 	color = pparticle->color;
 
-	for(count = pix; count; count--, pz += dvars.w, pdest += dvars.w){
-		for(i = 0; i < pix; i++){
-			if(pz[i] <= izi){
+	for(count = pix; count; count--, pz += dvars.w, pdest += dvars.w) {
+		for(i = 0; i < pix; i++) {
+			if(pz[i] <= izi) {
 				pz[i] = izi;
 				pdest[i] = color;
 			}

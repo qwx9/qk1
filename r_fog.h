@@ -1,3 +1,5 @@
+#pragma once
+
 typedef struct fog_t fog_t;
 
 struct fog_t {
@@ -6,9 +8,10 @@ struct fog_t {
 	pixel64_t fbv;
 };
 
-#define fogstep(f) do{ \
+#define fogstep(f) \
+	do { \
 		(f).v += (f).d; \
-	}while(0)
+	} while(0)
 
 static inline byte
 z2foga(uzint z)
@@ -20,23 +23,21 @@ z2foga(uzint z)
 		return 0;
 	x = 0xffffffffU / z;
 	d = exp2f(-fogvars.density * x * x);
-	return 255 - 255*d;
+	return 255 - 255 * d;
 }
 
 static inline pixel64_t
 pixto64(pixel_t p)
 {
-	return
-		(pixel64_t)((p>>24)&0xff)<<56 |
-		(pixel64_t)((p>>16)&0xff)<<40 |
-		(pixel64_t)((p>> 8)&0xff)<<24 |
-		(pixel64_t)((p>> 0)&0xff)<< 8;
+	return (pixel64_t)((p >> 24) & 0xff) << 56 | (pixel64_t)((p >> 16) & 0xff) << 40 |
+		   (pixel64_t)((p >> 8) & 0xff) << 24 | (pixel64_t)((p >> 0) & 0xff) << 8;
 }
 
 static inline pixel_t
 pixfrom64(pixel64_t p)
 {
-	return ((p>>56)&0xff)<<24 | ((p>>40)&0xff)<<16 | ((p>>24)&0xff)<<8 | ((p>>8)&0xff)<<0;
+	return ((p >> 56) & 0xff) << 24 | ((p >> 40) & 0xff) << 16 | ((p >> 24) & 0xff) << 8 |
+		   ((p >> 8) & 0xff) << 0;
 }
 
 static inline pixel_t
@@ -44,7 +45,7 @@ blendfog(pixel_t pix, fog_t fog)
 {
 	pixel64_t v = (pix & 0xff000000) != 0 ? fog.v : fog.fbv;
 	pixel_t a = pixfrom64(v);
-	pixel_t b = mulalpha(pix, 0xff - (v>>56));
+	pixel_t b = mulalpha(pix, 0xff - (v >> 56));
 	return a + b;
 }
 
@@ -59,12 +60,11 @@ fogcalc(uzint zi0, uzint zi1, int cnt, fog_t *f)
 
 	f->v = pixto64(mulalpha(fogvars.pix, v));
 	f->fbv = pixto64(mulalpha(fogvars.fbpix, v));
-	x = pixto64(mulalpha(fogvars.pix, (e<v ? v-e : e-v)));
-	f->d =
-		(((x & (0xffffULL<<48))/cnt) & (0xffffULL<<48)) |
-		(((x & (0xffffULL<<32))/cnt) & (0xffffULL<<32)) |
-		(((x & (0xffffULL<<16))/cnt) & (0xffffULL<<16)) |
-		(((x & (0xffffULL<< 0))/cnt) & (0xffffULL<< 0));
+	x = pixto64(mulalpha(fogvars.pix, e < v ? v - e : e - v));
+	f->d = (((x & (0xffffULL << 48)) / cnt) & (0xffffULL << 48)) |
+		   (((x & (0xffffULL << 32)) / cnt) & (0xffffULL << 32)) |
+		   (((x & (0xffffULL << 16)) / cnt) & (0xffffULL << 16)) |
+		   (((x & (0xffffULL << 0)) / cnt) & (0xffffULL << 0));
 	if(e < v)
 		f->d = -f->d;
 

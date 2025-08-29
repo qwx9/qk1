@@ -28,7 +28,8 @@ stepcd(void)
 void
 playcd(int nt, bool loop)
 {
-	USED(nt); USED(loop);
+	USED(nt);
+	USED(loop);
 }
 
 int

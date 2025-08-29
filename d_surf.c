@@ -1,25 +1,23 @@
 #include "quakedef.h"
 
+#define GUARDSIZE 4
+
 static float surfscale;
-bool r_cache_thrash;		 // set if surface cache is thrashing
-
-surfcache_t *sc_rover;
-
 static surfcache_t *sc_base;
 static int sc_size;
 
-#define GUARDSIZE	   4
+bool r_cache_thrash; // set if surface cache is thrashing
+surfcache_t *sc_rover;
 
-int	 D_SurfaceCacheForRes (int width, int height)
+int
+D_SurfaceCacheForRes(int width, int height)
 {
-	int			 size, pix;
+	int size, pix;
 
 	size = SURFCACHE_SIZE_AT_320X200;
-
-	pix = width*height*sizeof(pixel_t);
-	if (pix > 64000)
-		size += (pix-64000)*3;
-
+	pix = width * height * sizeof(pixel_t);
+	if(pix > 64000)
+		size += (pix - 64000) * 3;
 
 	return size;
 }
@@ -27,36 +25,30 @@ int	 D_SurfaceCacheForRes (int width, int height)
 static void
 D_CheckCacheGuard(void)
 {
-	byte	*s;
-	int			 i;
+	byte *s;
+	int i;
 
 	s = (byte *)sc_base + sc_size;
-	for (i=0 ; i<GUARDSIZE ; i++)
-		if (s[i] != (byte)i)
-			fatal ("D_CheckCacheGuard: failed");
+	for(i = 0; i < GUARDSIZE; i++)
+		if(s[i] != (byte)i)
+			fatal("D_CheckCacheGuard: failed");
 }
 
 static void
 D_ClearCacheGuard(void)
 {
-	byte	*s;
-	int			 i;
+	byte *s;
+	int i;
 
 	s = (byte *)sc_base + sc_size;
-	for (i=0 ; i<GUARDSIZE ; i++)
-		s[i] = (byte)i;
+	for(i = 0; i < GUARDSIZE; i++)
+		s[i] = i;
 }
 
-
-/*
-================
-D_InitCaches
-
-================
-*/
-void D_InitCaches (void *buffer, int size)
+void
+D_InitCaches(void *buffer, int size)
 {
-	Con_Printf ("%dk surface cache\n", size/1024);
+	Con_Printf("%dk surface cache\n", size / 1024);
 
 	sc_size = size - GUARDSIZE;
 	sc_base = (surfcache_t *)buffer;
@@ -66,25 +58,19 @@ void D_InitCaches (void *buffer, int size)
 	sc_base->owner = nil;
 	sc_base->size = sc_size;
 
-	D_ClearCacheGuard ();
+	D_ClearCacheGuard();
 }
 
-
-/*
-==================
-D_FlushCaches
-==================
-*/
-void D_FlushCaches (void)
+void
+D_FlushCaches(void)
 {
-	surfcache_t	 *c;
+	surfcache_t *c;
 
-	if (!sc_base)
+	if(!sc_base)
 		return;
 
-	for (c = sc_base ; c ; c = c->next)
-	{
-		if (c->owner)
+	for(c = sc_base; c; c = c->next) {
+		if(c->owner)
 			*c->owner = nil;
 	}
 
@@ -94,48 +80,39 @@ void D_FlushCaches (void)
 	sc_base->size = sc_size;
 }
 
-/*
-=================
-D_SCAlloc
-=================
-*/
 static surfcache_t *
 D_SCAlloc(int width, int size)
 {
-	surfcache_t			 *new;
-	bool				wrapped_this_time;
+	surfcache_t *new;
+	bool wrapped_this_time;
 
 	if(width < 0 || size <= 0)
 		Host_Error("D_SCAlloc: width=%d size=%d\n", width, size);
 
 	size = (sizeof(surfcache_t) + size + 3) & ~3;
 	if(size > sc_size)
-		Host_Error("D_SCAlloc: %d > cache size",size);
+		Host_Error("D_SCAlloc: %d > cache size", size);
 
 	// if there is not size bytes after the rover, reset to the start
 	wrapped_this_time = false;
 
-	if ( !sc_rover || (intptr)sc_rover-(intptr)sc_base > (intptr)sc_size-(intptr)size)
-	{
-		if (sc_rover)
-		{
+	if(!sc_rover || (intptr)sc_rover - (intptr)sc_base > (intptr)sc_size - (intptr)size) {
+		if(sc_rover)
 			wrapped_this_time = true;
-		}
 		sc_rover = sc_base;
 	}
 
 	// colect and free surfcache_t blocks until the rover block is large enough
 	new = sc_rover;
-	if (sc_rover->owner)
+	if(sc_rover->owner)
 		*sc_rover->owner = nil;
 
-	while (new->size < size)
-	{
+	while(new->size < size) {
 		// free another
 		sc_rover = sc_rover->next;
-		if (!sc_rover)
-			fatal ("D_SCAlloc: hit the end of memory");
-		if (sc_rover->owner)
+		if(!sc_rover)
+			fatal("D_SCAlloc: hit the end of memory");
+		if(sc_rover->owner)
 			*sc_rover->owner = nil;
 
 		new->size += sc_rover->size;
@@ -143,45 +120,35 @@ D_SCAlloc(int width, int size)
 	}
 
 	// create a fragment out of any leftovers
-	if (new->size - size > 256)
-	{
-		sc_rover = (surfcache_t *)( (byte *)new + size);
+	if(new->size - size > 256) {
+		sc_rover = (surfcache_t *)((byte *)new + size);
 		sc_rover->size = new->size - size;
 		sc_rover->next = new->next;
 		sc_rover->width = 0;
 		sc_rover->owner = nil;
 		new->next = sc_rover;
 		new->size = size;
-	}
-	else
+	} else
 		sc_rover = new->next;
 
 	new->width = width;
 	// DEBUG
-	if (width > 0)
+	if(width > 0)
 		new->height = (size - sizeof(*new)) / width / sizeof(pixel_t);
 
-	new->owner = nil;			  // should be set properly after return
+	new->owner = nil; // should be set properly after return
 
-	if (d_roverwrapped)
-	{
-		if (wrapped_this_time || (sc_rover >= d_initial_rover))
+	if(d_roverwrapped) {
+		if(wrapped_this_time || (sc_rover >= d_initial_rover))
 			r_cache_thrash = true;
-	}
-	else if (wrapped_this_time)
-	{
+	} else if(wrapped_this_time) {
 		d_roverwrapped = true;
 	}
 
-D_CheckCacheGuard ();   // DEBUG
+	D_CheckCacheGuard(); // DEBUG
 	return new;
 }
 
-/*
-================
-D_CacheSurface
-================
-*/
 surfcache_t *
 D_CacheSurface(entity_t *e, msurface_t *ms, drawsurf_t *ds, int miplevel)
 {
@@ -197,23 +164,20 @@ D_CacheSurface(entity_t *e, msurface_t *ms, drawsurf_t *ds, int miplevel)
 	// see if the cache holds apropriate data
 	cache = ms->cachespots[miplevel];
 
-	if(e == cl_entities || e->model->name[0] == '*')
-	if(cache && !cache->dlight && ms->dlightframe != r_framecount
-			&& cache->texture == ds->texture
-			&& cache->lightadj[0] == ds->lightadj[0]
-			&& cache->lightadj[1] == ds->lightadj[1]
-			&& cache->lightadj[2] == ds->lightadj[2]
-			&& cache->lightadj[3] == ds->lightadj[3] )
+	if((e == cl_entities || e->model->name[0] == '*') && cache && !cache->dlight &&
+	   ms->dlightframe != r_framecount && cache->texture == ds->texture &&
+	   cache->lightadj[0] == ds->lightadj[0] && cache->lightadj[1] == ds->lightadj[1] &&
+	   cache->lightadj[2] == ds->lightadj[2] && cache->lightadj[3] == ds->lightadj[3])
 		return cache;
 
 	// determine shape of surface
-	surfscale = 1.0 / (1<<miplevel);
+	surfscale = 1.0 / (1 << miplevel);
 	ds->mip = miplevel;
 	ds->width = ms->extents[0] >> miplevel;
 	ds->height = ms->extents[1] >> miplevel;
 
 	// allocate memory if needed
-	if(cache == nil){	 // if a texture just animated, don't reallocate it
+	if(cache == nil) { // if a texture just animated, don't reallocate it
 		cache = D_SCAlloc(ds->width, ds->width * ds->height * sizeof(pixel_t));
 		ms->cachespots[miplevel] = cache;
 		cache->owner = &ms->cachespots[miplevel];
@@ -233,5 +197,3 @@ D_CacheSurface(entity_t *e, msurface_t *ms, drawsurf_t *ds, int miplevel)
 
 	return ms->cachespots[miplevel];
 }
-
-

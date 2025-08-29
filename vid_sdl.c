@@ -48,11 +48,11 @@ resetfb(void)
 	vid.width = clamp(vid.width, 320, MAXWIDTH);
 	vid.height = clamp(vid.height, 240, MAXHEIGHT);
 
-	vid.aspect = (float)vid.height / (float)vid.width * (320.0/240.0);
+	vid.aspect = (float)vid.height / (float)vid.width * (320.0 / 240.0);
 	vid.conwidth = vid.width;
 	vid.conheight = vid.height;
 
-	n = (vid.width*vid.height+16)*sizeof(pixel_t);
+	n = (vid.width * vid.height + 16) * sizeof(pixel_t);
 	vidbuffer = realloc(vidbuffer, n);
 	r_warpbuffer = realloc(r_warpbuffer, n);
 	vid.maxwarpwidth = vid.width;
@@ -60,7 +60,9 @@ resetfb(void)
 
 	if(fbi != nil)
 		SDL_DestroyTexture(fbi);
-	fbi = SDL_CreateTexture(rend, SDL_PIXELFORMAT_XRGB8888, SDL_TEXTUREACCESS_STATIC, vid.width, vid.height);
+	fbi = SDL_CreateTexture(
+		rend, SDL_PIXELFORMAT_XRGB8888, SDL_TEXTUREACCESS_STATIC, vid.width, vid.height
+	);
 	if(fbi == NULL)
 		fatal("SDL_CreateTexture: %s", SDL_GetError());
 	SDL_SetTextureBlendMode(fbi, SDL_BLENDMODE_NONE);
@@ -92,18 +94,18 @@ stopfb(void)
 void
 flipfb(void)
 {
-	if(vid.resized){		/* skip this frame if window resize */
+	if(vid.resized) { /* skip this frame if window resize */
 		vid.resized = false;
 		resetfb();
-		vid.recalc_refdef = true;	/* force a surface cache flush */
+		vid.recalc_refdef = true; /* force a surface cache flush */
 		Con_CheckResize();
 		Con_Clear_f(nil);
 		return;
 	}
 
-	cmprocess(cm, vidbuffer, vid.width*vid.height);
+	cmprocess(cm, vidbuffer, vid.width * vid.height);
 
-	SDL_UpdateTexture(fbi, nil, vidbuffer, vid.width*4);
+	SDL_UpdateTexture(fbi, nil, vidbuffer, vid.width * 4);
 	SDL_RenderTexture(rend, fbi, nil, nil);
 	SDL_RenderPresent(rend);
 }
@@ -114,9 +116,9 @@ setpal(byte *p0)
 	pixel_t x;
 	byte *p;
 
-	for(p = p0, x = 0; x < 256; x++, p += 3){
-		q1pal[x] = (x < 256U-32U ? 0xffU : 0)<<24 | p[0]<<16 | p[1]<<8 | p[2];
-		q1palindexed[x] = opaque(q1pal[x]) ? (x<<24 | p[0]<<16 | p[1]<<8 | p[2]) : 0;
+	for(p = p0, x = 0; x < 256; x++, p += 3) {
+		q1pal[x] = (x < 256U - 32U ? 0xffU : 0) << 24 | p[0] << 16 | p[1] << 8 | p[2];
+		q1palindexed[x] = opaque(q1pal[x]) ? (x << 24 | p[0] << 16 | p[1] << 8 | p[2]) : 0;
 	}
 	q1pal[255] = 0;
 	q1palindexed[255] = 0;
@@ -150,10 +152,10 @@ makewindow(void)
 {
 	int x, y, w, h;
 
-	if(win != nil){
+	if(win != nil) {
 		SDL_GetWindowPosition(win, &x, &y);
 		SDL_GetWindowSize(win, &w, &h);
-	}else{
+	} else {
 		x = SDL_WINDOWPOS_CENTERED;
 		y = SDL_WINDOWPOS_CENTERED;
 		w = 800;
@@ -200,8 +202,8 @@ void
 initfb(void)
 {
 	vid.numpages = 2;
-	vid.colormap = malloc(256*64*sizeof(pixel_t));
-	torgbx(host_colormap, vid.colormap, 256*64);
+	vid.colormap = malloc(256 * 64 * sizeof(pixel_t));
+	torgbx(host_colormap, vid.colormap, 256 * 64);
 	vid.fullbright = 256 - LittleLong(*((int *)vid.colormap + 2048));
 
 	if(!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS))

@@ -1,7 +1,8 @@
-typedef struct
-{
+#pragma once
+
+typedef struct {
 	void *data;
-}mem_user_t;
+} mem_user_t;
 
 #define Z_Free(p) free(p)
 #define Z_Malloc(sz) calloc(1, (sz))

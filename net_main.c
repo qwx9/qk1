@@ -1,107 +1,92 @@
 #include "quakedef.h"
 
-qsocket_t	*net_activeSockets = nil;
-qsocket_t	*net_freeSockets = nil;
-static int net_numsockets;
-
-sizebuf_t		net_message;
-int				net_activeconnections = 0;
-
+qsocket_t *net_activeSockets = nil;
+qsocket_t *net_freeSockets = nil;
+sizebuf_t net_message;
+int net_activeconnections = 0;
 int messagesSent = 0;
 int messagesReceived = 0;
 int unreliableMessagesSent = 0;
 int unreliableMessagesReceived = 0;
+int net_numlandrivers = 0;
+int net_driverlevel;
+double net_time;
+cvar_t hostname = {"hostname", "UNNAMED"};
 
-static cvar_t	net_messagetimeout = {"net_messagetimeout","300"};
-cvar_t	hostname = {"hostname", "UNNAMED"};
+static cvar_t net_messagetimeout = {"net_messagetimeout", "300"};
+static int net_numsockets;
 
 static Netdrv netdrv[MAX_NET_DRIVERS] = {
-	{
-	"Loopback",
-	false,
-	Loop_Init,
-	Loop_Connect,
-	Loop_CheckNewConnections,
-	Loop_GetMessage,
-	Loop_SendMessage,
-	Loop_SendUnreliableMessage,
-	Loop_CanSendMessage,
-	Loop_CanSendUnreliableMessage,
-	Loop_Close,
-	Loop_Shutdown
-	}
+	{"Loopback",
+	 false,
+	 Loop_Init,
+	 Loop_Connect,
+	 Loop_CheckNewConnections,
+	 Loop_GetMessage,
+	 Loop_SendMessage,
+	 Loop_SendUnreliableMessage,
+	 Loop_CanSendMessage,
+	 Loop_CanSendUnreliableMessage,
+	 Loop_Close,
+	 Loop_Shutdown}
 #ifdef __plan9__
 	,
-	{
-	"Datagram",
-	false,
-	Datagram_Init,
-	Datagram_Connect,
-	Datagram_CheckNewConnections,
-	Datagram_GetMessage,
-	Datagram_SendMessage,
-	Datagram_SendUnreliableMessage,
-	Datagram_CanSendMessage,
-	Datagram_CanSendUnreliableMessage,
-	Datagram_Close,
-	Datagram_Shutdown
-	}
+	{"Datagram",
+	 false,
+	 Datagram_Init,
+	 Datagram_Connect,
+	 Datagram_CheckNewConnections,
+	 Datagram_GetMessage,
+	 Datagram_SendMessage,
+	 Datagram_SendUnreliableMessage,
+	 Datagram_CanSendMessage,
+	 Datagram_CanSendUnreliableMessage,
+	 Datagram_Close,
+	 Datagram_Shutdown}
 #endif
 };
 static int net_numdrivers;
 
 Landrv landrv[MAX_NET_DRIVERS] = {
 #ifdef __plan9__
-	{
-	"UDP",
-	false,
-	UDP_Init,
-	UDP_Shutdown,
-	UDP_Connect,
-	udpread,
-	udpwrite,
-	UDP_AddrToString,
-	getip,
-	UDP_AddrCompare,
-	UDP_GetSocketPort,
-	UDP_SetSocketPort
-	}
+	{"UDP",
+	 false,
+	 UDP_Init,
+	 UDP_Shutdown,
+	 UDP_Connect,
+	 udpread,
+	 udpwrite,
+	 UDP_AddrToString,
+	 getip,
+	 UDP_AddrCompare,
+	 UDP_GetSocketPort,
+	 UDP_SetSocketPort}
 #endif
 };
-int net_numlandrivers = 0;
 
 // these two macros are to make the code more readable
-#define sfunc	netdrv[sock->driver]
-#define dfunc	netdrv[net_driverlevel]
+#define sfunc netdrv[sock->driver]
+#define dfunc netdrv[net_driverlevel]
 
-int	net_driverlevel;
-
-
-double			net_time;
-
-double SetNetTime(void)
+double
+SetNetTime(void)
 {
 	net_time = dtime();
 	return net_time;
 }
 
-
 /*
-===================
-NET_NewQSocket
-
-Called by drivers when a new communications endpoint is required
-The sequence and buffer fields will be filled in properly
-===================
-*/
-qsocket_t *NET_NewQSocket (void)
+ * Called by drivers when a new communications endpoint is required
+ * The sequence and buffer fields will be filled in properly
+ */
+qsocket_t *
+NET_NewQSocket(void)
 {
-	qsocket_t	*sock;
+	qsocket_t *sock;
 
-	if (net_freeSockets == nil)
+	if(net_freeSockets == nil)
 		return nil;
-
-	if (net_activeconnections >= svs.maxclients)
+	if(net_activeconnections >= svs.maxclients)
 		return nil;
 
 	// get one from free list
@@ -114,7 +99,7 @@ qsocket_t *NET_NewQSocket (void)
 
 	sock->disconnected = false;
 	sock->connecttime = net_time;
-	strcpy(sock->address,"UNSET ADDRESS");
+	strcpy(sock->address, "UNSET ADDRESS");
 	sock->driver = net_driverlevel;
 	sock->socket = 0;
 	sock->driverdata = nil;
@@ -133,24 +118,23 @@ qsocket_t *NET_NewQSocket (void)
 	return sock;
 }
 
-
-void NET_FreeQSocket(qsocket_t *sock)
+void
+NET_FreeQSocket(qsocket_t *sock)
 {
-	qsocket_t	*s;
+	qsocket_t *s;
 
 	// remove it from active list
-	if (sock == net_activeSockets)
+	if(sock == net_activeSockets)
 		net_activeSockets = net_activeSockets->next;
-	else
-	{
-		for (s = net_activeSockets; s; s = s->next)
-			if (s->next == sock)
-			{
+	else {
+		for(s = net_activeSockets; s; s = s->next) {
+			if(s->next == sock) {
 				s->next = sock->next;
 				break;
 			}
-		if (!s)
-			fatal ("NET_FreeQSocket: not active\n");
+		}
+		if(!s)
+			fatal("NET_FreeQSocket: not active\n");
 	}
 	if(sock->addr.fd >= 0)
 		close(sock->addr.fd);
@@ -161,107 +145,77 @@ void NET_FreeQSocket(qsocket_t *sock)
 	sock->disconnected = true;
 }
 
-static void MaxPlayers_f (cmd_t *c)
+static void
+MaxPlayers_f(cmd_t *c)
 {
-	int 	n;
+	int n;
 
 	USED(c);
-	if (Cmd_Argc () != 2)
-	{
-		Con_Printf ("\"maxplayers\" is \"%d\"\n", svs.maxclients);
+	if(Cmd_Argc() != 2) {
+		Con_Printf("\"maxplayers\" is \"%d\"\n", svs.maxclients);
 		return;
 	}
 
-	if (sv.active)
-	{
-		Con_Printf ("maxplayers can not be changed while a server is running.\n");
+	if(sv.active) {
+		Con_Printf("maxplayers can not be changed while a server is running.\n");
 		return;
 	}
 
 	n = atoi(Cmd_Argv(1));
-	if (n < 1)
+	if(n < 1)
 		n = 1;
-	if (n > svs.maxclientslimit)
-	{
+	if(n > svs.maxclientslimit) {
 		n = svs.maxclientslimit;
-		Con_Printf ("\"maxplayers\" set to \"%d\"\n", n);
+		Con_Printf("\"maxplayers\" set to \"%d\"\n", n);
 	}
 
 	svs.maxclients = n;
-	if (n == 1)
-		setcvar ("deathmatch", "0");
+	if(n == 1)
+		setcvar("deathmatch", "0");
 	else
-		setcvar ("deathmatch", "1");
+		setcvar("deathmatch", "1");
 }
 
-
-static void NET_Port_f (cmd_t *c)
+static void
+NET_Port_f(cmd_t *c)
 {
-	int 	n;
+	int n;
 
 	USED(c);
-	if (Cmd_Argc () != 2)
-	{
-		Con_Printf ("\"port\" is \"%s\"\n", myip.srv);
+	if(Cmd_Argc() != 2) {
+		Con_Printf("\"port\" is \"%s\"\n", myip.srv);
 		return;
 	}
-	if(sv.active){
+	if(sv.active) {
 		Con_Printf("port cannot be changed while a server is running.\n");
 		return;
 	}
 
 	n = atoi(Cmd_Argv(1));
-	if (n < 1 || n > 65534)
-	{
-		Con_Printf ("Bad value, must be between 1 and 65534\n");
+	if(n < 1 || n > 65534) {
+		Con_Printf("Bad value, must be between 1 and 65534\n");
 		return;
 	}
 	snprint(myip.srv, sizeof myip.srv, "%d", n);
 }
 
-/*
-===================
-NET_Connect
-===================
-*/
-
-qsocket_t *NET_Connect (char *host)
+qsocket_t *
+NET_Connect(char *host)
 {
-	qsocket_t		*ret;
-	int				numdrivers = net_numdrivers;
+	qsocket_t *ret;
+	int numdrivers = net_numdrivers;
 
 	SetNetTime();
 
-	if (host == nil || *host == 0)
+	if(host == nil || *host == 0)
 		return nil;
 	if(cistrcmp(host, "local") == 0)
 		numdrivers = 1;
 
-	for (net_driverlevel=0 ; net_driverlevel<numdrivers; net_driverlevel++)
-	{
-		if (netdrv[net_driverlevel].initialized == false)
+	for(net_driverlevel = 0; net_driverlevel < numdrivers; net_driverlevel++) {
+		if(netdrv[net_driverlevel].initialized == false)
 			continue;
-		ret = dfunc.Connect (host);
-		if (ret)
-			return ret;
-	}
-
-	return nil;
-}
-
-qsocket_t *NET_CheckNewConnections (void)
-{
-	qsocket_t	*ret;
-
-	SetNetTime();
-
-	for (net_driverlevel=0 ; net_driverlevel<net_numdrivers; net_driverlevel++)
-	{
-		if (netdrv[net_driverlevel].initialized == false)
-			continue;
-		if (net_driverlevel && !sv.active)
-			continue;
-		ret = dfunc.CheckNewConnections ();
+		ret = dfunc.Connect(host);
 		if(ret)
 			return ret;
 	}
@@ -269,12 +223,28 @@ qsocket_t *NET_CheckNewConnections (void)
 	return nil;
 }
 
-/*
-===================
-NET_Close
-===================
-*/
-void NET_Close (qsocket_t *sock)
+qsocket_t *
+NET_CheckNewConnections(void)
+{
+	qsocket_t *ret;
+
+	SetNetTime();
+
+	for(net_driverlevel = 0; net_driverlevel < net_numdrivers; net_driverlevel++) {
+		if(netdrv[net_driverlevel].initialized == false)
+			continue;
+		if(net_driverlevel && !sv.active)
+			continue;
+		ret = dfunc.CheckNewConnections();
+		if(ret)
+			return ret;
+	}
+
+	return nil;
+}
+
+void
+NET_Close(qsocket_t *sock)
 {
 	if(sock == nil)
 		return;
@@ -284,35 +254,27 @@ void NET_Close (qsocket_t *sock)
 	SetNetTime();
 
 	// call the driver_Close function
-	sfunc.Close (sock);
+	sfunc.Close(sock);
 
 	NET_FreeQSocket(sock);
 }
 
-
 /*
-=================
-NET_GetMessage
-
-If there is a complete message, return it in net_message
-
-returns 0 if no data is waiting
-returns 1 if a message was received
-returns -1 if connection is invalid
-=================
-*/
-
-extern void PrintStats(qsocket_t *s);
-
-int	NET_GetMessage (qsocket_t *sock)
+ * If there is a complete message, return it in net_message
+ *
+ * returns 0 if no data is waiting
+ * returns 1 if a message was received
+ * returns -1 if connection is invalid
+ */
+int
+NET_GetMessage(qsocket_t *sock)
 {
 	int ret;
 
-	if (!sock)
+	if(!sock)
 		return -1;
 
-	if (sock->disconnected)
-	{
+	if(sock->disconnected) {
 		Con_Printf("NET_GetMessage: disconnected socket\n");
 		return -1;
 	}
@@ -322,25 +284,20 @@ int	NET_GetMessage (qsocket_t *sock)
 	ret = sfunc.QGetMessage(sock);
 
 	// see if this connection has timed out
-	if (ret == 0 && sock->driver)
-	{
-		if (net_time - sock->lastMessageTime > net_messagetimeout.value)
-		{
+	if(ret == 0 && sock->driver) {
+		if(net_time - sock->lastMessageTime > net_messagetimeout.value) {
 			Con_DPrintf("NET_GetMessage: sock %#p timed out\n", sock);
 			NET_Close(sock);
 			return -1;
 		}
 	}
 
-
-	if (ret > 0)
-	{
-		if (sock->driver)
-		{
+	if(ret > 0) {
+		if(sock->driver) {
 			sock->lastMessageTime = net_time;
-			if (ret == 1)
+			if(ret == 1)
 				messagesReceived++;
-			else if (ret == 2)
+			else if(ret == 2)
 				unreliableMessagesReceived++;
 		}
 	}
@@ -348,79 +305,69 @@ int	NET_GetMessage (qsocket_t *sock)
 	return ret;
 }
 
-
 /*
-==================
-NET_SendMessage
-
-Try to send a complete length+message unit over the reliable stream.
-returns 0 if the message cannot be delivered reliably, but the connection
-		is still considered valid
-returns 1 if the message was sent properly
-returns -1 if the connection died
-==================
-*/
-
-int NET_SendMessage (qsocket_t *sock, sizebuf_t *data)
+ * Try to send a complete length+message unit over the reliable stream.
+ * returns 0 if the message cannot be delivered reliably, but the connection
+ * is still considered valid
+ *
+ * returns 1 if the message was sent properly
+ * returns -1 if the connection died
+ */
+int
+NET_SendMessage(qsocket_t *sock, sizebuf_t *data)
 {
-	int		r;
+	int r;
 
-	if (!sock)
+	if(!sock)
 		return -1;
 
-	if (sock->disconnected)
-	{
+	if(sock->disconnected) {
 		Con_Printf("NET_SendMessage: disconnected socket\n");
 		return -1;
 	}
 
 	SetNetTime();
 	r = sfunc.QSendMessage(sock, data);
-	if (r == 1 && sock->driver)
+	if(r == 1 && sock->driver)
 		messagesSent++;
 
 	return r;
 }
 
-
-int NET_SendUnreliableMessage (qsocket_t *sock, sizebuf_t *data)
+int
+NET_SendUnreliableMessage(qsocket_t *sock, sizebuf_t *data)
 {
-	int		r;
+	int r;
 
-	if (!sock)
+	if(!sock)
 		return -1;
 
-	if (sock->disconnected)
-	{
+	if(sock->disconnected) {
 		Con_Printf("NET_SendUnreliableMessage: disconnected socket\n");
 		return -1;
 	}
 
 	SetNetTime();
 	r = sfunc.SendUnreliableMessage(sock, data);
-	if (r == 1 && sock->driver)
+	if(r == 1 && sock->driver)
 		unreliableMessagesSent++;
 
 	return r;
 }
 
-
 /*
-==================
-NET_CanSendMessage
-
-Returns true or false if the given qsocket can currently accept a
-message to be transmitted.
-==================
-*/
-bool NET_CanSendMessage (qsocket_t *sock)
+ * Returns true or false if the given qsocket can currently accept a
+ * message to be transmitted.
+ */
+bool
+NET_CanSendMessage(qsocket_t *sock)
 {
-	int		r;
+	int r;
 
-	if (!sock)
+	if(!sock)
 		return false;
 
-	if (sock->disconnected)
+	if(sock->disconnected)
 		return false;
 
 	SetNetTime();
@@ -430,102 +377,75 @@ bool NET_CanSendMessage (qsocket_t *sock)
 	return r;
 }
 
-
-int NET_SendToAll(sizebuf_t *data, int blocktime)
+int
+NET_SendToAll(sizebuf_t *data, int blocktime)
 {
-	double		start;
-	int			i;
-	int			count = 0;
-	bool	state1 [MAX_SCOREBOARD];
-	bool	state2 [MAX_SCOREBOARD];
+	double start;
+	int i, count = 0;
+	bool state1[MAX_SCOREBOARD], state2[MAX_SCOREBOARD];
 
 	memset(state1, 0, sizeof(state1));
 	memset(state2, 0, sizeof(state2));
-	for (i=0, host_client = svs.clients ; i<svs.maxclients ; i++, host_client++)
-	{
-		if (!host_client->netconnection)
+	for(i = 0, host_client = svs.clients; i < svs.maxclients; i++, host_client++) {
+		if(!host_client->netconnection)
 			continue;
-		if (host_client->active)
-		{
-			if (host_client->netconnection->driver == 0)
-			{
+		if(host_client->active) {
+			if(host_client->netconnection->driver == 0) {
 				NET_SendMessage(host_client->netconnection, data);
 				state1[i] = true;
 				state2[i] = true;
 				continue;
 			}
 			count++;
-		}
-		else
-		{
+		} else {
 			state1[i] = true;
 			state2[i] = true;
 		}
 	}
 
 	start = dtime();
-	while (count)
-	{
+	while(count) {
 		count = 0;
-		for (i=0, host_client = svs.clients ; i<svs.maxclients ; i++, host_client++)
-		{
-			if (! state1[i])
-			{
-				if (NET_CanSendMessage (host_client->netconnection))
-				{
+		for(i = 0, host_client = svs.clients; i < svs.maxclients; i++, host_client++) {
+			if(!state1[i]) {
+				if(NET_CanSendMessage(host_client->netconnection)) {
 					state1[i] = true;
 					NET_SendMessage(host_client->netconnection, data);
-				}
-				else
-				{
-					NET_GetMessage (host_client->netconnection);
+				} else {
+					NET_GetMessage(host_client->netconnection);
 				}
 				count++;
 				continue;
 			}
 
-			if (! state2[i])
-			{
-				if (NET_CanSendMessage (host_client->netconnection))
-				{
+			if(!state2[i]) {
+				if(NET_CanSendMessage(host_client->netconnection))
 					state2[i] = true;
-				}
 				else
-				{
-					NET_GetMessage (host_client->netconnection);
-				}
+					NET_GetMessage(host_client->netconnection);
 				count++;
 				continue;
 			}
 		}
-		if ((dtime() - start) > blocktime)
+		if((dtime() - start) > blocktime)
 			break;
 	}
 	return count;
 }
 
-
-//=============================================================================
-
-/*
-====================
-NET_Init
-====================
-*/
-
-void NET_Init (void)
+void
+NET_Init(void)
 {
-	int			i;
-	qsocket_t	*s;
+	int i;
+	qsocket_t *s;
 
 	net_numsockets = svs.maxclientslimit;
-	if (cls.state != ca_dedicated)
+	if(cls.state != ca_dedicated)
 		net_numsockets++;
 
 	SetNetTime();
 
-	for (i = 0; i < net_numsockets; i++)
-	{
+	for(i = 0; i < net_numsockets; i++) {
 		s = Hunk_Alloc(sizeof *s);
 		s->next = net_freeSockets;
 		net_freeSockets = s;
@@ -533,43 +453,36 @@ void NET_Init (void)
 	}
 
 	// allocate space for network message buffer
-	SZ_Alloc (&net_message, NET_MAXMESSAGE);
+	SZ_Alloc(&net_message, NET_MAXMESSAGE);
 
-	Cvar_RegisterVariable (&net_messagetimeout);
-	Cvar_RegisterVariable (&hostname);
+	Cvar_RegisterVariable(&net_messagetimeout);
+	Cvar_RegisterVariable(&hostname);
 
-	Cmd_AddCommand ("maxplayers", MaxPlayers_f);
-	Cmd_AddCommand ("port", NET_Port_f);
+	Cmd_AddCommand("maxplayers", MaxPlayers_f);
+	Cmd_AddCommand("port", NET_Port_f);
 
 	// initialize all the drivers
-	for(net_numdrivers=0; netdrv[net_numdrivers].Init; net_numdrivers++){
+	for(net_numdrivers = 0; netdrv[net_numdrivers].Init; net_numdrivers++) {
 		if(netdrv[net_numdrivers].Init() < 0)
 			continue;
 		netdrv[net_numdrivers].initialized = true;
 	}
 }
 
-/*
-====================
-NET_Shutdown
-====================
-*/
-
-void		NET_Shutdown (void)
+void
+NET_Shutdown(void)
 {
-	qsocket_t	*sock;
+	qsocket_t *sock;
 
 	SetNetTime();
 
-	for (sock = net_activeSockets; sock; sock = sock->next)
+	for(sock = net_activeSockets; sock; sock = sock->next)
 		NET_Close(sock);
 
 	// shutdown the drivers
-	for (net_driverlevel = 0; net_driverlevel < net_numdrivers; net_driverlevel++)
-	{
-		if (netdrv[net_driverlevel].initialized == true)
-		{
-			netdrv[net_driverlevel].Shutdown ();
+	for(net_driverlevel = 0; net_driverlevel < net_numdrivers; net_driverlevel++) {
+		if(netdrv[net_driverlevel].initialized == true) {
+			netdrv[net_driverlevel].Shutdown();
 			netdrv[net_driverlevel].initialized = false;
 		}
 	}
