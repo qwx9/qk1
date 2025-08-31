@@ -2,7 +2,6 @@
 
 static float scr_conlines; // lines of console to display
 static float oldscreensize, oldfov;
-static cvar_t scr_fov = {"fov", "90", true}; // 10 - 170
 static cvar_t scr_conspeed = {"scr_conspeed", "300", true};
 static cvar_t scr_centertime = {"scr_centertime", "2"};
 static cvar_t scr_showram = {"showram", "1"};
@@ -12,6 +11,7 @@ static cvar_t scr_printspeed = {"scr_printspeed", "8"};
 static cvar_t scr_showfps = {"showfps", "0", true};
 
 cvar_t scr_viewsize = {"viewsize", "100", true};
+cvar_t scr_fov = {"fov", "90", true}; // 10 - 170
 
 static bool scr_initialized; // ready to draw
 static qpic_t *scr_net, *scr_turtle;

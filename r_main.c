@@ -30,8 +30,6 @@ float screenAspect;
 float xOrigin, yOrigin;
 mplane_t screenedge[4];
 
-static float verticalFieldOfView;
-
 // refresh flags
 int r_framecount = 1; // so frame counts initialized to 0 don't match
 int r_visframecount;
@@ -216,7 +214,7 @@ void
 R_ViewChanged(vrect_t *pvrect, int lineadj, float aspect)
 {
 	int i, ow, oh;
-	float res_scale;
+	float res_scale, verticalFieldOfView;
 
 	r_viewchanged = true;
 
@@ -530,7 +528,7 @@ static void
 R_DrawViewModel(view_t *view)
 {
 	// FIXME: remove and do real lighting
-	vec3_t dist, lightvec = {-1, 0, 0};
+	vec3_t dist, lightvec = {-1, 0, 0}, q;
 	int lnum, i;
 	float add;
 	dlight_t *dl;
@@ -552,6 +550,13 @@ R_DrawViewModel(view_t *view)
 	memmove(&v, view, sizeof(v));
 	VectorCopy(currententity->origin, r_entorigin);
 	VectorSubtract(v.org, r_entorigin, v.modelorg);
+	if(scr_fov.value > 90.0) {
+		// adjust a little bit so it doesn't look as if the weapon
+		// is floating in space on its own
+		VectorAdd(v.pn, v.up, q);
+		VectorScale(q, (scr_fov.value - 90.0) / 10.0, q);
+		VectorAdd(v.modelorg, q, v.modelorg);
+	}
 
 	VectorCopy(v.up, viewlightvec);
 	VectorInverse(viewlightvec);
