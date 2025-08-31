@@ -645,7 +645,7 @@ ED_ParseEdict(pr_t *pr, char *data, edict_t *ent)
 {
 	ddef_t *key;
 	bool anglehack, init;
-	char keyname[256];
+	char keyname[256], tmp[256];
 	int n;
 
 	init = false;
@@ -721,6 +721,9 @@ ED_ParseEdict(pr_t *pr, char *data, edict_t *ent)
 					/* FIXME(sigrid): support more? */
 					break;
 				}
+			} else if(strcmp(PR_Str(pr, ent->v.classname), "worldspawn") == 0 &&
+					  (strcmp(keyname, "fog") == 0 || strcmp(keyname, "sky") == 0)) {
+				/* ignore */
 			} else {
 				Con_Printf("ED_ParseEdict: '%s' is not a field\n", keyname);
 			}
@@ -728,9 +731,8 @@ ED_ParseEdict(pr_t *pr, char *data, edict_t *ent)
 		}
 
 		if(anglehack) {
-			char temp[32];
-			strcpy(temp, com_token);
-			sprint(com_token, "0 %s 0", temp);
+			strcpy(tmp, com_token);
+			sprint(com_token, "0 %s 0", tmp);
 		}
 
 		if(!ED_ParseEpair(pr, (void *)&ent->v, key, com_token))

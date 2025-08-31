@@ -42,7 +42,7 @@ lproc(void *)
 		sysfatal("announce: %r");
 	for(;;) {
 		if((lfd = listen(adir, ldir)) < 0 || (fd = accept(lfd, ldir)) < 0 || close(lfd) < 0 ||
-			send(lchan, &fd) < 0)
+		   send(lchan, &fd) < 0)
 			break;
 	}
 }
