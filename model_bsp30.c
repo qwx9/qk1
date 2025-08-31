@@ -29,7 +29,6 @@ BSP30_LoadEntities(model_t *mod, byte *in, int sz)
 				mod->wads[mod->numwads++] = w;
 			} else {
 				Con_Printf("BSP_LoadEntities: %s\n", lerr());
-				continue;
 			}
 			p = s + 1;
 		} else if(*s == '\\')
