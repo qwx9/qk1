@@ -70,31 +70,50 @@ extern cvar_t scr_fov;
 static entity_t *ent_reject;
 
 void
-R_InitTextures(void)
+R_MissingTexture(texture_t *t)
 {
-	int x, y, m;
+	int w, h, x, y, j;
 	pixel_t *dest;
 
+	w = t->width;
+	h = t->height;
+	dest = t->pixels + t->offsets[0];
+	for(y = 0; y < h; y++) {
+		for(x = 0; x < w; x++, dest++) {
+			if((y < (h / 2)) ^ (x < (w / 2)))
+				*dest = 0xff000000;
+			else
+				*dest = 0xfff0f0f0;
+		}
+	}
+	for(j = 1; j < MIPLEVELS; j++) {
+		t->offsets[j] = t->offsets[j - 1] + w * h;
+		w /= 2;
+		h /= 2;
+		pixels_resize(
+			t->pixels + t->offsets[0],
+			t->pixels + t->offsets[j],
+			t->width,
+			t->height,
+			w,
+			h,
+			false,
+			false
+		);
+	}
+}
+
+void
+R_InitTextures(void)
+{
 	// create a simple checkerboard texture for the default
 	r_notexture_mip =
 		Hunk_Alloc(sizeof(*r_notexture_mip) + (16 * 16 + 8 * 8 + 4 * 4 + 2 * 2) * sizeof(pixel_t));
 
 	r_notexture_mip->width = r_notexture_mip->height = 16;
 	r_notexture_mip->offsets[0] = 0;
-	r_notexture_mip->offsets[1] = r_notexture_mip->offsets[0] + 16 * 16;
-	r_notexture_mip->offsets[2] = r_notexture_mip->offsets[1] + 8 * 8;
-	r_notexture_mip->offsets[3] = r_notexture_mip->offsets[2] + 4 * 4;
 
-	for(m = 0; m < 4; m++) {
-		dest = r_notexture_mip->pixels + r_notexture_mip->offsets[m];
-		for(y = 0; y < (16 >> m); y++)
-			for(x = 0; x < (16 >> m); x++, dest++) {
-				if((y < (8 >> m)) ^ (x < (8 >> m)))
-					*dest = 0xff000000;
-				else
-					*dest = 0xfff0f0f0;
-			}
-	}
+	R_MissingTexture(r_notexture_mip);
 }
 
 void

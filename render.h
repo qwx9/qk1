@@ -76,6 +76,7 @@ extern refdef_t r_refdef;
 
 extern struct texture_s *r_notexture_mip;
 
+void R_MissingTexture(struct texture_s *t);
 void R_Init(void);
 void R_InitTextures(void);
 void R_InitEfrags(void);

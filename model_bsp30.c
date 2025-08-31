@@ -1,5 +1,6 @@
 #include "quakedef.h"
 #include "model_bsp.h"
+#include "render.h"
 
 int
 BSP30_LoadEntities(model_t *mod, byte *in, int sz)
@@ -188,8 +189,11 @@ BSP30_LoadTextures(model_t *mod, byte *in, int sz)
 				if(W_ReadMipTex(mod->wads[j], tx->name, tx) >= 0)
 					break;
 			}
-			if(j >= mod->numwads)
+			if(j >= mod->numwads) {
+				tx->offsets[0] = 0;
+				R_MissingTexture(tx);
 				Con_Printf("missing texture: %s\n", tx->name);
+			}
 		}
 		if(strncmp(tx->name, "sky", 3) == 0)
 			R_InitSky(nil); /* FIXME(sigrid): skybox */
