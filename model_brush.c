@@ -46,6 +46,55 @@ RadiusFromBounds(vec3_t mins, vec3_t maxs)
 	return Length(corner);
 }
 
+static void
+Mod_Origin(model_t *mod, submodel_t *sub, int id, char *e)
+{
+	enum {
+		Sinit,
+		Sinside,
+		Satmodel,
+		Smodelfound,
+		Satorigin,
+	};
+
+	int state = Sinit, i;
+	char *s;
+
+	for(;;) {
+		if((e = COM_Parse(e)) == nil)
+			break;
+		if(com_token[0] == '{') {
+			if(state == Sinside)
+				break;
+			state = Sinside;
+			continue;
+		}
+		if(com_token[0] == '}') {
+			if(state != Sinside && state != Smodelfound)
+				break;
+			state = Sinit;
+			continue;
+		}
+		if(state == Sinside && strcmp(com_token, "model") == 0)
+			state = Satmodel;
+		else if(state == Smodelfound && strcmp(com_token, "origin") == 0)
+			state = Satorigin;
+		if((e = COM_Parse(e)) == nil)
+			break;
+		if(state == Satmodel) {
+			if(com_token[0] == '*' && atoi(com_token + 1) == id)
+				state = Smodelfound;
+			else
+				state = Sinside;
+		} else if(state == Satorigin) {
+			mod->flags |= MOD_ORIGIN_SET;
+			for(i = 0, s = com_token; i < 3; i++)
+				sub->origin[i] = strtod(s, &s);
+			break;
+		}
+	}
+}
+
 void
 Mod_LoadBrushModel(model_t *mod, byte *in0, int total)
 {
@@ -53,7 +102,7 @@ Mod_LoadBrushModel(model_t *mod, byte *in0, int total)
 	model_t *submod;
 	byte *in;
 	submodel_t *bm;
-	char name[16];
+	char name[16], *e;
 	int (*loadf[HEADER_LUMPS])(model_t *, byte *, int) = {
 		[LUMP_ENTITIES] = BSP_LoadEntities,
 		[LUMP_VERTEXES] = BSP_LoadVertexes,
@@ -132,6 +181,7 @@ Mod_LoadBrushModel(model_t *mod, byte *in0, int total)
 
 	mod->numframes = 2; // regular and alternate animation
 	mod->flags = 0;
+	e = mod->entities;
 
 	// set up the submodels (FIXME: this is confusing)
 	for(i = 0; i < mod->numsubmodels; i++) {
@@ -158,6 +208,8 @@ Mod_LoadBrushModel(model_t *mod, byte *in0, int total)
 		mod->radius = RadiusFromBounds(mod->mins, mod->maxs);
 		mod->numleafs = bm->visleafs;
 
+		if(i > 0)
+			Mod_Origin(mod, bm, i, e);
 		if(i < mod->numsubmodels - 1) {
 			snprint(name, sizeof(name), "*%d", i + 1);
 			submod = Mod_FindName(name);

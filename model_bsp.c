@@ -411,9 +411,9 @@ BSP_LoadVertexes(model_t *mod, byte *in, int sz)
 int
 BSP_LoadSubmodels(model_t *mod, byte *in, int sz)
 {
+	static const int elsz = 3 * 4 + 3 * 4 + 3 * 4 + MAX_MAP_HULLS * 4 + 4 + 4 + 4;
 	submodel_t *out;
 	int i, j;
-	static const int elsz = 3 * 4 + 3 * 4 + 3 * 4 + MAX_MAP_HULLS * 4 + 4 + 4 + 4;
 
 	if(sz % elsz) {
 		werrstr("BSP_LoadSubmodels: funny lump size");

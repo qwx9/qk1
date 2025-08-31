@@ -8,11 +8,6 @@ typedef enum {
 #include "modelgen.h"
 #include "spritegn.h"
 
-/*
-d*_t structures are on-disk representations
-m*_t structures are in-memory
-*/
-
 /* BRUSH MODELS */
 
 // in memory representation
@@ -248,6 +243,7 @@ enum {
 	EF_ZOMGIB = 1 << 5, // small blood trail
 	EF_TRACER2 = 1 << 6, // orange split trail + rotate
 	EF_TRACER3 = 1 << 7, // purple trail
+	MOD_ORIGIN_SET = 1 << 31, /* FIXME: nothing is using it yet */
 };
 
 typedef struct {
