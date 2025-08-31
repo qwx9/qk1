@@ -617,9 +617,9 @@ R_RenderView(void)
 	}
 
 	R_DrawViewModel(v);
+	r_drawflags = DRAW_BLEND;
 	R_DrawParticles();
 
-	r_drawflags = DRAW_BLEND;
 	R_RenderBlendedBrushes(v);
 	// FIXME(sigrid): these need to be sorted with blended brushes and *all* drawn back to front
 	if(cl_numvisedicts > 0) {
