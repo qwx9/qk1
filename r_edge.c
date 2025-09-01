@@ -47,8 +47,8 @@ R_BeginEdgeFrame(void)
 	surfaces[1].key = 0x7FFFFFFF;
 	r_currentkey = 0;
 
-	memset(newedges, 0, sizeof(newedges));
-	memset(removeedges, 0, sizeof(removeedges));
+	memset(newedges, 0, r_refdef.vrectbottom * sizeof(*newedges));
+	memset(removeedges, 0, r_refdef.vrectbottom * sizeof(*removeedges));
 }
 
 /*

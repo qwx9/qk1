@@ -27,11 +27,11 @@ extern fogvars_t fogvars;
 
 enum {
 	MAXVERTS = 16, // max points in a surface polygon
-	MAXWORKINGVERTS = (MAXVERTS + 4), // max points in an intermediate polygon (while processing)
+	MAXWORKINGVERTS = MAXVERTS + 4, // max points in an intermediate polygon (while processing)
 	MAXWIDTH = 3840,
 	MAXHEIGHT = 2160,
-	MAXDIMENSION = ((MAXHEIGHT > MAXWIDTH) ? MAXHEIGHT : MAXWIDTH),
-	SIN_BUFFER_SIZE = (MAXDIMENSION + TURB_CYCLE),
+	MAXDIMENSION = MAXHEIGHT > MAXWIDTH ? MAXHEIGHT : MAXWIDTH,
+	SIN_BUFFER_SIZE = MAXDIMENSION + TURB_CYCLE,
 
 	// NOTE: these are only initial values. limits are supposed to scale up dynamically
 	MAXEDGES = 2400,
