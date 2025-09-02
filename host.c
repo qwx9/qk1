@@ -151,7 +151,7 @@ Host_InitLocal(void)
 
 /* Sends text across to be displayed. FIXME: make this just a stuffed echo? */
 void
-SV_ClientPrintf(char *fmt, ...)
+SV_ClientPrintf(const char *fmt, ...)
 {
 	va_list arg;
 	char s[1024];
@@ -166,7 +166,7 @@ SV_ClientPrintf(char *fmt, ...)
 
 /* Sends text to all active clients */
 void
-SV_BroadcastPrintf(char *fmt, ...)
+SV_BroadcastPrintf(const char *fmt, ...)
 {
 	va_list arg;
 	char s[1024];

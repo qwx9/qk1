@@ -37,7 +37,7 @@ Con_AddObject(char *name, void *obj)
 }
 
 void *
-Con_FindObject(char *name)
+Con_FindObject(const char *name)
 {
 	return Tget(conobj, name);
 }
@@ -204,7 +204,7 @@ Con_Linefeed(void)
  * notify window will pop up.
  */
 static void
-Con_Print(char *txt)
+Con_Print(const char *txt)
 {
 	static bool cr;
 	int y, c, l, mask;
@@ -264,7 +264,7 @@ Con_Print(char *txt)
 
 /* Handles cursor positioning, line wrapping, etc */
 void
-Con_Printf(char *fmt, ...)
+Con_Printf(const char *fmt, ...)
 {
 	va_list arg;
 	char msg[MAXPRINTMSG];
@@ -297,7 +297,7 @@ Con_Printf(char *fmt, ...)
 
 /* A Con_Printf that only shows up if the "developer" cvar is set */
 void
-Con_DPrintf(char *fmt, ...)
+Con_DPrintf(const char *fmt, ...)
 {
 	va_list argptr;
 	char msg[MAXPRINTMSG];

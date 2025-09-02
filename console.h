@@ -14,15 +14,15 @@ void Con_CheckResize(void);
 void Con_Init(void);
 void Con_DrawConsole(int lines, bool drawinput);
 #pragma varargck argpos Con_Printf 1
-void Con_Printf(char *fmt, ...);
+void Con_Printf(const char *fmt, ...);
 #pragma varargck argpos Con_DPrintf 1
-void Con_DPrintf(char *fmt, ...);
+void Con_DPrintf(const char *fmt, ...);
 void Con_Clear_f(cmd_t *c);
 void Con_DrawNotify(void);
 void Con_ClearNotify(void);
 void Con_ToggleConsole_f(cmd_t *c);
 
 void Con_AddObject(char *name, void *obj);
-void *Con_FindObject(char *name);
+void *Con_FindObject(const char *name);
 int
 Con_SearchObject(const char *prefix, int len, void (*f)(const char *, void *, void *), void *aux);

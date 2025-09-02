@@ -1,7 +1,7 @@
 #include "quakedef.h"
 
 cvar_t *
-Cvar_FindVar(char *name)
+Cvar_FindVar(const char *name)
 {
 	cvar_t *v;
 
@@ -12,7 +12,7 @@ Cvar_FindVar(char *name)
 }
 
 float
-Cvar_VariableValue(char *var_name)
+Cvar_VariableValue(const char *var_name)
 {
 	cvar_t *var;
 
@@ -22,8 +22,8 @@ Cvar_VariableValue(char *var_name)
 	return atof(var->string);
 }
 
-char *
-Cvar_VariableString(char *var_name)
+const char *
+Cvar_VariableString(const char *var_name)
 {
 	cvar_t *var;
 
@@ -77,7 +77,7 @@ Cvar_Command(void)
 }
 
 void
-setcvar(char *k, char *v)
+setcvar(const char *k, const char *v)
 {
 	int n;
 	cvar_t *cv;
@@ -99,7 +99,7 @@ setcvar(char *k, char *v)
 }
 
 void
-setcvarv(char *k, float v)
+setcvarv(const char *k, float v)
 {
 	char u[32];
 

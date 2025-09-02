@@ -24,7 +24,7 @@ Host_Status_f(cmd_t *c)
 {
 	client_t *client;
 	int seconds, minutes, hours, j;
-	void (*print)(char *fmt, ...);
+	void (*print)(const char *fmt, ...);
 
 	USED(c);
 	if(cmd_source == src_command) {

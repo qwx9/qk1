@@ -17,20 +17,20 @@ struct cvar_s {
 cvar_t *Cvar_RegisterVariable(cvar_t *variable);
 
 // returns 0 if not defined or non numeric
-float Cvar_VariableValue(char *var_name);
+float Cvar_VariableValue(const char *var_name);
 
 // returns an empty string if not defined
-char *Cvar_VariableString(char *var_name);
+const char *Cvar_VariableString(const char *var_name);
 
 // attempts to match a partial variable name for command line completion
 // returns NULL if nothing fits
-char *Cvar_CompleteVariable(char *partial);
+char *Cvar_CompleteVariable(const char *partial);
 
 // called by Cmd_ExecuteString when Cmd_Argv(0) doesn't match a known
 // command.  Returns true if the command was a variable reference that
 // was handled. (print or change)
 bool Cvar_Command(void);
 
-cvar_t *Cvar_FindVar(char *var_name);
+cvar_t *Cvar_FindVar(const char *var_name);
 
 extern cvar_t *cvar_vars;
