@@ -180,7 +180,7 @@ void SV_SetIdealPitch(void);
 void SV_AddUpdates(void);
 void SV_ClientThink(void);
 void SV_AddClientToServer(struct qsocket_s *ret);
-void SV_Physics(void);
+void SV_Physics(pr_t *pr);
 bool SV_CheckBottom(edict_t *ent);
 bool SV_movestep(edict_t *ent, vec3_t move, bool relink);
 void SV_WriteClientdataToMessage(edict_t *ent, sizebuf_t *msg);

@@ -1218,7 +1218,7 @@ PF_tracetoss(pr_t *pr)
 	ent = G_EDICT(pr, OFS_PARM0);
 	ignore = G_EDICT(pr, OFS_PARM1);
 
-	trace = SV_Trace_Toss(ent, ignore);
+	trace = SV_Trace_Toss(pr, ent, ignore);
 
 	pr->global_struct->trace_allsolid = trace.allsolid;
 	pr->global_struct->trace_startsolid = trace.startsolid;

@@ -1111,8 +1111,8 @@ SV_SpawnServer(char *server)
 
 	// run two frames to allow everything to settle
 	host_frametime = 0.1;
-	SV_Physics();
-	SV_Physics();
+	SV_Physics(sv.pr);
+	SV_Physics(sv.pr);
 
 	// create a baseline for more efficient communications
 	SV_CreateBaseline();

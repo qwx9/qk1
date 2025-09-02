@@ -53,4 +53,4 @@ bool SV_RecursiveHullCheck(
 // passedict is explicitly excluded from clipping checks (normally NULL)
 trace_t SV_Move(vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end, int type, edict_t *passedict);
 
-trace_t SV_Trace_Toss(edict_t *ent, edict_t *ignore);
+trace_t SV_Trace_Toss(pr_t *pr, edict_t *ent, edict_t *ignore);
