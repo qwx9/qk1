@@ -6,7 +6,7 @@ enum {
 	SINGLEPLAYER_ITEMS = 3,
 	MULTIPLAYER_ITEMS = 3,
 	NUM_SETUP_CMDS = 5,
-	OPTIONS_ITEMS = 13,
+	OPTIONS_ITEMS = 14,
 	SLIDER_RANGE = 10,
 	NUM_HELP_PAGES = 6,
 	NUM_LANCONFIG_CMDS = 2,
@@ -804,20 +804,12 @@ M_Net_Draw(void)
 {
 	static const char *net_helpMessage[] = {
 		/* .........1.........2.... */
-		"                        ",
-		" Two computers connected",
-		"   through two modems.  ",
-		"                        ",
-		"                        ",
-		" Two computers connected",
-		" by a null-modem cable. ",
-		"                        ",
 		" Commonly used to play  ",
 		" over the Internet, but ",
 		" also used on a Local   ",
 		" Area Network.          ",
 	};
-	int f;
+	int i, f;
 	qpic_t *p;
 
 	M_DrawTransPic(16, 4, Draw_CachePic("gfx/qplaque.lmp"));
@@ -825,32 +817,18 @@ M_Net_Draw(void)
 	M_DrawPic((320 - p->width) / 2, 4, p);
 
 	f = 32;
-
-	p = Draw_CachePic("gfx/dim_modm.lmp");
-
-	if(p)
-		M_DrawTransPic(72, f, p);
-
-	f += 19;
-
-	p = Draw_CachePic("gfx/dim_drct.lmp");
-
-	if(p)
-		M_DrawTransPic(72, f, p);
-
-	f += 19;
 	p = Draw_CachePic("gfx/netmen4.lmp");
-	M_DrawTransPic(72, f, p);
+	if(p)
+		M_DrawTransPic(72, f, p);
 
 	f = (320 - 26 * 8) / 2;
 	M_DrawTextBox(f, 134, 24, 4);
 	f += 8;
-	M_Print(f, 142, net_helpMessage[m_net_cursor * 4 + 0]);
-	M_Print(f, 150, net_helpMessage[m_net_cursor * 4 + 1]);
-	M_Print(f, 158, net_helpMessage[m_net_cursor * 4 + 2]);
+	for(i = 0; i < nelem(net_helpMessage); i++)
+		M_Print(f, 142 + i * 8, net_helpMessage[i]);
 
 	f = (int)(host_time * 10) % 6;
-	M_DrawTransPic(54, 32 + m_net_cursor * 20, Draw_CachePic(va("gfx/menudot%d.lmp", f + 1)));
+	M_DrawTransPic(54, 32, Draw_CachePic(va("gfx/menudot%d.lmp", f + 1)));
 }
 
 static void
@@ -1061,7 +1039,7 @@ M_Options_Draw(void)
 	M_DrawCheckbox(220, y, lookspring.value);
 	y += 8;
 
-	M_Print(16, 120, "            Lookstrafe");
+	M_Print(16, y, "            Lookstrafe");
 	M_DrawCheckbox(220, y, lookstrafe.value);
 	y += 8;
 	USED(y);
@@ -1118,13 +1096,6 @@ M_Options_Key(int k)
 	case K_RIGHTARROW:
 		M_AdjustSliders(1);
 		break;
-	}
-
-	if(options_cursor == 12) {
-		if(k == K_UPARROW)
-			options_cursor = 11;
-		else
-			options_cursor = 0;
 	}
 }
 
@@ -1432,7 +1403,7 @@ M_LanConfig_Draw(void)
 
 	M_DrawTransPic(16, 4, Draw_CachePic("gfx/qplaque.lmp"));
 	p = Draw_CachePic("gfx/p_multi.lmp");
-	basex = (320 - p->width) / 2;
+	basex = (320 - p->width) / 2 + 36;
 	M_DrawPic(basex, 4, p);
 
 	if(StartingGame)
