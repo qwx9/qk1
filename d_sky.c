@@ -41,14 +41,18 @@ D_DrawSkyScans8(espan_t *pspan)
 		return;
 
 	sstep[0] = sstep[1] = 0; // keep compiler happy
+	snext[0] = snext[1] = 0;
 	tstep[0] = tstep[1] = 0; // ditto
+	tnext[0] = tnext[1] = 0;
 	skydist = skyvars.time * skyvars.speed; // TODO: add D_SetupFrame & set this there
 	fog = fogvars.skypix;
 	inva = 255 - (fog >> 24);
 
-	do {
+	for(; pspan != nil; pspan = pspan->pnext) {
+		if((count = pspan->count) < 1)
+			continue;
+
 		pdest = dvars.fb + pspan->v * dvars.w + pspan->u;
-		count = pspan->count;
 		pz = dvars.zb + pspan->v * dvars.w + pspan->u;
 		memset(pz, 0xff, count * sizeof(*pz));
 
@@ -110,6 +114,5 @@ D_DrawSkyScans8(espan_t *pspan)
 			s[1] = snext[1];
 			t[1] = tnext[1];
 		} while(count > 0);
-
-	} while((pspan = pspan->pnext) != nil);
+	}
 }
