@@ -3,7 +3,7 @@
 static void *
 Mod_LoadAliasFrame(
 	void *pin, int *pframeindex, int numv, trivertx_t *pbboxmin, trivertx_t *pbboxmax,
-	aliashdr_t *pheader, char *name
+	aliashdr_t *pheader, char *name, int aliasbboxmin[3], int aliasbboxmax[3]
 )
 {
 	trivertx_t *pframe, *pinframe;
@@ -19,6 +19,8 @@ Mod_LoadAliasFrame(
 		// endianness
 		pbboxmin->v[i] = pdaliasframe->bboxmin.v[i];
 		pbboxmax->v[i] = pdaliasframe->bboxmax.v[i];
+		aliasbboxmin[i] = min(aliasbboxmin[i], pbboxmin->v[i]);
+		aliasbboxmax[i] = max(aliasbboxmax[i], pbboxmax->v[i]);
 	}
 
 	pinframe = (trivertx_t *)(pdaliasframe + 1);
@@ -31,9 +33,8 @@ Mod_LoadAliasFrame(
 		// these are all byte values, so no need to deal with endianness
 		pframe[j].lightnormalindex = pinframe[j].lightnormalindex;
 
-		for(k = 0; k < 3; k++) {
+		for(k = 0; k < 3; k++)
 			pframe[j].v[k] = pinframe[j].v[k];
-		}
 	}
 
 	pinframe += numv;
@@ -44,7 +45,7 @@ Mod_LoadAliasFrame(
 static void *
 Mod_LoadAliasGroup(
 	void *pin, int *pframeindex, int numv, trivertx_t *pbboxmin, trivertx_t *pbboxmax,
-	aliashdr_t *pheader, char *name
+	aliashdr_t *pheader, char *name, int aliasbboxmin[3], int aliasbboxmax[3]
 )
 {
 	daliasgroup_t *pingroup;
@@ -68,6 +69,8 @@ Mod_LoadAliasGroup(
 		// these are byte values, so we don't have to worry about endianness
 		pbboxmin->v[i] = pingroup->bboxmin.v[i];
 		pbboxmax->v[i] = pingroup->bboxmax.v[i];
+		aliasbboxmin[i] = min(aliasbboxmin[i], pbboxmin->v[i]);
+		aliasbboxmax[i] = max(aliasbboxmax[i], pbboxmax->v[i]);
 	}
 
 	pin_intervals = (daliasinterval_t *)(pingroup + 1);
@@ -94,7 +97,9 @@ Mod_LoadAliasGroup(
 			&paliasgroup->frames[i].bboxmin,
 			&paliasgroup->frames[i].bboxmax,
 			pheader,
-			name
+			name,
+			aliasbboxmin,
+			aliasbboxmax
 		);
 	}
 
@@ -162,18 +167,15 @@ Mod_LoadAliasSkinGroup(void *pin, int *pskinindex, int skinsize, aliashdr_t *phe
 void
 Mod_LoadAliasModel(model_t *mod, void *buffer)
 {
-	int i;
+	int i, version, numframes, numskins, size, skinsize, bboxmin[3], bboxmax[3];
 	mdl_t *pmodel, *pinmodel;
 	stvert_t *pstverts, *pinstverts;
 	aliashdr_t *pheader;
 	mtriangle_t *ptri;
 	dtriangle_t *pintriangles;
-	int version, numframes, numskins;
-	int size;
 	daliasframetype_t *pframetype;
 	daliasskintype_t *pskintype;
 	maliasskindesc_t *pskindesc;
-	int skinsize;
 
 	pinmodel = (mdl_t *)buffer;
 
@@ -299,6 +301,8 @@ Mod_LoadAliasModel(model_t *mod, void *buffer)
 		Host_Error("Mod_LoadAliasModel: Invalid # of frames: %d\n", numframes);
 
 	pframetype = (daliasframetype_t *)&pintriangles[pmodel->numtris];
+	bboxmin[0] = bboxmin[1] = bboxmin[2] = 999999;
+	bboxmax[0] = bboxmax[1] = bboxmax[2] = -999999;
 
 	for(i = 0; i < numframes; i++) {
 		aliasframetype_t frametype;
@@ -314,7 +318,9 @@ Mod_LoadAliasModel(model_t *mod, void *buffer)
 				&pheader->frames[i].bboxmin,
 				&pheader->frames[i].bboxmax,
 				pheader,
-				pheader->frames[i].name
+				pheader->frames[i].name,
+				bboxmin,
+				bboxmax
 			);
 		} else {
 			pframetype = (daliasframetype_t *)Mod_LoadAliasGroup(
@@ -324,16 +330,19 @@ Mod_LoadAliasModel(model_t *mod, void *buffer)
 				&pheader->frames[i].bboxmin,
 				&pheader->frames[i].bboxmax,
 				pheader,
-				pheader->frames[i].name
+				pheader->frames[i].name,
+				bboxmin,
+				bboxmax
 			);
 		}
 	}
 
 	mod->type = mod_alias;
 
-	// FIXME: do this right
-	mod->mins[0] = mod->mins[1] = mod->mins[2] = -16;
-	mod->maxs[0] = mod->maxs[1] = mod->maxs[2] = 16;
+	for(i = 0; i < 3; i++) {
+		mod->mins[i] = bboxmin[i] * pmodel->scale[i] + pmodel->scale_origin[i];
+		mod->maxs[i] = bboxmax[i] * pmodel->scale[i] + pmodel->scale_origin[i];
+	}
 
 	// move the complete, relocatable alias model to the cache
 
