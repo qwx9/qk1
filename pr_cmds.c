@@ -1152,7 +1152,7 @@ PF_changepitch(pr_t *pr)
 	ent = G_EDICT(pr, OFS_PARM0);
 	current = anglemod(ent->v.angles[0]);
 	ideal = ent->v.idealpitch;
-	ev = GetEdictFieldValue(sv.pr, ent, "pitch_speed");
+	ev = GetEdictFieldValue(pr, ent, "pitch_speed");
 	speed = ev ? ev->_float : 0;
 
 	if(current == ideal)
