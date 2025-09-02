@@ -14,6 +14,7 @@ enum {
 	MOVETYPE_FLYMISSILE, // extra size to monsters
 	MOVETYPE_BOUNCE,
 	MOVETYPE_GIB,
+	MOVETYPE_FOLLOW, // track movement of aiment
 
 	SIGNON_INIT = 0,
 	SIGNON_SENDING,

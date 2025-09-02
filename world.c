@@ -242,6 +242,8 @@ void
 SV_LinkEdict(edict_t *ent, bool touch_triggers)
 {
 	areanode_t *node;
+	float max, v;
+	int i;
 
 	if(ent->area.prev)
 		SV_UnlinkEdict(ent); // unlink from old position
@@ -253,8 +255,26 @@ SV_LinkEdict(edict_t *ent, bool touch_triggers)
 		return;
 
 	// set the abs box
-	VectorAdd(ent->v.origin, ent->v.mins, ent->v.absmin);
-	VectorAdd(ent->v.origin, ent->v.maxs, ent->v.absmax);
+	if(ent->v.solid == SOLID_BSP && (ent->v.angles[0] || ent->v.angles[1] || ent->v.angles[2])) {
+		// expand for rotation
+
+		max = 0;
+		for(i = 0; i < 3; i++) {
+			v = fabs(ent->v.mins[i]);
+			if(v > max)
+				max = v;
+			v = fabs(ent->v.maxs[i]);
+			if(v > max)
+				max = v;
+		}
+		for(i = 0; i < 3; i++) {
+			ent->v.absmin[i] = ent->v.origin[i] - max;
+			ent->v.absmax[i] = ent->v.origin[i] + max;
+		}
+	} else {
+		VectorAdd(ent->v.origin, ent->v.mins, ent->v.absmin);
+		VectorAdd(ent->v.origin, ent->v.maxs, ent->v.absmax);
+	}
 
 	// to make items easier to pick up and allow them to be grabbed off
 	// of shelves, the abs sizes are expanded
@@ -471,7 +491,7 @@ static trace_t
 SV_ClipMoveToEntity(edict_t *ent, vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end)
 {
 	trace_t trace;
-	vec3_t offset, start_l, end_l;
+	vec3_t offset, start_l, end_l, a, forward, right, up, temp;
 	hull_t *hull;
 
 	// fill in a default trace
@@ -486,12 +506,40 @@ SV_ClipMoveToEntity(edict_t *ent, vec3_t start, vec3_t mins, vec3_t maxs, vec3_t
 	VectorSubtract(start, offset, start_l);
 	VectorSubtract(end, offset, end_l);
 
+	// rotate start and end into the models frame of reference
+	if(ent->v.solid == SOLID_BSP && (ent->v.angles[0] || ent->v.angles[1] || ent->v.angles[2])) {
+		AngleVectors(ent->v.angles, forward, right, up);
+		VectorCopy(start_l, temp);
+		start_l[0] = DotProduct(temp, forward);
+		start_l[1] = -DotProduct(temp, right);
+		start_l[2] = DotProduct(temp, up);
+		VectorCopy(end_l, temp);
+		end_l[0] = DotProduct(temp, forward);
+		end_l[1] = -DotProduct(temp, right);
+		end_l[2] = DotProduct(temp, up);
+	}
+
 	// trace a line through the apropriate clipping hull
 	SV_RecursiveHullCheck(hull, hull->firstclipnode, 0, 1, start_l, end_l, &trace);
 
 	// fix trace up by the offset
-	if(trace.fraction != 1)
+	if(trace.fraction != 1) {
+		if(ent->v.solid == SOLID_BSP &&
+		   (ent->v.angles[0] || ent->v.angles[1] || ent->v.angles[2])) {
+			// rotate endpos back to world frame of reference
+			VectorSubtract(vec3_origin, ent->v.angles, a);
+			AngleVectors(a, forward, right, up);
+			VectorCopy(trace.endpos, temp);
+			trace.endpos[0] = DotProduct(temp, forward);
+			trace.endpos[1] = -DotProduct(temp, right);
+			trace.endpos[2] = DotProduct(temp, up);
+			VectorCopy(trace.plane.normal, temp);
+			trace.plane.normal[0] = DotProduct(temp, forward);
+			trace.plane.normal[1] = -DotProduct(temp, right);
+			trace.plane.normal[2] = DotProduct(temp, up);
+		}
 		VectorAdd(trace.endpos, offset, trace.endpos);
+	}
 
 	// did we clip the move?
 	if(trace.fraction < 1 || trace.startsolid)

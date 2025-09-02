@@ -1411,6 +1411,7 @@ PF_checkextension(pr_t *pr)
 		"DP_QC_MINMAXBOUND",
 		"DP_QC_SINCOSSQRTPOW",
 		"DP_QC_TOKENIZE_CONSOLE", /* FIXME(sigrid): not really; see somewhere around */
+		"DP_SV_ROTATINGBMODEL",
 		"KRIMZON_SV_PARSECLIENTCOMMAND",
 	};
 	const char *ext = G_STRING(pr, OFS_PARM0);

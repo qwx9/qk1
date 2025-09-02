@@ -298,6 +298,124 @@ SV_PushEntity(edict_t *ent, vec3_t push)
 }
 
 static void
+SV_PushRotate(edict_t *pusher, float movetime)
+{
+	int i, e;
+	edict_t *check, *block;
+	vec3_t move, a, amove;
+	vec3_t entorig, pushorig;
+	int num_moved;
+	edict_t *moved_edict[MAX_EDICTS];
+	vec3_t moved_from[MAX_EDICTS];
+	vec3_t org, org2;
+	vec3_t forward, right, up;
+
+	if(!pusher->v.avelocity[0] && !pusher->v.avelocity[1] && !pusher->v.avelocity[2]) {
+		pusher->v.ltime += movetime;
+		return;
+	}
+
+	for(i = 0; i < 3; i++)
+		amove[i] = pusher->v.avelocity[i] * movetime;
+
+	VectorSubtract(vec3_origin, amove, a);
+	AngleVectors(a, forward, right, up);
+
+	VectorCopy(pusher->v.angles, pushorig);
+
+	// move the pusher to it's final position
+
+	VectorAdd(pusher->v.angles, amove, pusher->v.angles);
+	pusher->v.ltime += movetime;
+	SV_LinkEdict(pusher, false);
+
+	// see if any solid entities are inside the final position
+	num_moved = 0;
+	check = NEXT_EDICT(sv.pr, sv.pr->edicts);
+	for(e = 1; e < sv.pr->num_edicts; e++, check = NEXT_EDICT(sv.pr, check)) {
+		if(check->free)
+			continue;
+		if(check->v.movetype == MOVETYPE_PUSH || check->v.movetype == MOVETYPE_NONE ||
+		   check->v.movetype == MOVETYPE_FOLLOW || check->v.movetype == MOVETYPE_NOCLIP)
+			continue;
+
+		// if the entity is standing on the pusher, it will definately be moved
+		if(!(((int)check->v.flags & FL_ONGROUND) &&
+			 PROG_TO_EDICT(sv.pr, check->v.groundentity) == pusher)) {
+			if(check->v.absmin[0] >= pusher->v.absmax[0] ||
+			   check->v.absmin[1] >= pusher->v.absmax[1] ||
+			   check->v.absmin[2] >= pusher->v.absmax[2] ||
+			   check->v.absmax[0] <= pusher->v.absmin[0] ||
+			   check->v.absmax[1] <= pusher->v.absmin[1] ||
+			   check->v.absmax[2] <= pusher->v.absmin[2])
+				continue;
+
+			// see if the ent's bbox is inside the pusher's final position
+			if(!SV_TestEntityPosition(check))
+				continue;
+		}
+
+		// remove the onground flag for non-players
+		if(check->v.movetype != MOVETYPE_WALK)
+			check->v.flags = (int)check->v.flags & ~FL_ONGROUND;
+
+		VectorCopy(check->v.origin, entorig);
+		VectorCopy(check->v.origin, moved_from[num_moved]);
+		moved_edict[num_moved] = check;
+		num_moved++;
+
+		// calculate destination position
+		VectorSubtract(check->v.origin, pusher->v.origin, org);
+		org2[0] = DotProduct(org, forward);
+		org2[1] = -DotProduct(org, right);
+		org2[2] = DotProduct(org, up);
+		VectorSubtract(org2, org, move);
+
+		// try moving the contacted entity
+		pusher->v.solid = SOLID_NOT;
+		SV_PushEntity(check, move);
+		pusher->v.solid = SOLID_BSP;
+
+		// if it is still inside the pusher, block
+		block = SV_TestEntityPosition(check);
+		if(block) { // fail the move
+			if(check->v.mins[0] == check->v.maxs[0])
+				continue;
+			if(check->v.solid == SOLID_NOT || check->v.solid == SOLID_TRIGGER) { // corpse
+				check->v.mins[0] = check->v.mins[1] = 0;
+				VectorCopy(check->v.mins, check->v.maxs);
+				continue;
+			}
+
+			VectorCopy(entorig, check->v.origin);
+			SV_LinkEdict(check, true);
+
+			VectorCopy(pushorig, pusher->v.angles);
+			SV_LinkEdict(pusher, false);
+			pusher->v.ltime -= movetime;
+
+			// if the pusher has a "blocked" function, call it
+			// otherwise, just stay in place until the obstacle is gone
+			if(pusher->v.blocked) {
+				sv.pr->global_struct->self = EDICT_TO_PROG(sv.pr, pusher);
+				sv.pr->global_struct->other = EDICT_TO_PROG(sv.pr, check);
+				PR_ExecuteProgram(sv.pr, pusher->v.blocked);
+			}
+
+			// move back any entities we already moved
+			for(i = 0; i < num_moved; i++) {
+				VectorCopy(moved_from[i], moved_edict[i]->v.origin);
+				VectorSubtract(moved_edict[i]->v.angles, amove, moved_edict[i]->v.angles);
+				SV_LinkEdict(moved_edict[i], false);
+			}
+			return;
+		} else {
+			VectorAdd(check->v.angles, amove, check->v.angles);
+		}
+	}
+}
+
+static void
 SV_PushMove(edict_t *pusher, float movetime)
 {
 	static edict_t *moved_edict[MAX_EDICTS];
@@ -332,7 +450,7 @@ SV_PushMove(edict_t *pusher, float movetime)
 		if(check->free)
 			continue;
 		if(check->v.movetype == MOVETYPE_PUSH || check->v.movetype == MOVETYPE_NONE ||
-		   check->v.movetype == MOVETYPE_NOCLIP)
+		   check->v.movetype == MOVETYPE_NOCLIP || check->v.movetype == MOVETYPE_FOLLOW)
 			continue;
 
 		// if the entity is standing on the pusher, it will definately be moved
@@ -415,6 +533,8 @@ SV_Physics_Pusher(edict_t *ent)
 	} else
 		movetime = host_frametime;
 
+	if(ent->v.avelocity[0] || ent->v.avelocity[1] || ent->v.avelocity[2])
+		SV_PushRotate(ent, host_frametime);
 	if(movetime)
 		SV_PushMove(ent, movetime); // advances ent->v.ltime if not blocked
 
@@ -878,6 +998,14 @@ SV_Physics_Step(edict_t *ent)
 	SV_CheckWaterTransition(ent);
 }
 
+static void
+SV_Physics_Follow(edict_t *ent)
+{
+	SV_RunThink(ent);
+	VectorAdd(PROG_TO_EDICT(sv.pr, ent->v.aiment)->v.origin, ent->v.v_angle, ent->v.origin);
+	SV_LinkEdict(ent, true);
+}
+
 void
 SV_Physics(void)
 {
@@ -909,6 +1037,8 @@ SV_Physics(void)
 			SV_Physics_Noclip(ent);
 		else if(ent->v.movetype == MOVETYPE_STEP)
 			SV_Physics_Step(ent);
+		else if(ent->v.movetype == MOVETYPE_FOLLOW)
+			SV_Physics_Follow(ent);
 		else if(ent->v.movetype == MOVETYPE_TOSS || ent->v.movetype == MOVETYPE_GIB ||
 				ent->v.movetype == MOVETYPE_BOUNCE || ent->v.movetype == MOVETYPE_FLY ||
 				ent->v.movetype == MOVETYPE_FLYMISSILE)
