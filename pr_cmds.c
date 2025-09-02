@@ -1142,6 +1142,40 @@ PF_aim(pr_t *pr)
 	}
 }
 
+static void
+PF_changepitch(pr_t *pr)
+{
+	edict_t *ent;
+	float ideal, current, move, speed;
+	eval_t *ev;
+
+	ent = G_EDICT(pr, OFS_PARM0);
+	current = anglemod(ent->v.angles[0]);
+	ideal = ent->v.idealpitch;
+	ev = GetEdictFieldValue(sv.pr, ent, "pitch_speed");
+	speed = ev ? ev->_float : 0;
+
+	if(current == ideal)
+		return;
+	move = ideal - current;
+	if(ideal > current) {
+		if(move >= 180)
+			move = move - 360;
+	} else {
+		if(move <= -180)
+			move = move + 360;
+	}
+	if(move > 0) {
+		if(move > speed)
+			move = speed;
+	} else {
+		if(move < -speed)
+			move = -speed;
+	}
+
+	ent->v.angles[0] = anglemod(current + move);
+}
+
 /* This was a major timewaster in progs, so it was converted to C */
 void
 PF_changeyaw(pr_t *pr)
@@ -1416,6 +1450,7 @@ PF_checkextension(pr_t *pr)
 		"DP_HALFLIFE_MAP_CVAR",
 		"DP_LITSUPPORT",
 		"DP_QC_ASINACOSATANATAN2TAN",
+		"DP_QC_CHANGEPITCH",
 		"DP_QC_MINMAXBOUND",
 		"DP_QC_SINCOSSQRTPOW",
 		"DP_QC_TOKENIZE_CONSOLE", /* FIXME(sigrid): not really; see somewhere around */
@@ -1594,7 +1629,7 @@ static const builtin_t pr_sv_builtins[] = {
 	[60] = PF_sinf,
 	[61] = PF_cosf,
 	[62] = PF_sqrtf,
-	PF_Fixme,
+	[63] = PF_changepitch,
 	PF_Fixme,
 	PF_Fixme,
 	PF_Fixme,

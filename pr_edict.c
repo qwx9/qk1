@@ -830,6 +830,7 @@ struct extra_field_t {
 
 static extra_field_t extra_fields[] = {
 	{ev_float, "alpha"},
+	{ev_float, "pitch_speed"},
 };
 
 static void
