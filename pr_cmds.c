@@ -655,7 +655,11 @@ PF_localcmd(pr_t *pr)
 static void
 PF_cvar(pr_t *pr)
 {
-	G_FLOAT(pr, OFS_RETURN) = Cvar_VariableValue(G_STRING(pr, OFS_PARM0));
+	const char *name = G_STRING(pr, OFS_PARM0);
+	if(strcmp(name, "halflifebsp") == 0)
+		G_FLOAT(pr, OFS_RETURN) = sv.worldmodel->ver == BSP30VERSION;
+	else
+		G_FLOAT(pr, OFS_RETURN) = Cvar_VariableValue(name);
 }
 
 /* float cvar (string) */
@@ -1409,6 +1413,7 @@ PF_checkextension(pr_t *pr)
 		"DP_EF_NODRAW",
 		"DP_ENT_ALPHA",
 		"DP_HALFLIFE_MAP",
+		"DP_HALFLIFE_MAP_CVAR",
 		"DP_QC_ASINACOSATANATAN2TAN",
 		"DP_QC_MINMAXBOUND",
 		"DP_QC_SINCOSSQRTPOW",
