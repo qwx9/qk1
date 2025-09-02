@@ -964,6 +964,38 @@ SV_Physics_Toss(edict_t *ent)
 	SV_CheckWaterTransition(ent);
 }
 
+trace_t
+SV_Trace_Toss(edict_t *ent, edict_t *ignore)
+{
+	int i;
+	trace_t trace;
+	vec3_t move, end, org, vel;
+	float gravity, fv;
+	eval_t *val;
+
+	SV_CheckVelocity(ent);
+
+	VectorCopy(ent->v.origin, org);
+	VectorCopy(ent->v.velocity, vel);
+	val = GetEdictFieldValue(sv.pr, ent, "gravity");
+	gravity = ((val && val->_float) ? val->_float : 1.0) * sv_gravity.value * 0.05;
+
+	for(i = 0; i < 200; i++) { /* 10s max */
+		vel[2] -= gravity;
+		VectorScale(vel, 0.05, move);
+		VectorAdd(org, move, end);
+		trace = SV_Move(org, ent->v.mins, ent->v.maxs, end, MOVE_NORMAL, ent);
+		VectorCopy(trace.endpos, org);
+		if(trace.ent && trace.ent != ignore && trace.fraction < 1)
+			break;
+		if((fv = Length(vel)) > sv_maxvelocity.value)
+			VectorScale(vel, sv_maxvelocity.value / fv, vel);
+	}
+
+	trace.fraction = 0;
+	return trace;
+}
+
 /*
  * Monsters freefall when they don't have a ground entity, otherwise
  * all movement is done with discrete steps.

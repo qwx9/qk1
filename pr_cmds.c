@@ -1209,6 +1209,28 @@ PF_changeyaw(pr_t *pr)
 	ent->v.angles[1] = anglemod(current + move);
 }
 
+static void
+PF_tracetoss(pr_t *pr)
+{
+	trace_t trace;
+	edict_t *ent, *ignore;
+
+	ent = G_EDICT(pr, OFS_PARM0);
+	ignore = G_EDICT(pr, OFS_PARM1);
+
+	trace = SV_Trace_Toss(ent, ignore);
+
+	pr->global_struct->trace_allsolid = trace.allsolid;
+	pr->global_struct->trace_startsolid = trace.startsolid;
+	pr->global_struct->trace_fraction = trace.fraction;
+	pr->global_struct->trace_inwater = trace.inwater;
+	pr->global_struct->trace_inopen = trace.inopen;
+	VectorCopy(trace.endpos, pr->global_struct->trace_endpos);
+	VectorCopy(trace.plane.normal, pr->global_struct->trace_plane_normal);
+	pr->global_struct->trace_plane_dist = trace.plane.dist;
+	pr->global_struct->trace_ent = EDICT_TO_PROG(pr, trace.ent ? trace.ent : pr->edicts);
+}
+
 static sizebuf_t *
 WriteDest(pr_t *pr)
 {
@@ -1453,6 +1475,7 @@ PF_checkextension(pr_t *pr)
 		"DP_QC_CHANGEPITCH",
 		"DP_QC_MINMAXBOUND",
 		"DP_QC_SINCOSSQRTPOW",
+		"DP_QC_TRACETOSS",
 		"DP_QC_TOKENIZE_CONSOLE", /* FIXME(sigrid): not really; see somewhere around */
 		"DP_SV_ROTATINGBMODEL",
 		"KRIMZON_SV_PARSECLIENTCOMMAND",
@@ -1630,7 +1653,7 @@ static const builtin_t pr_sv_builtins[] = {
 	[61] = PF_cosf,
 	[62] = PF_sqrtf,
 	[63] = PF_changepitch,
-	PF_Fixme,
+	[64] = PF_tracetoss,
 	PF_Fixme,
 	PF_Fixme,
 
