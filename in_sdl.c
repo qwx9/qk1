@@ -6,6 +6,7 @@ static cvar_t m_filter = {"m_filter", "0", true};
 static cvar_t m_raw = {"m_raw", "1", true};
 static bool mouseon, focuslost = true;
 static float dx, dy, olddx, olddy;
+static SDL_Keycode k_section; // §
 
 static int mbuttons[] = {
 	K_MOUSE1,
@@ -24,7 +25,8 @@ void
 Sys_SendKeyEvents(void)
 {
 	SDL_Event event;
-	int key, b;
+	SDL_Keycode key;
+	int b;
 
 	if(cls.state == ca_dedicated)
 		return;
@@ -64,7 +66,10 @@ Sys_SendKeyEvents(void)
 		case SDL_EVENT_KEY_UP:
 			if(event.key.repeat && key_dest == key_game)
 				break;
-			switch(key = event.key.key) {
+			key = event.key.key;
+			if(k_section != SDLK_UNKNOWN && key == k_section)
+				key = SDLK_TILDE;
+			switch(key) {
 			case SDLK_GRAVE:
 				key = '~';
 				break;
@@ -209,6 +214,7 @@ IN_Shutdown(void)
 void
 IN_Init(void)
 {
+	k_section = SDL_GetKeyFromName("§");
 	SDL_SetHint(SDL_HINT_MOUSE_RELATIVE_MODE_CENTER, "0");
 	m_raw.cb = m_raw_cb;
 	Cvar_RegisterVariable(&m_windowed);
