@@ -670,7 +670,7 @@ loadedicts(FILE *bf, pr_t *pr)
 			ed->free = 0;
 			ED_ParseEdict(pr, s, ed);
 			if(!ed->free)
-				SV_LinkEdict(ed, 0);
+				SV_LinkEdict(pr, ed, 0);
 		}
 		ent++;
 	} while(!feof(bf) && !ferror(bf));

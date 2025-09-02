@@ -50,7 +50,7 @@ SV_SetIdealPitch(void)
 		bottom[1] = top[1];
 		bottom[2] = top[2] - 160;
 
-		tr = SV_Move(top, vec3_origin, vec3_origin, bottom, 1, sv_player);
+		tr = SV_Move(sv.pr, top, vec3_origin, vec3_origin, bottom, MOVE_NOMONSTERS, sv_player);
 		if(tr.allsolid)
 			return; // looking at a wall, leave ideal the way is was
 
@@ -102,7 +102,7 @@ SV_UserFriction(void)
 	start[2] = origin[2] + sv_player->v.mins[2];
 	stop[2] = start[2] - 34;
 
-	trace = SV_Move(start, vec3_origin, vec3_origin, stop, true, sv_player);
+	trace = SV_Move(sv.pr, start, vec3_origin, vec3_origin, stop, MOVE_NOMONSTERS, sv_player);
 
 	if(trace.fraction == 1.0)
 		friction = sv_friction.value * sv_edgefriction.value;
@@ -362,7 +362,7 @@ SV_ReadClientMove(usercmd_t *move)
 
 /* Returns false if the client should be killed */
 static bool
-SV_ReadClientMessage(void)
+SV_ReadClientMessage(pr_t *pr)
 {
 	int ret, i, cmd;
 	client_t *tmp;
@@ -415,19 +415,19 @@ nextmsg:
 
 			case clc_stringcmd:
 				s = MSG_ReadString();
-				if(sv.pr->parse_cl_command.func != nil) {
+				if(pr->parse_cl_command.func != nil) {
 					for(i = 0; i < nelem(nooverride); i++) {
 						if(cistrncmp(nooverride[i] + 1, s, nooverride[i][0]) == 0)
 							break;
 					}
 					if(i >= nelem(nooverride)) {
 						tmp = host_client;
-						G_INT(sv.pr, OFS_PARM0) = PR_SetStr(sv.pr, s);
-						sv.pr->global_struct->self = EDICT_TO_PROG(sv.pr, tmp->edict);
-						sv.pr->global_struct->time = sv.time;
-						sv.pr->parse_cl_command.in_callback = true;
-						PR_ExecuteProgram(sv.pr, sv.pr->parse_cl_command.func - sv.pr->functions);
-						sv.pr->parse_cl_command.in_callback = false;
+						G_INT(pr, OFS_PARM0) = PR_SetStr(pr, s);
+						pr->global_struct->self = EDICT_TO_PROG(pr, tmp->edict);
+						pr->global_struct->time = sv.time;
+						pr->parse_cl_command.in_callback = true;
+						PR_ExecuteProgram(pr, pr->parse_cl_command.func - pr->functions);
+						pr->parse_cl_command.in_callback = false;
 						break;
 					}
 				}
@@ -470,7 +470,7 @@ SV_RunClients(void)
 
 		sv_player = host_client->edict;
 
-		if(!SV_ReadClientMessage()) {
+		if(!SV_ReadClientMessage(sv.pr)) {
 			SV_DropClient(false); // client misbehaved...
 			continue;
 		}

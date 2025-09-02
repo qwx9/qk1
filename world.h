@@ -35,11 +35,11 @@ void SV_UnlinkEdict(edict_t *ent);
 // flags ent->v.modified
 // sets ent->v.absmin and ent->v.absmax
 // if touchtriggers, calls prog functions for the intersected triggers
-void SV_LinkEdict(edict_t *ent, bool touch_triggers);
+void SV_LinkEdict(pr_t *pr, edict_t *ent, bool touch_triggers);
 
 int SV_PointContents(vec3_t p);
 
-edict_t *SV_TestEntityPosition(edict_t *ent);
+edict_t *SV_TestEntityPosition(pr_t *pr, edict_t *ent);
 bool SV_RecursiveHullCheck(
 	hull_t *hull, int num, float p1f, float p2f, vec3_t p1, vec3_t p2, trace_t *trace
 );
@@ -51,6 +51,8 @@ bool SV_RecursiveHullCheck(
 // nomonsters is used for line of sight or edge testing, where mosnters
 // shouldn't be considered solid objects
 // passedict is explicitly excluded from clipping checks (normally NULL)
-trace_t SV_Move(vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end, int type, edict_t *passedict);
+trace_t SV_Move(
+	pr_t *pr, vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end, int type, edict_t *passedict
+);
 
 trace_t SV_Trace_Toss(pr_t *pr, edict_t *ent, edict_t *ignore);

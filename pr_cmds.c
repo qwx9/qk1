@@ -103,7 +103,7 @@ PF_setorigin(pr_t *pr)
 	e = G_EDICT(pr, OFS_PARM0);
 	org = G_VECTOR(pr, OFS_PARM1);
 	VectorCopy(org, e->v.origin);
-	SV_LinkEdict(e, false);
+	SV_LinkEdict(pr, e, false);
 }
 
 static void
@@ -168,7 +168,7 @@ SetMinMaxSize(pr_t *pr, edict_t *e, float *min, float *max, bool rotate)
 	VectorCopy(rmax, e->v.maxs);
 	VectorSubtract(max, min, e->v.size);
 
-	SV_LinkEdict(e, false);
+	SV_LinkEdict(pr, e, false);
 }
 
 /*
@@ -496,15 +496,17 @@ PF_traceline(pr_t *pr)
 {
 	float *v1, *v2;
 	trace_t trace;
-	int nomonsters;
+	bool nomonsters;
 	edict_t *ent;
 
 	v1 = G_VECTOR(pr, OFS_PARM0);
 	v2 = G_VECTOR(pr, OFS_PARM1);
-	nomonsters = G_FLOAT(pr, OFS_PARM2);
+	nomonsters = G_FLOAT(pr, OFS_PARM2) != 0;
 	ent = G_EDICT(pr, OFS_PARM3);
 
-	trace = SV_Move(v1, vec3_origin, vec3_origin, v2, nomonsters, ent);
+	trace = SV_Move(
+		pr, v1, vec3_origin, vec3_origin, v2, nomonsters ? MOVE_NOMONSTERS : MOVE_NORMAL, ent
+	);
 
 	pr->global_struct->trace_allsolid = trace.allsolid;
 	pr->global_struct->trace_startsolid = trace.startsolid;
@@ -847,8 +849,8 @@ PF_MoveToGoal(pr_t *pr)
 		return;
 
 	// bump around...
-	if((rand() & 3) == 1 || !SV_StepDirection(ent, ent->v.ideal_yaw, dist))
-		SV_NewChaseDir(ent, goal, dist);
+	if((rand() & 3) == 1 || !SV_StepDirection(pr, ent, ent->v.ideal_yaw, dist))
+		SV_NewChaseDir(pr, ent, goal, dist);
 }
 
 static void
@@ -910,9 +912,7 @@ PF_precache_model(pr_t *pr)
 static void
 PF_coredump(pr_t *pr)
 {
-	// FIXME(sigrid): needs to be pr-specific
-	USED(pr);
-	ED_PrintEdicts(nil);
+	ED_PrintEdicts(pr);
 }
 
 static void
@@ -962,7 +962,7 @@ PF_walkmove(pr_t *pr)
 	oldf = pr->xfunction;
 	oldself = pr->global_struct->self;
 
-	G_FLOAT(pr, OFS_RETURN) = SV_movestep(ent, move, true);
+	G_FLOAT(pr, OFS_RETURN) = SV_movestep(pr, ent, move, true);
 
 	// restore program state
 	pr->xfunction = oldf;
@@ -981,13 +981,13 @@ PF_droptofloor(pr_t *pr)
 	VectorCopy(ent->v.origin, end);
 	end[2] -= 256;
 
-	trace = SV_Move(ent->v.origin, ent->v.mins, ent->v.maxs, end, false, ent);
+	trace = SV_Move(pr, ent->v.origin, ent->v.mins, ent->v.maxs, end, MOVE_NORMAL, ent);
 
 	if(trace.fraction == 1 || trace.allsolid)
 		G_FLOAT(pr, OFS_RETURN) = 0;
 	else {
 		VectorCopy(trace.endpos, ent->v.origin);
-		SV_LinkEdict(ent, false);
+		SV_LinkEdict(pr, ent, false);
 		ent->v.flags = (int)ent->v.flags | FL_ONGROUND;
 		ent->v.groundentity = EDICT_TO_PROG(pr, trace.ent);
 		G_FLOAT(pr, OFS_RETURN) = 1;
@@ -1042,7 +1042,7 @@ PF_ceil(pr_t *pr)
 static void
 PF_checkbottom(pr_t *pr)
 {
-	G_FLOAT(pr, OFS_RETURN) = SV_CheckBottom(G_EDICT(pr, OFS_PARM0));
+	G_FLOAT(pr, OFS_RETURN) = SV_CheckBottom(pr, G_EDICT(pr, OFS_PARM0));
 }
 
 static void
@@ -1095,7 +1095,7 @@ PF_aim(pr_t *pr)
 	// try sending a trace straight
 	VectorCopy(pr->global_struct->v_forward, dir);
 	VectorMA(start, 2048, dir, end);
-	tr = SV_Move(start, vec3_origin, vec3_origin, end, false, ent);
+	tr = SV_Move(pr, start, vec3_origin, vec3_origin, end, MOVE_NORMAL, ent);
 	if(tr.ent && tr.ent->v.takedamage == DAMAGE_AIM &&
 	   (!teamplay.value || ent->v.team <= 0 || ent->v.team != tr.ent->v.team)) {
 		VectorCopy(pr->global_struct->v_forward, G_VECTOR(pr, OFS_RETURN));
@@ -1122,7 +1122,7 @@ PF_aim(pr_t *pr)
 		dist = DotProduct(dir, pr->global_struct->v_forward);
 		if(dist < bestdist)
 			continue; // to far to turn
-		tr = SV_Move(start, vec3_origin, vec3_origin, end, false, ent);
+		tr = SV_Move(pr, start, vec3_origin, vec3_origin, end, MOVE_NORMAL, ent);
 		if(tr.ent == check) {
 			// can shoot at this one
 			bestdist = dist;

@@ -450,14 +450,20 @@ ED_PrintNum(pr_t *pr, int ent)
 
 /* For debugging, prints all the entities in the current server */
 void
-ED_PrintEdicts(cmd_t *c)
+ED_PrintEdicts(pr_t *pr)
 {
 	int i;
 
+	Con_Printf("%d entities\n", pr->num_edicts);
+	for(i = 0; i < pr->num_edicts; i++)
+		ED_PrintNum(pr, i);
+}
+
+static void
+ED_PrintEdicts_f(cmd_t *c)
+{
 	USED(c);
-	Con_Printf("%d entities\n", sv.pr->num_edicts);
-	for(i = 0; i < sv.pr->num_edicts; i++)
-		ED_PrintNum(sv.pr, i);
+	ED_PrintEdicts(sv.pr);
 }
 
 /* For debugging, prints a single edict */
@@ -477,7 +483,7 @@ ED_PrintEdict_f(cmd_t *c)
 
 /* For debugging */
 static void
-ED_Count(cmd_t *c)
+ED_Count_f(cmd_t *c)
 {
 	int i, active, models, solid, step;
 	edict_t *ent;
@@ -1005,8 +1011,8 @@ void
 PR_Init(void)
 {
 	Cmd_AddCommand("edict", ED_PrintEdict_f);
-	Cmd_AddCommand("edicts", ED_PrintEdicts);
-	Cmd_AddCommand("edictcount", ED_Count);
+	Cmd_AddCommand("edicts", ED_PrintEdicts_f);
+	Cmd_AddCommand("edictcount", ED_Count_f);
 	Cmd_AddCommand("profile", PR_Profile_f);
 	Cvar_RegisterVariable(&nomonsters);
 	Cvar_RegisterVariable(&gamecfg);

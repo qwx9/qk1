@@ -145,7 +145,7 @@ extern const int type_size[8];
 void PR_RunError(pr_t *pr, char *error, ...);
 
 ddef_t *ED_FieldAtOfs(pr_t *pr, int ofs);
-void ED_PrintEdicts(cmd_t *c);
+void ED_PrintEdicts(pr_t *pr);
 void ED_PrintNum(pr_t *pr, int ent);
 
 eval_t *GetEdictFieldValue(pr_t *pr, edict_t *ed, char *field);

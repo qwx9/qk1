@@ -177,7 +177,7 @@ SV_UnlinkEdict(edict_t *ent)
 }
 
 static void
-SV_TouchLinks(edict_t *ent, areanode_t *node)
+SV_TouchLinks(pr_t *pr, edict_t *ent, areanode_t *node)
 {
 	link_t *l, *next;
 	edict_t *touch;
@@ -195,16 +195,16 @@ SV_TouchLinks(edict_t *ent, areanode_t *node)
 		   ent->v.absmin[2] > touch->v.absmax[2] || ent->v.absmax[0] < touch->v.absmin[0] ||
 		   ent->v.absmax[1] < touch->v.absmin[1] || ent->v.absmax[2] < touch->v.absmin[2])
 			continue;
-		old_self = sv.pr->global_struct->self;
-		old_other = sv.pr->global_struct->other;
+		old_self = pr->global_struct->self;
+		old_other = pr->global_struct->other;
 
-		sv.pr->global_struct->self = EDICT_TO_PROG(sv.pr, touch);
-		sv.pr->global_struct->other = EDICT_TO_PROG(sv.pr, ent);
-		sv.pr->global_struct->time = sv.time;
-		PR_ExecuteProgram(sv.pr, touch->v.touch);
+		pr->global_struct->self = EDICT_TO_PROG(pr, touch);
+		pr->global_struct->other = EDICT_TO_PROG(pr, ent);
+		pr->global_struct->time = sv.time;
+		PR_ExecuteProgram(pr, touch->v.touch);
 
-		sv.pr->global_struct->self = old_self;
-		sv.pr->global_struct->other = old_other;
+		pr->global_struct->self = old_self;
+		pr->global_struct->other = old_other;
 	}
 
 	// recurse down both sides
@@ -212,9 +212,9 @@ SV_TouchLinks(edict_t *ent, areanode_t *node)
 		return;
 
 	if(ent->v.absmax[node->axis] > node->dist)
-		SV_TouchLinks(ent, node->children[0]);
+		SV_TouchLinks(pr, ent, node->children[0]);
 	if(ent->v.absmin[node->axis] < node->dist)
-		SV_TouchLinks(ent, node->children[1]);
+		SV_TouchLinks(pr, ent, node->children[1]);
 }
 
 int
@@ -239,7 +239,7 @@ SV_FindTouchedLeafs(edict_t *ent, mnode_t *node, byte *pvs)
 }
 
 void
-SV_LinkEdict(edict_t *ent, bool touch_triggers)
+SV_LinkEdict(pr_t *pr, edict_t *ent, bool touch_triggers)
 {
 	areanode_t *node;
 	float max, v;
@@ -248,7 +248,7 @@ SV_LinkEdict(edict_t *ent, bool touch_triggers)
 	if(ent->area.prev)
 		SV_UnlinkEdict(ent); // unlink from old position
 
-	if(ent == sv.pr->edicts)
+	if(ent == pr->edicts)
 		return; // don't add the world
 
 	if(ent->free)
@@ -317,7 +317,7 @@ SV_LinkEdict(edict_t *ent, bool touch_triggers)
 
 	// if touch_triggers, touch all entities at this node and decend for more
 	if(touch_triggers)
-		SV_TouchLinks(ent, sv_areanodes);
+		SV_TouchLinks(pr, ent, sv_areanodes);
 }
 
 int
@@ -360,13 +360,13 @@ SV_PointContents(vec3_t p)
 
 // FIXME: This could be a lot more efficient...
 edict_t *
-SV_TestEntityPosition(edict_t *ent)
+SV_TestEntityPosition(pr_t *pr, edict_t *ent)
 {
 	trace_t trace;
 
-	trace = SV_Move(ent->v.origin, ent->v.mins, ent->v.maxs, ent->v.origin, 0, ent);
+	trace = SV_Move(pr, ent->v.origin, ent->v.mins, ent->v.maxs, ent->v.origin, MOVE_NORMAL, ent);
 
-	return trace.startsolid ? sv.pr->edicts : nil;
+	return trace.startsolid ? pr->edicts : nil;
 }
 
 bool
@@ -550,7 +550,7 @@ SV_ClipMoveToEntity(edict_t *ent, vec3_t start, vec3_t mins, vec3_t maxs, vec3_t
 
 /* Mins and maxs enclose the entire area swept by the move */
 static void
-SV_ClipToLinks(areanode_t *node, moveclip_t *clip)
+SV_ClipToLinks(pr_t *pr, areanode_t *node, moveclip_t *clip)
 {
 	link_t *l, *next;
 	edict_t *touch;
@@ -582,9 +582,9 @@ SV_ClipToLinks(areanode_t *node, moveclip_t *clip)
 		if(clip->trace.allsolid)
 			return;
 		if(clip->passedict) {
-			if(PROG_TO_EDICT(sv.pr, touch->v.owner) == clip->passedict)
+			if(PROG_TO_EDICT(pr, touch->v.owner) == clip->passedict)
 				continue; // don't clip against own missiles
-			if(PROG_TO_EDICT(sv.pr, clip->passedict->v.owner) == touch)
+			if(PROG_TO_EDICT(pr, clip->passedict->v.owner) == touch)
 				continue; // don't clip against owner
 		}
 
@@ -614,9 +614,9 @@ SV_ClipToLinks(areanode_t *node, moveclip_t *clip)
 		return;
 
 	if(clip->boxmaxs[node->axis] > node->dist)
-		SV_ClipToLinks(node->children[0], clip);
+		SV_ClipToLinks(pr, node->children[0], clip);
 	if(clip->boxmins[node->axis] < node->dist)
-		SV_ClipToLinks(node->children[1], clip);
+		SV_ClipToLinks(pr, node->children[1], clip);
 }
 
 static void
@@ -640,7 +640,7 @@ SV_MoveBounds(vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end, vec3_t boxmins
 }
 
 trace_t
-SV_Move(vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end, int type, edict_t *passedict)
+SV_Move(pr_t *pr, vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end, int type, edict_t *passedict)
 {
 	moveclip_t clip;
 	int i;
@@ -648,7 +648,7 @@ SV_Move(vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end, int type, edict_t *p
 	memset(&clip, 0, sizeof clip);
 
 	// clip to world
-	clip.trace = SV_ClipMoveToEntity(sv.pr->edicts, start, mins, maxs, end);
+	clip.trace = SV_ClipMoveToEntity(pr->edicts, start, mins, maxs, end);
 
 	clip.start = start;
 	clip.end = end;
@@ -671,7 +671,7 @@ SV_Move(vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end, int type, edict_t *p
 	SV_MoveBounds(start, clip.mins2, clip.maxs2, end, clip.boxmins, clip.boxmaxs);
 
 	// clip to entities
-	SV_ClipToLinks(sv_areanodes, &clip);
+	SV_ClipToLinks(pr, sv_areanodes, &clip);
 
 	return clip.trace;
 }
