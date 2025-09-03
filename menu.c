@@ -6,7 +6,7 @@ enum {
 	SINGLEPLAYER_ITEMS = 3,
 	MULTIPLAYER_ITEMS = 3,
 	NUM_SETUP_CMDS = 5,
-	OPTIONS_ITEMS = 14,
+	OPTIONS_ITEMS = 12,
 	SLIDER_RANGE = 10,
 	NUM_HELP_PAGES = 6,
 	NUM_LANCONFIG_CMDS = 2,
@@ -836,12 +836,6 @@ M_AdjustSliders(int dir)
 	case 11: // invert mouse
 		setcvarv("m_pitch", -m_pitch.value);
 		break;
-	case 12: // lookspring
-		setcvarv("lookspring", !lookspring.value);
-		break;
-	case 13: // lookstrafe
-		setcvarv("lookstrafe", !lookstrafe.value);
-		break;
 	}
 }
 
@@ -937,15 +931,6 @@ M_Options_Draw(void)
 	M_Print(16, y, "          Invert Mouse");
 	M_DrawCheckbox(220, y, m_pitch.value < 0);
 	y += 8;
-
-	M_Print(16, y, "            Lookspring");
-	M_DrawCheckbox(220, y, lookspring.value);
-	y += 8;
-
-	M_Print(16, y, "            Lookstrafe");
-	M_DrawCheckbox(220, y, lookstrafe.value);
-	y += 8;
-	USED(y);
 
 	// cursor
 	M_DrawCharacter(200, 32 + options_cursor * 8, 12 + ((int)(realtime * 4) & 1));
