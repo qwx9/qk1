@@ -1851,7 +1851,7 @@ M_GameOptions_Key(int key)
 		if(gameoptions_cursor == 0) {
 			if(sv.active)
 				Cbuf_AddText("disconnect\n");
-			Cbuf_AddText(va("maxplayers %ud\n", maxplayers));
+			Cbuf_AddText(va("maxplayers %d\n", maxplayers));
 			SCR_BeginLoadingPlaque();
 
 			if(hipnotic)

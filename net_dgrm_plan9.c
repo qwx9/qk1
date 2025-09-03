@@ -47,7 +47,7 @@ Datagram_SendMessage(qsocket_t *s, sizebuf_t *data)
 		fatal("Datagram_SendMessage: zero length message\n");
 
 	if(data->cursize > NET_MAXMESSAGE)
-		fatal("Datagram_SendMessage: message too big %ud\n", data->cursize);
+		fatal("Datagram_SendMessage: message too big %d\n", data->cursize);
 
 	if(s->canSend == false)
 		fatal("SendMessage: called with canSend == false\n");
@@ -135,7 +135,7 @@ Datagram_SendUnreliableMessage(qsocket_t *s, sizebuf_t *data)
 		fatal("Datagram_SendUnreliableMessage: zero length message\n");
 
 	if(data->cursize > MAX_DATAGRAM)
-		fatal("Datagram_SendUnreliableMessage: message too big %ud\n", data->cursize);
+		fatal("Datagram_SendUnreliableMessage: message too big %d\n", data->cursize);
 #endif
 
 	if(netpack(&s->addr, NFUNREL, s->unreliableSendSequence++, data->data, data->cursize) < 0)
@@ -189,7 +189,7 @@ Datagram_GetMessage(qsocket_t *sock)
 			if(sequence != sock->unreliableReceiveSequence) {
 				count = sequence - sock->unreliableReceiveSequence;
 				droppedDatagrams += count;
-				Con_DPrintf("Dropped %ud datagram(s)\n", count);
+				Con_DPrintf("Dropped %d datagram(s)\n", count);
 			}
 			sock->unreliableReceiveSequence = sequence + 1;
 
