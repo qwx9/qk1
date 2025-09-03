@@ -8,8 +8,9 @@ struct cvar_s {
 	bool archive; // set to true to cause it to be saved to vars.rc
 	bool hidden;
 	float value;
-	void (*cb)(cvar_t *);
 	bool server; // notifies players when changed
+	void (*cb)(cvar_t *);
+	int strlen;
 };
 
 // registers a cvar that already has the name, string, and optionally the

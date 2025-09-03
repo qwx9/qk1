@@ -46,7 +46,8 @@ Cvar_RegisterVariable(cvar_t *v)
 
 	// copy the value off, because future sets will Z_Free it
 	oldstr = v->string;
-	v->string = Z_Malloc(strlen(v->string) + 1);
+	v->strlen = strlen(v->string);
+	v->string = Z_Malloc(v->strlen + 1);
 	strcpy(v->string, oldstr);
 	v->value = atof(v->string);
 	Con_AddObject(v->name, v);
@@ -79,20 +80,24 @@ Cvar_Command(void)
 void
 setcvar(const char *k, const char *v)
 {
-	int n;
+	bool change;
 	cvar_t *cv;
+	int n;
 
 	cv = Cvar_FindVar(k);
 	if(cv == nil) {
 		Con_DPrintf("setcvar: no such cvar %s\n", k);
 		return;
 	}
-	n = strcmp(cv->string, k);
-	Z_Free(cv->string);
-	cv->string = Z_Malloc(strlen(v) + 1);
+	change = strcmp(cv->string, k) != 0;
+	if(change && cv->strlen < (n = strlen(v))) {
+		Z_Free(cv->string);
+		cv->string = Z_Malloc(n + 1);
+		cv->strlen = n;
+	}
 	strcpy(cv->string, v);
 	cv->value = atof(v);
-	if(n && cv->server && sv.active)
+	if(change && cv->server && sv.active)
 		SV_BroadcastPrintf("\"%s\" changed to \"%s\"\n", cv->name, cv->string);
 	if(cv->cb != nil)
 		cv->cb(cv);
