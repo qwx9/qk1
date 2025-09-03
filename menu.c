@@ -35,8 +35,6 @@ static int setup_oldtop;
 static int setup_oldbottom;
 static int setup_top;
 static int setup_bottom;
-static int m_net_cursor;
-static int m_net_items;
 static bool m_entersound; // play after drawing a frame, so caching won't disrupt the sound
 static bool m_recursiveDraw;
 static int options_cursor;
@@ -60,7 +58,6 @@ static int bind_grab;
 
 #define StartingGame (m_multiplayer_cursor == 1)
 #define JoiningGame (m_multiplayer_cursor == 0)
-#define UDPIPConfig (m_net_cursor == 2)
 
 enum {
 	m_none,
@@ -70,7 +67,6 @@ enum {
 	m_save,
 	m_multiplayer,
 	m_setup,
-	m_net,
 	m_options,
 	m_keys,
 	m_help,
@@ -85,7 +81,6 @@ static void M_Menu_Load_f(cmd_t *c);
 static void M_Menu_Save_f(cmd_t *c);
 static void M_Menu_MultiPlayer_f(cmd_t *c);
 static void M_Menu_Setup_f(cmd_t *c);
-static void M_Menu_Net_f(cmd_t *c);
 static void M_Menu_Options_f(cmd_t *c);
 static void M_Menu_Keys_f(cmd_t *c);
 static void M_Menu_Help_f(cmd_t *c);
@@ -99,7 +94,6 @@ static void M_Load_Draw(void);
 static void M_Save_Draw(void);
 static void M_MultiPlayer_Draw(void);
 static void M_Setup_Draw(void);
-static void M_Net_Draw(void);
 static void M_Options_Draw(void);
 static void M_Keys_Draw(void);
 static void M_Help_Draw(void);
@@ -113,7 +107,6 @@ static void M_Load_Key(int key);
 static void M_Save_Key(int key);
 static void M_MultiPlayer_Key(int key);
 static void M_Setup_Key(int key);
-static void M_Net_Key(int key);
 static void M_Options_Key(int key);
 static void M_Keys_Key(int key);
 static void M_Help_Key(int key);
@@ -608,11 +601,8 @@ M_MultiPlayer_Key(int key)
 		m_entersound = true;
 		switch(m_multiplayer_cursor) {
 		case 0:
-			M_Menu_Net_f(nil);
-			break;
-
 		case 1:
-			M_Menu_Net_f(nil);
+			M_Menu_LanConfig_f(nil);
 			break;
 
 		case 2:
@@ -780,93 +770,6 @@ forward:
 		setup_bottom = 0;
 	if(setup_bottom < 0)
 		setup_bottom = 13;
-}
-
-/* NET MENU */
-
-static void
-M_Menu_Net_f(cmd_t *c)
-{
-	USED(c);
-	key_dest = key_menu;
-	m_state = m_net;
-	m_entersound = true;
-	m_net_items = 3;
-
-	if(m_net_cursor >= m_net_items)
-		m_net_cursor = 0;
-	m_net_cursor--;
-	M_Net_Key(K_DOWNARROW);
-}
-
-static void
-M_Net_Draw(void)
-{
-	static const char *net_helpMessage[] = {
-		/* .........1.........2.... */
-		" Commonly used to play  ",
-		" over the Internet, but ",
-		" also used on a Local   ",
-		" Area Network.          ",
-	};
-	int i, f;
-	qpic_t *p;
-
-	M_DrawTransPic(16, 4, Draw_CachePic("gfx/qplaque.lmp"));
-	p = Draw_CachePic("gfx/p_multi.lmp");
-	M_DrawPic((320 - p->width) / 2, 4, p);
-
-	f = 32;
-	p = Draw_CachePic("gfx/netmen4.lmp");
-	if(p)
-		M_DrawTransPic(72, f, p);
-
-	f = (320 - 26 * 8) / 2;
-	M_DrawTextBox(f, 134, 24, 4);
-	f += 8;
-	for(i = 0; i < nelem(net_helpMessage); i++)
-		M_Print(f, 142 + i * 8, net_helpMessage[i]);
-
-	f = (int)(host_time * 10) % 6;
-	M_DrawTransPic(54, 32, Draw_CachePic(va("gfx/menudot%d.lmp", f + 1)));
-}
-
-static void
-M_Net_Key(int k)
-{
-again:
-	switch(k) {
-	case K_ESCAPE:
-		M_Menu_MultiPlayer_f(nil);
-		break;
-
-	case K_DOWNARROW:
-		localsfx("misc/menu1.wav");
-		if(++m_net_cursor >= m_net_items)
-			m_net_cursor = 0;
-		break;
-
-	case K_UPARROW:
-		localsfx("misc/menu1.wav");
-		if(--m_net_cursor < 0)
-			m_net_cursor = m_net_items - 1;
-		break;
-
-	case K_ENTER:
-		m_entersound = true;
-		switch(m_net_cursor) {
-		case 0:
-		case 1:
-			break;
-		case 2:
-			M_Menu_LanConfig_f(nil);
-			break;
-		default:
-			break;
-		}
-	}
-	if(m_net_cursor == 0 || m_net_cursor == 1)
-		goto again;
 }
 
 /* OPTIONS MENU */
@@ -1458,7 +1361,7 @@ M_LanConfig_Key(int key)
 
 	switch(key) {
 	case K_ESCAPE:
-		M_Menu_Net_f(nil);
+		M_Menu_MultiPlayer_f(nil);
 		break;
 
 	case K_UPARROW:
@@ -1480,8 +1383,7 @@ M_LanConfig_Key(int key)
 			break;
 		m_entersound = true;
 		Cbuf_AddText("stopdemo\n");
-		if(UDPIPConfig)
-			Cbuf_AddText(va("port %s\n", lanConfig_portname));
+		Cbuf_AddText(va("port %s\n", lanConfig_portname));
 		if(lanConfig_cursor == 1) {
 			if(StartingGame) {
 				M_Menu_GameOptions_f(nil);
@@ -1913,7 +1815,7 @@ M_GameOptions_Key(int key)
 {
 	switch(key) {
 	case K_ESCAPE:
-		M_Menu_Net_f(nil);
+		M_Menu_MultiPlayer_f(nil);
 		break;
 
 	case K_UPARROW:
@@ -2033,9 +1935,6 @@ M_Draw(void)
 	case m_setup:
 		M_Setup_Draw();
 		break;
-	case m_net:
-		M_Net_Draw();
-		break;
 	case m_options:
 		M_Options_Draw();
 		break;
@@ -2085,9 +1984,6 @@ M_Keydown(int key)
 		break;
 	case m_setup:
 		M_Setup_Key(key);
-		break;
-	case m_net:
-		M_Net_Key(key);
 		break;
 	case m_options:
 		M_Options_Key(key);
