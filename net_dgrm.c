@@ -665,7 +665,7 @@ _Datagram_Connect(char *host)
 	ret = MSG_ReadByte();
 	if(ret == CPREJECT) {
 		reason = MSG_ReadString();
-		Con_Printf(reason);
+		Con_Printf("%s\n", reason);
 		strncpy(m_return_reason, reason, 31);
 		goto ErrorReturn;
 	}

@@ -738,7 +738,7 @@ savegame(cmd_t *cmd)
 	Con_Printf("Writing game to %s\n", s);
 	savecomment(cm);
 	if(dumpsav(s, cm) < 0)
-		Con_Printf(va("savegame: %s\n", lerr()));
+		Con_Printf("savegame: %s\n", lerr());
 }
 
 static void
@@ -760,7 +760,7 @@ loadgame(cmd_t *c)
 	SCR_BeginLoadingPlaque();
 	Con_DPrintf("loadgame: reading from %s", s);
 	if(loadsav(s) < 0) {
-		Con_Printf(va("loadgame: %s\n", lerr()));
+		Con_Printf("loadgame: %s\n", lerr());
 		return;
 	}
 	if(cls.state != ca_dedicated) {

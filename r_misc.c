@@ -73,10 +73,10 @@ R_SetupFrame(void)
 		if((surface_p - surfaces) > r_maxsurfsseen)
 			r_maxsurfsseen = surface_p - surfaces;
 		Con_Printf(
-			va("Used %zd of %zd surfs; %d max\n",
-			   surface_p - surfaces,
-			   surf_max - surfaces,
-			   r_maxsurfsseen)
+			"Used %zd of %zd surfs; %d max\n",
+			surface_p - surfaces,
+			surf_max - surfaces,
+			r_maxsurfsseen
 		);
 	}
 

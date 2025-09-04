@@ -144,7 +144,7 @@ path(cmd_t *c)
 	USED(c);
 	for(pl = pkl; pl != nil; pl = pl->pl)
 		if(pl->p)
-			Con_Printf(va("%s (%zd files)\n", pl->p->f, pl->p->e - pl->p->l));
+			Con_Printf("%s (%zd files)\n", pl->p->f, pl->p->e - pl->p->l);
 		else
 			Con_Printf("%s\n", pl->f);
 }
@@ -439,7 +439,7 @@ loadpoints(cmd_t *c)
 	USED(c);
 	bf = openlmp(va("maps/%s.pts", sv.name), &n);
 	if(bf == nil) {
-		Con_Printf(va("loadpoints: %s\n", lerr()));
+		Con_Printf("loadpoints: %s\n", lerr());
 		return;
 	}
 	nv = 0;
