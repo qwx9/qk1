@@ -36,6 +36,7 @@ resetfb(void)
 {
 	void *surfcache;
 	int hunkvbuf, scachesz, n;
+	float r;
 
 	setcvar(v_fullscreen.name, va("%d", curwinmode()));
 
@@ -45,8 +46,18 @@ resetfb(void)
 	SDL_GetCurrentRenderOutputSize(rend, &vid.width, &vid.height);
 	vid.width /= v_scale.value;
 	vid.height /= v_scale.value;
-	vid.width = clamp(vid.width, 320, MAXWIDTH);
-	vid.height = clamp(vid.height, 240, MAXHEIGHT);
+	if(vid.width > MAXWIDTH) {
+		r = (float)vid.width / (float)MAXWIDTH;
+		vid.height /= r;
+		vid.width = MAXWIDTH;
+	}
+	if(vid.height > MAXHEIGHT) {
+		r = (float)vid.height / (float)MAXHEIGHT;
+		vid.width /= r;
+		vid.height = MAXHEIGHT;
+	}
+	vid.width = max(vid.width, 320);
+	vid.height = max(vid.height, 240);
 
 	vid.aspect = (float)vid.height / (float)vid.width * (320.0 / 240.0);
 	vid.conwidth = vid.width;
