@@ -99,7 +99,7 @@ fatal(char *fmt, ...)
 	va_list arg;
 
 	va_start(arg, fmt);
-	vseprint(s, s + sizeof s, fmt, arg);
+	vseprint(s, s + sizeof(s), fmt, arg);
 	va_end(arg);
 	Host_Shutdown();
 	sysfatal("%s", s);

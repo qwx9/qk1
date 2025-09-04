@@ -23,7 +23,7 @@ cproc(void *)
 		if(chtrk > 0) {
 			close(fd);
 			cdtrk = chtrk;
-			snprint(f, sizeof f, "%s%03ud", cdfile, cdtrk);
+			snprint(f, sizeof(f), "%s%03ud", cdfile, cdtrk);
 			if((fd = open(f, OREAD)) < 0)
 				Con_DPrintf("cd: open: %r\n");
 			chtrk = 0;
@@ -32,7 +32,7 @@ cproc(void *)
 			sleep(1);
 			continue;
 		}
-		if((n = read(fd, buf, sizeof buf)) < 0)
+		if((n = read(fd, buf, sizeof(buf))) < 0)
 			break;
 		if(n == 0) {
 			if(cdloop)
@@ -44,7 +44,7 @@ cproc(void *)
 			continue;
 		}
 		vol = bgmvolume.value;
-		for(p = buf; p < buf + n / sizeof *buf; p++) {
+		for(p = buf; p < buf + n / sizeof(*buf); p++) {
 			v = *p * vol;
 			if(v > 0x7fff)
 				v = 0x7fff;
@@ -131,7 +131,7 @@ cdinfo(void)
 	free(d);
 	if(cdntrk < 1)
 		return -1;
-	snprint(cdfile, sizeof cdfile, "/mnt/cd/%c", type);
+	snprint(cdfile, sizeof(cdfile), "/mnt/cd/%c", type);
 	return 0;
 }
 

@@ -182,7 +182,7 @@ CL_ParseServerInfo(void)
 		Con_Printf("Bad maxclients (%d) from server\n", cl.maxclients);
 		return;
 	}
-	cl.scores = Hunk_Alloc(cl.maxclients * sizeof *cl.scores);
+	cl.scores = Hunk_Alloc(cl.maxclients * sizeof(*cl.scores));
 
 	// parse gametype
 	cl.gametype = MSG_ReadByte();
@@ -203,7 +203,7 @@ CL_ParseServerInfo(void)
 	// needlessly purge it
 
 	// precache models
-	memset(cl.model_precache, 0, sizeof cl.model_precache);
+	memset(cl.model_precache, 0, sizeof(cl.model_precache));
 	for(nummodels = 1;; nummodels++) {
 		str = MSG_ReadString();
 		if(!str[0])
@@ -217,7 +217,7 @@ CL_ParseServerInfo(void)
 	}
 
 	// precache sounds
-	memset(cl.sound_precache, 0, sizeof cl.sound_precache);
+	memset(cl.sound_precache, 0, sizeof(cl.sound_precache));
 	sfxbegin();
 	for(numsounds = 1;; numsounds++) {
 		str = MSG_ReadString();
@@ -459,7 +459,7 @@ CL_NewTranslation(int slot)
 		fatal("CL_NewTranslation: slot > cl.maxclients");
 	dest = cl.scores[slot].translations;
 	source = vid.colormap;
-	memmove(dest, vid.colormap, sizeof cl.scores[slot].translations);
+	memmove(dest, vid.colormap, sizeof(cl.scores[slot].translations));
 	top = cl.scores[slot].colors & 0xf0;
 	bottom = (cl.scores[slot].colors & 15) << 4;
 

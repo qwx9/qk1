@@ -277,8 +277,8 @@ SV_ConnectClient(int clientnum)
 	netconnection = client->netconnection;
 
 	if(sv.loadgame)
-		memmove(spawn_parms, client->spawn_parms, sizeof spawn_parms);
-	memset(client, 0, sizeof *client);
+		memmove(spawn_parms, client->spawn_parms, sizeof(spawn_parms));
+	memset(client, 0, sizeof(*client));
 	client->netconnection = netconnection;
 
 	strcpy(client->name, "unconnected");
@@ -286,12 +286,12 @@ SV_ConnectClient(int clientnum)
 	client->spawned = false;
 	client->edict = ent;
 	client->message.data = client->msgbuf;
-	client->message.maxsize = sizeof client->msgbuf;
+	client->message.maxsize = sizeof(client->msgbuf);
 	client->message.allowoverflow = true; // we can catch it
 	client->message.name = "client.message";
 
 	if(sv.loadgame)
-		memmove(client->spawn_parms, spawn_parms, sizeof spawn_parms);
+		memmove(client->spawn_parms, spawn_parms, sizeof(spawn_parms));
 	else {
 		// call the progs to get default spawn parms for the new client
 		PR_ExecuteProgram(sv.pr, sv.pr->global_struct->SetNewParms);
@@ -772,7 +772,7 @@ SV_SendNop(client_t *client)
 	byte buf[4];
 
 	msg.data = buf;
-	msg.maxsize = sizeof buf;
+	msg.maxsize = sizeof(buf);
 	msg.cursize = 0;
 	msg.name = "nop";
 
@@ -957,7 +957,7 @@ SV_SendReconnect(void)
 
 	msg.data = data;
 	msg.cursize = 0;
-	msg.maxsize = sizeof data;
+	msg.maxsize = sizeof(data);
 	msg.name = "reconnect";
 
 	MSG_WriteChar(&msg, svc_stufftext);

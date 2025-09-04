@@ -167,8 +167,8 @@ R_NewMap(void)
 	r_cnumsurfs = MAXSURFACES;
 	r_numallocatededges = MAXEDGES;
 	r_basespans = Hunk_Alloc(r_numallocatedbasespans * sizeof(espan_t));
-	surfaces = Hunk_Alloc(r_cnumsurfs * sizeof *surfaces);
-	r_edges = Hunk_Alloc(r_numallocatededges * sizeof *r_edges);
+	surfaces = Hunk_Alloc(r_cnumsurfs * sizeof(*surfaces));
+	r_edges = Hunk_Alloc(r_numallocatededges * sizeof(*r_edges));
 
 	r_viewleaf = nil;
 	R_ClearParticles();

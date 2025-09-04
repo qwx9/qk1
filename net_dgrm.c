@@ -342,7 +342,7 @@ _Datagram_CheckNewConnections(void)
 	qsocket_t *sock, *s;
 	int len, command, control, newsock;
 
-	memset(&clientaddr, 0, sizeof clientaddr);
+	memset(&clientaddr, 0, sizeof(clientaddr));
 	if(dfunc.GetNewConn(&clientaddr) == 0)
 		return nil;
 	SZ_Clear(&net_message);
@@ -524,7 +524,7 @@ _Datagram_CheckNewConnections(void)
 	// everything is allocated, just fill in the details
 	sock->socket = newsock;
 	sock->landriver = net_landriverlevel;
-	memmove(&sock->addr, &clientaddr, sizeof clientaddr);
+	memmove(&sock->addr, &clientaddr, sizeof(clientaddr));
 	strcpy(sock->address, dfunc.AddrToString(&clientaddr));
 
 	// send him back the info about the server connection he has been allocated
@@ -564,8 +564,8 @@ _Datagram_Connect(char *host)
 	qsocket_t *sock;
 	char *reason;
 
-	memset(&sendaddr, 0, sizeof sendaddr);
-	memset(&readaddr, 0, sizeof readaddr);
+	memset(&sendaddr, 0, sizeof(sendaddr));
+	memset(&readaddr, 0, sizeof(readaddr));
 
 	// see if we can resolve the host name
 	if(dfunc.GetIP(host, &sendaddr) == -1) {
@@ -581,7 +581,7 @@ _Datagram_Connect(char *host)
 	// connect to the host
 	if(dfunc.Connect(&sendaddr) == -1)
 		goto ErrorReturn;
-	memmove(&readaddr, &sendaddr, sizeof readaddr);
+	memmove(&readaddr, &sendaddr, sizeof(readaddr));
 
 	// send the connection request
 	Con_Printf("trying...\n");
@@ -641,7 +641,7 @@ _Datagram_Connect(char *host)
 	do {
 		if(dfunc.GetNewConn(&sendaddr) > 0) {
 			dfunc.Close(&readaddr);
-			memmove(&readaddr, &sendaddr, sizeof readaddr);
+			memmove(&readaddr, &sendaddr, sizeof(readaddr));
 			break;
 		}
 		sleep(1);
@@ -671,7 +671,7 @@ _Datagram_Connect(char *host)
 	}
 
 	if(ret == CPACCEPT) {
-		memmove(&sock->addr, &readaddr, sizeof readaddr);
+		memmove(&sock->addr, &readaddr, sizeof(readaddr));
 		dfunc.SetSocketPort(&sock->addr, MSG_ReadLong());
 	} else {
 		reason = "Bad Response";

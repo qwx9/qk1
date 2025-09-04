@@ -495,7 +495,7 @@ SV_ClipMoveToEntity(edict_t *ent, vec3_t start, vec3_t mins, vec3_t maxs, vec3_t
 	hull_t *hull;
 
 	// fill in a default trace
-	memset(&trace, 0, sizeof trace);
+	memset(&trace, 0, sizeof(trace));
 	trace.fraction = 1;
 	trace.allsolid = true;
 	VectorCopy(end, trace.endpos);
@@ -645,7 +645,7 @@ SV_Move(pr_t *pr, vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end, int type, 
 	moveclip_t clip;
 	int i;
 
-	memset(&clip, 0, sizeof clip);
+	memset(&clip, 0, sizeof(clip));
 
 	// clip to world
 	clip.trace = SV_ClipMoveToEntity(pr->edicts, start, mins, maxs, end);

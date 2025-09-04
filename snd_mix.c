@@ -120,7 +120,7 @@ loadsfx(Sfx *sfx)
 		return nil;
 	if(sc = Cache_Check(&sfx->cu), sc != nil)
 		return sc;
-	u = loadstklmp(va("sound/%s", sfx->s), buf, sizeof buf, &len);
+	u = loadstklmp(va("sound/%s", sfx->s), buf, sizeof(buf), &len);
 	if(u == nil || wavinfo(u, len, &info) != 0) {
 		Con_Printf("loadsfx: %s: %s\n", sfx->s, lerr());
 		return nil;
@@ -132,7 +132,7 @@ loadsfx(Sfx *sfx)
 	stepscale = (float)info.rate / Srate;
 	len = info.samples / stepscale;
 	len *= info.width * info.channels;
-	if(sc = Cache_Alloc(&sfx->cu, len + sizeof *sc), sc == nil)
+	if(sc = Cache_Alloc(&sfx->cu, len + sizeof(*sc)), sc == nil)
 		return nil;
 	sc->length = info.samples;
 	sc->loop = info.loopofs;
@@ -216,7 +216,7 @@ samplesfx(void)
 	sfxcache_t *sc;
 	void (*sf)(Chan *, void *, int);
 
-	memset(sampbuf, 0, sizeof sampbuf);
+	memset(sampbuf, 0, sizeof(sampbuf));
 	for(c = chans; c < che; c++) {
 		if(c->sfx == nil)
 			continue;
@@ -438,7 +438,7 @@ startsfx(int entn, int entch, Sfx *sfx, vec3_t zp, float vol, float att)
 		return;
 	if(c = pickchan(entn, entch), c == nil)
 		return;
-	memset(c, 0, sizeof *c);
+	memset(c, 0, sizeof(*c));
 	VectorCopy(zp, c->zp);
 	c->attf = att / Clipdist;
 	c->chvol = vol * 255;
@@ -674,7 +674,7 @@ initsnd(void)
 		}
 
 		chans = calloc(Nchan, sizeof(*chans));
-		known_sfx = Hunk_Alloc(MAX_SOUNDS * sizeof *known_sfx);
+		known_sfx = Hunk_Alloc(MAX_SOUNDS * sizeof(*known_sfx));
 		num_sfx = 0;
 
 		ambsfx[Ambwater] = precachesfx("ambience/water1.wav");

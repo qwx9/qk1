@@ -477,7 +477,7 @@ SV_RunClients(void)
 
 		if(!host_client->spawned) {
 			// clear client movement until a new packet is received
-			memset(&host_client->cmd, 0, sizeof host_client->cmd);
+			memset(&host_client->cmd, 0, sizeof(host_client->cmd));
 			continue;
 		}
 

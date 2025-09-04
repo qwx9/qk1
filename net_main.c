@@ -48,25 +48,23 @@ static Netdrv netdrv[MAX_NET_DRIVERS] = {
 };
 static int net_numdrivers;
 
-Landrv landrv[MAX_NET_DRIVERS] = {
-	{
-		"UDP",
-		false,
-		UDP_Init,
-		UDP_Shutdown,
-		UDP_Listen,
-		UDP_GetNewConn,
-		UDP_Connect,
-		UDP_Close,
-		UDP_Read,
-		UDP_Write,
-		UDP_AddrToString,
-		UDP_GetIP,
-		UDP_AddrCompare,
-		UDP_GetSocketPort,
-		UDP_SetSocketPort,
-	}
-};
+Landrv landrv[MAX_NET_DRIVERS] = {{
+	"UDP",
+	false,
+	UDP_Init,
+	UDP_Shutdown,
+	UDP_Listen,
+	UDP_GetNewConn,
+	UDP_Connect,
+	UDP_Close,
+	UDP_Read,
+	UDP_Write,
+	UDP_AddrToString,
+	UDP_GetIP,
+	UDP_AddrCompare,
+	UDP_GetSocketPort,
+	UDP_SetSocketPort,
+}};
 
 // these two macros are to make the code more readable
 #define sfunc netdrv[sock->driver]
@@ -200,7 +198,7 @@ NET_Port_f(cmd_t *c)
 		Con_Printf("Bad value, must be between 1 and 65534\n");
 		return;
 	}
-	snprint(myip.srv, sizeof myip.srv, "%d", n);
+	snprint(myip.srv, sizeof(myip.srv), "%d", n);
 }
 
 qsocket_t *
@@ -450,7 +448,7 @@ NET_Init(void)
 	SetNetTime();
 
 	for(i = 0; i < net_numsockets; i++) {
-		s = Hunk_Alloc(sizeof *s);
+		s = Hunk_Alloc(sizeof(*s));
 		s->next = net_freeSockets;
 		net_freeSockets = s;
 		s->disconnected = true;

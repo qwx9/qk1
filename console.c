@@ -89,7 +89,7 @@ Con_ToggleConsole_f(cmd_t *c)
 	}
 
 	SCR_EndLoadingPlaque();
-	memset(con_times, 0, sizeof con_times);
+	memset(con_times, 0, sizeof(con_times));
 }
 
 void
@@ -271,7 +271,7 @@ Con_Printf(const char *fmt, ...)
 	static bool inupdate;
 
 	va_start(arg, fmt);
-	vsnprintf(msg, sizeof msg, fmt, arg);
+	vsnprintf(msg, sizeof(msg), fmt, arg);
 	va_end(arg);
 
 	if(!con_initialized)

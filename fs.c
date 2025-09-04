@@ -524,7 +524,7 @@ savnames(void)
 	canld = savcanld;
 	for(n = 0, e = savs + Nsav; s < e; n++, s++, canld++) {
 		*canld = 0;
-		memset(*s, 0, sizeof *s);
+		memset(*s, 0, sizeof(*s));
 		strcpy(*s, "--- UNUSED SLOT ---");
 		bf = fopen(va("%s/s%d.sav", fsdir, n), "rb");
 		if(bf == nil) {
@@ -719,7 +719,7 @@ loadparms(FILE *bf, char *f)
 	}
 	r = 0;
 	loadedicts(bf, sv.pr);
-	memmove(svs.clients->spawn_parms, sp, sizeof sp);
+	memmove(svs.clients->spawn_parms, sp, sizeof(sp));
 exit:
 	return r;
 }
@@ -840,7 +840,7 @@ pak(char *f)
 	bf = fopen(f, "rb");
 	if(bf == nil)
 		return nil;
-	memset(u, 0, sizeof u);
+	memset(u, 0, sizeof(u));
 	eread(bf, u, 4);
 	if(memcmp(u, "PACK", 4) != 0)
 		fatal("pak %s: invalid pak file", f);
@@ -851,8 +851,8 @@ pak(char *f)
 		fatal("pak %s: invalid lump number %d", f, nlmp);
 	if(nlmp != Npak0lmp)
 		notid1 = 1;
-	l = Hunk_Alloc(nlmp * sizeof *l);
-	p = Hunk_Alloc(sizeof *p);
+	l = Hunk_Alloc(nlmp * sizeof(*l));
+	p = Hunk_Alloc(sizeof(*p));
 	snprint(p->f, sizeof(p->f), "%s", f);
 	p->l = l;
 	p->e = l + nlmp;
@@ -884,18 +884,18 @@ pakdir(char *d)
 	Pak *p;
 
 	strncpy(fsdir, d, sizeof(fsdir) - 1);
-	pl = Hunk_Alloc(sizeof *pl);
+	pl = Hunk_Alloc(sizeof(*pl));
 	strncpy(pl->f, d, sizeof(pl->f) - 1);
 	pl->pl = pkl;
 	pkl = pl;
 	for(n = 0;; n++) {
-		snprint(f, sizeof f, "%s/pak%d.pak", d, n);
+		snprint(f, sizeof(f), "%s/pak%d.pak", d, n);
 		p = pak(f);
 		if(p == nil) {
 			Con_DPrintf("pakdir: %s\n", lerr());
 			break;
 		}
-		pl = Hunk_Alloc(sizeof *pl);
+		pl = Hunk_Alloc(sizeof(*pl));
 		strncpy(pl->f, d, sizeof(pl->f) - 1);
 		pl->p = p;
 		pl->pl = pkl;

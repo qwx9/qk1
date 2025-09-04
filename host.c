@@ -50,7 +50,7 @@ Host_EndGame(char *fmt, ...)
 	char s[1024];
 
 	va_start(arg, fmt);
-	vsnprint(s, sizeof s, fmt, arg);
+	vsnprint(s, sizeof(s), fmt, arg);
 	va_end(arg);
 
 	Con_DPrintf("Host_EndGame: %s\n", s);
@@ -74,7 +74,7 @@ Host_Error(char *fmt, ...)
 	char s[1024];
 
 	va_start(arg, fmt);
-	vsnprint(s, sizeof s, fmt, arg);
+	vsnprint(s, sizeof(s), fmt, arg);
 	va_end(arg);
 
 	if(inerror) {
@@ -116,7 +116,7 @@ Host_FindMaxClients(void)
 	svs.maxclientslimit = svs.maxclients;
 	if(svs.maxclientslimit < 4)
 		svs.maxclientslimit = 4;
-	svs.clients = Hunk_Alloc(svs.maxclientslimit * sizeof *svs.clients);
+	svs.clients = Hunk_Alloc(svs.maxclientslimit * sizeof(*svs.clients));
 
 	if(svs.maxclients > 1)
 		setcvarv("deathmatch", 1.0);
@@ -157,7 +157,7 @@ SV_ClientPrintf(const char *fmt, ...)
 	char s[1024];
 
 	va_start(arg, fmt);
-	vsnprint(s, sizeof s, fmt, arg);
+	vsnprint(s, sizeof(s), fmt, arg);
 	va_end(arg);
 
 	MSG_WriteByte(&host_client->message, svc_print);
@@ -173,7 +173,7 @@ SV_BroadcastPrintf(const char *fmt, ...)
 	int i;
 
 	va_start(arg, fmt);
-	vsnprint(s, sizeof s, fmt, arg);
+	vsnprint(s, sizeof(s), fmt, arg);
 	va_end(arg);
 
 	for(i = 0; i < svs.maxclients; i++) {
@@ -192,7 +192,7 @@ Host_ClientCommands(char *fmt, ...)
 	char s[1024];
 
 	va_start(arg, fmt);
-	vsnprint(s, sizeof s, fmt, arg);
+	vsnprint(s, sizeof(s), fmt, arg);
 	va_end(arg);
 
 	MSG_WriteByte(&host_client->message, svc_stufftext);
@@ -306,8 +306,8 @@ Host_ShutdownServer(bool crash)
 	}
 
 	// clear structures
-	memset(&sv, 0, sizeof sv);
-	memset(svs.clients, 0, svs.maxclientslimit * sizeof *svs.clients);
+	memset(&sv, 0, sizeof(sv));
+	memset(svs.clients, 0, svs.maxclientslimit * sizeof(*svs.clients));
 }
 
 /* This clears all the memory used by both the client and server, but does not reinitialize
@@ -322,8 +322,8 @@ Host_ClearMemory(void)
 		Hunk_FreeToMark(host_hunklevel);
 
 	cls.signon = 0;
-	memset(&sv, 0, sizeof sv);
-	memset(&cl, 0, sizeof cl);
+	memset(&sv, 0, sizeof(sv));
+	memset(&cl, 0, sizeof(cl));
 }
 
 void

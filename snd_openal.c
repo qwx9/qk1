@@ -974,7 +974,7 @@ initsnd(void)
 		s_al_dev.cb = s_al_hrtf.cb = alvarcb;
 		s_al_doppler_factor.cb = aldopplercb;
 		alinit(nil);
-		known_sfx = Hunk_Alloc(MAX_SOUNDS * sizeof *known_sfx);
+		known_sfx = Hunk_Alloc(MAX_SOUNDS * sizeof(*known_sfx));
 		num_sfx = 0;
 	}
 

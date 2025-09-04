@@ -72,7 +72,7 @@ CL_ClearState(void)
 	if(!sv.active)
 		Host_ClearMemory();
 
-	memset(&cl, 0, sizeof cl);
+	memset(&cl, 0, sizeof(cl));
 
 	if(cls.state == ca_connected)
 		stopallsfx(nil);
@@ -81,9 +81,9 @@ CL_ClearState(void)
 	CL_ResetTEnts();
 	memset(cl_static_entities, 0, MAX_STATIC_ENTITIES * sizeof(*cl_static_entities));
 	memset(cl_entities, 0, MAX_EDICTS * sizeof(*cl_entities));
-	memset(cl_lightstyle, 0, sizeof cl_lightstyle);
-	memset(cl_dlights, 0, sizeof cl_dlights);
-	memset(cl_beams, 0, sizeof cl_beams);
+	memset(cl_lightstyle, 0, sizeof(cl_lightstyle));
+	memset(cl_dlights, 0, sizeof(cl_dlights));
+	memset(cl_beams, 0, sizeof(cl_beams));
 	cl_numvisedicts = 0;
 
 	// allocate the efrags and chain together into a free list
@@ -261,7 +261,7 @@ CL_AllocDlight(int key)
 		dl = cl_dlights;
 		for(i = 0; i < MAX_DLIGHTS; i++, dl++) {
 			if(dl->key == key) {
-				memset(dl, 0, sizeof *dl);
+				memset(dl, 0, sizeof(*dl));
 				dl->key = key;
 				return dl;
 			}
@@ -272,14 +272,14 @@ CL_AllocDlight(int key)
 	dl = cl_dlights;
 	for(i = 0; i < MAX_DLIGHTS; i++, dl++) {
 		if(dl->die < cl.time) {
-			memset(dl, 0, sizeof *dl);
+			memset(dl, 0, sizeof(*dl));
 			dl->key = key;
 			return dl;
 		}
 	}
 
 	dl = &cl_dlights[0];
-	memset(dl, 0, sizeof *dl);
+	memset(dl, 0, sizeof(*dl));
 	dl->key = key;
 	return dl;
 }

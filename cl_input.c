@@ -417,7 +417,7 @@ CL_BaseMove(usercmd_t *cmd)
 
 	CL_AdjustAngles();
 
-	memset(cmd, 0, sizeof *cmd);
+	memset(cmd, 0, sizeof(*cmd));
 
 	if(in_strafe.state & 1) {
 		cmd->sidemove += cl_sidespeed.value * CL_KeyState(&in_right);

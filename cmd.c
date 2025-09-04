@@ -304,7 +304,7 @@ Cmd_AddCommand(char *name, cmdfun_t f)
 		return nil;
 	}
 
-	cmd = Z_Malloc(sizeof *cmd);
+	cmd = Z_Malloc(sizeof(*cmd));
 	cmd->name = name;
 	cmd->f = f;
 	Con_AddObject(name, cmd);

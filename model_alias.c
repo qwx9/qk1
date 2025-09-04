@@ -25,7 +25,7 @@ Mod_LoadAliasFrame(
 
 	pinframe = (trivertx_t *)(pdaliasframe + 1);
 	*pframeindex = Hunk_From(pheader);
-	pframe = Hunk_Alloc(numv * sizeof *pframe);
+	pframe = Hunk_Alloc(numv * sizeof(*pframe));
 
 	for(j = 0; j < numv; j++) {
 		int k;
@@ -61,7 +61,7 @@ Mod_LoadAliasGroup(
 
 	*pframeindex = Hunk_From(pheader);
 	paliasgroup =
-		Hunk_Alloc(sizeof(*paliasgroup) + (numframes - 1) * sizeof paliasgroup->frames[0]);
+		Hunk_Alloc(sizeof(*paliasgroup) + (numframes - 1) * sizeof(paliasgroup->frames[0]));
 
 	paliasgroup->numframes = numframes;
 
@@ -76,7 +76,7 @@ Mod_LoadAliasGroup(
 	pin_intervals = (daliasinterval_t *)(pingroup + 1);
 
 	paliasgroup->intervals = Hunk_From(pheader);
-	poutintervals = Hunk_Alloc(numframes * sizeof *poutintervals);
+	poutintervals = Hunk_Alloc(numframes * sizeof(*poutintervals));
 
 	for(i = 0; i < numframes; i++) {
 		*poutintervals = LittleFloat(pin_intervals->interval);
@@ -136,7 +136,7 @@ Mod_LoadAliasSkinGroup(void *pin, int *pskinindex, int skinsize, aliashdr_t *phe
 
 	*pskinindex = Hunk_From(pheader);
 	paliasskingroup = Hunk_Alloc(
-		sizeof(*paliasskingroup) + (numskins - 1) * sizeof paliasskingroup->skindescs[0]
+		sizeof(*paliasskingroup) + (numskins - 1) * sizeof(paliasskingroup->skindescs[0])
 	);
 
 	paliasskingroup->numskins = numskins;
@@ -144,7 +144,7 @@ Mod_LoadAliasSkinGroup(void *pin, int *pskinindex, int skinsize, aliashdr_t *phe
 	pinskinintervals = (daliasskininterval_t *)(pinskingroup + 1);
 
 	paliasskingroup->intervals = Hunk_From(pheader);
-	poutskinintervals = Hunk_Alloc(numskins * sizeof *poutskinintervals);
+	poutskinintervals = Hunk_Alloc(numskins * sizeof(*poutskinintervals));
 
 	for(i = 0; i < numskins; i++) {
 		*poutskinintervals = LittleFloat(pinskinintervals->interval);
@@ -248,7 +248,7 @@ Mod_LoadAliasModel(model_t *mod, void *buffer)
 	pskintype = (daliasskintype_t *)&pinmodel[1];
 
 	pheader->skindesc = Hunk_From(pheader);
-	pskindesc = Hunk_Alloc(numskins * sizeof *pskindesc);
+	pskindesc = Hunk_Alloc(numskins * sizeof(*pskindesc));
 
 	for(i = 0; i < numskins; i++) {
 		aliasskintype_t skintype;

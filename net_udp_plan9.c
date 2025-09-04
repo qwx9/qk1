@@ -20,8 +20,8 @@ UDP_Init(void)
 			free(s);
 		}
 	myipaddr(ip, nil);
-	snprint(myip.ip, sizeof myip.ip, "%I", ip);
-	snprint(myip.srv, sizeof myip.srv, "%hud", Udpport);
+	snprint(myip.ip, sizeof(myip.ip), "%I", ip);
+	snprint(myip.srv, sizeof(myip.srv), "%hud", Udpport);
 	return 0;
 }
 
@@ -37,7 +37,7 @@ lproc(void *)
 	int fd, lfd;
 	char adir[40], ldir[40], data[100];
 
-	snprint(data, sizeof data, "%s/udp!*!%s", netmtpt, myip.srv);
+	snprint(data, sizeof(data), "%s/udp!*!%s", netmtpt, myip.srv);
 	if((afd = announce(data, adir)) < 0)
 		sysfatal("announce: %r");
 	for(;;) {
@@ -45,11 +45,6 @@ lproc(void *)
 		   send(lchan, &fd) < 0)
 			break;
 	}
-}
-
-static void
-udpname(void)
-{
 }
 
 void
@@ -153,7 +148,7 @@ UDP_Broadcast(byte *buf, int len)
 	int fd;
 	char ip[46];
 
-	snprint(ip, sizeof ip, "%I", IPv4bcast);
+	snprint(ip, sizeof(ip), "%I", IPv4bcast);
 	if((fd = dial(netmkaddr(ip, "udp", myip.srv), myip.srv, nil, nil)) < 0) {
 		Con_DPrintf("UDP_Broadcast: %r\n");
 		return -1;
@@ -170,7 +165,7 @@ UDP_GetIP(char *s, Addr *a)
 	int fd, n;
 	char buf[128], *f[4], *p;
 
-	snprint(buf, sizeof buf, "%s/cs", netmtpt);
+	snprint(buf, sizeof(buf), "%s/cs", netmtpt);
 	if((fd = open(buf, ORDWR)) < 0)
 		sysfatal("open: %r");
 
@@ -178,7 +173,7 @@ UDP_GetIP(char *s, Addr *a)
 		p = myip.srv;
 	else
 		p++;
-	snprint(buf, sizeof buf, "udp!%s!%s", s, p);
+	snprint(buf, sizeof(buf), "udp!%s!%s", s, p);
 	n = strlen(buf);
 	if(write(fd, buf, n) != n) {
 		Con_DPrintf("translating %s: %r\n", s);
@@ -197,7 +192,7 @@ UDP_GetIP(char *s, Addr *a)
 	a->ip[sizeof(a->ip) - 1] = 0;
 	strncpy(a->srv, f[2], sizeof(a->srv) - 1);
 	a->srv[sizeof(a->srv) - 1] = 0;
-	snprint(a->sys, sizeof a->sys, "%s!%s", a->ip, a->srv);
+	snprint(a->sys, sizeof(a->sys), "%s!%s", a->ip, a->srv);
 	return 0;
 err:
 	Con_DPrintf("bad cs entry %s", buf);
@@ -223,5 +218,5 @@ UDP_GetSocketPort(Addr *a)
 void
 UDP_SetSocketPort(Addr *a, u16int port)
 {
-	snprint(a->srv, sizeof a->srv, "%hud", port); /* was htons'ed */
+	snprint(a->srv, sizeof(a->srv), "%hud", port); /* was htons'ed */
 }

@@ -257,8 +257,8 @@ kproc(void *)
 	fd = open("/dev/kbd", OREAD);
 	if(fd < 0)
 		sysfatal("open /dev/kbd: %r");
-	memset(buf, 0, sizeof buf);
-	memset(kdown, 0, sizeof kdown);
+	memset(buf, 0, sizeof(buf));
+	memset(kdown, 0, sizeof(kdown));
 	evc.key = K_ENTER;
 	evc.down = true;
 	for(;;) {
@@ -319,7 +319,7 @@ mproc(void *)
 	nerr = 0;
 	o = center;
 	for(;;) {
-		if(n = read(fd, buf, sizeof buf), n != 1 + 4 * 12) {
+		if(n = read(fd, buf, sizeof(buf)), n != 1 + 4 * 12) {
 			if(n < 0 || ++nerr > 10)
 				break;
 			Con_DPrintf("mproc: bad count %d not 49: %r\n", n);
@@ -370,7 +370,7 @@ IN_Grabm(int on)
 			Con_DPrintf("IN_Grabm:open: %r\n");
 			return;
 		}
-		write(fd, nocurs, sizeof nocurs);
+		write(fd, nocurs, sizeof(nocurs));
 		fixms++;
 	} else if(fd >= 0) {
 		close(fd);

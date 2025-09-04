@@ -500,7 +500,7 @@ va(char *fmt, ...)
 	va_list arg;
 
 	va_start(arg, fmt);
-	vsnprint(s, sizeof s, fmt, arg);
+	vsnprint(s, sizeof(s), fmt, arg);
 	va_end(arg);
 
 	return s;

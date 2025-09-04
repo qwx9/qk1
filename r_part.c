@@ -22,7 +22,7 @@ void
 R_InitParticles(void)
 {
 	r_numparticles = MAX_PARTICLES;
-	particles = Hunk_Alloc(r_numparticles * sizeof *particles);
+	particles = Hunk_Alloc(r_numparticles * sizeof(*particles));
 }
 
 void
