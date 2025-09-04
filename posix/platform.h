@@ -72,7 +72,9 @@ extern char lasterr[256];
 		snprint(lasterr, sizeof(lasterr), fmt); \
 	} while(0)
 
-char *seprint(char *, char *, char *, ...);
+#define format_printf(a, b) __attribute__((format(printf, a, b)))
+
+char *seprint(char *, char *, char *, ...) format_printf(3, 4);
 
 void hnputl(void *p, u32int v);
 u32int nhgetl(const void *p);

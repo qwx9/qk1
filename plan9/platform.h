@@ -49,6 +49,8 @@ typedef enum {
 static double ln2c;
 #define exp2f(x) (exp((x) * (ln2c ? ln2c : (ln2c = log(2.0)))))
 
+#define format_printf(a, b)
+
 int qclz(unsigned);
 int qctz(unsigned);
 

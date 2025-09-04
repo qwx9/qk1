@@ -142,7 +142,7 @@ int NUM_FOR_EDICT(pr_t *pr, edict_t *e);
 extern const int type_size[8];
 
 #pragma varargck argpos PR_RunError 2
-void PR_RunError(pr_t *pr, char *error, ...);
+void PR_RunError(pr_t *pr, char *error, ...) format_printf(2, 3);
 
 ddef_t *ED_FieldAtOfs(pr_t *pr, int ofs);
 void ED_PrintEdicts(pr_t *pr);

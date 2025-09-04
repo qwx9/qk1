@@ -164,9 +164,9 @@ extern double host_time;
 extern edict_t *sv_player;
 
 #pragma varargck argpos SV_ClientPrintf 1
-void SV_ClientPrintf(const char *fmt, ...);
+void SV_ClientPrintf(const char *fmt, ...) format_printf(1, 2);
 #pragma varargck argpos SV_BroadcastPrintf 1
-void SV_BroadcastPrintf(const char *fmt, ...);
+void SV_BroadcastPrintf(const char *fmt, ...) format_printf(1, 2);
 
 void SV_SignonFrame(void);
 void SV_Init(void);

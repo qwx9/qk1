@@ -190,11 +190,11 @@ void Host_ServerFrame(void);
 void Host_InitCommands(void);
 void Host_Init(int argc, char **argv, char **paths);
 void Host_Shutdown(void);
-_Noreturn void Host_Error(char *error, ...);
-void Host_EndGame(char *message, ...);
+_Noreturn void Host_Error(char *error, ...) format_printf(1, 2);
+void Host_EndGame(char *message, ...) format_printf(1, 2);
 void Host_Frame(float time);
 void Host_Quit_f(cmd_t *c);
-void Host_ClientCommands(char *fmt, ...);
+void Host_ClientCommands(char *fmt, ...) format_printf(1, 2);
 void Host_ShutdownServer(bool crash);
 
 extern cvar_t pausable;

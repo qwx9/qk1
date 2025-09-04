@@ -290,7 +290,7 @@ NET_GetMessage(qsocket_t *sock)
 	// see if this connection has timed out
 	if(ret == 0 && sock->driver) {
 		if(net_time - sock->lastMessageTime > net_messagetimeout.value) {
-			Con_DPrintf("NET_GetMessage: sock %#p timed out\n", sock);
+			Con_DPrintf("NET_GetMessage: sock %p timed out\n", sock);
 			NET_Close(sock);
 			return -1;
 		}

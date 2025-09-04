@@ -111,7 +111,7 @@ extern bool com_eof;
 char *COM_Parse(char *data);
 
 #pragma varargck argpos va 1
-char *va(char *format, ...);
+char *va(char *format, ...) format_printf(1, 2);
 // does a varargs printf into a temp buffer
 
 struct cache_user_s;

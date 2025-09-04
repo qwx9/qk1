@@ -56,7 +56,7 @@ int loaddm(char *);
 int opendm(char *, int);
 void initfs(char **paths);
 #pragma varargck argpos fatal 1
-_Noreturn void fatal(char *, ...);
+_Noreturn void fatal(char *, ...) format_printf(1, 2);
 void *emalloc(long);
 s64int flen(int);
 double dtime(void);

@@ -14,9 +14,9 @@ void Con_CheckResize(void);
 void Con_Init(void);
 void Con_DrawConsole(int lines, bool drawinput);
 #pragma varargck argpos Con_Printf 1
-void Con_Printf(const char *fmt, ...);
+void Con_Printf(const char *fmt, ...) format_printf(1, 2);
 #pragma varargck argpos Con_DPrintf 1
-void Con_DPrintf(const char *fmt, ...);
+void Con_DPrintf(const char *fmt, ...) format_printf(1, 2);
 void Con_Clear_f(cmd_t *c);
 void Con_DrawNotify(void);
 void Con_ClearNotify(void);
