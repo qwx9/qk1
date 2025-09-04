@@ -121,8 +121,9 @@ Datagram_CanSendMessage(qsocket_t *sock)
 }
 
 bool
-Datagram_CanSendUnreliableMessage(qsocket_t *)
+Datagram_CanSendUnreliableMessage(qsocket_t *sock)
 {
+	USED(sock);
 	return true;
 }
 
