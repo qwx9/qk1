@@ -40,9 +40,6 @@ resetfb(void)
 
 	setcvar(v_fullscreen.name, va("%d", curwinmode()));
 
-	/* lower than 320x240 doesn't really make sense,
-	 * but at least this prevents a crash, beyond that
-	 * it's your funeral */
 	SDL_GetCurrentRenderOutputSize(rend, &vid.width, &vid.height);
 	vid.width /= v_scale.value;
 	vid.height /= v_scale.value;
@@ -56,10 +53,10 @@ resetfb(void)
 		vid.width /= r;
 		vid.height = MAXHEIGHT;
 	}
-	vid.width = max(vid.width, 320);
-	vid.height = max(vid.height, 240);
+	vid.width = max(vid.width, MINWIDTH);
+	vid.height = max(vid.height, MINHEIGHT);
 
-	vid.aspect = (float)vid.height / (float)vid.width * (320.0 / 240.0);
+	vid.aspect = (float)(vid.height * MINWIDTH) / (float)(vid.width * MINHEIGHT);
 	vid.conwidth = vid.width;
 	vid.conheight = vid.height;
 
@@ -169,8 +166,8 @@ makewindow(void)
 	} else {
 		x = SDL_WINDOWPOS_CENTERED;
 		y = SDL_WINDOWPOS_CENTERED;
-		w = 800;
-		h = 600;
+		w = MINWIDTH;
+		h = MINHEIGHT;
 	}
 
 	if(fbi != nil)
@@ -184,7 +181,7 @@ makewindow(void)
 	if(!SDL_CreateWindowAndRenderer("quake", w, h, cvarwinflags(), &win, &rend))
 		fatal("SDL_CreateWindow: %s", SDL_GetError());
 	SDL_SetWindowResizable(win, true);
-	SDL_SetWindowMinimumSize(win, 320, 240);
+	SDL_SetWindowMinimumSize(win, MINWIDTH, MINHEIGHT);
 	SDL_SetRenderDrawColor(rend, 0, 0, 0, 255);
 	SDL_RenderClear(rend);
 	SDL_RenderPresent(rend);

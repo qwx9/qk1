@@ -23,16 +23,13 @@ resetfb(void)
 	int hunkvbuf, scachesz, i;
 	Point p;
 
-	/* lower than 320x240 doesn't really make sense,
-	 * but at least this prevents a crash, beyond that
-	 * it's your funeral */
 	vid.width = Dx(screen->r);
 	vid.height = Dy(screen->r);
 	scifactor = v_scale.value;
 	vid.width /= scifactor;
 	vid.height /= scifactor;
-	vid.width = clamp(vid.width, 320, MAXWIDTH);
-	vid.height = clamp(vid.height, 240, MAXHEIGHT);
+	vid.width = clamp(vid.width, MINWIDTH, MAXWIDTH);
+	vid.height = clamp(vid.height, MINHEIGHT, MAXHEIGHT);
 
 	if(dvars.zb != nil)
 		D_FlushCaches();
@@ -47,7 +44,7 @@ resetfb(void)
 	surfcache = (byte *)(dvars.zb + vid.width * vid.height);
 	D_InitCaches(surfcache, scachesz);
 
-	vid.aspect = (float)vid.height / (float)vid.width * (320.0 / 240.0);
+	vid.aspect = (float)(vid.height * MINWIDTH) / (float)(vid.width * MINHEIGHT);
 	vid.conwidth = vid.width;
 	vid.conheight = vid.height;
 
