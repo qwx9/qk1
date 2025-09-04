@@ -148,6 +148,11 @@ v_fullscreen_cb(cvar_t *var)
 static void
 hints(void)
 {
+	SDL_SetHint(SDL_HINT_WINDOWS_RAW_KEYBOARD, "1");
+	SDL_SetHint(SDL_HINT_VIDEO_SYNC_WINDOW_OPERATIONS, "1");
+	SDL_SetHint(SDL_HINT_WINDOW_FRAME_USABLE_WHILE_CURSOR_HIDDEN, "0");
+	SDL_SetHint(SDL_HINT_RENDER_GPU_LOW_POWER, "1");
+	SDL_SetHint(SDL_HINT_RENDER_METAL_PREFER_LOW_POWER_DEVICE, "1");
 	SDL_SetHint(SDL_HINT_VIDEO_DOUBLE_BUFFER, "1");
 	SDL_SetHint(SDL_HINT_WINDOWS_CLOSE_ON_ALT_F4, "0");
 	SDL_SetHint(SDL_HINT_VIDEO_X11_NET_WM_BYPASS_COMPOSITOR, "1");
@@ -214,6 +219,7 @@ initfb(void)
 	torgbx(host_colormap, vid.colormap, 256 * 64);
 	vid.fullbright = 256 - LittleLong(*((int *)vid.colormap + 2048));
 
+	hints();
 	if(!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS))
 		fatal("SDL_Init: %s", SDL_GetError());
 	makewindow();
