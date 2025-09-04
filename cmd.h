@@ -84,9 +84,9 @@ int Cmd_Argc(void);
 char *Cmd_Argv(int arg);
 char *Cmd_Args(void);
 
-void Cmd_ExecuteString(char *text, cmd_source_t src);
 // Parses a single line of text into arguments and tries to execute it.
 // The text can come from the command buffer, a remote client, or stdin.
+void Cmd_ExecuteString(char *text, cmd_source_t src);
 
 // adds the current command line as a clc_stringcmd to the client message.
 // things like godmode, noclip, etc, are commands directed to the server,

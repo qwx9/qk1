@@ -2,6 +2,7 @@
 #include <libc.h>
 #include <stdio.h>
 #include <ctype.h>
+#include <ip.h>
 
 #define RAND_MAX ((2 << 15) - 1)
 

@@ -19,12 +19,6 @@ UDP_Listen(bool on)
 	USED(on);
 }
 
-void
-udpinfo(Addr *a)
-{
-	USED(a);
-}
-
 int
 UDP_Connect(Addr *a)
 {
@@ -32,15 +26,21 @@ UDP_Connect(Addr *a)
 	return -1;
 }
 
+void
+UDP_Close(Addr *a)
+{
+	USED(a);
+}
+
 int
-getnewcon(Addr *a)
+UDP_GetNewConn(Addr *a)
 {
 	USED(a);
 	return 0;
 }
 
 int
-udpread(byte *buf, int len, Addr *a)
+UDP_Read(byte *buf, int len, Addr *a)
 {
 	USED(buf);
 	USED(len);
@@ -49,7 +49,7 @@ udpread(byte *buf, int len, Addr *a)
 }
 
 int
-udpwrite(byte *buf, int len, Addr *a)
+UDP_Write(byte *buf, int len, Addr *a)
 {
 	USED(buf);
 	USED(len);
@@ -73,7 +73,7 @@ UDP_Broadcast(byte *buf, int len)
 }
 
 int
-getip(char *s, Addr *a)
+UDP_GetIP(char *s, Addr *a)
 {
 	USED(s);
 	USED(a);

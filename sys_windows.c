@@ -10,6 +10,23 @@ char lasterr[256] = {0};
 static const char *disabled[32];
 static int ndisabled;
 
+void
+hnputl(void *p, u32int v)
+{
+	u8int *a = p;
+	a[0] = v >> 24;
+	a[1] = v >> 16;
+	a[2] = v >> 8;
+	a[3] = v;
+}
+
+u32int
+nhgetl(const void *p)
+{
+	const u8int *a = p;
+	return a[0] << 24 | a[1] << 16 | a[2] << 8 | a[3];
+}
+
 bool
 isdisabled(char *s)
 {

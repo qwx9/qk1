@@ -17,51 +17,55 @@ static cvar_t net_messagetimeout = {"net_messagetimeout", "300"};
 static int net_numsockets;
 
 static Netdrv netdrv[MAX_NET_DRIVERS] = {
-	{"Loopback",
-	 false,
-	 Loop_Init,
-	 Loop_Connect,
-	 Loop_CheckNewConnections,
-	 Loop_GetMessage,
-	 Loop_SendMessage,
-	 Loop_SendUnreliableMessage,
-	 Loop_CanSendMessage,
-	 Loop_CanSendUnreliableMessage,
-	 Loop_Close,
-	 Loop_Shutdown}
-#ifdef __plan9__
-	,
-	{"Datagram",
-	 false,
-	 Datagram_Init,
-	 Datagram_Connect,
-	 Datagram_CheckNewConnections,
-	 Datagram_GetMessage,
-	 Datagram_SendMessage,
-	 Datagram_SendUnreliableMessage,
-	 Datagram_CanSendMessage,
-	 Datagram_CanSendUnreliableMessage,
-	 Datagram_Close,
-	 Datagram_Shutdown}
-#endif
+	{
+		"Loopback",
+		false,
+		Loop_Init,
+		Loop_Connect,
+		Loop_CheckNewConnections,
+		Loop_GetMessage,
+		Loop_SendMessage,
+		Loop_SendUnreliableMessage,
+		Loop_CanSendMessage,
+		Loop_CanSendUnreliableMessage,
+		Loop_Close,
+		Loop_Shutdown,
+	},
+	{
+		"Datagram",
+		false,
+		Datagram_Init,
+		Datagram_Connect,
+		Datagram_CheckNewConnections,
+		Datagram_GetMessage,
+		Datagram_SendMessage,
+		Datagram_SendUnreliableMessage,
+		Datagram_CanSendMessage,
+		Datagram_CanSendUnreliableMessage,
+		Datagram_Close,
+		Datagram_Shutdown,
+	}
 };
 static int net_numdrivers;
 
 Landrv landrv[MAX_NET_DRIVERS] = {
-#ifdef __plan9__
-	{"UDP",
-	 false,
-	 UDP_Init,
-	 UDP_Shutdown,
-	 UDP_Connect,
-	 udpread,
-	 udpwrite,
-	 UDP_AddrToString,
-	 getip,
-	 UDP_AddrCompare,
-	 UDP_GetSocketPort,
-	 UDP_SetSocketPort}
-#endif
+	{
+		"UDP",
+		false,
+		UDP_Init,
+		UDP_Shutdown,
+		UDP_Listen,
+		UDP_GetNewConn,
+		UDP_Connect,
+		UDP_Close,
+		UDP_Read,
+		UDP_Write,
+		UDP_AddrToString,
+		UDP_GetIP,
+		UDP_AddrCompare,
+		UDP_GetSocketPort,
+		UDP_SetSocketPort,
+	}
 };
 
 // these two macros are to make the code more readable

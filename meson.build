@@ -70,6 +70,7 @@ src_common = [
 	'model_bsp30.c',
 	'model_sprite.c',
 	'mt19937-64.c',
+	'net_dgrm.c',
 	'net_loop.c',
 	'net_main.c',
 	'pr_cmds.c',
@@ -129,40 +130,28 @@ network = dependency('', required: false)
 audio = dependency('', required: false)
 video = dependency('', required: false)
 
-if host_machine.system() == 'macos'
-	src_sys += [
-		'cd_null.c',
-		'in_null.c',
-		'net_udp_null.c',
-		'snd_mix.c',
-		'snd_null.c',
-		'sys_macos.c',
-		'vid_null.c',
-	]
+audio = dependency('openal')
+video = dependency('sdl3')
+src_sys += [
+    'in_sdl.c',
+    'parg.c',
+    'snd_openal.c',
+    'vid_sdl.c',
+]
+if host_machine.system() == 'windows'
+    src_sys += [
+        'net_udp_null.c',
+        'sys_windows.c',
+    ]
+    network = cc.find_library('ws2_32')
 else
-	audio = dependency('openal')
-	video = dependency('sdl3')
-	src_sys += [
-		'in_sdl.c',
-		'parg.c',
-		'snd_openal.c',
-		'vid_sdl.c',
-	]
-	if host_machine.system() == 'windows'
-		src_sys += [
-			'net_udp_null.c',
-			'sys_windows.c',
-		]
-		network = cc.find_library('ws2_32')
-	else
-		if host_machine.system() == 'haiku'
-			network = cc.find_library('network')
-		endif
-		src_sys += [
-			'net_udp_null.c',
-			'sys_unix.c',
-		]
-	endif
+    if host_machine.system() == 'haiku'
+        network = cc.find_library('network')
+    endif
+    src_sys += [
+        'net_udp_null.c',
+        'sys_unix.c',
+    ]
 endif
 
 if cc.check_header('endian.h')

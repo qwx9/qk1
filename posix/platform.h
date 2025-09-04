@@ -74,4 +74,7 @@ extern char lasterr[256];
 
 char *seprint(char *, char *, char *, ...);
 
+void hnputl(void *p, u32int v);
+u32int nhgetl(const void *p);
+
 #define DotProduct(x, y) DotProduct_((x), (y))

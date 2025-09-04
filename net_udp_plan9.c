@@ -50,18 +50,18 @@ lproc(void *)
 static void
 udpname(void)
 {
-	if((lchan = chancreate(sizeof(int), 0)) == nil)
-		sysfatal("chancreate: %r");
-	if((lpid = proccreate(lproc, nil, 8192)) < 0)
-		sysfatal("proccreate lproc: %r");
 }
 
 void
 UDP_Listen(bool on)
 {
 	if(lpid < 0) {
-		if(on)
-			udpname();
+		if(on) {
+			if((lchan = chancreate(sizeof(int), 0)) == nil)
+				sysfatal("chancreate: %r");
+			if((lpid = proccreate(lproc, nil, 8192)) < 0)
+				sysfatal("proccreate lproc: %r");
+		}
 		return;
 	}
 	if(on)
@@ -71,21 +71,6 @@ UDP_Listen(bool on)
 	threadint(lpid);
 	chanfree(lchan);
 	lpid = -1;
-}
-
-void
-udpinfo(Addr *a)
-{
-	NetConnInfo *nc;
-
-	if((nc = getnetconninfo(nil, a->fd)) == nil) {
-		Con_DPrintf("getnetconninfo: %r\n");
-		return;
-	}
-	strncpy(a->ip, nc->raddr, sizeof(a->ip) - 1);
-	strncpy(a->srv, nc->rserv, sizeof(a->srv) - 1);
-	strncpy(a->sys, nc->rsys, sizeof(a->sys) - 1);
-	free(nc);
 }
 
 int
@@ -98,36 +83,53 @@ UDP_Connect(Addr *a)
 	return 0;
 }
 
-int
-getnewcon(Addr *a)
+void
+UDP_Close(Addr *a)
 {
+	close(a->fd);
+	a->fd = -1;
+}
+
+int
+UDP_GetNewConn(Addr *a)
+{
+	NetConnInfo *nc;
+
 	if(lpid < 0)
 		return 0;
 	if(nbrecv(lchan, &a->fd) == 0)
 		return 0;
-	udpinfo(a);
+	if((nc = getnetconninfo(nil, a->fd)) == nil) {
+		close(a->fd);
+		Con_DPrintf("UDP_GetNewConn: %r\n");
+		return 0;
+	}
+	strncpy(a->ip, nc->raddr, sizeof(a->ip) - 1);
+	strncpy(a->srv, nc->rserv, sizeof(a->srv) - 1);
+	strncpy(a->sys, nc->rsys, sizeof(a->sys) - 1);
+	free(nc);
 	return 1;
 }
 
 int
-udpread(byte *buf, int len, Addr *a)
+UDP_Read(byte *buf, int len, Addr *a)
 {
 	int n;
 
 	if(flen(a->fd) < 1)
 		return 0;
 	if((n = read(a->fd, buf, len)) <= 0) {
-		Con_DPrintf("udpread: %r\n");
+		Con_DPrintf("UDP_Read: %r\n");
 		return -1;
 	}
 	return n;
 }
 
 int
-udpwrite(byte *buf, int len, Addr *a)
+UDP_Write(byte *buf, int len, Addr *a)
 {
 	if(write(a->fd, buf, len) != len) {
-		Con_DPrintf("udpwrite: %r\n");
+		Con_DPrintf("UDP_Write: %r\n");
 		return -1;
 	}
 	return len;
@@ -163,7 +165,7 @@ UDP_Broadcast(byte *buf, int len)
 }
 
 int
-getip(char *s, Addr *a)
+UDP_GetIP(char *s, Addr *a)
 {
 	int fd, n;
 	char buf[128], *f[4], *p;

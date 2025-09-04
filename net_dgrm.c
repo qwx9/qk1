@@ -1,5 +1,4 @@
 #include "quakedef.h"
-#include <ip.h>
 
 // #define DEBUG
 
@@ -27,13 +26,13 @@ extern bool m_return_onerror;
 extern char m_return_reason[32];
 
 static int
-netpack(Addr *a, int f, uint seq, byte *buf, int n)
+netpack(Addr *a, int f, u32int seq, byte *buf, int n)
 {
-	hnputl(netbuf, NET_HEADERSIZE + n | f);
+	hnputl(netbuf, (NET_HEADERSIZE + n) | f);
 	hnputl(netbuf + 4, seq);
 	if(buf != nil)
 		memmove(netbuf + 8, buf, n);
-	return udpwrite(netbuf, NET_HEADERSIZE + n, a);
+	return dfunc.Write(netbuf, NET_HEADERSIZE + n, a);
 }
 
 int
@@ -70,7 +69,7 @@ Datagram_SendMessage(qsocket_t *s, sizebuf_t *data)
 	return 1;
 }
 
-int
+static int
 SendMessageNext(qsocket_t *s)
 {
 	unsigned int n;
@@ -91,7 +90,7 @@ SendMessageNext(qsocket_t *s)
 	return 1;
 }
 
-int
+static int
 ReSendMessage(qsocket_t *s)
 {
 	unsigned int n;
@@ -157,7 +156,7 @@ Datagram_GetMessage(qsocket_t *sock)
 		if((net_time - sock->lastSendTime) > 1.0)
 			ReSendMessage(sock);
 	while(1) {
-		if((n = udpread(netbuf, NET_MAXMESSAGE, &sock->addr)) == 0)
+		if((n = dfunc.Read(netbuf, NET_MAXMESSAGE, &sock->addr)) == 0)
 			break;
 
 		if(n == -1) {
@@ -260,7 +259,7 @@ Datagram_GetMessage(qsocket_t *sock)
 	return ret;
 }
 
-void
+static void
 PrintStats(qsocket_t *s)
 {
 	Con_Printf("canSend = %4d   \n", s->canSend);
@@ -269,7 +268,7 @@ PrintStats(qsocket_t *s)
 	Con_Printf("\n");
 }
 
-void
+static void
 NET_Stats_f(cmd_t *c)
 {
 	qsocket_t *s;
@@ -340,19 +339,15 @@ static qsocket_t *
 _Datagram_CheckNewConnections(void)
 {
 	Addr clientaddr;
-	int newsock;
-	qsocket_t *sock;
-	qsocket_t *s;
-	int len;
-	int command;
-	int control;
+	qsocket_t *sock, *s;
+	int len, command, control, newsock;
 
 	memset(&clientaddr, 0, sizeof clientaddr);
-	if(getnewcon(&clientaddr) == 0)
+	if(dfunc.GetNewConn(&clientaddr) == 0)
 		return nil;
 	SZ_Clear(&net_message);
-	len = udpread(net_message.data, net_message.maxsize, &clientaddr);
-	if(len < sizeof(s32int))
+	len = dfunc.Read(net_message.data, net_message.maxsize, &clientaddr);
+	if(len < (int)sizeof(s32int))
 		goto done;
 	net_message.cursize = len;
 
@@ -530,7 +525,7 @@ _Datagram_CheckNewConnections(void)
 	sock->socket = newsock;
 	sock->landriver = net_landriverlevel;
 	memmove(&sock->addr, &clientaddr, sizeof clientaddr);
-	strcpy(sock->address, UDP_AddrToString(&clientaddr));
+	strcpy(sock->address, dfunc.AddrToString(&clientaddr));
 
 	// send him back the info about the server connection he has been allocated
 	SZ_Clear(&net_message);
@@ -544,7 +539,7 @@ _Datagram_CheckNewConnections(void)
 
 	return sock;
 done:
-	close(clientaddr.fd);
+	dfunc.Close(&clientaddr);
 	return nil;
 }
 
@@ -563,20 +558,17 @@ Datagram_CheckNewConnections(void)
 static qsocket_t *
 _Datagram_Connect(char *host)
 {
-	Addr sendaddr;
-	Addr readaddr;
-	qsocket_t *sock;
-	int ret = 0;
-	int reps;
+	int ret = 0, reps, control;
+	Addr sendaddr, readaddr;
 	double start_time;
-	int control;
+	qsocket_t *sock;
 	char *reason;
 
 	memset(&sendaddr, 0, sizeof sendaddr);
 	memset(&readaddr, 0, sizeof readaddr);
 
 	// see if we can resolve the host name
-	if(dfunc.getip(host, &sendaddr) == -1) {
+	if(dfunc.GetIP(host, &sendaddr) == -1) {
 		return nil;
 	}
 
@@ -596,7 +588,7 @@ _Datagram_Connect(char *host)
 	SCR_UpdateScreen(false);
 	start_time = net_time;
 
-	UDP_Listen(1);
+	dfunc.Listen(1);
 	for(reps = 0; reps < 3; reps++) {
 		SZ_Clear(&net_message);
 		// save space for the header, filled in later
@@ -611,7 +603,7 @@ _Datagram_Connect(char *host)
 			ret = dfunc.Read(net_message.data, net_message.maxsize, &readaddr);
 			// if we got something, validate it
 			if(ret > 0) {
-				if(ret < sizeof(int)) {
+				if(ret < (int)sizeof(int)) {
 					ret = 0;
 					continue;
 				}
@@ -647,14 +639,14 @@ _Datagram_Connect(char *host)
 	 * has a better solution, i'm all ears. */
 	start_time = SetNetTime();
 	do {
-		if(getnewcon(&sendaddr) > 0) {
-			close(readaddr.fd);
+		if(dfunc.GetNewConn(&sendaddr) > 0) {
+			dfunc.Close(&readaddr);
 			memmove(&readaddr, &sendaddr, sizeof readaddr);
 			break;
 		}
 		sleep(1);
 	} while(SetNetTime() - start_time < 2.5);
-	UDP_Listen(0);
+	dfunc.Listen(0);
 
 	if(ret == 0) {
 		reason = "No Response";
@@ -697,7 +689,7 @@ _Datagram_Connect(char *host)
 	return sock;
 
 ErrorReturn:
-	close(readaddr.fd);
+	dfunc.Close(&readaddr);
 	NET_FreeQSocket(sock);
 ErrorReturn2:
 	if(m_return_onerror) {
@@ -723,5 +715,5 @@ Datagram_Connect(char *host)
 void
 Datagram_Close(qsocket_t *s)
 {
-	close(s->addr.fd);
+	dfunc.Close(&s->addr);
 }
