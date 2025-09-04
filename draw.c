@@ -259,21 +259,17 @@ Draw_ConsoleBackground(int lines)
 	for(y = 0; y < lines; y++, dest += vid.conwidth) {
 		v = (vid.conheight - lines + y) * 200 / vid.conheight;
 		src = conback->pixels + v * 320;
-		if(vid.conwidth == 320)
-			memmove(dest, src, vid.conwidth * sizeof(pixel_t));
-		else {
-			f = 0;
-			fstep = 320 * 0x10000 / vid.conwidth;
-			for(x = 0; x < (int)vid.conwidth; x += 4) {
-				dest[x] = src[f >> 16];
-				f += fstep;
-				dest[x + 1] = src[f >> 16];
-				f += fstep;
-				dest[x + 2] = src[f >> 16];
-				f += fstep;
-				dest[x + 3] = src[f >> 16];
-				f += fstep;
-			}
+		f = 0;
+		fstep = 320 * 0x10000 / vid.conwidth;
+		for(x = 0; x < (int)vid.conwidth; x += 4) {
+			dest[x] = src[f >> 16];
+			f += fstep;
+			dest[x + 1] = src[f >> 16];
+			f += fstep;
+			dest[x + 2] = src[f >> 16];
+			f += fstep;
+			dest[x + 3] = src[f >> 16];
+			f += fstep;
 		}
 	}
 }

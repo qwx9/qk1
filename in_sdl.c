@@ -1,9 +1,7 @@
 #include "quakedef.h"
 #include <SDL3/SDL.h>
 
-static cvar_t m_windowed = {"m_windowed", "1", true};
 static cvar_t m_filter = {"m_filter", "0", true};
-static cvar_t m_raw = {"m_raw", "1", true};
 static bool mouseon, focuslost = true;
 static float dx, dy, olddx, olddy;
 static SDL_Keycode k_section; // §
@@ -159,12 +157,6 @@ IN_Commands(void)
 {
 }
 
-static void
-m_raw_cb(cvar_t *var)
-{
-	SDL_SetHint(SDL_HINT_MOUSE_RELATIVE_MODE_CENTER, var->value > 0 ? "0" : "1");
-}
-
 void
 IN_Move(usercmd_t *cmd)
 {
@@ -215,9 +207,5 @@ void
 IN_Init(void)
 {
 	k_section = SDL_GetKeyFromName("§");
-	SDL_SetHint(SDL_HINT_MOUSE_RELATIVE_MODE_CENTER, "0");
-	m_raw.cb = m_raw_cb;
-	Cvar_RegisterVariable(&m_windowed);
 	Cvar_RegisterVariable(&m_filter);
-	Cvar_RegisterVariable(&m_raw);
 }
