@@ -408,6 +408,7 @@ _Host_Frame(double time)
 
 	if(boundfps(time)) {
 		// even if fps-bound, at least do something
+		host_frametime = 0.0; // server has not advanced the time
 		// fetch results from server
 		if(cls.state == ca_connected)
 			CL_ReadFromServer();
