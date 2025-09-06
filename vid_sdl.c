@@ -148,6 +148,7 @@ v_fullscreen_cb(cvar_t *var)
 static void
 hints(void)
 {
+	SDL_SetHint(SDL_HINT_VIDEO_DRIVER, "wayland,cocoa,x11,windows,kmsdrm,kmsdrmvulkan,rpi");
 	SDL_SetHint(SDL_HINT_WINDOWS_RAW_KEYBOARD, "1");
 	SDL_SetHint(SDL_HINT_VIDEO_SYNC_WINDOW_OPERATIONS, "1");
 	SDL_SetHint(SDL_HINT_WINDOW_FRAME_USABLE_WHILE_CURSOR_HIDDEN, "0");
@@ -223,8 +224,8 @@ initfb(void)
 	if(!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS))
 		fatal("SDL_Init: %s", SDL_GetError());
 	makewindow();
-	resetfb();
 	IN_Grabm(true);
+	resetfb();
 
 	Cvar_RegisterVariable(&v_fullscreen);
 	v_fullscreen.cb = v_fullscreen_cb;
