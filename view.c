@@ -54,8 +54,6 @@ static cshift_t cshift_water = {{130, 80, 50}, 128};
 static cshift_t cshift_slime = {{0, 25, 5}, 150};
 static cshift_t cshift_lava = {{255, 80, 0}, 150};
 
-extern int in_forward, in_forward2, in_back;
-
 float
 V_CalcRoll(vec3_t angles, vec3_t velocity)
 {
@@ -615,8 +613,8 @@ V_CalcRefdef(void)
 void
 V_NewMap(void)
 {
-	v_step_z = v_step_oldz = 0.0;
-	v_step_time = 0.0;
+	v_step_time = v_step_z = v_step_oldz = 0.0;
+	v_dmg_time = v_dmg_roll = v_dmg_pitch = 0.0;
 	memset(cl.cshifts, 0, sizeof(cl.cshifts));
 	V_Blend();
 }
