@@ -94,12 +94,12 @@ extern int d_lightstylevalue[256]; // 8.8 frac of base light value
 
 // flags in finalvert_t.flags
 enum {
-	ALIAS_LEFT_CLIP = 1<<0,
-	ALIAS_TOP_CLIP = 1<<1,
-	ALIAS_RIGHT_CLIP = 1<<2,
-	ALIAS_BOTTOM_CLIP = 1<<3,
-	ALIAS_Z_CLIP = 1<<4,
-	ALIAS_ONSEAM = 1<<5, // also defined in modelgen.h - must be kept in sync
+	ALIAS_LEFT_CLIP = 1 << 0,
+	ALIAS_TOP_CLIP = 1 << 1,
+	ALIAS_RIGHT_CLIP = 1 << 2,
+	ALIAS_BOTTOM_CLIP = 1 << 3,
+	ALIAS_Z_CLIP = 1 << 4,
+	ALIAS_ONSEAM = 1 << 5, // also defined in modelgen.h - must be kept in sync
 	ALIAS_XY_CLIP_MASK = 0xf,
 };
 
