@@ -310,7 +310,7 @@ D_SpriteCalculateGradients(view_t *v, texvars_t *tv)
 void
 D_DrawSprite(view_t *v)
 {
-	static sspan_t spans[MAXHEIGHT + 1];
+	static sspan_t spans[MAXDIMENSION + 1];
 	int i, nump;
 	float ymin, ymax;
 	emitpoint_t *pverts;

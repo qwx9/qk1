@@ -21,7 +21,7 @@ typedef struct {
 } edgetable;
 
 // TODO: put in span spilling to shrink list size
-static spanpackage_t a_spans[MAXHEIGHT + 1]; // 1 extra for spanpackage that marks end
+static spanpackage_t a_spans[MAXDIMENSION + 1]; // 1 extra for spanpackage that marks end
 
 static finalvert_t r_p0, r_p1, r_p2;
 static pixel_t *d_pcolormap;
@@ -540,7 +540,7 @@ D_RasterizeAliasPolySmooth(void)
 
 	initialleftheight = pleftbottom->v - plefttop->v;
 	initialrightheight = prightbottom->v - prighttop->v;
-	assert(initialleftheight <= MAXHEIGHT);
+	assert(initialleftheight <= MAXDIMENSION);
 
 	// set the s, t, and light gradients, which are consistent across the triangle
 	// because being a triangle, things are affine

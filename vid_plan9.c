@@ -28,8 +28,8 @@ resetfb(void)
 	scifactor = v_scale.value;
 	vid.width /= scifactor;
 	vid.height /= scifactor;
-	vid.width = clamp(vid.width, MINWIDTH, MAXWIDTH);
-	vid.height = clamp(vid.height, MINHEIGHT, MAXHEIGHT);
+	vid.width = clamp(vid.width, MINWIDTH, MAXDIMENSION);
+	vid.height = clamp(vid.height, MINHEIGHT, MAXDIMENSION);
 
 	if(dvars.zb != nil)
 		D_FlushCaches();

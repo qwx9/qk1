@@ -17,8 +17,8 @@ surf_t *surfaces, *surface_p, *surf_max;
 // pointer is greater than another one, it should be drawn in front
 // surfaces[1] is the background, and is used as the active surface stack
 
-edge_t *newedges[MAXHEIGHT];
-edge_t *removeedges[MAXHEIGHT];
+edge_t *newedges[MAXDIMENSION];
+edge_t *removeedges[MAXDIMENSION];
 
 int r_currentkey;
 
@@ -44,7 +44,7 @@ R_BeginEdgeFrame(void)
 	surfaces[1].flags = SURF_DRAWBACKGROUND;
 
 	// put the background behind everything in the world
-	surfaces[1].key = 0x7FFFFFFF;
+	surfaces[1].key = Q_MAXINT;
 	r_currentkey = 0;
 
 	memset(newedges, 0, r_refdef.vrectbottom * sizeof(*newedges));
@@ -350,7 +350,7 @@ R_ScanEdges(view_t *v)
 	edge_aftertail.prev = &edge_tail;
 
 	// FIXME: do we need this now that we clamp x in r_draw.c?
-	edge_sentinel.u = 0x7d << 24; // make sure nothing sorts past this
+	edge_sentinel.u = Q_MAXINT; // make sure nothing sorts past this
 	edge_sentinel.prev = &edge_aftertail;
 
 	// process all scan lines

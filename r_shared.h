@@ -28,11 +28,9 @@ extern fogvars_t fogvars;
 enum {
 	MAXVERTS = 16, // max points in a surface polygon
 	MAXWORKINGVERTS = MAXVERTS + 4, // max points in an intermediate polygon (while processing)
-	MAXWIDTH = 2040,
-	MAXHEIGHT = 2040,
 	MINWIDTH = 640,
 	MINHEIGHT = 480,
-	MAXDIMENSION = MAXHEIGHT > MAXWIDTH ? MAXHEIGHT : MAXWIDTH,
+	MAXDIMENSION = 2047,
 	SIN_BUFFER_SIZE = MAXDIMENSION + TURB_CYCLE,
 
 	// NOTE: these are only initial values. limits are supposed to scale up dynamically
@@ -96,13 +94,13 @@ extern int d_lightstylevalue[256]; // 8.8 frac of base light value
 
 // flags in finalvert_t.flags
 enum {
-	ALIAS_LEFT_CLIP = 0x0001,
-	ALIAS_TOP_CLIP = 0x0002,
-	ALIAS_RIGHT_CLIP = 0x0004,
-	ALIAS_BOTTOM_CLIP = 0x0008,
-	ALIAS_Z_CLIP = 0x0010,
-	ALIAS_ONSEAM = 0x0020, // also defined in modelgen.h - must be kept in sync
-	ALIAS_XY_CLIP_MASK = 0x000F,
+	ALIAS_LEFT_CLIP = 1<<0,
+	ALIAS_TOP_CLIP = 1<<1,
+	ALIAS_RIGHT_CLIP = 1<<2,
+	ALIAS_BOTTOM_CLIP = 1<<3,
+	ALIAS_Z_CLIP = 1<<4,
+	ALIAS_ONSEAM = 1<<5, // also defined in modelgen.h - must be kept in sync
+	ALIAS_XY_CLIP_MASK = 0xf,
 };
 
 typedef struct edge_s {

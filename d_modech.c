@@ -3,8 +3,8 @@
 double d_pix_scale;
 int d_vrectx, d_vrecty, d_vrectright_particle, d_vrectbottom_particle;
 int d_pix_min, d_pix_max;
-int d_scantable[MAXHEIGHT];
-uzint *zspantable[MAXHEIGHT];
+int d_scantable[MAXDIMENSION];
+uzint *zspantable[MAXDIMENSION];
 
 void
 D_ViewChanged(void)

@@ -135,8 +135,8 @@ extern edge_t *auxedges;
 extern int r_numallocatededges;
 extern edge_t *r_edges, *edge_p, *edge_max;
 
-extern edge_t *newedges[MAXHEIGHT];
-extern edge_t *removeedges[MAXHEIGHT];
+extern edge_t *newedges[MAXDIMENSION];
+extern edge_t *removeedges[MAXDIMENSION];
 
 // FIXME: make stack vars when debugging done
 extern int r_bmodelactive;

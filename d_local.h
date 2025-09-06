@@ -86,12 +86,12 @@ void D_DrawSkyScans8(espan_t *pspan);
 surfcache_t *D_CacheSurface(entity_t *e, msurface_t *ms, drawsurf_t *ds, int miplevel);
 
 extern int *d_pscantable;
-extern int d_scantable[MAXHEIGHT];
+extern int d_scantable[MAXDIMENSION];
 
 extern int d_vrectx, d_vrecty, d_vrectright_particle, d_vrectbottom_particle;
 
 extern int d_pix_min, d_pix_max;
-extern uzint *zspantable[MAXHEIGHT];
+extern uzint *zspantable[MAXDIMENSION];
 extern int d_minmip;
 extern float d_scalemip[3];
 

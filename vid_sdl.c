@@ -43,15 +43,15 @@ resetfb(void)
 	SDL_GetCurrentRenderOutputSize(rend, &vid.width, &vid.height);
 	vid.width /= v_scale.value;
 	vid.height /= v_scale.value;
-	if(vid.width > MAXWIDTH) {
-		r = (float)vid.width / (float)MAXWIDTH;
+	if(vid.width > MAXDIMENSION) {
+		r = (float)vid.width / (float)MAXDIMENSION;
 		vid.height /= r;
-		vid.width = MAXWIDTH;
+		vid.width = MAXDIMENSION;
 	}
-	if(vid.height > MAXHEIGHT) {
-		r = (float)vid.height / (float)MAXHEIGHT;
+	if(vid.height > MAXDIMENSION) {
+		r = (float)vid.height / (float)MAXDIMENSION;
 		vid.width /= r;
-		vid.height = MAXHEIGHT;
+		vid.height = MAXDIMENSION;
 	}
 	vid.width = max(vid.width, MINWIDTH);
 	vid.height = max(vid.height, MINHEIGHT);

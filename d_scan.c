@@ -8,8 +8,8 @@ int *r_turb_turb;
 void
 D_WarpScreen(void)
 {
-	static pixel_t *rowptr[MAXHEIGHT + (AMP2 * 2)];
-	static int column[MAXWIDTH + (AMP2 * 2)];
+	static pixel_t *rowptr[MAXDIMENSION + (AMP2 * 2)];
+	static int column[MAXDIMENSION + (AMP2 * 2)];
 	int w, h, u, v, *turb, *col;
 	pixel_t *dest, **row;
 	float wratio, hratio;
