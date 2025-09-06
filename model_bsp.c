@@ -324,52 +324,61 @@ BSP_LoadLeafs(model_t *mod, byte *in, int sz)
 	return 0;
 }
 
-int
-BSP_LoadVisibility(model_t *mod, byte *in, int sz)
+static void
+BSP_LoadVisibilityExt(model_t *mod)
 {
 	char s[128 + 4 + 1], *t;
-	byte *vis, *leaf;
+	byte *vis, *leaf, *p;
 	int filesz, combined, vissz, leafsz;
-
-	mod->visdata = nil;
-	if(sz == 0)
-		return 0;
 
 	// external vis files
 	// FIXME(sigrid): add support for big combo ("id1.vis") files?
-	if(mod->ver == BSPVERSION) { // bsp2 should have proper vis built in already
-		snprint(s, sizeof(s) - 4, "%s", mod->name);
-		if((t = strrchr(s, '.')) != nil) {
-			strcpy(t, ".vis");
-			if((t = strrchr(mod->name, '/')) != nil)
-				t++;
-			else
-				t = mod->name;
-			vis = loadhunklmp(s, &filesz);
-			if(vis != nil && strcmp(fs_lmpfrom, mod->lmpfrom) == 0 && filesz >= 32 + 4 + 4 + 4) {
-				vis += 32;
-				combined = le32(vis);
-				filesz -= 32 + 4;
-				vis[-4] = 0;
-				if(combined > filesz || strcmp(t, (char *)&vis[-32 - 4]) != 0) {
+	snprint(s, sizeof(s) - 4, "%s", mod->name);
+	if((t = strrchr(s, '.')) == nil)
+		return;
+
+	strcpy(t, ".vis");
+	if((t = strrchr(mod->name, '/')) != nil)
+		t++;
+	else
+		t = mod->name;
+	vis = p = loadhunklmp(s, &filesz);
+	if(vis == nil)
+		return;
+	if(strcmp(fs_lmpfrom, mod->lmpfrom) != 0 || filesz < 32 + 4 + 4 + 4) {
 bad:
-					Con_Printf("%s: invalid/unsupported VIS file\n", s);
-					mod->visdata = nil;
-					mod->leafs = nil;
-				} else {
-					vissz = le32(vis);
-					combined -= 4;
-					if(vissz + 4 > combined)
-						goto bad;
-					mod->visdata = vis;
-					leaf = vis + vissz;
-					leafsz = le32(leaf);
-					combined -= 4;
-					if(leafsz > combined || BSP_LoadLeafs(mod, leaf, leafsz) != 0)
-						goto bad;
-				}
-			}
-		}
+		Hunk_Free(p);
+		Con_Printf("%s: invalid/unsupported VIS file\n", s);
+		return;
+	}
+
+	vis += 32;
+	combined = le32(vis);
+	filesz -= 32 + 4;
+	vis[-4] = 0;
+	if(combined > filesz || strcmp(t, (char *)&vis[-32 - 4]) != 0)
+		goto bad;
+	vissz = le32(vis);
+	combined -= 4;
+	if(vissz + 4 > combined)
+		goto bad;
+	mod->visdata = vis;
+	leaf = vis + vissz;
+	leafsz = le32(leaf);
+	combined -= 4;
+	if(leafsz > combined || BSP_LoadLeafs(mod, leaf, leafsz) != 0)
+		goto bad;
+}
+
+int
+BSP_LoadVisibility(model_t *mod, byte *in, int sz)
+{
+	mod->visdata = nil;
+	if(sz == 0)
+		return 0;
+	if(mod->ver == BSPVERSION) {
+		// bsp2 and bsp30 should have proper vis built in already
+		BSP_LoadVisibilityExt(mod);
 	}
 
 	if(mod->visdata == nil)
