@@ -350,19 +350,19 @@ Host_ServerFrame(void)
 	SV_SendClientMessages();
 }
 
-static int
+static bool
 boundfps(double t)
 {
 	realtime += t;
 	if(!cls.timedemo && realtime - oldrealtime < 1.0 / Fpsmax)
-		return -1;
+		return true;
 	host_frametime = realtime - oldrealtime;
 	oldrealtime = realtime;
 	if(host_framerate.value > 0)
 		host_frametime = host_framerate.value;
 	else if(host_frametime > 1.0 / Fpsmin)
 		host_frametime = 1.0 / Fpsmin;
-	return 0;
+	return false;
 }
 
 static void
@@ -406,7 +406,7 @@ _Host_Frame(double time)
 	// check for commands typed to the host
 	conscmd();
 
-	if(boundfps(time) < 0) {
+	if(boundfps(time)) {
 		// even if fps-bound, at least do something
 		// fetch results from server
 		if(cls.state == ca_connected)

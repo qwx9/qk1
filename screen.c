@@ -9,6 +9,7 @@ static cvar_t scr_showturtle = {"showturtle", "0"};
 static cvar_t scr_showpause = {"showpause", "1"};
 static cvar_t scr_printspeed = {"scr_printspeed", "8"};
 static cvar_t scr_showfps = {"showfps", "0", true};
+static cvar_t v_maxfps = {"v_maxfps", "0", true};
 
 cvar_t scr_viewsize = {"viewsize", "100", true};
 cvar_t scr_fov = {"fov", "90", true}; // 10 - 170
@@ -230,6 +231,7 @@ SCR_Init(void)
 	Cvar_RegisterVariable(&scr_centertime);
 	Cvar_RegisterVariable(&scr_printspeed);
 	Cvar_RegisterVariable(&scr_showfps);
+	Cvar_RegisterVariable(&v_maxfps);
 	Cmd_AddCommand("sizeup", SCR_SizeUp_f);
 	Cmd_AddCommand("sizedown", SCR_SizeDown_f);
 
@@ -472,6 +474,20 @@ SCR_BringDownConsole(void)
 	setpal(host_basepal);
 }
 
+static bool
+boundfps(void)
+{
+	static double oldtime;
+	double time, fpsmax = v_maxfps.value;
+	if(fpsmax < 1 || fpsmax > 999)
+		return false;
+	time = dtime();
+	if(time - oldtime < 1.0 / fpsmax)
+		return true;
+	oldtime = time;
+	return false;
+}
+
 /*
  * This is called every frame, and can also be called explicitly to flush
  * text to the screen.
@@ -489,9 +505,10 @@ SCR_UpdateScreen(bool drawdialog)
 
 	if(cls.state == ca_dedicated)
 		return; // stdout only
-
 	if(!scr_initialized || !con_initialized)
 		return; // not initialized yet
+	if(boundfps())
+		return;
 
 	// check for vid changes
 	if(oldfov != scr_fov.value) {
