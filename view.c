@@ -617,6 +617,8 @@ V_NewMap(void)
 {
 	v_step_z = v_step_oldz = 0.0;
 	v_step_time = 0.0;
+	memset(cl.cshifts, 0, sizeof(cl.cshifts));
+	V_Blend();
 }
 
 void
