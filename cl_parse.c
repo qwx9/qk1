@@ -258,6 +258,7 @@ CL_ParseServerInfo(void)
 
 	R_NewMap();
 	V_NewMap();
+	CL_NewMap();
 
 	noclip_anglehack = false; // noclip is turned off at start
 }

@@ -508,6 +508,26 @@ CL_SendMove(usercmd_t *cmd)
 }
 
 void
+CL_NewMap(void)
+{
+	memset(&in_strafe, 0, sizeof(kbutton_t));
+	memset(&in_left, 0, sizeof(kbutton_t));
+	memset(&in_right, 0, sizeof(kbutton_t));
+	memset(&in_forward, 0, sizeof(kbutton_t));
+	memset(&in_back, 0, sizeof(kbutton_t));
+	memset(&in_lookup, 0, sizeof(kbutton_t));
+	memset(&in_lookdown, 0, sizeof(kbutton_t));
+	memset(&in_moveleft, 0, sizeof(kbutton_t));
+	memset(&in_moveright, 0, sizeof(kbutton_t));
+	memset(&in_use, 0, sizeof(kbutton_t));
+	memset(&in_jump, 0, sizeof(kbutton_t));
+	memset(&in_attack, 0, sizeof(kbutton_t));
+	memset(&in_up, 0, sizeof(kbutton_t));
+	memset(&in_down, 0, sizeof(kbutton_t));
+	in_impulse = 0;
+}
+
+void
 CL_InitInput(void)
 {
 	Cmd_AddCommand("+moveup", IN_UpDown);

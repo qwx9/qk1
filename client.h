@@ -235,6 +235,7 @@ typedef struct {
 
 extern kbutton_t in_mlook, in_strafe;
 
+void CL_NewMap(void);
 void CL_InitInput(void);
 void CL_SendCmd(void);
 void CL_SendMove(usercmd_t *cmd);
