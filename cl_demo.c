@@ -4,7 +4,7 @@ static void
 timedm(void)
 {
 	int f;
-	float t;
+	double t;
 
 	cls.timedemo = 0;
 	f = host_framecount - cls.td_startframe - 1;

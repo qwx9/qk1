@@ -15,7 +15,7 @@ bool host_initialized; // true if into command execution
 double host_frametime;
 double host_time;
 double realtime; // without any filtering or bounding
-int host_framecount;
+u64int host_framecount;
 
 client_t *host_client; // current client
 
@@ -351,7 +351,7 @@ Host_ServerFrame(void)
 }
 
 static int
-boundfps(float t)
+boundfps(double t)
 {
 	realtime += t;
 	if(!cls.timedemo && realtime - oldrealtime < 1.0 / Fpsmax)
@@ -366,7 +366,7 @@ boundfps(float t)
 }
 
 static void
-_Host_Frame(float time)
+_Host_Frame(double time)
 {
 	static double time1 = 0;
 	static double time2 = 0;
@@ -403,26 +403,20 @@ _Host_Frame(float time)
 
 	stepcd();
 
-	if(boundfps(time) < 0)
-		return;
-
-	//-------------------
-	//
-	// server operations
-	//
-	//-------------------
-
 	// check for commands typed to the host
 	conscmd();
 
+	if(boundfps(time) < 0) {
+		// even if fps-bound, at least do something
+		// fetch results from server
+		if(cls.state == ca_connected)
+			CL_ReadFromServer();
+		SCR_UpdateScreen(false);
+		return;
+	}
+
 	if(sv.active)
 		Host_ServerFrame();
-
-	//-------------------
-	//
-	// client operations
-	//
-	//-------------------
 
 	// if running the server remotely, send intentions now after
 	// the incoming messages have been read
@@ -458,7 +452,7 @@ _Host_Frame(float time)
 }
 
 void
-Host_Frame(float time)
+Host_Frame(double time)
 {
 	static double timetotal;
 	static int timecount;

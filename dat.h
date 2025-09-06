@@ -44,7 +44,7 @@ extern int dedicated;
 
 enum {
 	Fpsmin = 5,
-	Fpsmax = 72
+	Fpsmax = 72,
 };
 
 enum {

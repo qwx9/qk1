@@ -91,9 +91,9 @@ typedef struct {
 	bool demoplayback;
 	bool timedemo;
 	int forcetrack; // -1 = use normal cd track
-	int td_lastframe; // to meter out one message a frame
-	int td_startframe; // host_framecount at start
-	float td_starttime; // realtime at second frame of timedemo
+	u64int td_lastframe; // to meter out one message a frame
+	u64int td_startframe; // host_framecount at start
+	double td_starttime; // realtime at second frame of timedemo
 
 	// connection information
 	int signon; // 0 to SIGNONS

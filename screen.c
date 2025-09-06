@@ -17,7 +17,8 @@ static bool scr_initialized; // ready to draw
 static qpic_t *scr_net, *scr_turtle;
 static int clearconsole;
 static bool scr_drawloading;
-static float scr_disabled_time;
+static double scr_disabled_time;
+static u64int scr_framecount;
 
 int scr_fullupdate;
 int clearnotify;
@@ -271,8 +272,8 @@ SCR_DrawFPS(void)
 		return;
 	t = nanosec();
 	if((t - lastframetime) >= 1000000000ULL) {
-		fps = host_framecount - lastcnt;
-		lastcnt = host_framecount;
+		fps = scr_framecount - lastcnt;
+		lastcnt = scr_framecount;
 		lastframetime = t;
 	}
 	n = snprint(s, sizeof(s), "%d", fps);
@@ -543,4 +544,5 @@ SCR_UpdateScreen(bool drawdialog)
 	V_ApplyShifts();
 
 	flipfb();
+	scr_framecount++;
 }

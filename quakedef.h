@@ -173,7 +173,7 @@ extern cvar_t developer;
 extern bool host_initialized; // true if into command execution
 extern double host_frametime;
 extern byte *host_basepal, *host_colormap;
-extern int host_framecount; // incremented every frame, never reset
+extern u64int host_framecount; // incremented every frame, never reset
 extern double realtime; // not bounded in any way, changed at the start of every frame, never reset
 
 bool isdisabled(char *s);
@@ -192,7 +192,7 @@ void Host_Init(int argc, char **argv, char **paths);
 void Host_Shutdown(void);
 _Noreturn void Host_Error(char *error, ...) format_printf(1, 2);
 void Host_EndGame(char *message, ...) format_printf(1, 2);
-void Host_Frame(float time);
+void Host_Frame(double time);
 void Host_Quit_f(cmd_t *c);
 void Host_ClientCommands(char *fmt, ...) format_printf(1, 2);
 void Host_ShutdownServer(bool crash);
