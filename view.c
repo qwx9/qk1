@@ -1,5 +1,6 @@
 #include "quakedef.h"
 #include "colormatrix.h"
+#include "crosshairs.h"
 
 /*
  * The view is allowed to move slightly from it's true position for bobbing,
@@ -622,6 +623,8 @@ V_NewMap(void)
 void
 V_RenderView(void)
 {
+	const qpic_t *c;
+
 	if(con_forcedup)
 		return;
 
@@ -641,10 +644,11 @@ V_RenderView(void)
 	R_RenderView();
 
 	if(crosshair.value) {
-		Draw_Character(
-			scr_vrect.x + scr_vrect.width / 2 + cl_crossx.value,
-			scr_vrect.y + scr_vrect.height / 2 + cl_crossy.value,
-			crosshair_shape.value < 1 ? '+' : '\xf'
+		c = crosshairs[(int)clamp(crosshair_shape.value, 0, nelem(crosshairs)-1)];
+		Draw_Pic(
+			scr_vrect.x + (scr_vrect.width - c->width) / 2 + cl_crossx.value,
+			scr_vrect.y + (scr_vrect.height - c->height) / 2 + cl_crossy.value,
+			c
 		);
 	}
 }

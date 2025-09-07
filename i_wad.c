@@ -26,7 +26,7 @@ struct Wad {
 };
 
 Wad *
-W_OpenWad(char *path)
+W_OpenWad(const char *path)
 {
 	Wad *w;
 	Lmp *lmp;
@@ -79,7 +79,7 @@ err:
 }
 
 static Lmp *
-W_FindName(Wad *w, char *name)
+W_FindName(Wad *w, const char *name)
 {
 	int i;
 	Lmp *lmp;
@@ -97,7 +97,7 @@ W_FindName(Wad *w, char *name)
 }
 
 qpic_t *
-W_ReadQpic(Wad *wad, char *name, mem_user_t *c)
+W_ReadQpic(Wad *wad, const char *name, mem_user_t *c)
 {
 	int i, n, w, h, palsz, j;
 	Lmp *lmp;
@@ -159,7 +159,7 @@ err:
 }
 
 static int
-W_ReadPixelsAt(Wad *wad, char *name, int off, int sz, pixel_t *out, int num)
+W_ReadPixelsAt(Wad *wad, const char *name, int off, int sz, pixel_t *out, int num)
 {
 	int n, palsz, x, fb;
 	byte *t, *pal;
@@ -203,7 +203,7 @@ err:
 }
 
 int
-W_ReadMipTex(Wad *wad, char *name, texture_t *t)
+W_ReadMipTex(Wad *wad, const char *name, texture_t *t)
 {
 	Lmp *lmp;
 	byte *p;
@@ -245,7 +245,7 @@ W_ReadMipTex(Wad *wad, char *name, texture_t *t)
 }
 
 int
-W_ReadPixels(Wad *wad, char *name, pixel_t *out, int num)
+W_ReadPixels(Wad *wad, const char *name, pixel_t *out, int num)
 {
 	Lmp *lmp;
 	int n;
@@ -258,7 +258,7 @@ W_ReadPixels(Wad *wad, char *name, pixel_t *out, int num)
 }
 
 int
-W_ReadRaw(Wad *wad, char *name, byte *out, int num)
+W_ReadRaw(Wad *wad, const char *name, byte *out, int num)
 {
 	Lmp *lmp;
 

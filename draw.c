@@ -27,7 +27,7 @@ static cachepic_t menu_cachepics[MAX_CACHED_PICS];
 static int menu_numcachepics;
 
 qpic_t *
-Draw_CachePic(char *path)
+Draw_CachePic(const char *path)
 {
 	cachepic_t *pic;
 	int i, n;
@@ -63,7 +63,7 @@ Draw_CachePic(char *path)
 }
 
 qpic_t *
-Draw_PicFromWad(char *name)
+Draw_PicFromWad(const char *name)
 {
 	return W_ReadQpic(wad_gfx, name, nil);
 }
@@ -147,7 +147,7 @@ Draw_Character(int x, int y, int num)
 }
 
 void
-Draw_String(int x, int y, char *str)
+Draw_String(int x, int y, const char *str)
 {
 	while(*str) {
 		Draw_Character(x, y, *str);
@@ -157,9 +157,10 @@ Draw_String(int x, int y, char *str)
 }
 
 void
-Draw_Pic(int x, int y, qpic_t *pic)
+Draw_Pic(int x, int y, const qpic_t *pic)
 {
-	pixel_t *dest, *source;
+	const pixel_t *source;
+	pixel_t *dest;
 	int px, py;
 
 	if((x < 0) || (x + pic->width > vid.width) || (y < 0) || (y + pic->height > vid.height)) {
@@ -178,9 +179,10 @@ Draw_Pic(int x, int y, qpic_t *pic)
 }
 
 void
-Draw_TransPic(int x, int y, qpic_t *pic)
+Draw_TransPic(int x, int y, const qpic_t *pic)
 {
-	pixel_t *dest, *source, tpix;
+	const pixel_t *source;
+	pixel_t *dest, tpix;
 	int v, u;
 
 	if(x < 0 || y < 0 || x + pic->width > vid.width || y + pic->height > vid.height)
@@ -198,9 +200,10 @@ Draw_TransPic(int x, int y, qpic_t *pic)
 }
 
 void
-Draw_TransPicTranslate(int x, int y, qpic_t *pic, byte *translation)
+Draw_TransPicTranslate(int x, int y, const qpic_t *pic, const byte *translation)
 {
-	pixel_t *dest, *source, tpix;
+	const pixel_t *source;
+	pixel_t *dest, tpix;
 	int v, u;
 
 	if(x < 0 || y < 0 || x + pic->width > vid.width || y + pic->height > vid.height)

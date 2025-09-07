@@ -119,9 +119,9 @@ ext(char *f, char *e)
 }
 
 void
-radix(char *f, char *d)
+radix(const char *f, char *d)
 {
-	char *s, *e;
+	const char *s, *e;
 
 	s = strrchr(f, '/');
 	e = strrchr(f, '.');
@@ -335,7 +335,7 @@ closelmp(FILE *bf)
 }
 
 FILE *
-openlmp(char *f, int *len)
+openlmp(const char *f, int *len)
 {
 	char d[Nfspath + 1];
 	FILE *bf;
@@ -372,7 +372,7 @@ openlmp(char *f, int *len)
 }
 
 static byte *
-loadlmp(char *f, int mth, int *n)
+loadlmp(const char *f, int mth, int *n)
 {
 	int m;
 	char r[32];
@@ -406,13 +406,13 @@ loadlmp(char *f, int mth, int *n)
 }
 
 void *
-loadhunklmp(char *f, int *n)
+loadhunklmp(const char *f, int *n)
 {
 	return loadlmp(f, Fhunk, n);
 }
 
 void *
-loadcachelmp(char *f, mem_user_t *c)
+loadcachelmp(const char *f, mem_user_t *c)
 {
 	loadcache = c;
 	loadlmp(f, Fcache, nil);

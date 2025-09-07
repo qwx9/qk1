@@ -36,6 +36,7 @@ src_common = [
 	'colormatrix.c',
 	'common.c',
 	'console.c',
+    'crosshairs.c',
 	'cmprocess.c',
 	'cvar.c',
 	'd_alpha.c',
