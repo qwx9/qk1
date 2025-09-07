@@ -162,7 +162,7 @@ V_DriftPitch(void)
 	move = host_frametime * cl.pitchvel;
 	cl.pitchvel += host_frametime * v_centerspeed.value;
 
-	// Con_Printf("move: %f (%f)\n", move, host_frametime);
+	// Con_Printf("move: %f (%f)\n", move, scr_frametime);
 
 	if(delta > 0) {
 		if(move > delta) {
@@ -350,14 +350,14 @@ V_ApplyShifts(void)
 
 	// drop the damage value
 	if(cl.cshifts[CSHIFT_DAMAGE].percent > 0) {
-		cl.cshifts[CSHIFT_DAMAGE].percent -= host_frametime * 150;
+		cl.cshifts[CSHIFT_DAMAGE].percent -= scr_frametime * 150;
 		if(cl.cshifts[CSHIFT_DAMAGE].percent < 0)
 			cl.cshifts[CSHIFT_DAMAGE].percent = 0;
 	}
 
 	// drop the bonus value
 	if(cl.cshifts[CSHIFT_BONUS].percent > 0) {
-		cl.cshifts[CSHIFT_BONUS].percent -= host_frametime * 100;
+		cl.cshifts[CSHIFT_BONUS].percent -= scr_frametime * 100;
 		if(cl.cshifts[CSHIFT_BONUS].percent < 0)
 			cl.cshifts[CSHIFT_BONUS].percent = 0;
 	}

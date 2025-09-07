@@ -174,7 +174,7 @@ extern bool host_initialized; // true if into command execution
 extern double host_frametime;
 extern const byte *host_basepal, *host_colormap;
 extern u64int host_framecount; // incremented every frame, never reset
-extern double realtime; // not bounded in any way, changed at the start of every frame, never reset
+extern double scr_frametime, realtime; // not bounded in any way, changed at the start of every frame, never reset
 
 bool isdisabled(char *s);
 

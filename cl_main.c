@@ -450,13 +450,10 @@ CL_RelinkEntities(void)
 }
 
 /* Read all incoming data from the server */
-int
-CL_ReadFromServer(void)
+void
+CL_ReadFromServer(bool shownet)
 {
 	int ret;
-
-	cl.oldtime = cl.time;
-	cl.time += host_frametime;
 
 	do {
 		ret = readcl();
@@ -464,19 +461,15 @@ CL_ReadFromServer(void)
 			Host_Error("CL_ReadFromServer: lost server connection");
 		if(!ret)
 			break;
-
 		cl.last_received_message = realtime;
 		CL_ParseServerMessage();
 	} while(ret && cls.state == ca_connected);
 
-	if(cl_shownet.value)
+	if(shownet)
 		Con_Printf("\n");
 
 	CL_RelinkEntities();
 	CL_UpdateTEnts();
-
-	// bring the links up to date
-	return 0;
 }
 
 void

@@ -409,10 +409,9 @@ _Host_Frame(double time)
 
 	if(boundfps(time)) {
 		// even if fps-bound, at least do something
-		host_frametime = 0.0; // server has not advanced the time
 		// fetch results from server
 		if(cls.state == ca_connected)
-			CL_ReadFromServer();
+			CL_ReadFromServer(false);
 		SCR_UpdateScreen(false);
 		return;
 	}
@@ -428,8 +427,11 @@ _Host_Frame(double time)
 	host_time += host_frametime;
 
 	// fetch results from server
-	if(cls.state == ca_connected)
-		CL_ReadFromServer();
+	if(cls.state == ca_connected) {
+		cl.oldtime = cl.time;
+		cl.time += host_frametime;
+		CL_ReadFromServer(cl_shownet.value > 0);
+	}
 
 	// update video
 	if(host_speeds.value)

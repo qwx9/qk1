@@ -243,7 +243,7 @@ void CL_ParseTEnt(void);
 void CL_UpdateTEnts(void);
 void CL_ResetTEnts(void);
 void CL_ClearState(void);
-int CL_ReadFromServer(void);
+void CL_ReadFromServer(bool shownet);
 void CL_WriteToServer(usercmd_t *cmd);
 void CL_BaseMove(usercmd_t *cmd);
 void CL_ParseServerMessage(void);

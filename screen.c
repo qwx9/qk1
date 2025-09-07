@@ -18,8 +18,9 @@ static bool scr_initialized; // ready to draw
 static qpic_t *scr_net, *scr_turtle;
 static int clearconsole;
 static bool scr_drawloading;
-static double scr_disabled_time;
+static double scr_disabled_time, scr_oldtime;
 static u64int scr_framecount;
+double scr_frametime;
 
 int scr_fullupdate;
 int clearnotify;
@@ -124,7 +125,7 @@ SCR_CheckDrawCenterString(void)
 	if(scr_center_lines > scr_erase_lines)
 		scr_erase_lines = scr_center_lines;
 
-	scr_centertime_off -= host_frametime;
+	scr_centertime_off -= scr_frametime;
 
 	if(scr_centertime_off <= 0 && !cl.intermission)
 		return;
@@ -249,7 +250,7 @@ SCR_DrawTurtle(void)
 	if(!scr_showturtle.value)
 		return;
 
-	if(host_frametime < 0.1) {
+	if(scr_frametime < 0.1) {
 		count = 0;
 		return;
 	}
@@ -341,7 +342,7 @@ SCR_SetUpToDrawConsole(void)
 	else
 		scr_conlines = 0; // none visible
 
-	dt = scr_conspeed.value * host_frametime * vid.height / MINHEIGHT;
+	dt = scr_conspeed.value * scr_frametime * vid.height / MINHEIGHT;
 	if(scr_conlines < scr_con_current) {
 		scr_con_current -= dt;
 		if(scr_conlines > scr_con_current)
@@ -495,6 +496,8 @@ boundfps(void)
 void
 SCR_UpdateScreen(bool drawdialog)
 {
+	double t;
+
 	if(scr_disabled_for_loading) {
 		if(realtime - scr_disabled_time > 60) {
 			scr_disabled_for_loading = false;
@@ -509,6 +512,9 @@ SCR_UpdateScreen(bool drawdialog)
 		return; // not initialized yet
 	if(boundfps())
 		return;
+	t = dtime();
+	scr_frametime = t - scr_oldtime;
+	scr_oldtime = t;
 
 	// check for vid changes
 	if(oldfov != scr_fov.value) {
