@@ -160,15 +160,19 @@ IN_Commands(void)
 void
 IN_Move(usercmd_t *cmd)
 {
+	float ndx, ndy;
+
 	if(!mouseon)
 		return;
 
+	ndx = dx;
+	ndy = dy;
 	if(m_filter.value) {
-		dx = (dx + olddx) * 0.5;
-		dy = (dy + olddy) * 0.5;
+		dx = (dx + olddx) / 2.0;
+		dy = (dy + olddy) / 2.0;
 	}
-	olddx = dx;
-	olddy = dy;
+	olddx = ndx;
+	olddy = ndy;
 	dx *= sensitivity.value;
 	dy *= sensitivity.value;
 	if(in_strafe.state & 1 || (lookstrafe.value && in_mlook.state & 1))

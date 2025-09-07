@@ -145,7 +145,7 @@ V_DriftPitch(void)
 		if(fabs(cl.cmd.forwardmove) < cl_forwardspeed.value)
 			cl.driftmove = 0;
 		else
-			cl.driftmove += host_frametime;
+			cl.driftmove += scr_frametime;
 
 		if(cl.driftmove > v_centermove.value)
 			V_StartPitchDrift(nil);
@@ -159,8 +159,8 @@ V_DriftPitch(void)
 		return;
 	}
 
-	move = host_frametime * cl.pitchvel;
-	cl.pitchvel += host_frametime * v_centerspeed.value;
+	move = scr_frametime * cl.pitchvel;
+	cl.pitchvel += scr_frametime * v_centerspeed.value;
 
 	// Con_Printf("move: %f (%f)\n", move, scr_frametime);
 
@@ -395,7 +395,7 @@ CalcGunAngle(void)
 		pitch = 10;
 	else if(pitch < -10)
 		pitch = -10;
-	move = host_frametime * 20;
+	move = scr_frametime * 20;
 	if(yaw > oldyaw) {
 		if(oldyaw + move < yaw)
 			yaw = oldyaw + move;
@@ -474,7 +474,7 @@ V_CalcViewRoll(void)
 	if(v_dmg_time > 0) {
 		r_refdef.view.angles[ROLL] += v_dmg_time / v_kicktime.value * v_dmg_roll;
 		r_refdef.view.angles[PITCH] += v_dmg_time / v_kicktime.value * v_dmg_pitch;
-		v_dmg_time -= host_frametime;
+		v_dmg_time -= scr_frametime;
 	}
 
 	if(cl.stats[STAT_HEALTH] <= 0) {
