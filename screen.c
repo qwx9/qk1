@@ -159,25 +159,19 @@ SCR_CalcRefdef(void)
 	// bound viewsize
 	if(scr_viewsize.value < 100)
 		setcvar("viewsize", "100");
-	if(scr_viewsize.value > 120)
+	else if(scr_viewsize.value > 120)
 		setcvar("viewsize", "120");
 
 	// bound field of view
 	if(scr_fov.value < 10)
 		setcvar("fov", "10");
-	if(scr_fov.value > 170)
+	else if(scr_fov.value > 170)
 		setcvar("fov", "170");
-
-	r_refdef.fov_y = CalcFov(scr_fov.value, 640, 432); // 480→432 adjusted for a status bar
-	r_refdef.fov_x = CalcFov(r_refdef.fov_y, r_refdef.vrect.height, r_refdef.vrect.width);
 
 	scr_vrect = r_refdef.vrect;
 
 	// intermission is always full screen
-	if(cl.intermission)
-		size = 120;
-	else
-		size = scr_viewsize.value;
+	size = cl.intermission ? 120 : scr_viewsize.value;
 
 	if(size >= 120)
 		sb_lines = 0; // no status bar at all
@@ -185,6 +179,15 @@ SCR_CalcRefdef(void)
 		sb_lines = 24; // no inventory
 	else
 		sb_lines = 24 + 16 + 8;
+
+	// adapt 4:3 fov to current aspect (taken from yquake2)
+	r_refdef.fov_x = atanf(
+						 tanf(scr_fov.value / 360.0 * M_PI) *
+						 ((float)r_refdef.vrect.width / (float)r_refdef.vrect.height * 0.75)
+					 ) /
+					 M_PI * 360.0;
+	r_refdef.fov_y =
+		CalcFov(r_refdef.fov_x, r_refdef.vrect.width, r_refdef.vrect.height - sb_lines);
 
 	// these calculations mirror those in R_Init() for r_refdef, but take no
 	// account of water warping
