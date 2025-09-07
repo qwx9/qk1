@@ -9,7 +9,7 @@ enum {
 	MSG_INIT, // write to the init string
 };
 
-cvar_t sv_aim = {"sv_aim", "0.93"};
+cvar_t sv_aim = {"sv_aim", "0"};
 
 static byte *checkpvs;
 static int checkpvs_size;
@@ -1096,8 +1096,9 @@ PF_aim(pr_t *pr)
 	VectorCopy(pr->global_struct->v_forward, dir);
 	VectorMA(start, 2048, dir, end);
 	tr = SV_Move(pr, start, vec3_origin, vec3_origin, end, MOVE_NORMAL, ent);
-	if(tr.ent && tr.ent->v.takedamage == DAMAGE_AIM &&
-	   (!teamplay.value || ent->v.team <= 0 || ent->v.team != tr.ent->v.team)) {
+	if(sv_aim.value <= 0 ||
+	   (tr.ent && tr.ent->v.takedamage == DAMAGE_AIM &&
+		(!teamplay.value || ent->v.team <= 0 || ent->v.team != tr.ent->v.team))) {
 		VectorCopy(pr->global_struct->v_forward, G_VECTOR(pr, OFS_RETURN));
 		return;
 	}
