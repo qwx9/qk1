@@ -160,7 +160,7 @@ flipfb(void)
 }
 
 void
-setpal(byte *p0)
+setpal(const byte *p0)
 {
 	int x;
 	byte *p;

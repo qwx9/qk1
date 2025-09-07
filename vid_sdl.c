@@ -119,10 +119,10 @@ flipfb(void)
 }
 
 void
-setpal(byte *p0)
+setpal(const byte *p0)
 {
 	pixel_t x;
-	byte *p;
+	const byte *p;
 
 	for(p = p0, x = 0; x < 256; x++, p += 3) {
 		q1pal[x] = (x < 256U - 32U ? 0xffU : 0) << 24 | p[0] << 16 | p[1] << 8 | p[2];

@@ -1,4 +1,5 @@
 #include "quakedef.h"
+#include "q1_palette.h"
 
 /*
  * A server can always be started, even if the system started out as a client
@@ -21,8 +22,8 @@ client_t *host_client; // current client
 
 jmp_buf host_abortserver;
 
-byte *host_basepal;
-byte *host_colormap;
+const byte *host_basepal;
+const byte *host_colormap;
 
 cvar_t sys_ticrate = {"sys_ticrate", "0.05"};
 cvar_t fraglimit = {"fraglimit", "0", false, true};
@@ -513,11 +514,11 @@ Host_Init(int argc, char **argv, char **paths)
 	if(cls.state != ca_dedicated) {
 		host_basepal = loadhunklmp("gfx/palette.lmp", nil);
 		if(host_basepal == nil)
-			fatal("Host_Init: %s", lerr());
+			host_basepal = q1_palette;
 		setpal(host_basepal);
 		host_colormap = loadhunklmp("gfx/colormap.lmp", nil);
 		if(host_colormap == nil)
-			fatal("Host_Init: %s", lerr());
+			host_colormap = q1_build_colormap(host_basepal);
 		initfb();
 		Draw_Init();
 		SCR_Init();

@@ -6,7 +6,7 @@ char com_token[1024];
 bool standard_quake = true, rogue, hipnotic;
 
 void
-pal3torgbx(byte *in, pixel_t *out, int n, byte *pal, int palsz)
+pal3torgbx(const byte *in, pixel_t *out, int n, byte *pal, int palsz)
 {
 	int x;
 
@@ -29,7 +29,7 @@ pal3torgbx(byte *in, pixel_t *out, int n, byte *pal, int palsz)
 }
 
 void
-paltorgbx(byte *in, pixel_t *out, int n, pixel_t *pal)
+paltorgbx(const byte *in, pixel_t *out, int n, pixel_t *pal)
 {
 	if(in < (byte *)out || in > (byte *)(out + n) || in + n < (byte *)out) {
 		while(n-- > 0)
@@ -41,7 +41,7 @@ paltorgbx(byte *in, pixel_t *out, int n, pixel_t *pal)
 }
 
 void
-torgbx(byte *in, pixel_t *out, int n)
+torgbx(const byte *in, pixel_t *out, int n)
 {
 	paltorgbx(in, out, n, q1pal);
 }

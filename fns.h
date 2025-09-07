@@ -1,6 +1,6 @@
 #pragma once
 
-void setpal(byte *);
+void setpal(const byte *);
 void stopfb(void);
 void flipfb(void);
 void initfb(void);
