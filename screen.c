@@ -324,7 +324,7 @@ SCR_DrawLoading(void)
 static void
 SCR_SetUpToDrawConsole(void)
 {
-	int dt;
+	float dt;
 
 	Con_CheckResize();
 
