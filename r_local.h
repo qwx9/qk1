@@ -97,8 +97,6 @@ void D_DrawSurfaces(view_t *v);
 
 extern void R_RotateBmodel(entity_t *e, view_t *v);
 
-extern model_t *cl_worldmodel;
-
 extern int *pfrustum_indexes[4];
 
 #define NEAR_CLIP 0.01

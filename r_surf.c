@@ -256,13 +256,17 @@ R_DrawSurface(entity_t *e, drawsurf_t *ds)
 	unsigned int *lp[3];
 	pixel_t *source, *sourcemax;
 
-	// calculate the lightings
-	R_BuildLightMap(e, ds);
-
 	mt = ds->texture;
 	ms = ds->m;
 
-	draw = drawsurf[mt->drawsurf][e != nil && (e->effects & EF_ADDITIVE) != 0][ds->mip];
+	if(mt->drawsurf & DRAWSURF_NODRAW)
+		return;
+
+	// calculate the lightings
+	R_BuildLightMap(e, ds);
+
+	draw = drawsurf[mt->drawsurf & DRAWSURF_FULLBRIGHT]
+				   [e != nil && (e->effects & EF_ADDITIVE) != 0][ds->mip];
 
 	source = mt->pixels + mt->offsets[ds->mip];
 

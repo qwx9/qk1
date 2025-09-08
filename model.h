@@ -30,6 +30,7 @@ typedef struct mplane_s {
 
 enum {
 	DRAWSURF_FULLBRIGHT = 1 << 0,
+	DRAWSURF_NODRAW = 1 << 1,
 };
 
 typedef struct texture_s {
@@ -39,7 +40,7 @@ typedef struct texture_s {
 	int drawsurf;
 	int width, height;
 	int anim_total; // total tenths in sequence ( 0 = no)
-	int anim_min, anim_max; // time for this frame min <=time< max
+	int anim_min, anim_max; // time for this frame min <= time < max
 	int offsets[MIPLEVELS]; // four mip maps stored
 	pixel_t pixels[];
 } texture_t;
@@ -58,6 +59,7 @@ enum {
 	SURF_TELE = 1 << 10,
 	SURF_IN_SUBMODEL = 1 << 11,
 	SURF_DRAWSKYBOX = 1 << 12,
+	SURF_NODRAW = 1 << 13,
 };
 
 #define insubmodel(s) ((s)->flags & SURF_IN_SUBMODEL)
@@ -243,6 +245,8 @@ enum {
 	EF_ZOMGIB = 1 << 5, // small blood trail
 	EF_TRACER2 = 1 << 6, // orange split trail + rotate
 	EF_TRACER3 = 1 << 7, // purple trail
+
+	MOD_NODRAW = 1 << 30,
 	MOD_ORIGIN_SET = 1 << 31, /* FIXME: nothing is using it yet */
 };
 

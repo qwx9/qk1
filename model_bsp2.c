@@ -85,8 +85,12 @@ BSP2_LoadFaces(model_t *mod, byte *in, int sz)
 		in += MAXLIGHTMAPS;
 		out->samples = (i = le32(in)) < 0 ? nil : mod->lightdata + i * 3;
 
-		// set the drawing flags flag
+		// set the drawing flags
 
+		if(out->texinfo->texture->drawsurf & DRAWSURF_NODRAW) {
+			out->flags |= SURF_NODRAW;
+			continue;
+		}
 		if(strncmp(out->texinfo->texture->name, "sky", 3) == 0)
 			out->flags |= SURF_DRAWSKY | SURF_DRAWTILED;
 		else if(out->texinfo->texture->name[0] == '*') { // turbulent

@@ -136,8 +136,12 @@ BSP_LoadTextures(model_t *mod, byte *in, int sz)
 			tx->height = h;
 			// the pixels immediately follow the structures
 			torgbx(p, tx->pixels, pixels);
+			tx->drawsurf |= DRAWSURF_NODRAW;
 			for(j = 0; j < pixels; j++) {
-				if(tx->pixels[j] != 0 && (tx->pixels[j] & 0xff000000) == 0) {
+				if(p[j] == 0)
+					continue;
+				tx->drawsurf &= ~DRAWSURF_NODRAW;
+				if((tx->pixels[j] & 0xff000000) == 0) {
 					tx->drawsurf |= DRAWSURF_FULLBRIGHT;
 					break;
 				}
@@ -157,10 +161,11 @@ BSP_LoadTextures(model_t *mod, byte *in, int sz)
 						true
 					);
 				}
-			}
+			} else if(strcmp(tx->name, "skip") == 0)
+				tx->drawsurf = DRAWSURF_NODRAW;
+			else if(strncmp(tx->name, "sky", 3) == 0)
+				R_InitSky(tx);
 		}
-		if(strncmp(tx->name, "sky", 3) == 0)
-			R_InitSky(tx);
 	}
 
 	// sequence the animations
@@ -549,8 +554,12 @@ BSP_LoadFaces(model_t *mod, byte *in, int sz)
 		i = le32(in);
 		out->samples = i < 0 ? nil : mod->lightdata + i * 3;
 
-		// set the drawing flags flag
+		// set the drawing flags
 
+		if(out->texinfo->texture->drawsurf & DRAWSURF_NODRAW) {
+			out->flags = SURF_NODRAW;
+			continue;
+		}
 		if(strncmp(out->texinfo->texture->name, "sky", 3) == 0)
 			out->flags |= SURF_DRAWSKY | SURF_DRAWTILED;
 		else if(out->texinfo->texture->name[0] == '*') { // turbulent

@@ -1,11 +1,5 @@
 #include "quakedef.h"
 
-typedef enum {
-	touchessolid,
-	drawnode,
-	nodrawnode,
-} solidstate_t;
-
 enum {
 	MAX_BMODEL_VERTS = 6000,
 	MAX_BMODEL_EDGES = 12000,
@@ -275,6 +269,9 @@ R_DrawSolidClippedSubmodelPolygons(model_t *pmodel, view_t *v)
 	pedges = pmodel->edges;
 
 	for(i = 0; i < numsurfaces; i++, psurf++) {
+		if(psurf->flags & SURF_NODRAW)
+			continue;
+
 		// find which side of the node we are on
 		pplane = psurf->plane;
 
@@ -334,6 +331,9 @@ R_DrawSubmodelPolygons(model_t *pmodel, view_t *v, int clipflags)
 	numsurfaces = pmodel->nummodelsurfaces;
 
 	for(i = 0; i < numsurfaces; i++, psurf++) {
+		if(psurf->flags & SURF_NODRAW)
+			continue;
+
 		// find which side of the node we are on
 		pplane = psurf->plane;
 
@@ -444,13 +444,15 @@ again:
 
 			if(dot < -BACKFACE_EPSILON) {
 				do {
-					if((surf->flags & SURF_PLANEBACK) && surf->visframe == r_framecount)
+					if((surf->flags & SURF_NODRAW) == 0 && (surf->flags & SURF_PLANEBACK) &&
+					   surf->visframe == r_framecount)
 						rejected |= !R_RenderFace(surf, v, clipflags);
 					surf++;
 				} while(--c);
 			} else if(dot > BACKFACE_EPSILON) {
 				do {
-					if(!(surf->flags & SURF_PLANEBACK) && surf->visframe == r_framecount)
+					if((surf->flags & SURF_NODRAW) == 0 && !(surf->flags & SURF_PLANEBACK) &&
+					   surf->visframe == r_framecount)
 						rejected |= !R_RenderFace(surf, v, clipflags);
 					surf++;
 				} while(--c);

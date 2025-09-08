@@ -48,6 +48,8 @@ entdrawflags(entity_t *e)
 	if(e->model != cl.worldmodel) {
 		if(e->effects & EF_NODRAW)
 			return DRAW_NO;
+		if(e->model->flags & MOD_NODRAW)
+			return DRAW_NO;
 		if(e->model->blend || (e->effects & EF_ADDITIVE) || !defalpha(e->alpha))
 			return DRAW_BLEND;
 	}

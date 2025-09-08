@@ -173,14 +173,13 @@ Mod_LoadBrushModel(model_t *mod, byte *in0, int total)
 			werrstr("invalid lump off=%d sz=%d total=%d", off, sz, total);
 			goto err;
 		}
-		if(loadf[order[i]](mod, in0 + off, sz) != 0)
+		if(loadf[order[i]](mod, in0 + off, sz, extra[order[i]]) != 0)
 			goto err;
 	}
 
 	BSP_MakeHull0(mod);
 
 	mod->numframes = 2; // regular and alternate animation
-	mod->flags = 0;
 	e = mod->entities;
 
 	// set up the submodels (FIXME: this is confusing)
@@ -196,7 +195,11 @@ Mod_LoadBrushModel(model_t *mod, byte *in0, int total)
 		mod->firstmodelsurface = bm->firstface;
 		mod->nummodelsurfaces = bm->numfaces;
 		mod->blend = false;
+		mod->flags = MOD_NODRAW;
 		for(j = bm->firstface; j < bm->firstface + bm->numfaces; j++) {
+			if(mod->surfaces[j].flags & SURF_NODRAW)
+				continue;
+			mod->flags &= ~MOD_NODRAW;
 			if(mod->surfaces[j].flags & SURF_TRANS) {
 				mod->blend = true;
 				break;
