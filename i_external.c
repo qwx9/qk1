@@ -10,12 +10,15 @@ Load_ExternalTexture(char *map, char *name)
 	qpic_t *q;
 	byte *in;
 
-	if((s = strrchr(map, '/')) != nil)
-		map = s + 1;
-	strcpy(tmp, map);
-	if((s = strchr(tmp, '.')) != nil)
-		*s = 0;
-	n = snprint(path, sizeof(path), "textures/%s/", tmp);
+	n = 0;
+	if(map != nil) {
+		if((s = strrchr(map, '/')) != nil)
+			map = s + 1;
+		strcpy(tmp, map);
+		if((s = strchr(tmp, '.')) != nil)
+			*s = 0;
+		n = snprint(path, sizeof(path), "textures/%s/", tmp);
+	}
 
 	/* clean up the name, add extension */
 	strcpy(tmp, name);
@@ -28,7 +31,9 @@ Load_ExternalTexture(char *map, char *name)
 	}
 	if(in == nil)
 		return nil;
-	if((q = TGA_Decode(in, sz, &premult)) == nil) {
+	q = TGA_Decode(in, sz, &premult);
+	Hunk_Free(in);
+	if(q == nil) {
 		fprintf(stderr, "Load_ExternalTexture: %s: %s\n", path, lerr());
 		return nil;
 	}
@@ -39,6 +44,7 @@ Load_ExternalTexture(char *map, char *name)
 	w = tx->width = q->width;
 	h = tx->height = q->height;
 	memmove(tx->pixels, q->pixels, n * sizeof(pixel_t));
+	Hunk_Free(q);
 
 	tx->offsets[0] = 0;
 	for(i = 1; i < MIPLEVELS; i++) {
