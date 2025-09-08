@@ -898,6 +898,7 @@ SV_CreateBaseline(void)
 		VectorCopy(svent->v.angles, svent->baseline.angles);
 		svent->baseline.frame = svent->v.frame;
 		svent->baseline.skin = svent->v.skin;
+		svent->baseline.effects = svent->v.effects;
 		if(entnum > 0 && entnum <= svs.maxclients) {
 			svent->baseline.colormap = entnum;
 			svent->baseline.modelindex = SV_ModelIndex("progs/player.mdl");
