@@ -329,7 +329,7 @@ mleaf_t *Mod_PointInLeaf(const vec3_t p, model_t *model);
 byte *Mod_LeafPVS(mleaf_t *leaf, model_t *model, int *sz);
 void Mod_Print_f(cmd_t *c);
 
-texture_t *Load_ExternalTexture(char *map, char *name);
+texture_t *Load_ExternalTexture(char *map, char *name, bool nomip);
 
 void Mod_LoadBrushModel(model_t *mod, byte *buffer, int total);
 void Mod_LoadSpriteModel(model_t *mod, byte *buffer, int total);

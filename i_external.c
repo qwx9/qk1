@@ -1,7 +1,7 @@
 #include "quakedef.h"
 
 texture_t *
-Load_ExternalTexture(char *map, char *name)
+Load_ExternalTexture(char *map, char *name, bool nomip)
 {
 	char path[256], tmp[128], *s;
 	int i, n, sz, w, h;
@@ -38,7 +38,7 @@ Load_ExternalTexture(char *map, char *name)
 		return nil;
 	}
 	n = q->width * q->height;
-	tx = Hunk_Alloc(sizeof(*tx) + n * 85 / 64 * sizeof(pixel_t));
+	tx = Hunk_Alloc(sizeof(*tx) + n * 85 / (nomip ? 85 : 64) * sizeof(pixel_t));
 	strncpy(tx->name, name, sizeof(tx->name) - 1);
 	tx->name[sizeof(tx->name) - 1] = 0;
 	w = tx->width = q->width;
@@ -47,21 +47,23 @@ Load_ExternalTexture(char *map, char *name)
 	Hunk_Free(q);
 
 	tx->offsets[0] = 0;
-	for(i = 1; i < MIPLEVELS; i++) {
-		tx->offsets[i] = tx->offsets[i - 1] + n;
-		w /= 2;
-		h /= 2;
-		n = w * h;
-		pixels_resize(
-			tx->pixels + tx->offsets[0],
-			tx->pixels + tx->offsets[i],
-			tx->width,
-			tx->height,
-			w,
-			h,
-			premult,
-			name[0] == '{'
-		);
+	if(!nomip) {
+		for(i = 1; i < MIPLEVELS; i++) {
+			tx->offsets[i] = tx->offsets[i - 1] + n;
+			w /= 2;
+			h /= 2;
+			n = w * h;
+			pixels_resize(
+				tx->pixels + tx->offsets[0],
+				tx->pixels + tx->offsets[i],
+				tx->width,
+				tx->height,
+				w,
+				h,
+				premult,
+				name[0] == '{'
+			);
+		}
 	}
 
 	return tx;

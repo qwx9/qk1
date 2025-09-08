@@ -121,7 +121,7 @@ BSP_LoadTextures(model_t *mod, byte *in, int sz, int extra)
 			werrstr("bad offset %d (sz %d)", off, sz);
 			goto err;
 		}
-		if((mod->textures[i] = tx = Load_ExternalTexture(mod->name, (char *)in0 + off)) == nil) {
+		if((mod->textures[i] = tx = Load_ExternalTexture(mod->name, (char *)in0 + off, false)) == nil) {
 			p = in0 + off + 16;
 			w = le32(p);
 			h = le32(p);

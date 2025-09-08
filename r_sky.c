@@ -111,7 +111,7 @@ R_LoadSkyBox(const char *name, model_t *m)
 
 	for(i = 0; i < nelem(ts); i++, s++) {
 		path = va("gfx/env/%s%s", name, suffix[i]);
-		if((t = Load_ExternalTexture(nil, path)) == nil) {
+		if((t = Load_ExternalTexture(nil, path, true)) == nil) {
 			Con_Printf("R_SetSkyBox: failed to load %s%s\n", name, suffix[i]);
 			t = r_notexture_mip;
 		}
