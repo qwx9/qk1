@@ -14,7 +14,7 @@ D_DrawSolidSurface(surf_t *surf, pixel_t color)
 	for(span = surf->spans; span; span = span->pnext) {
 		pdest = dvars.fb + span->v * dvars.w;
 		pz = dvars.zb + span->v * dvars.w;
-		memset(pz, 0xfe, span->count * sizeof(*pz));
+		memset(pz, Q_MAXUINT, span->count * sizeof(*pz));
 		u2 = span->u + span->count - 1;
 		for(u = span->u; u <= u2; u++)
 			pdest[u] = color;

@@ -54,7 +54,7 @@ D_DrawSkyScans8(espan_t *pspan)
 
 		pdest = dvars.fb + pspan->v * dvars.w + pspan->u;
 		pz = dvars.zb + pspan->v * dvars.w + pspan->u;
-		memset(pz, 0xff, count * sizeof(*pz));
+		memset(pz, Q_MAXUINT, count * sizeof(*pz));
 
 		// calculate the initial s & t
 		u = pspan->u;
