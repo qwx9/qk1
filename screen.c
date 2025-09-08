@@ -475,7 +475,6 @@ SCR_BringDownConsole(void)
 		SCR_UpdateScreen(false);
 
 	cl.cshifts[0].percent = 0; // no area contents palette on next frame
-	setpal(host_basepal);
 }
 
 static bool
