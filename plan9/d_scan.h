@@ -303,3 +303,68 @@ dospan_turb_f1(
 		fogstep(*fog);
 	} while(--spancount > 0);
 }
+
+static void
+dospan_skybox(
+	pixel_t *pdest, pixel_t *pbase, int s, int t, int sstep, int tstep, int spancount, int width,
+	uzint *pz
+)
+{
+	if(((t + tstep * spancount) >> 16) == (t >> 16)) {
+		pbase += (t >> 16) * width;
+		do {
+			*pdest++ = pbase[s >> 16];
+			*pz++ = Q_MAXUINT;
+			s += sstep;
+		} while(--spancount);
+	} else if(((s + sstep * spancount) >> 16) == (s >> 16)) {
+		pbase += s >> 16;
+		do {
+			*pdest++ = pbase[(t >> 16) * width];
+			*pz++ = Q_MAXUINT;
+			t += tstep;
+		} while(--spancount);
+	} else {
+		do {
+			*pdest++ = pbase[(s >> 16) + (t >> 16) * width];
+			*pz++ = Q_MAXUINT;
+			s += sstep;
+			t += tstep;
+		} while(--spancount);
+	}
+}
+
+static void
+dospan_skybox_f1(
+	pixel_t *pdest, pixel_t *pbase, int s, int t, int sstep, int tstep, int spancount, int width,
+	uzint *pz
+)
+{
+	pixel_t fog;
+	int inva;
+
+	fog = fogvars.skypix;
+	inva = 255 - (fog >> 24);
+	if(((t + tstep * spancount) >> 16) == (t >> 16)) {
+		pbase += (t >> 16) * width;
+		do {
+			*pz++ = Q_MAXUINT;
+			*pdest++ = fog + mulalpha(pbase[s >> 16], inva);
+			s += sstep;
+		} while(--spancount);
+	} else if(((s + sstep * spancount) >> 16) == (s >> 16)) {
+		pbase += s >> 16;
+		do {
+			*pz++ = Q_MAXUINT;
+			*pdest++ = fog + mulalpha(pbase[(t >> 16) * width], inva);
+			t += tstep;
+		} while(--spancount);
+	} else {
+		do {
+			*pz++ = Q_MAXUINT;
+			*pdest++ = fog + mulalpha(pbase[(s >> 16) + (t >> 16) * width], inva);
+			s += sstep;
+			t += tstep;
+		} while(--spancount);
+	}
+}

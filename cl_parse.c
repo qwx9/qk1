@@ -762,8 +762,7 @@ CL_ParseServerMessage(void)
 			break;
 
 		case svc_skybox:
-			/* FIXME(sigrid): skyboxes */
-			MSG_ReadString();
+			R_LoadSkyBox(MSG_ReadString(), cl.worldmodel);
 			break;
 
 		case svc_skyboxsize:

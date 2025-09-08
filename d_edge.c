@@ -109,6 +109,11 @@ D_DrawSurfaces(view_t *v0)
 		pface = s->data;
 		if(s->flags & SURF_DRAWSKY) {
 			D_DrawSkyScans8(s->spans);
+		} else if(s->flags & SURF_DRAWSKYBOX) {
+			t.p = pface->texinfo->texture->pixels;
+			t.w = pface->texinfo->texture->width;
+			D_CalcGradients(0, pface, transformed_modelorg, &v, &t);
+			D_DrawSpans(s->spans, &t, 255, SPAN_SKYBOX);
 		} else if(s->flags & SURF_DRAWBACKGROUND) {
 			D_DrawSolidSurface(s, q1pal[(int)r_clearcolor.value & 0xFF]);
 		} else if(s->flags & SURF_DRAWTURB) {

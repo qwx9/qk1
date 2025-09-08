@@ -298,6 +298,8 @@ R_RenderFace(msurface_t *fa, view_t *v, int clipflags)
 
 	if((surfdrawflags(fa->flags) | entdrawflags(currententity)) ^ r_drawflags)
 		return 0;
+	if((fa->flags & SURF_DRAWSKY) != 0 && r_skybox)
+		return 0;
 
 	// skip out if no more surfs
 	if(surface_p >= surf_max) {

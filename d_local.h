@@ -77,6 +77,7 @@ enum {
 	SPAN_FENCE,
 	SPAN_SOLID,
 	SPAN_TURB,
+	SPAN_SKYBOX,
 };
 
 void D_DrawSpans(espan_t *pspan, texvars_t *t, byte alpha, int spanfunc);

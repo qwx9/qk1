@@ -2,7 +2,7 @@
 #include "model_bsp.h"
 
 int
-BSP2_LoadEdges(model_t *mod, byte *in, int sz)
+BSP2_LoadEdges(model_t *mod, byte *in, int sz, int extra)
 {
 	medge_t *out;
 	int i;
@@ -13,8 +13,7 @@ BSP2_LoadEdges(model_t *mod, byte *in, int sz)
 		return -1;
 	}
 	mod->numedges = sz / elsz;
-	// FIXME(sigrid): why +1?
-	mod->edges = out = Hunk_Alloc((mod->numedges + 1) * sizeof(*out));
+	mod->edges = out = Hunk_Alloc((mod->numedges + extra) * sizeof(*out));
 
 	for(i = 0; i < mod->numedges; i++, out++) {
 		out->v[0] = le32u(in);
@@ -24,7 +23,7 @@ BSP2_LoadEdges(model_t *mod, byte *in, int sz)
 }
 
 int
-BSP2_LoadLeafs(model_t *mod, byte *in, int sz)
+BSP2_LoadLeafs(model_t *mod, byte *in, int sz, int extra)
 {
 	mleaf_t *out;
 	int i, j, p;
@@ -35,7 +34,7 @@ BSP2_LoadLeafs(model_t *mod, byte *in, int sz)
 		return -1;
 	}
 	mod->numleafs = sz / elsz;
-	mod->leafs = out = Hunk_Alloc(mod->numleafs * sizeof(*out));
+	mod->leafs = out = Hunk_Alloc((mod->numleafs + extra) * sizeof(*out));
 
 	for(i = 0; i < mod->numleafs; i++, out++) {
 		out->contents = le32(in);
@@ -56,7 +55,7 @@ BSP2_LoadLeafs(model_t *mod, byte *in, int sz)
 }
 
 int
-BSP2_LoadFaces(model_t *mod, byte *in, int sz)
+BSP2_LoadFaces(model_t *mod, byte *in, int sz, int extra)
 {
 	msurface_t *out;
 	int i, surfnum;
@@ -67,7 +66,7 @@ BSP2_LoadFaces(model_t *mod, byte *in, int sz)
 		return -1;
 	}
 	mod->numsurfaces = sz / elsz;
-	mod->surfaces = out = Hunk_Alloc(mod->numsurfaces * sizeof(*out));
+	mod->surfaces = out = Hunk_Alloc((mod->numsurfaces + extra) * sizeof(*out));
 
 	for(surfnum = 0; surfnum < mod->numsurfaces; surfnum++, out++) {
 		out->plane = mod->planes + le32u(in);
@@ -114,7 +113,7 @@ BSP2_LoadFaces(model_t *mod, byte *in, int sz)
 }
 
 int
-BSP2_LoadNodes(model_t *mod, byte *in, int sz)
+BSP2_LoadNodes(model_t *mod, byte *in, int sz, int extra)
 {
 	int i, j, p;
 	mnode_t *out;
@@ -125,7 +124,7 @@ BSP2_LoadNodes(model_t *mod, byte *in, int sz)
 		return -1;
 	}
 	mod->numnodes = sz / elsz;
-	mod->nodes = out = Hunk_Alloc(mod->numnodes * sizeof(*out));
+	mod->nodes = out = Hunk_Alloc((mod->numnodes + extra) * sizeof(*out));
 
 	for(i = 0; i < mod->numnodes; i++, out++) {
 		out->plane = mod->planes + le32u(in);
@@ -157,7 +156,7 @@ BSP2_LoadNodes(model_t *mod, byte *in, int sz)
 }
 
 int
-BSP2_LoadClipnodes(model_t *mod, byte *in, int sz)
+BSP2_LoadClipnodes(model_t *mod, byte *in, int sz, int extra)
 {
 	mclipnode_t *out;
 	int i;
@@ -169,7 +168,7 @@ BSP2_LoadClipnodes(model_t *mod, byte *in, int sz)
 		return -1;
 	}
 	mod->numclipnodes = sz / elsz;
-	mod->clipnodes = out = Hunk_Alloc(mod->numclipnodes * sizeof(*out));
+	mod->clipnodes = out = Hunk_Alloc((mod->numclipnodes + extra) * sizeof(*out));
 
 	hull = &mod->hulls[1];
 	hull->clipnodes = out;
@@ -208,7 +207,7 @@ BSP2_LoadClipnodes(model_t *mod, byte *in, int sz)
 }
 
 int
-BSP2_LoadMarksurfaces(model_t *mod, byte *in, int sz)
+BSP2_LoadMarksurfaces(model_t *mod, byte *in, int sz, int extra)
 {
 	int i, j;
 	msurface_t **out;
@@ -218,7 +217,7 @@ BSP2_LoadMarksurfaces(model_t *mod, byte *in, int sz)
 		return -1;
 	}
 	mod->nummarksurfaces = sz / 4;
-	mod->marksurfaces = out = Hunk_Alloc(mod->nummarksurfaces * sizeof(*out));
+	mod->marksurfaces = out = Hunk_Alloc((mod->nummarksurfaces + extra) * sizeof(*out));
 
 	for(i = 0; i < mod->nummarksurfaces; i++) {
 		j = le32u(in);

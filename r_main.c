@@ -114,6 +114,20 @@ R_InitTextures(void)
 	R_MissingTexture(r_notexture_mip);
 }
 
+static void
+R_LoadSky_f(cmd_t *c)
+{
+	const char *name;
+
+	USED(c);
+	if(cl.worldmodel == nil || Cmd_Argc() != 1) {
+		Con_Printf("usage: loadsky <skyname>\n");
+		return;
+	}
+	name = Cmd_Argc() > 1 ? Cmd_Argv(1) : nil;
+	R_LoadSkyBox(name, cl.worldmodel);
+}
+
 void
 R_Init(void)
 {
@@ -121,6 +135,8 @@ R_Init(void)
 	R_InitFog();
 
 	Cmd_AddCommand("pointfile", loadpoints);
+	Cmd_AddCommand("loadsky", R_LoadSky_f);
+	Cmd_AddCommand("sky", R_LoadSky_f)->hidden = true; // for AD
 
 	Cvar_RegisterVariable(&r_ambient);
 	Cvar_RegisterVariable(&r_clearcolor);
@@ -177,6 +193,8 @@ R_NewMap(void)
 	r_maxsurfsseen = 0;
 	r_dowarpold = false;
 	r_viewchanged = false;
+
+	R_LoadSkyBox(nil, cl.worldmodel);
 }
 
 void

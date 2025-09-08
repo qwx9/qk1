@@ -334,3 +334,5 @@ texture_t *Load_ExternalTexture(char *map, char *name);
 void Mod_LoadBrushModel(model_t *mod, byte *buffer, int total);
 void Mod_LoadSpriteModel(model_t *mod, byte *buffer, int total);
 void Mod_LoadAliasModel(model_t *mod, void *buffer);
+
+const char *Mod_FindInWorldspawn(model_t *mod, const char *key);

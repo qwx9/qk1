@@ -488,6 +488,8 @@ R_RenderWorld(view_t *v)
 
 	num_node_rejects = 0;
 	R_RecursiveWorldNode(clmodel->nodes, v, 15);
+	if(r_skybox)
+		R_EmitSkyBox(v);
 }
 
 void

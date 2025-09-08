@@ -87,7 +87,7 @@ BSP_CalcSurfaceExtents(model_t *mod, msurface_t *s)
 }
 
 int
-BSP_LoadTextures(model_t *mod, byte *in, int sz)
+BSP_LoadTextures(model_t *mod, byte *in, int sz, int extra)
 {
 	int off, i, j, pixels, num, max, altmax, w, h;
 	byte *p, *in0;
@@ -111,7 +111,7 @@ BSP_LoadTextures(model_t *mod, byte *in, int sz)
 		werrstr("overflow? %d > %d", mod->numtextures * 4, sz - 4);
 		goto err;
 	}
-	mod->textures = Hunk_Alloc(mod->numtextures * sizeof(*mod->textures));
+	mod->textures = Hunk_Alloc((mod->numtextures + extra) * sizeof(*mod->textures));
 
 	for(i = 0; i < mod->numtextures; i++) {
 		off = le32(in);
@@ -258,7 +258,7 @@ err:
 }
 
 int
-BSP_LoadLighting(model_t *mod, byte *in, int sz)
+BSP_LoadLighting(model_t *mod, byte *in, int sz, int extra)
 {
 	int i, litsz;
 	byte *lit;
@@ -284,7 +284,7 @@ BSP_LoadLighting(model_t *mod, byte *in, int sz)
 		Hunk_Free(lit);
 	}
 
-	mod->lightdata = Hunk_Alloc(sz * 3);
+	mod->lightdata = Hunk_Alloc((sz + extra) * 3);
 	for(i = 0; i < sz; i++) {
 		mod->lightdata[i * 3 + 0] = in[i];
 		mod->lightdata[i * 3 + 1] = in[i];
@@ -294,7 +294,7 @@ BSP_LoadLighting(model_t *mod, byte *in, int sz)
 }
 
 int
-BSP_LoadLeafs(model_t *mod, byte *in, int sz)
+BSP_LoadLeafs(model_t *mod, byte *in, int sz, int extra)
 {
 	mleaf_t *out;
 	int i, j, p;
@@ -309,7 +309,7 @@ BSP_LoadLeafs(model_t *mod, byte *in, int sz)
 		return -1;
 	}
 	mod->numleafs = sz / elsz;
-	mod->leafs = out = Hunk_Alloc(mod->numleafs * sizeof(*out));
+	mod->leafs = out = Hunk_Alloc((mod->numleafs + extra) * sizeof(*out));
 
 	for(i = 0; i < mod->numleafs; i++, out++) {
 		out->contents = le32(in);
@@ -371,12 +371,12 @@ bad:
 	leaf = vis + vissz;
 	leafsz = le32(leaf);
 	combined -= 4;
-	if(leafsz > combined || BSP_LoadLeafs(mod, leaf, leafsz) != 0)
+	if(leafsz > combined || BSP_LoadLeafs(mod, leaf, leafsz, 0) != 0)
 		goto bad;
 }
 
 int
-BSP_LoadVisibility(model_t *mod, byte *in, int sz)
+BSP_LoadVisibility(model_t *mod, byte *in, int sz, int extra)
 {
 	mod->visdata = nil;
 	if(sz == 0)
@@ -387,22 +387,22 @@ BSP_LoadVisibility(model_t *mod, byte *in, int sz)
 	}
 
 	if(mod->visdata == nil)
-		memmove(mod->visdata = Hunk_Alloc(sz), in, sz);
+		memmove(mod->visdata = Hunk_Alloc(sz + extra), in, sz);
 	return 0;
 }
 
 int
-BSP_LoadEntities(model_t *mod, byte *in, int sz)
+BSP_LoadEntities(model_t *mod, byte *in, int sz, int extra)
 {
 	if(sz == 0)
 		mod->entities = nil;
 	else
-		memmove(mod->entities = Hunk_Alloc(sz), in, sz);
+		memmove(mod->entities = Hunk_Alloc(sz + extra), in, sz);
 	return 0;
 }
 
 int
-BSP_LoadVertexes(model_t *mod, byte *in, int sz)
+BSP_LoadVertexes(model_t *mod, byte *in, int sz, int extra)
 {
 	mvertex_t *out;
 	int i;
@@ -413,7 +413,7 @@ BSP_LoadVertexes(model_t *mod, byte *in, int sz)
 		return -1;
 	}
 	mod->numvertexes = sz / elsz;
-	mod->vertexes = out = Hunk_Alloc(mod->numvertexes * sizeof(*out));
+	mod->vertexes = out = Hunk_Alloc((mod->numvertexes + extra) * sizeof(*out));
 	for(i = 0; i < mod->numvertexes; i++, out++) {
 		out->position[0] = f32(in);
 		out->position[1] = f32(in);
@@ -423,7 +423,7 @@ BSP_LoadVertexes(model_t *mod, byte *in, int sz)
 }
 
 int
-BSP_LoadSubmodels(model_t *mod, byte *in, int sz)
+BSP_LoadSubmodels(model_t *mod, byte *in, int sz, int extra)
 {
 	static const int elsz = 3 * 4 + 3 * 4 + 3 * 4 + MAX_MAP_HULLS * 4 + 4 + 4 + 4;
 	submodel_t *out;
@@ -434,7 +434,7 @@ BSP_LoadSubmodels(model_t *mod, byte *in, int sz)
 		return -1;
 	}
 	mod->numsubmodels = sz / elsz;
-	mod->submodels = out = Hunk_Alloc(mod->numsubmodels * sizeof(*out));
+	mod->submodels = out = Hunk_Alloc((mod->numsubmodels + extra) * sizeof(*out));
 
 	for(i = 0; i < mod->numsubmodels; i++, out++) {
 		for(j = 0; j < 3; j++)
@@ -453,7 +453,7 @@ BSP_LoadSubmodels(model_t *mod, byte *in, int sz)
 }
 
 int
-BSP_LoadEdges(model_t *mod, byte *in, int sz)
+BSP_LoadEdges(model_t *mod, byte *in, int sz, int extra)
 {
 	medge_t *out;
 	int i;
@@ -464,7 +464,7 @@ BSP_LoadEdges(model_t *mod, byte *in, int sz)
 		return -1;
 	}
 	mod->numedges = sz / elsz;
-	mod->edges = out = Hunk_Alloc(mod->numedges * sizeof(*out));
+	mod->edges = out = Hunk_Alloc((mod->numedges + extra) * sizeof(*out));
 
 	for(i = 0; i < mod->numedges; i++, out++) {
 		out->v[0] = le16u(in);
@@ -474,7 +474,7 @@ BSP_LoadEdges(model_t *mod, byte *in, int sz)
 }
 
 int
-BSP_LoadTexinfo(model_t *mod, byte *in, int sz)
+BSP_LoadTexinfo(model_t *mod, byte *in, int sz, int extra)
 {
 	mtexinfo_t *out;
 	int i, j, k, miptex;
@@ -486,7 +486,7 @@ BSP_LoadTexinfo(model_t *mod, byte *in, int sz)
 		return -1;
 	}
 	mod->numtexinfo = sz / elsz;
-	mod->texinfo = out = Hunk_Alloc(mod->numtexinfo * sizeof(*out));
+	mod->texinfo = out = Hunk_Alloc((mod->numtexinfo + extra) * sizeof(*out));
 
 	for(i = 0; i < mod->numtexinfo; i++, out++) {
 		for(j = 0; j < 2; j++) {
@@ -524,7 +524,7 @@ BSP_LoadTexinfo(model_t *mod, byte *in, int sz)
 }
 
 int
-BSP_LoadFaces(model_t *mod, byte *in, int sz)
+BSP_LoadFaces(model_t *mod, byte *in, int sz, int extra)
 {
 	msurface_t *out;
 	int i, surfnum;
@@ -535,7 +535,7 @@ BSP_LoadFaces(model_t *mod, byte *in, int sz)
 		return -1;
 	}
 	mod->numsurfaces = sz / elsz;
-	mod->surfaces = out = Hunk_Alloc(mod->numsurfaces * sizeof(*out));
+	mod->surfaces = out = Hunk_Alloc((mod->numsurfaces + extra) * sizeof(*out));
 
 	for(surfnum = 0; surfnum < mod->numsurfaces; surfnum++, out++) {
 		out->plane = mod->planes + le16u(in);
@@ -583,7 +583,7 @@ BSP_LoadFaces(model_t *mod, byte *in, int sz)
 }
 
 int
-BSP_LoadNodes(model_t *mod, byte *in, int sz)
+BSP_LoadNodes(model_t *mod, byte *in, int sz, int extra)
 {
 	int i, j, p;
 	mnode_t *out;
@@ -594,7 +594,7 @@ BSP_LoadNodes(model_t *mod, byte *in, int sz)
 		return -1;
 	}
 	mod->numnodes = sz / elsz;
-	mod->nodes = out = Hunk_Alloc(mod->numnodes * sizeof(*out));
+	mod->nodes = out = Hunk_Alloc((mod->numnodes + extra) * sizeof(*out));
 
 	for(i = 0; i < mod->numnodes; i++, out++) {
 		out->plane = mod->planes + le32u(in);
@@ -627,7 +627,7 @@ BSP_LoadNodes(model_t *mod, byte *in, int sz)
 }
 
 int
-BSP_LoadClipnodes(model_t *mod, byte *in, int sz)
+BSP_LoadClipnodes(model_t *mod, byte *in, int sz, int extra)
 {
 	mclipnode_t *out;
 	int i;
@@ -639,7 +639,7 @@ BSP_LoadClipnodes(model_t *mod, byte *in, int sz)
 		return -1;
 	}
 	mod->numclipnodes = sz / elsz;
-	mod->clipnodes = out = Hunk_Alloc(mod->numclipnodes * sizeof(*out));
+	mod->clipnodes = out = Hunk_Alloc((mod->numclipnodes + extra) * sizeof(*out));
 
 	hull = &mod->hulls[1];
 	hull->clipnodes = out;
@@ -708,7 +708,7 @@ BSP_MakeHull0(model_t *mod)
 }
 
 int
-BSP_LoadMarksurfaces(model_t *mod, byte *in, int sz)
+BSP_LoadMarksurfaces(model_t *mod, byte *in, int sz, int extra)
 {
 	int i, j;
 	msurface_t **out;
@@ -719,7 +719,7 @@ BSP_LoadMarksurfaces(model_t *mod, byte *in, int sz)
 		return -1;
 	}
 	mod->nummarksurfaces = sz / elsz;
-	mod->marksurfaces = out = Hunk_Alloc(mod->nummarksurfaces * sizeof(*out));
+	mod->marksurfaces = out = Hunk_Alloc((mod->nummarksurfaces + extra) * sizeof(*out));
 
 	for(i = 0; i < mod->nummarksurfaces; i++) {
 		j = le16u(in);
@@ -733,7 +733,7 @@ BSP_LoadMarksurfaces(model_t *mod, byte *in, int sz)
 }
 
 int
-BSP_LoadSurfedges(model_t *mod, byte *in, int sz)
+BSP_LoadSurfedges(model_t *mod, byte *in, int sz, int extra)
 {
 	int i, *out;
 	static const int elsz = 4;
@@ -743,7 +743,7 @@ BSP_LoadSurfedges(model_t *mod, byte *in, int sz)
 		return -1;
 	}
 	mod->numsurfedges = sz / elsz;
-	mod->surfedges = out = Hunk_Alloc(mod->numsurfedges * sizeof(*out));
+	mod->surfedges = out = Hunk_Alloc((mod->numsurfedges + extra) * sizeof(*out));
 
 	for(i = 0; i < mod->numsurfedges; i++)
 		out[i] = le32(in);
@@ -751,7 +751,7 @@ BSP_LoadSurfedges(model_t *mod, byte *in, int sz)
 }
 
 int
-BSP_LoadPlanes(model_t *mod, byte *in, int sz)
+BSP_LoadPlanes(model_t *mod, byte *in, int sz, int extra)
 {
 	int i, j, bits;
 	mplane_t *out;
@@ -762,7 +762,7 @@ BSP_LoadPlanes(model_t *mod, byte *in, int sz)
 		return -1;
 	}
 	mod->numplanes = sz / elsz;
-	mod->planes = out = Hunk_Alloc(mod->numplanes * sizeof(*out));
+	mod->planes = out = Hunk_Alloc((mod->numplanes + extra) * sizeof(*out));
 
 	for(i = 0; i < mod->numplanes; i++, out++) {
 		bits = 0;

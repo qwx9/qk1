@@ -1,34 +1,5 @@
 #include "quakedef.h"
-
-void BSP_MakeHull0(model_t *mod);
-
-int BSP_LoadClipnodes(model_t *mod, byte *in, int sz);
-int BSP_LoadEdges(model_t *mod, byte *in, int sz);
-int BSP_LoadEntities(model_t *mod, byte *in, int sz);
-int BSP_LoadFaces(model_t *mod, byte *in, int sz);
-int BSP_LoadLeafs(model_t *mod, byte *in, int sz);
-int BSP_LoadLighting(model_t *mod, byte *in, int sz);
-int BSP_LoadMarksurfaces(model_t *mod, byte *in, int sz);
-int BSP_LoadNodes(model_t *mod, byte *in, int sz);
-int BSP_LoadPlanes(model_t *mod, byte *in, int sz);
-int BSP_LoadSubmodels(model_t *mod, byte *in, int sz);
-int BSP_LoadSurfedges(model_t *mod, byte *in, int sz);
-int BSP_LoadTexinfo(model_t *mod, byte *in, int sz);
-int BSP_LoadTextures(model_t *mod, byte *in, int sz);
-int BSP_LoadVertexes(model_t *mod, byte *in, int sz);
-int BSP_LoadVisibility(model_t *mod, byte *in, int sz);
-
-int BSP2_LoadClipnodes(model_t *mod, byte *in, int sz);
-int BSP2_LoadEdges(model_t *mod, byte *in, int sz);
-int BSP2_LoadFaces(model_t *mod, byte *in, int sz);
-int BSP2_LoadLeafs(model_t *mod, byte *in, int sz);
-int BSP2_LoadMarksurfaces(model_t *mod, byte *in, int sz);
-int BSP2_LoadNodes(model_t *mod, byte *in, int sz);
-
-int BSP30_LoadEntities(model_t *mod, byte *in, int sz);
-int BSP30_LoadLighting(model_t *mod, byte *in, int sz);
-int BSP30_LoadFaces(model_t *mod, byte *in, int sz);
-int BSP30_LoadTextures(model_t *mod, byte *in, int sz);
+#include "model_bsp.h"
 
 static float
 RadiusFromBounds(vec3_t mins, vec3_t maxs)
@@ -103,7 +74,7 @@ Mod_LoadBrushModel(model_t *mod, byte *in0, int total)
 	byte *in;
 	submodel_t *bm;
 	char name[16], *e;
-	int (*loadf[HEADER_LUMPS])(model_t *, byte *, int) = {
+	int (*loadf[HEADER_LUMPS])(model_t *, byte *, int, int) = {
 		[LUMP_ENTITIES] = BSP_LoadEntities,
 		[LUMP_VERTEXES] = BSP_LoadVertexes,
 		[LUMP_EDGES] = BSP_LoadEdges,
@@ -119,6 +90,12 @@ Mod_LoadBrushModel(model_t *mod, byte *in0, int total)
 		[LUMP_NODES] = BSP_LoadNodes,
 		[LUMP_CLIPNODES] = BSP_LoadClipnodes,
 		[LUMP_MODELS] = BSP_LoadSubmodels,
+	};
+	static const int extra[HEADER_LUMPS] = {
+		[LUMP_VERTEXES] = 8,
+		[LUMP_EDGES] = 12,
+		[LUMP_SURFEDGES] = 24,
+		[LUMP_FACES] = 6,
 	};
 	static const int order[HEADER_LUMPS] = {
 		LUMP_ENTITIES,
@@ -145,7 +122,8 @@ Mod_LoadBrushModel(model_t *mod, byte *in0, int total)
 	if(mod->ver == BSPVERSION) {
 		// all set
 	} else if(mod->ver == BSP30VERSION) {
-		loadf[LUMP_ENTITIES] = BSP30_LoadEntities, loadf[LUMP_FACES] = BSP30_LoadFaces;
+		loadf[LUMP_ENTITIES] = BSP30_LoadEntities;
+		loadf[LUMP_FACES] = BSP30_LoadFaces;
 		loadf[LUMP_LIGHTING] = BSP30_LoadLighting;
 		loadf[LUMP_TEXTURES] = BSP30_LoadTextures;
 	} else if(mod->ver == BSP2VERSION) {
@@ -221,8 +199,40 @@ Mod_LoadBrushModel(model_t *mod, byte *in0, int total)
 			mod = submod;
 		}
 	}
-
 	return;
 err:
 	Host_Error("Mod_LoadBrushModel: %s: %s", mod->name, lerr());
+}
+
+const char *
+Mod_FindInWorldspawn(model_t *mod, const char *key)
+{
+	enum {
+		Sinit,
+		Sinside,
+		Sfound,
+	};
+
+	int state = Sinit;
+	char *e;
+
+	for(e = mod->entities;;) {
+		if((e = COM_Parse(e)) == nil)
+			break;
+		if(com_token[0] == '{') {
+			if(state == Sinside)
+				break;
+			state = Sinside;
+			continue;
+		}
+		if(com_token[0] == '}')
+			break;
+		if(state == Sinside && strcmp(com_token, key) == 0)
+			state = Sfound;
+		if((e = COM_Parse(e)) == nil)
+			break;
+		if(state == Sfound)
+			return com_token;
+	}
+	return nil;
 }

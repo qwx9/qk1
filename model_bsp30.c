@@ -3,7 +3,7 @@
 #include "render.h"
 
 int
-BSP30_LoadEntities(model_t *mod, byte *in, int sz)
+BSP30_LoadEntities(model_t *mod, byte *in, int sz, int extra)
 {
 	char *p, *s, *e, path[32];
 	Wad *w;
@@ -15,7 +15,7 @@ BSP30_LoadEntities(model_t *mod, byte *in, int sz)
 		return 0;
 	}
 
-	memmove(mod->entities = Hunk_Alloc(sz), in, sz);
+	memmove(mod->entities = Hunk_Alloc(sz + extra), in, sz);
 	if((s = strstr((char *)mod->entities, "\"wad\"")) == nil || (s = strchr(s + 5, '"')) == nil ||
 	   (e = strchr(s + 1, '"')) == nil)
 		return 0;
@@ -39,19 +39,19 @@ BSP30_LoadEntities(model_t *mod, byte *in, int sz)
 }
 
 int
-BSP30_LoadLighting(model_t *mod, byte *in, int sz)
+BSP30_LoadLighting(model_t *mod, byte *in, int sz, int extra)
 {
 	if(sz == 0) {
 		mod->lightdata = nil;
 		return 0;
 	}
 
-	memmove(mod->lightdata = Hunk_Alloc(sz), in, sz);
+	memmove(mod->lightdata = Hunk_Alloc(sz + extra), in, sz);
 	return 0;
 }
 
 int
-BSP30_LoadFaces(model_t *mod, byte *in, int sz)
+BSP30_LoadFaces(model_t *mod, byte *in, int sz, int extra)
 {
 	msurface_t *out;
 	int i, surfnum;
@@ -62,7 +62,7 @@ BSP30_LoadFaces(model_t *mod, byte *in, int sz)
 		return -1;
 	}
 	mod->numsurfaces = sz / elsz;
-	mod->surfaces = out = Hunk_Alloc(mod->numsurfaces * sizeof(*out));
+	mod->surfaces = out = Hunk_Alloc((mod->numsurfaces + extra) * sizeof(*out));
 
 	for(surfnum = 0; surfnum < mod->numsurfaces; surfnum++, out++) {
 		out->plane = mod->planes + le16u(in);
@@ -102,7 +102,7 @@ BSP30_LoadFaces(model_t *mod, byte *in, int sz)
 }
 
 int
-BSP30_LoadTextures(model_t *mod, byte *in, int sz)
+BSP30_LoadTextures(model_t *mod, byte *in, int sz, int extra)
 {
 	int off, i, j, pixels, num, max, altmax, w, h, palsz;
 	byte *p, *in0, *x;
@@ -126,7 +126,7 @@ BSP30_LoadTextures(model_t *mod, byte *in, int sz)
 		werrstr("overflow? %d > %d", mod->numtextures * 4, sz - 4);
 		goto err;
 	}
-	mod->textures = Hunk_Alloc(mod->numtextures * sizeof(*mod->textures));
+	mod->textures = Hunk_Alloc((mod->numtextures + extra) * sizeof(*mod->textures));
 
 	for(i = 0; i < mod->numtextures; i++) {
 		off = le32(in);

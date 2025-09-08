@@ -112,7 +112,8 @@ D_DrawSpans(espan_t *pspan, texvars_t *tv, byte alpha, int spanfunc)
 			// calculate s and t at the far end of the span
 			spancount = min(count, spanmax);
 			count -= spancount;
-			fogged = fogenabled && fogcalc(izi, izi + izistep * spancount, spancount, &fog);
+			fogged = fogenabled && ((spanfunc == SPAN_SKYBOX && fogvars.skypix != 0) ||
+									fogcalc(izi, izi + izistep * spancount, spancount, &fog));
 
 			if(count) {
 				// calculate s/z, t/z, zi->fixed s and t at far end of span,
@@ -231,6 +232,9 @@ D_DrawSpans(espan_t *pspan, texvars_t *tv, byte alpha, int spanfunc)
 						fog_
 					);
 					break;
+				case SPAN_SKYBOX:
+					dospan_skybox_f1(pdest_, pbase, s, t, sstep, tstep, spancount_, tv->w, pz_);
+					break;
 				}
 			} else {
 				switch(spanfunc) {
@@ -264,6 +268,9 @@ D_DrawSpans(espan_t *pspan, texvars_t *tv, byte alpha, int spanfunc)
 					dospan_fence(
 						pdest_, pbase, s, t, sstep, tstep, spancount_, tv->w, pz_, izi_, izistep
 					);
+					break;
+				case SPAN_SKYBOX:
+					dospan_skybox(pdest_, pbase, s, t, sstep, tstep, spancount_, tv->w, pz_);
 					break;
 				}
 			}
