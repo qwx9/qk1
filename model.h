@@ -66,7 +66,7 @@ enum {
 
 typedef struct {
 	unsigned int v[2];
-	unsigned int cachededgeoffset;
+	unsigned int cacheoffset;
 } medge_t;
 
 typedef struct {
