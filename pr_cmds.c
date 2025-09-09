@@ -1470,6 +1470,7 @@ PF_checkextension(pr_t *pr)
 		"DP_EF_ADDITIVE",
 		"DP_EF_NODRAW",
 		"DP_ENT_ALPHA",
+		"DP_GFX_FOG",
 		"DP_GFX_SKYBOX",
 		"DP_HALFLIFE_MAP",
 		"DP_HALFLIFE_MAP_CVAR",
