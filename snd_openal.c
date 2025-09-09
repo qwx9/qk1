@@ -867,6 +867,7 @@ stepcd(void)
 	if(track.stop)
 		stopcd();
 	else if(track.v != nil) {
+		alSourcef(track.src, AL_MAX_GAIN, 2.0);
 		alSourcef(track.src, AL_GAIN, bgmvolume.value);
 		ALERR();
 	}
