@@ -1,180 +1,48 @@
-qk1 - (9) quake
-===============
+qk1
+===
 
-Port of linux/x11 quake and quakeworld to plan9front.  Tested and known to
-work on arm64, amd64, 386 and arm.
+Modernized Quake for Linux/X11 and [9front](http://9front.org). For
+9front-specific documentation refer to
+[README-9front.md](./README-9front.md).
 
-For details, see: http://nopenopenope.net/posts/quake
+It was mainly extended in order to support [Arcane
+Dimensions](https://www.moddb.com/mods/arcane-dimensions).
 
-This fork in particular was extended to support Arcane Dimensions[1] mod.
+Some of the notable changes:
 
-Hereafter `qk1' refers to the project as a whole, and `quake' and `quakeworld'
-refer to the actual games.
+ * 32-bit and 64-bit systems support
+ * raised limits and refactored memory management
+ * better console editing and completion
+ * support for any screen resolution
+ * 24-bit *software* renderer as opposed to 8-bit one
+ * colored lighting (built-in or external LIT files)
+ * BSP2 and BSP30 (Half-Life) support
+ * translucent water (built-in or external VIS files)
+ * external textures (TGA)
+ * skyboxes
+ * exponential fog
+ * client's screen refresh rate not tied to server's
+ * OpenAL with optional HRTF for sound
+ * OGG/Vorbis for music
+ * RMQ (v999) network protocol (original v15 is supported as well)
+ * a ton of other bugfixes and improvements
 
-[1] https://www.moddb.com/mods/arcane-dimensions
+Advertised extentions:
 
-Installation and start up
--------------------------
-
-	*Note*: all data filenames should be lowercased; exceptions are demo
-	files, maps and other non-hardcoded files.
-
-Besides building and installing qk1, you still need .pak files to play.  Both
-shareware and registered versions work, as well as the official expansions,
-and many mods.
-The data files are to be installed in the system directory,
-/sys/games/lib/quake/$gamename, where $gamename is `id1' for plain old quake,
-`qw' for quakeworld, `hipnotic' or `rogue' for the expansions, _reaper_ for
-the Reaper bot mod, etc.
-
-Savegames, configuration files and other user-specific data like demos is
-saved in $home/lib/quake/$gamename.  Shared demos can be installed in the
-system directory instead.
-
-	*Note*: demos in .pak files are a special case; they need to be
-	installed in a user directory, named using the next available .pak
-	index; for instance, the registered version has `pak0.pak' and
-	`pak1.pak', thus the additional .pak file will be `pak2.pak'.
-
-To install quake:
-
-	; mk install
-	# installation from cd; both shareware and registered versions work
-	; cdfs
-	; cp /mnt/cd/id1/*.pak /sys/games/lib/quake/id1/
-	; unmount /mnt/cd
-	# launch!
-	; games/quake >/dev/null
-
-To install quakeworld, first install quake, then:
-
-	; cd qw
-	; mk install
-	# a qwprogs.dat file must be provided also, one is included
-	; cp qw/progs/qwprogs.dat /sys/games/lib/quake/qw/
-	# launch!
-	; games/qwcl >/dev/null
-
-To start a quakeworld dedicated server:
-
-	; echo scroll >/mnt/wsys/wctl
-	; games/qwsv
-
-To install an expansion (here from cd):
-
-	; mkdir /sys/games/lib/quake/$mod
-	# expansions provide at least .pak files
-	; cdfs
-	; cp /mnt/cd/$mod/*.pak /sys/games/lib/quake/$mod/
-	; unmount /mnt/cd
-	# launch!
-	; games/quake -g rogue >/dev/null
-
-To install a mod
-
-	; mkdir /sys/games/lib/quake/$mod
-	; dircp /n/hjdicks/$mod /sys/games/lib/quake/$mod
-	# launch!
-	; games/quake -g $mod >/dev/null
-
-
-
-Memory limit (applies to QW only)
----------------------------------
-By default, qw allocates 64 MB of memory for its internal heap.  This
-amount can be controlled via a command line parameter, which is sadly
-different between games (i'm to blame):
-
-	; games/qwcl -mem 192
-	; games/qwsv -mem 192
-
-It is necessary to increase it when playing on larger resolutions, else qw
-might crash with errors such as 'Hunk_Alloc: failed on 548512 bytes'.  Mods
-may require more memory as well.  The old default was 12 MB, so it can also
-be lowered in the unlikely case that it's necessary.  Typically, this
-needn't be touched.
-
-
-Mouse usage
------------
-Both quake and quakeworld now grab the mouse and have free mouse look by
-default.  Mouse grabbing is controled via a console variable at runtime:
-
-	] m_windowed 1
-
-Mouse look on the other hand is enabled with a command:
-
-	] +mlook
-
-To disable mouse look, use `-mlook'.
-
-
-Screen resolution (applies to QW only)
---------------------------------------
-The rio(1) window running qw can be resized at will and at runtime, but must
-the drawing area's size must be between 320x160 and 2047x2048.  To help with
-drawing speed, scaling up from a fixed resolution has been implemented.  When
-enabled, qw will behave like doom(1), where window size determines at
-runtime a scaling factor.
-
-quakeworld:
-
-	; games/qwcl -scale 320 200
-
-
-Framerate and performance
--------------------------
-To play the games comfortably the framerate should be above 72.  There are
-several things to note:
-
-- lowering the resolution (window size) improves performance
-- scaling up graphics from a lower resolution improves performance
-- performance influences sound output and can cause underflows (see below)
-- on slower or uniprocessor machines, the parallel cd audio process affects
-  performance
-
-In quakeworld, the framerate is controlled by one of two console variables,
-`cl_maxfps' and `rate' and can be between 30 and 72.  If `cl_maxfps' is not
-set, framerate is set to `rate' / 80.  `cl_maxfps' is now set to 72 by
-default and saved on exit.
-
-A simple way to benchmark is to play a demo with an uncapped framerate (one
-must be provided for quakeworld beforehand):
-
-	] timedemo demo3
-
-
-Audio and music
----------------
-On low framerates, devaudio's delay must be increased appropriately, up to
-4410 (for a rate of 44.1 kHz), or sound will cut up.  This applies to
-quakeworld as well, for which the framerate can also be capped lower.
-
-qk1 reads /mnt/cd/[au]NNN files as in cdfs(1) to play music.  The directory
-needn't be populated by cdfs(1), so long as the files are raw signed little-
-endian 16-bit pcm audio, as described by audio(3).  CD playback requires
-mixfs(1).
-
-
-Known bugs
-----------
-- regression: cd audio with actual cd's broken
-- a rare crash at d_sprite.c:/D_SpriteDrawSpansd can occur when running for
-a long time
-- an infinite loop in world.c:/SV_TouchLinks can sometimes occur
-- (amd64) entities visible through walls right when emerging from/immerging
-  into water
-- resolutions other than 4:3: some vertical and horizontal strips on the edge
-  of the screen aren't drawn
-- sprites are not scaled correctly on higher resolutions and become=
-disproportionate
-- #define PARANOID reveals several points of failure that are otherwise ignored
-- both stdio(2) and print(2) are used due to the way colored strings are, how
-to handle this gracefully is unknown
-- questionable pr_edict.c:/PR_Str hack may cause problems (QW only)
-- refactoring: manpages, command line args, merge quakeworld, FIXME's in code
-
-
-Legal
------
-Quake, hence qk1, is licensed under the GPLv2. see COPYING for details.
+ * [DP_CL_LOADSKY](https://quakewiki.org/wiki/DP_CL_LOADSKY)
+ * [DP_EF_ADDITIVE](https://quakewiki.org/wiki/DP_EF_ADDITIVE)
+ * [DP_EF_NODRAW](https://quakewiki.org/wiki/DP_EF_NODRAW)
+ * [DP_ENT_ALPHA](https://quakewiki.org/wiki/DP_ENT_ALPHA)
+ * [DP_GFX_SKYBOX](https://quakewiki.org/wiki/DP_GFX_SKYBOX)
+ * [DP_HALFLIFE_MAP](https://quakewiki.org/wiki/DP_HALFLIFE_MAP)
+ * [DP_HALFLIFE_MAP_CVAR](https://quakewiki.org/wiki/DP_HALFLIFE_MAP_CVAR)
+ * [DP_LITSUPPORT](https://quakewiki.org/wiki/DP_LITSUPPORT)
+ * [DP_QC_ASINACOSATANATAN2TAN](https://quakewiki.org/wiki/DP_QC_DP_QC_ASINACOSATANATAN2TAN)
+ * [DP_QC_CHANGEPITCH](https://quakewiki.org/wiki/DP_QC_CHANGEPITCH)
+ * [DP_QC_MINMAXBOUND](https://quakewiki.org/wiki/DP_QC_MINMAXBOUND)
+ * [DP_QC_SINCOSSQRTPOW](https://quakewiki.org/wiki/DP_QC_SINCOSSQRTPOW)
+ * [DP_QC_TRACETOSS](https://quakewiki.org/wiki/DP_QC_TRACETOSS)
+ * [DP_QC_TOKENIZE_CONSOLE](https://quakewiki.org/wiki/DP_QC_TOKENIZE_CONSOLE)
+ * [DP_SPRITE32](https://quakewiki.org/wiki/DP_SPRITE32)
+ * [DP_SV_ROTATINGBMODEL](https://quakewiki.org/wiki/DP_SV_ROTATINGBMODEL)
+ * [KRIMZON_SV_PARSECLIENTCOMMAND](https://quakewiki.org/wiki/KRIMZON_SV_PARSECLIENTCOMMAND)
