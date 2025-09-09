@@ -117,15 +117,12 @@ R_InitTextures(void)
 static void
 R_LoadSky_f(cmd_t *c)
 {
-	const char *name;
-
 	USED(c);
-	if(cl.worldmodel == nil || Cmd_Argc() != 1) {
+	if(cl.worldmodel == nil || Cmd_Argc() != 2) {
 		Con_Printf("usage: loadsky <skyname>\n");
 		return;
 	}
-	name = Cmd_Argc() > 1 ? Cmd_Argv(1) : nil;
-	R_LoadSkyBox(name, cl.worldmodel);
+	R_LoadSkyBox(Cmd_Argv(1), cl.worldmodel);
 }
 
 void
