@@ -814,15 +814,15 @@ M_AdjustSliders(int dir)
 		sensitivity.value = clamp(sensitivity.value, 1, 11);
 		setcvarv("sensitivity", sensitivity.value);
 		break;
-	case 8: // music volume
-		bgmvolume.value += dir * 0.1;
-		bgmvolume.value = clamp(bgmvolume.value, 0, 1);
-		setcvarv("bgmvolume", bgmvolume.value);
-		break;
-	case 9: // sfx volume
+	case 8: // sfx volume
 		volume.value += dir * 0.1;
 		volume.value = clamp(volume.value, 0, 1);
 		setcvarv("volume", volume.value);
+		break;
+	case 9: // music volume
+		bgmvolume.value += dir * 0.1;
+		bgmvolume.value = clamp(bgmvolume.value, 0, 1);
+		setcvarv("bgmvolume", bgmvolume.value);
 		break;
 	case 10: // always run
 		if(cl_forwardspeed.value > 200) {
@@ -914,13 +914,13 @@ M_Options_Draw(void)
 	M_DrawSlider(220, y, r);
 	y += 8;
 
-	M_Print(16, y, "       CD Music Volume");
-	r = bgmvolume.value;
+	M_Print(16, y, "          Sound Volume");
+	r = volume.value;
 	M_DrawSlider(220, y, r);
 	y += 8;
 
-	M_Print(16, y, "          Sound Volume");
-	r = volume.value;
+	M_Print(16, y, "          Music Volume");
+	r = bgmvolume.value;
 	M_DrawSlider(220, y, r);
 	y += 8;
 
