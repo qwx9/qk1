@@ -156,17 +156,17 @@ croak(void *, char *note)
 static void
 usage(void)
 {
-	fprint(2, "usage: %s [-b basepath] [-d] [-g game] [-x netmtpt] [-N cd|snd]\n", argv0);
+	fprint(2, "usage: %s [-b BASEPATH] [-g GAME] [-d] [-x NETMTPT] [-N snd|cd]\n", argv0);
 	exits("usage");
 }
 
 void
 threadmain(int argc, char **argv)
 {
+	static char *paths[8] = {0};
 	double t, t´, Δt;
 	char *e;
 	int i;
-	static char *paths[8] = {0};
 
 	i = 0;
 	paths[i++] = ".";
