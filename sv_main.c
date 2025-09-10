@@ -964,7 +964,7 @@ SV_SendReconnect(void)
 	NET_SendToAll(&msg, 5);
 
 	if(cls.state != ca_dedicated)
-		Cmd_ExecuteString("reconnect\n", src_command);
+		Cmd_ExecuteString("reconnect", src_command);
 }
 
 /*

@@ -73,7 +73,7 @@ extern int r_drawflags;
 void R_RenderWorld(view_t *v);
 void R_RenderBlendedBrushes(view_t *v);
 
-void R_ResetFog(void);
+void R_ApplyFog(model_t *m);
 void R_InitFog(void);
 
 void R_DrawSprite(view_t *v);

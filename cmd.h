@@ -11,24 +11,6 @@
  * The game starts with a Cbuf_AddText ("exec quake.rc\n"); Cbuf_Execute ();
  */
 
-// allocates an initial text buffer that will grow as needed
-void Cbuf_Init(void);
-
-// as new commands are generated from the console or keybindings,
-// the text is added to the end of the command buffer.
-void Cbuf_AddText(char *text);
-
-// when a command wants to issue other commands immediately, the text is
-// inserted at the beginning of the buffer, before any remaining unexecuted
-// commands.
-void Cbuf_InsertText(char *text);
-
-// Pulls off \n terminated lines of text from the command buffer and sends
-// them through Cmd_ExecuteString.  Stops when the buffer is empty.
-// Normally called once per frame, but may be explicitly invoked.
-// Do not call inside a command function!
-void Cbuf_Execute(void);
-
 /*
  * Command execution takes a null terminated string, breaks it into tokens,
  * then searches for a command or variable that matches the first token.
@@ -92,3 +74,21 @@ void Cmd_ExecuteString(char *text, cmd_source_t src);
 // things like godmode, noclip, etc, are commands directed to the server,
 // so when they are typed in at the console, they will need to be forwarded.
 void Cmd_ForwardToServer(cmd_t *c);
+
+// allocates an initial text buffer that will grow as needed
+void Cbuf_Init(void);
+
+// as new commands are generated from the console or keybindings,
+// the text is added to the end of the command buffer.
+void Cbuf_AddText(char *text);
+
+// when a command wants to issue other commands immediately, the text is
+// inserted at the beginning of the buffer, before any remaining unexecuted
+// commands.
+void Cbuf_InsertText(char *text);
+
+// Pulls off \n terminated lines of text from the command buffer and sends
+// them through Cmd_ExecuteString.  Stops when the buffer is empty.
+// Normally called once per frame, but may be explicitly invoked.
+// Do not call inside a command function!
+void Cbuf_Execute(void);

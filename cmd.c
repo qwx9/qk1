@@ -255,7 +255,7 @@ Cmd_Args(void)
 }
 
 static void
-Cmd_TokenizeString(char *text)
+Cmd_TokenizeString(char *s)
 {
 	int i;
 
@@ -270,20 +270,20 @@ Cmd_TokenizeString(char *text)
 
 	while(1) {
 		// skip whitespace up to a /n
-		while(*text && *text <= ' ' && *text != '\n')
-			text++;
+		while(*s != 0 && *s <= ' ' && *s != '\n')
+			s++;
 
-		if(*text == '\n') // a newline seperates commands in the buffer
+		if(*s == '\n') // a newline seperates commands in the buffer
 			return;
 
-		if(!*text)
+		if(*s == 0)
 			return;
 
 		if(cmd_argc == 1)
-			cmd_args = text;
+			cmd_args = s;
 
-		text = COM_Parse(text);
-		if(!text)
+		s = COM_Parse(s);
+		if(!s)
 			return;
 
 		if(cmd_argc < nelem(cmd_argv)) {

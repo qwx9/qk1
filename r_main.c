@@ -184,13 +184,13 @@ R_NewMap(void)
 	r_edges = Hunk_Alloc(r_numallocatededges * sizeof(*r_edges));
 
 	r_viewleaf = nil;
-	R_ClearParticles();
-	R_ResetFog();
 	r_maxedgesseen = 0;
 	r_maxsurfsseen = 0;
 	r_dowarpold = false;
 	r_viewchanged = false;
 
+	R_ClearParticles();
+	R_ApplyFog(cl.worldmodel);
 	R_LoadSkyBox(nil, cl.worldmodel);
 }
 

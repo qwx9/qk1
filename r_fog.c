@@ -1,8 +1,8 @@
 #include "quakedef.h"
 
-static cvar_t r_fog = {"r_fog", "1", true};
 static cvar_t r_fullbrightfog = {"r_fullbrightfog", "0.9"};
 static cvar_t r_skyfog = {"r_skyfog", "0.5"};
+static cvar_t r_fog = {"r_fog", "1", true};
 
 fogvars_t fogvars;
 
@@ -41,8 +41,8 @@ fog(cmd_t *c)
 	i = 1;
 	n = Cmd_Argc();
 	switch(n) {
-	case 5:
 	case 2:
+	case 5:
 		x = atof(Cmd_Argv(i++));
 		if(n == 2 && strncmp(s = Cmd_Argv(0), "gl_fog", 6) == 0 && s[6] != 'd') { // Nehahra
 			x = 255 * clamp(x, 0.0, 1.0);
@@ -70,19 +70,37 @@ fog(cmd_t *c)
 		fogvars.c1 = 0xff * clamp(x, 0.0, 1.0);
 		x = atof(Cmd_Argv(i));
 		fogvars.c0 = 0xff * clamp(x, 0.0, 1.0);
-		r_skyfog_cb(&r_skyfog); /* recalculate sky fog */
 		break;
 	}
 	fogrecalc();
 }
 
 void
-R_ResetFog(void)
+R_ApplyFog(model_t *m)
 {
-	memset(&fogvars, 0, sizeof(fogvars));
-	fogvars.c2 = fogvars.c1 = fogvars.c0 = 0x80;
+	const char *s;
+
+	fogvars.enabled = false;
 	fogvars.allowed = r_fog.value > 0.0;
-	setcvar("r_skyfog", "0"); // calls fogrecalc
+	if(!fogvars.allowed)
+		return;
+
+	fogvars.pix = fogvars.fbpix = fogvars.skypix = 0;
+	fogvars.density = 0;
+	fogvars.c0 = fogvars.c1 = fogvars.c2 = 0x80;
+
+	if((s = Mod_FindInWorldspawn(m, "fog")) != nil)
+		Cmd_ExecuteString(va("fog %s", s), src_command);
+	else if((s = Mod_FindInWorldspawn(m, "fog_density")) != nil) {
+		Cmd_ExecuteString(va("fog %s", s), src_command);
+		if(fogvars.enabled && (s = Mod_FindInWorldspawn(m, "fog_colour")) != nil)
+			Cmd_ExecuteString(va("fog %s", s), src_command);
+	}
+	if(fogvars.enabled) {
+		if((s = Mod_FindInWorldspawn(m, "skyfog_density")) == nil)
+			s = "0";
+		setcvar("r_skyfog", s);
+	}
 }
 
 static void
