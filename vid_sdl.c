@@ -185,7 +185,7 @@ makewindow(void)
 		SDL_DestroyWindow(win);
 
 	hints();
-	if(!SDL_CreateWindowAndRenderer("quake", w, h, cvarwinflags(), &win, &rend))
+	if(!SDL_CreateWindowAndRenderer("Quake (qk1)", w, h, cvarwinflags(), &win, &rend))
 		fatal("SDL_CreateWindow: %s", SDL_GetError());
 	SDL_SetWindowResizable(win, true);
 	SDL_SetWindowMinimumSize(win, MINWIDTH, MINHEIGHT);
@@ -216,6 +216,11 @@ sys_wrpath(void)
 void
 initfb(void)
 {
+	SDL_SetAppMetadataProperty(SDL_PROP_APP_METADATA_NAME_STRING, "Quake (qk1)");
+	SDL_SetAppMetadataProperty(SDL_PROP_APP_METADATA_VERSION_STRING, va("%.2f", VERSION));
+	SDL_SetAppMetadataProperty(SDL_PROP_APP_METADATA_TYPE_STRING, "game");
+	SDL_SetAppMetadataProperty(SDL_PROP_APP_METADATA_URL_STRING, "https://sr.ht/~ft/qk1");
+
 	vid.numpages = 2;
 	vid.colormap = malloc(256 * 64 * sizeof(pixel_t));
 	torgbx(host_colormap, vid.colormap, 256 * 64);
