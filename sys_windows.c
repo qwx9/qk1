@@ -4,9 +4,12 @@
 #include <errno.h>
 #include <fenv.h>
 
+extern bool doublebufer;
+
 char *game;
 int debug;
 char lasterr[256] = {0};
+
 static const char *disabled[32];
 static int ndisabled;
 
@@ -145,10 +148,13 @@ main(int argc, char **argv)
 
 	parg_init(&ps);
 	nargs = 0;
-	while((c = parg_getopt(&ps, argc, argv, "b:Ddg:N:")) >= 0) {
+	while((c = parg_getopt(&ps, argc, argv, "2b:Ddg:N:")) >= 0) {
 		switch(c) {
 		case 1:
 			argv[nargs++] = (char *)ps.optarg;
+			break;
+		case '2':
+			doublebuffer = true;
 			break;
 		case 'b':
 			if(i < nelem(paths) - 2)
@@ -168,7 +174,7 @@ main(int argc, char **argv)
 			game = (char *)ps.optarg;
 			break;
 		case 'h':
-			fprintf(stderr, "usage: qk1 [-g game]\n");
+			fprintf(stderr, "usage: qk1 [-b BASE_PATH] [-g GAME] [-2] [-d] [-N snd|cd]\n");
 			return 0;
 			break;
 		case '?':

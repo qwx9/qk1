@@ -11,6 +11,8 @@ extern pixel_t *r_warpbuffer;
 static cvar_t v_fullscreen = {"v_fullscreen", "0", true};
 static cvar_t v_sync = {"v_sync", "1", true};
 
+bool doublebuffer = false;
+
 static int
 curwinmode(void)
 {
@@ -154,9 +156,8 @@ hints(void)
 	SDL_SetHint(SDL_HINT_WINDOW_FRAME_USABLE_WHILE_CURSOR_HIDDEN, "0");
 	SDL_SetHint(SDL_HINT_RENDER_GPU_LOW_POWER, "1");
 	SDL_SetHint(SDL_HINT_RENDER_METAL_PREFER_LOW_POWER_DEVICE, "1");
-	SDL_SetHint(SDL_HINT_VIDEO_DOUBLE_BUFFER, "1");
+	SDL_SetHint(SDL_HINT_VIDEO_DOUBLE_BUFFER, doublebuffer ? "1" : "0");
 	SDL_SetHint(SDL_HINT_WINDOWS_CLOSE_ON_ALT_F4, "0");
-	SDL_SetHint(SDL_HINT_VIDEO_X11_NET_WM_BYPASS_COMPOSITOR, "1");
 	SDL_SetHint(SDL_HINT_VIDEO_X11_NET_WM_PING, "0");
 	SDL_SetHint(SDL_HINT_RENDER_VSYNC, v_sync.value ? "1" : "0");
 }
@@ -197,7 +198,7 @@ makewindow(void)
 static void
 v_sync_cb(cvar_t *var)
 {
-	static int vsync;
+	static int vsync = -1;
 
 	if(vsync == (var->value != 0))
 		return;
@@ -227,8 +228,6 @@ initfb(void)
 	IN_Grabm(true);
 	resetfb();
 
-	Cvar_RegisterVariable(&v_fullscreen);
-	v_fullscreen.cb = v_fullscreen_cb;
-	Cvar_RegisterVariable(&v_sync);
-	v_sync.cb = v_sync_cb;
+	Cvar_RegisterVariable(&v_fullscreen)->cb = v_fullscreen_cb;
+	Cvar_RegisterVariable(&v_sync)->cb = v_sync_cb;
 }
