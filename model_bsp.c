@@ -121,51 +121,54 @@ BSP_LoadTextures(model_t *mod, byte *in, int sz, int extra)
 			werrstr("bad offset %d (sz %d)", off, sz);
 			goto err;
 		}
-		if((mod->textures[i] = tx = Load_ExternalTexture(mod->name, (char *)in0 + off, false)) == nil) {
-			p = in0 + off + 16;
-			w = le32(p);
-			h = le32(p);
-			pixels = w * h * 85 / 64;
-			tx = Hunk_Alloc(sizeof(*tx) + pixels * sizeof(pixel_t));
-			strncpy(tx->name, (char *)in0 + off, sizeof(tx->name) - 1);
-			tx->name[sizeof(tx->name) - 1] = 0;
-			for(j = 0; j < MIPLEVELS; j++)
-				tx->offsets[j] = le32(p) - (16 + 2 * 4 + 4 * 4);
+		tx = Load_ExternalTexture(mod->name, (char *)in0 + off, false);
+		if(tx != nil) {
 			mod->textures[i] = tx;
-			tx->width = w;
-			tx->height = h;
-			// the pixels immediately follow the structures
-			torgbx(p, tx->pixels, pixels);
-			tx->drawsurf |= DRAWSURF_NODRAW;
-			for(j = 0; j < pixels; j++) {
-				if(p[j] == 0)
-					continue;
-				tx->drawsurf &= ~DRAWSURF_NODRAW;
-				if((tx->pixels[j] & 0xff000000) == 0) {
-					tx->drawsurf |= DRAWSURF_FULLBRIGHT;
-					break;
-				}
-			}
-			if(tx->name[0] == '{') {
-				for(j = 1; j < MIPLEVELS; j++) {
-					w /= 2;
-					h /= 2;
-					pixels_resize(
-						tx->pixels + tx->offsets[0],
-						tx->pixels + tx->offsets[j],
-						tx->width,
-						tx->height,
-						w,
-						h,
-						false,
-						true
-					);
-				}
-			} else if(strcmp(tx->name, "skip") == 0)
-				tx->drawsurf = DRAWSURF_NODRAW;
-			else if(strncmp(tx->name, "sky", 3) == 0)
-				R_InitSky(tx);
+			continue;
 		}
+		p = in0 + off + 16;
+		w = le32(p);
+		h = le32(p);
+		pixels = w * h * 85 / 64;
+		tx = Hunk_Alloc(sizeof(*tx) + pixels * sizeof(pixel_t));
+		strncpy(tx->name, (char *)in0 + off, sizeof(tx->name) - 1);
+		tx->name[sizeof(tx->name) - 1] = 0;
+		for(j = 0; j < MIPLEVELS; j++)
+			tx->offsets[j] = le32(p) - (16 + 2 * 4 + 4 * 4);
+		mod->textures[i] = tx;
+		tx->width = w;
+		tx->height = h;
+		// the pixels immediately follow the structures
+		torgbx(p, tx->pixels, pixels);
+		tx->drawsurf |= DRAWSURF_NODRAW;
+		for(j = 0; j < pixels; j++) {
+			if(p[j] == 0)
+				continue;
+			tx->drawsurf &= ~DRAWSURF_NODRAW;
+			if((tx->pixels[j] & 0xff000000) == 0) {
+				tx->drawsurf |= DRAWSURF_FULLBRIGHT;
+				break;
+			}
+		}
+		if(tx->name[0] == '{') {
+			for(j = 1; j < MIPLEVELS; j++) {
+				w /= 2;
+				h /= 2;
+				pixels_resize(
+					tx->pixels + tx->offsets[0],
+					tx->pixels + tx->offsets[j],
+					tx->width,
+					tx->height,
+					w,
+					h,
+					false,
+					true
+				);
+			}
+		} else if(strcmp(tx->name, "skip") == 0)
+			tx->drawsurf = DRAWSURF_NODRAW;
+		else if(strncmp(tx->name, "sky", 3) == 0)
+			R_InitSky(tx);
 	}
 
 	// sequence the animations

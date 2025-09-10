@@ -1153,7 +1153,7 @@ PF_changepitch(pr_t *pr)
 	ent = G_EDICT(pr, OFS_PARM0);
 	current = anglemod(ent->v.angles[0]);
 	ideal = ent->v.idealpitch;
-	ev = GetEdictFieldValue(pr, ent, "pitch_speed");
+	ev = GetEdictFieldValue(pr, ent, pitch_speed);
 	speed = ev ? ev->_float : 0;
 
 	if(current == ideal)
@@ -1474,6 +1474,7 @@ PF_checkextension(pr_t *pr)
 		"DP_GFX_SKYBOX",
 		"DP_HALFLIFE_MAP",
 		"DP_HALFLIFE_MAP_CVAR",
+		"DP_INPUTBUTTONS",
 		"DP_LITSUPPORT",
 		"DP_QC_ASINACOSATANATAN2TAN",
 		"DP_QC_CHANGEPITCH",

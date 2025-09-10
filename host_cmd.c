@@ -890,7 +890,7 @@ Host_Give_f(cmd_t *c)
 
 	case 's':
 		if(rogue) {
-			val = GetEdictFieldValue(sv.pr, sv_player, "ammo_shells1");
+			val = GetEdictFieldValue(sv.pr, sv_player, ammo_shells1);
 			if(val)
 				val->_float = v;
 		}
@@ -899,7 +899,7 @@ Host_Give_f(cmd_t *c)
 
 	case 'n':
 		if(rogue) {
-			val = GetEdictFieldValue(sv.pr, sv_player, "ammo_nails1");
+			val = GetEdictFieldValue(sv.pr, sv_player, ammo_nails1);
 			if(val) {
 				val->_float = v;
 				if(sv_player->v.weapon <= IT_LIGHTNING)
@@ -912,7 +912,7 @@ Host_Give_f(cmd_t *c)
 
 	case 'l':
 		if(rogue) {
-			val = GetEdictFieldValue(sv.pr, sv_player, "ammo_lava_nails");
+			val = GetEdictFieldValue(sv.pr, sv_player, ammo_lava_nails);
 			if(val) {
 				val->_float = v;
 				if(sv_player->v.weapon > IT_LIGHTNING)
@@ -923,7 +923,7 @@ Host_Give_f(cmd_t *c)
 
 	case 'r':
 		if(rogue) {
-			val = GetEdictFieldValue(sv.pr, sv_player, "ammo_rockets1");
+			val = GetEdictFieldValue(sv.pr, sv_player, ammo_rockets1);
 			if(val) {
 				val->_float = v;
 				if(sv_player->v.weapon <= IT_LIGHTNING)
@@ -936,7 +936,7 @@ Host_Give_f(cmd_t *c)
 
 	case 'm':
 		if(rogue) {
-			val = GetEdictFieldValue(sv.pr, sv_player, "ammo_multi_rockets");
+			val = GetEdictFieldValue(sv.pr, sv_player, ammo_multi_rockets);
 			if(val) {
 				val->_float = v;
 				if(sv_player->v.weapon > IT_LIGHTNING)
@@ -951,7 +951,7 @@ Host_Give_f(cmd_t *c)
 
 	case 'c':
 		if(rogue) {
-			val = GetEdictFieldValue(sv.pr, sv_player, "ammo_cells1");
+			val = GetEdictFieldValue(sv.pr, sv_player, ammo_cells1);
 			if(val) {
 				val->_float = v;
 				if(sv_player->v.weapon <= IT_LIGHTNING)
@@ -964,7 +964,7 @@ Host_Give_f(cmd_t *c)
 
 	case 'p':
 		if(rogue) {
-			val = GetEdictFieldValue(sv.pr, sv_player, "ammo_plasma");
+			val = GetEdictFieldValue(sv.pr, sv_player, ammo_plasma);
 			if(val) {
 				val->_float = v;
 				if(sv_player->v.weapon > IT_LIGHTNING)

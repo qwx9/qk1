@@ -37,6 +37,7 @@ Advertised [QSG extensions](https://quakewiki.org/wiki/QSG_extensions):
  * [DP_GFX_SKYBOX](https://quakewiki.org/wiki/DP_GFX_SKYBOX)
  * [DP_HALFLIFE_MAP](https://quakewiki.org/wiki/DP_HALFLIFE_MAP)
  * [DP_HALFLIFE_MAP_CVAR](https://quakewiki.org/wiki/DP_HALFLIFE_MAP_CVAR)
+ * [DP_INPUTBUTTONS](https://quakewiki.org/wiki/DP_INPUTBUTTONS)
  * [DP_LITSUPPORT](https://quakewiki.org/wiki/DP_LITSUPPORT)
  * [DP_QC_ASINACOSATANATAN2TAN](https://quakewiki.org/wiki/DP_QC_DP_QC_ASINACOSATANATAN2TAN)
  * [DP_QC_CHANGEPITCH](https://quakewiki.org/wiki/DP_QC_CHANGEPITCH)

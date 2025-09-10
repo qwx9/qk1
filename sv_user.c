@@ -24,7 +24,6 @@ bool onground;
 usercmd_t cmd;
 
 cvar_t sv_idealpitchscale = {"sv_idealpitchscale", "0.8"};
-cvar_t sv_nouse = {"sv_nouse", "0"};
 
 void
 SV_SetIdealPitch(void)
@@ -332,6 +331,8 @@ SV_ReadClientMove(usercmd_t *move)
 {
 	int i, bits;
 	vec3_t angle;
+	edict_t *e;
+	eval_t *ev;
 
 	// read ping time
 	host_client->ping_times[host_client->num_pings % NUM_PING_TIMES] = sv.time - MSG_ReadFloat();
@@ -350,14 +351,25 @@ SV_ReadClientMove(usercmd_t *move)
 
 	// read buttons
 	bits = MSG_ReadByte();
-	host_client->edict->v.button0 = (bits & 1) != 0;
-	host_client->edict->v.button2 = (bits & 2) != 0;
-	if(!sv_nouse.value)
-		host_client->edict->v.button1 = (bits & 4) != 0;
+	e = host_client->edict;
+	e->v.button0 = (bits & (1 << 0)) != 0;
+	// button1 is used by a bunch of mods as an extra variable, not to be messed with
+	e->v.button2 = (bits & (1 << 1)) != 0;
+	if((ev = GetEdictFieldValue(sv.pr, e, button[3])) != nil)
+		ev->_float = (bits & (1 << 2)) != 0;
+	if((ev = GetEdictFieldValue(sv.pr, e, button[4])) != nil)
+		ev->_float = (bits & (1 << 3)) != 0;
+	if((ev = GetEdictFieldValue(sv.pr, e, button[5])) != nil)
+		ev->_float = (bits & (1 << 4)) != 0;
+	if((ev = GetEdictFieldValue(sv.pr, e, button[6])) != nil)
+		ev->_float = (bits & (1 << 5)) != 0;
+	if((ev = GetEdictFieldValue(sv.pr, e, button[7])) != nil)
+		ev->_float = (bits & (1 << 6)) != 0;
+	if((ev = GetEdictFieldValue(sv.pr, e, button[8])) != nil)
+		ev->_float = (bits & (1 << 7)) != 0;
 
-	i = MSG_ReadByte();
-	if(i)
-		host_client->edict->v.impulse = i;
+	if((i = MSG_ReadByte()) != 0)
+		e->v.impulse = i;
 }
 
 /* Returns false if the client should be killed */

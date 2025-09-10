@@ -33,8 +33,10 @@ kbutton_t in_strafe, in_mlook;
 
 static kbutton_t in_left, in_right, in_forward, in_back;
 static kbutton_t in_lookup, in_lookdown, in_moveleft, in_moveright;
-static kbutton_t in_klook, in_speed, in_use, in_jump, in_attack;
-static kbutton_t in_up, in_down;
+static kbutton_t in_klook, in_speed;
+static kbutton_t in_moveup, in_movedown;
+static kbutton_t in_attack, in_jump, in_button3, in_button4, in_use;
+static kbutton_t in_button5, in_button6, in_button7, in_button8;
 static int in_impulse;
 
 static void
@@ -96,244 +98,56 @@ KeyUp(kbutton_t *b)
 	b->state |= 4; // impulse up
 }
 
-static void
-IN_KLookDown(cmd_t *c)
-{
-	USED(c);
-	KeyDown(&in_klook);
-}
+#define IN_KEY_DOWN(key) \
+	static void IN_##key##Down(cmd_t *c) \
+	{ \
+		USED(c); \
+		KeyDown(&in_##key); \
+	}
+
+#define IN_KEY_UP(key) \
+	static void IN_##key##Up(cmd_t *c) \
+	{ \
+		USED(c); \
+		KeyUp(&in_##key); \
+	}
+
+#define IN_KEY(key) \
+	IN_KEY_DOWN(key); \
+	IN_KEY_UP(key);
+
+IN_KEY(klook);
+IN_KEY_DOWN(mlook);
 
 static void
-IN_KLookUp(cmd_t *c)
-{
-	USED(c);
-	KeyUp(&in_klook);
-}
-
-static void
-IN_MLookDown(cmd_t *c)
-{
-	USED(c);
-	KeyDown(&in_mlook);
-}
-
-static void
-IN_MLookUp(cmd_t *c)
+IN_mlookUp(cmd_t *c)
 {
 	KeyUp(&in_mlook);
 	if((in_mlook.state & 1) == 0 && lookspring.value)
 		V_StartPitchDrift(c);
 }
 
-static void
-IN_UpDown(cmd_t *c)
-{
-	USED(c);
-	KeyDown(&in_up);
-}
-
-static void
-IN_UpUp(cmd_t *c)
-{
-	USED(c);
-	KeyUp(&in_up);
-}
-
-static void
-IN_DownDown(cmd_t *c)
-{
-	USED(c);
-	KeyDown(&in_down);
-}
-
-static void
-IN_DownUp(cmd_t *c)
-{
-	USED(c);
-	KeyUp(&in_down);
-}
-
-static void
-IN_LeftDown(cmd_t *c)
-{
-	USED(c);
-	KeyDown(&in_left);
-}
-
-static void
-IN_LeftUp(cmd_t *c)
-{
-	USED(c);
-	KeyUp(&in_left);
-}
-
-static void
-IN_RightDown(cmd_t *c)
-{
-	USED(c);
-	KeyDown(&in_right);
-}
-
-static void
-IN_RightUp(cmd_t *c)
-{
-	USED(c);
-	KeyUp(&in_right);
-}
-
-static void
-IN_ForwardDown(cmd_t *c)
-{
-	USED(c);
-	KeyDown(&in_forward);
-}
-
-static void
-IN_ForwardUp(cmd_t *c)
-{
-	USED(c);
-	KeyUp(&in_forward);
-}
-
-static void
-IN_BackDown(cmd_t *c)
-{
-	USED(c);
-	KeyDown(&in_back);
-}
-
-static void
-IN_BackUp(cmd_t *c)
-{
-	USED(c);
-	KeyUp(&in_back);
-}
-
-static void
-IN_LookupDown(cmd_t *c)
-{
-	USED(c);
-	KeyDown(&in_lookup);
-}
-
-static void
-IN_LookupUp(cmd_t *c)
-{
-	USED(c);
-	KeyUp(&in_lookup);
-}
-
-static void
-IN_LookdownDown(cmd_t *c)
-{
-	USED(c);
-	KeyDown(&in_lookdown);
-}
-
-static void
-IN_LookdownUp(cmd_t *c)
-{
-	USED(c);
-	KeyUp(&in_lookdown);
-}
-
-static void
-IN_MoveleftDown(cmd_t *c)
-{
-	USED(c);
-	KeyDown(&in_moveleft);
-}
-
-static void
-IN_MoveleftUp(cmd_t *c)
-{
-	USED(c);
-	KeyUp(&in_moveleft);
-}
-
-static void
-IN_MoverightDown(cmd_t *c)
-{
-	USED(c);
-	KeyDown(&in_moveright);
-}
-
-static void
-IN_MoverightUp(cmd_t *c)
-{
-	USED(c);
-	KeyUp(&in_moveright);
-}
-
-static void
-IN_SpeedDown(cmd_t *c)
-{
-	USED(c);
-	KeyDown(&in_speed);
-}
-
-static void
-IN_SpeedUp(cmd_t *c)
-{
-	USED(c);
-	KeyUp(&in_speed);
-}
-
-static void
-IN_StrafeDown(cmd_t *c)
-{
-	USED(c);
-	KeyDown(&in_strafe);
-}
-
-static void
-IN_StrafeUp(cmd_t *c)
-{
-	USED(c);
-	KeyUp(&in_strafe);
-}
-
-static void
-IN_AttackDown(cmd_t *c)
-{
-	USED(c);
-	KeyDown(&in_attack);
-}
-
-static void
-IN_AttackUp(cmd_t *c)
-{
-	USED(c);
-	KeyUp(&in_attack);
-}
-
-static void
-IN_UseDown(cmd_t *c)
-{
-	USED(c);
-	KeyDown(&in_use);
-}
-
-static void
-IN_UseUp(cmd_t *c)
-{
-	USED(c);
-	KeyUp(&in_use);
-}
-
-static void
-IN_JumpDown(cmd_t *c)
-{
-	USED(c);
-	KeyDown(&in_jump);
-}
-
-static void
-IN_JumpUp(cmd_t *c)
-{
-	USED(c);
-	KeyUp(&in_jump);
-}
+IN_KEY(left);
+IN_KEY(right);
+IN_KEY(forward);
+IN_KEY(back);
+IN_KEY(lookup);
+IN_KEY(lookdown);
+IN_KEY(moveleft);
+IN_KEY(moveright);
+IN_KEY(moveup);
+IN_KEY(movedown);
+IN_KEY(speed);
+IN_KEY(strafe);
+IN_KEY(attack);
+IN_KEY(jump);
+IN_KEY(button3);
+IN_KEY(button4);
+IN_KEY(button5);
+IN_KEY(button6);
+IN_KEY(button7);
+IN_KEY(button8);
+IN_KEY(use);
 
 static void
 IN_Impulse(cmd_t *c)
@@ -427,8 +241,8 @@ CL_BaseMove(usercmd_t *cmd)
 	cmd->sidemove += cl_sidespeed.value * CL_KeyState(&in_moveright);
 	cmd->sidemove -= cl_sidespeed.value * CL_KeyState(&in_moveleft);
 
-	cmd->upmove += cl_upspeed.value * CL_KeyState(&in_up);
-	cmd->upmove -= cl_upspeed.value * CL_KeyState(&in_down);
+	cmd->upmove += cl_upspeed.value * CL_KeyState(&in_moveup);
+	cmd->upmove -= cl_upspeed.value * CL_KeyState(&in_movedown);
 
 	if((in_klook.state & 1) == 0) {
 		cmd->forwardmove += cl_forwardspeed.value * CL_KeyState(&in_forward);
@@ -476,17 +290,41 @@ CL_SendMove(usercmd_t *cmd)
 	bits = 0;
 
 	if(in_attack.state & 3)
-		bits |= 1;
+		bits |= 1 << 0;
 	in_attack.state &= ~2;
 
 	if(in_jump.state & 3)
-		bits |= 2;
+		bits |= 1 << 1;
 	in_jump.state &= ~2;
 
-	if(in_use.state & 3)
-		bits |= 4;
-	in_use.state &= ~2;
+	if(in_button3.state & 3)
+		bits |= 1 << 2;
+	in_button3.state &= ~2;
 
+	if(in_button4.state & 3)
+		bits |= 1 << 3;
+	in_button4.state &= ~2;
+
+	if(in_button5.state & 3)
+		bits |= 1 << 4;
+	in_button5.state &= ~2;
+
+	if(in_button6.state & 3)
+		bits |= 1 << 5;
+	in_button6.state &= ~2;
+
+	if(in_button7.state & 3)
+		bits |= 1 << 6;
+	in_button7.state &= ~2;
+
+	if(in_button8.state & 3)
+		bits |= 1 << 7;
+	in_button8.state &= ~2;
+	/* FIXME
+		if(in_use.state & 3)
+			bits |= 4;
+		in_use.state &= ~2;
+	*/
 	MSG_WriteByte(&buf, bits);
 
 	MSG_WriteByte(&buf, in_impulse);
@@ -519,50 +357,50 @@ CL_NewMap(void)
 	memset(&in_lookdown, 0, sizeof(kbutton_t));
 	memset(&in_moveleft, 0, sizeof(kbutton_t));
 	memset(&in_moveright, 0, sizeof(kbutton_t));
-	memset(&in_use, 0, sizeof(kbutton_t));
-	memset(&in_jump, 0, sizeof(kbutton_t));
+	memset(&in_moveup, 0, sizeof(kbutton_t));
+	memset(&in_movedown, 0, sizeof(kbutton_t));
 	memset(&in_attack, 0, sizeof(kbutton_t));
-	memset(&in_up, 0, sizeof(kbutton_t));
-	memset(&in_down, 0, sizeof(kbutton_t));
+	memset(&in_jump, 0, sizeof(kbutton_t));
+	memset(&in_button3, 0, sizeof(kbutton_t));
+	memset(&in_button4, 0, sizeof(kbutton_t));
+	memset(&in_button5, 0, sizeof(kbutton_t));
+	memset(&in_button6, 0, sizeof(kbutton_t));
+	memset(&in_button7, 0, sizeof(kbutton_t));
+	memset(&in_button8, 0, sizeof(kbutton_t));
+	memset(&in_use, 0, sizeof(kbutton_t));
 	in_impulse = 0;
 }
 
 void
 CL_InitInput(void)
 {
-	Cmd_AddCommand("+moveup", IN_UpDown);
-	Cmd_AddCommand("-moveup", IN_UpUp);
-	Cmd_AddCommand("+movedown", IN_DownDown);
-	Cmd_AddCommand("-movedown", IN_DownUp);
-	Cmd_AddCommand("+left", IN_LeftDown);
-	Cmd_AddCommand("-left", IN_LeftUp);
-	Cmd_AddCommand("+right", IN_RightDown);
-	Cmd_AddCommand("-right", IN_RightUp);
-	Cmd_AddCommand("+forward", IN_ForwardDown);
-	Cmd_AddCommand("-forward", IN_ForwardUp);
-	Cmd_AddCommand("+back", IN_BackDown);
-	Cmd_AddCommand("-back", IN_BackUp);
-	Cmd_AddCommand("+lookup", IN_LookupDown);
-	Cmd_AddCommand("-lookup", IN_LookupUp);
-	Cmd_AddCommand("+lookdown", IN_LookdownDown);
-	Cmd_AddCommand("-lookdown", IN_LookdownUp);
-	Cmd_AddCommand("+strafe", IN_StrafeDown);
-	Cmd_AddCommand("-strafe", IN_StrafeUp);
-	Cmd_AddCommand("+moveleft", IN_MoveleftDown);
-	Cmd_AddCommand("-moveleft", IN_MoveleftUp);
-	Cmd_AddCommand("+moveright", IN_MoverightDown);
-	Cmd_AddCommand("-moveright", IN_MoverightUp);
-	Cmd_AddCommand("+speed", IN_SpeedDown);
-	Cmd_AddCommand("-speed", IN_SpeedUp);
-	Cmd_AddCommand("+attack", IN_AttackDown);
-	Cmd_AddCommand("-attack", IN_AttackUp);
-	Cmd_AddCommand("+use", IN_UseDown);
-	Cmd_AddCommand("-use", IN_UseUp);
-	Cmd_AddCommand("+jump", IN_JumpDown);
-	Cmd_AddCommand("-jump", IN_JumpUp);
+#define KEY_CMD(key) \
+	Cmd_AddCommand("+" #key, IN_##key##Down); \
+	Cmd_AddCommand("-" #key, IN_##key##Up);
+
+	KEY_CMD(strafe);
+	KEY_CMD(left);
+	KEY_CMD(right);
+	KEY_CMD(forward);
+	KEY_CMD(back);
+	KEY_CMD(lookup);
+	KEY_CMD(lookdown);
+	KEY_CMD(moveleft);
+	KEY_CMD(moveright);
+	KEY_CMD(moveup);
+	KEY_CMD(movedown);
+	KEY_CMD(attack);
+	KEY_CMD(jump);
+	KEY_CMD(button3);
+	KEY_CMD(button4);
+	KEY_CMD(button5);
+	KEY_CMD(button6);
+	KEY_CMD(button7);
+	KEY_CMD(button8);
+	KEY_CMD(use);
+
+	KEY_CMD(klook);
+	KEY_CMD(mlook);
+	KEY_CMD(speed);
 	Cmd_AddCommand("impulse", IN_Impulse);
-	Cmd_AddCommand("+klook", IN_KLookDown);
-	Cmd_AddCommand("-klook", IN_KLookUp);
-	Cmd_AddCommand("+mlook", IN_MLookDown);
-	Cmd_AddCommand("-mlook", IN_MLookUp);
 }

@@ -263,7 +263,7 @@ SV_AddGravity(pr_t *pr, edict_t *ent)
 	float ent_gravity;
 	eval_t *val;
 
-	val = GetEdictFieldValue(pr, ent, "gravity");
+	val = GetEdictFieldValue(pr, ent, gravity);
 	if(val && val->_float)
 		ent_gravity = val->_float;
 	else
@@ -977,7 +977,7 @@ SV_Trace_Toss(pr_t *pr, edict_t *ent, edict_t *ignore)
 
 	VectorCopy(ent->v.origin, org);
 	VectorCopy(ent->v.velocity, vel);
-	val = GetEdictFieldValue(pr, ent, "gravity");
+	val = GetEdictFieldValue(pr, ent, gravity);
 	gravity = ((val && val->_float) ? val->_float : 1.0) * sv_gravity.value * 0.05;
 
 	for(i = 0; i < 200; i++) { /* 10s max */

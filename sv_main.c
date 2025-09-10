@@ -89,7 +89,6 @@ SV_Init(void)
 	extern cvar_t sv_maxspeed;
 	extern cvar_t sv_accelerate;
 	extern cvar_t sv_idealpitchscale;
-	extern cvar_t sv_nouse;
 	extern cvar_t sv_aim;
 
 	Cvar_RegisterVariable(&sv_maxvelocity);
@@ -102,7 +101,6 @@ SV_Init(void)
 	Cvar_RegisterVariable(&sv_idealpitchscale);
 	Cvar_RegisterVariable(&sv_aim);
 	Cvar_RegisterVariable(&sv_nostep);
-	Cvar_RegisterVariable(&sv_nouse);
 	Cvar_RegisterVariable(&developer);
 
 	Cmd_AddCommand("sv_protocol", SV_Protocol_f);
@@ -415,7 +413,7 @@ SV_WriteEntitiesToClient(edict_t *clent, sizebuf_t *msg)
 		// ignore if not touching a PV leaf
 		model = ent->v.modelindex;
 
-		v = GetEdictFieldValue(sv.pr, ent, "alpha");
+		v = GetEdictFieldValue(sv.pr, ent, alpha);
 		alpha = v ? f2alpha(v->_float) : DEFAULT_ALPHA;
 
 		if(ent != clent) { // clent is ALWAYS sent
@@ -599,7 +597,7 @@ SV_WriteClientdataToMessage(edict_t *ent, sizebuf_t *msg)
 
 	// stuff the sigil bits into the high bits of items for sbar, or else
 	// mix in items2
-	val = GetEdictFieldValue(sv.pr, ent, "items2");
+	val = GetEdictFieldValue(sv.pr, ent, items2);
 	items = (int)ent->v.items |
 			(val ? ((int)val->_float << 23) : ((int)sv.pr->global_struct->serverflags << 28));
 	weaponmodel = SV_ModelIndex(PR_Str(sv.pr, ent->v.weaponmodel));

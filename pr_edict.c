@@ -31,17 +31,7 @@ enum {
 	MAX_PRSTR = 1024,
 	MAX_PRTEMPSTR = 1024,
 	PRTEMPSTR_SIZE = 1024,
-
-	MAX_FIELD_LEN = 64,
-	GEFV_CACHESIZE = 2,
 };
-
-typedef struct {
-	ddef_t *pcache;
-	char field[MAX_FIELD_LEN];
-} gefv_cache;
-
-static gefv_cache gefvCache[GEFV_CACHESIZE] = {{nil, ""}, {nil, ""}};
 
 char *
 PR_StrTmp(pr_t *pr)
@@ -192,7 +182,7 @@ ED_FieldAtOfs(pr_t *pr, int ofs)
 }
 
 static ddef_t *
-ED_FindField(pr_t *pr, char *name)
+ED_FindField(pr_t *pr, const char *name)
 {
 	ddef_t *def;
 	int i;
@@ -206,7 +196,7 @@ ED_FindField(pr_t *pr, char *name)
 }
 
 static ddef_t *
-ED_FindGlobal(pr_t *pr, char *name)
+ED_FindGlobal(pr_t *pr, const char *name)
 {
 	ddef_t *def;
 	int i;
@@ -220,7 +210,7 @@ ED_FindGlobal(pr_t *pr, char *name)
 }
 
 dfunction_t *
-ED_FindFunction(pr_t *pr, char *name)
+ED_FindFunction(pr_t *pr, const char *name)
 {
 	dfunction_t *func;
 	int i;
@@ -231,35 +221,6 @@ ED_FindFunction(pr_t *pr, char *name)
 			return func;
 	}
 	return nil;
-}
-
-eval_t *
-GetEdictFieldValue(pr_t *pr, edict_t *ed, char *field)
-{
-	static int rep = 0;
-	ddef_t *def;
-	int i;
-
-	for(i = 0; i < GEFV_CACHESIZE; i++) {
-		if(!strcmp(field, gefvCache[i].field)) {
-			def = gefvCache[i].pcache;
-			goto Done;
-		}
-	}
-
-	def = ED_FindField(pr, field);
-
-	if(strlen(field) < MAX_FIELD_LEN) {
-		gefvCache[rep].pcache = def;
-		strcpy(gefvCache[rep].field, field);
-		rep ^= 1;
-	}
-
-Done:
-	if(def == nil)
-		return nil;
-
-	return (eval_t *)((char *)&ed->v + def->ofs * 4);
 }
 
 /* Returns a string describing *data in a type specific manner */
@@ -830,52 +791,53 @@ ED_LoadFromFile(pr_t *pr, char *data)
 typedef struct extra_field_t extra_field_t;
 
 struct extra_field_t {
-	int type;
-	char *name;
+	const char *name;
+	int off;
 };
 
-static extra_field_t extra_fields[] = {
-	{ev_float, "alpha"},
-	{ev_float, "pitch_speed"},
+#define EXTRA_FIELD(name) {#name, offsetof(pr_extra_fields_t, name)}
+#define EXTRA_FIELD_BUTTON(index) {"button" #index, offsetof(pr_extra_fields_t, button[index])}
+static const extra_field_t extra_fields[] = {
+	EXTRA_FIELD(alpha),
+	EXTRA_FIELD(gravity),
+	EXTRA_FIELD(items2),
+	EXTRA_FIELD(pitch_speed),
+	EXTRA_FIELD(ammo_shells1),
+	EXTRA_FIELD(ammo_nails1),
+	EXTRA_FIELD(ammo_lava_nails),
+	EXTRA_FIELD(ammo_rockets1),
+	EXTRA_FIELD(ammo_multi_rockets),
+	EXTRA_FIELD(ammo_cells1),
+	EXTRA_FIELD(ammo_plasma),
+	EXTRA_FIELD_BUTTON(3),
+	EXTRA_FIELD_BUTTON(4),
+	EXTRA_FIELD_BUTTON(5),
+	EXTRA_FIELD_BUTTON(6),
+	EXTRA_FIELD_BUTTON(7),
+	EXTRA_FIELD_BUTTON(8),
 };
+#undef EXTRA_FIELD
+#undef EXTRA_FIELD_BUTTON
 
 static void
-PR_FieldDefs(pr_t *pr, byte *in, int num)
+PR_FieldDefs(pr_t *pr, byte *in, int n)
 {
-	extra_field_t *e;
+	const extra_field_t *e;
 	ddef_t *d;
-	int i, n;
+	int i;
 
-	// allocate to fit *all* extra fields, if needed, and copy over
-	pr->numfielddefs = n = num;
-	for(i = 0; i < nelem(extra_fields); i++)
-		n += extra_fields[i].type == ev_vector ? 4 : 1;
+	pr->numfielddefs = n;
 	pr->fielddefs = d = Hunk_Alloc(n * sizeof(*d));
-	for(i = 0; i < pr->numfielddefs; i++) {
-		d[i].type = le16u(in);
-		d[i].ofs = le16u(in);
-		d[i].s_name = le32(in);
+	for(i = 0; i < pr->numfielddefs; i++, d++) {
+		d->type = le16u(in);
+		d->ofs = le16u(in);
+		d->s_name = le32(in);
 	}
 
-	// add missing extra fields
-	d += pr->numfielddefs;
-	for(i = 0, e = extra_fields; i < nelem(extra_fields); i++, e++) {
-		if(ED_FindField(pr, e->name) != nil)
-			continue;
-		d->type = e->type;
-		d->s_name = ED_NewString(pr, e->name);
-		d->ofs = pr->numfielddefs++;
-		d++;
-		if(e->type == ev_vector) {
-			for(n = 0; n < 3; n++) {
-				d->type = ev_float;
-				d->s_name = ED_NewString(pr, va("%s_%c", e->name, 'x' + n));
-				d->ofs = pr->numfielddefs++;
-				d++;
-			}
-		}
-		pr->entityfields += type_size[e->type];
-	}
+	// locate extra fields
+	for(i = 0, e = extra_fields; i < nelem(extra_fields); i++, e++)
+		*(int *)((byte *)&pr->extra + e->off) =
+			(d = ED_FindField(pr, e->name)) != nil ? d->ofs * 4 : -1;
 }
 
 pr_t *
@@ -895,10 +857,6 @@ PR_LoadProgs(char *name)
 		[PR_LUMP_GLOBALS] = 4,
 	};
 	dproglump_t lumps[NUM_PR_LUMPS];
-
-	// flush the non-C variable lookup cache
-	for(i = 0; i < GEFV_CACHESIZE; i++)
-		gefvCache[i].field[0] = 0;
 
 	pr = Hunk_Alloc(sizeof(*pr));
 
