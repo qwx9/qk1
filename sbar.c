@@ -1,5 +1,7 @@
 #include "quakedef.h"
 
+static cvar_t scr_miniscores = {"scr_miniscores", "0", true};
+
 #define STAT_MINUS 10 // num frame for '-' stats digit
 
 static qpic_t *sb_nums[2][11];
@@ -39,8 +41,8 @@ static qpic_t *hsb_items[2];
 static int fragsort[MAX_SCOREBOARD];
 static int scoreboardlines;
 
-void Sbar_MiniDeathmatchOverlay(void);
-void Sbar_DeathmatchOverlay(void);
+static void Sbar_MiniDeathmatchOverlay(void);
+static void Sbar_DeathmatchOverlay(void);
 
 /* Tab key down/up */
 static void
@@ -53,6 +55,8 @@ void
 Sbar_Init(void)
 {
 	int i;
+
+	Cvar_RegisterVariable(&scr_miniscores);
 
 	for(i = 0; i < 10; i++) {
 		sb_nums[0][i] = Draw_PicFromWad(va("num_%d", i));
@@ -189,7 +193,7 @@ Sbar_Init(void)
 static void
 Sbar_DrawPic(int x, int y, qpic_t *pic)
 {
-	if(cl.gametype == GAME_DEATHMATCH)
+	if(cl.gametype == GAME_DEATHMATCH && scr_miniscores.value > 0)
 		Draw_Pic(x /* + ((vid.width - 320)>>1)*/, y + (vid.height - SBAR_HEIGHT), pic);
 	else
 		Draw_Pic(x + ((vid.width - 320) >> 1), y + (vid.height - SBAR_HEIGHT), pic);
@@ -198,7 +202,7 @@ Sbar_DrawPic(int x, int y, qpic_t *pic)
 static void
 Sbar_DrawTransPic(int x, int y, qpic_t *pic)
 {
-	if(cl.gametype == GAME_DEATHMATCH)
+	if(cl.gametype == GAME_DEATHMATCH && scr_miniscores.value > 0)
 		Draw_TransPic(x /*+ ((vid.width - 320)>>1)*/, y + (vid.height - SBAR_HEIGHT), pic);
 	else
 		Draw_TransPic(x + ((vid.width - 320) >> 1), y + (vid.height - SBAR_HEIGHT), pic);
@@ -208,7 +212,7 @@ Sbar_DrawTransPic(int x, int y, qpic_t *pic)
 static void
 Sbar_DrawCharacter(int x, int y, int num)
 {
-	if(cl.gametype == GAME_DEATHMATCH)
+	if(cl.gametype == GAME_DEATHMATCH && scr_miniscores.value > 0)
 		Draw_Character(x /*+ ((vid.width - 320)>>1) */ + 4, y + vid.height - SBAR_HEIGHT, num);
 	else
 		Draw_Character(x + ((vid.width - 320) >> 1) + 4, y + vid.height - SBAR_HEIGHT, num);
@@ -217,7 +221,7 @@ Sbar_DrawCharacter(int x, int y, int num)
 static void
 Sbar_DrawString(int x, int y, char *str)
 {
-	if(cl.gametype == GAME_DEATHMATCH)
+	if(cl.gametype == GAME_DEATHMATCH && scr_miniscores.value > 0)
 		Draw_String(x /*+ ((vid.width - 320)>>1)*/, y + vid.height - SBAR_HEIGHT, str);
 	else
 		Draw_String(x + ((vid.width - 320) >> 1), y + vid.height - SBAR_HEIGHT, str);
@@ -522,7 +526,7 @@ Sbar_DrawFace(void)
 		top = Sbar_ColorForMap(top);
 		bottom = Sbar_ColorForMap(bottom);
 
-		if(cl.gametype == GAME_DEATHMATCH)
+		if(cl.gametype == GAME_DEATHMATCH && scr_miniscores.value > 0)
 			xofs = 113;
 		else
 			xofs = ((vid.width - 320) >> 1) + 113;
@@ -664,7 +668,7 @@ Sbar_Draw(void)
 		Sbar_DrawNum(248, 0, cl.stats[STAT_AMMO], 3, cl.stats[STAT_AMMO] <= 10);
 	}
 
-	if(cl.gametype == GAME_DEATHMATCH)
+	if(cl.gametype == GAME_DEATHMATCH && scr_miniscores.value > 0)
 		Sbar_MiniDeathmatchOverlay();
 }
 
