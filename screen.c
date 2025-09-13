@@ -1,7 +1,7 @@
 #include "quakedef.h"
 
 static float scr_conlines; // lines of console to display
-static float oldscreensize, oldfov;
+static float oldfov;
 static cvar_t scr_conspeed = {"scr_conspeed", "900", true};
 static cvar_t scr_centertime = {"scr_centertime", "2"};
 static cvar_t scr_showram = {"showram", "1"};
@@ -186,8 +186,7 @@ SCR_CalcRefdef(void)
 						 ((float)r_refdef.vrect.width / (float)r_refdef.vrect.height * 0.75)
 					 ) /
 					 M_PI * 360.0;
-	r_refdef.fov_y =
-		CalcFov(r_refdef.fov_x, r_refdef.vrect.width, r_refdef.vrect.height - sb_lines);
+	r_refdef.fov_y = CalcFov(r_refdef.fov_x, r_refdef.vrect.width, r_refdef.vrect.height);
 
 	// these calculations mirror those in R_Init() for r_refdef, but take no
 	// account of water warping
@@ -196,15 +195,13 @@ SCR_CalcRefdef(void)
 	vrect.width = vid.width;
 	vrect.height = vid.height;
 
-	R_SetVrect(&vrect, &scr_vrect, sb_lines);
-
 	// guard against going from one mode to another that's less than half the
 	// vertical resolution
 	if(scr_con_current > vid.height)
 		scr_con_current = vid.height;
 
 	// notify the refresh of the change
-	R_ViewChanged(&vrect, sb_lines, vid.aspect);
+	R_ViewChanged(&vrect, vid.aspect);
 }
 
 static void
@@ -521,11 +518,6 @@ SCR_UpdateScreen(bool drawdialog)
 	// check for vid changes
 	if(oldfov != scr_fov.value) {
 		oldfov = scr_fov.value;
-		vid.recalc_refdef = true;
-	}
-
-	if(oldscreensize != scr_viewsize.value) {
-		oldscreensize = scr_viewsize.value;
 		vid.recalc_refdef = true;
 	}
 

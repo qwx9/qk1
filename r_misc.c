@@ -126,7 +126,7 @@ R_SetupFrame(void)
 				vrect.width = vid.width;
 				vrect.height = vid.height;
 
-				R_ViewChanged(&vrect, sb_lines, vid.aspect);
+				R_ViewChanged(&vrect, vid.aspect);
 			} else {
 				w = vid.width;
 				h = vid.height;
@@ -147,7 +147,6 @@ R_SetupFrame(void)
 
 				R_ViewChanged(
 					&vrect,
-					(int)((float)sb_lines * (h / (float)vid.height)),
 					vid.aspect * (h / w) * ((float)vid.width / (float)vid.height)
 				);
 			}
@@ -157,7 +156,7 @@ R_SetupFrame(void)
 			vrect.width = vid.width;
 			vrect.height = vid.height;
 
-			R_ViewChanged(&vrect, sb_lines, vid.aspect);
+			R_ViewChanged(&vrect, vid.aspect);
 		}
 
 		r_viewchanged = false;

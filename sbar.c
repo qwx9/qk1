@@ -584,9 +584,6 @@ Sbar_Draw(void)
 	if(scr_con_current == vid.height)
 		return; // console is full screen
 
-	if(sb_lines && vid.width > 320)
-		Draw_TileClear(0, vid.height - sb_lines, vid.width, sb_lines);
-
 	if(sb_lines > 24) {
 		Sbar_DrawInventory();
 		if(cl.maxclients != 1)
@@ -667,7 +664,7 @@ Sbar_Draw(void)
 		Sbar_DrawNum(248, 0, cl.stats[STAT_AMMO], 3, cl.stats[STAT_AMMO] <= 10);
 	}
 
-	if(vid.width > 320 && cl.gametype == GAME_DEATHMATCH)
+	if(cl.gametype == GAME_DEATHMATCH)
 		Sbar_MiniDeathmatchOverlay();
 }
 

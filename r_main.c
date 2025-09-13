@@ -194,17 +194,15 @@ R_NewMap(void)
 	R_LoadSkyBox(nil, cl.worldmodel);
 }
 
-void
-R_SetVrect(vrect_t *pvrectin, vrect_t *pvrect, int lineadj)
+static void
+R_SetVrect(vrect_t *pvrectin, vrect_t *pvrect)
 {
 	int h;
 	float size;
 
-	if(cl.intermission)
-		lineadj = 0;
 	size = 1;
 
-	h = pvrectin->height - lineadj;
+	h = pvrectin->height;
 	pvrect->width = pvrectin->width;
 	if(pvrect->width < 96) {
 		size = 96.0 / pvrectin->width;
@@ -212,8 +210,8 @@ R_SetVrect(vrect_t *pvrectin, vrect_t *pvrect, int lineadj)
 	}
 	pvrect->width &= ~7;
 	pvrect->height = pvrectin->height * size;
-	if(pvrect->height > pvrectin->height - lineadj)
-		pvrect->height = pvrectin->height - lineadj;
+	if(pvrect->height > pvrectin->height)
+		pvrect->height = pvrectin->height;
 
 	pvrect->height &= ~1;
 
@@ -226,7 +224,7 @@ R_SetVrect(vrect_t *pvrectin, vrect_t *pvrect, int lineadj)
  * Guaranteed to be called before the first refresh
  */
 void
-R_ViewChanged(vrect_t *pvrect, int lineadj, float aspect)
+R_ViewChanged(vrect_t *pvrect, float aspect)
 {
 	int i, ow, oh;
 	float res_scale, verticalFieldOfView;
@@ -235,7 +233,7 @@ R_ViewChanged(vrect_t *pvrect, int lineadj, float aspect)
 
 	ow = r_refdef.vrect.width;
 	oh = r_refdef.vrect.height;
-	R_SetVrect(pvrect, &r_refdef.vrect, lineadj);
+	R_SetVrect(pvrect, &r_refdef.vrect);
 	if(ow != r_refdef.vrect.width || oh != r_refdef.vrect.height)
 		vid.recalc_refdef = true;
 
