@@ -91,9 +91,13 @@ IN_Commands(void)
 	b = mb;
 	qunlock(&mlck);
 	b = b & 0x19 | (b & 2) << 1 | (b & 4) >> 1;
-	for(i = 0, k = K_MOUSE1; i < 5; i++, k++) {
+	for(i = 0; i < 5; i++) {
 		if(i == 3)
 			k = K_MWHEELUP;
+		else if(i == 4)
+			k = K_MWHEELDOWN;
+		else
+			k = K_MOUSE1 + i;
 		r = b & 1 << i;
 		if(r ^ oldmb & 1 << i)
 			Key_Event(k, r);

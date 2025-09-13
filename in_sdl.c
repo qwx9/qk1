@@ -12,6 +12,9 @@ static int mbuttons[] = {
 	K_MOUSE2,
 	K_MOUSE4,
 	K_MOUSE5,
+	K_MOUSE6,
+	K_MOUSE7,
+	K_MOUSE8,
 };
 
 void
@@ -24,7 +27,7 @@ Sys_SendKeyEvents(void)
 {
 	SDL_Event event;
 	SDL_Keycode key;
-	int b;
+	int b, i, n, ev;
 
 	if(cls.state == ca_dedicated)
 		return;
@@ -59,6 +62,22 @@ Sys_SendKeyEvents(void)
 		case SDL_EVENT_MOUSE_BUTTON_UP:
 			if((b = event.button.button - 1) >= 0 && b < nelem(mbuttons))
 				Key_Event(mbuttons[b], event.type == SDL_EVENT_MOUSE_BUTTON_DOWN);
+			break;
+		case SDL_EVENT_MOUSE_WHEEL:
+			if((n = event.wheel.integer_x) != 0) {
+				ev = n < 0 ? K_MWHEELLEFT : K_MWHEELRIGHT;
+				n = n < 0 ? -n : n;
+				for(i = 0; i < n; i++)
+					Key_Event(ev, true);
+				Key_Event(ev, false);
+			}
+			if((n = event.wheel.integer_y) != 0) {
+				ev = n < 0 ? K_MWHEELDOWN : K_MWHEELUP;
+				n = n < 0 ? -n : n;
+				for(i = 0; i < n; i++)
+					Key_Event(ev, true);
+				Key_Event(ev, false);
+			}
 			break;
 		case SDL_EVENT_KEY_DOWN:
 		case SDL_EVENT_KEY_UP:
@@ -139,6 +158,27 @@ Sys_SendKeyEvents(void)
 			case SDLK_RALT:
 			case SDLK_LALT:
 				key = K_ALT;
+				break;
+			case SDLK_CAPSLOCK:
+				key = K_CAPSLOCK;
+				break;
+			case SDLK_PRINTSCREEN:
+				key = K_PRINTSCREEN;
+				break;
+			case SDLK_INSERT:
+				key = K_INS;
+				break;
+			case SDLK_HOME:
+				key = K_HOME;
+				break;
+			case SDLK_END:
+				key = K_END;
+				break;
+			case SDLK_PAGEDOWN:
+				key = K_PGDN;
+				break;
+			case SDLK_PAGEUP:
+				key = K_PGUP;
 				break;
 			default:
 				if(key >= 128)
