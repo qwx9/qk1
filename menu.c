@@ -991,23 +991,22 @@ M_Options_Key(int k)
 
 static const char *bindnames[][2] = {
 	{"+attack", "attack"},
-	{"impulse 10", "change weapon"},
 	{"+jump", "jump / swim up"},
 	{"+forward", "walk forward"},
 	{"+back", "backpedal"},
-	{"+left", "turn left"},
-	{"+right", "turn right"},
-	{"+speed", "run / walk"},
 	{"+moveleft", "step left"},
 	{"+moveright", "step right"},
-	{"+strafe", "sidestep"},
-	{"+lookup", "look up"},
-	{"+lookdown", "look down"},
-	{"centerview", "center view"},
-	{"+mlook", "mouse look"},
-	{"+klook", "keyboard look"},
 	{"+moveup", "swim up"},
-	{"+movedown", "swim down"}
+	{"+movedown", "swim down"},
+	{"impulse 10", "next weapon"},
+	{"impulse 12", "prev weapon"},
+	{"+speed", "run / walk"},
+	{"+strafe", "sidestep"},
+	{"echo Quicksaving...; wait; save quick", "quick save"},
+	{"echo Quickloading...; wait; load quick", "quick load"},
+	{"+showscores", "show scores"},
+	{"messagemode", "say to all"},
+	{"messagemode2", "say to team"},
 };
 
 static void
