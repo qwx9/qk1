@@ -9,7 +9,7 @@
 
 enum {
 	MAX_DATAGRAM = 1400, // max length of unreliable message
-	MAX_DATAGRAM_LOCAL = 65000, // on loopback we don't care
+	MAX_DATAGRAM_LOCAL = 4*65536, // on loopback we don't care
 
 	PITCH = 0, // up / down
 	YAW, // left / right
