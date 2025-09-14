@@ -689,7 +689,7 @@ ED_ParseEdict(pr_t *pr, char *data, edict_t *ent)
 					break;
 				}
 			} else if(strcmp(PR_Str(pr, ent->v.classname), "worldspawn") == 0 &&
-					  (strcmp(keyname, "fog") == 0 || strcmp(keyname, "sky") == 0)) {
+					  (strcmp(keyname, "fog") == 0 || strcmp(keyname, "sky") == 0 || strcmp(keyname, "skyname") == 0)) {
 				/* ignore */
 			} else {
 				Con_Printf("ED_ParseEdict: '%s' is not a field\n", keyname);
