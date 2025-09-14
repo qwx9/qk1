@@ -163,9 +163,9 @@ Draw_Pic(int x, int y, const qpic_t *pic)
 	pixel_t *dest;
 	int px, py;
 
-	if((x < 0) || (x + pic->width > vid.width) || (y < 0) || (y + pic->height > vid.height)) {
-		fatal("Draw_Pic: bad coordinates");
-	}
+	if((x < 0) || (x + pic->width > vid.width) || (y < 0) || (y + pic->height > vid.height))
+		return;
+
 	source = pic->pixels;
 	dest = vid.buffer + y * vid.width + x;
 	for(py = 0; py < pic->height; py++) {
@@ -186,7 +186,7 @@ Draw_TransPic(int x, int y, const qpic_t *pic)
 	int v, u;
 
 	if(x < 0 || y < 0 || x + pic->width > vid.width || y + pic->height > vid.height)
-		fatal("Draw_TransPic: bad coordinates");
+		return;
 
 	source = pic->pixels;
 	dest = vid.buffer + y * vid.width + x;
@@ -207,7 +207,7 @@ Draw_TransPicTranslate(int x, int y, const qpic_t *pic, const byte *translation)
 	int v, u;
 
 	if(x < 0 || y < 0 || x + pic->width > vid.width || y + pic->height > vid.height)
-		fatal("Draw_TransPic: bad coordinates");
+		return;
 
 	source = pic->pixels;
 	dest = vid.buffer + y * vid.width + x;
