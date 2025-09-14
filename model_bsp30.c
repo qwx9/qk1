@@ -26,7 +26,7 @@ BSP30_LoadEntities(model_t *mod, byte *in, int sz, int extra)
 		if(p != s && (*s == ';' || s == e)) {
 			snprintf(path, sizeof(path), "%.*s", (int)(s - p), p);
 			if((w = W_OpenWad(path)) != nil) {
-				mod->wads = Arr_AllocExtra(mod->wads, &maxw, mod->numwads - maxw);
+				mod->wads = Arr_AllocExtra(mod->wads, &maxw, mod->numwads + 1 - maxw);
 				mod->wads[mod->numwads++] = w;
 			} else {
 				Con_Printf("BSP_LoadEntities: %s\n", lerr());
