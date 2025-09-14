@@ -372,6 +372,8 @@ R_ScanEdges(view_t *v)
 		// the next scan
 		if(span_p >= max_span_p) {
 			r_outofspans++;
+			r_frame_not_full = true;
+
 			D_DrawSurfaces(v);
 
 			// clear the surface span pointers

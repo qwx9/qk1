@@ -532,7 +532,14 @@ SCR_UpdateScreen(bool drawdialog)
 	SCR_SetUpToDrawConsole();
 	SCR_EraseCenterString();
 
-	V_RenderView();
+	do{
+		r_frame_not_full = false;
+		V_RenderView();
+
+		surfaces = Arr_AllocExtra(surfaces, &r_cnumsurfs, r_outofsurfaces);
+		surf_max = &surfaces[r_cnumsurfs];
+		r_outofsurfaces = 0;
+	}while(r_frame_not_full);
 
 	if(drawdialog) {
 		Sbar_Draw();

@@ -304,12 +304,14 @@ R_RenderFace(msurface_t *fa, view_t *v, int clipflags)
 	// skip out if no more surfs
 	if(surface_p >= surf_max) {
 		r_outofsurfaces++;
+		r_frame_not_full = true;
 		return 1;
 	}
 
 	// ditto if not enough edges left, or switch to auxedges if possible
 	if(edge_p + fa->numedges + 4 >= edge_max) {
 		r_outofedges += fa->numedges;
+		r_frame_not_full = true;
 		return 1;
 	}
 
@@ -464,12 +466,14 @@ R_RenderBmodelFace(bedge_t *pedges, msurface_t *psurf, view_t *v)
 	// skip out if no more surfs
 	if(surface_p >= surf_max) {
 		r_outofsurfaces++;
+		r_frame_not_full = true;
 		return;
 	}
 
 	// ditto if not enough edges left, or switch to auxedges if possible
 	if((edge_p + psurf->numedges + 4) >= edge_max) {
 		r_outofedges += psurf->numedges;
+		r_frame_not_full = true;
 		return;
 	}
 

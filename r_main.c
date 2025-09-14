@@ -12,7 +12,7 @@ float r_aliasuvscale = 1.0;
 int r_outofsurfaces;
 int r_outofedges;
 int r_outofspans;
-bool r_dowarp, r_dowarpold, r_viewchanged;
+bool r_frame_not_full, r_dowarp, r_dowarpold, r_viewchanged;
 mvertex_t *r_pcurrentvertbase;
 int r_maxsurfsseen, r_maxedgesseen, r_cnumsurfs;
 int r_clipflags;
