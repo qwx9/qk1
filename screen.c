@@ -18,9 +18,9 @@ static bool scr_initialized; // ready to draw
 static qpic_t *scr_net, *scr_turtle;
 static int clearconsole;
 static bool scr_drawloading;
-static double scr_disabled_time, scr_oldtime;
+static double scr_disabled_time;
 static u64int scr_framecount;
-double scr_frametime;
+double scr_frametime, scr_oldtime;
 
 int scr_fullupdate;
 int clearnotify;

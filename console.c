@@ -266,9 +266,10 @@ Con_Print(const char *txt)
 void
 Con_Printf(const char *fmt, ...)
 {
+	static bool inupdate;
 	va_list arg;
 	char msg[MAXPRINTMSG];
-	static bool inupdate;
+	double now;
 
 	va_start(arg, fmt);
 	vsnprintf(msg, sizeof(msg), fmt, arg);
@@ -288,6 +289,9 @@ Con_Printf(const char *fmt, ...)
 		/* protect against infinite loop if something in
 		 * SCR_UpdateScreen(...) calls Con_Printf() */
 		if(!inupdate) {
+			now = dtime();
+			if(now - scr_oldtime < 1.0 / 10.0)
+				return;
 			inupdate = true;
 			SCR_UpdateScreen(false);
 			inupdate = false;

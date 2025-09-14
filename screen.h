@@ -16,3 +16,4 @@ extern int sb_lines;
 extern int clearnotify; // set to 0 whenever notify text is drawn
 extern bool scr_disabled_for_loading;
 extern cvar_t scr_viewsize;
+extern double scr_frametime, scr_oldtime;
