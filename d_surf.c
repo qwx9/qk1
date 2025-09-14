@@ -6,7 +6,6 @@ static float surfscale;
 static surfcache_t *sc_base;
 static int sc_size;
 
-bool r_cache_thrash; // set if surface cache is thrashing
 surfcache_t *sc_rover;
 
 int
@@ -138,12 +137,8 @@ D_SCAlloc(int width, int size)
 
 	new->owner = nil; // should be set properly after return
 
-	if(d_roverwrapped) {
-		if(wrapped_this_time || (sc_rover >= d_initial_rover))
-			r_cache_thrash = true;
-	} else if(wrapped_this_time) {
+	if(!d_roverwrapped && wrapped_this_time)
 		d_roverwrapped = true;
-	}
 
 	D_CheckCacheGuard(); // DEBUG
 	return new;

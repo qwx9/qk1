@@ -162,7 +162,6 @@ R_SetupFrame(void)
 		r_viewchanged = false;
 	}
 
-	r_cache_thrash = false;
 	R_TransformFrustum(&r_refdef.view); // start off with just the four screen edge clip planes
 	R_SetSkyFrame();
 	R_SetUpFrustumIndexes(&r_refdef.view);
