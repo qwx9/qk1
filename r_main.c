@@ -188,6 +188,7 @@ R_NewMap(void)
 
 	R_ClearParticles();
 	R_ApplyFog(cl.worldmodel);
+	R_InitSky(nil);
 	R_LoadSkyBox(nil, cl.worldmodel);
 }
 
