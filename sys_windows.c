@@ -148,7 +148,7 @@ main(int argc, char **argv)
 
 	parg_init(&ps);
 	nargs = 0;
-	while((c = parg_getopt(&ps, argc, argv, "2b:Ddg:N:")) >= 0) {
+	while((c = parg_getopt(&ps, argc, argv, "2b:Ddg:hN:")) >= 0) {
 		switch(c) {
 		case 1:
 			argv[nargs++] = (char *)ps.optarg;
