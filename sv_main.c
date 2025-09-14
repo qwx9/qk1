@@ -14,7 +14,7 @@ static protocol_t *sv_protocol = &protos[PROTO_RMQ];
 
 static char localmodels[MAX_MODELS][8]; // inline model names for precache
 
-static sizebuf_t *signon_overflow_sb(sizebuf_t *s);
+static sizebuf_t *signon_overflow_cb(sizebuf_t *s);
 
 static void
 SV_AllocSignon(void)
@@ -25,12 +25,12 @@ SV_AllocSignon(void)
 	sv.signon->data = (byte *)(sv.signon + 1);
 	sv.signon->maxsize = MAX_SIGNON_SIZE;
 	sv.signon->name = "sv.signon";
-	sv.signon->overflow_cb = signon_overflow_sb;
+	sv.signon->overflow_cb = signon_overflow_cb;
 	sv.signon_frame = 0;
 }
 
 static sizebuf_t *
-signon_overflow_sb(sizebuf_t *s)
+signon_overflow_cb(sizebuf_t *s)
 {
 	int frame;
 

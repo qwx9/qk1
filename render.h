@@ -26,11 +26,6 @@ typedef struct entity_s {
 	struct mnode_s *topnode;
 
 	double msgtime; // time of last update
-	entity_state_t baseline; // to fill in defaults in updates
-	vec3_t msg_origins[2]; // last two updates (0 is newest)
-	vec3_t origin;
-	vec3_t msg_angles[2]; // last two updates (0 is newest)
-	vec3_t angles;
 	int frame;
 	float syncbase; // for client-side animations
 	int effects; // light, particals, etc
@@ -44,6 +39,12 @@ typedef struct entity_s {
 	int trivial_accept;
 	byte alpha;
 	bool forcelink; // model changed
+
+	entity_state_t baseline; // to fill in defaults in updates
+	vec3_t msg_origins[2]; // last two updates (0 is newest)
+	vec3_t origin;
+	vec3_t msg_angles[2]; // last two updates (0 is newest)
+	vec3_t angles;
 } entity_t;
 
 typedef struct {
@@ -52,7 +53,6 @@ typedef struct {
 	vrect_t aliasvrect; // scaled Alias version
 	int vrectright, vrectbottom; // right & bottom screen coords
 	int aliasvrectright, aliasvrectbottom; // scaled Alias versions
-	float vrectrightedge; // rightmost right edge we care about, for use in edge list
 	float fvrectx, fvrecty; // for floating-point compares
 	float fvrectx_adj, fvrecty_adj; // left and top edges, for clamping
 	int vrect_x_adj_shift20; // (vrect.x + 0.5 - epsilon) << 20
@@ -82,7 +82,7 @@ void R_InitTextures(void);
 void R_InitEfrags(void);
 void R_RenderView(void); // must set r_refdef first
 void R_ViewChanged(
-	vrect_t *pvrect, float aspect
+	vrect_t *pvrect, float pixelAspect
 ); // called whenever r_refdef or vid change
 
 void R_InitSky(struct texture_s *mt); // called at level load

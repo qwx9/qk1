@@ -25,9 +25,6 @@ float xscale, yscale;
 float xscaleinv, yscaleinv;
 float xscaleshrink, yscaleshrink;
 float aliasxscale, aliasyscale, aliasxcenter, aliasycenter;
-float pixelAspect;
-float screenAspect;
-float xOrigin, yOrigin;
 mplane_t screenedge[4];
 
 // refresh flags
@@ -224,10 +221,10 @@ R_SetVrect(vrect_t *pvrectin, vrect_t *pvrect)
  * Guaranteed to be called before the first refresh
  */
 void
-R_ViewChanged(vrect_t *pvrect, float aspect)
+R_ViewChanged(vrect_t *pvrect, float pixelAspect)
 {
 	int i, ow, oh;
-	float res_scale, verticalFieldOfView;
+	float res_scale, verticalFieldOfView, screenAspect;
 
 	r_viewchanged = true;
 
@@ -247,7 +244,6 @@ R_ViewChanged(vrect_t *pvrect, float aspect)
 	r_refdef.vrectright_adj_shift20 = (r_refdef.vrectright << 20) + (1 << 19) - 1;
 	r_refdef.fvrectright = (float)r_refdef.vrectright;
 	r_refdef.fvrectright_adj = (float)r_refdef.vrectright - 0.5;
-	r_refdef.vrectrightedge = (float)r_refdef.vrectright - 0.99;
 	r_refdef.vrectbottom = r_refdef.vrect.y + r_refdef.vrect.height;
 	r_refdef.fvrectbottom = (float)r_refdef.vrectbottom;
 	r_refdef.fvrectbottom_adj = (float)r_refdef.vrectbottom - 0.5;
@@ -258,10 +254,6 @@ R_ViewChanged(vrect_t *pvrect, float aspect)
 	r_refdef.aliasvrect.height = (int)(r_refdef.vrect.height * r_aliasuvscale);
 	r_refdef.aliasvrectright = r_refdef.aliasvrect.x + r_refdef.aliasvrect.width;
 	r_refdef.aliasvrectbottom = r_refdef.aliasvrect.y + r_refdef.aliasvrect.height;
-
-	pixelAspect = aspect;
-	xOrigin = r_refdef.xOrigin;
-	yOrigin = r_refdef.yOrigin;
 
 	screenAspect = r_refdef.vrect.width * pixelAspect / r_refdef.vrect.height;
 	// 320*200 1.0 pixelAspect = 1.6 screenAspect
@@ -291,26 +283,26 @@ R_ViewChanged(vrect_t *pvrect, float aspect)
 	yscaleshrink = xscaleshrink * pixelAspect;
 
 	// left side clip
-	screenedge[0].normal[0] = -1.0 / (xOrigin * r_refdef.horizontalFieldOfView);
+	screenedge[0].normal[0] = -1.0 / (r_refdef.xOrigin * r_refdef.horizontalFieldOfView);
 	screenedge[0].normal[1] = 0;
 	screenedge[0].normal[2] = 1;
 	screenedge[0].type = PLANE_ANYZ;
 
 	// right side clip
-	screenedge[1].normal[0] = 1.0 / ((1.0 - xOrigin) * r_refdef.horizontalFieldOfView);
+	screenedge[1].normal[0] = 1.0 / ((1.0 - r_refdef.xOrigin) * r_refdef.horizontalFieldOfView);
 	screenedge[1].normal[1] = 0;
 	screenedge[1].normal[2] = 1;
 	screenedge[1].type = PLANE_ANYZ;
 
 	// top side clip
 	screenedge[2].normal[0] = 0;
-	screenedge[2].normal[1] = -1.0 / (yOrigin * verticalFieldOfView);
+	screenedge[2].normal[1] = -1.0 / (r_refdef.yOrigin * verticalFieldOfView);
 	screenedge[2].normal[2] = 1;
 	screenedge[2].type = PLANE_ANYZ;
 
 	// bottom side clip
 	screenedge[3].normal[0] = 0;
-	screenedge[3].normal[1] = 1.0 / ((1.0 - yOrigin) * verticalFieldOfView);
+	screenedge[3].normal[1] = 1.0 / ((1.0 - r_refdef.yOrigin) * verticalFieldOfView);
 	screenedge[3].normal[2] = 1;
 	screenedge[3].type = PLANE_ANYZ;
 

@@ -394,7 +394,7 @@ again:
 			}
 		}
 		if(!buf->allowoverflow)
-			Host_Error("SZ_GetSpace: %s: overflow without allowoverflow set", buf->name);
+			Host_Error("SZ_GetSpace: %s: overflow without allowoverflow set: %d bytes", buf->name, length);
 		if(length > buf->maxsize)
 			Host_Error("SZ_GetSpace: %s: %d is > full buffer size", buf->name, length);
 		buf->overflowed = true;

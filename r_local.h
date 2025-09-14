@@ -64,8 +64,6 @@ extern cvar_t r_slimealpha;
 
 extern mplane_t screenedge[4];
 extern vec3_t r_entorigin;
-extern float screenAspect;
-extern float xOrigin, yOrigin;
 extern int r_visframecount;
 extern float scale_for_mip;
 extern int r_drawflags;
@@ -99,18 +97,16 @@ extern void R_RotateBmodel(entity_t *e, view_t *v);
 
 extern int *pfrustum_indexes[4];
 
-#define NEAR_CLIP 0.01
-#define MAXBVERTINDEXES 1000 // new clipped vertices when clipping bmodels to the world BSP
+#define NEAR_CLIP 0.001
 extern mvertex_t *r_ptverts, *r_ptvertsmax;
 
-extern int r_currentkey;
-extern int r_currentbkey;
+extern int r_currentkey, r_currentbkey;
 
 void R_InitTurb(void);
 
 // Alias models
 
-#define MAXALIASVERTS 2000 // TODO: tune this
+#define MAXALIASVERTS 2048
 #define ALIAS_Z_CLIP_PLANE 5
 
 extern finalvert_t *pfinalverts;
