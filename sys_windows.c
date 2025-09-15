@@ -7,7 +7,6 @@
 extern bool doublebufer;
 
 char *game;
-int debug;
 char lasterr[256] = {0};
 
 static const char *disabled[32];
@@ -148,7 +147,7 @@ main(int argc, char **argv)
 
 	parg_init(&ps);
 	nargs = 0;
-	while((c = parg_getopt(&ps, argc, argv, "2b:Ddg:hN:")) >= 0) {
+	while((c = parg_getopt(&ps, argc, argv, "2b:dg:hN:")) >= 0) {
 		switch(c) {
 		case 1:
 			argv[nargs++] = (char *)ps.optarg;
@@ -164,11 +163,8 @@ main(int argc, char **argv)
 			if(ndisabled < nelem(disabled))
 				disabled[ndisabled++] = ps.optarg;
 			break;
-		case 'D':
-			debug++;
-			break;
 		case 'd':
-			dedicated = 1;
+			dedicated = true;
 			break;
 		case 'g':
 			game = (char *)ps.optarg;

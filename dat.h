@@ -40,7 +40,8 @@ extern char *fs_lmpfrom;
 extern char savs[][Nsavcm];
 extern int savcanld[];
 
-extern int dedicated;
+extern bool dedicated;
+extern void (*con_log)(const char *s);
 
 enum {
 	Fpsmin = 5,
@@ -61,5 +62,3 @@ enum {
 extern cvar_t bgmvolume;
 extern int cdtrk, cdntrk;
 extern bool cdloop, cdenabled;
-
-extern int debug;

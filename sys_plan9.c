@@ -4,7 +4,6 @@
 int mainstacksize = 1 * 1024 * 1024;
 char *netmtpt = "/net";
 char *game;
-int debug;
 static const char *disabled[32];
 static int ndisabled;
 
@@ -178,11 +177,8 @@ threadmain(int argc, char **argv)
 		if(i < nelem(paths) - 2)
 			paths[i++] = EARGF(usage());
 		break;
-	case 'D':
-		debug = 1;
-		break;
 	case 'd':
-		dedicated = 1;
+		dedicated = true;
 		break;
 	case 'g':
 		game = EARGF(usage());

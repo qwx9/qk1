@@ -9,7 +9,7 @@
  *
  * Memory is cleared / released when a server or client begins, not when they end.
  */
-int dedicated;
+bool dedicated;
 
 bool host_initialized; // true if into command execution
 

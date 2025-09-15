@@ -17,6 +17,7 @@ static cvar_t con_notifytime = {"con_notifytime", "3"}; // seconds
 // realtime time the line was generated for transparent notify lines
 static float con_times[NUM_CON_TIMES];
 
+void (*con_log)(const char *s);
 bool con_forcedup; // because no entities to refresh
 int con_totallines; // total lines in console scrollback
 int con_backscroll; // lines up from bottom to display
@@ -208,6 +209,9 @@ Con_Print(const char *txt)
 {
 	static bool cr;
 	int y, c, l, mask;
+
+	if(con_log != nil)
+		con_log(txt);
 
 	con_backscroll = 0;
 

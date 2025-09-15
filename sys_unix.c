@@ -5,7 +5,6 @@
 #include <fenv.h>
 
 char *game;
-int debug;
 char lasterr[256] = {0};
 static const char *disabled[32];
 static int ndisabled;
@@ -131,6 +130,60 @@ game_shutdown(void)
 	exit(0);
 }
 
+static void
+sys_log(const char *s)
+{
+	int c;
+
+	for(; *s; s++) {
+		c = *s;
+		if(c == '\t' || c == '\n' || (c >= ' ' && c <= '~'))
+			fputc(c, stdout);
+		else if(c >= 160 && c <= 254)
+			fputc(c & ~0x80, stdout);
+		else if(c >= 18 && c <= 27)
+			fputc(c - 18 + '0', stdout);
+		else {
+			switch(c) {
+			case 127:
+			case 255:
+				fputs("←", stdout);
+				break;
+			case 16:
+			case 144:
+				fputc('[', stdout);
+				break;
+			case 17:
+			case 145:	
+				fputc(']', stdout);
+				break;
+			case 13:
+				if(s[1] == '\n')
+					break;
+			case 141:
+				fputs("▷", stdout);
+				break;
+			case 11:
+			case 139:
+				fputs("□", stdout);
+				break;
+			case 128:
+			case 157:
+				fputs("🭮", stdout);
+				break;
+			case 130:
+			case 159:
+				fputs("🭬", stdout);
+				break;
+			default:
+				fputs("■", stdout);
+				break;
+			}
+		}
+	}
+	fflush(stdout);
+}
+
 int
 main(int argc, char **argv)
 {
@@ -146,7 +199,7 @@ main(int argc, char **argv)
 
 	parg_init(&ps);
 	nargs = 0;
-	while((c = parg_getopt(&ps, argc, argv, "2b:Ddg:hN:")) >= 0) {
+	while((c = parg_getopt(&ps, argc, argv, "2b:dg:hlN:")) >= 0) {
 		switch(c) {
 		case 1:
 			argv[nargs++] = (char *)ps.optarg;
@@ -162,11 +215,9 @@ main(int argc, char **argv)
 			if(ndisabled < nelem(disabled))
 				disabled[ndisabled++] = ps.optarg;
 			break;
-		case 'D':
-			debug++;
-			break;
 		case 'd':
-			dedicated = 1;
+			dedicated = true;
+			con_log = sys_log;
 			break;
 		case 'g':
 			game = (char *)ps.optarg;
@@ -174,6 +225,9 @@ main(int argc, char **argv)
 		case 'h':
 			fprintf(stderr, "usage: qk1 [-b BASE_PATH] [-g GAME] [-2] [-d] [-N snd|cd]\n");
 			return 0;
+			break;
+		case 'l':
+			con_log = sys_log;
 			break;
 		case '?':
 			fprintf(stderr, "unknown option -%c\n", ps.optopt);
