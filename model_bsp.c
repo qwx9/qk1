@@ -95,6 +95,7 @@ BSP_LoadTextures(model_t *mod, byte *in, int sz, int extra)
 	texture_t *anims[10];
 	texture_t *altanims[10];
 	static const int elsz = 16 + 2 * 4 + 4 * 4;
+	bool havesky;
 
 	if(sz < 1) {
 		mod->textures = nil;
@@ -113,6 +114,7 @@ BSP_LoadTextures(model_t *mod, byte *in, int sz, int extra)
 	}
 	mod->textures = Hunk_Alloc((mod->numtextures + extra) * sizeof(*mod->textures));
 
+	havesky = false;
 	for(i = 0; i < mod->numtextures; i++) {
 		off = le32(in);
 		if(off == -1)
@@ -150,7 +152,9 @@ BSP_LoadTextures(model_t *mod, byte *in, int sz, int extra)
 				break;
 			}
 		}
-		if(tx->name[0] == '{') {
+		if(strcmp(tx->name, "skip") == 0)
+			tx->drawsurf = DRAWSURF_NODRAW;
+		else if(tx->name[0] == '{') {
 			for(j = 1; j < MIPLEVELS; j++) {
 				w /= 2;
 				h /= 2;
@@ -165,10 +169,10 @@ BSP_LoadTextures(model_t *mod, byte *in, int sz, int extra)
 					true
 				);
 			}
-		} else if(strcmp(tx->name, "skip") == 0)
-			tx->drawsurf = DRAWSURF_NODRAW;
-		else if(strncmp(tx->name, "sky", 3) == 0)
+		} else if(!havesky && strncmp(tx->name, "sky", 3) == 0) {
 			R_InitSky(tx);
+			havesky = true;
+		}
 	}
 
 	// sequence the animations

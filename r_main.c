@@ -186,9 +186,10 @@ R_NewMap(void)
 	r_dowarpold = false;
 	r_viewchanged = false;
 
+	if(!sv.active)
+		R_InitSky(nil);
 	R_ClearParticles();
 	R_ApplyFog(cl.worldmodel);
-	R_InitSky(nil);
 	R_LoadSkyBox(nil, cl.worldmodel);
 }
 

@@ -195,8 +195,6 @@ BSP30_LoadTextures(model_t *mod, byte *in, int sz, int extra)
 				Con_Printf("missing texture: %s\n", tx->name);
 			}
 		}
-		if(strncmp(tx->name, "sky", 3) == 0)
-			R_InitSky(nil); /* FIXME(sigrid): skybox */
 	}
 
 	// sequence the animations
