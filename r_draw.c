@@ -336,74 +336,34 @@ R_RenderFace(msurface_t *fa, view_t *v, int clipflags)
 	for(i = 0; i < fa->numedges; i++) {
 		lindex = currententity->model->surfedges[fa->firstedge + i];
 
-		if(lindex > 0) {
-			r_pedge = &pedges[lindex];
-
-			// if the edge is cached, we can just reuse the edge
-			if(currententity == cl_entities) {
-				if(r_pedge->cacheoffset & FULLY_CLIPPED_CACHED) {
-					if((int)(r_pedge->cacheoffset & FRAMECOUNT_MASK) == r_framecount) {
-						r_lastvertvalid = false;
-						continue;
-					}
-				} else {
-					if((((uintptr)edge_p - (uintptr)r_edges) > r_pedge->cacheoffset) &&
-					   (((edge_t *)((uintptr)r_edges + r_pedge->cacheoffset))->owner == r_pedge)) {
-						R_EmitCachedEdge();
-						r_lastvertvalid = false;
-						continue;
-					}
+		r_pedge = &pedges[lindex > 0 ? lindex : -lindex];
+		// if the edge is cached, we can just reuse the edge
+		if(currententity == cl_entities) {
+			if(r_pedge->cacheoffset & FULLY_CLIPPED_CACHED) {
+				if((int)(r_pedge->cacheoffset & FRAMECOUNT_MASK) == r_framecount) {
+					r_lastvertvalid = false;
+					continue;
 				}
+			} else if((((uintptr)edge_p - (uintptr)r_edges) > r_pedge->cacheoffset) &&
+					  (((edge_t *)((uintptr)r_edges + r_pedge->cacheoffset))->owner == r_pedge)) {
+				R_EmitCachedEdge();
+				r_lastvertvalid = false;
+				continue;
 			}
-
-			// assume it's cacheable
-			cacheoffset = (byte *)edge_p - (byte *)r_edges;
-			r_leftclipped = r_rightclipped = false;
-			R_ClipEdge(
-				&r_pcurrentvertbase[r_pedge->v[0]], &r_pcurrentvertbase[r_pedge->v[1]], pclip, v
-			);
-			r_pedge->cacheoffset = cacheoffset;
-			if(r_leftclipped)
-				makeleftedge = true;
-			if(r_rightclipped)
-				makerightedge = true;
-			r_lastvertvalid = true;
-		} else {
-			lindex = -lindex;
-			r_pedge = &pedges[lindex];
-			// if the edge is cached, we can just reuse the edge
-			if(currententity == cl_entities) {
-				if(r_pedge->cacheoffset & FULLY_CLIPPED_CACHED) {
-					if((int)(r_pedge->cacheoffset & FRAMECOUNT_MASK) == r_framecount) {
-						r_lastvertvalid = false;
-						continue;
-					}
-				} else {
-					// it's cached if the cached edge is valid and is owned
-					// by this medge_t
-					if((((uintptr)edge_p - (uintptr)r_edges) > r_pedge->cacheoffset) &&
-					   (((edge_t *)((uintptr)r_edges + r_pedge->cacheoffset))->owner == r_pedge)) {
-						R_EmitCachedEdge();
-						r_lastvertvalid = false;
-						continue;
-					}
-				}
-			}
-
-			// assume it's cacheable
-			cacheoffset = (byte *)edge_p - (byte *)r_edges;
-			r_leftclipped = r_rightclipped = false;
-			R_ClipEdge(
-				&r_pcurrentvertbase[r_pedge->v[1]], &r_pcurrentvertbase[r_pedge->v[0]], pclip, v
-			);
-			r_pedge->cacheoffset = cacheoffset;
-
-			if(r_leftclipped)
-				makeleftedge = true;
-			if(r_rightclipped)
-				makerightedge = true;
-			r_lastvertvalid = true;
 		}
+
+		// assume it's cacheable
+		cacheoffset = (byte *)edge_p - (byte *)r_edges;
+		r_leftclipped = r_rightclipped = false;
+		R_ClipEdge(
+			&r_pcurrentvertbase[r_pedge->v[lindex < 0]], &r_pcurrentvertbase[r_pedge->v[lindex > 0]], pclip, v
+		);
+		r_pedge->cacheoffset = cacheoffset;
+		if(r_leftclipped)
+			makeleftedge = true;
+		if(r_rightclipped)
+			makerightedge = true;
+		r_lastvertvalid = true;
 	}
 
 	// if there was a clip off the left edge, add that edge too

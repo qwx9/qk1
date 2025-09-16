@@ -487,7 +487,7 @@ R_RenderWorld(view_t *v)
 	r_pcurrentvertbase = clmodel->vertexes;
 
 	num_node_rejects = 0;
-	R_RecursiveWorldNode(clmodel->nodes, v, 15);
+	R_RecursiveWorldNode(clmodel->nodes, v, ALIAS_XY_CLIP_MASK);
 	if(r_skybox)
 		R_EmitSkyBox(v);
 }
