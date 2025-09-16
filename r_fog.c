@@ -82,8 +82,6 @@ R_ApplyFog(model_t *m)
 
 	fogvars.enabled = false;
 	fogvars.allowed = r_fog.value > 0.0;
-	if(!fogvars.allowed)
-		return;
 
 	fogvars.pix = fogvars.fbpix = fogvars.skypix = 0;
 	fogvars.density = 0;
