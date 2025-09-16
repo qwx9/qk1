@@ -163,16 +163,14 @@ Draw_Pic(int x, int y, const qpic_t *pic)
 	pixel_t *dest;
 	int px, py;
 
-	if((x < 0) || (x + pic->width > vid.width) || (y < 0) || (y + pic->height > vid.height))
+	if(x < 0 || x + pic->width > vid.width || y < 0 || y + pic->height > vid.height)
 		return;
 
 	source = pic->pixels;
 	dest = vid.buffer + y * vid.width + x;
 	for(py = 0; py < pic->height; py++) {
-		for(px = 0; px < pic->width; px++) {
-			if(opaque(source[px]))
-				dest[px] = source[px];
-		}
+		for(px = 0; px < pic->width; px++)
+			dest[px] = source[px];
 		dest += vid.width;
 		source += pic->width;
 	}
@@ -233,9 +231,10 @@ Draw_CharToConback(int num, pixel_t *dest)
 	drawline = 8;
 
 	while(drawline--) {
-		for(x = 0; x < 8; x++)
-			if((source[x] & 0xffffff) != 0)
+		for(x = 0; x < 8; x++) {
+			if(source[x] != 0)
 				dest[x] = source[x];
+		}
 		source += 128;
 		dest += 320;
 	}
@@ -247,7 +246,7 @@ Draw_ConsoleBackground(int lines)
 	int x, y, v, n, f, fstep;
 	pixel_t *src, *dest;
 	qpic_t *conback;
-	char ver[100];
+	char ver[16];
 
 	conback = Draw_CachePic("gfx/conback.lmp");
 

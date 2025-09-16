@@ -708,7 +708,7 @@ Sbar_DeathmatchOverlay(void)
 	scr_fullupdate = 0;
 
 	pic = Draw_CachePic("gfx/ranking.lmp");
-	M_DrawPic((320 - pic->width) / 2, 8, pic);
+	Draw_Pic((vid.width - pic->width) >> 1, 8, pic);
 
 	// scores
 	Sbar_SortFrags();
