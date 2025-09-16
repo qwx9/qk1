@@ -6,6 +6,7 @@ project(
 		'c_std=c99',
 		'warning_level=2',
 		'buildtype=release',
+        'b_ndebug=if-release',
 		#'b_coverage=true',
 	],
 )

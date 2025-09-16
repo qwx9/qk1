@@ -113,10 +113,7 @@ MSG_WriteChar(sizebuf_t *sb, int c)
 {
 	byte *buf;
 
-#ifdef PARANOID
-	if(c < -128 || c > 127)
-		fatal("MSG_WriteChar: range error");
-#endif
+	assert(c >= -128 && c <= 127);
 
 	buf = SZ_GetSpace(sb, 1);
 	buf[0] = c;
@@ -127,10 +124,7 @@ MSG_WriteByte(sizebuf_t *sb, int c)
 {
 	byte *buf;
 
-#ifdef PARANOID
-	if(c < 0 || c > 255)
-		fatal("MSG_WriteByte: range error");
-#endif
+	assert(c >= 0 && c <= 255);
 
 	buf = SZ_GetSpace(sb, 1);
 	buf[0] = c;
@@ -141,10 +135,19 @@ MSG_WriteShort(sizebuf_t *sb, int c)
 {
 	byte *buf;
 
-#ifdef PARANOID
-	if(c < ((short)0x8000) || c > (short)0x7fff)
-		fatal("MSG_WriteShort: range error");
-#endif
+	assert(c >= ((short)0x8000) && c <= (short)0x7fff);
+
+	buf = SZ_GetSpace(sb, 2);
+	buf[0] = c & 0xff;
+	buf[1] = c >> 8;
+}
+
+void
+MSG_WriteUShort(sizebuf_t *sb, int c)
+{
+	byte *buf;
+
+	assert(c >= 0 && c <= 0xffff);
 
 	buf = SZ_GetSpace(sb, 2);
 	buf[0] = c & 0xff;
@@ -207,7 +210,8 @@ MSG_WriteAngle(sizebuf_t *sb, float f)
 void
 MSG_WriteAngleInt16(sizebuf_t *sb, float f)
 {
-	MSG_WriteShort(sb, Qrint(f * 65536.0 / 360.0) & 65535);
+	int x = (short)(Qrint(f * 65536.0 / 360.0) & 65535);
+	MSG_WriteShort(sb, x);
 }
 
 //
@@ -394,7 +398,9 @@ again:
 			}
 		}
 		if(!buf->allowoverflow)
-			Host_Error("SZ_GetSpace: %s: overflow without allowoverflow set: %d bytes", buf->name, length);
+			Host_Error(
+				"SZ_GetSpace: %s: overflow without allowoverflow set: %d bytes", buf->name, length
+			);
 		if(length > buf->maxsize)
 			Host_Error("SZ_GetSpace: %s: %d is > full buffer size", buf->name, length);
 		buf->overflowed = true;

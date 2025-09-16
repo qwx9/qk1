@@ -354,7 +354,10 @@ R_RenderFace(msurface_t *fa, view_t *v, int clipflags)
 		cacheoffset = (byte *)edge_p - (byte *)r_edges;
 		r_leftclipped = r_rightclipped = false;
 		R_ClipEdge(
-			&r_pcurrentvertbase[r_pedge->v[lindex < 0]], &r_pcurrentvertbase[r_pedge->v[lindex > 0]], pclip, v
+			&r_pcurrentvertbase[r_pedge->v[lindex < 0]],
+			&r_pcurrentvertbase[r_pedge->v[lindex > 0]],
+			pclip,
+			v
 		);
 		r_pedge->cacheoffset = cacheoffset;
 		if(r_leftclipped)
@@ -404,8 +407,8 @@ R_RenderFace(msurface_t *fa, view_t *v, int clipflags)
 
 	surface_p->d_zistepu = p->v_normal[0] * xscaleinv * p->v_distinv;
 	surface_p->d_zistepv = -p->v_normal[1] * yscaleinv * p->v_distinv;
-	surface_p->d_ziorigin =
-		p->v_normal[2] * p->v_distinv - xcenter * surface_p->d_zistepu - ycenter * surface_p->d_zistepv;
+	surface_p->d_ziorigin = p->v_normal[2] * p->v_distinv - xcenter * surface_p->d_zistepu -
+							ycenter * surface_p->d_zistepv;
 	surface_p++;
 
 	return 1;

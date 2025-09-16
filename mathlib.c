@@ -70,7 +70,7 @@ BoxOnPlaneSide(vec3_t emins, vec3_t emaxs, mplane_t *p)
 	if(dist2 < p->dist)
 		sides |= 2;
 
-#ifdef PARANOID
+#ifndef NDEBUG
 	if(sides == 0)
 		fatal("BoxOnPlaneSide: sides==0");
 #endif
@@ -200,11 +200,11 @@ FloorDivMod(double numer, double denom, int *quotient, int *rem)
 	int q, r;
 	double x;
 
-#ifdef PARANOID
+#ifndef NDEBUG
 	if(denom <= 0.0)
-		fatal("FloorDivMod: bad denominator %d\n", denom);
+		fatal("FloorDivMod: bad denominator %g\n", denom);
 	if(floor(numer) != numer || floor(denom) != denom)
-		fatal("FloorDivMod: non-integer numer or denom %f %f\n", numer, denom);
+		fatal("FloorDivMod: non-integer numer or denom %g %g\n", numer, denom);
 #endif
 
 	if(numer >= 0.0) {

@@ -1350,7 +1350,7 @@ PF_makestatic(pr_t *pr)
 	((bits & sv.protocol->fl_large_baseline_frame) ? MSG_WriteShort
 												   : MSG_WriteByte)(sv.signon, frame);
 	MSG_WriteByte(sv.signon, ent->v.colormap);
-	MSG_WriteByte(sv.signon, ent->v.skin);
+	MSG_WriteByte(sv.signon, ent->v.skin < 0 ? 0 : ent->v.skin);
 	for(i = 0; i < 3; i++) {
 		sv.protocol->MSG_WriteCoord(sv.signon, ent->v.origin[i]);
 		sv.protocol->MSG_WriteAngle(sv.signon, ent->v.angles[i]);

@@ -146,8 +146,7 @@ R_SetupFrame(void)
 				vrect.height = (int)h;
 
 				R_ViewChanged(
-					&vrect,
-					vid.aspect * (h / w) * ((float)vid.width / (float)vid.height)
+					&vrect, vid.aspect * (h / w) * ((float)vid.width / (float)vid.height)
 				);
 			}
 		} else {

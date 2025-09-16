@@ -106,7 +106,7 @@ Draw_Character(int x, int y, int num)
 	if(y <= -8)
 		return; // totally off screen
 
-#ifdef PARANOID
+#ifndef NDEBUG
 	if(y > vid.height - 8 || x < 0 || x > vid.width - 8)
 		fatal("Con_DrawCharacter: (%d, %d)", x, y);
 	if(num < 0 || num > 255)

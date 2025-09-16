@@ -2,7 +2,7 @@
 
 BIN=/$objtype/bin/games
 TARG=quake
-CFLAGS=$CFLAGS -D__plan9__ -D__${objtype}__ -Iplan9
+CFLAGS=$CFLAGS -D__plan9__ -DNDEBUG -D__${objtype}__ -Iplan9
 
 OFILES=\
 	cd.$O\

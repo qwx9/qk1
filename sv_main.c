@@ -185,13 +185,13 @@ SV_StartSound(edict_t *entity, int channel, char *sample, int volume, float atte
 	if(field_mask & SND_ATTENUATION)
 		MSG_WriteByte(&sv.datagram, attenuation * 64);
 	if(field_mask & (sv.protocol->fl_large_entity | sv.protocol->fl_large_channel)) {
-		MSG_WriteShort(&sv.datagram, ent);
+		MSG_WriteUShort(&sv.datagram, ent);
 		MSG_WriteByte(&sv.datagram, channel);
 	} else {
-		MSG_WriteShort(&sv.datagram, ent << 3 | channel);
+		MSG_WriteUShort(&sv.datagram, ent << 3 | channel);
 	}
 	if(field_mask & sv.protocol->fl_large_sound)
-		MSG_WriteShort(&sv.datagram, sound_num);
+		MSG_WriteUShort(&sv.datagram, sound_num);
 	else
 		MSG_WriteByte(&sv.datagram, sound_num);
 	for(i = 0; i < 3; i++)
@@ -241,7 +241,7 @@ SV_SendServerinfo(client_t *client)
 
 	// set view
 	MSG_WriteByte(&client->message, svc_setview);
-	MSG_WriteShort(&client->message, NUM_FOR_EDICT(sv.pr, client->edict));
+	MSG_WriteUShort(&client->message, NUM_FOR_EDICT(sv.pr, client->edict));
 
 	MSG_WriteByte(&client->message, svc_signonnum);
 	MSG_WriteByte(&client->message, 1);
@@ -487,27 +487,28 @@ SV_WriteEntitiesToClient(edict_t *clent, sizebuf_t *msg)
 		}
 
 		// write the message
-		MSG_WriteByte(msg, bits | U_SIGNAL);
+		assert((bits & U_SIGNAL) == 0);
+		MSG_WriteByte(msg, (bits & 0xff) | U_SIGNAL);
 
 		if(bits & U_MOREBITS) {
-			MSG_WriteByte(msg, bits >> 8);
+			MSG_WriteByte(msg, (bits >> 8) & 0xff);
 			if(bits & U_MOREBITS2) {
-				MSG_WriteByte(msg, bits >> 16);
+				MSG_WriteByte(msg, (bits >> 16) & 0xff);
 				if(bits & U_MOREBITS3)
 					MSG_WriteByte(msg, bits >> 24);
 			}
 		}
-		((bits & U_LONGENTITY) ? MSG_WriteShort : MSG_WriteByte)(msg, e);
+		((bits & U_LONGENTITY) ? MSG_WriteUShort : MSG_WriteByte)(msg, e);
 		if(bits & U_MODEL)
-			MSG_WriteByte(msg, model);
+			MSG_WriteByte(msg, model & 0xff);
 		if(bits & U_FRAME)
-			MSG_WriteByte(msg, ent->v.frame);
+			MSG_WriteByte(msg, (int)ent->v.frame & 0xff);
 		if(bits & U_COLORMAP)
 			MSG_WriteByte(msg, ent->v.colormap);
 		if(bits & U_SKIN)
 			MSG_WriteByte(msg, ent->v.skin);
 		if(bits & U_EFFECTS)
-			MSG_WriteByte(msg, ent->v.effects);
+			MSG_WriteByte(msg, (int)ent->v.effects & 0xff);
 		if(bits & U_ORIGIN1)
 			sv.protocol->MSG_WriteCoord(msg, ent->v.origin[0]);
 		if(bits & U_ANGLE1)
@@ -641,7 +642,7 @@ SV_WriteClientdataToMessage(edict_t *ent, sizebuf_t *msg)
 	// send the data
 
 	MSG_WriteByte(msg, svc_clientdata);
-	MSG_WriteShort(msg, bits);
+	MSG_WriteUShort(msg, bits & 0xffff);
 	if(bits & SU_MOREBITS) {
 		MSG_WriteByte(msg, bits >> 16);
 		if(bits & SU_MOREBITS2)
@@ -668,7 +669,7 @@ SV_WriteClientdataToMessage(edict_t *ent, sizebuf_t *msg)
 	if(bits & SU_ARMOR)
 		MSG_WriteByte(msg, ent->v.armorvalue);
 	if(bits & SU_WEAPON)
-		MSG_WriteByte(msg, weaponmodel);
+		MSG_WriteByte(msg, weaponmodel & 0xff);
 
 	MSG_WriteShort(msg, ent->v.health);
 	MSG_WriteByte(msg, ent->v.currentammo);
@@ -678,7 +679,7 @@ SV_WriteClientdataToMessage(edict_t *ent, sizebuf_t *msg)
 	MSG_WriteByte(msg, ent->v.ammo_cells);
 
 	if(standard_quake)
-		MSG_WriteByte(msg, ent->v.weapon);
+		MSG_WriteByte(msg, (int)ent->v.weapon & 0xff);
 	else {
 		for(i = 0; i < 32; i++) {
 			if(((int)ent->v.weapon) & (1 << i)) {
@@ -924,15 +925,15 @@ SV_CreateBaseline(void)
 		// add to the message
 		SV_SignonFrame();
 		MSG_WriteByte(sv.signon, bits ? svc_spawnbaseline2 : svc_spawnbaseline);
-		MSG_WriteShort(sv.signon, entnum);
+		MSG_WriteUShort(sv.signon, entnum);
 		if(bits != 0)
 			MSG_WriteByte(sv.signon, bits);
 
 		((bits & sv.protocol->fl_large_baseline_model)
-			 ? MSG_WriteShort
+			 ? MSG_WriteUShort
 			 : MSG_WriteByte)(sv.signon, svent->baseline.modelindex);
 		((bits & sv.protocol->fl_large_baseline_frame)
-			 ? MSG_WriteShort
+			 ? MSG_WriteUShort
 			 : MSG_WriteByte)(sv.signon, svent->baseline.frame);
 		MSG_WriteByte(sv.signon, svent->baseline.colormap);
 		MSG_WriteByte(sv.signon, svent->baseline.skin);

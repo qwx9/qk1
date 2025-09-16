@@ -359,8 +359,8 @@ PR_ExecuteProgram(pr_t *pr, func_t fnum)
 			break;
 		case OP_ADDRESS:
 			ed = PROG_TO_EDICT(pr, a->edict);
-#ifdef PARANOID
-			NUM_FOR_EDICT(ed); // make sure it's in range
+#ifndef NDEBUG
+			NUM_FOR_EDICT(pr, ed); // make sure it's in range
 #endif
 			if(ed == (edict_t *)pr->edicts && sv.state == ss_active)
 				PR_RunError(pr, "assignment to world entity");
@@ -372,16 +372,16 @@ PR_ExecuteProgram(pr_t *pr, func_t fnum)
 		case OP_LOAD_S:
 		case OP_LOAD_FNC:
 			ed = PROG_TO_EDICT(pr, a->edict);
-#ifdef PARANOID
-			NUM_FOR_EDICT(ed); // make sure it's in range
+#ifndef NDEBUG
+			NUM_FOR_EDICT(pr, ed); // make sure it's in range
 #endif
 			a = (eval_t *)((int *)&ed->v + b->_int);
 			c->_int = a->_int;
 			break;
 		case OP_LOAD_V:
 			ed = PROG_TO_EDICT(pr, a->edict);
-#ifdef PARANOID
-			NUM_FOR_EDICT(ed); // make sure it's in range
+#ifndef NDEBUG
+			NUM_FOR_EDICT(pr, ed); // make sure it's in range
 #endif
 			a = (eval_t *)((int *)&ed->v + b->_int);
 			c->vector[0] = a->vector[0];

@@ -154,7 +154,7 @@ sys_log(const char *s)
 				fputc('[', stdout);
 				break;
 			case 17:
-			case 145:	
+			case 145:
 				fputc(']', stdout);
 				break;
 			case 13:

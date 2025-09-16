@@ -4,12 +4,11 @@
 
 #define QUAKE_GAME // as opposed to utilities
 #define VERSION 1.09
-// #define PARANOID // speed sapping error checking
 #define GAMENAME "id1" // directory to look in by default
 
 enum {
 	MAX_DATAGRAM = 1400, // max length of unreliable message
-	MAX_DATAGRAM_LOCAL = 4*65536, // on loopback we don't care
+	MAX_DATAGRAM_LOCAL = 4 * 65536, // on loopback we don't care
 
 	PITCH = 0, // up / down
 	YAW, // left / right
