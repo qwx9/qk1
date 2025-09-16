@@ -142,12 +142,8 @@ BSP_LoadTextures(model_t *mod, byte *in, int sz, int extra)
 		tx->height = h;
 		// the pixels immediately follow the structures
 		torgbx(p, tx->pixels, pixels);
-		tx->drawsurf |= DRAWSURF_NODRAW;
 		for(j = 0; j < pixels; j++) {
-			if(p[j] == 0)
-				continue;
-			tx->drawsurf &= ~DRAWSURF_NODRAW;
-			if((tx->pixels[j] & 0xff000000) == 0) {
+			if(tx->pixels[j] != 0 && (tx->pixels[j] & 0xff000000) == 0) {
 				tx->drawsurf |= DRAWSURF_FULLBRIGHT;
 				break;
 			}
