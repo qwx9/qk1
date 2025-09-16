@@ -119,7 +119,7 @@ R_EmitEdge(mvertex_t *pv0, mvertex_t *pv1, view_t *view)
 	// create the edge
 	if(ceilv0 == r_ceilv1) {
 		// we cache unclipped horizontal edges as fully clipped
-		if(cacheoffset != 0x7FFFFFFF)
+		if(cacheoffset != FRAMECOUNT_MASK)
 			cacheoffset = FULLY_CLIPPED_CACHED | (r_framecount & FRAMECOUNT_MASK);
 		return; // horizontal edge
 	}
@@ -195,7 +195,7 @@ R_ClipEdge(mvertex_t *pv0, mvertex_t *pv1, clipplane_t *clip, view_t *v)
 			// only point 1 is clipped
 
 			// we don't cache clipped edges
-			cacheoffset = 0x7FFFFFFF;
+			cacheoffset = FRAMECOUNT_MASK;
 
 			f = d0 / (d0 - d1);
 			clipvert.position[0] = pv0->position[0] + f * (pv1->position[0] - pv0->position[0]);
@@ -226,7 +226,7 @@ R_ClipEdge(mvertex_t *pv0, mvertex_t *pv1, clipplane_t *clip, view_t *v)
 			r_lastvertvalid = false;
 
 			// we don't cache partially clipped edges
-			cacheoffset = 0x7FFFFFFF;
+			cacheoffset = FRAMECOUNT_MASK;
 
 			f = d0 / (d0 - d1);
 			clipvert.position[0] = pv0->position[0] + f * (pv1->position[0] - pv0->position[0]);
@@ -290,9 +290,7 @@ R_RenderFace(msurface_t *fa, view_t *v, int clipflags)
 {
 	int i, lindex;
 	unsigned int mask;
-	mplane_t *pplane;
-	float distinv;
-	vec3_t p_normal;
+	mplane_t *p;
 	medge_t *pedges, tedge;
 	clipplane_t *pclip;
 
@@ -397,16 +395,17 @@ R_RenderFace(msurface_t *fa, view_t *v, int clipflags)
 	surface_p->key = r_currentkey++;
 	surface_p->spans = nil;
 
-	pplane = fa->plane;
-	// FIXME: cache this?
-	TransformVector(pplane->normal, p_normal, v);
-	// FIXME: cache this?
-	distinv = 1.0 / (pplane->dist - DotProduct(v->modelorg, pplane->normal));
+	p = fa->plane;
+	if(p->v_frame != r_framecount) {
+		p->v_frame = r_framecount;
+		TransformVector(p->normal, p->v_normal, v);
+		p->v_distinv = 1.0 / (p->dist - DotProduct(v->modelorg, p->normal));
+	}
 
-	surface_p->d_zistepu = p_normal[0] * xscaleinv * distinv;
-	surface_p->d_zistepv = -p_normal[1] * yscaleinv * distinv;
+	surface_p->d_zistepu = p->v_normal[0] * xscaleinv * p->v_distinv;
+	surface_p->d_zistepv = -p->v_normal[1] * yscaleinv * p->v_distinv;
 	surface_p->d_ziorigin =
-		p_normal[2] * distinv - xcenter * surface_p->d_zistepu - ycenter * surface_p->d_zistepv;
+		p->v_normal[2] * p->v_distinv - xcenter * surface_p->d_zistepu - ycenter * surface_p->d_zistepv;
 	surface_p++;
 
 	return 1;
@@ -422,6 +421,9 @@ R_RenderBmodelFace(bedge_t *pedges, msurface_t *psurf, view_t *v)
 	float distinv;
 	vec3_t p_normal;
 	clipplane_t *pclip;
+
+	if((psurf->flags & SURF_DRAWSKY) != 0 && r_skybox)
+		return;
 
 	// skip out if no more surfs
 	if(surface_p >= surf_max) {
@@ -499,9 +501,7 @@ R_RenderBmodelFace(bedge_t *pedges, msurface_t *psurf, view_t *v)
 	surface_p->spans = nil;
 
 	pplane = psurf->plane;
-	// FIXME: cache this?
 	TransformVector(pplane->normal, p_normal, v);
-	// FIXME: cache this?
 	distinv = 1.0 / (pplane->dist - DotProduct(v->modelorg, pplane->normal));
 
 	surface_p->d_zistepu = p_normal[0] * xscaleinv * distinv;

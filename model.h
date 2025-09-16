@@ -26,6 +26,9 @@ typedef struct mplane_s {
 	float dist;
 	byte type; // for texture axis selection and fast side tests
 	byte signbits; // signx + signy<<1 + signz<<1
+	int v_frame;
+	float v_distinv;
+	vec3_t v_normal;
 } mplane_t;
 
 enum {
