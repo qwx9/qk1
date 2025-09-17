@@ -635,7 +635,7 @@ V_RenderView(void)
 
 	if(crosshair.value) {
 		c = crosshairs[(int)clamp(crosshair_shape.value, 0, nelem(crosshairs) - 1)];
-		Draw_Pic(
+		Draw_TransPic(
 			scr_vrect.x + (scr_vrect.width - c->width) / 2 + cl_crossx.value,
 			scr_vrect.y + (scr_vrect.height - c->height) / 2 + cl_crossy.value,
 			c
