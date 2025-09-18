@@ -448,9 +448,9 @@ R_DrawEntity(entity_t *e, view_t *view)
 			VectorSubtract(e->origin, cl_dlights[k].origin, dist);
 			add = cl_dlights[k].radius - Length(dist);
 			if(add > 0) {
-				lighting.ambientlight[0] += add;
-				lighting.ambientlight[1] += add;
-				lighting.ambientlight[2] += add;
+				lighting.ambientlight[0] += cl_dlights[k].color[0] * add;
+				lighting.ambientlight[1] += cl_dlights[k].color[1] * add;
+				lighting.ambientlight[2] += cl_dlights[k].color[2] * add;
 			}
 		}
 
@@ -586,9 +586,9 @@ R_DrawViewModel(view_t *view)
 		VectorSubtract(currententity->origin, dl->origin, dist);
 		add = dl->radius - Length(dist);
 		if(add > 0) {
-			r_viewlighting.ambientlight[0] += add;
-			r_viewlighting.ambientlight[1] += add;
-			r_viewlighting.ambientlight[2] += add;
+			r_viewlighting.ambientlight[0] += dl->color[0] * add;
+			r_viewlighting.ambientlight[1] += dl->color[1] * add;
+			r_viewlighting.ambientlight[2] += dl->color[2] * add;
 		}
 	}
 

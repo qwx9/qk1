@@ -57,6 +57,7 @@ typedef struct {
 	float decay; // drop this each second
 	float minlight; // don't add when contributing less
 	int key;
+	float color[3];
 } dlight_t;
 
 typedef struct {

@@ -5,9 +5,10 @@ R_AddDynamicLights(entity_t *e, drawsurf_t *ds)
 {
 	msurface_t *ms;
 	int lnum, sd, td, s, t, i, smax, tmax;
-	float dist, rad, minlight;
+	float dist, rad, minlight, rd;
 	vec3_t impact, local, entorigin;
 	mtexinfo_t *tex;
+	dlight_t *dl;
 
 	ms = ds->m;
 	smax = (ms->extents[0] >> 4) + 1;
@@ -18,11 +19,12 @@ R_AddDynamicLights(entity_t *e, drawsurf_t *ds)
 		if((ms->dlightbits & (1 << lnum)) == 0)
 			continue; // not lit by this light
 
-		rad = cl_dlights[lnum].radius;
-		VectorSubtract(cl_dlights[lnum].origin, e->origin, entorigin);
+		dl = &cl_dlights[lnum];
+		rad = dl->radius;
+		VectorSubtract(dl->origin, e->origin, entorigin);
 		dist = DotProduct(entorigin, ms->plane->normal) - ms->plane->dist;
 		rad -= fabs(dist);
-		minlight = cl_dlights[lnum].minlight;
+		minlight = dl->minlight;
 		if(rad < minlight)
 			continue;
 		minlight = rad - minlight;
@@ -49,9 +51,10 @@ R_AddDynamicLights(entity_t *e, drawsurf_t *ds)
 				else
 					dist = td + (sd >> 1);
 				if(dist < minlight) {
-					ds->blocklights[0][t * smax + s] += (rad - dist) * 256;
-					ds->blocklights[1][t * smax + s] += (rad - dist) * 256;
-					ds->blocklights[2][t * smax + s] += (rad - dist) * 256;
+					rd = rad - dist;
+					ds->blocklights[0][t * smax + s] += dl->color[0] * 256.0 * rd;
+					ds->blocklights[1][t * smax + s] += dl->color[1] * 256.0 * rd;
+					ds->blocklights[2][t * smax + s] += dl->color[2] * 256.0 * rd;
 				}
 			}
 		}

@@ -150,6 +150,7 @@ R_LoadSkyBox(const char *name, model_t *m)
 	m->numsurfedges += nelem(surfedges);
 	m->numsurfaces += nelem(ts);
 	m->numedges += nelem(edges);
+	R_InitSky(nil);
 	r_skybox = true;
 }
 

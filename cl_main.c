@@ -253,35 +253,28 @@ CL_PrintEntities_f(cmd_t *c)
 dlight_t *
 CL_AllocDlight(int key)
 {
-	dlight_t *dl;
+	dlight_t *dl, *best;
 	int i;
 
-	// first look for an exact key match
-	if(key) {
-		dl = cl_dlights;
-		for(i = 0; i < MAX_DLIGHTS; i++, dl++) {
-			if(dl->key == key) {
-				memset(dl, 0, sizeof(*dl));
-				dl->key = key;
-				return dl;
-			}
-		}
-	}
+	dl = best = cl_dlights;
 
-	// then look for anything else
-	dl = cl_dlights;
 	for(i = 0; i < MAX_DLIGHTS; i++, dl++) {
 		if(dl->die < cl.time) {
-			memset(dl, 0, sizeof(*dl));
-			dl->key = key;
-			return dl;
+			best = dl;
+			if(!key)
+				break;
+		}
+		if(key && dl->key == key) {
+			best = dl;
+			break;
 		}
 	}
 
-	dl = &cl_dlights[0];
+	dl = best;
 	memset(dl, 0, sizeof(*dl));
 	dl->key = key;
-	return dl;
+	dl->color[0] = dl->color[1] = dl->color[2] = 1;
+	return best;
 }
 
 void
