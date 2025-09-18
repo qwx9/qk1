@@ -271,8 +271,7 @@ CL_ParseServerInfo(void)
 static void
 CL_ParseUpdate(int bits)
 {
-	static int bitcounts[16];
-	int i, modnum, num, skin, colormap;
+	int modnum, num, skin, colormap;
 	model_t *model;
 	bool forcelink;
 	entity_t *ent;
@@ -295,11 +294,6 @@ CL_ParseUpdate(int bits)
 
 	num = (bits & U_LONGENTITY) ? MSG_ReadShort() : MSG_ReadByte();
 	ent = CL_EntityNum(num);
-
-	for(i = 0; i < 16; i++) {
-		if(bits & (1 << i))
-			bitcounts[i]++;
-	}
 
 	forcelink = ent->msgtime != cl.mtime[1]; // no previous frame to lerp from
 	ent->msgtime = cl.mtime[0];
