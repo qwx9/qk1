@@ -407,7 +407,7 @@ SV_WriteEntitiesToClient(edict_t *clent, sizebuf_t *msg)
 	VectorAdd(clent->v.origin, clent->v.view_ofs, org);
 	pvs = SV_FatPVS(org, sv.worldmodel);
 
-	// send over all entities (excpet the client) that touch the pvs
+	// send over all entities (except the client) that touch the pvs
 	ent = NEXT_EDICT(sv.pr, sv.pr->edicts);
 	for(e = 1; e < sv.pr->num_edicts; e++, ent = NEXT_EDICT(sv.pr, ent)) {
 		// ignore if not touching a PV leaf
