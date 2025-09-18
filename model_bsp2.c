@@ -196,12 +196,8 @@ BSP2_LoadClipnodes(model_t *mod, byte *in, int sz, int extra)
 
 	for(i = 0; i < mod->numclipnodes; i++, out++) {
 		out->planenum = le32u(in);
-		out->children[0] = le32u(in);
-		out->children[1] = le32u(in);
-		if(out->children[0] >= mod->numclipnodes)
-			out->children[0] -= 0x10000;
-		if(out->children[1] >= mod->numclipnodes)
-			out->children[1] -= 0x10000;
+		out->children[0] = le32(in);
+		out->children[1] = le32(in);
 	}
 	return 0;
 }
