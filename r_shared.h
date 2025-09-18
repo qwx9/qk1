@@ -63,7 +63,7 @@ typedef struct surf_s {
 	struct surf_s *next; // active surface stack in r_edge.c
 	struct surf_s *prev; // used in r_edge.c for active surf stack
 	struct espan_s *spans; // pointer to linked list of spans to draw
-	void *data; // associated data like msurface_t
+	msurface_t *data; // associated data like msurface_t
 	entity_t *entity;
 	u16int flags;
 	s16int miplevel;

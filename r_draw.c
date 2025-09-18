@@ -293,6 +293,8 @@ R_RenderFace(msurface_t *fa, view_t *v, int clipflags)
 	mplane_t *p;
 	medge_t *pedges, tedge;
 	clipplane_t *pclip;
+	float distinv;
+	vec3_t normal;
 
 	if((surfdrawflags(fa->flags) | entdrawflags(currententity)) ^ r_drawflags)
 		return 0;
@@ -391,7 +393,7 @@ R_RenderFace(msurface_t *fa, view_t *v, int clipflags)
 	surface_p->miplevel = R_MipLevelForScale(r_nearzi * scale_for_mip * fa->texinfo->mipadjust);
 	if(fa->flags & SURF_FENCE)
 		surface_p->miplevel = max(surface_p->miplevel - 1, 0);
-	surface_p->data = (void *)fa;
+	surface_p->data = fa;
 	surface_p->flags = fa->flags | (currententity == cl_entities ? 0 : SURF_IN_SUBMODEL);
 	surface_p->spanstate = 0;
 	surface_p->entity = currententity;
@@ -399,16 +401,13 @@ R_RenderFace(msurface_t *fa, view_t *v, int clipflags)
 	surface_p->spans = nil;
 
 	p = fa->plane;
-	if(p->v_frame != r_framecount) {
-		p->v_frame = r_framecount;
-		TransformVector(p->normal, p->v_normal, v);
-		p->v_distinv = 1.0 / (p->dist - DotProduct(v->modelorg, p->normal));
-	}
+	TransformVector(p->normal, normal, v);
+	distinv = 1.0 / (p->dist - DotProduct(v->modelorg, p->normal));
 
-	surface_p->d_zistepu = p->v_normal[0] * xscaleinv * p->v_distinv;
-	surface_p->d_zistepv = -p->v_normal[1] * yscaleinv * p->v_distinv;
-	surface_p->d_ziorigin = p->v_normal[2] * p->v_distinv - xcenter * surface_p->d_zistepu -
-							ycenter * surface_p->d_zistepv;
+	surface_p->d_zistepu = normal[0] * xscaleinv * distinv;
+	surface_p->d_zistepv = -normal[1] * yscaleinv * distinv;
+	surface_p->d_ziorigin =
+		normal[2] * distinv - xcenter * surface_p->d_zistepu - ycenter * surface_p->d_zistepv;
 	surface_p++;
 
 	return 1;
@@ -496,7 +495,7 @@ R_RenderBmodelFace(bedge_t *pedges, msurface_t *psurf, view_t *v)
 	surface_p->miplevel = R_MipLevelForScale(r_nearzi * scale_for_mip * psurf->texinfo->mipadjust);
 	if(psurf->flags & SURF_FENCE)
 		surface_p->miplevel = max(surface_p->miplevel - 1, 0);
-	surface_p->data = (void *)psurf;
+	surface_p->data = psurf;
 	surface_p->flags = psurf->flags | SURF_IN_SUBMODEL;
 	surface_p->spanstate = 0;
 	surface_p->entity = currententity;
