@@ -741,8 +741,10 @@ Sbar_DeathmatchOverlay(void)
 		Draw_Character(x + 16, y, num[1]);
 		Draw_Character(x + 24, y, num[2]);
 
-		if(k == cl.viewentity - 1)
-			Draw_Character(x - 8, y, 12);
+		if(k == cl.viewentity - 1) {
+			Draw_Character(x - 8, y, 16);
+			Draw_Character(((vid.width - pic->width) >> 1) + pic->width - 4, y, 17);
+		}
 
 		// draw name
 		Draw_String(x + 64, y, s->name);
