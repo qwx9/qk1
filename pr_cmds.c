@@ -1468,7 +1468,9 @@ PF_checkextension(pr_t *pr)
 	static const char *exts[] = {
 		"DP_CL_LOADSKY",
 		"DP_EF_ADDITIVE",
+		"DP_EF_BLUE",
 		"DP_EF_NODRAW",
+		"DP_EF_RED",
 		"DP_ENT_ALPHA",
 		"DP_GFX_FOG",
 		"DP_GFX_SKYBOX",

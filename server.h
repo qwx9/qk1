@@ -61,6 +61,8 @@ enum {
 	EF_DIMLIGHT = 1 << 3,
 	EF_NODRAW = 1 << 4,
 	EF_ADDITIVE = 1 << 5,
+	EF_BLUE = 1 << 6,
+	EF_RED = 1 << 7,
 
 	SPAWNFLAG_NOT_EASY = 1 << 8,
 	SPAWNFLAG_NOT_MEDIUM = 1 << 9,

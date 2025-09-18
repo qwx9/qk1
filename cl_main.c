@@ -410,6 +410,22 @@ CL_RelinkEntities(void)
 			dl->radius = 200 + (rand() & 31);
 			dl->die = cl.time + 0.001;
 		}
+		if(ent->effects & EF_BLUE) {
+			dl = CL_AllocDlight(i);
+			VectorCopy(ent->origin, dl->origin);
+			dl->radius = 200 + (rand() & 31);
+			dl->die = cl.time + 0.001;
+			dl->color[0] = dl->color[1] = 0.5;
+			dl->color[2] = 3.0;
+		}
+		if(ent->effects & EF_RED) {
+			dl = CL_AllocDlight(i);
+			VectorCopy(ent->origin, dl->origin);
+			dl->radius = 200 + (rand() & 31);
+			dl->die = cl.time + 0.001;
+			dl->color[0] = 3.0;
+			dl->color[1] = dl->color[2] = 0.5;
+		}
 
 		if(ent->model->flags & EF_GIB)
 			R_RocketTrail(oldorg, ent->origin, 2);

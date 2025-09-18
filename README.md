@@ -31,7 +31,9 @@ Advertised [QSG extensions](https://quakewiki.org/wiki/QSG_extensions):
 
  * [DP_CL_LOADSKY](https://quakewiki.org/wiki/DP_CL_LOADSKY)
  * [DP_EF_ADDITIVE](https://quakewiki.org/wiki/DP_EF_ADDITIVE)
+ * [DP_EF_BLUE](https://quakewiki.org/wiki/DP_EF_ADDITIVE)
  * [DP_EF_NODRAW](https://quakewiki.org/wiki/DP_EF_NODRAW)
+ * [DP_EF_RED](https://quakewiki.org/wiki/DP_EF_RED)
  * [DP_ENT_ALPHA](https://quakewiki.org/wiki/DP_ENT_ALPHA)
  * [DP_GFX_FOG](https://quakewiki.org/wiki/DP_GFX_FOG)
  * [DP_GFX_SKYBOX](https://quakewiki.org/wiki/DP_GFX_SKYBOX)
