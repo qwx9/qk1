@@ -410,12 +410,17 @@ R_DrawEntity(entity_t *e, view_t *view)
 	model_t *clmodel;
 	view_t v;
 
-	if(!r_drawentities.value || e == &cl_entities[cl.viewentity])
+	if(!r_drawentities.value)
 		return 1;
 	if((entdrawflags(e) ^ r_drawflags) != 0)
 		return 0;
 	if(e->alpha == DEFAULT_ALPHA)
 		e->alpha = 0xff;
+	if(e == &cl_entities[cl.viewentity]) {
+		if(!chase_active.value)
+			return 1;
+		e->angles[0] *= 0.3; // it looks rather awkward otherwise
+	}
 
 	currententity = e;
 	memmove(&v, view, sizeof(v));
@@ -541,7 +546,7 @@ R_DrawViewModel(view_t *view)
 	dlight_t *dl;
 	view_t v;
 
-	if(!r_drawviewmodel.value)
+	if(!r_drawviewmodel.value || chase_active.value)
 		return;
 
 	if(cl.items & IT_INVISIBILITY)
