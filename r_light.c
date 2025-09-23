@@ -175,7 +175,7 @@ R_LightPoint(vec3_t p, int *r)
 {
 	vec3_t end;
 
-	if(!cl.worldmodel->lightdata) {
+	if(!cl.worldmodel->lightdata || r_fullbright.value) {
 		r[0] = 255;
 		r[1] = 255;
 		r[2] = 255;
