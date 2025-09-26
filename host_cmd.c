@@ -332,10 +332,11 @@ Host_Version_f(cmd_t *c)
 static void
 Host_Say(bool teamonly)
 {
+	bool fromServer = false, quoted = false;
 	client_t *client, *save;
-	char *p, text[64];
-	bool fromServer = false;
-	int j;
+	const char *p;
+	char *text;
+	int j, n;
 
 	if(cmd_source == src_command) {
 		if(cls.state == ca_dedicated) {
@@ -353,24 +354,19 @@ Host_Say(bool teamonly)
 	save = host_client;
 
 	p = Cmd_Args();
-	// remove quotes if present
-	if(*p == '"') {
+	quoted = *p == '"' && p[strlen(p) - 1] == '"';
+	if(quoted)
 		p++;
-		p[strlen(p) - 1] = 0;
-	}
-
 	// turn on color set 1
-	if(!fromServer)
-		sprint(text, "%c%s: ", 1, save->name);
+	if(fromServer)
+		text = va("%c<%s> %s", 1, hostname.string, p);
 	else
-		sprint(text, "%c<%s> ", 1, hostname.string);
-
-	j = sizeof(text) - 2 - strlen(text); // -2 for /n and null terminator
-	if(j < (int)strlen(p))
-		p[j] = 0;
-
-	strcat(text, p);
-	strcat(text, "\n");
+		text = va("%c%s: %s", 1, save->name, p);
+	n = strlen(text);
+	if(quoted)
+		n--;
+	text[n++] = '\n';
+	text[n++] = 0;
 
 	for(j = 0, client = svs.clients; j < svs.maxclients; j++, client++) {
 		if(!client || !client->active || !client->spawned)
@@ -381,7 +377,7 @@ Host_Say(bool teamonly)
 		SV_ClientPrintf("%s", text);
 	}
 	host_client = save;
-	Con_DPrintf("%s", &text[1]);
+	Con_DPrintf("%s", text + 1);
 }
 
 static void
@@ -402,8 +398,10 @@ static void
 Host_Tell_f(cmd_t *c)
 {
 	client_t *client, *save;
-	char *p, text[64];
-	int j;
+	bool quoted = false;
+	const char *p;
+	char *text;
+	int j, n;
 
 	USED(c);
 	if(cmd_source == src_command) {
@@ -414,24 +412,16 @@ Host_Tell_f(cmd_t *c)
 	if(Cmd_Argc() < 3)
 		return;
 
-	strcpy(text, host_client->name);
-	strcat(text, ": ");
-
 	p = Cmd_Args();
-
-	// remove quotes if present
-	if(*p == '"') {
+	quoted = *p == '"' && p[strlen(p) - 1] == '"';
+	if(quoted)
 		p++;
-		p[strlen(p) - 1] = 0;
-	}
-
-	// check length & truncate if necessary
-	j = sizeof(text) - 2 - strlen(text); // -2 for /n and null terminator
-	if(j < (int)strlen(p))
-		p[j] = 0;
-
-	strcat(text, p);
-	strcat(text, "\n");
+	text = va("%s: %s", host_client->name, p);
+	n = strlen(text);
+	if(quoted)
+		n--;
+	text[n++] = '\n';
+	text[n++] = 0;
 
 	save = host_client;
 	for(j = 0, client = svs.clients; j < svs.maxclients; j++, client++) {
@@ -702,7 +692,8 @@ savecomment(char *cm)
 static void
 savegame(cmd_t *cmd)
 {
-	char *s, *a, cm[Nsavcm];
+	char *s, cm[Nsavcm];
+	const char *a;
 	client_t *c, *e;
 
 	USED(cmd);
@@ -744,7 +735,8 @@ savegame(cmd_t *cmd)
 static void
 loadgame(cmd_t *c)
 {
-	char *s, *a;
+	const char *a;
+	char *s;
 
 	if(cmd_source != src_command)
 		return;
@@ -772,7 +764,7 @@ loadgame(cmd_t *c)
 static void
 Host_Kick_f(cmd_t *c)
 {
-	char *who, *message = nil;
+	const char *who, *message = nil;
 	bool byNumber = false;
 	client_t *save;
 	int i;
@@ -842,7 +834,7 @@ Host_Kick_f(cmd_t *c)
 static void
 Host_Give_f(cmd_t *c)
 {
-	char *t;
+	const char *t;
 	int v;
 	eval_t *val;
 

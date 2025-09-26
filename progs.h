@@ -83,7 +83,7 @@ struct pr_t {
 	int depth;
 
 	// allocated/temp strings
-	char **str;
+	const char **str;
 	char *tempstr;
 	int max_str;
 	int num_str;
@@ -117,9 +117,9 @@ pr_t *PR_LoadProgs(char *name);
 
 char *PR_StrTmp(pr_t *pr);
 int PR_CopyStrTmp(pr_t *pr, char *s);
-int PR_SetStr(pr_t *pr, char *s);
-char *PR_Str(pr_t *pr, int ofs);
-char *PR_UglyValueString(pr_t *pr, etype_t, eval_t *);
+int PR_SetStr(pr_t *pr, const char *s);
+const char *PR_Str(pr_t *pr, int ofs);
+const char *PR_UglyValueString(pr_t *pr, etype_t, eval_t *);
 
 void PR_Profile_f(cmd_t *c);
 
@@ -130,12 +130,12 @@ void ED_Free(edict_t *ed);
 string_t ED_NewString(pr_t *pr, char *string);
 
 void ED_Print(pr_t *pr, edict_t *ed);
-char *ED_ParseEdict(pr_t *pr, char *data, edict_t *ent);
+const char *ED_ParseEdict(pr_t *pr, const char *data, edict_t *ent);
 
 dfunction_t *ED_FindFunction(pr_t *pr, const char *name);
 
-void ED_ParseGlobals(pr_t *pr, char *data);
-void ED_LoadFromFile(pr_t *pr, char *data);
+void ED_ParseGlobals(pr_t *pr, const char *data);
+void ED_LoadFromFile(pr_t *pr, const char *data);
 
 edict_t *EDICT_NUM(pr_t *pr, int n);
 int NUM_FOR_EDICT(pr_t *pr, edict_t *e);

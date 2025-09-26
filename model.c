@@ -129,7 +129,7 @@ Mod_ClearAll(void)
 }
 
 model_t *
-Mod_FindName(char *name)
+Mod_FindName(const char *name)
 {
 	int i;
 	model_t *mod, *avail = nil;
@@ -165,7 +165,7 @@ Mod_FindName(char *name)
 }
 
 void
-Mod_TouchModel(char *name)
+Mod_TouchModel(const char *name)
 {
 	model_t *mod;
 
@@ -223,7 +223,7 @@ Mod_LoadModel(model_t *mod, bool crash)
 }
 
 model_t *
-Mod_ForName(char *name, bool crash)
+Mod_ForName(const char *name, bool crash)
 {
 	return Mod_LoadModel(Mod_FindName(name), crash);
 }

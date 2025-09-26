@@ -108,7 +108,8 @@ void
 recdemo(cmd_t *cmd)
 {
 	int c, trk;
-	char *s, *a;
+	char *s;
+	const char *a;
 
 	USED(cmd);
 	if(cmd_source != src_command)
@@ -146,7 +147,8 @@ recdemo(cmd_t *cmd)
 void
 playdemo(cmd_t *cmd)
 {
-	char *s, *a;
+	char *s;
+	const char *a;
 
 	USED(cmd);
 	if(cmd_source != src_command)

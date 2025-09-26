@@ -8,7 +8,7 @@
  *
  * The + command line options are also added to the command buffer.
  *
- * The game starts with a Cbuf_AddText ("exec quake.rc\n"); Cbuf_Execute ();
+ * The game starts with a Cbuf_AddText("exec quake.rc\n"); Cbuf_Execute();
  */
 
 /*
@@ -63,12 +63,12 @@ char *Cmd_CompleteCommand(char *partial);
 // functions. Cmd_Argv () will return an empty string, not a NULL
 // if arg > argc, so string operations are always safe.
 int Cmd_Argc(void);
-char *Cmd_Argv(int arg);
-char *Cmd_Args(void);
+const char *Cmd_Argv(int arg);
+const char *Cmd_Args(void);
 
 // Parses a single line of text into arguments and tries to execute it.
 // The text can come from the command buffer, a remote client, or stdin.
-void Cmd_ExecuteString(char *text, cmd_source_t src);
+void Cmd_ExecuteString(const char *text, cmd_source_t src);
 
 // adds the current command line as a clc_stringcmd to the client message.
 // things like godmode, noclip, etc, are commands directed to the server,
@@ -80,12 +80,12 @@ void Cbuf_Init(void);
 
 // as new commands are generated from the console or keybindings,
 // the text is added to the end of the command buffer.
-void Cbuf_AddText(char *text);
+void Cbuf_AddText(const char *text);
 
 // when a command wants to issue other commands immediately, the text is
 // inserted at the beginning of the buffer, before any remaining unexecuted
 // commands.
-void Cbuf_InsertText(char *text);
+void Cbuf_InsertText(const char *text);
 
 // Pulls off \n terminated lines of text from the command buffer and sends
 // them through Cmd_ExecuteString.  Stops when the buffer is empty.

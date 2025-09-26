@@ -4,8 +4,7 @@ static bool cmd_wait;
 static sizebuf_t cmd_text;
 static int cmd_argc;
 static char *cmd_argv[80];
-static char *cmd_null_string = "";
-static char *cmd_args = nil;
+static const char *cmd_args = nil;
 
 cmd_source_t cmd_source;
 
@@ -29,7 +28,7 @@ Cbuf_Init(void)
 
 /* Adds command text at the end of the buffer */
 void
-Cbuf_AddText(char *text)
+Cbuf_AddText(const char *text)
 {
 	int l;
 
@@ -49,7 +48,7 @@ Cbuf_AddText(char *text)
  * FIXME: actually change the command buffer to do less copying
  */
 void
-Cbuf_InsertText(char *text)
+Cbuf_InsertText(const char *text)
 {
 	char *temp = nil;
 	int templen;
@@ -154,7 +153,7 @@ Cmd_Echo_f(cmd_t *c)
 }
 
 static char *
-CopyString(char *in)
+CopyString(const char *in)
 {
 	char *out;
 
@@ -183,7 +182,8 @@ Cmd_ExecAlias_f(cmd_t *a)
 static void
 Cmd_Alias_f(cmd_t *t)
 {
-	char *s, cmd[1024];
+	const char *s;
+	char cmd[1024];
 	cmd_t *a;
 	int i, c;
 
@@ -240,22 +240,22 @@ Cmd_Argc(void)
 	return cmd_argc;
 }
 
-char *
+const char *
 Cmd_Argv(int arg)
 {
 	if(arg >= cmd_argc)
-		return cmd_null_string;
+		return "";
 	return cmd_argv[arg];
 }
 
-char *
+const char *
 Cmd_Args(void)
 {
 	return cmd_args;
 }
 
 static void
-Cmd_TokenizeString(char *s)
+Cmd_TokenizeString(const char *s)
 {
 	int i;
 
@@ -312,7 +312,7 @@ Cmd_AddCommand(char *name, cmdfun_t f)
 }
 
 void
-Cmd_ExecuteString(char *text, cmd_source_t src)
+Cmd_ExecuteString(const char *text, cmd_source_t src)
 {
 	cmd_t *cmd;
 

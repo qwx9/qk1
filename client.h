@@ -250,4 +250,4 @@ void CL_BaseMove(usercmd_t *cmd);
 void CL_ParseServerMessage(void);
 void CL_InitTEnts(void);
 void CL_SignonReply(void);
-char *Key_KeynumToString(int keynum);
+const char *Key_KeynumToString(int keynum);

@@ -33,9 +33,9 @@ r_fullbrightfog_cb(cvar_t *var)
 static void
 fog(cmd_t *c)
 {
+	const char *s;
 	int i, n;
 	float x;
-	char *s;
 
 	USED(c);
 	i = 1;

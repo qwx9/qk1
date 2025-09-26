@@ -320,10 +320,10 @@ typedef struct model_s {
 
 void Mod_Init(void);
 void Mod_ClearAll(void);
-model_t *Mod_FindName(char *name);
-model_t *Mod_ForName(char *name, bool crash);
+model_t *Mod_FindName(const char *name);
+model_t *Mod_ForName(const char *name, bool crash);
 void *Mod_Extradata(model_t *mod); // handles caching
-void Mod_TouchModel(char *name);
+void Mod_TouchModel(const char *name);
 
 mleaf_t *Mod_PointInLeaf(const vec3_t p, model_t *model);
 byte *Mod_LeafPVS(mleaf_t *leaf, model_t *model, int *sz);

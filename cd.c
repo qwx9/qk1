@@ -8,7 +8,7 @@ bool cdloop = false, cdenabled;
 void
 cdcmd(cmd_t *cmd)
 {
-	char *c;
+	const char *c;
 	bool loop;
 
 	USED(cmd);

@@ -181,7 +181,7 @@ MSG_WriteFloat(sizebuf_t *sb, float f)
 }
 
 void
-MSG_WriteString(sizebuf_t *sb, char *s)
+MSG_WriteString(sizebuf_t *sb, const char *s)
 {
 	if(!s)
 		SZ_Write(sb, "", 1);
@@ -414,13 +414,13 @@ again:
 }
 
 void
-SZ_Write(sizebuf_t *buf, void *data, int length)
+SZ_Write(sizebuf_t *buf, const void *data, int length)
 {
 	memmove(SZ_GetSpace(buf, length), data, length);
 }
 
 void
-SZ_Print(sizebuf_t *buf, char *data)
+SZ_Print(sizebuf_t *buf, const char *data)
 {
 	int len;
 
@@ -432,8 +432,8 @@ SZ_Print(sizebuf_t *buf, char *data)
 		memmove((byte *)SZ_GetSpace(buf, len - 1) - 1, data, len); // write over trailing 0
 }
 
-char *
-COM_Parse(char *data)
+const char *
+COM_Parse(const char *data)
 {
 	int c, len;
 
@@ -494,20 +494,39 @@ skipwhite:
 	return data;
 }
 
+typedef struct str_t str_t;
+
+struct str_t {
+	char *s;
+	int max;
+};
+
 /*
  * does a varargs printf into a temp buffer, so I don't need to have
  * varargs versions of all text functions.
- * FIXME: make this buffer size safe someday
  */
 char *
 va(char *fmt, ...)
 {
-	static char s[1024];
+	static str_t strs[8];
+	static int stri;
 	va_list arg;
+	str_t *s;
+	int n;
 
+	s = &strs[stri++];
+	stri = stri % nelem(strs);
+	if(s->s == nil) {
+		s->max = 64;
+		s->s = malloc(s->max);
+	}
 	va_start(arg, fmt);
-	vsnprint(s, sizeof(s), fmt, arg);
+	// NOTE: -4 is there to ensure a couple extra chars can always be strcat'ed without worrying
+	while((n = vsnprint(s->s, s->max, fmt, arg)) >= s->max - 4) {
+		s->max *= 2;
+		s->s = realloc(s->s, s->max);
+	}
 	va_end(arg);
 
-	return s;
+	return s->s;
 }

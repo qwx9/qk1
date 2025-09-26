@@ -283,7 +283,7 @@ Key_Message(int key)
  * are matched up.
  */
 static int
-Key_StringToKeynum(char *s)
+Key_StringToKeynum(const char *s)
 {
 	keyname_t *k;
 
@@ -303,7 +303,7 @@ Key_StringToKeynum(char *s)
  * given keynum.
  * FIXME: handle quote special (general escape sequence?)
  */
-char *
+const char *
 Key_KeynumToString(int keynum)
 {
 	keyname_t *kn;

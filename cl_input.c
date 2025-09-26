@@ -43,7 +43,7 @@ static void
 KeyDown(kbutton_t *b)
 {
 	int k;
-	char *c;
+	const char *c;
 
 	c = Cmd_Argv(1);
 	if(c[0])
@@ -72,7 +72,7 @@ static void
 KeyUp(kbutton_t *b)
 {
 	int k;
-	char *c;
+	const char *c;
 
 	c = Cmd_Argv(1);
 	if(c[0])

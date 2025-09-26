@@ -17,8 +17,8 @@ struct sizebuf_t {
 void SZ_Alloc(sizebuf_t *buf, int startsize);
 void SZ_Clear(sizebuf_t *buf);
 void *SZ_GetSpace(sizebuf_t *buf, int length);
-void SZ_Write(sizebuf_t *buf, void *data, int length);
-void SZ_Print(sizebuf_t *buf, char *data); // strcats onto the sizebuf
+void SZ_Write(sizebuf_t *buf, const void *data, int length);
+void SZ_Print(sizebuf_t *buf, const char *data); // strcats onto the sizebuf
 
 typedef struct link_s {
 	struct link_s *prev, *next;
@@ -70,7 +70,7 @@ void MSG_WriteShort(sizebuf_t *sb, int c);
 void MSG_WriteUShort(sizebuf_t *sb, int c);
 void MSG_WriteLong(sizebuf_t *sb, int c);
 void MSG_WriteFloat(sizebuf_t *sb, float f);
-void MSG_WriteString(sizebuf_t *sb, char *s);
+void MSG_WriteString(sizebuf_t *sb, const char *s);
 void MSG_WriteCoord(sizebuf_t *sb, float f);
 void MSG_WriteCoordInt32(sizebuf_t *sb, float f);
 void MSG_WriteAngle(sizebuf_t *sb, float f);
@@ -109,7 +109,7 @@ float MSG_ReadAngleInt16(void);
 extern char com_token[1024];
 extern bool com_eof;
 
-char *COM_Parse(char *data);
+const char *COM_Parse(const char *data);
 
 #pragma varargck argpos va 1
 char *va(char *format, ...) format_printf(1, 2);

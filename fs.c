@@ -112,8 +112,8 @@ initcrc(void)
 	crcn = Ncrc0;
 }
 
-char *
-ext(char *f, char *e)
+const char *
+ext(const char *f, const char *e)
 {
 	return strrchr(f, '.') > strrchr(f, '/') ? "" : e;
 }
@@ -549,7 +549,7 @@ static void
 dumpedict(FILE *bf, pr_t *pr, edict_t *ed)
 {
 	int *vp, *ve;
-	char *s;
+	const char *s;
 	byte *ev;
 	ddef_t *d, *de;
 	eval_t *v;
@@ -608,7 +608,7 @@ int
 dumpsav(char *f, char *cm)
 {
 	int i;
-	char **s, **e;
+	const char **s, **e;
 	float *fs, *fe;
 	FILE *bf;
 
@@ -656,7 +656,7 @@ loadedicts(FILE *bf, pr_t *pr)
 		if(s == sb + sizeof(sb) - 1)
 			fatal("loadgame: buffer overflow");
 		*s = 0;
-		s = COM_Parse(sb);
+		s = (char *)COM_Parse(sb);
 		if(com_token[0] == 0)
 			break;
 		if(strcmp(com_token, "{") != 0)
@@ -680,9 +680,9 @@ loadedicts(FILE *bf, pr_t *pr)
 static int
 loadparms(FILE *bf, char *f)
 {
-	int r;
 	float sp[Nparms], *p;
-	char *s, **lp;
+	char **lp, *s;
+	int r, i;
 
 	r = -1;
 	p = sp;
@@ -709,12 +709,12 @@ loadparms(FILE *bf, char *f)
 	if(s = frdline(bf), s == nil)
 		goto exit;
 	sv.time = strtod(s, nil);
-	lp = sv.lightstyles;
-	while(lp < sv.lightstyles + nelem(sv.lightstyles)) {
+	lp = (char **)sv.lightstyles;
+	for(i = 0; i < nelem(sv.lightstyles); i++, lp++) {
 		if(s = frdlinedup(bf), s == nil)
 			goto exit;
 		*lp = Hunk_Alloc(strlen(s) + 1);
-		strcpy(*lp++, s);
+		strcpy(*lp, s);
 		free(s);
 	}
 	r = 0;

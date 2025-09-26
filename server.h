@@ -98,10 +98,10 @@ typedef struct {
 	char name[64]; // map name
 	char modelname[64]; // maps/<name>.bsp, for model_precache[0]
 	struct model_s *worldmodel;
-	char *model_precache[MAX_MODELS];
+	const char *model_precache[MAX_MODELS];
 	struct model_s *models[MAX_MODELS];
-	char *sound_precache[MAX_SOUNDS];
-	char *lightstyles[Nlights];
+	const char *sound_precache[MAX_SOUNDS];
+	const char *lightstyles[Nlights];
 	server_state_t state; // some actions are only valid during load
 
 	sizebuf_t datagram;
@@ -173,11 +173,12 @@ void SV_BroadcastPrintf(const char *fmt, ...) format_printf(1, 2);
 void SV_SignonFrame(void);
 void SV_Init(void);
 void SV_StartParticle(vec3_t org, vec3_t dir, int color, int count);
-void SV_StartSound(edict_t *entity, int channel, char *sample, int volume, float attenuation);
+void
+SV_StartSound(edict_t *entity, int channel, const char *sample, int volume, float attenuation);
 void SV_DropClient(bool crash);
 void SV_SendClientMessages(void);
 void SV_ClearDatagram(void);
-int SV_ModelIndex(char *name);
+int SV_ModelIndex(const char *name);
 void SV_SetIdealPitch(void);
 void SV_AddUpdates(void);
 void SV_ClientThink(void);

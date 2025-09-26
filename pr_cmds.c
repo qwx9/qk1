@@ -1,4 +1,5 @@
 #include "quakedef.h"
+#include "server.h"
 
 #define RETURN_EDICT(pr, e) (((int *)pr->globals)[OFS_RETURN] = EDICT_TO_PROG(pr, e))
 
@@ -13,8 +14,6 @@ cvar_t sv_aim = {"sv_aim", "0"};
 
 static byte *checkpvs;
 static int checkpvs_size;
-
-int SV_ModelIndex(char *name);
 
 static char *
 PF_VarString(pr_t *pr, int first)
@@ -192,8 +191,8 @@ PF_setsize(pr_t *pr)
 static void
 PF_setmodel(pr_t *pr)
 {
+	const char *m, **check;
 	edict_t *e;
-	char *m, **check;
 	model_t *mod;
 	int i;
 
@@ -400,7 +399,7 @@ PF_particle(pr_t *pr)
 static void
 PF_ambientsound(pr_t *pr)
 {
-	char **check, *samp;
+	const char *samp, **check;
 	float *pos, vol, attenuation;
 	int i, soundnum;
 
@@ -451,7 +450,7 @@ PF_ambientsound(pr_t *pr)
 static void
 PF_sound(pr_t *pr)
 {
-	char *sample;
+	const char *sample;
 	int channel, volume;
 	edict_t *entity;
 	float attenuation;
@@ -627,9 +626,9 @@ PF_checkclient(pr_t *pr)
 static void
 PF_stuffcmd(pr_t *pr)
 {
-	int entnum;
-	char *str;
+	const char *str;
 	client_t *old;
+	int entnum;
 
 	entnum = G_EDICTNUM(pr, OFS_PARM0);
 	if(entnum < 1 || entnum > svs.maxclients)
@@ -668,7 +667,7 @@ PF_cvar(pr_t *pr)
 static void
 PF_cvar_set(pr_t *pr)
 {
-	char *var, *val;
+	const char *var, *val;
 
 	var = G_STRING(pr, OFS_PARM0);
 	val = G_STRING(pr, OFS_PARM1);
@@ -776,7 +775,7 @@ static void
 PF_find(pr_t *pr)
 {
 	int e, f;
-	char *s, *t;
+	const char *s, *t;
 	edict_t *ed;
 	ddef_t *def;
 
@@ -809,7 +808,7 @@ PF_find(pr_t *pr)
 }
 
 static void
-PR_CheckEmptyString(pr_t *pr, char *s)
+PR_CheckEmptyString(pr_t *pr, const char *s)
 {
 	if(s[0] <= ' ')
 		PR_RunError(pr, "Bad string");
@@ -863,7 +862,7 @@ PF_precache_file(pr_t *pr)
 static void
 PF_precache_sound(pr_t *pr)
 {
-	char *s;
+	const char *s;
 	int i;
 
 	if(sv.state != ss_loading)
@@ -887,7 +886,7 @@ PF_precache_sound(pr_t *pr)
 static void
 PF_precache_model(pr_t *pr)
 {
-	char *s;
+	const char *s;
 	int i;
 
 	if(sv.state != ss_loading)
@@ -999,7 +998,7 @@ static void
 PF_lightstyle(pr_t *pr)
 {
 	int style, j;
-	char *val;
+	const char *val;
 	client_t *client;
 
 	style = G_FLOAT(pr, OFS_PARM0);
@@ -1386,7 +1385,7 @@ PF_setspawnparms(pr_t *pr)
 static void
 PF_changelevel(pr_t *pr)
 {
-	char *s;
+	const char *s;
 
 	// make sure we don't issue two changelevels
 	if(svs.changelevel_issued)
@@ -1513,9 +1512,9 @@ PF_clientstat(pr_t *pr)
 static void
 PF_clientcommand(pr_t *pr)
 {
+	const char *cmd;
 	client_t *tmp;
 	edict_t *e;
-	char *cmd;
 	int n;
 
 	if(!pr->parse_cl_command.in_callback) {
@@ -1569,7 +1568,7 @@ PF_tanf(pr_t *pr)
 static void
 PF_tokenize(pr_t *pr)
 {
-	char *s;
+	const char *s;
 	int n;
 
 	s = G_STRING(pr, OFS_PARM0);

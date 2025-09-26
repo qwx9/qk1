@@ -36,7 +36,7 @@ void recdemo(cmd_t *);
 void playdemo(cmd_t *);
 void crc(u8int);
 void initcrc(void);
-char *ext(char *, char *);
+const char *ext(const char *, const char *);
 void radix(const char *, char *);
 void *loadhunklmp(const char *, int *);
 void *loadcachelmp(const char *, mem_user_t *);

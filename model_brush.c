@@ -18,7 +18,7 @@ RadiusFromBounds(vec3_t mins, vec3_t maxs)
 }
 
 static void
-Mod_Origin(model_t *mod, submodel_t *sub, int id, char *e)
+Mod_Origin(model_t *mod, submodel_t *sub, int id, const char *e)
 {
 	enum {
 		Sinit,
@@ -214,7 +214,7 @@ Mod_FindInWorldspawn(model_t *mod, const char *key)
 	};
 
 	int state = Sinit;
-	char *e;
+	const char *e;
 
 	for(e = mod->entities;;) {
 		if((e = COM_Parse(e)) == nil)

@@ -58,7 +58,7 @@ PR_StrSlot(pr_t *pr)
 }
 
 int
-PR_SetStr(pr_t *pr, char *s)
+PR_SetStr(pr_t *pr, const char *s)
 {
 	int i;
 
@@ -75,7 +75,7 @@ PR_SetStr(pr_t *pr, char *s)
 	return -1 - i;
 }
 
-char *
+const char *
 PR_Str(pr_t *pr, int i)
 {
 	if(i >= 0 && i < pr->strings_size)
@@ -224,93 +224,93 @@ ED_FindFunction(pr_t *pr, const char *name)
 }
 
 /* Returns a string describing *data in a type specific manner */
-static char *
+static const char *
 PR_ValueString(pr_t *pr, etype_t type, eval_t *val)
 {
-	static char line[256];
 	ddef_t *def;
 	dfunction_t *f;
+	const char *s;
 
 	type &= ~DEF_SAVEGLOBAL;
 
 	switch(type) {
 	case ev_string:
-		sprint(line, "%s", PR_Str(pr, val->string));
+		s = PR_Str(pr, val->string);
 		break;
 	case ev_entity:
-		sprint(line, "entity %d", NUM_FOR_EDICT(pr, PROG_TO_EDICT(pr, val->edict)));
+		s = va("entity %d", NUM_FOR_EDICT(pr, PROG_TO_EDICT(pr, val->edict)));
 		break;
 	case ev_function:
 		f = pr->functions + val->function;
-		sprint(line, "%s()", PR_Str(pr, f->s_name));
+		s = va("%s()", PR_Str(pr, f->s_name));
 		break;
 	case ev_field:
 		def = ED_FieldAtOfs(pr, val->_int);
-		sprint(line, ".%s", PR_Str(pr, def->s_name));
+		s = va(".%s", PR_Str(pr, def->s_name));
 		break;
 	case ev_void:
-		sprint(line, "void");
+		s = "void";
 		break;
 	case ev_float:
-		sprint(line, "%5.1f", val->_float);
+		s = va("%5.1f", val->_float);
 		break;
 	case ev_vector:
-		sprint(line, "'%5.1f %5.1f %5.1f'", val->vector[0], val->vector[1], val->vector[2]);
+		s = va("'%5.1f %5.1f %5.1f'", val->vector[0], val->vector[1], val->vector[2]);
 		break;
 	case ev_pointer:
-		sprint(line, "pointer");
+		s = "pointer";
 		break;
 	default:
-		sprint(line, "bad type %d", type);
+		s = va("bad type %d", type);
 		break;
 	}
 
-	return line;
+	return s;
 }
 
 /*
  * Returns a string describing *data in a type specific manner
  * Easier to parse than PR_ValueString
  */
-char *
+const char *
 PR_UglyValueString(pr_t *pr, etype_t type, eval_t *val)
 {
-	static char line[256];
 	ddef_t *def;
 	dfunction_t *f;
+	const char *s;
 
 	type &= ~DEF_SAVEGLOBAL;
 
 	switch(type) {
 	case ev_string:
-		sprint(line, "%s", PR_Str(pr, val->string));
+		s = PR_Str(pr, val->string);
 		break;
 	case ev_entity:
-		sprint(line, "%d", NUM_FOR_EDICT(pr, PROG_TO_EDICT(pr, val->edict)));
+		s = va("%d", NUM_FOR_EDICT(pr, PROG_TO_EDICT(pr, val->edict)));
 		break;
 	case ev_function:
 		f = pr->functions + val->function;
-		sprint(line, "%s", PR_Str(pr, f->s_name));
+		s = PR_Str(pr, f->s_name);
 		break;
 	case ev_field:
 		def = ED_FieldAtOfs(pr, val->_int);
-		sprint(line, "%s", PR_Str(pr, def->s_name));
+		s = va("%s", PR_Str(pr, def->s_name));
 		break;
 	case ev_void:
-		sprint(line, "void");
+		s = "void";
 		break;
 	case ev_float:
-		sprint(line, "%f", val->_float);
+		s = va("%f", val->_float);
 		break;
 	case ev_vector:
-		sprint(line, "%f %f %f", val->vector[0], val->vector[1], val->vector[2]);
+		s = va("%f %f %f", val->vector[0], val->vector[1], val->vector[2]);
 		break;
 	default:
-		sprint(line, "bad type %d", type);
+		s = va("bad type %d", type);
 		break;
 	}
 
-	return line;
+	return s;
 }
 
 /*
@@ -320,19 +320,19 @@ PR_UglyValueString(pr_t *pr, etype_t type, eval_t *val)
 char *
 PR_GlobalString(pr_t *pr, int ofs)
 {
-	char *s;
+	const char *s;
+	char *line;
 	int i;
 	ddef_t *def;
 	void *val;
-	static char line[128];
 
 	val = (void *)&pr->globals[ofs];
 	def = ED_GlobalAtOfs(pr, ofs);
 	if(!def)
-		sprint(line, "%d(?)", ofs);
+		line = va("%d(?)", ofs);
 	else {
 		s = PR_ValueString(pr, def->type, val);
-		sprint(line, "%d(%s)%s", ofs, PR_Str(pr, def->s_name), s);
+		line = va("%d(%s)%s", ofs, PR_Str(pr, def->s_name), s);
 	}
 
 	for(i = strlen(line); i < 20; i++)
@@ -347,13 +347,13 @@ PR_GlobalStringNoContents(pr_t *pr, int ofs)
 {
 	int i;
 	ddef_t *def;
-	static char line[128];
+	char *line;
 
 	def = ED_GlobalAtOfs(pr, ofs);
 	if(!def)
-		sprint(line, "%d(?)", ofs);
+		line = va("%d(?)", ofs);
 	else
-		sprint(line, "%d(%s)", ofs, PR_Str(pr, def->s_name));
+		line = va("%d(%s)", ofs, PR_Str(pr, def->s_name));
 
 	for(i = strlen(line); i < 20; i++)
 		strcat(line, " ");
@@ -367,8 +367,8 @@ void
 ED_Print(pr_t *pr, edict_t *ed)
 {
 	int l, *v, i, j, type;
+	const char *name;
 	ddef_t *d;
-	char *name;
 
 	if(ed->free) {
 		Con_Printf("FREE\n");
@@ -476,7 +476,7 @@ ED_Count_f(cmd_t *c)
  * FIXME: need to tag constants, doesn't really work
  */
 void
-ED_ParseGlobals(pr_t *pr, char *data)
+ED_ParseGlobals(pr_t *pr, const char *data)
 {
 	char keyname[64];
 	ddef_t *key;
@@ -607,8 +607,8 @@ ED_ParseEpair(pr_t *pr, void *base, ddef_t *key, char *s)
  * ent should be a properly initialized empty edict.
  * Used for initial level load and for savegames.
  */
-char *
-ED_ParseEdict(pr_t *pr, char *data, edict_t *ent)
+const char *
+ED_ParseEdict(pr_t *pr, const char *data, edict_t *ent)
 {
 	ddef_t *key;
 	bool anglehack, init;
@@ -725,7 +725,7 @@ ED_ParseEdict(pr_t *pr, char *data, edict_t *ent)
  * to call ED_CallSpawnFunctions () to let the objects initialize themselves.
  */
 void
-ED_LoadFromFile(pr_t *pr, char *data)
+ED_LoadFromFile(pr_t *pr, const char *data)
 {
 	edict_t *ent;
 	int inhibit;
