@@ -250,24 +250,6 @@ R_ClipEdge(mvertex_t *pv0, mvertex_t *pv1, clipplane_t *clip, view_t *v)
 	R_EmitEdge(pv0, pv1, v);
 }
 
-static void
-R_EmitCachedEdge(void)
-{
-	edge_t *pedge_t;
-
-	pedge_t = (edge_t *)((uintptr)r_edges + r_pedge->cacheoffset);
-
-	if(!pedge_t->surfs[0])
-		pedge_t->surfs[0] = surface_p - surfaces;
-	else
-		pedge_t->surfs[1] = surface_p - surfaces;
-
-	if(pedge_t->nearzi > r_nearzi) // for mipmap finding
-		r_nearzi = pedge_t->nearzi;
-
-	r_emitted = 1;
-}
-
 static int
 R_MipLevelForScale(float scale)
 {
@@ -337,20 +319,6 @@ R_RenderFace(msurface_t *fa, view_t *v, int clipflags)
 		lindex = currententity->model->surfedges[fa->firstedge + i];
 
 		r_pedge = &pedges[lindex > 0 ? lindex : -lindex];
-		// if the edge is cached, we can just reuse the edge
-		if(currententity == cl_entities) {
-			if(r_pedge->cacheoffset & FULLY_CLIPPED_CACHED) {
-				if((int)(r_pedge->cacheoffset & FRAMECOUNT_MASK) == r_framecount) {
-					r_lastvertvalid = false;
-					continue;
-				}
-			} else if((((uintptr)edge_p - (uintptr)r_edges) > r_pedge->cacheoffset) &&
-					  (((edge_t *)((uintptr)r_edges + r_pedge->cacheoffset))->owner == r_pedge)) {
-				R_EmitCachedEdge();
-				r_lastvertvalid = false;
-				continue;
-			}
-		}
 
 		// assume it's cacheable
 		cacheoffset = (byte *)edge_p - (byte *)r_edges;
