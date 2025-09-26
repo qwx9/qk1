@@ -173,7 +173,7 @@ ED_FieldAtOfs(pr_t *pr, int ofs)
 	ddef_t *def;
 	int i;
 
-	for(i = 0; i < pr->numfielddefs; i++) {
+	for(i = 1; i < pr->numfielddefs; i++) {
 		def = &pr->fielddefs[i];
 		if(def->ofs == ofs)
 			return def;
