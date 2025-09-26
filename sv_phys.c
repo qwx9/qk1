@@ -420,7 +420,7 @@ SV_PushMove(pr_t *pr, edict_t *pusher, float movetime)
 {
 	static edict_t *moved_edict[MAX_EDICTS];
 	static vec3_t moved_from[MAX_EDICTS];
-	int i, e, num_moved;
+	int i, e, num_moved, solid;
 	edict_t *check, *block;
 	vec3_t mins, maxs, move, entorig, pushorig;
 
@@ -476,9 +476,13 @@ SV_PushMove(pr_t *pr, edict_t *pusher, float movetime)
 		num_moved++;
 
 		// try moving the contacted entity
-		pusher->v.solid = SOLID_NOT;
-		SV_PushEntity(pr, check, move);
-		pusher->v.solid = SOLID_BSP;
+		solid = pusher->v.solid;
+		if(solid >= SOLID_BBOX && solid <= SOLID_BSP) {
+			// https://www.quake-info-pool.net/q1/qfix.htm#movetype_push
+			pusher->v.solid = SOLID_NOT;
+			SV_PushEntity(pr, check, move);
+			pusher->v.solid = solid;
+		}
 
 		// if it is still inside the pusher, block
 		block = SV_TestEntityPosition(pr, check);
@@ -486,7 +490,8 @@ SV_PushMove(pr_t *pr, edict_t *pusher, float movetime)
 			// fail the move
 			if(check->v.mins[0] == check->v.maxs[0])
 				continue;
-			if(check->v.solid == SOLID_NOT || check->v.solid == SOLID_TRIGGER) {
+			solid = check->v.solid;
+			if(solid <= SOLID_TRIGGER) {
 				// corpse
 				check->v.mins[0] = check->v.mins[1] = 0;
 				VectorCopy(check->v.mins, check->v.maxs);
