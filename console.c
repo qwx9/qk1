@@ -384,10 +384,14 @@ Con_DrawNotify(void)
 
 	if(key_dest == key_message) {
 		clearnotify = 0;
-		x = 0;
+		i = x = 0;
 		Draw_String(8, v, "say:");
-		while(chat_buffer[x]) {
-			Draw_Character((x + 5) << 3, v, chat_buffer[x]);
+		for(i = x = 0; chat_buffer[i]; i++) {
+			if(x + 6 >= con_linewidth) {
+				x = 0;
+				v += 8;
+			}
+			Draw_Character((x + 5) << 3, v, chat_buffer[i]);
 			x++;
 		}
 		Draw_Character((x + 5) << 3, v, 10 + ((int)(realtime * con_cursorspeed) & 1));

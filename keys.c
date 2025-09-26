@@ -10,7 +10,7 @@ int edit_line = 0;
 keydest_t key_dest;
 int key_count; // incremented every key event
 char *keybindings[256];
-char chat_buffer[32];
+char chat_buffer[256];
 bool team_message = false;
 
 static bool shift_down;
@@ -239,12 +239,14 @@ Key_Message(int key)
 	static int chat_bufferlen = 0;
 
 	if(key == K_ENTER) {
-		if(team_message)
-			Cbuf_AddText("say_team \"");
-		else
-			Cbuf_AddText("say \"");
-		Cbuf_AddText(chat_buffer);
-		Cbuf_AddText("\"\n");
+		if(chat_bufferlen > 0) {
+			if(team_message)
+				Cbuf_AddText("say_team \"");
+			else
+				Cbuf_AddText("say \"");
+			Cbuf_AddText(chat_buffer);
+			Cbuf_AddText("\"\n");
+		}
 
 		key_dest = key_game;
 		chat_bufferlen = 0;
@@ -270,7 +272,7 @@ Key_Message(int key)
 		return;
 	}
 
-	if(chat_bufferlen == 31)
+	if(chat_bufferlen >= nelem(chat_buffer))
 		return; // all full
 
 	chat_buffer[chat_bufferlen++] = key;
