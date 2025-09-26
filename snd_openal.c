@@ -884,7 +884,7 @@ playcd(int nt, bool loop)
 		return;
 
 	stopcd();
-	if((f = openlmp(va("music/track%02d.ogg", nt), &track.len)) == nil)
+	if(nt < 1 || (f = openlmp(va("music/track%02d.ogg", nt), &track.len)) == nil)
 		return;
 	if(track.tmp.alloc_buffer == nil) {
 		track.tmp.alloc_buffer_length_in_bytes = 512 * 1024;
