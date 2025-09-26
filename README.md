@@ -1,9 +1,8 @@
 qk1
 ===
 
-Modernized Quake for Linux/X11 and [9front](http://9front.org). For
-9front-specific documentation refer to
-[README-9front.md](./README-9front.md).
+Modernized Quake for Unix-like operating systems and [9front](http://9front.org). For
+9front-specific documentation refer to [README-9front.md](./README-9front.md).
 
 It was mainly extended in order to support [Arcane
 Dimensions](https://www.moddb.com/mods/arcane-dimensions).
@@ -47,6 +46,7 @@ Advertised [QSG extensions](https://quakewiki.org/wiki/QSG_extensions):
  * [DP_QC_SINCOSSQRTPOW](https://quakewiki.org/wiki/DP_QC_SINCOSSQRTPOW)
  * [DP_QC_TRACETOSS](https://quakewiki.org/wiki/DP_QC_TRACETOSS)
  * [DP_QC_TOKENIZE_CONSOLE](https://quakewiki.org/wiki/DP_QC_TOKENIZE_CONSOLE)
+ * [DP_SND_FAKETRACKS](https://quakewiki.org/wiki/DP_SND_FAKETRACKS)
  * [DP_SPRITE32](https://quakewiki.org/wiki/DP_SPRITE32)
  * [DP_SV_ROTATINGBMODEL](https://quakewiki.org/wiki/DP_SV_ROTATINGBMODEL)
  * [KRIMZON_SV_PARSECLIENTCOMMAND](https://quakewiki.org/wiki/KRIMZON_SV_PARSECLIENTCOMMAND)

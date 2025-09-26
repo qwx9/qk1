@@ -1483,6 +1483,7 @@ PF_checkextension(pr_t *pr)
 		"DP_QC_SINCOSSQRTPOW",
 		"DP_QC_TRACETOSS",
 		"DP_QC_TOKENIZE_CONSOLE", /* FIXME(sigrid): not really; see somewhere around */
+		"DP_SND_FAKETRACKS",
 		"DP_SPRITE32",
 		"DP_SV_ROTATINGBMODEL",
 		"KRIMZON_SV_PARSECLIENTCOMMAND",
