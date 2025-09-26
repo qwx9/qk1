@@ -219,7 +219,7 @@ Draw_TransPicTranslate(int x, int y, const qpic_t *pic, const byte *translation)
 }
 
 static void
-Draw_CharToConback(int num, pixel_t *dest)
+Draw_CharToConback(int num, pixel_t *dest, int width)
 {
 	int row, col, drawline, x;
 	pixel_t *source;
@@ -236,7 +236,7 @@ Draw_CharToConback(int num, pixel_t *dest)
 				dest[x] = source[x];
 		}
 		source += 128;
-		dest += 320;
+		dest += width;
 	}
 }
 
@@ -252,17 +252,17 @@ Draw_ConsoleBackground(int lines)
 
 	// hack the version number directly into the pic
 	sprint(ver, "qk1 %4.2f", (float)VERSION);
-	dest = conback->pixels + 320 * 186 + 320 - 11 - 8 * strlen(ver);
+	dest = conback->pixels + conback->width * (1 + conback->height - 14) - 11 - 8 * strlen(ver);
 
 	n = strlen(ver);
 	for(x = 0; x < n; x++)
-		Draw_CharToConback(ver[x], dest + (x << 3));
+		Draw_CharToConback(ver[x], dest + (x << 3), conback->width);
 	dest = vid.conbuffer;
 	for(y = 0; y < lines; y++, dest += vid.conwidth) {
-		v = (vid.conheight - lines + y) * 200 / vid.conheight;
-		src = conback->pixels + v * 320;
+		v = (vid.conheight - lines + y) * conback->height / vid.conheight;
+		src = conback->pixels + v * conback->width;
 		f = 0;
-		fstep = 320 * 0x10000 / vid.conwidth;
+		fstep = conback->width * 0x10000 / vid.conwidth;
 		for(x = 0; x < (int)vid.conwidth; x += 4) {
 			dest[x] = src[f >> 16];
 			f += fstep;
