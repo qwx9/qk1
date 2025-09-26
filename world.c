@@ -366,7 +366,7 @@ SV_TestEntityPosition(pr_t *pr, edict_t *ent)
 
 	trace = SV_Move(pr, ent->v.origin, ent->v.mins, ent->v.maxs, ent->v.origin, MOVE_NORMAL, ent);
 
-	return trace.startsolid ? pr->edicts : nil;
+	return trace.startsolid ? (trace.ent ? trace.ent : pr->edicts) : nil;
 }
 
 bool
