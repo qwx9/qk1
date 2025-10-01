@@ -143,21 +143,17 @@ v_fullscreen_cb(cvar_t *var)
 
 	oldmode = curwinmode();
 	mode = var->value;
-	if(oldmode != mode && SDL_SetWindowFullscreen(win, mode) == 0)
+	if(oldmode != mode && SDL_SetWindowFullscreen(win, mode)) {
 		vid.resized = true;
+		SDL_SyncWindow(win);
+	}
 }
 
 static void
 hints(void)
 {
-	SDL_SetHint(SDL_HINT_VIDEO_DRIVER, "wayland,cocoa,x11,windows,kmsdrm,kmsdrmvulkan,rpi");
-	SDL_SetHint(SDL_HINT_WINDOWS_RAW_KEYBOARD, "1");
-	SDL_SetHint(SDL_HINT_VIDEO_SYNC_WINDOW_OPERATIONS, "1");
-	SDL_SetHint(SDL_HINT_WINDOW_FRAME_USABLE_WHILE_CURSOR_HIDDEN, "0");
 	SDL_SetHint(SDL_HINT_RENDER_GPU_LOW_POWER, "1");
 	SDL_SetHint(SDL_HINT_RENDER_METAL_PREFER_LOW_POWER_DEVICE, "1");
-	SDL_SetHint(SDL_HINT_VIDEO_DOUBLE_BUFFER, doublebuffer ? "1" : "0");
-	SDL_SetHint(SDL_HINT_WINDOWS_CLOSE_ON_ALT_F4, "0");
 	SDL_SetHint(SDL_HINT_VIDEO_X11_NET_WM_PING, "0");
 	SDL_SetHint(SDL_HINT_RENDER_VSYNC, v_sync.value ? "1" : "0");
 }
@@ -226,7 +222,11 @@ initfb(void)
 	torgbx(host_colormap, vid.colormap, 256 * 64);
 	vid.fullbright = 256 - LittleLong(*((int *)vid.colormap + 2048));
 
-	hints();
+	SDL_SetHint(SDL_HINT_VIDEO_DRIVER, "wayland,cocoa,x11,windows,kmsdrm,kmsdrmvulkan,rpi");
+	SDL_SetHint(SDL_HINT_WINDOWS_CLOSE_ON_ALT_F4, "0");
+	SDL_SetHint(SDL_HINT_VIDEO_DOUBLE_BUFFER, doublebuffer ? "1" : "0");
+	SDL_SetHint(SDL_HINT_WINDOW_FRAME_USABLE_WHILE_CURSOR_HIDDEN, "0");
+	SDL_SetHint(SDL_HINT_WINDOWS_RAW_KEYBOARD, "1");
 	if(!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS))
 		fatal("SDL_Init: %s", SDL_GetError());
 	makewindow();
