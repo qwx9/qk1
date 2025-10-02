@@ -558,8 +558,8 @@ SV_WriteClientdataToMessage(edict_t *ent, sizebuf_t *msg)
 
 		other = PROG_TO_EDICT(sv.pr, ent->v.dmg_inflictor);
 		MSG_WriteByte(msg, svc_damage);
-		MSG_WriteByte(msg, ent->v.dmg_save);
-		MSG_WriteByte(msg, ent->v.dmg_take);
+		MSG_WriteByte(msg, min(0xff, ent->v.dmg_save));
+		MSG_WriteByte(msg, min(0xff, ent->v.dmg_take));
 		for(i = 0; i < 3; i++)
 			sv.protocol->MSG_WriteCoord(
 				msg, other->v.origin[i] + 0.5 * (other->v.mins[i] + other->v.maxs[i])
