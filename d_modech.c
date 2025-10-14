@@ -1,6 +1,6 @@
 #include "quakedef.h"
 
-double d_pix_scale;
+double d_pix_scale = 1.0;
 int d_vrectx, d_vrecty, d_vrectright_particle, d_vrectbottom_particle;
 int d_pix_min, d_pix_max;
 int d_scantable[MAXDIMENSION];
