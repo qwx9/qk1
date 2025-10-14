@@ -84,6 +84,7 @@ void R_RenderView(void); // must set r_refdef first
 void R_ViewChanged(vrect_t *pvrect, float pixelAspect); // called whenever r_refdef or vid change
 
 void R_InitSky(struct texture_s *mt); // called at level load
+void R_ResetSkyBox(void);
 void R_LoadSkyBox(const char *name, struct model_s *m);
 void R_EmitSkyBox(view_t *v);
 

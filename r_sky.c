@@ -53,6 +53,20 @@ R_EmitSkyBox(view_t *v)
 }
 
 void
+R_ResetSkyBox(void)
+{
+	int i;
+
+	for(i = 0; i < nelem(r_skytexinfo); i++) {
+		if(r_skytexinfo[i].texture != r_notexture_mip) {
+			Hunk_Free(r_skytexinfo[i].texture);
+			r_skytexinfo[i].texture = r_notexture_mip;
+		}
+	}
+	R_InitSky(nil);
+}
+
+void
 R_LoadSkyBox(const char *name, model_t *m)
 {
 	static const vec3_t vecs[6][2] = {
@@ -89,15 +103,11 @@ R_LoadSkyBox(const char *name, model_t *m)
 	int i, *se;
 
 	if(r_skybox) {
-		for(i = 0; i < nelem(ts); i++) {
-			if(r_skytexinfo[i].texture != r_notexture_mip)
-				Hunk_Free(r_skytexinfo[i].texture);
-		}
 		m->numvertexes -= 8;
 		m->numsurfedges -= nelem(surfedges);
 		m->numsurfaces -= nelem(ts);
 		m->numedges -= nelem(edges);
-		r_skybox = false;
+		R_ResetSkyBox();
 	}
 
 	if(name != nil && name[0] == 0)

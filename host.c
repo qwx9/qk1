@@ -319,6 +319,7 @@ Host_ClearMemory(void)
 	Con_DPrintf("Clearing memory\n");
 	D_FlushCaches();
 	Mod_ClearAll();
+	R_ResetSkyBox();
 	if(host_hunklevel)
 		Hunk_FreeToMark(host_hunklevel);
 
