@@ -263,7 +263,7 @@ Draw_ConsoleBackground(int lines)
 		src = conback->pixels + v * conback->width;
 		f = 0;
 		fstep = conback->width * 0x10000 / vid.conwidth;
-		for(x = 0; x < (int)vid.conwidth; x += 4) {
+		for(x = 0; x < (int)vid.conwidth-4; x += 4) {
 			dest[x] = src[f >> 16];
 			f += fstep;
 			dest[x + 1] = src[f >> 16];
