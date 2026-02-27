@@ -329,15 +329,13 @@ void NET_Stats_f (cmd_t *c)
 int
 Datagram_Init(void)
 {
-	int i;
-
 	myDriverLevel = net_driverlevel;
 	Cmd_AddCommand("net_stats", NET_Stats_f);
 
-	for(i=0; i<net_numlandrivers; i++){
-		if(landrv[i].Init() < 0)
+	for(net_numlandrivers=0; landrv[net_numlandrivers].Init; net_numlandrivers++){
+		if(landrv[net_numlandrivers].Init() < 0)
 			continue;
-		landrv[i].initialized = true;
+		landrv[net_numlandrivers].initialized = true;
 	}
 
 	return 0;
