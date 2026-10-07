@@ -878,7 +878,7 @@ again:
 //=============================================================================
 /* OPTIONS MENU */
 
-#define	OPTIONS_ITEMS	13
+#define	OPTIONS_ITEMS	15
 
 #define	SLIDER_RANGE	10
 
@@ -1042,7 +1042,7 @@ static void M_Options_Draw (void)
 	M_Print (16, y, "            Lookspring");
 	M_DrawCheckbox (220, y, lookspring.value); y += 8;
 
-	M_Print (16, 120, "            Lookstrafe");
+	M_Print (16, y, "            Lookstrafe");
 	M_DrawCheckbox (220, y, lookstrafe.value); y += 8;
 	USED(y);
 
@@ -1101,9 +1101,9 @@ static void M_Options_Key (int k)
 		break;
 	}
 
-	if(options_cursor == 12){
+	if(options_cursor == OPTIONS_ITEMS-1){
 		if (k == K_UPARROW)
-			options_cursor = 11;
+			options_cursor = OPTIONS_ITEMS-2;
 		else
 			options_cursor = 0;
 	}
