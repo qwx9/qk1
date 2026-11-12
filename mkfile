@@ -54,7 +54,6 @@ OFILES=\
 	model_bsp30.$O\
 	model_sprite.$O\
 	mt19937-64.$O\
-	nanosec.$O\
 	net_dgrm_plan9.$O\
 	net_loop.$O\
 	net_main.$O\

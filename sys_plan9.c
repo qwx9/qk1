@@ -120,6 +120,12 @@ flen(int fd)
 	return l;
 }
 
+u64int
+nanosec(void)
+{
+	return uptime();
+}
+
 double
 dtime(void)
 {
