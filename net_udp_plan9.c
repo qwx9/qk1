@@ -1,5 +1,4 @@
 #include "quakedef.h"
-#include <ip.h>
 #include <thread.h>
 
 Addr myip;

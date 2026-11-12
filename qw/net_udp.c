@@ -1,6 +1,5 @@
 #include "quakedef.h"
 #include <thread.h>
-#include <ip.h>
 
 Channel *echan, *lchan;
 char *netmtpt = "/net";

@@ -27,9 +27,7 @@
 		} \
 	}
 
-#define dospan_solid_f1( \
-	pdest, pbase, s, t, sstep, tstep, spancount, width, pz, izi, izistep, fog \
-) \
+#define dospan_solid_f1(pdest, pbase, s, t, sstep, tstep, spancount, width, pz, izi, izistep, fog) \
 	{ \
 		if(((t + tstep * spancount) >> 16) == (t >> 16)) { \
 			pbase += (t >> 16) * width; \
@@ -101,9 +99,7 @@
 		} \
 	}
 
-#define dospan_blend_f1( \
-	pdest, pbase, s, t, sstep, tstep, spancount, width, alpha, pz, izi, izistep, fog \
-) \
+#define dospan_blend_f1(pdest, pbase, s, t, sstep, tstep, spancount, width, alpha, pz, izi, izistep, fog) \
 	{ \
 		pixel_t pix; \
 \
@@ -192,9 +188,7 @@
 		} \
 	}
 
-#define dospan_fence_f1( \
-	pdest, pbase, s, t, sstep, tstep, spancount, width, pz, izi, izistep, fog \
-) \
+#define dospan_fence_f1(pdest, pbase, s, t, sstep, tstep, spancount, width, pz, izi, izistep, fog) \
 	{ \
 		pixel_t pix; \
 \

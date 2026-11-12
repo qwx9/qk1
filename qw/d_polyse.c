@@ -72,14 +72,7 @@ int						d_sfracbasestep, d_tfracbasestep;
 int						d_ziextrastep, d_zibasestep;
 int						d_pzextrastep, d_pzbasestep;
 
-typedef struct {
-	int		quotient;
-	int		remainder;
-} adivtab_t;
-
-static adivtab_t	adivtab[32*32] = {
-#include "/adivtab.h"
-};
+#include "adivtab.h"
 
 byte	*skintable[MAX_LBM_HEIGHT];
 int		skinwidth;

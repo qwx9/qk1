@@ -1,5 +1,4 @@
 #include "quakedef.h"
-#include "server.h"
 
 #define RETURN_EDICT(pr, e) (((int *)pr->globals)[OFS_RETURN] = EDICT_TO_PROG(pr, e))
 

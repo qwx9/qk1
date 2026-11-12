@@ -1,6 +1,5 @@
 #include "quakedef.h"
 #include "model_bsp.h"
-#include "render.h"
 
 int
 BSP30_LoadEntities(model_t *mod, byte *in, int sz, int extra)

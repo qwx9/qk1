@@ -5,6 +5,8 @@ TARG=quake
 CFLAGS=$CFLAGS -D__plan9__ -DNDEBUG -D__${objtype}__ -Iplan9
 
 OFILES=\
+	adivtab.$O\
+	anorms.$O\
 	cd.$O\
 	cd_plan9.$O\
 	chase.$O\
@@ -18,6 +20,7 @@ OFILES=\
 	colormatrix.$O\
 	common.$O\
 	console.$O\
+	crosshairs.$O\
 	cvar.$O\
 	d_alpha.$O\
 	d_edge.$O\
@@ -55,7 +58,7 @@ OFILES=\
 	model_sprite.$O\
 	mt19937-64.$O\
 	nanosec.$O\
-	net_dgrm_plan9.$O\
+	net_dgrm.$O\
 	net_loop.$O\
 	net_main.$O\
 	net_udp_plan9.$O\
@@ -63,6 +66,7 @@ OFILES=\
 	pr_edict.$O\
 	pr_exec.$O\
 	protocol.$O\
+	q1_palette.$O\
 	r_aclip.$O\
 	r_alias.$O\
 	r_bsp.$O\
@@ -147,8 +151,14 @@ i_resize.$O: stb_image_resize2.h
 
 r_surf.$O: r_surf_block.h r_surf_light.h r_surf_x.h
 
+cl_input.$O: cl_input.c
+	$CC $CFLAGS -p cl_input.c
+
 i_resize.$O: i_resize.c
 	$CC $CFLAGS -p i_resize.c
+
+pr_edict.$O: pr_edict.c
+	$CC $CFLAGS -p pr_edict.c
 
 fn.$O: fn.c
 	$CC $CFLAGS -p fn.c
