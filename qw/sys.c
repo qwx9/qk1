@@ -82,7 +82,7 @@ flen(int fd)
 double
 Sys_DoubleTime(void)
 {
-	return nanosec()/1000000000.0;
+	return uptime()/1000000000.0;
 }
 
 void

@@ -69,7 +69,7 @@ flen(int fd)
 double
 dtime(void)
 {
-	return nanosec() / 1000000000.0;
+	return uptime() / 1000000000.0;
 }
 
 void

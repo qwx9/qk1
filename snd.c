@@ -494,8 +494,8 @@ stepsnd(vec3_t origin, vec3_t forward, vec3_t right, vec3_t up)
 		return;
 
 	if(sndt == 0)
-		sndt = nanosec() - Te9 / Fpsmax;
-	nsamp = (nanosec() - sndt) / (Te9 / Srate);
+		sndt = uptime() - Te9 / Fpsmax;
+	nsamp = (uptime() - sndt) / (Te9 / Srate);
 	if(!cls.timedemo)
 		nsamp = (nsamp + 15) & ~15;
 	nsamp -= sndqueued()/Sblk - Srate/Fpsmax;
@@ -511,7 +511,7 @@ stepsnd(vec3_t origin, vec3_t forward, vec3_t right, vec3_t up)
 		sndwrite(mixbuf, ns);
 		mixbufi = (mixbufi + 1) % nelem(mixbufs);
 	}
-	sndt = nanosec();
+	sndt = uptime();
 
 	VectorCopy(origin, listener_origin);
 	VectorCopy(forward, listener_forward);

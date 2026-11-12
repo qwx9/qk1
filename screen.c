@@ -325,7 +325,7 @@ static void SCR_DrawFPS (void)
 
 	if(!scr_showfps.value)
 		return;
-	t = nanosec();
+	t = uptime();
 	if((t - lastframetime) >= 1000000000ULL){
 		fps = host_framecount - lastcnt;
 		lastcnt = host_framecount;

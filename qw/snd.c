@@ -533,8 +533,8 @@ stepsnd(vec3_t origin, vec3_t forward, vec3_t right, vec3_t up)
 		}
 	}
 	if(sndt == 0)
-		sndt = nanosec() - Te9 / Fpsmax;
-	nsamp = (nanosec() - sndt) / (Te9 / Srate);
+		sndt = uptime() - Te9 / Fpsmax;
+	nsamp = (uptime() - sndt) / (Te9 / Srate);
 	if(!cls.timedemo)
 		nsamp = nsamp + 15 & ~15;
 	if(nsamp > Ssamp)
@@ -545,7 +545,7 @@ stepsnd(vec3_t origin, vec3_t forward, vec3_t right, vec3_t up)
 		fprint(2, "sndwrite: %r\n");
 		shutsnd();
 	}
-	sndt = nanosec();
+	sndt = uptime();
 }
 
 void
